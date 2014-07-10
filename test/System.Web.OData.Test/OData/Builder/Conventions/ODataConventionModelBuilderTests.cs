@@ -1622,6 +1622,128 @@ namespace System.Web.OData.Builder.Conventions
                 "Ignore<System.Web.OData.Builder.Conventions.EntityTypeWithDateTime>() on " +
                 "'System.Web.OData.Builder.ODataModelBuilder'.\r\nParameter name: navigationProperty");
         }
+
+        [Fact]
+        public void AddDynamicDictionary_ThrowsException_IfMoreThanOneDynamicPropertyInOpenEntityType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<BadOpenEntityType>();
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => builder.GetEdmModel(),
+                "propertyInfo",
+                "Found more than one dynamic property container in type 'BadOpenEntityType'. " +
+                "Each open type must have at most one dynamic property container.\r\n" +
+                "Parameter name: propertyInfo");
+        }
+
+        [Fact]
+        public void AddDynamicDictionary_ThrowsException_IfBaseAndDerivedHasDynamicPropertyDictionary()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<BadBaseOpenEntityType>();
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => builder.GetEdmModel(),
+                "propertyInfo",
+                "Found more than one dynamic property container in type 'BadDerivedOpenEntityType'. " +
+                "Each open type must have at most one dynamic property container.\r\n" +
+                "Parameter name: propertyInfo");
+        }
+
+        [Fact]
+        public void GetEdmModel_WorksOnConventionModelBuilder_ForOpenEntityType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<EntityTypeTest.SimpleOpenEntityType>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType entityType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
+            Assert.True(entityType.IsOpen);
+            Assert.Equal(2, entityType.Properties().Count());
+
+            Assert.True(entityType.Properties().Where(c => c.Name == "Id").Any());
+            Assert.True(entityType.Properties().Where(c => c.Name == "Name").Any());
+        }
+
+        [Fact]
+        public void GetEdmModel_WorksOnConventionModelBuilder_ForDerivedOpenEntityType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<BaseOpenEntityType>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType baseEntityType =
+                Assert.Single(model.SchemaElements.OfType<IEdmEntityType>().Where(c => c.Name == "BaseOpenEntityType"));
+            Assert.True(baseEntityType.IsOpen);
+            Assert.Single(baseEntityType.Properties());
+
+            IEdmEntityType derivedEntityType =
+                Assert.Single(model.SchemaElements.OfType<IEdmEntityType>().Where(c => c.Name == "DerivedOpenEntityType"));
+            Assert.True(derivedEntityType.IsOpen);
+            Assert.Equal(2, derivedEntityType.Properties().Count());
+
+            DynamicPropertyDictionaryAnnotation baseDynamicPropertyAnnotation =
+                model.GetAnnotationValue<DynamicPropertyDictionaryAnnotation>(baseEntityType);
+
+            DynamicPropertyDictionaryAnnotation derivedDynamicPropertyAnnotation =
+                model.GetAnnotationValue<DynamicPropertyDictionaryAnnotation>(derivedEntityType);
+
+            Assert.Equal(baseDynamicPropertyAnnotation.PropertyInfo.Name, derivedDynamicPropertyAnnotation.PropertyInfo.Name);
+        }
+
+        [Fact]
+        public void GetEdmModel_WorksOnConventionModelBuilder_ForBaseEntityType_DerivedOpenEntityType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<BaseEntityType>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType baseEntityType =
+                Assert.Single(model.SchemaElements.OfType<IEdmEntityType>().Where(c => c.Name == "BaseEntityType"));
+            Assert.False(baseEntityType.IsOpen);
+            Assert.Single(baseEntityType.Properties());
+
+            IEdmEntityType derivedEntityType =
+                Assert.Single(model.SchemaElements.OfType<IEdmEntityType>().Where(c => c.Name == "DerivedEntityType"));
+            Assert.True(derivedEntityType.IsOpen);
+            Assert.Equal(2, derivedEntityType.Properties().Count());
+        }
+
+        [Fact]
+        public void GetEdmModel_Works_ForOpenEntityTypeWithDerivedDynamicProperty()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<OpenEntityTypeWithDerivedDynamicProperty>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType entityType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
+            Assert.True(entityType.IsOpen);
+            IEdmProperty edmProperty = Assert.Single(entityType.Properties());
+            Assert.Equal("Id", edmProperty.Name);
+        }
     }
 
     public class Product
@@ -1794,5 +1916,56 @@ namespace System.Web.OData.Builder.Conventions
         public string Name { get; set; }
 
         public DateTime ReleaseDate { get; set; }
+    }
+
+    public class BadOpenEntityType
+    {
+        public int Id { get; set; }
+        public int IntProperty { get; set; }
+        public IDictionary<string, object> DynamicProperties1 { get; set; }
+        public IDictionary<string, object> DynamicProperties2 { get; set; }
+    }
+
+    public class BadBaseOpenEntityType
+    {
+        public int Id { get; set; }
+        public IDictionary<string, object> BaseDynamicProperties { get; set; }
+    }
+
+    public class BadDerivedOpenEntityType : BadBaseOpenEntityType
+    {
+        public int IntProperty { get; set; }
+        public IDictionary<string, object> DerivedDynamicProperties { get; set; }
+    }
+
+    public class DerivedDynamicPropertyDictionary : Dictionary<string, object>
+    { }
+
+    public class OpenEntityTypeWithDerivedDynamicProperty
+    {
+        public int Id { get; set; }
+        public DerivedDynamicPropertyDictionary MyProperties { get; set; }
+    }
+
+    public class BaseEntityType
+    {
+        public int Id { get; set; }
+    }
+
+    public class DerivedEntityType : BaseEntityType
+    {
+        public string Name { get; set; }
+        public IDictionary<string, object> DynamicProperties { get; set; }
+    }
+
+    public class BaseOpenEntityType
+    {
+        public int Id { get; set; }
+        public IDictionary<string, object> DynamicProperties { get; set; }
+    }
+
+    public class DerivedOpenEntityType : BaseOpenEntityType
+    {
+        public string DerivedProperty { get; set; }
     }
 }

@@ -13,6 +13,7 @@ using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 using Moq;
 
 namespace System.Web.OData.Formatter.Deserialization
@@ -285,6 +286,169 @@ namespace System.Web.OData.Formatter.Deserialization
 
             // Assert
             deserializer.Verify();
+        }
+
+        [Fact]
+        public void ReadEntry_CanReadDynamicPropertiesForOpenEntityType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<SimpleOpenCustomer>();
+            builder.EnumType<SimpleEnum>();
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntityTypeReference customerTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenCustomer)).AsEntity();
+
+            var deserializerProvider = new DefaultODataDeserializerProvider();
+            var deserializer = new ODataEntityDeserializer(deserializerProvider);
+
+            ODataEnumValue enumValue = new ODataEnumValue("Third", typeof(SimpleEnum).FullName);
+
+            ODataComplexValue[] complexValues =
+            {
+                new ODataComplexValue
+                {
+                    TypeName = typeof(SimpleOpenAddress).FullName,
+                    Properties = new[]
+                    {
+                        // declared properties
+                        new ODataProperty { Name = "Street", Value = "Street 1" },
+                        new ODataProperty { Name = "City", Value = "City 1" },
+
+                        // dynamic properties
+                        new ODataProperty
+                        {
+                            Name = "DateTimeProperty",
+                            Value = new DateTimeOffset(new DateTime(2014, 5, 6))
+                        }
+                    }
+                },
+                new ODataComplexValue
+                {
+                    TypeName = typeof(SimpleOpenAddress).FullName,
+                    Properties = new[]
+                    {
+                        // declared properties
+                        new ODataProperty { Name = "Street", Value = "Street 2" },
+                        new ODataProperty { Name = "City", Value = "City 2" },
+
+                        // dynamic properties
+                        new ODataProperty
+                        {
+                            Name = "ArrayProperty",
+                            Value = new ODataCollectionValue { TypeName = "Collection(Edm.Int32)", Items = new[] {1, 2, 3, 4} }
+                        }
+                    }
+                }
+            };
+
+            ODataCollectionValue collectionValue = new ODataCollectionValue
+            {
+                TypeName = "Collection(" + typeof(SimpleOpenAddress).FullName + ")",
+                Items = complexValues
+            };
+
+            ODataEntry odataEntry = new ODataEntry
+            {
+                Properties = new[]
+                {
+                    // declared properties
+                    new ODataProperty { Name = "CustomerId", Value = 991 },
+                    new ODataProperty { Name = "Name", Value = "Name #991" },
+
+                    // dynamic properties
+                    new ODataProperty { Name = "GuidProperty", Value = new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA") },
+                    new ODataProperty { Name = "EnumValue", Value = enumValue },
+                    new ODataProperty { Name = "CollectionProperty", Value = collectionValue }
+                },
+                TypeName = typeof(SimpleOpenCustomer).FullName
+            };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
+                Model = model
+            };
+
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(odataEntry);
+
+            // Act
+            SimpleOpenCustomer customer = deserializer.ReadEntry(entry, customerTypeReference, readContext)
+                as SimpleOpenCustomer;
+
+            // Assert
+            Assert.NotNull(customer);
+
+            // Verify the declared properties
+            Assert.Equal(991, customer.CustomerId);
+            Assert.Equal("Name #991", customer.Name);
+
+            // Verify the dynamic properties
+            Assert.NotNull(customer.CustomerProperties);
+            Assert.Equal(3, customer.CustomerProperties.Count());
+            Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), customer.CustomerProperties["GuidProperty"]);
+            Assert.Equal(SimpleEnum.Third, customer.CustomerProperties["EnumValue"]);
+
+            // Verify the dynamic collection property
+            var collectionValues = Assert.IsType<List<SimpleOpenAddress>>(customer.CustomerProperties["CollectionProperty"]);
+            Assert.NotNull(collectionValues);
+            Assert.Equal(2, collectionValues.Count());
+
+            Assert.Equal(new DateTimeOffset(new DateTime(2014, 5, 6)), collectionValues[0].Properties["DateTimeProperty"]);
+            Assert.Equal(new List<int> { 1, 2, 3, 4 }, collectionValues[1].Properties["ArrayProperty"]);
+        }
+
+        [Fact]
+        public void ReadEntry_CanReadDynamicPropertiesForInheritanceOpenEntityType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<SimpleOpenCustomer>();
+            builder.EnumType<SimpleEnum>();
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntityTypeReference vipCustomerTypeReference = model.GetEdmTypeReference(typeof(SimpleVipCustomer)).AsEntity();
+
+            var deserializerProvider = new DefaultODataDeserializerProvider();
+            var deserializer = new ODataEntityDeserializer(deserializerProvider);
+
+            ODataEntry odataEntry = new ODataEntry
+            {
+                Properties = new[]
+                {
+                    // declared properties
+                    new ODataProperty { Name = "CustomerId", Value = 121 },
+                    new ODataProperty { Name = "Name", Value = "VipName #121" },
+                    new ODataProperty { Name = "VipNum", Value = "Vip Num 001" },
+
+                    // dynamic properties
+                    new ODataProperty { Name = "GuidProperty", Value = new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA") },
+                },
+                TypeName = typeof(SimpleVipCustomer).FullName
+            };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
+                Model = model
+            };
+
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(odataEntry);
+
+            // Act
+            SimpleVipCustomer customer = deserializer.ReadEntry(entry, vipCustomerTypeReference, readContext)
+                as SimpleVipCustomer;
+
+            // Assert
+            Assert.NotNull(customer);
+
+            // Verify the declared properties
+            Assert.Equal(121, customer.CustomerId);
+            Assert.Equal("VipName #121", customer.Name);
+            Assert.Equal("Vip Num 001", customer.VipNum);
+
+            // Verify the dynamic properties
+            Assert.NotNull(customer.CustomerProperties);
+            Assert.Equal(1, customer.CustomerProperties.Count());
+            Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), customer.CustomerProperties["GuidProperty"]);
         }
 
         [Fact]

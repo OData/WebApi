@@ -19,6 +19,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Annotations;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 using Moq;
 using ODataPath = System.Web.OData.Routing.ODataPath;
 
@@ -776,6 +777,100 @@ namespace System.Web.OData.Formatter.Serialization
             // Assert
             Assert.Equal(actions, entry.Actions);
             serializer.Verify();
+        }
+
+        [Fact]
+        public void CreateEntry_Works_ToAppendDynamicProperties_ForOpenEntityType()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+
+            IEdmEntityType customerType = model.FindDeclaredType("Default.Customer") as IEdmEntityType;
+            Type simpleOpenCustomer = typeof(SimpleOpenCustomer);
+            model.SetAnnotationValue(customerType, new ClrTypeAnnotation(simpleOpenCustomer));
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(customerType, new DynamicPropertyDictionaryAnnotation(
+                simpleOpenCustomer.GetProperty("CustomerProperties")));
+
+            model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
+                simpleOpenAddress.GetProperty("Properties")));
+
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            ODataEntityTypeSerializer serializer = new ODataEntityTypeSerializer(serializerProvider);
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);
+            ODataSerializerContext writeContext = new ODataSerializerContext
+            {
+                Model = model,
+                Path = new ODataPath(new EntitySetPathSegment(customers))
+            };
+
+            SimpleOpenCustomer customer = new SimpleOpenCustomer()
+            {
+                CustomerId = 991,
+                Name = "Name #991",
+                Address = new SimpleOpenAddress
+                {
+                    City = "a city",
+                    Street = "a street",
+                    Properties = new Dictionary<string, object> { {"ArrayProperty", new[] { "15", "14", "13" } } }
+                },
+                CustomerProperties = new Dictionary<string, object>()
+            };
+            customer.CustomerProperties.Add("EnumProperty", SimpleEnum.Fourth);
+            customer.CustomerProperties.Add("GuidProperty", new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"));
+            customer.CustomerProperties.Add("ListProperty", new List<int>{5,4,3,2,1});
+
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext,
+                customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
+
+            // Act
+            ODataEntry entry = serializer.CreateEntry(selectExpandNode, entityInstanceContext);
+
+            // Assert
+            Assert.Equal(entry.TypeName, "Default.Customer");
+            Assert.Equal(6, entry.Properties.Count());
+
+            // Verify the declared properties
+            ODataProperty street = Assert.Single(entry.Properties.Where(p => p.Name == "CustomerId"));
+            Assert.Equal(991, street.Value);
+
+            ODataProperty city = Assert.Single(entry.Properties.Where(p => p.Name == "Name"));
+            Assert.Equal("Name #991", city.Value);
+
+            // Verify the nested open complex property
+            ODataProperty address = Assert.Single(entry.Properties.Where(p => p.Name == "Address"));
+            ODataComplexValue addressComplexValue = Assert.IsType<ODataComplexValue>(address.Value);
+            ODataProperty addressDynamicProperty =
+                Assert.Single(addressComplexValue.Properties.Where(p => p.Name == "ArrayProperty"));
+            ODataCollectionValue addressCollectionValue =
+                Assert.IsType<ODataCollectionValue>(addressDynamicProperty.Value);
+            Assert.Equal(new[] { "15", "14", "13" }, addressCollectionValue.Items.OfType<string>().ToList());
+            Assert.Equal("Collection(Edm.String)", addressCollectionValue.TypeName);
+
+            // Verify the dynamic properties
+            ODataProperty enumProperty = Assert.Single(entry.Properties.Where(p => p.Name == "EnumProperty"));
+            ODataEnumValue enumValue = Assert.IsType<ODataEnumValue>(enumProperty.Value);
+            Assert.Equal("Fourth", enumValue.Value);
+            Assert.Equal("Default.SimpleEnum", enumValue.TypeName);
+
+            ODataProperty guidProperty = Assert.Single(entry.Properties.Where(p => p.Name == "GuidProperty"));
+            Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), guidProperty.Value);
+
+            ODataProperty listProperty = Assert.Single(entry.Properties.Where(p => p.Name == "ListProperty"));
+            ODataCollectionValue collectionValue = Assert.IsType<ODataCollectionValue>(listProperty.Value);
+            Assert.Equal(new List<int>{5,4,3,2,1}, collectionValue.Items.OfType<int>().ToList());
+            Assert.Equal("Collection(Edm.Int32)", collectionValue.TypeName);
         }
 
         [Fact]

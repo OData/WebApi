@@ -2,7 +2,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -21,33 +20,63 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             IEdmProperty edmProperty = resourceType.FindProperty(property.Name);
 
-            // try to deserializer the dynamic properties for open type.
-            if (edmProperty == null)
-            {
-                // the logic here works for open complex type and open entity type.
-                IEdmStructuredType structuredType = resourceType.StructuredDefinition();
-                if (structuredType != null && structuredType.IsOpen)
-                {
-                    if (ApplyDynamicProperty(property, structuredType, resource, deserializerProvider, readContext))
-                    {
-                        return;
-                    }
-                }
-            }
-
+            bool isDynamicProperty = false;
             string propertyName = property.Name;
             if (edmProperty != null)
             {
                 propertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, readContext.Model);
             }
-            IEdmTypeReference propertyType = edmProperty != null ? edmProperty.Type : null; // open properties have null values
+            else
+            {
+                IEdmStructuredType structuredType = resourceType.StructuredDefinition();
+                isDynamicProperty = structuredType != null && structuredType.IsOpen;
+            }
+
+            // dynamic properties have null values
+            IEdmTypeReference propertyType = edmProperty != null ? edmProperty.Type : null;
 
             EdmTypeKind propertyKind;
-            object value = ConvertValue(property.Value, ref propertyType, deserializerProvider, readContext, out propertyKind);
+            object value = ConvertValue(property.Value, ref propertyType, deserializerProvider, readContext,
+                out propertyKind);
 
+            if (isDynamicProperty)
+            {
+                SetDynamicProperty(resource, resourceType, propertyKind, propertyName, value, propertyType,
+                    readContext);
+            }
+            else
+            {
+                SetDeclaredProperty(resource, propertyKind, propertyName, value, edmProperty, readContext);
+            }
+        }
+
+        internal static void SetDynamicProperty(object resource, IEdmStructuredTypeReference resourceType,
+            EdmTypeKind propertyKind, string propertyName, object propertyValue, IEdmTypeReference propertyType,
+            ODataDeserializerContext readContext)
+        {
             if (propertyKind == EdmTypeKind.Collection)
             {
-                SetCollectionProperty(resource, edmProperty, value, propertyName);
+                SetDynamicCollectionProperty(resource, propertyName, propertyValue, propertyType.AsCollection(),
+                    resourceType.StructuredDefinition(), readContext);
+            }
+            else
+            {
+                if (propertyKind == EdmTypeKind.Enum)
+                {
+                    propertyValue = ConvertDynamicEnumValue(propertyValue, readContext);
+                }
+
+                SetDynamicProperty(resource, propertyName, propertyValue, resourceType.StructuredDefinition(),
+                    readContext);
+            }
+        }
+
+        internal static void SetDeclaredProperty(object resource, EdmTypeKind propertyKind, string propertyName,
+            object propertyValue, IEdmProperty edmProperty, ODataDeserializerContext readContext)
+        {
+            if (propertyKind == EdmTypeKind.Collection)
+            {
+                SetCollectionProperty(resource, edmProperty, propertyValue, propertyName);
             }
             else
             {
@@ -55,15 +84,17 @@ namespace System.Web.OData.Formatter.Deserialization
                 {
                     if (propertyKind == EdmTypeKind.Primitive)
                     {
-                        value = EdmPrimitiveHelpers.ConvertPrimitiveValue(value, GetPropertyType(resource, propertyName));
+                        propertyValue = EdmPrimitiveHelpers.ConvertPrimitiveValue(propertyValue,
+                            GetPropertyType(resource, propertyName));
                     }
                     else if (propertyKind == EdmTypeKind.Enum)
                     {
-                        value = EnumDeserializationHelpers.ConvertEnumValue(value, GetPropertyType(resource, propertyName));
+                        propertyValue = EnumDeserializationHelpers.ConvertEnumValue(propertyValue,
+                            GetPropertyType(resource, propertyName));
                     }
                 }
 
-                SetProperty(resource, propertyName, value);
+                SetProperty(resource, propertyName, propertyValue);
             }
         }
 
@@ -126,6 +157,29 @@ namespace System.Web.OData.Formatter.Deserialization
             }
         }
 
+        internal static void SetDynamicCollectionProperty(object resource, string propertyName, object value,
+            IEdmCollectionTypeReference edmPropertyType, IEdmStructuredType structuredType,
+            ODataDeserializerContext readContext)
+        {
+            Contract.Assert(value != null);
+            Contract.Assert(readContext != null);
+            Contract.Assert(readContext.Model != null);
+
+            IEnumerable collection = value as IEnumerable;
+            Contract.Assert(collection != null);
+
+            Type resourceType = resource.GetType();
+            Type elementType = EdmLibHelpers.GetClrType(edmPropertyType.ElementType(), readContext.Model);
+            Type propertyType = typeof(ICollection<>).MakeGenericType(elementType);
+            IEnumerable newCollection;
+            if (CollectionDeserializationHelpers.TryCreateInstance(propertyType, edmPropertyType, elementType,
+                out newCollection))
+            {
+                collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType);
+                SetDynamicProperty(resource, propertyName, newCollection, structuredType, readContext);
+            }
+        }
+
         internal static void SetProperty(object resource, string propertyName, object value)
         {
             IDelta delta = resource as IDelta;
@@ -136,6 +190,51 @@ namespace System.Web.OData.Formatter.Deserialization
             else
             {
                 delta.TrySetPropertyValue(propertyName, value);
+            }
+        }
+
+        internal static void SetDynamicProperty(object resource, string propertyName, object value,
+            IEdmStructuredType structuredType, ODataDeserializerContext readContext)
+        {
+            IDelta delta = resource as IDelta;
+            if (delta != null)
+            {
+                delta.TrySetPropertyValue(propertyName, value);
+            }
+            else
+            {
+                PropertyInfo propertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(structuredType,
+                    readContext.Model);
+                if (propertyInfo == null)
+                {
+                    return;
+                }
+
+                IDictionary<string, object> dynamicPropertyDictionary;
+                object dynamicDictionaryObject = propertyInfo.GetValue(resource);
+                if (dynamicDictionaryObject == null)
+                {
+                    if (!propertyInfo.CanWrite)
+                    {
+                        throw Error.InvalidOperation(SRResources.CannotSetDynamicPropertyDictionary, propertyName,
+                            resource.GetType().FullName);
+                    }
+
+                    dynamicPropertyDictionary = new Dictionary<string, object>();
+                    propertyInfo.SetValue(resource, dynamicPropertyDictionary);
+                }
+                else
+                {
+                    dynamicPropertyDictionary = (IDictionary<string, object>)dynamicDictionaryObject;
+                }
+
+                if (dynamicPropertyDictionary.ContainsKey(propertyName))
+                {
+                    throw Error.InvalidOperation(SRResources.DuplicateDynamicPropertyNameFound,
+                        propertyName, structuredType.FullTypeName());
+                }
+
+                dynamicPropertyDictionary.Add(propertyName, value);
             }
         }
 
@@ -159,13 +258,12 @@ namespace System.Web.OData.Formatter.Deserialization
             if (collection != null)
             {
                 typeKind = EdmTypeKind.Collection;
-                Contract.Assert(propertyType != null, "Open collection properties are not supported.");
-                return ConvertCollectionValue(collection, propertyType, deserializerProvider, readContext);
+                return ConvertCollectionValue(collection, ref propertyType, deserializerProvider, readContext);
             }
 
             if (oDataValue is ODataEnumValue)
             {
-                typeKind = EdmTypeKind.Enum;   
+                typeKind = EdmTypeKind.Enum;
             }
             else
             {
@@ -249,66 +347,91 @@ namespace System.Web.OData.Formatter.Deserialization
             }
         }
 
-        private static object ConvertCollectionValue(ODataCollectionValue collection, IEdmTypeReference propertyType,
-            ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
+        private static object ConvertCollectionValue(ODataCollectionValue collection,
+            ref IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider,
+            ODataDeserializerContext readContext)
         {
-            IEdmCollectionTypeReference collectionType = propertyType as IEdmCollectionTypeReference;
-            Contract.Assert(collectionType != null, "The type for collection must be a IEdmCollectionType.");
+            IEdmCollectionTypeReference collectionType;
+            if (propertyType == null)
+            {
+                // dynamic collection property
+                Contract.Assert(!String.IsNullOrEmpty(collection.TypeName),
+                    "ODataLib should have verified that dynamic collection value has a type name " +
+                    "since we provided metadata.");
+
+                string elementTypeName = GetCollectionElementTypeName(collection.TypeName, isNested: false);
+                IEdmModel model = readContext.Model;
+                IEdmSchemaType elementType = model.FindType(elementTypeName);
+                Contract.Assert(elementType != null);
+                collectionType =
+                    new EdmCollectionTypeReference(
+                        new EdmCollectionType(elementType.ToEdmTypeReference(isNullable: false)));
+                propertyType = collectionType;
+            }
+            else
+            {
+                collectionType = propertyType as IEdmCollectionTypeReference;
+                Contract.Assert(collectionType != null, "The type for collection must be a IEdmCollectionType.");
+            }
 
             ODataEdmTypeDeserializer deserializer = deserializerProvider.GetEdmTypeDeserializer(collectionType);
             return deserializer.ReadInline(collection, collectionType, readContext);
         }
 
-        private static bool ApplyDynamicProperty(ODataProperty property, IEdmStructuredType structuredType,
-            object resource, ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
+        private static object ConvertDynamicEnumValue(object value, ODataDeserializerContext readContext)
         {
-            PropertyInfo propertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(structuredType,
-                        readContext.Model);
-            if (propertyInfo == null)
+            Contract.Assert(value != null);
+            Contract.Assert(readContext != null);
+            Contract.Assert(readContext.Model != null);
+
+            ODataEnumValue enumValue = value as ODataEnumValue;
+            Contract.Assert(enumValue != null);
+
+            IEdmType edmType = readContext.Model.FindType(enumValue.TypeName);
+            Contract.Assert(edmType != null);
+
+            if (!readContext.IsUntyped)
             {
-                return false;
+                Type enumType = EdmLibHelpers.GetClrType(edmType, readContext.Model);
+                return Enum.Parse(enumType, enumValue.Value);
             }
-
-            IDictionary<string, object> dynamicPropertyDictionary = propertyInfo.GetValue(resource)
-                as IDictionary<string, object>;
-
-            if (dynamicPropertyDictionary == null)
+            else
             {
-                dynamicPropertyDictionary = new Dictionary<string, object>();
-                propertyInfo.SetValue(resource, dynamicPropertyDictionary);
+                // TODO: https://aspnetwebstack.codeplex.com/workitem/1956:
+                // Enum (de)serialization on un-type doesn't work
+                // Currently, just return the "string" value of the ODataEnumValue for untype enum type.
+                return enumValue.Value;
             }
+        }
 
-            if (dynamicPropertyDictionary.ContainsKey(property.Name))
+        // The same logic from ODL to get the element type name in a collection.
+        private static string GetCollectionElementTypeName(string typeName, bool isNested)
+        {
+            const string CollectionTypeQualifier = "Collection";
+            int collectionTypeQualifierLength = CollectionTypeQualifier.Length;
+
+            // A collection type name must not be null, it has to start with "Collection(" and end with ")"
+            // and must not be "Collection()"
+            if (typeName != null &&
+                typeName.StartsWith(CollectionTypeQualifier + "(", StringComparison.Ordinal) &&
+                typeName[typeName.Length - 1] == ')' &&
+                typeName.Length != collectionTypeQualifierLength + 2)
             {
-                throw Error.InvalidOperation(SRResources.DuplicateDynamicPropertyNameFound,
-                    property.Name, structuredType.FullTypeName());
-            }
-
-            EdmTypeKind propertyKind;
-            IEdmTypeReference propertyType = null;
-            object value = ConvertValue(property.Value, ref propertyType, deserializerProvider, readContext, out propertyKind);
-
-            if (propertyKind == EdmTypeKind.Collection)
-            {
-                throw Error.InvalidOperation(SRResources.CollectionNotAllowedAsDynamicProperty, property.Name);
-            }
-
-            if (propertyKind == EdmTypeKind.Enum)
-            {
-                ODataEnumValue enumValue = (ODataEnumValue)value;
-                IEdmModel model = readContext.Model;
-                IEdmType edmType = model.FindType(enumValue.TypeName);
-                if (edmType == null)
+                if (isNested)
                 {
-                    return false;
+                    throw new ODataException(Error.Format(SRResources.NestedCollectionsNotSupported, typeName));
                 }
 
-                Type enumType = EdmLibHelpers.GetClrType(edmType, model);
-                value = Enum.Parse(enumType, enumValue.Value);
+                string innerTypeName = typeName.Substring(collectionTypeQualifierLength + 1,
+                    typeName.Length - (collectionTypeQualifierLength + 2));
+
+                // Check if it is not a nested collection and throw if it is
+                GetCollectionElementTypeName(innerTypeName, true);
+
+                return innerTypeName;
             }
 
-            dynamicPropertyDictionary.Add(property.Name, value);
-            return true;
+            return null;
         }
     }
 }

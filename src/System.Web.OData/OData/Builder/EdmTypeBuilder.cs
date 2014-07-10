@@ -78,7 +78,6 @@ namespace System.Web.OData.Builder
                     Contract.Assert(entity != null);
 
                     IEdmEntityType baseType = null;
-
                     if (entity.BaseType != null)
                     {
                         CreateEdmTypeHeader(entity.BaseType);
@@ -87,7 +86,15 @@ namespace System.Web.OData.Builder
                         Contract.Assert(baseType != null);
                     }
 
-                    _types.Add(config.ClrType, new EdmEntityType(config.Namespace, config.Name, baseType, entity.IsAbstract ?? false, isOpen: false));
+                    EdmEntityType entityType = new EdmEntityType(config.Namespace, config.Name, baseType,
+                        entity.IsAbstract ?? false, entity.IsOpen);
+                    _types.Add(config.ClrType, entityType);
+
+                    if (entity.IsOpen)
+                    {
+                        // add a mapping between the open entity type and its dynamic property dictionary.
+                        _openTypes.Add(entityType, entity.DynamicPropertyDictionary);
+                    }
                 }
                 else
                 {
@@ -96,7 +103,9 @@ namespace System.Web.OData.Builder
                     // The config has to be enum.
                     Contract.Assert(enumTypeConfiguration != null);
 
-                    _types.Add(enumTypeConfiguration.ClrType, new EdmEnumType(enumTypeConfiguration.Namespace, enumTypeConfiguration.Name, GetTypeKind(enumTypeConfiguration.UnderlyingType), enumTypeConfiguration.IsFlags));
+                    _types.Add(enumTypeConfiguration.ClrType,
+                        new EdmEnumType(enumTypeConfiguration.Namespace, enumTypeConfiguration.Name,
+                            GetTypeKind(enumTypeConfiguration.UnderlyingType), enumTypeConfiguration.IsFlags));
                 }
             }
         }

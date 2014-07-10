@@ -214,7 +214,9 @@ namespace System.Web.OData.Formatter.Deserialization
             // Arrange
             ODataProperty property = new ODataProperty { Name = "Key1", Value = "Value1" };
             EdmEntityType entityType = new EdmEntityType("namespace", "name");
-            entityType.AddKeys(new EdmStructuralProperty(entityType, "Key1", EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string))));
+            entityType.AddKeys(entityType.AddStructuralProperty("Key1",
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string))));
+
             EdmEntityTypeReference entityTypeReference = new EdmEntityTypeReference(entityType, isNullable: false);
             ODataDeserializerProvider provider = new DefaultODataDeserializerProvider();
 
@@ -224,7 +226,8 @@ namespace System.Web.OData.Formatter.Deserialization
             resource.Setup(r => r.TrySetPropertyValue("Key1", "Value1")).Returns(true).Verifiable();
 
             // Act
-            DeserializationHelpers.ApplyProperty(property, entityTypeReference, resource.Object, provider, new ODataDeserializerContext());
+            DeserializationHelpers.ApplyProperty(property, entityTypeReference, resource.Object, provider,
+                new ODataDeserializerContext{ Model = new EdmModel() });
 
             // Assert
             resource.Verify();

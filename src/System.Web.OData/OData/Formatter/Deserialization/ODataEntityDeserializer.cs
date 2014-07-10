@@ -1,14 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Properties;
-using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -206,7 +205,19 @@ namespace System.Web.OData.Formatter.Deserialization
                 {
                     IEnumerable<string> structuralProperties = entityType.StructuralProperties()
                         .Select(edmProperty => EdmLibHelpers.GetClrPropertyName(edmProperty, model));
-                    return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties);
+
+                    if (entityType.IsOpen())
+                    {
+                        PropertyInfo dynamicDictionaryPropertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(
+                            entityType.StructuredDefinition(), model);
+
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties,
+                            dynamicDictionaryPropertyInfo);
+                    }
+                    else
+                    {
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties);
+                    }
                 }
                 else
                 {

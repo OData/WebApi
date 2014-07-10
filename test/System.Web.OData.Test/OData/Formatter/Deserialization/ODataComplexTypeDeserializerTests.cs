@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.OData.Builder;
+using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -267,6 +269,68 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Equal(101, zipCode.Code);
             Assert.Equal(1, zipCode.Properties.Count());
             Assert.Equal(new DateTimeOffset(new DateTime(2014, 4, 22)), zipCode.Properties["DateTimeProperty"]);
+        }
+
+        [Fact]
+        public void ReadComplexValue_CanReadDynamicCollectionPropertiesForOpenComplexType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<SimpleOpenAddress>();
+            builder.EnumType<SimpleEnum>();
+            IEdmModel model = builder.GetEdmModel();
+            IEdmComplexTypeReference addressTypeReference =
+                model.GetEdmTypeReference(typeof(SimpleOpenAddress)).AsComplex();
+
+            var deserializerProvider = new DefaultODataDeserializerProvider();
+            var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
+
+            ODataEnumValue enumValue = new ODataEnumValue("Third", typeof(SimpleEnum).FullName);
+
+            ODataCollectionValue collectionValue = new ODataCollectionValue
+            {
+                TypeName = "Collection(" + typeof(SimpleEnum).FullName + ")",
+                Items = new[] { enumValue, enumValue }
+            };
+
+            ODataComplexValue complexValue = new ODataComplexValue
+            {
+                Properties = new[]
+                {
+                    // declared properties
+                    new ODataProperty { Name = "Street", Value = "My Way #599" },
+
+                    // dynamic properties
+                    new ODataProperty { Name = "CollectionProperty", Value = collectionValue }
+                },
+                TypeName = typeof(SimpleOpenAddress).FullName
+            };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
+                Model = model
+            };
+
+            // Act
+            SimpleOpenAddress address = deserializer.ReadComplexValue(complexValue, addressTypeReference, readContext)
+                as SimpleOpenAddress;
+
+            // Assert
+            Assert.NotNull(address);
+
+            // Verify the declared properties
+            Assert.Equal("My Way #599", address.Street);
+            Assert.Null(address.City);
+
+            // Verify the dynamic properties
+            Assert.NotNull(address.Properties);
+            Assert.Equal(1, address.Properties.Count());
+
+            var collectionValues = Assert.IsType<List<SimpleEnum>>(address.Properties["CollectionProperty"]);
+            Assert.NotNull(collectionValues);
+            Assert.Equal(2, collectionValues.Count());
+            Assert.Equal(SimpleEnum.Third, collectionValues[0]);
+            Assert.Equal(SimpleEnum.Third, collectionValues[1]);
         }
 
         [Fact]

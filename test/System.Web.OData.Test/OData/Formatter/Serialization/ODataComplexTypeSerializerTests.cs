@@ -320,6 +320,63 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void CreateODataComplexValue_WritesDynamicCollectionProperty_ForOpenComplexType()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue<ClrTypeAnnotation>(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue<ClrTypeAnnotation>(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
+                simpleOpenAddress.GetProperty("Properties")));
+
+            IEdmComplexTypeReference addressTypeRef = addressType.ToEdmTypeReference(isNullable: false).AsComplex();
+
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider);
+            ODataSerializerContext context = new ODataSerializerContext
+            {
+                Model = model
+            };
+
+            SimpleOpenAddress address = new SimpleOpenAddress()
+            {
+                Street = "One Way",
+                City = "One City",
+                Properties = new Dictionary<string, object>()
+            };
+            address.Properties.Add("CollectionProperty", new[] { 1.1, 2.2 });
+
+            // Act
+            var odataValue = serializer.CreateODataComplexValue(address, addressTypeRef, context);
+
+            // Assert
+            ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
+
+            Assert.Equal(complexValue.TypeName, "Default.Address");
+            Assert.Equal(3, complexValue.Properties.Count());
+
+            // Verify the declared properties
+            ODataProperty street = Assert.Single(complexValue.Properties.Where(p => p.Name == "Street"));
+            Assert.Equal("One Way", street.Value);
+
+            ODataProperty city = Assert.Single(complexValue.Properties.Where(p => p.Name == "City"));
+            Assert.Equal("One City", city.Value);
+
+            // Verify the dynamic properties
+            ODataProperty enumProperty = Assert.Single(complexValue.Properties.Where(p => p.Name == "CollectionProperty"));
+            ODataCollectionValue collectionValue = Assert.IsType<ODataCollectionValue>(enumProperty.Value);
+            Assert.Equal("Collection(Edm.Double)", collectionValue.TypeName);
+            Assert.Equal(new List<double> { 1.1, 2.2 }, collectionValue.Items.OfType<double>().ToList());
+        }
+
+        [Fact]
         public void CreateODataComplexValue_Throws_IfDynamicPropertyNameSameAsDeclaredPropertyName()
         {
             // Arrange

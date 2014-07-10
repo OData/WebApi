@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -131,6 +130,69 @@ namespace System.Web.OData
             // changed
             Assert.Equal("Sammamish", original.City);
             Assert.Equal("23213 NE 15th Ct", original.StreetAddress);
+        }
+
+        [Fact]
+        public void CanPatch_OpenType()
+        {
+            // Arrange
+            var address = new SimpleOpenAddress
+            {
+                City = "City",
+                Street = "Street",
+                Properties = new Dictionary<string, object>
+                {
+                    { "IntProp", 9 },
+                    { "ListProp", new List<int> {1, 2, 3} }
+                }
+            };
+
+            PropertyInfo propertyInfo = typeof(SimpleOpenAddress).GetProperty("Properties");
+            var delta = new Delta<SimpleOpenAddress>(typeof(SimpleOpenAddress), null, propertyInfo);
+            delta.TrySetPropertyValue("City", "ChangedCity");
+            delta.TrySetPropertyValue("IntProp", 1);
+
+            // Act
+            delta.Patch(address);
+
+            // Assert
+            // unchanged
+            Assert.Equal("Street", address.Street);
+            Assert.Equal(new List<int> { 1, 2, 3 }, address.Properties["ListProp"]);
+
+            // changed
+            Assert.Equal("ChangedCity", address.City);
+            Assert.Equal(1, address.Properties["IntProp"]);
+        }
+
+        [Fact]
+        public void CanPut_OpenType()
+        {
+            // Arrange
+            var address = new SimpleOpenAddress
+            {
+                City = "City",
+                Street = "Street",
+                Properties = new Dictionary<string, object>
+                {
+                    { "IntProp", 9 },
+                    { "ListProp", new List<int> {1, 2, 3} }
+                }
+            };
+
+            PropertyInfo propertyInfo = typeof(SimpleOpenAddress).GetProperty("Properties");
+            var delta = new Delta<SimpleOpenAddress>(typeof(SimpleOpenAddress), null, propertyInfo);
+            delta.TrySetPropertyValue("City", "ChangedCity");
+            delta.TrySetPropertyValue("IntProp", 1);
+
+            // Act
+            delta.Put(address);
+
+            // Assert
+            Assert.Equal("ChangedCity", address.City);
+            Assert.Null(address.Street);
+            Assert.Equal(1, address.Properties["IntProp"]);
+            Assert.False(address.Properties.ContainsKey("ListProp"));
         }
 
         [Fact]

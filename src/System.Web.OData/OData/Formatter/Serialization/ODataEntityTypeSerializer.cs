@@ -152,6 +152,22 @@ namespace System.Web.OData.Formatter.Serialization
                 Properties = CreateStructuralPropertyBag(selectExpandNode.SelectedStructuralProperties, entityInstanceContext),
             };
 
+            // Try to add the dynamic properties if the entity type is open.
+            if (entityInstanceContext.EntityType.IsOpen && selectExpandNode.SelectAllDynamicProperties)
+            {
+                IEdmTypeReference entityTypeReference =
+                    entityInstanceContext.EntityType.ToEdmTypeReference(isNullable: false);
+                List<ODataProperty> dynamicProperties = AppendDynamicProperties(entityInstanceContext.EdmObject,
+                    (IEdmStructuredTypeReference)entityTypeReference,
+                    entityInstanceContext.SerializerContext,
+                    entry.Properties.ToList());
+
+                if (dynamicProperties != null)
+                {
+                    entry.Properties = entry.Properties.Concat(dynamicProperties);
+                }
+            }
+
             IEnumerable<ODataAction> actions = CreateODataActions(selectExpandNode.SelectedActions, entityInstanceContext);
             foreach (ODataAction action in actions)
             {

@@ -472,7 +472,7 @@ namespace System.Web.OData.Builder
                 }
                 else if (propertyKind == PropertyKind.Dynamic)
                 {
-                    // Skip the dynamic property for entity type because open entity type is not supported.
+                    entity.AddDynamicPropertyDictionary(property);
                 }
                 else
                 {

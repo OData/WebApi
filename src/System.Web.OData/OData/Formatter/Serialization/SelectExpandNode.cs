@@ -59,6 +59,7 @@ namespace System.Web.OData.Formatter.Serialization
                 SelectedNavigationProperties = allNavigationProperties;
                 SelectedActions = allActions;
                 SelectedFunctions = allFunctions;
+                SelectAllDynamicProperties = true;
             }
             else
             {
@@ -68,10 +69,12 @@ namespace System.Web.OData.Formatter.Serialization
                     SelectedNavigationProperties = allNavigationProperties;
                     SelectedActions = allActions;
                     SelectedFunctions = allFunctions;
+                    SelectAllDynamicProperties = true;
                 }
                 else
                 {
                     BuildSelections(selectExpandClause, allStructuralProperties, allNavigationProperties, allActions, allFunctions);
+                    SelectAllDynamicProperties = false;
                 }
 
                 BuildExpansions(selectExpandClause, allNavigationProperties);
@@ -95,6 +98,11 @@ namespace System.Web.OData.Formatter.Serialization
         /// Gets the list of EDM navigation properties to be expanded in the response.
         /// </summary>
         public IDictionary<IEdmNavigationProperty, SelectExpandClause> ExpandedNavigationProperties { get; private set; }
+
+        /// <summary>
+        /// Gets the flag to indicate the dynamic property to be included in the response or not.
+        /// </summary>
+        public bool SelectAllDynamicProperties { get; private set; }
 
         /// <summary>
         /// Gets the list of OData actions to be included in the response.

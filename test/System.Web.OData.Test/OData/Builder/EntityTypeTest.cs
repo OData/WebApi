@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.TestCommon;
@@ -461,6 +462,52 @@ namespace System.Web.OData.Builder
 
             // Assert
             Assert.Empty(motorcycle.Keys);
+        }
+
+        [Fact]
+        public void DynamicDictionaryProperty_Works_ToSetEntityTypeAsOpen()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act
+            EntityTypeConfiguration<SimpleOpenEntityType> entityType = builder.EntityType<SimpleOpenEntityType>();
+            entityType.HasKey(c => c.Id);
+            entityType.Property(c => c.Name);
+            entityType.HasDynamicProperties(c => c.DynamicProperties);
+
+            // Act & Assert
+            Assert.True(entityType.IsOpen);
+        }
+
+        [Fact]
+        public void GetEdmModel_WorksOnModelBuilder_ForOpenEntityType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<SimpleOpenEntityType> entity = builder.EntityType<SimpleOpenEntityType>();
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Name);
+            entity.HasDynamicProperties(c => c.DynamicProperties);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType entityType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
+            Assert.True(entityType.IsOpen);
+            Assert.Equal(2, entityType.Properties().Count());
+
+            Assert.True(entityType.Properties().Where(c => c.Name == "Id").Any());
+            Assert.True(entityType.Properties().Where(c => c.Name == "Name").Any());
+        }
+
+        public class SimpleOpenEntityType
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public IDictionary<string, object> DynamicProperties { get; set; }
         }
     }
 }

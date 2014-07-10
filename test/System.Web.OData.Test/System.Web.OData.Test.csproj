@@ -154,6 +154,7 @@
     <Compile Include="OData\ETagMessageHandlerTest.cs" />
     <Compile Include="OData\ODataNullValueMessageHandlerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\SelectExpandNodeTest.cs" />
+    <Compile Include="OData\OpenEntityTypeTest.cs" />
     <Compile Include="OData\PerRequestContentNegotiatorTest.cs" />
     <Compile Include="OData\ODataRoutingAttributeTest.cs" />
     <Compile Include="OData\Formatter\HttpRequestMessageExtensions.cs" />
@@ -288,7 +289,10 @@
     <Compile Include="TestCommon\CustomersModelWithInheritance.cs" />
     <Compile Include="TestCommon\SimpleOpenAddress.cs" />
     <Compile Include="TestCommon\ODataModelBuilderMocks.cs" />
+    <Compile Include="TestCommon\SimpleOpenCustomer.cs" />
+    <Compile Include="TestCommon\SimpleOpenOrder.cs" />
     <Compile Include="TestCommon\SimpleOpenZipCode.cs" />
+    <Compile Include="TestCommon\SimpleVipCustomer.cs" />
     <Compile Include="TestCommon\TestAssemblyResolver.cs" />
     <Compile Include="TestCommon\MockAssembly.cs" />
     <Compile Include="TestCommon\MockPropertyInfo.cs" />

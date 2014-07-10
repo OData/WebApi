@@ -3,6 +3,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http;
@@ -29,6 +30,10 @@ namespace System.Web.OData
         private TEntityType _entity;
         private Type _entityType;
 
+        private PropertyInfo _dynamicDictionaryPropertyinfo;
+        private HashSet<string> _changedDynamicProperties;
+        private IDictionary<string, object> _dynamicDictionaryCache;
+ 
         /// <summary>
         /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
         /// </summary>
@@ -41,7 +46,8 @@ namespace System.Web.OData
         /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
         /// </summary>
         /// <param name="entityType">The derived entity type for which the changes would be tracked.
-        /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.</param>
+        /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.
+        /// </param>
         public Delta(Type entityType)
             : this(entityType, updatableProperties: null)
         {
@@ -51,10 +57,29 @@ namespace System.Web.OData
         /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
         /// </summary>
         /// <param name="entityType">The derived entity type for which the changes would be tracked.
-        /// <param name="updatableProperties">The set of properties that can be updated or reset.</param>
-        /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.</param>
+        /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.
+        /// </param>
+        /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
+        /// names, including those of dynamic properties, are ignored.</param>
         public Delta(Type entityType, IEnumerable<string> updatableProperties)
+            : this(entityType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo: null)
         {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
+        /// </summary>
+        /// <param name="entityType">The derived entity type for which the changes would be tracked.
+        /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.
+        /// </param>
+        /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
+        /// names, including those of dynamic properties, are ignored.</param>
+        /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
+        /// properties. <c>null</c> means this entity type is not open.</param>
+        public Delta(Type entityType, IEnumerable<string> updatableProperties,
+            PropertyInfo dynamicDictionaryPropertyInfo)
+        {
+            _dynamicDictionaryPropertyinfo = dynamicDictionaryPropertyInfo;
             Reset(entityType);
             InitializeProperties(updatableProperties);
         }
@@ -86,6 +111,24 @@ namespace System.Web.OData
             if (name == null)
             {
                 throw Error.ArgumentNull("name");
+            }
+
+            if (_dynamicDictionaryPropertyinfo != null)
+            {
+                // Dynamic property can have the same name as the dynamic property dictionary.
+                if (name == _dynamicDictionaryPropertyinfo.Name ||
+                    !_allProperties.ContainsKey(name))
+                {
+                    if (_dynamicDictionaryCache == null)
+                    {
+                        _dynamicDictionaryCache =
+                            GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _entity, create: true);
+                    }
+
+                    _dynamicDictionaryCache[name] = value;
+                    _changedDynamicProperties.Add(name);
+                    return true;
+                }
             }
 
             if (!_updatableProperties.Contains(name))
@@ -120,17 +163,29 @@ namespace System.Web.OData
                 throw Error.ArgumentNull("name");
             }
 
+            if (_dynamicDictionaryPropertyinfo != null)
+            {
+                if (_dynamicDictionaryCache == null)
+                {
+                    _dynamicDictionaryCache = 
+                        GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _entity, create: false);
+                }
+
+                if (_dynamicDictionaryCache != null && _dynamicDictionaryCache.TryGetValue(name, out value))
+                {
+                    return true;
+                }
+            }
+
             PropertyAccessor<TEntityType> cacheHit;
             if (_allProperties.TryGetValue(name, out cacheHit))
             {
                 value = cacheHit.GetValue(_entity);
                 return true;
             }
-            else
-            {
-                value = null;
-                return false;
-            }
+
+            value = null;
+            return false;
         }
 
         /// <inheritdoc/>
@@ -141,17 +196,38 @@ namespace System.Web.OData
                 throw Error.ArgumentNull("name");
             }
 
+            if (_dynamicDictionaryPropertyinfo != null)
+            {
+                if (_dynamicDictionaryCache == null)
+                {
+                    _dynamicDictionaryCache =
+                        GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _entity, create: false);
+                }
+
+                object dynamicValue;
+                if (_dynamicDictionaryCache != null &&
+                    _dynamicDictionaryCache.TryGetValue(name, out dynamicValue))
+                {
+                    if (dynamicValue == null)
+                    {
+                        type = null;
+                        return false;
+                    }
+
+                    type = dynamicValue.GetType();
+                    return true;
+                }
+            }
+
             PropertyAccessor<TEntityType> value;
             if (_allProperties.TryGetValue(name, out value))
             {
                 type = value.Property.PropertyType;
                 return true;
             }
-            else
-            {
-                type = null;
-                return false;
-            }
+
+            type = null;
+            return false;
         }
 
         /// <summary>
@@ -164,13 +240,21 @@ namespace System.Web.OData
             return _entity;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Returns the known properties that have been modified through this <see cref="Delta"/> as an
+        /// <see cref="IEnumerable{T}" /> of property Names. Does not include the names of the changed
+        /// dynamic properties.
+        /// </summary>
         public override IEnumerable<string> GetChangedPropertyNames()
         {
             return _changedProperties;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Returns the known properties that have not been modified through this <see cref="Delta"/> as an
+        /// <see cref="IEnumerable{T}" /> of property Names. Does not include the names of the changed dynamic
+        /// properties.
+        /// </summary>
         public override IEnumerable<string> GetUnchangedPropertyNames()
         {
             return _updatableProperties.Except(GetChangedPropertyNames());
@@ -198,6 +282,54 @@ namespace System.Web.OData
             {
                 propertyToCopy.Copy(_entity, original);
             }
+
+            CopyChangedDynamicValues(original);
+        }
+
+        // Copy changed dynamic properties and leave the unchanged dynamic properties
+        private void CopyChangedDynamicValues(TEntityType targetEntity)
+        {
+            if (_dynamicDictionaryPropertyinfo == null)
+            {
+                return;
+            }
+
+            if (_dynamicDictionaryCache == null)
+            {
+                _dynamicDictionaryCache =
+                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _entity, create: false);
+            }
+
+            IDictionary<string, object> fromDictionary = _dynamicDictionaryCache;
+            if (fromDictionary == null)
+            {
+                return;
+            }
+
+            IDictionary<string, object> toDictionary =
+                GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, targetEntity, create: false);
+
+            IDictionary<string, object> tempDictionary = toDictionary != null
+                ? new Dictionary<string, object>(toDictionary)
+                : new Dictionary<string, object>();
+
+            foreach (string dynamicPropertyName in _changedDynamicProperties)
+            {
+                object dynamicPropertyValue = fromDictionary[dynamicPropertyName];
+
+                // a dynamic propery value equal to null, it means to remove this dynamic property
+                if (dynamicPropertyValue == null)
+                {
+                    tempDictionary.Remove(dynamicPropertyName);
+                }
+                else
+                {
+                    tempDictionary[dynamicPropertyName] = dynamicPropertyValue;
+                }
+            }
+
+            CopyDynamicPropertyDictionary(tempDictionary, toDictionary, _dynamicDictionaryPropertyinfo,
+                targetEntity);
         }
 
         /// <summary>
@@ -221,6 +353,50 @@ namespace System.Web.OData
             foreach (PropertyAccessor<TEntityType> propertyToCopy in propertiesToCopy)
             {
                 propertyToCopy.Copy(_entity, original);
+            }
+
+            CopyUnchangedDynamicValues(original);
+        }
+
+        // Missing dynamic structural properties MUST be removed or set to null in *Put*
+        private void CopyUnchangedDynamicValues(TEntityType targetEntity)
+        {
+            if (_dynamicDictionaryPropertyinfo == null)
+            {
+                return;
+            }
+
+            if (_dynamicDictionaryCache == null)
+            {
+                _dynamicDictionaryCache =
+                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _entity, create: false);
+            }
+
+            IDictionary<string, object> toDictionary =
+                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, targetEntity, create: false);
+
+            if (_dynamicDictionaryCache == null)
+            {
+                if (toDictionary != null)
+                {
+                    toDictionary.Clear();
+                }
+            }
+            else
+            {
+                IDictionary<string, object> tempDictionary = toDictionary != null
+                    ? new Dictionary<string, object>(toDictionary)
+                    : new Dictionary<string, object>();
+
+                List<string> removedSet = tempDictionary.Keys.Except(_changedDynamicProperties).ToList();
+
+                foreach (string name in removedSet)
+                {
+                    tempDictionary.Remove(name);
+                }
+
+                CopyDynamicPropertyDictionary(tempDictionary, toDictionary, _dynamicDictionaryPropertyinfo,
+                    targetEntity);
             }
         }
 
@@ -260,6 +436,9 @@ namespace System.Web.OData
             _entity = Activator.CreateInstance(entityType) as TEntityType;
             _changedProperties = new HashSet<string>();
             _entityType = entityType;
+
+            _changedDynamicProperties = new HashSet<string>();
+            _dynamicDictionaryCache = null;
         }
 
         private void InitializeProperties(IEnumerable<string> updatableProperties)
@@ -281,6 +460,78 @@ namespace System.Web.OData
             {
                 _updatableProperties = new HashSet<string>(_allProperties.Keys);
             }
+
+            if (_dynamicDictionaryPropertyinfo != null)
+            {
+                _updatableProperties.Remove(_dynamicDictionaryPropertyinfo.Name);
+            }
+        }
+
+        private static void CopyDynamicPropertyDictionary(IDictionary<string, object> source, 
+            IDictionary<string, object> dest, PropertyInfo dynamicPropertyInfo, TEntityType targetEntity)
+        {
+            Contract.Assert(source != null);
+            Contract.Assert(dynamicPropertyInfo != null);
+            Contract.Assert(targetEntity != null);
+
+            if (source.Count == 0)
+            {
+                if (dest != null)
+                {
+                    dest.Clear();
+                }
+            }
+            else
+            {
+                if (dest == null)
+                {
+                    dest = GetDynamicPropertyDictionary(dynamicPropertyInfo, targetEntity, create: true);
+                }
+                else
+                {
+                    dest.Clear();
+                }
+
+                foreach (KeyValuePair<string, object> item in source)
+                {
+                    dest.Add(item);
+                }
+            }
+        }
+
+        private static IDictionary<string, object> GetDynamicPropertyDictionary(PropertyInfo propertyInfo,
+            TEntityType entity, bool create)
+        {
+            if (propertyInfo == null)
+            {
+                throw Error.ArgumentNull("propertyInfo");
+            }
+
+            if (entity == null)
+            {
+                throw Error.ArgumentNull("entity");
+            }
+
+            object propertyValue = propertyInfo.GetValue(entity);
+            if (propertyValue != null)
+            {
+                return (IDictionary<string, object>)propertyValue;
+            }
+
+            if (create)
+            {
+                if (!propertyInfo.CanWrite)
+                {
+                    throw Error.InvalidOperation(SRResources.CannotSetDynamicPropertyDictionary, propertyInfo.Name,
+                            entity.GetType().FullName);
+                }
+                IDictionary<string, object> newPropertyValue = new Dictionary<string, object>();
+
+                propertyInfo.SetValue(entity, newPropertyValue);
+                return newPropertyValue;
+            }
+
+            return null;
         }
     }
 }

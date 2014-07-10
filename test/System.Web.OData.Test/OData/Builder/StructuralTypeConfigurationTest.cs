@@ -109,5 +109,19 @@ namespace System.Web.OData.Builder
                     "The type '{0}' of property 'Birthday' in the 'Contoso.Customer' type is not a supported type.",
                     propertyType.FullName));
         }
+
+        [Fact]
+        public void AddDynamicPropertyDictionary_ThrowsIfTypeIsNotDictionary()
+        {
+            // Arrange
+            MockPropertyInfo property = new MockPropertyInfo(typeof(Int32), "Test");
+            Mock<StructuralTypeConfiguration> mock = new Mock<StructuralTypeConfiguration> { CallBase = true };
+            StructuralTypeConfiguration configuration = mock.Object;
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => configuration.AddDynamicPropertyDictionary(property),
+                "propertyInfo",
+                string.Format("The argument must be of type '{0}'.", "IDictionary<string, object>"));
+        }
     }
 }

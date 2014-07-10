@@ -426,13 +426,6 @@ namespace System.Web.OData.Builder
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
             }
 
-            // Throws NotSupported exception if attempting to add a dynamic property dictionary property
-            // on open entity type. Please remove this block after supporting the open entity type.
-            if (Kind == EdmTypeKind.Entity)
-            {
-                throw Error.NotSupported(SRResources.OpenEntityTypeNotSupported, propertyInfo.Name, Name);
-            }
-
             // Remove from the ignored properties
             if (IgnoredProperties.Contains(propertyInfo))
             {

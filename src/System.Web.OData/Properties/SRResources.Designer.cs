@@ -268,6 +268,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The dynamic dictionary property &apos;{0}&apos; of type &apos;{1}&apos; cannot be set. The dynamic property dictionary must have a setter..
+        /// </summary>
+        internal static string CannotSetDynamicPropertyDictionary {
+            get {
+                return ResourceManager.GetString("CannotSetDynamicPropertyDictionary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} cannot write an object of type &apos;{1}&apos;..
         /// </summary>
         internal static string CannotWriteType {
@@ -282,15 +291,6 @@ namespace System.Web.OData.Properties {
         internal static string ClrTypeNotInModel {
             get {
                 return ResourceManager.GetString("ClrTypeNotInModel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Type &apos;{0}&apos; is not allowed as dynamic property. Only primitive type, complex type and enum type are supported..
-        /// </summary>
-        internal static string CollectionNotAllowedAsDynamicProperty {
-            get {
-                return ResourceManager.GetString("CollectionNotAllowedAsDynamicProperty", resourceCulture);
             }
         }
         
@@ -435,6 +435,15 @@ namespace System.Web.OData.Properties {
         internal static string DuplicateKeyInSegment {
             get {
                 return ResourceManager.GetString("DuplicateKeyInSegment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The dynamic property &apos;{0}&apos; with Edm type &apos;{1}&apos; cannot be serialized..
+        /// </summary>
+        internal static string DynamicPropertyCannotBeSerialized {
+            get {
+                return ResourceManager.GetString("DynamicPropertyCannotBeSerialized", resourceCulture);
             }
         }
         
@@ -1114,6 +1123,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; is a nested collection type. Nested collection types are not allowed..
+        /// </summary>
+        internal static string NestedCollectionsNotSupported {
+            get {
+                return ResourceManager.GetString("NestedCollectionsNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No key name was found at {0} in segment &apos;{1}&apos;..
         /// </summary>
         internal static string NoKeyNameFoundInSegment {
@@ -1308,15 +1326,6 @@ namespace System.Web.OData.Properties {
         internal static string ODataPathNotFound {
             get {
                 return ResourceManager.GetString("ODataPathNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; can not be added as dynamic property into entity type &apos;{1}&apos;. Open entity type is not supported..
-        /// </summary>
-        internal static string OpenEntityTypeNotSupported {
-            get {
-                return ResourceManager.GetString("OpenEntityTypeNotSupported", resourceCulture);
             }
         }
         
@@ -1767,6 +1776,15 @@ namespace System.Web.OData.Properties {
         internal static string TypeMustBeEnumOrNullableEnum {
             get {
                 return ResourceManager.GetString("TypeMustBeEnumOrNullableEnum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; of dynamic property &apos;{1}&apos; is not supported..
+        /// </summary>
+        internal static string TypeOfDynamicPropertyNotSupported {
+            get {
+                return ResourceManager.GetString("TypeOfDynamicPropertyNotSupported", resourceCulture);
             }
         }
         

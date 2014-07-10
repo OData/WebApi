@@ -109,8 +109,18 @@ namespace System.Web.OData.Formatter.Serialization
             simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Fourth", new EdmIntegerConstant(3)));
             model.AddElement(simpleEnum);
 
+            // Customer is an open entity type
+            var customerType = new EdmEntityType("Default", "Customer", null, false, true);
+            customerType.AddKeys(customerType.AddStructuralProperty("CustomerId", EdmPrimitiveTypeKind.Int32));
+            customerType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            customerType.AddStructuralProperty("Address", addressType.ToEdmTypeReference(false));
+            model.AddElement(customerType);
+
             var container = new EdmEntityContainer("Default", "Container");
             model.AddElement(container);
+
+            var customers = new EdmEntitySet(container, "Customers", customerType);
+            container.AddElement(customers);
             return model;
         }
     }

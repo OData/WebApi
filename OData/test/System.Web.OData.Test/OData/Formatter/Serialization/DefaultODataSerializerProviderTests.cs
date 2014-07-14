@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Routing;
@@ -126,6 +127,43 @@ namespace System.Web.OData.Formatter.Serialization
 
             var serializer = serializerProvider.GetODataPayloadSerializer(GetEnumModel(), typeof(TestEnum), request);
 
+            Assert.NotNull(serializer);
+            var rawValueSerializer = Assert.IsType<ODataRawValueSerializer>(serializer);
+            Assert.Equal(ODataPayloadKind.Value, rawValueSerializer.ODataPayloadKind);
+        }
+
+        [Theory]
+        [InlineData("DollarCountEntities/$count", typeof(ODataCountTest.DollarCountEntity))]
+        [InlineData("DollarCountEntities(5)/StringCollectionProp/$count", typeof(string))]
+        [InlineData("DollarCountEntities(5)/EnumCollectionProp/$count", typeof(Color))]
+        [InlineData("DollarCountEntities(5)/TimeSpanCollectionProp/$count", typeof(TimeSpan))]
+        [InlineData("DollarCountEntities(5)/ComplexCollectionProp/$count", typeof(ODataCountTest.DollarCountComplex))]
+        [InlineData("DollarCountEntities(5)/EntityCollectionProp/$count", typeof(ODataCountTest.DollarCountEntity))]
+        [InlineData("UnboundFunctionReturnsPrimitveCollection()/$count", typeof(int))]
+        [InlineData("UnboundFunctionReturnsEnumCollection()/$count", typeof(Color))]
+        [InlineData("UnboundFunctionReturnsDateTimeOffsetCollection()/$count", typeof(DateTimeOffset))]
+        [InlineData("UnboundFunctionReturnsComplexCollection()/$count", typeof(ODataCountTest.DollarCountComplex))]
+        [InlineData("UnboundFunctionReturnsEntityCollection()/$count", typeof(ODataCountTest.DollarCountEntity))]
+        [InlineData("DollarCountEntities/Default.BoundFunctionReturnsPrimitveCollection()/$count", typeof(DateTimeOffset))]
+        [InlineData("DollarCountEntities/Default.BoundFunctionReturnsEnumCollection()/$count", typeof(Color))]
+        [InlineData("DollarCountEntities/Default.BoundFunctionReturnsDateTimeOffsetCollection()/$count", typeof(DateTimeOffset))]
+        [InlineData("DollarCountEntities/Default.BoundFunctionReturnsComplexCollection()/$count", typeof(ODataCountTest.DollarCountComplex))]
+        [InlineData("DollarCountEntities/Default.BoundFunctionReturnsEntityCollection()/$count", typeof(ODataCountTest.DollarCountEntity))]
+        public void GetODataPayloadSerializer_ReturnsRawValueSerializer_ForDollarCountRequests(string uri, Type elementType)
+        {
+            // Arrange
+            IEdmModel model = ODataCountTest.GetEdmModel();
+            Type type = typeof(ICollection<>).MakeGenericType(elementType);
+            var request = new HttpRequestMessage();
+            var pathHandler = new DefaultODataPathHandler();
+            var path = pathHandler.Parse(model, "http://localhost/", uri);
+            request.ODataProperties().Path = path;
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+
+            // Act
+            var serializer = serializerProvider.GetODataPayloadSerializer(model, type, request);
+
+            // Assert
             Assert.NotNull(serializer);
             var rawValueSerializer = Assert.IsType<ODataRawValueSerializer>(serializer);
             Assert.Equal(ODataPayloadKind.Value, rawValueSerializer.ODataPayloadKind);

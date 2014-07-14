@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using System.Web.OData.TestCommon;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -75,6 +76,34 @@ namespace System.Web.OData.Routing.Conventions
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal("GetNameFromCustomer", selectedAction);
+            Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
+            Assert.Equal("7", controllerContext.Request.GetRouteData().Values["key"]);
+        }
+
+        [Fact]
+        public void SelectAction_ReturnsTheActionName_DollarCount()
+        {
+            // Arrange
+            IEdmModel model = ODataCountTest.GetEdmModel();
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(
+                model, _serviceRoot, "DollarCountEntities(7)/EnumCollectionProp/$count");
+            ILookup<string, HttpActionDescriptor> actionMap =
+                new HttpActionDescriptor[1].ToLookup(desc => "GetEnumCollectionPropFromDollarCountEntity");
+            HttpRequestContext requestContext = new HttpRequestContext();
+            HttpControllerContext controllerContext = new HttpControllerContext
+            {
+                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
+                RequestContext = requestContext,
+                RouteData = new HttpRouteData(new HttpRoute())
+            };
+            controllerContext.Request.SetRequestContext(requestContext);
+
+            // Act
+            string selectedAction = new PropertyRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.NotNull(selectedAction);
+            Assert.Equal("GetEnumCollectionPropFromDollarCountEntity", selectedAction);
             Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
             Assert.Equal("7", controllerContext.Request.GetRouteData().Values["key"]);
         }

@@ -39,7 +39,7 @@ namespace System.Web.OData.Routing
         public static ODataPath TranslateODLPathToWebAPIPath(
             Semantic.ODataPath path,
             IEdmModel model,
-            UnresolvedPathSegment unresolvedPathSegment,            
+            UnresolvedPathSegment unresolvedPathSegment,
             KeySegment id,
             bool enableUriTemplateParsing,
             IDictionary<string, SingleValueNode> parameterAliasNodes,
@@ -294,10 +294,7 @@ namespace System.Web.OData.Routing
         /// <returns>Translated WebApi path segment.</returns>
         public override IEnumerable<ODataPathSegment> Translate(CountSegment segment)
         {
-            throw new ODataException(Error.Format(
-                SRResources.TargetKindNotImplemented,
-                typeof(Semantic.ODataPathSegment).Name, 
-                typeof(CountSegment).Name));
+            yield return new CountPathSegment();
         }
 
         /// <summary>
@@ -340,7 +337,7 @@ namespace System.Web.OData.Routing
         {
             throw new ODataException(Error.Format(
                 SRResources.TargetKindNotImplemented,
-                typeof(Semantic.ODataPathSegment).Name, 
+                typeof(Semantic.ODataPathSegment).Name,
                 typeof(BatchReferenceSegment).Name));
         }
 
@@ -395,7 +392,7 @@ namespace System.Web.OData.Routing
             {
                 value = String.Join(
                     ",",
-                    keys.Select(keyValuePair => 
+                    keys.Select(keyValuePair =>
                         TranslateKeySegmentValue(keyValuePair.Value, enableUriTemplateParsing)).ToArray());
             }
             else
@@ -467,7 +464,7 @@ namespace System.Web.OData.Routing
             }
 
             throw Error.NotSupported(
-                SRResources.CannotRecognizeNodeType, 
+                SRResources.CannotRecognizeNodeType,
                 typeof(ODataPathSegmentTranslator),
                 node.GetType().FullName);
         }

@@ -127,7 +127,7 @@ namespace System.Web.OData.Routing
             function.Returns<string>();
 
             // Unbound function
-            builder.Function("UnboundFunction").Returns<int>();
+            builder.Function("UnboundFunction").ReturnsCollection<int>().IsComposable = true;
 
             // Action only bound to the derived entity type
             builder.EntityType<SpecialVIP>().Action("ActionBoundToSpecialVIP");

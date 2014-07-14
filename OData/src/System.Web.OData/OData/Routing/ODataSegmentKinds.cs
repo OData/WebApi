@@ -13,6 +13,7 @@ namespace System.Web.OData.Routing
         internal const string _Ref = "$ref";
         internal const string _Metadata = "$metadata";
         internal const string _Value = "$value";
+        internal const string _Count = "$count";
         internal const string _Action = "action";
         internal const string _Function = "function";
         internal const string _UnboundAction = "unboundaction";
@@ -49,6 +50,11 @@ namespace System.Web.OData.Routing
         /// Represents the OData $value segment.
         /// </summary>
         public static readonly string Value = _Value;
+
+        /// <summary>
+        /// Represents the OData $count segment.
+        /// </summary>
+        public static readonly string Count = _Count;
 
         /// <summary>
         /// Represents a segment indicating a bound OData action.

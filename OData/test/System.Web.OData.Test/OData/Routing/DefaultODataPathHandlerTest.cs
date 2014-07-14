@@ -174,6 +174,9 @@ namespace System.Web.OData.Routing
         [InlineData("VipCustomer/Products/$ref", "~/singleton/navigation/$ref", "VipCustomer/Products/$ref")]
         [InlineData("VipCustomer/Default.GetRelatedRoutingCustomers", "~/singleton/action", "VipCustomer/Default.GetRelatedRoutingCustomers")]
         [InlineData("MyProduct/Default.TopProductId()", "~/singleton/function", "MyProduct/Default.TopProductId()")]
+        [InlineData("RoutingCustomers/$count", "~/entityset/$count", "RoutingCustomers/$count")]
+        [InlineData("RoutingCustomers(100)/Products/$count", "~/entityset/key/navigation/$count", "RoutingCustomers(100)/Products/$count")]
+        [InlineData("UnboundFunction()/$count", "~/unboundfunction/$count", "UnboundFunction()/$count")]
         public void Parse_ReturnsPath_WithCorrectTemplateAndPathString(string odataPath, string template, string pathString)
         {
             ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
@@ -1337,6 +1340,55 @@ namespace System.Web.OData.Routing
                 "it is one of the following: $ref, $batch, $count, $value, $metadata, a named media resource, " +
                 "an action, a noncomposable function, an action import, a noncomposable function import, " +
                 "an operation with void return type, or an operation import with void return type.");
+        }
+
+        [Theory]
+        [InlineData("RoutingCustomers/$count/$value")]
+        [InlineData("RoutingCustomers(100)/Products/$count/unknown")]
+        [InlineData("UnboundFunction()/$count/somesegment")]
+        public void DefaultODataPathHandler_ThrowsIfDollarCountIsNotTheLastSegment(string path)
+        {
+            // Arrange & Act & Assert
+            Assert.Throws<ODataUnrecognizedPathException>(
+                () => _parser.Parse(_model, _serviceRoot, path),
+                "The request URI is not valid. The segment '$count' must be the last segment in the URI because " +
+                "it is one of the following: $ref, $batch, $count, $value, $metadata, a named media resource, " +
+                "an action, a noncomposable function, an action import, a noncomposable function import, " +
+                "an operation with void return type, or an operation import with void return type.");
+        }
+
+        [Theory]
+        [InlineData("RoutingCustomers(1)/Name/$count", "Name")]
+        [InlineData("DateTimeOffsetKeyCustomers(2001-01-01T12:00:00.000+08:00)/ID/$count", "ID")]
+        public void DefaultODataPathHandler_Throws_DollarCountFollowsNonCollectionPrimitive(
+            string path, string segment)
+        {
+            // Arrange & Act & Assert
+            Assert.Throws<ODataUnrecognizedPathException>(
+                () => _parser.Parse(_model, _serviceRoot, path),
+                String.Format(
+                    "The segment '$count' in the request URI is not valid. The segment '{0}' refers to a primitive property, " +
+                    "function, or service operation, so the only supported value from the next segment is '$value'.",
+                    segment));
+        }
+
+        [Theory]
+        [InlineData("EnumCustomers(3)/Color/$count", "Color")]
+        [InlineData("RoutingCustomers(4)/Address/$count", "Address")]
+        [InlineData("RoutingCustomers(5)/$count", "RoutingCustomers")]
+        [InlineData("RoutingCustomers(5)/Products(6)/$count", "Products")]
+        [InlineData("VipCustomer/$count", "VipCustomer")]
+        public void DefaultODataPathHandler_Throws_DollarCountFollowsNonCollectionNonPrimitive(
+            string path, string segment)
+        {
+            // Arrange & Act & Assert
+            Assert.Throws<ODataUnrecognizedPathException>(
+                () => _parser.Parse(_model, _serviceRoot, path),
+                String.Format(
+                    "The request URI is not valid. $count cannot be applied to the segment '{0}' since $count can only " +
+                    "follow an entity set, a collection navigation property, a structural property of collection type, " +
+                    "an operation returning collection type or an operation import returning collection type.",
+                    segment));
         }
 
         private static IEdmModel GetModelWithFunctions()

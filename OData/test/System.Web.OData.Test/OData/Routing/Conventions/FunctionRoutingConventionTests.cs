@@ -211,9 +211,9 @@ namespace System.Web.OData.Routing.Conventions
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(1)/NS.IsUpgraded");
             ILookup<string, HttpActionDescriptor> emptyActionMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
             HttpControllerContext controllerContext = new HttpControllerContext
-                {
-                    Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/")
-                };
+            {
+                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/")
+            };
             controllerContext.Request.SetRouteData(new HttpRouteData(new HttpRoute()));
 
             // Act
@@ -222,6 +222,33 @@ namespace System.Web.OData.Routing.Conventions
             // Assert
             Assert.Null(selectedAction);
             Assert.Empty(controllerContext.Request.GetRouteData().Values);
+        }
+
+        [Fact]
+        public void SelectAction_ReturnsFunctionName_DollarCount()
+        {
+            // Arrange
+            var model = new CustomersModelWithInheritance();
+            var handler = new DefaultODataPathHandler();
+            ODataPath odataPath = handler.Parse(model.Model, _serviceRoot, "Customers(1)/NS.GetOrders(parameter=5)/$count");
+            var requestContext = new HttpRequestContext();
+            var controllerContext = new HttpControllerContext
+            {
+                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
+                RequestContext = requestContext,
+                RouteData = new HttpRouteData(new HttpRoute())
+            };
+            controllerContext.Request.SetRequestContext(requestContext);
+            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "GetOrders");
+
+            // Act
+            string selectedAction = new FunctionRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Equal("GetOrders", selectedAction);
+            Assert.Equal(2, controllerContext.Request.GetRouteData().Values.Count);
+            Assert.Equal("1", controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Equal(5, controllerContext.Request.GetRouteData().Values["parameter"]);
         }
     }
 }

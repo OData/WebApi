@@ -71,7 +71,11 @@ namespace System.Web.OData.Routing.Conventions
                 else if (odataPath.PathTemplate == "~/entityset/key/property/$value" ||
                     odataPath.PathTemplate == "~/entityset/key/cast/property/$value" ||
                     odataPath.PathTemplate == "~/singleton/property/$value" ||
-                    odataPath.PathTemplate == "~/singleton/cast/property/$value")
+                    odataPath.PathTemplate == "~/singleton/cast/property/$value" ||
+                    odataPath.PathTemplate == "~/entityset/key/property/$count" ||
+                    odataPath.PathTemplate == "~/entityset/key/cast/property/$count" ||
+                    odataPath.PathTemplate == "~/singleton/property/$count" ||
+                    odataPath.PathTemplate == "~/singleton/cast/property/$count")
                 {
                     segment = odataPath.Segments[odataPath.Segments.Count - 2] as PropertyAccessPathSegment;
                 }

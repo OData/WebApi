@@ -39,6 +39,30 @@ namespace System.Web.OData.Routing.Conventions
             ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers),
                 new CastPathSegment(model.SpecialCustomer));
 
+            var controllerContext = new HttpControllerContext()
+            {
+                Request = new HttpRequestMessage(new HttpMethod(method), "http://localhost/"),
+                RouteData = new HttpRouteData(new HttpRoute())
+            };
+
+            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => expected);
+
+            // Act
+            string actionName = new EntitySetRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Equal(expected, actionName);
+        }
+
+        [Theory]
+        [InlineData("GET", "GetCustomers")]
+        [InlineData("GET", "Get")]
+        public void SelectAction_ReturnsExpectedActionName_DollarCount(string method, string expected)
+        {
+            // Arrange
+            var model = new CustomersModelWithInheritance();
+            var odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new CountPathSegment());
+
             HttpControllerContext controllerContext = new HttpControllerContext()
             {
                 Request = new HttpRequestMessage(new HttpMethod(method), "http://localhost/"),
@@ -52,6 +76,32 @@ namespace System.Web.OData.Routing.Conventions
 
             // Assert
             Assert.Equal(expected, actionName);
+        }
+
+        [Theory]
+        [InlineData("Put")]
+        [InlineData("Post")]
+        [InlineData("Patch")]
+        [InlineData("Delete")]
+        public void SelectAction_ReturnsNull_NotSupportedMethodForDollarCount(string method)
+        {
+            // Arrange
+            var model = new CustomersModelWithInheritance();
+            var odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new CountPathSegment());
+
+            HttpControllerContext controllerContext = new HttpControllerContext()
+            {
+                Request = new HttpRequestMessage(new HttpMethod(method), "http://localhost/"),
+                RouteData = new HttpRouteData(new HttpRoute())
+            };
+
+            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "PostCustomer");
+
+            // Act
+            string actionName = new EntitySetRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Null(actionName);
         }
     }
 }

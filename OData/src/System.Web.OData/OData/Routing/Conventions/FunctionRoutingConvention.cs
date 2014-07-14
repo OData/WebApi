@@ -35,11 +35,22 @@ namespace System.Web.OData.Routing.Conventions
             if (controllerContext.Request.Method == HttpMethod.Get)
             {
                 string actionName = null;
+                BoundFunctionPathSegment function = null;
                 switch (odataPath.PathTemplate)
                 {
                     case "~/entityset/key/cast/function":
                     case "~/entityset/key/function":
-                        actionName = GetFunction(odataPath).SelectAction(actionMap, isCollection: false);
+                        function = odataPath.Segments.Last() as BoundFunctionPathSegment;
+                        actionName = GetFunction(function).SelectAction(actionMap, isCollection: false);
+                        if (actionName != null)
+                        {
+                            controllerContext.AddKeyValueToRouteData(odataPath);
+                        }
+                        break;
+                    case "~/entityset/key/cast/function/$count":
+                    case "~/entityset/key/function/$count":
+                        function = odataPath.Segments[odataPath.Segments.Count - 2] as BoundFunctionPathSegment;
+                        actionName = GetFunction(function).SelectAction(actionMap, isCollection: false);
                         if (actionName != null)
                         {
                             controllerContext.AddKeyValueToRouteData(odataPath);
@@ -47,17 +58,29 @@ namespace System.Web.OData.Routing.Conventions
                         break;
                     case "~/entityset/cast/function":
                     case "~/entityset/function":
-                        actionName = GetFunction(odataPath).SelectAction(actionMap, isCollection: true);
+                        function = odataPath.Segments.Last() as BoundFunctionPathSegment;
+                        actionName = GetFunction(function).SelectAction(actionMap, isCollection: true);
+                        break;
+                    case "~/entityset/cast/function/$count":
+                    case "~/entityset/function/$count":
+                        function = odataPath.Segments[odataPath.Segments.Count - 2] as BoundFunctionPathSegment;
+                        actionName = GetFunction(function).SelectAction(actionMap, isCollection: true);
                         break;
                     case "~/singleton/function":
                     case "~/singleton/cast/function":
-                        actionName = GetFunction(odataPath).SelectAction(actionMap, isCollection: false);
+                        function = odataPath.Segments.Last() as BoundFunctionPathSegment;
+                        actionName = GetFunction(function).SelectAction(actionMap, isCollection: false);
+                        break;
+                    case "~/singleton/function/$count":
+                    case "~/singleton/cast/function/$count":
+                        function = odataPath.Segments[odataPath.Segments.Count - 2] as BoundFunctionPathSegment;
+                        actionName = GetFunction(function).SelectAction(actionMap, isCollection: false);
                         break;
                 }
 
                 if (actionName != null)
                 {
-                    controllerContext.AddFunctionParameterToRouteData(odataPath.Segments.Last() as BoundFunctionPathSegment);
+                    controllerContext.AddFunctionParameterToRouteData(function);
                     return actionName;
                 }
             }
@@ -65,17 +88,14 @@ namespace System.Web.OData.Routing.Conventions
             return null;
         }
 
-        private static IEdmFunction GetFunction(ODataPath odataPath)
+        private static IEdmFunction GetFunction(BoundFunctionPathSegment function)
         {
-            ODataPathSegment odataSegment = odataPath.Segments.Last();
-            IEdmFunction function = null;
-            BoundFunctionPathSegment functionSegment = odataSegment as BoundFunctionPathSegment;
-            if (functionSegment != null)
+            if (function != null)
             {
-                function = functionSegment.Function;
+                return function.Function;
             }
 
-            return function;
+            return null;
         }
     }
 }

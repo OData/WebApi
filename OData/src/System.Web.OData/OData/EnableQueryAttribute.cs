@@ -14,6 +14,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
@@ -388,11 +389,16 @@ namespace System.Web.OData
                         response.Content.GetType().FullName);
                 }
 
-                // Apply the query if there are any query options, if there is a page size set or in the case of
-                // SingleResult.
-                if (responseContent.Value != null && request.RequestUri != null &&
-                    (!String.IsNullOrWhiteSpace(request.RequestUri.Query) || _querySettings.PageSize.HasValue
-                     || responseContent.Value is SingleResult))
+                // Apply the query if there are any query options, if there is a page size set, in the case of
+                // SingleResult or in the case of $count request.
+                bool shouldApplyQuery = responseContent.Value != null &&
+                    request.RequestUri != null &&
+                    (!String.IsNullOrWhiteSpace(request.RequestUri.Query) ||
+                    _querySettings.PageSize.HasValue ||
+                    responseContent.Value is SingleResult ||
+                    ODataCountMediaTypeMapping.IsCountRequest(request));
+
+                if (shouldApplyQuery)
                 {
                     try
                     {
@@ -564,7 +570,20 @@ namespace System.Web.OData
             {
                 // response is a collection.
                 IQueryable queryable = (enumerable as IQueryable) ?? enumerable.AsQueryable();
-                return ApplyQuery(queryable, queryOptions);
+                queryable = ApplyQuery(queryable, queryOptions);
+
+                if (ODataCountMediaTypeMapping.IsCountRequest(request))
+                {
+                    long? count = request.ODataProperties().TotalCount;
+
+                    if (count.HasValue)
+                    {
+                        // Return the count value if it is a $count request.
+                        return count.Value;
+                    }
+                }
+
+                return queryable;
             }
         }
 

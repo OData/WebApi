@@ -95,7 +95,7 @@ namespace System.Web.OData.TestCommon
             EdmAction tag = new EdmAction("NS", "tag", returnType: null, isBound: true, entitySetPathExpression: null);
             tag.AddParameter("entity", new EdmEntityTypeReference(orderLine, false));
             model.AddElement(tag);
-            
+
             // entity sets
             EdmEntityContainer container = new EdmEntityContainer("NS", "ModelWithInheritance");
             model.AddElement(container);
@@ -146,6 +146,17 @@ namespace System.Web.OData.TestCommon
             orderByCityAndAmount.AddParameter("city", stringType);
             orderByCityAndAmount.AddParameter("amount", intType);
             model.AddElement(orderByCityAndAmount);
+
+            EdmFunction getOrders = new EdmFunction(
+                "NS",
+                "GetOrders",
+                EdmCoreModel.GetCollection(order.ToEdmTypeReference(false)),
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: true);
+            getOrders.AddParameter("entity", new EdmEntityTypeReference(customer, false));
+            getOrders.AddParameter("parameter", intType);
+            model.AddElement(getOrders);
 
             EdmFunction IsSpecialUpgraded = new EdmFunction(
                 "NS",
@@ -313,7 +324,7 @@ namespace System.Web.OData.TestCommon
         public EdmAction UpgradeSpecialCustomer { get; private set; }
 
         public EdmAction Tag { get; private set; }
-        
+
         public IEdmProperty CustomerName { get; private set; }
 
         public EdmFunction IsCustomerUpgraded { get; private set; }

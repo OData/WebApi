@@ -133,7 +133,9 @@ namespace System.Web.OData.Formatter.Serialization
 
             if (edmType != null)
             {
-                if ((edmType.IsPrimitive() || edmType.IsEnum()) && ODataRawValueMediaTypeMapping.IsRawValueRequest(request))
+                if (((edmType.IsPrimitive() || edmType.IsEnum()) &&
+                    ODataRawValueMediaTypeMapping.IsRawValueRequest(request)) ||
+                    ODataCountMediaTypeMapping.IsCountRequest(request))
                 {
                     return _rawValueSerializer;
                 }

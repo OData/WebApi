@@ -75,64 +75,14 @@ namespace System.Web.OData.Query
 
             // Parse the query from request Uri
             RawValues = new ODataRawQueryOptions();
-            IEnumerable<KeyValuePair<string, string>> queryParameters = request.GetQueryNameValuePairs();
-
-            IDictionary<string, string> queryOptions = queryParameters.ToDictionary(p => p.Key, p => p.Value);
-            _queryOptionParser = new ODataQueryOptionParser(context.Model, context.ElementType,
-                context.NavigationSource, queryOptions);
-
-            foreach (KeyValuePair<string, string> kvp in queryParameters)
-            {
-                switch (kvp.Key)
-                {
-                    case "$filter":
-                        ThrowIfEmpty(kvp.Value, "$filter");
-                        RawValues.Filter = kvp.Value;
-                        Filter = new FilterQueryOption(kvp.Value, context, _queryOptionParser);
-                        break;
-                    case "$orderby":
-                        ThrowIfEmpty(kvp.Value, "$orderby");
-                        RawValues.OrderBy = kvp.Value;
-                        OrderBy = new OrderByQueryOption(kvp.Value, context, _queryOptionParser);
-                        break;
-                    case "$top":
-                        ThrowIfEmpty(kvp.Value, "$top");
-                        RawValues.Top = kvp.Value;
-                        Top = new TopQueryOption(kvp.Value, context, _queryOptionParser);
-                        break;
-                    case "$skip":
-                        ThrowIfEmpty(kvp.Value, "$skip");
-                        RawValues.Skip = kvp.Value;
-                        Skip = new SkipQueryOption(kvp.Value, context, _queryOptionParser);
-                        break;
-                    case "$select":
-                        RawValues.Select = kvp.Value;
-                        break;
-                    case "$count":
-                        ThrowIfEmpty(kvp.Value, "$count");
-                        RawValues.Count = kvp.Value;
-                        Count = new CountQueryOption(kvp.Value, context, _queryOptionParser);
-                        break;
-                    case "$expand":
-                        RawValues.Expand = kvp.Value;
-                        break;
-                    case "$format":
-                        RawValues.Format = kvp.Value;
-                        break;
-                    case "$skiptoken":
-                        RawValues.SkipToken = kvp.Value;
-                        break;
-                    default:
-                        // we don't throw if we can't recognize the query
-                        break;
-                }
-            }
-
-            if (RawValues.Select != null || RawValues.Expand != null)
-            {
-                SelectExpand = new SelectExpandQueryOption(RawValues.Select, RawValues.Expand,
-                    context, _queryOptionParser);
-            }
+            IDictionary<string, string> queryParameters =
+                request.GetQueryNameValuePairs().ToDictionary(p => p.Key, p => p.Value);
+            _queryOptionParser = new ODataQueryOptionParser(
+                context.Model,
+                context.ElementType,
+                context.NavigationSource,
+                queryParameters);
+            BuildQueryOptions(queryParameters);
 
             Validator = new ODataQueryValidator();
         }
@@ -281,12 +231,20 @@ namespace System.Web.OData.Query
                 result = Filter.ApplyTo(result, querySettings, _assembliesResolver);
             }
 
-            if (Count != null && Request.ODataProperties().TotalCount == null)
+            if (Count != null)
             {
-                long? count = Count.GetEntityCount(result);
-                if (count.HasValue)
+                if (Request.ODataProperties().TotalCount == null)
                 {
-                    Request.ODataProperties().TotalCount = count.Value;
+                    long? count = Count.GetEntityCount(result);
+                    if (count.HasValue)
+                    {
+                        Request.ODataProperties().TotalCount = count.Value;
+                    }
+                }
+
+                if (ODataCountMediaTypeMapping.IsCountRequest(Request))
+                {
+                    return result;
                 }
             }
 
@@ -591,6 +549,74 @@ namespace System.Web.OData.Query
         internal virtual ETag GetETag(EntityTagHeaderValue etagHeaderValue)
         {
             return Request.GetETag(etagHeaderValue);
+        }
+
+        private void BuildQueryOptions(IDictionary<string, string> queryParameters)
+        {
+            foreach (KeyValuePair<string, string> kvp in queryParameters)
+            {
+                switch (kvp.Key)
+                {
+                    case "$filter":
+                        ThrowIfEmpty(kvp.Value, "$filter");
+                        RawValues.Filter = kvp.Value;
+                        Filter = new FilterQueryOption(kvp.Value, Context, _queryOptionParser);
+                        break;
+                    case "$orderby":
+                        ThrowIfEmpty(kvp.Value, "$orderby");
+                        RawValues.OrderBy = kvp.Value;
+                        OrderBy = new OrderByQueryOption(kvp.Value, Context, _queryOptionParser);
+                        break;
+                    case "$top":
+                        ThrowIfEmpty(kvp.Value, "$top");
+                        RawValues.Top = kvp.Value;
+                        Top = new TopQueryOption(kvp.Value, Context, _queryOptionParser);
+                        break;
+                    case "$skip":
+                        ThrowIfEmpty(kvp.Value, "$skip");
+                        RawValues.Skip = kvp.Value;
+                        Skip = new SkipQueryOption(kvp.Value, Context, _queryOptionParser);
+                        break;
+                    case "$select":
+                        RawValues.Select = kvp.Value;
+                        break;
+                    case "$count":
+                        ThrowIfEmpty(kvp.Value, "$count");
+                        RawValues.Count = kvp.Value;
+                        Count = new CountQueryOption(kvp.Value, Context, _queryOptionParser);
+                        break;
+                    case "$expand":
+                        RawValues.Expand = kvp.Value;
+                        break;
+                    case "$format":
+                        RawValues.Format = kvp.Value;
+                        break;
+                    case "$skiptoken":
+                        RawValues.SkipToken = kvp.Value;
+                        break;
+                    default:
+                        // we don't throw if we can't recognize the query
+                        break;
+                }
+            }
+
+            if (RawValues.Select != null || RawValues.Expand != null)
+            {
+                SelectExpand = new SelectExpandQueryOption(RawValues.Select, RawValues.Expand,
+                    Context, _queryOptionParser);
+            }
+
+            if (ODataCountMediaTypeMapping.IsCountRequest(Request))
+            {
+                Count = new CountQueryOption(
+                    "true",
+                    Context,
+                    new ODataQueryOptionParser(
+                        Context.Model,
+                        Context.ElementType,
+                        Context.NavigationSource,
+                        new Dictionary<string, string> { { "$count", "true" } }));
+            }
         }
     }
 }

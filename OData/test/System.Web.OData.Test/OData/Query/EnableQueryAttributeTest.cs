@@ -281,6 +281,45 @@ namespace System.Web.OData.Query
         }
 
         [Fact]
+        public void CountValueReturnsAsContent_CountRequest()
+        {
+            // Arrange
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
+            HttpRequestMessage request = new HttpRequestMessage(
+                HttpMethod.Get,
+                "http://localhost/DollarCountEntities(5)/StringCollectionProp/$count");
+            request.ODataProperties().Path = new ODataPath(new CountPathSegment());
+            HttpConfiguration config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            HttpControllerContext controllerContext = new HttpControllerContext(
+                config,
+                new HttpRouteData(new HttpRoute()),
+                request);
+            HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(
+                new HttpConfiguration(),
+                "DollarCountEntities",
+                typeof(ODataCountTest.DollarCountEntitiesController));
+            HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(
+                controllerDescriptor,
+                typeof(ODataCountTest.DollarCountEntitiesController).GetMethod("GetStringCollectionProp"));
+            HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
+            HttpActionExecutedContext context = new HttpActionExecutedContext(actionContext, null);
+            context.Response = new HttpResponseMessage(HttpStatusCode.OK);
+            context.Response.Content = new ObjectContent(
+                typeof(IEnumerable<string>),
+                new[] { "123", "abc", "A1B2" },
+                new JsonMediaTypeFormatter());
+
+            // Act
+            attribute.OnActionExecuted(context);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, context.Response.StatusCode);
+            Assert.True(context.Response.Content is ObjectContent);
+            Assert.Equal(3L, ((ObjectContent)context.Response.Content).Value);
+        }
+
+        [Fact]
         public void UnknownQueryNotStartingWithDollarSignWorks()
         {
             // Arrange

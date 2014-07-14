@@ -104,6 +104,7 @@
     <Compile Include="OData\Builder\OperationTitleAnnotation.cs" />
     <Compile Include="OData\Builder\DynamicPropertyDictionaryAnnotation.cs" />
     <Compile Include="OData\ETagMessageHandler.cs" />
+    <Compile Include="OData\Formatter\ODataCountMediaTypeMapping.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
     <Compile Include="OData\Query\ParameterAliasNodeTranslator.cs" />
@@ -194,6 +195,7 @@
     <Compile Include="OData\Results\UpdatedODataResult.cs" />
     <Compile Include="OData\Routing\Conventions\NavigationSourceRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\SingletonRoutingConvention.cs" />
+    <Compile Include="OData\Routing\CountPathSegment.cs" />
     <Compile Include="OData\Routing\SingletonPathSegment.cs" />
     <Compile Include="OData\Routing\ODataPathSegmentTranslator.cs" />
     <Compile Include="OData\Routing\ODataVersionConstraint.cs" />

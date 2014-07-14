@@ -7,8 +7,8 @@ using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing.Conventions;
-using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Routing
@@ -153,15 +153,25 @@ namespace System.Web.OData.Routing
         public void Match_ReturnsFalse_IfODataPathHasNotImplementedSegment()
         {
             // Arrange
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://any/Customers/$count");
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://any/Customers(1)/OpenProperty");
             HttpRouteCollection httpRouteCollection = new HttpRouteCollection();
             httpRouteCollection.Add(_routeName, new HttpRoute());
             request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
 
-            var values = new Dictionary<string, object>() { { "odataPath", "Customers/$count" } };
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.EntitySet<Customer>("Customers");
-            IEdmModel model = builder.GetEdmModel();
+            var model = new EdmModel();
+            var customer = new EdmEntityType(
+                namespaceName: "NS",
+                name: "Customer",
+                baseType: null,
+                isAbstract: false,
+                isOpen: true);
+            customer.AddKeys(customer.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
+            model.AddElement(customer);
+            var container = new EdmEntityContainer("NS", "Container");
+            container.AddEntitySet("Customers", customer);
+            model.AddElement(container);
+
+            var values = new Dictionary<string, object>() { { "odataPath", "Customers(1)/OpenProperty" } };
             var constraint = new ODataPathRouteConstraint(_pathHandler, model, _routeName, _conventions);
 
             // Act & Assert

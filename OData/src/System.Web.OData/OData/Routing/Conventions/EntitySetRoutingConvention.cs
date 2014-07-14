@@ -60,6 +60,17 @@ namespace System.Web.OData.Routing.Conventions
                         "Post");
                 }
             }
+            else if (odataPath.PathTemplate == "~/entityset/$count" &&
+                controllerContext.Request.Method == HttpMethod.Get)
+            {
+                EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)odataPath.Segments[0];
+                IEdmEntitySetBase entitySet = entitySetSegment.EntitySetBase;
+
+                // e.g. Try GetCustomers first, then fall back to Get action name
+                return actionMap.FindMatchingAction(
+                    "Get" + entitySet.Name,
+                    "Get");
+            }
             else if (odataPath.PathTemplate == "~/entityset/cast")
             {
                 EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)odataPath.Segments[0];
@@ -82,6 +93,20 @@ namespace System.Web.OData.Routing.Conventions
                         "Post" + entitySet.EntityType().Name + "From" + entityType.Name,
                         "PostFrom" + entityType.Name);
                 }
+            }
+            else if (odataPath.PathTemplate == "~/entityset/cast/$count" &&
+                controllerContext.Request.Method == HttpMethod.Get)
+            {
+                EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)odataPath.Segments[0];
+                IEdmEntitySetBase entitySet = entitySetSegment.EntitySetBase;
+                IEdmCollectionType collectionType = (IEdmCollectionType)odataPath.Segments[1].GetEdmType(
+                    entitySetSegment.GetEdmType(previousEdmType: null));
+                IEdmEntityType entityType = (IEdmEntityType)collectionType.ElementType.Definition;
+
+                // e.g. Try GetCustomersFromSpecialCustomer first, then fall back to GetFromSpecialCustomer
+                return actionMap.FindMatchingAction(
+                    "Get" + entitySet.Name + "From" + entityType.Name,
+                    "GetFrom" + entityType.Name);
             }
 
             return null;

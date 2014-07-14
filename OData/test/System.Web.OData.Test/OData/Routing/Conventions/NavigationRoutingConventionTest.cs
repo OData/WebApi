@@ -228,6 +228,82 @@ namespace System.Web.OData.Routing.Conventions
             Assert.Equal("1", controllerContext.RouteData.Values["key"]);
         }
 
+        [Theory]
+        [InlineData("GET", new[] { "GetOrders" }, "GetOrders")]
+        [InlineData("GET", new[] { "GetOrders", "Get" }, "GetOrders")]
+        [InlineData("GET", new[] { "GetOrders", "GetOrdersFromCustomer" }, "GetOrdersFromCustomer")]
+        public void SelectAction_Returns_DollarCount(string method, string[] methodsInController,
+            string expectedSelectedAction)
+        {
+            // Arrange
+            const string key = "42";
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            var ordersProperty = model.Customer.FindProperty("Orders") as IEdmNavigationProperty;
+            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
+                new NavigationPathSegment(ordersProperty), new CountPathSegment());
+            HttpControllerContext controllerContext = CreateControllerContext(method);
+            var actionMap = GetMockActionMap(methodsInController);
+
+            // Act
+            string selectedAction = new NavigationRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Equal(expectedSelectedAction, selectedAction);
+            Assert.Equal(1, controllerContext.RouteData.Values.Count);
+            Assert.Equal(key, controllerContext.RouteData.Values["key"]);
+        }
+
+        [Theory]
+        [InlineData("GET", new[] { "GetSpecialOrders" }, "GetSpecialOrders")]
+        [InlineData("GET", new[] { "GetSpecialOrders", "GetOrders" }, "GetSpecialOrders")]
+        [InlineData("GET", new[] { "GetSpecialOrders", "GetSpecialOrdersFromSpecialCustomer" }, "GetSpecialOrdersFromSpecialCustomer")]
+        public void SelectAction_Returns_DerivedTypeWithDollarCount(string method, string[] methodsInController,
+            string expectedSelectedAction)
+        {
+            // Arrange
+            const string key = "42";
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
+
+            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
+                new CastPathSegment(model.SpecialCustomer), new NavigationPathSegment(specialOrdersProperty), new CountPathSegment());
+
+            HttpControllerContext controllerContext = CreateControllerContext(method);
+            var actionMap = GetMockActionMap(methodsInController);
+
+            // Act
+            string selectedAction = new NavigationRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Equal(expectedSelectedAction, selectedAction);
+            Assert.Equal(1, controllerContext.RouteData.Values.Count);
+            Assert.Equal(key, controllerContext.RouteData.Values["key"]);
+        }
+
+        [Theory]
+        [InlineData("POST", new[] { "GetSpecialOrders" })]
+        [InlineData("POST", new[] { "GetSpecialOrders", "GetOrders" })]
+        [InlineData("POST", new[] { "GetSpecialOrders", "GetSpecialOrdersFromSpecialCustomer" })]
+        public void SelectAction_ReturnsNull_NotSupportedMethodForDollarCount(string method, string[] methodsInController)
+        {
+            // Arrange
+            const string key = "42";
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
+
+            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
+                new CastPathSegment(model.SpecialCustomer), new NavigationPathSegment(specialOrdersProperty), new CountPathSegment());
+
+            HttpControllerContext controllerContext = CreateControllerContext(method);
+            var actionMap = GetMockActionMap(methodsInController);
+
+            // Act
+            string selectedAction = new NavigationRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.Null(selectedAction);
+        }
+
         private static ILookup<string, HttpActionDescriptor> GetMockActionMap(params string[] actionNames)
         {
             return actionNames.Select(name => GetMockActionDescriptor(name)).ToLookup(a => a.ActionName);

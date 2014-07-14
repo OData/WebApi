@@ -39,11 +39,17 @@ namespace System.Web.OData.Routing.Conventions
             }
 
             if (odataPath.PathTemplate == "~/entityset/key/navigation" ||
+                odataPath.PathTemplate == "~/entityset/key/navigation/$count" ||
                 odataPath.PathTemplate == "~/entityset/key/cast/navigation" ||
+                odataPath.PathTemplate == "~/entityset/key/cast/navigation/$count" ||
                 odataPath.PathTemplate == "~/singleton/navigation" ||
-                odataPath.PathTemplate == "~/singleton/cast/navigation")
+                odataPath.PathTemplate == "~/singleton/navigation/$count" ||
+                odataPath.PathTemplate == "~/singleton/cast/navigation" ||
+                odataPath.PathTemplate == "~/singleton/cast/navigation/$count")
             {
-                NavigationPathSegment navigationSegment = odataPath.Segments.Last() as NavigationPathSegment;
+                NavigationPathSegment navigationSegment =
+                    (odataPath.Segments.Last() as NavigationPathSegment) ??
+                    odataPath.Segments[odataPath.Segments.Count - 2] as NavigationPathSegment;
                 IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
                 IEdmEntityType declaringType = navigationProperty.DeclaringType as IEdmEntityType;
 
@@ -57,6 +63,12 @@ namespace System.Web.OData.Routing.Conventions
                 // It is not valid to *Put/Patch" to any collection-valued navigation property.
                 if (navigationProperty.TargetMultiplicity() == EdmMultiplicity.Many &&
                     (method == HttpMethod.Put || "PATCH" == method.Method.ToUpperInvariant()))
+                {
+                    return null;
+                }
+
+                // *Get* is the only supported method for $count request.
+                if (odataPath.Segments.Last() is CountPathSegment && method != HttpMethod.Get)
                 {
                     return null;
                 }

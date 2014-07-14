@@ -128,7 +128,8 @@ namespace System.Web.OData.Routing
                 if (ex.ParsedSegments != null &&
                     ex.ParsedSegments.Count() > 0 &&
                     (ex.ParsedSegments.Last().EdmType is IEdmComplexType ||
-                     ex.ParsedSegments.Last().EdmType is IEdmEntityType))
+                     ex.ParsedSegments.Last().EdmType is IEdmEntityType) &&
+                    ex.CurrentSegment != ODataSegmentKinds.Count)
                 {
                     if (ex.UnparsedSegments.Count() == 0)
                     {
@@ -194,7 +195,7 @@ namespace System.Web.OData.Routing
                 enableUriTemplateParsing,
                 unresolvedPathSegment == null ?
                     uriParser.ParameterAliasNodes :
-                    // We can't get parameter alias if ODataUnrecognizedPathException was thrown.
+                // We can't get parameter alias if ODataUnrecognizedPathException was thrown.
                     new Dictionary<string, Semantic.SingleValueNode>(),
                 unresolvedPathSegment == null ? null : queryString);
 

@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.TestCommon;
@@ -57,12 +59,11 @@ namespace System.Web.WebPages.Test
                 StringWriter writer = new StringWriter();
 
                 mock = new Mock<StreamWriter>(MockBehavior.Strict, stream) { CallBase = true };
-                mock.Setup(sw 
-                    => sw.Write(It.IsAny<char[]>(),
+                mock.Setup(sw => sw.Write(It.IsAny<char[]>(),
                                           It.IsAny<int>(),
                                           It.Is<int>(c => c == StringWriterExtensions.BufferSize ||
-                                                         c == textInBytes.Length % StringWriterExtensions.BufferSize))).
-                                          Verifiable();
+                                                          c == textInBytes.Length % StringWriterExtensions.BufferSize)))
+                    .Verifiable();
 
                 StreamWriter outputWriter = mock.Object;
                 writer.Write(text);

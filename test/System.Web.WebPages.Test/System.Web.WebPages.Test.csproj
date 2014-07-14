@@ -45,6 +45,7 @@
     <Compile Include="ApplicationParts\MimeMappingTest.cs" />
     <Compile Include="ApplicationParts\ResourceHandlerTest.cs" />
     <Compile Include="ApplicationParts\TestResourceAssembly.cs" />
+    <Compile Include="Extensions\StringWriterExtensionsTest.cs" />
     <Compile Include="Helpers\AntiXsrf\AntiForgeryTokenStoreTest.cs" />
     <Compile Include="Helpers\AntiXsrf\MachineKey45CryptoSystemTest.cs" />
     <Compile Include="Helpers\AntiXsrf\MockableTokenStore.cs" />

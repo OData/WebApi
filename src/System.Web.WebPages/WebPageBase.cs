@@ -10,19 +10,17 @@ using Microsoft.Internal.Web.Utils;
 
 namespace System.Web.WebPages
 {
-    // TODO(elipton): Clean this up and remove the suppression
     [SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "This is temporary (elipton)")]
     public abstract class WebPageBase : WebPageRenderingBase
     {
         // Keep track of which sections RenderSection has already been called on
-        private HashSet<string> _renderedSections = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _renderedSections = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         // Keep track of whether RenderBody has been called
         private bool _renderedBody = false;
         // Action for rendering the body within a layout page
         private Action<TextWriter> _body;
 
-        // TODO(elipton): Figure out if we still need these two writers
-        private TextWriter _tempWriter;
+        private StringWriter _tempWriter;
         private TextWriter _currentWriter;
 
         private DynamicPageDataDictionary<dynamic> _dynamicPageData;
@@ -267,23 +265,25 @@ namespace System.Web.WebPages
 
         public void PopContext()
         {
-            string renderedContent = _tempWriter.ToString();
+            // Using the CopyTo extension method on the _tempWriter instead of .ToString()
+            // to avoid allocating large strings that then end up on the Large object heap.
             OutputStack.Pop();
 
             if (!String.IsNullOrEmpty(Layout))
             {
                 string layoutPagePath = NormalizeLayoutPagePath(Layout);
-                // If a layout file was specified, render it passing our page content
+
+                // If a layout file was specified, render it passing our page content.
                 OutputStack.Push(_currentWriter);
                 RenderSurrounding(
                     layoutPagePath,
-                    w => w.Write(renderedContent));
+                    _tempWriter.CopyTo);
                 OutputStack.Pop();
             }
             else
             {
-                // Otherwise, just render the page
-                _currentWriter.Write(renderedContent);
+                // Otherwise, just render the page.
+                _tempWriter.CopyTo(_currentWriter);
             }
 
             VerifyRenderedBodyOrSections();

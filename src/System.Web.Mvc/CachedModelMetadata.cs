@@ -20,6 +20,7 @@ namespace System.Web.Mvc
         private string _editFormatString;
         private bool _hasNonDefaultEditFormat;
         private bool _hideSurroundingHtml;
+        private bool _htmlEncode;
         private bool _isReadOnly;
         private bool _isRequired;
         private string _nullDisplayText;
@@ -38,6 +39,7 @@ namespace System.Web.Mvc
         private bool _editFormatStringComputed;
         private bool _hasNonDefaultEditFormatComputed;
         private bool _hideSurroundingHtmlComputed;
+        private bool _htmlEncodeComputed;
         private bool _isReadOnlyComputed;
         private bool _isRequiredComputed;
         private bool _nullDisplayTextComputed;
@@ -204,6 +206,24 @@ namespace System.Web.Mvc
             {
                 _hideSurroundingHtml = value;
                 _hideSurroundingHtmlComputed = true;
+            }
+        }
+
+        public sealed override bool HtmlEncode
+        {
+            get
+            {
+                if (!_htmlEncodeComputed)
+                {
+                    _htmlEncode = ComputeHtmlEncode();
+                    _htmlEncodeComputed = true;
+                }
+                return _htmlEncode;
+            }
+            set
+            {
+                _htmlEncode = value;
+                _htmlEncodeComputed = true;
             }
         }
 
@@ -419,6 +439,11 @@ namespace System.Web.Mvc
         protected virtual bool ComputeHideSurroundingHtml()
         {
             return base.HideSurroundingHtml;
+        }
+
+        protected virtual bool ComputeHtmlEncode()
+        {
+            return base.HtmlEncode;
         }
 
         protected virtual bool ComputeIsReadOnly()

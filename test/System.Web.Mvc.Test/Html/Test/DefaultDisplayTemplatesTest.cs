@@ -454,14 +454,20 @@ namespace System.Web.Mvc.Html.Test
             Assert.Equal(metadata.NullDisplayText, result);
         }
 
-        [Fact]
-        public void ObjectTemplateDisplaysSimpleDisplayTextWhenTemplateDepthGreaterThanOne()
+        [Theory]
+        [PropertyData("DisplayTextData", PropertyType = typeof(DisplayTextExtensionsTest))]
+        public void ObjectTemplateDisplaysSimpleDisplayTextWhenTemplateDepthGreaterThanOne(
+            string simpleDisplayText,
+            bool htmlEncode,
+            string expectedResult)
         {
             // Arrange
             ObjectTemplateModel model = new ObjectTemplateModel();
             HtmlHelper html = MakeHtmlHelper<ObjectTemplateModel>(model);
             ModelMetadata metadata = ModelMetadataProviders.Current.GetMetadataForType(() => model, typeof(ObjectTemplateModel));
-            metadata.SimpleDisplayText = "Simple Display Text";
+            metadata.SimpleDisplayText = simpleDisplayText;
+            metadata.HtmlEncode = htmlEncode;
+
             html.ViewData.ModelMetadata = metadata;
             html.ViewData.TemplateInfo.VisitedObjects.Add("foo");
             html.ViewData.TemplateInfo.VisitedObjects.Add("bar");
@@ -470,7 +476,7 @@ namespace System.Web.Mvc.Html.Test
             string result = DefaultDisplayTemplates.ObjectTemplate(html, SpyCallback);
 
             // Assert
-            Assert.Equal(metadata.SimpleDisplayText, result);
+            Assert.Equal(expectedResult, result);
         }
 
         [Fact]

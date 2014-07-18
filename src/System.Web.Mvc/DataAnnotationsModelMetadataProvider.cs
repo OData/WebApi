@@ -121,6 +121,7 @@ namespace System.Web.Mvc
                 result.NullDisplayText = displayFormatAttribute.NullDisplayText;
                 result.DisplayFormatString = displayFormatAttribute.DataFormatString;
                 result.ConvertEmptyStringToNull = displayFormatAttribute.ConvertEmptyStringToNull;
+                result.HtmlEncode = displayFormatAttribute.HtmlEncode;
 
                 if (displayFormatAttribute.ApplyFormatInEditMode)
                 {

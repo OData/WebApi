@@ -55,6 +55,11 @@ namespace System.Web.OData.Formatter
         /// </summary>
         public Type EntityType { get; set; }
 
+        /// <summary>
+        /// Gets or sets whether the ETag is corresponding to "*".
+        /// </summary>
+        public bool IsAny { get; set; }
+
         internal bool IsIfNoneMatch { get; set; }
 
         internal IDictionary<string, object> ConcurrencyProperties
@@ -109,6 +114,11 @@ namespace System.Web.OData.Formatter
         /// <returns>The new <see cref="IQueryable"/> after the ETag has been applied to.</returns>
         public virtual IQueryable ApplyTo(IQueryable query)
         {
+            if (IsAny)
+            {
+                return query;
+            }
+
             Type type = EntityType;
             ParameterExpression param = Expression.Parameter(type);
             Expression where = null;

@@ -159,5 +159,20 @@ namespace System.Web.OData.Formatter
                 + "AndAlso (Param_0.LastName == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty)))",
                 methodCall.Arguments[1].ToString());
         }
+
+        [Fact]
+        public void ApplyTo_SameQueryReturned_GivenQueryableAndETagAny()
+        {
+            // Arrange
+            var any = new ETag { IsAny = true };
+            var customers = _customers.AsQueryable();
+
+            // Act
+            var queryable = any.ApplyTo(customers);
+
+            // Assert
+            Assert.NotNull(queryable);
+            Assert.Same(queryable, customers);
+        }
     }
 }

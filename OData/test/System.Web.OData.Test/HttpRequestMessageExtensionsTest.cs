@@ -227,6 +227,34 @@ namespace System.Net.Http
         }
 
         [Fact]
+        public void GetETag_Returns_ETagAny()
+        {
+            // Arrange
+            var request = new HttpRequestMessage();
+            var etagHeaderValue = EntityTagHeaderValue.Any;
+
+            // Act
+            var result = request.GetETag(etagHeaderValue);
+
+            // Assert
+            Assert.True(result.IsAny);
+        }
+
+        [Fact]
+        public void GetETagTEntity_Returns_ETagAny()
+        {
+            // Arrange
+            var request = new HttpRequestMessage();
+            var etagHeaderValue = EntityTagHeaderValue.Any;
+
+            // Act
+            var result = request.GetETag<Customer>(etagHeaderValue);
+
+            // Assert
+            Assert.True(result.IsAny);
+        }
+
+        [Fact]
         public void GetETag_Returns_ETagInHeader()
         {
             // Arrange

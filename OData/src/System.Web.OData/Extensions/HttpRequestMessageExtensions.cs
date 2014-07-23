@@ -111,6 +111,11 @@ namespace System.Web.OData.Extensions
 
             if (entityTagHeaderValue != null)
             {
+                if (entityTagHeaderValue.Equals(EntityTagHeaderValue.Any))
+                {
+                    return new ETag { IsAny = true };
+                }
+
                 HttpConfiguration configuration = request.GetConfiguration();
                 if (configuration == null)
                 {
@@ -165,6 +170,7 @@ namespace System.Web.OData.Extensions
                 {
                     ConcurrencyProperties = etag.ConcurrencyProperties,
                     IsWellFormed = etag.IsWellFormed,
+                    IsAny = etag.IsAny,
                 }
                 : null;
         }

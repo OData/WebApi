@@ -20,9 +20,10 @@ namespace System.Web.WebPages
             }
             else
             {
-                _urlData = pathInfo.Split(new char[] { '/' }).ToList();
+                _urlData = pathInfo.Split(ForwardSlash).ToList();
             }
         }
+        private static readonly char[] ForwardSlash = new[] { '/' };
 
         public int Count
         {

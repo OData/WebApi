@@ -78,7 +78,7 @@ namespace System.Web.WebPages.Razor
             }
 
             // Get the segments removing any empty entries
-            IEnumerable<string> segments = virtualPath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            IEnumerable<string> segments = virtualPath.Split(ForwardSlash, StringSplitOptions.RemoveEmptyEntries);
 
             if (!segments.Any())
             {
@@ -87,7 +87,7 @@ namespace System.Web.WebPages.Razor
 
             return WebDefaultNamespace + "." + String.Join(".", segments);
         }
-
+        private static readonly char[] ForwardSlash = new[] {'/'};
         private static string GetDirectory(string virtualPath)
         {
             int lastSlash = virtualPath.LastIndexOf('/');

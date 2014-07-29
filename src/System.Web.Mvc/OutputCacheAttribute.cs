@@ -153,7 +153,7 @@ namespace System.Web.Mvc
             }
 
             // Unique ID from the VaryByParam settings, if any
-            uniqueIdBuilder.Append(GetUniqueIdFromActionParameters(filterContext, SplitVaryByParam(VaryByParam)));
+            uniqueIdBuilder.Append(GetUniqueIdFromActionParameters(filterContext, VaryByParam));
 
             // The key is typically too long to be useful, so we use a cryptographic hash
             // as the actual key (better randomization and key distribution, so small vary
@@ -164,14 +164,77 @@ namespace System.Web.Mvc
             }
         }
 
-        private static string GetUniqueIdFromActionParameters(ActionExecutingContext filterContext, IEnumerable<string> keys)
+        private static string GetUniqueIdFromActionParameters(ActionExecutingContext filterContext, string varyByParam)
         {
-            // Generate a unique ID of normalized key names + key values
-            var keyValues = new Dictionary<string, object>(filterContext.ActionParameters, StringComparer.OrdinalIgnoreCase);
-            keys = (keys ?? keyValues.Keys).Select(key => key.ToUpperInvariant())
-                .OrderBy(key => key, StringComparer.Ordinal);
+            if (string.Equals(varyByParam, "none", StringComparison.OrdinalIgnoreCase))
+            {
+                return "";
+            }
+            var args = filterContext.ActionParameters;
+            if (args.Count == 0) return ""; // nothing to do
 
-            return DescriptorUtil.CreateUniqueId(keys.Concat(keys.Select(key => keyValues.ContainsKey(key) ? keyValues[key] : null)));
+            // Generate a unique ID of normalized key names + key values
+            var result = new StringBuilder();
+            if (string.Equals(varyByParam, "*", StringComparison.OrdinalIgnoreCase))
+            {   // use all available key/value pairs (without caring about order, so sort the keys)
+                string[] keys = new string[args.Count];
+                args.Keys.CopyTo(keys, 0);
+                Array.Sort(keys, StringComparer.OrdinalIgnoreCase);
+                for(int i = 0; i < keys.Length; i++)
+                {
+                    var key = keys[i];
+                    DescriptorUtil.AppendUniqueId(result, key.ToUpperInvariant());
+                    DescriptorUtil.AppendUniqueId(result, args[key]);
+                }
+            }
+            else
+            {   // use only the key/value pairs specified in the varyByParam string; lazily create a sorted
+                // dictionary to represent the selected keys (normalizes the order at the same time)
+                SortedList<string, object> keyValues = null;
+                foreach (var pair in args)
+                {
+                    if (ContainsToken(varyByParam, pair.Key))
+                    {
+                        if(keyValues == null) keyValues = new SortedList<string, object>(args.Count, StringComparer.OrdinalIgnoreCase);
+                        keyValues[pair.Key] = pair.Value;
+                    }
+                }
+                if (keyValues != null) // something to do
+                {
+                    foreach (var pair in keyValues)
+                    {
+                        DescriptorUtil.AppendUniqueId(result, pair.Key.ToUpperInvariant());
+                        DescriptorUtil.AppendUniqueId(result, pair.Value);
+                    }
+                }
+            }
+            return result.ToString();
+        }
+
+        // check a delimited string i.e. "a;bcd; e" contains the given part, without actually splitting it -
+        // by searching for the entire token, then checking whether the before/after is EOF, delimiter or white-space
+        public static bool ContainsToken(string value, string token)
+        {
+            if (string.IsNullOrEmpty(token)) return false;
+            if (string.IsNullOrEmpty(value)) return false;
+
+            const char delimiter = ';'; // could be parameterized easily enough
+
+            int lastIndex = -1, idx, endIndex = value.Length - token.Length, tokenLength = token.Length;
+            while ((idx = value.IndexOf(token, lastIndex + 1, StringComparison.OrdinalIgnoreCase)) > lastIndex)
+            {
+                lastIndex = idx;
+                char c;
+                if (
+                    (idx == 0 || ((c = value[idx - 1]) == delimiter) || char.IsWhiteSpace(c))
+                    &&
+                    (idx == endIndex || ((c = value[idx + tokenLength]) == delimiter) || char.IsWhiteSpace(c))
+                    )
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public static bool IsChildActionCacheActive(ControllerContext controllerContext)
@@ -298,26 +361,6 @@ namespace System.Web.Mvc
         private static void SetChildActionFilterFinishCallback(ControllerContext controllerContext, Action<bool> callback)
         {
             controllerContext.HttpContext.Items[_childActionFilterFinishCallbackKey] = callback;
-        }
-
-        private static IEnumerable<string> SplitVaryByParam(string varyByParam)
-        {
-            if (String.Equals(varyByParam, "none", StringComparison.OrdinalIgnoreCase))
-            {
-                // Vary by nothing
-                return Enumerable.Empty<string>();
-            }
-
-            if (String.Equals(varyByParam, "*", StringComparison.OrdinalIgnoreCase))
-            {
-                // Vary by everything
-                return null;
-            }
-
-            return from part in varyByParam.Split(';') // Vary by specific parameters
-                   let trimmed = part.Trim()
-                   where !String.IsNullOrEmpty(trimmed)
-                   select trimmed;
         }
 
         private void ValidateChildActionConfiguration()

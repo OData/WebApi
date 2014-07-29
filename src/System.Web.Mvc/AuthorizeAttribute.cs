@@ -144,7 +144,7 @@ namespace System.Web.Mvc
                 return new string[0];
             }
 
-            var split = from piece in original.Split(',')
+            var split = from piece in original.Split(StringSplits.Comma)
                         let trimmed = piece.Trim()
                         where !String.IsNullOrEmpty(trimmed)
                         select trimmed;

@@ -23,35 +23,65 @@ namespace System.Web.Mvc
             }
         }
 
+        internal static void AppendUniqueId(StringBuilder builder, object part)
+        {
+            // We can special-case certain part type
+            MemberInfo memberInfo = part as MemberInfo;
+            if (memberInfo != null)
+            {
+                AppendPartToUniqueIdBuilder(builder, memberInfo.Module.ModuleVersionId);
+                AppendPartToUniqueIdBuilder(builder, memberInfo.MetadataToken);
+                return;
+            }
+
+            IUniquelyIdentifiable uniquelyIdentifiable = part as IUniquelyIdentifiable;
+            if (uniquelyIdentifiable != null)
+            {
+                AppendPartToUniqueIdBuilder(builder, uniquelyIdentifiable.UniqueId);
+                return;
+            }
+
+            AppendPartToUniqueIdBuilder(builder, part);
+        }
+        // special-case common constructors to avoid extra array allocation
+        public static string CreateUniqueId(object part0)
+        {
+            var builder = new StringBuilder();
+            AppendUniqueId(builder, part0);
+            return builder.ToString();
+        }
+        public static string CreateUniqueId(object part0, object part1)
+        {
+            var builder = new StringBuilder();
+            AppendUniqueId(builder, part0);
+            AppendUniqueId(builder, part1);
+            return builder.ToString();
+        }
+        public static string CreateUniqueId(object part0, object part1, object part2)
+        {
+            var builder = new StringBuilder();
+            AppendUniqueId(builder, part0);
+            AppendUniqueId(builder, part1);
+            AppendUniqueId(builder, part2);
+            return builder.ToString();
+        }
         public static string CreateUniqueId(params object[] parts)
         {
-            return CreateUniqueId((IEnumerable<object>)parts);
+            // returns a unique string made up of the pieces passed in
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < parts.Length; i++)
+            {
+                AppendUniqueId(builder, parts[i]);
+            }
+            return builder.ToString();
         }
-
         public static string CreateUniqueId(IEnumerable<object> parts)
         {
             // returns a unique string made up of the pieces passed in
             StringBuilder builder = new StringBuilder();
             foreach (object part in parts)
             {
-                // We can special-case certain part types
-
-                MemberInfo memberInfo = part as MemberInfo;
-                if (memberInfo != null)
-                {
-                    AppendPartToUniqueIdBuilder(builder, memberInfo.Module.ModuleVersionId);
-                    AppendPartToUniqueIdBuilder(builder, memberInfo.MetadataToken);
-                    continue;
-                }
-
-                IUniquelyIdentifiable uniquelyIdentifiable = part as IUniquelyIdentifiable;
-                if (uniquelyIdentifiable != null)
-                {
-                    AppendPartToUniqueIdBuilder(builder, uniquelyIdentifiable.UniqueId);
-                    continue;
-                }
-
-                AppendPartToUniqueIdBuilder(builder, part);
+                AppendUniqueId(builder, part);
             }
 
             return builder.ToString();

@@ -343,6 +343,385 @@ namespace System.Web.Mvc.Test
             Assert.Equal(result1, result2);
         }
 
+        [Fact]
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_SingleSpecified_Different()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "2";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.NotEqual(result1, result2);
+        }
+
+        [Fact]
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_SingleSpecified_Same()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "1";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.Equal(result1, result2);
+        }
+
+        [Fact]
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_MultipleSpecified_Different()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo;bar;blap" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "1";
+            context2.ActionParameters["bar"] = "3";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.NotEqual(result1, result2);
+        }
+
+        [Fact]
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_MultipleSpecified_Same()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo;bar;blap" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            context1.ActionParameters["blap"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "1";
+            context2.ActionParameters["bar"] = "2";
+            context2.ActionParameters["blap"] = "3";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.Equal(result1, result2);
+        }
+
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_MultipleSpecified_Whitespace1_Same()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo; bar; blap" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            context1.ActionParameters["blap"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "1";
+            context2.ActionParameters["bar"] = "2";
+            context2.ActionParameters["blap"] = "3";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.Equal(result1, result2);
+        }
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_MultipleSpecified_Whitespace1_DifferentFirst()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo; bar; blap" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            context1.ActionParameters["blap"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "4";
+            context2.ActionParameters["bar"] = "2";
+            context2.ActionParameters["blap"] = "3";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.NotEqual(result1, result2);
+        }
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_MultipleSpecified_Whitespace1_DifferentSecond()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo; bar; blap" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            context1.ActionParameters["blap"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "1";
+            context2.ActionParameters["bar"] = "4";
+            context2.ActionParameters["blap"] = "3";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.NotEqual(result1, result2);
+        }
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_MultipleSpecified_Whitespace1_DifferentThird()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo; bar; blap" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            context1.ActionParameters["blap"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "1";
+            context2.ActionParameters["bar"] = "2";
+            context2.ActionParameters["blap"] = "4";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.NotEqual(result1, result2);
+        }
+
+        [Fact]
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_MultipleSpecified_Whitespace2_Same()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo ; bar ; blap" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            context1.ActionParameters["blap"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "1";
+            context2.ActionParameters["bar"] = "2";
+            context2.ActionParameters["blap"] = "3";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.Equal(result1, result2);
+        }
+
+        [Fact]
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_MultipleSpecified_Whitespace2_CaseOnly_Same()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo ; bar ; blap" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["BAR"] = "2";
+            context1.ActionParameters["blap"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "1";
+            context2.ActionParameters["bar"] = "2";
+            context2.ActionParameters["BLAP"] = "3";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.Equal(result1, result2);
+        }
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_MultipleSpecified_Whitespace2_DifferentFirst()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo ; bar ; blap" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            context1.ActionParameters["blap"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "4";
+            context2.ActionParameters["bar"] = "2";
+            context2.ActionParameters["blap"] = "3";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.NotEqual(result1, result2);
+        }
+
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_MultipleSpecified_Whitespace2_DifferentSecond()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo ; bar ; blap" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            context1.ActionParameters["blap"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "1";
+            context2.ActionParameters["bar"] = "4";
+            context2.ActionParameters["blap"] = "3";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.NotEqual(result1, result2);
+        }
+
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_MultipleSpecified_Whitespace2_DifferentThird()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "foo ; bar ; blap" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            context1.ActionParameters["blap"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "1";
+            context2.ActionParameters["bar"] = "2";
+            context2.ActionParameters["blap"] = "4";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.NotEqual(result1, result2);
+        }
+
+        [Fact]
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_Wildcard_Same()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "*" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            context1.ActionParameters["blap"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "1";
+            context2.ActionParameters["bar"] = "2";
+            context2.ActionParameters["blap"] = "3";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.Equal(result1, result2);
+        }
+
+        [Fact]
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_Wildcard_CaseOnly_Same()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "*" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            context1.ActionParameters["BLAP"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["FOO"] = "1";
+            context2.ActionParameters["bar"] = "2";
+            context2.ActionParameters["blap"] = "3";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.Equal(result1, result2);
+        }
+
+        [Fact]
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_Wildcard_Different()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "*" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            context1.ActionParameters["bar"] = "2";
+            context1.ActionParameters["blap"] = "3";
+            context1.ActionParameters["xyz"] = "abc";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "1";
+            context2.ActionParameters["bar"] = "4";
+            context2.ActionParameters["blap"] = "3";
+            context2.ActionParameters["xyz"] = "abc";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.NotEqual(result1, result2);
+        }
+
+        [Fact]
+        public void GetChildActionUniqueId_VariesByActionParameters_OnlyVariesByTheGivenParameters_None()
+        {
+            // Arrange
+            var attr = new OutputCacheAttribute { VaryByParam = "none" };
+            var context1 = new MockActionExecutingContext();
+            context1.ActionParameters["foo"] = "1";
+            var context2 = new MockActionExecutingContext();
+            context2.ActionParameters["foo"] = "2";
+
+            // Act
+            string result1 = attr.GetChildActionUniqueId(context1.Object);
+            string result2 = attr.GetChildActionUniqueId(context2.Object);
+
+            // Assert
+            Assert.Equal(result1, result2);
+        }
+
+
+
+
+
         class MockActionExecutingContext : Mock<ActionExecutingContext>
         {
             public Dictionary<string, object> ActionParameters = new Dictionary<string, object>();

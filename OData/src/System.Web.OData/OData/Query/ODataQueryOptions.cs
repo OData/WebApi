@@ -18,6 +18,7 @@ using System.Web.OData.Properties;
 using System.Web.OData.Query.Validators;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Query
@@ -284,8 +285,15 @@ namespace System.Web.OData.Query
 
             if (SelectExpand != null)
             {
-                Request.ODataProperties().SelectExpandClause = SelectExpand.SelectExpandClause;
-                result = SelectExpand.ApplyTo(result, querySettings);
+                SelectExpandClause processedClause = SelectExpand.ProcessLevels();
+                SelectExpandQueryOption newSelectExpand = new SelectExpandQueryOption(
+                    SelectExpand.RawSelect,
+                    SelectExpand.RawExpand,
+                    SelectExpand.Context,
+                    processedClause);
+
+                Request.ODataProperties().SelectExpandClause = processedClause;
+                result = newSelectExpand.ApplyTo(result, querySettings);
             }
 
             if (querySettings.PageSize.HasValue)
@@ -328,8 +336,15 @@ namespace System.Web.OData.Query
 
             if (SelectExpand != null)
             {
-                Request.ODataProperties().SelectExpandClause = SelectExpand.SelectExpandClause;
-                return SelectExpand.ApplyTo(entity, querySettings);
+                SelectExpandClause processedClause = SelectExpand.ProcessLevels();
+                SelectExpandQueryOption newSelectExpand = new SelectExpandQueryOption(
+                    SelectExpand.RawSelect,
+                    SelectExpand.RawExpand,
+                    SelectExpand.Context,
+                    processedClause);
+
+                Request.ODataProperties().SelectExpandClause = processedClause;
+                return newSelectExpand.ApplyTo(entity, querySettings);
             }
 
             return entity;

@@ -763,6 +763,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; should be less than or equal to &apos;{1}&apos;..
+        /// </summary>
+        internal static string InvalidExpansionDepthValue {
+            get {
+                return ResourceManager.GetString("InvalidExpansionDepthValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The given OData path template &apos;{0}&apos; is invalid..
         /// </summary>
         internal static string InvalidODataPathTemplate {

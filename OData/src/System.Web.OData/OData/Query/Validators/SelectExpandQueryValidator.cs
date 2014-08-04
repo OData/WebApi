@@ -38,6 +38,14 @@ namespace System.Web.OData.Query.Validators
 
             if (validationSettings.MaxExpansionDepth > 0)
             {
+                if (selectExpandQueryOption.LevelsMaxLiteralExpansionDepth > validationSettings.MaxExpansionDepth)
+                {
+                    throw new ODataException(Error.Format(
+                        SRResources.InvalidExpansionDepthValue,
+                        "LevelsMaxLiteralExpansionDepth",
+                        "MaxExpansionDepth"));
+                }
+
                 ValidateDepth(selectExpandQueryOption.SelectExpandClause, validationSettings.MaxExpansionDepth);
             }
         }
@@ -54,7 +62,18 @@ namespace System.Web.OData.Query.Validators
                 SelectExpandClause currentNode = tuple.Item2;
 
                 ExpandedNavigationSelectItem[] expandItems = currentNode.SelectedItems.OfType<ExpandedNavigationSelectItem>().ToArray();
-                if (expandItems.Length > 0 && currentDepth == maxDepth)
+
+                if (expandItems.Length > 0 &&
+                    ((currentDepth == maxDepth &&
+                    expandItems.Any(expandItem =>
+                        expandItem.LevelsOption == null ||
+                        expandItem.LevelsOption.IsMaxLevel ||
+                        expandItem.LevelsOption.Level != 0)) ||
+                    expandItems.Any(expandItem =>
+                        expandItem.LevelsOption != null &&
+                        !expandItem.LevelsOption.IsMaxLevel &&
+                        (expandItem.LevelsOption.Level > Int32.MaxValue ||
+                        expandItem.LevelsOption.Level + currentDepth > maxDepth))))
                 {
                     throw new ODataException(
                         Error.Format(SRResources.MaxExpandDepthExceeded, maxDepth, "MaxExpansionDepth"));
@@ -62,7 +81,15 @@ namespace System.Web.OData.Query.Validators
 
                 foreach (ExpandedNavigationSelectItem expandItem in expandItems)
                 {
-                    nodesToVisit.Push(Tuple.Create(currentDepth + 1, expandItem.SelectAndExpand));
+                    int depth = currentDepth + 1;
+
+                    if (expandItem.LevelsOption != null && !expandItem.LevelsOption.IsMaxLevel)
+                    {
+                        // Add the value of $levels for next depth.
+                        depth = depth + (int)expandItem.LevelsOption.Level - 1;
+                    }
+
+                    nodesToVisit.Push(Tuple.Create(depth, expandItem.SelectAndExpand));
                 }
             }
         }

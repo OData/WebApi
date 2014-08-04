@@ -224,6 +224,25 @@ namespace System.Web.OData
         }
 
         [Fact]
+        public void SelectExpand_Works_WithLevels()
+        {
+            // Arrange
+            string uri = "/api/?id=44&$select=ID&$expand=PreviousCustomer($levels=2)";
+
+            // Act
+            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(44, result["ID"]);
+            Assert.Equal(43, result["PreviousCustomer"]["ID"]);
+            Assert.Equal(42, result["PreviousCustomer"]["PreviousCustomer"]["ID"]);
+            Assert.Null(result["PreviousCustomer"]["PreviousCustomer"]["PreviousCustomer"]);
+        }
+
+        [Fact]
         public void SelectExpand_Works_ForSelectAction_WithNamespaceQualifiedName()
         {
             // Arrange
@@ -258,7 +277,7 @@ namespace System.Web.OData
             // Act
             HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
             string responseString = response.Content.ReadAsStringAsync().Result;
-            
+
             // Assert
             Assert.False(response.IsSuccessStatusCode);
             Assert.Contains("The query specified in the URI is not valid. " +
@@ -361,12 +380,38 @@ namespace System.Web.OData
                 SelectExpandTestOrder order = new SelectExpandTestOrder { ID = 24, Amount = 100, Customer = customer };
                 customer.Orders = new[] { order };
 
-                SelectExpandTestSpecialCustomer specialCustomer = new SelectExpandTestSpecialCustomer { ID = 43, Name = "Name", Rank = 100 };
-                SelectExpandTestSpecialOrder specialOrder =
-                    new SelectExpandTestSpecialOrder { ID = 25, Amount = 100, SpecialDiscount = 100, SpecialCustomer = specialCustomer };
+                SelectExpandTestSpecialCustomer specialCustomer = new SelectExpandTestSpecialCustomer
+                {
+                    ID = 43,
+                    Name = "Name",
+                    Rank = 100,
+                    PreviousCustomer = customer
+                };
+                SelectExpandTestSpecialOrder specialOrder = new SelectExpandTestSpecialOrder
+                {
+                    ID = 25,
+                    Amount = 100,
+                    SpecialDiscount = 100,
+                    SpecialCustomer = specialCustomer
+
+                };
                 specialCustomer.SpecialOrders = new[] { specialOrder };
 
-                return new[] { customer, specialCustomer };
+                SelectExpandTestCustomer nextCustomer = new SelectExpandTestCustomer
+                {
+                    ID = 44,
+                    Name = "Name",
+                    PreviousCustomer = specialCustomer
+                };
+                SelectExpandTestOrder nextOrder = new SelectExpandTestOrder
+                {
+                    ID = 26,
+                    Amount = 100,
+                    Customer = nextCustomer
+                };
+                nextCustomer.Orders = new[] { nextOrder };
+
+                return new[] { customer, specialCustomer, nextCustomer };
             }
         }
 
@@ -375,6 +420,8 @@ namespace System.Web.OData
         public string Name { get; set; }
 
         public SelectExpandTestOrder[] Orders { get; set; }
+
+        public SelectExpandTestCustomer PreviousCustomer { get; set; }
     }
 
     public class SelectExpandTestSpecialCustomer : SelectExpandTestCustomer
@@ -535,7 +582,8 @@ namespace System.Web.OData
         [EnableQuery]
         public SingleResult Get(int id)
         {
-            IQueryable<SelectExpandTestCustomer> singleCustomer = SelectExpandTestCustomer.Customers.AsQueryable().Take(1);
+            IQueryable<SelectExpandTestCustomer> singleCustomer = SelectExpandTestCustomer.Customers
+                .Where(c => c.ID == id).AsQueryable();
             return SingleResult.Create(singleCustomer);
         }
     }

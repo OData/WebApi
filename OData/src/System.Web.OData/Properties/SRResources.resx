@@ -535,6 +535,9 @@
   <data name="BatchRequestMissingContent" xml:space="preserve">
     <value>The 'Content' property on the batch request cannot be null.</value>
   </data>
+  <data name="InvalidExpansionDepthValue" xml:space="preserve">
+    <value>'{0}' should be less than or equal to '{1}'.</value>
+  </data>
   <data name="MaxExpandDepthExceeded" xml:space="preserve">
     <value>The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the '{1}' property on EnableQueryAttribute or ODataValidationSettings.</value>
   </data>

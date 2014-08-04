@@ -16,6 +16,7 @@ namespace System.Web.OData.Query
         private const int MinMaxNodeCount = 1;
         private const int MinMaxAnyAllExpressionDepth = 1;
         private const int MinMaxOrderByNodeCount = 1;
+        internal const int DefaultMaxExpansionDepth = 2;
 
         private AllowedArithmeticOperators _allowedArithmeticOperators = AllowedArithmeticOperators.All;
         private AllowedFunctions _allowedFunctions = AllowedFunctions.AllFunctions;
@@ -26,7 +27,7 @@ namespace System.Web.OData.Query
         private int? _maxTop;
         private int _maxAnyAllExpressionDepth = 1;
         private int _maxNodeCount = 100;
-        private int _maxExpansionDepth = 2;
+        private int _maxExpansionDepth = DefaultMaxExpansionDepth;
         private int _maxOrderByNodeCount = 5;
 
         /// <summary>

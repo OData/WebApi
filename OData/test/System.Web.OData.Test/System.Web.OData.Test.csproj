@@ -188,6 +188,7 @@
     <Compile Include="OData\Routing\Conventions\ODataRoutingConventionsTest.cs" />
     <Compile Include="OData\Routing\Conventions\SingletonRoutingConventionTest.cs" />
     <Compile Include="OData\Routing\ODataCountTest.cs" />
+    <Compile Include="OData\Routing\ODataLevelsTest.cs" />
     <Compile Include="OData\Routing\ODataSingletonRoutingTest.cs" />
     <Compile Include="OData\Routing\SingletonPathSegmentTest.cs" />
     <Compile Include="OData\Routing\ODataVersionConstraintTests.cs" />

@@ -423,6 +423,14 @@ namespace System.Web.OData.Builder
                             propertyConfiguration = entityToBePatched.AddComplexProperty(propertyToBeRemoved.PropertyInfo);
                         }
 
+                        Contract.Assert(propertyToBeRemoved.AddedExplicitly == false);
+
+                        // The newly added property must be marked as added implicitly. This can make sure the property
+                        // conventions can be re-applied to the new property.
+                        propertyConfiguration.AddedExplicitly = false;
+
+                        ReapplyPropertyConvention(propertyConfiguration, entityToBePatched);
+
                         propertyConfiguration.Name = propertyNameAlias;
                     }
                 }
@@ -812,6 +820,15 @@ namespace System.Web.OData.Builder
             foreach (PropertyConfiguration property in edmTypeConfiguration.Properties.ToArray())
             {
                 propertyConvention.Apply(property, edmTypeConfiguration, this);
+            }
+        }
+
+        private void ReapplyPropertyConvention(PropertyConfiguration property,
+            StructuralTypeConfiguration edmTypeConfiguration)
+        {
+            foreach (IEdmPropertyConvention propertyConvention in _conventions.OfType<IEdmPropertyConvention>())
+            {
+                  propertyConvention.Apply(property, edmTypeConfiguration, this);
             }
         }
 

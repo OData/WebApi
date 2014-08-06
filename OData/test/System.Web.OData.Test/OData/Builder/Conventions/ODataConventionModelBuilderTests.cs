@@ -1609,6 +1609,40 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
+        public void ODataConventionModelBuilder_RequiredAttribute_WorksOnComplexTypeProperty()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<RequiredEmployee>("Employees");
+            
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType entityType = model.AssertHasEntityType(typeof(RequiredEmployee));
+            IEdmProperty property = Assert.Single(entityType.DeclaredProperties.Where(e => e.Name == "Address"));
+            Assert.False(property.Type.IsNullable);
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_QueryLimitAttributes_WorksOnComplexTypeProperty()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<QueryLimitEmployee>("Employees");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType entityType = model.AssertHasEntityType(typeof(QueryLimitEmployee));
+            IEdmProperty property = Assert.Single(entityType.DeclaredProperties.Where(e => e.Name == "Address"));
+
+            Assert.True(EdmLibHelpers.IsNonFilterable(property, model));
+            Assert.True(EdmLibHelpers.IsUnsortable(property, model));
+        }
+
+        [Fact]
         public void ODataConventionModelBuilder_GetEdmModel_ThrowsException_IfHasDateTimeProperty()
         {
             // Arrange
@@ -1901,6 +1935,28 @@ namespace System.Web.OData.Builder.Conventions
     public class DerivedManager : BaseEmployee
     {
         public int Heads { get; set; }
+    }
+
+    public class RequiredEmployee
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public EmployeeAddress Address { get; set; }
+    }
+
+    public class QueryLimitEmployee
+    {
+        public int Id { get; set; }
+
+        [NonFilterable]
+        [Unsortable]
+        public EmployeeAddress Address { get; set; }
+    }
+
+    public class EmployeeAddress
+    {
+        public string City { get; set; }
     }
 
     public enum Gender

@@ -292,6 +292,32 @@ namespace System.Web.OData.Builder
             Assert.DoesNotContain("ODataMetadata", apis);
         }
 
+        [Fact]
+        public void RequiredAttribute_Works_OnComplexTypeProperty()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<FormatterAccount>("Accounts");
+
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(builder.GetEdmModel());
+
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var responseString = client.GetStringAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.Contains(
+                "<Property Name=\"Address\" Type=\"System.Web.OData.Formatter.FormatterAddress\" Nullable=\"false\" />",
+                responseString);
+
+            Assert.Contains(
+                "<Property Name=\"Addresses\" Type=\"Collection(System.Web.OData.Formatter.FormatterAddress)\" Nullable=\"false\" />",
+                responseString);
+        }
+
         private HttpConfiguration GetConfiguration()
         {
             var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();

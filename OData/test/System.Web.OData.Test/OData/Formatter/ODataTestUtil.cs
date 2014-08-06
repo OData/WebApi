@@ -189,4 +189,18 @@ namespace System.Web.OData.Formatter
         public string City { get; set; }
         public IDictionary<string, object> Properties { get; set; }
     }
+
+    public class FormatterAccount
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        public FormatterAddress Address { get; set; }
+
+        [Required]
+        public IList<FormatterAddress> Addresses { get; set; } 
+    }
 }

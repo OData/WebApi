@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Formatter.Serialization.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -143,6 +144,45 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Null(address.Country);
             Assert.Null(address.State);
             Assert.Null(address.ZipCode);
+        }
+
+        [Fact]
+        public void ReadComplexValue_CanReadDerivedComplexValue()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Address>();
+            IEdmModel model = builder.GetEdmModel();
+            IEdmComplexTypeReference addressEdmType = model.GetEdmTypeReference(typeof(Address)).AsComplex();
+
+            DefaultODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
+            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
+
+            ODataComplexValue complexValue = new ODataComplexValue
+            {
+                Properties = new[]
+                { 
+                    new ODataProperty { Name = "Street", Value = "12"},
+                    new ODataProperty { Name = "City", Value = "Redmond"},
+                    new ODataProperty { Name = "UsProp", Value = "UsPropertyValue"}
+                },
+                TypeName = typeof(UsAddress).FullName
+            };
+            ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model };
+
+            // Act
+            object address = deserializer.ReadComplexValue(complexValue, addressEdmType, readContext);
+
+            // Assert
+            Assert.NotNull(address);
+            UsAddress usAddress = Assert.IsType<UsAddress>(address);
+
+            Assert.Equal(usAddress.Street, "12");
+            Assert.Equal(usAddress.City, "Redmond");
+            Assert.Null(usAddress.Country);
+            Assert.Null(usAddress.State);
+            Assert.Null(usAddress.ZipCode);
+            Assert.Equal("UsPropertyValue", usAddress.UsProp);
         }
 
         [Fact]
@@ -357,7 +397,7 @@ namespace System.Web.OData.Formatter.Deserialization
                     new ODataProperty { Name = "GuidProperty", Value = new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA") },
                     new ODataProperty { Name = "GuidProperty", Value = new DateTimeOffset(new DateTime(1992, 1, 1)) }
                 },
-                TypeName = "ODataDemo.Address"
+                TypeName = typeof(SimpleOpenAddress).FullName
             };
 
             ODataDeserializerContext readContext = new ODataDeserializerContext()

@@ -82,7 +82,8 @@ namespace System.Web.OData.Builder.Conventions
             else
             {
                 // default navigation source is the same as the default navigation source for the base type.
-                return GetDefaultNavigationSource(targetEntityType.BaseType, model, isSingleton);
+                return GetDefaultNavigationSource(targetEntityType.BaseType as EntityTypeConfiguration,
+                    model, isSingleton);
             }
         }
     }

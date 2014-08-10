@@ -413,6 +413,48 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void CreateODataComplexValue_WritesBaseAndDerivedProperties_ForDerivedComplexType()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleCustomerOrderModel();
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.CnAddress") as IEdmComplexType;
+            Type cnAddress = typeof(CnAddress);
+            model.SetAnnotationValue<ClrTypeAnnotation>(addressType, new ClrTypeAnnotation(cnAddress));
+
+            IEdmComplexTypeReference addressTypeRef = addressType.ToEdmTypeReference(isNullable: false).AsComplex();
+
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider);
+            ODataSerializerContext context = new ODataSerializerContext
+            {
+                Model = model
+            };
+
+            Address address = new CnAddress()
+            {
+                Street = "One Microsoft Way",
+                City = "Redmond",
+                State = "Washington",
+                Country = "United States",
+                ZipCode = "98052",
+                CnProp = new Guid("F83FB4CC-84BD-403B-B411-79926800F9A5")
+            };
+
+            // Act
+            var odataValue = serializer.CreateODataComplexValue(address, addressTypeRef, context);
+
+            // Assert
+            ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
+            Assert.Equal(complexValue.TypeName, "Default.CnAddress");
+            Assert.Equal(6, complexValue.Properties.Count());
+
+            // Verify the derived property
+            ODataProperty street = Assert.Single(complexValue.Properties.Where(p => p.Name == "CnProp"));
+            Assert.Equal(new Guid("F83FB4CC-84BD-403B-B411-79926800F9A5"), street.Value);
+        }
+
+        [Fact]
         public void CreateODataComplexValue_ReturnsNull_ForNullValue()
         {
             var odataValue = _serializer.CreateODataComplexValue(null, _addressTypeRef, new ODataSerializerContext());

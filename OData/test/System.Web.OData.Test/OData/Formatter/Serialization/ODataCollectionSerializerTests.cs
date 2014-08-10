@@ -142,7 +142,7 @@ namespace System.Web.OData.Formatter.Serialization
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(It.IsAny<IEdmTypeReference>())).Returns<IEdmTypeReference>(null);
 
             Assert.Throws<SerializationException>(
-                () => serializer.CreateODataCollectionValue(enumerable, _edmIntType, new ODataSerializerContext()),
+                () => serializer.CreateODataCollectionValue(enumerable, _edmIntType, new ODataSerializerContext { Model = _model }),
                 "'Edm.Int32' cannot be serialized using the ODataMediaTypeFormatter.");
         }
 
@@ -171,7 +171,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void CreateODataCollectionValue_Serializes_AllElementsInTheCollection()
         {
-            ODataSerializerContext writeContext = new ODataSerializerContext();
+            ODataSerializerContext writeContext = new ODataSerializerContext { Model = _model };
             var oDataValue = _serializer.CreateODataCollectionValue(new int[] { 1, 2, 3 }, _edmIntType, writeContext);
 
             var values = Assert.IsType<ODataCollectionValue>(oDataValue);
@@ -189,9 +189,11 @@ namespace System.Web.OData.Formatter.Serialization
         public void CreateODataCollectionValue_CanSerialize_IEdmObjects()
         {
             // Arrange
-            IEdmComplexObject[] collection = new IEdmComplexObject[] { new Mock<IEdmComplexObject>().Object };
+            Mock<IEdmComplexObject> edmComplexObject = new Mock<IEdmComplexObject>();
+            IEdmComplexObject[] collection = new IEdmComplexObject[] { edmComplexObject.Object };
             ODataSerializerContext serializerContext = new ODataSerializerContext();
             IEdmComplexTypeReference elementType = new EdmComplexTypeReference(new EdmComplexType("NS", "ComplexType"), isNullable: true);
+            edmComplexObject.Setup(s => s.GetEdmType()).Returns(elementType);
             IEdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType));
 
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
@@ -223,7 +225,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             IEnumerable enumerable = new int[] { 1, 2, 3 };
-            ODataSerializerContext context = new ODataSerializerContext();
+            ODataSerializerContext context = new ODataSerializerContext { Model = _model };
 
             // Act
             ODataValue oDataValue = _serializer.CreateODataCollectionValue(enumerable, _edmIntType, context);

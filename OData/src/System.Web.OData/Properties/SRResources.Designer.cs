@@ -223,6 +223,24 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot determine the Edm type for the CLR type &apos;{0}&apos; because the derived type &apos;{1}&apos; is configured as entity type and another derived type &apos;{2}&apos; is configured as complex type..
+        /// </summary>
+        internal static string CannotInferEdmType {
+            get {
+                return ResourceManager.GetString("CannotInferEdmType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An instance of the abstract complex type &apos;{0}&apos; was found. Abstract complex types cannot be instantiated..
+        /// </summary>
+        internal static string CannotInstantiateAbstractComplexType {
+            get {
+                return ResourceManager.GetString("CannotInstantiateAbstractComplexType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An instance of the abstract entity type &apos;{0}&apos; was found. Abstract entity types cannot be instantiated..
         /// </summary>
         internal static string CannotInstantiateAbstractEntityType {
@@ -246,6 +264,15 @@ namespace System.Web.OData.Properties {
         internal static string CannotRecognizeNodeType {
             get {
                 return ResourceManager.GetString("CannotRecognizeNodeType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The entity type &apos;{0}&apos; cannot be configured as a complex type because the derived type &apos;{1}&apos; is already configured as an entity type..
+        /// </summary>
+        internal static string CannotReconfigEntityTypeAsComplexType {
+            get {
+                return ResourceManager.GetString("CannotReconfigEntityTypeAsComplexType", resourceCulture);
             }
         }
         
@@ -318,6 +345,15 @@ namespace System.Web.OData.Properties {
         internal static string CollectionShouldHaveClearMethod {
             get {
                 return ResourceManager.GetString("CollectionShouldHaveClearMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot find the complex type &apos;{0}&apos; in the model..
+        /// </summary>
+        internal static string ComplexTypeNotInModel {
+            get {
+                return ResourceManager.GetString("ComplexTypeNotInModel", resourceCulture);
             }
         }
         
@@ -1411,7 +1447,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot define property &apos;{0}&apos; in the base entity type &apos;{1}&apos; as the derived type &apos;{2}&apos; already defines it..
+        ///   Looks up a localized string similar to Cannot define property &apos;{0}&apos; in the base type &apos;{1}&apos; as the derived type &apos;{2}&apos; already defines it..
         /// </summary>
         internal static string PropertyAlreadyDefinedInDerivedType {
             get {

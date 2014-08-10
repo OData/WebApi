@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using System.Web.Http;
 using System.Web.OData.Formatter;
@@ -20,6 +21,8 @@ namespace System.Web.OData.Builder
         private string _namespace;
         private string _name;
         private PropertyInfo _dynamicPropertyDictionary;
+        private StructuralTypeConfiguration _baseType;
+        private bool _baseTypeConfigured;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StructuralTypeConfiguration"/> class.
@@ -141,6 +144,22 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this type is abstract.
+        /// </summary>
+        public virtual bool? IsAbstract { get; set; }
+
+        /// <summary>
+        /// Gets a value that represents whether the base type is explicitly configured or inferred.
+        /// </summary>
+        public virtual bool BaseTypeConfigured
+        {
+            get
+            {
+                return _baseTypeConfigured;
+            }
+        }
+
+        /// <summary>
         /// Gets the declared properties on this edm type.
         /// </summary>
         public IEnumerable<PropertyConfiguration> Properties
@@ -184,6 +203,55 @@ namespace System.Web.OData.Builder
         protected internal IDictionary<PropertyInfo, PropertyConfiguration> ExplicitProperties { get; private set; }
 
         /// <summary>
+        /// Gets the base type of this structural type.
+        /// </summary>
+        protected internal virtual StructuralTypeConfiguration BaseTypeInternal
+        {
+            get
+            {
+                return _baseType;
+            }
+        }
+
+        internal virtual void AbstractImpl()
+        {
+            IsAbstract = true;
+        }
+
+        internal virtual void DerivesFromNothingImpl()
+        {
+            _baseType = null;
+            _baseTypeConfigured = true;
+        }
+
+        internal virtual void DerivesFromImpl(StructuralTypeConfiguration baseType)
+        {
+            if (baseType == null)
+            {
+                throw Error.ArgumentNull("baseType");
+            }
+
+            _baseType = baseType;
+            _baseTypeConfigured = true;
+
+            if (!baseType.ClrType.IsAssignableFrom(ClrType) || baseType.ClrType == ClrType)
+            {
+                throw Error.Argument("baseType", SRResources.TypeDoesNotInheritFromBaseType,
+                    ClrType.FullName, baseType.ClrType.FullName);
+            }
+
+            foreach (PropertyConfiguration property in Properties)
+            {
+                ValidatePropertyNotAlreadyDefinedInBaseTypes(property.PropertyInfo);
+            }
+
+            foreach (PropertyConfiguration property in this.DerivedProperties())
+            {
+                ValidatePropertyNotAlreadyDefinedInDerivedTypes(property.PropertyInfo);
+            }
+        }
+
+        /// <summary>
         /// Adds a primitive property to this edm type.
         /// </summary>
         /// <param name="propertyInfo">The property being added.</param>
@@ -206,6 +274,9 @@ namespace System.Web.OData.Builder
                     propertyInfo.PropertyType.FullName, propertyInfo.Name, propertyInfo.DeclaringType.FullName,
                     typeof(DateTimeOffset).FullName, typeof(ODataModelBuilder).FullName);
             }
+
+            ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
+            ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
             // Remove from the ignored properties
             if (RemovedProperties.Contains(propertyInfo))
@@ -252,6 +323,9 @@ namespace System.Web.OData.Builder
             {
                 throw Error.Argument("propertyInfo", SRResources.MustBeEnumProperty, propertyInfo.Name, ClrType.FullName);
             }
+
+            ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
+            ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
             // Remove from the ignored properties
             if (RemovedProperties.Contains(propertyInfo))
@@ -307,6 +381,9 @@ namespace System.Web.OData.Builder
                     typeof(DateTimeOffset).FullName, typeof(ODataModelBuilder).FullName);
             }
 
+            ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
+            ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
+
             // Remove from the ignored properties
             if (RemovedProperties.Contains(propertyInfo))
             {
@@ -350,6 +427,9 @@ namespace System.Web.OData.Builder
             {
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
             }
+
+            ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
+            ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
             // Remove from the ignored properties
             if (IgnoredProperties.Contains(propertyInfo))
@@ -469,6 +549,31 @@ namespace System.Web.OData.Builder
             if (_dynamicPropertyDictionary == propertyInfo)
             {
                 _dynamicPropertyDictionary = null;
+            }
+        }
+
+        internal void ValidatePropertyNotAlreadyDefinedInBaseTypes(PropertyInfo propertyInfo)
+        {
+            PropertyConfiguration baseProperty =
+                this.DerivedProperties().FirstOrDefault(p => p.Name == propertyInfo.Name);
+            if (baseProperty != null)
+            {
+                throw Error.Argument("propertyInfo", SRResources.CannotRedefineBaseTypeProperty,
+                    propertyInfo.Name, baseProperty.PropertyInfo.ReflectedType.FullName);
+            }
+        }
+
+        internal void ValidatePropertyNotAlreadyDefinedInDerivedTypes(PropertyInfo propertyInfo)
+        {
+            foreach (StructuralTypeConfiguration derivedType in ModelBuilder.DerivedTypes(this))
+            {
+                PropertyConfiguration propertyInDerivedType =
+                    derivedType.Properties.FirstOrDefault(p => p.Name == propertyInfo.Name);
+                if (propertyInDerivedType != null)
+                {
+                    throw Error.Argument("propertyInfo", SRResources.PropertyAlreadyDefinedInDerivedType,
+                        propertyInfo.Name, FullName, derivedType.FullName);
+                }
             }
         }
     }

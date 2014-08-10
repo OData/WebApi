@@ -70,6 +70,15 @@ namespace System.Web.OData.Builder
             return complexType;
         }
 
+        public static IEdmComplexType AssertHasComplexType(this IEdmModel model, Type mappedComplexClrType, Type mappedComplexBaseType)
+        {
+            IEdmComplexType complex = AssertHasComplexType(model, mappedComplexClrType);
+            IEdmComplexType baseComplex = AssertHasComplexType(model, mappedComplexBaseType);
+
+            Assert.Equal(baseComplex, complex.BaseComplexType());
+            return complex;
+        }
+
         public static IEdmStructuralProperty AssertHasKey(this IEdmEntityType entity, IEdmModel model, string keyName, EdmPrimitiveTypeKind primitiveTypeKind)
         {
             IEdmStructuralProperty key = entity.AssertHasPrimitiveProperty(model, keyName, primitiveTypeKind, isNullable: false);

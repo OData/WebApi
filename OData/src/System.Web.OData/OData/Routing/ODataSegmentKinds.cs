@@ -19,6 +19,7 @@ namespace System.Web.OData.Routing
         internal const string _UnboundAction = "unboundaction";
         internal const string _UnboundFunction = "unboundfunction";
         internal const string _Cast = "cast";
+        internal const string _ComplexCast = "complexcast";
         internal const string _EntitySet = "entityset";
         internal const string _Singleton = "singleton";
         internal const string _Key = "key";
@@ -80,6 +81,11 @@ namespace System.Web.OData.Routing
         /// Represents a segment indicating a type cast.
         /// </summary>
         public static readonly string Cast = _Cast;
+
+        /// <summary>
+        /// Represents a segment indicating a complex type cast.
+        /// </summary>
+        public static readonly string ComplexCast = _ComplexCast;
 
         /// <summary>
         /// Represents a segment indicating an entity set.

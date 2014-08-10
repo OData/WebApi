@@ -178,6 +178,14 @@ namespace System.Web.OData.Formatter.Serialization
                         throw Error.InvalidOperation(SRResources.ClrTypeNotInModel, type);
                     }
                 }
+                else if (instance != null)
+                {
+                    IEdmTypeReference actualType = _typeMappingCache.GetEdmType(instance.GetType(), Model);
+                    if (actualType != null && actualType != edmType)
+                    {
+                        edmType = actualType;
+                    }
+                }
             }
 
             return edmType;

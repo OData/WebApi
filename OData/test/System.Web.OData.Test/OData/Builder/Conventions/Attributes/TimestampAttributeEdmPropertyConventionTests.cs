@@ -2,6 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -69,8 +70,11 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             PropertyInfo property = CreateMockPropertyInfo("TestProperty");
             PropertyInfo otherProperty = CreateMockPropertyInfo("OtherTestProperty");
             EntityTypeConfiguration baseEntityType = new EntityTypeConfiguration();
-            EntityTypeConfiguration entityType = new Mock<EntityTypeConfiguration>().SetupAllProperties().Object;
-            entityType.BaseType = baseEntityType;
+            Mock<EntityTypeConfiguration> mockEntityType = new Mock<EntityTypeConfiguration>().SetupAllProperties();
+            mockEntityType.Setup(c => c.BaseType).Returns(baseEntityType);
+            mockEntityType.SetupGet(c => c.Kind).Returns(EdmTypeKind.Entity);
+
+            EntityTypeConfiguration entityType = mockEntityType.Object;
             PrimitivePropertyConfiguration primitiveProperty = new PrimitivePropertyConfiguration(property, entityType);
             entityType.ExplicitProperties.Add(property, primitiveProperty);
             baseEntityType.ExplicitProperties.Add(otherProperty, new PrimitivePropertyConfiguration(otherProperty, baseEntityType));

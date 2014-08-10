@@ -47,6 +47,16 @@ namespace System.Web.OData.Formatter.Serialization
             addressType.AddStructuralProperty("ZipCode", EdmPrimitiveTypeKind.String);
             model.AddElement(addressType);
 
+            // add a derived complex type "UsAddress"
+            var usAddressType = new EdmComplexType("Default", "UsAddress", addressType);
+            usAddressType.AddStructuralProperty("UsProp", EdmPrimitiveTypeKind.String);
+            model.AddElement(usAddressType);
+
+            // add a derived complex type "CnAddress"
+            var cnAddressType = new EdmComplexType("Default", "CnAddress", addressType);
+            cnAddressType.AddStructuralProperty("CnProp", EdmPrimitiveTypeKind.Guid);
+            model.AddElement(cnAddressType);
+
             // Add navigations
             customerType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo() { Name = "Orders", Target = orderType, TargetMultiplicity = EdmMultiplicity.Many });
             orderType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo() { Name = "Customer", Target = customerType, TargetMultiplicity = EdmMultiplicity.One });

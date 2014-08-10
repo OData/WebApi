@@ -101,6 +101,7 @@ namespace System.Web.OData.Builder.Conventions
             Mock<EntityTypeConfiguration> entity = new Mock<EntityTypeConfiguration>();
             NavigationPropertyConfiguration navigationProperty = new NavigationPropertyConfiguration(new MockPropertyInfo(typeof(Motorcycle), "Motorcycle"), EdmMultiplicity.One, entity.Object);
             entity.Setup(e => e.NavigationProperties).Returns(new[] { navigationProperty });
+            entity.SetupGet(e => e.Kind).Returns(EdmTypeKind.Entity);
 
             var mockEntitySet = new Mock<EntitySetConfiguration>();
             mockEntitySet.Setup(e => e.EntityType).Returns(entity.Object);

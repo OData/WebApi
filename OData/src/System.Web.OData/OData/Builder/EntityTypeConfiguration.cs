@@ -18,8 +18,6 @@ namespace System.Web.OData.Builder
     public class EntityTypeConfiguration : StructuralTypeConfiguration
     {
         private List<PrimitivePropertyConfiguration> _keys = new List<PrimitivePropertyConfiguration>();
-        private EntityTypeConfiguration _baseType;
-        private bool _baseTypeConfigured;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityTypeConfiguration"/> class.
@@ -70,34 +68,17 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this type is abstract.
-        /// </summary>
-        public virtual bool? IsAbstract { get; set; }
-
-        /// <summary>
         /// Gets or sets the base type of this entity type.
         /// </summary>
         public virtual EntityTypeConfiguration BaseType
         {
             get
             {
-                return _baseType;
+                return BaseTypeInternal as EntityTypeConfiguration;
             }
-
             set
             {
                 DerivesFrom(value);
-            }
-        }
-
-        /// <summary>
-        /// Gets a value that represents whether the base type is explicitly configured or inferred.
-        /// </summary>
-        public virtual bool BaseTypeConfigured
-        {
-            get
-            {
-                return _baseTypeConfigured;
             }
         }
 
@@ -107,7 +88,7 @@ namespace System.Web.OData.Builder
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
         public virtual EntityTypeConfiguration Abstract()
         {
-            IsAbstract = true;
+            AbstractImpl();
             return this;
         }
 
@@ -159,8 +140,7 @@ namespace System.Web.OData.Builder
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
         public virtual EntityTypeConfiguration DerivesFromNothing()
         {
-            _baseType = null;
-            _baseTypeConfigured = true;
+            DerivesFromNothingImpl();
             return this;
         }
 
@@ -171,87 +151,13 @@ namespace System.Web.OData.Builder
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
         public virtual EntityTypeConfiguration DerivesFrom(EntityTypeConfiguration baseType)
         {
-            if (baseType == null)
-            {
-                throw Error.ArgumentNull("baseType");
-            }
-
-            _baseType = baseType;
-            _baseTypeConfigured = true;
-
-            if (!baseType.ClrType.IsAssignableFrom(ClrType) || baseType.ClrType == ClrType)
-            {
-                throw Error.Argument("baseType", SRResources.TypeDoesNotInheritFromBaseType, ClrType.FullName, baseType.ClrType.FullName);
-            }
-
             if (Keys.Any())
             {
                 throw Error.InvalidOperation(SRResources.CannotDefineKeysOnDerivedTypes, FullName, baseType.FullName);
             }
 
-            foreach (PropertyConfiguration property in Properties)
-            {
-                ValidatePropertyNotAlreadyDefinedInBaseTypes(property.PropertyInfo);
-            }
-
-            foreach (PropertyConfiguration property in this.DerivedProperties())
-            {
-                ValidatePropertyNotAlreadyDefinedInDerivedTypes(property.PropertyInfo);
-            }
-
+            DerivesFromImpl(baseType);
             return this;
-        }
-
-        /// <summary>
-        /// Adds a new EDM primitive property to this entity type.
-        /// </summary>
-        /// <param name="propertyInfo">The backing CLR property.</param>
-        /// <returns>Returns the <see cref="PrimitivePropertyConfiguration"/> of the added property.</returns>
-        public override PrimitivePropertyConfiguration AddProperty(PropertyInfo propertyInfo)
-        {
-            ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
-            ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
-
-            return base.AddProperty(propertyInfo);
-        }
-
-        /// <summary>
-        /// Adds a new EDM enum property to this entity type.
-        /// </summary>
-        /// <param name="propertyInfo">The backing CLR property.</param>
-        /// <returns>Returns the <see cref="EnumPropertyConfiguration"/> of the added property.</returns>
-        public override EnumPropertyConfiguration AddEnumProperty(PropertyInfo propertyInfo)
-        {
-            ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
-            ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
-
-            return base.AddEnumProperty(propertyInfo);
-        }
-
-        /// <summary>
-        /// Adds a new EDM complex property to this entity type.
-        /// </summary>
-        /// <param name="propertyInfo">The backing CLR property.</param>
-        /// <returns>Returns the <see cref="ComplexPropertyConfiguration"/> of the added property.</returns>
-        public override ComplexPropertyConfiguration AddComplexProperty(PropertyInfo propertyInfo)
-        {
-            ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
-            ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
-
-            return base.AddComplexProperty(propertyInfo);
-        }
-
-        /// <summary>
-        /// Adds a new EDM collection property to this entity type.
-        /// </summary>
-        /// <param name="propertyInfo">The backing CLR property.</param>
-        /// <returns>Returns the <see cref="CollectionPropertyConfiguration"/> of the added property.</returns>
-        public override CollectionPropertyConfiguration AddCollectionProperty(PropertyInfo propertyInfo)
-        {
-            ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
-            ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
-
-            return base.AddCollectionProperty(propertyInfo);
         }
 
         /// <summary>
@@ -345,27 +251,6 @@ namespace System.Web.OData.Builder
         {
             base.RemoveProperty(propertyInfo);
             _keys.RemoveAll(p => p.PropertyInfo == propertyInfo);
-        }
-
-        private void ValidatePropertyNotAlreadyDefinedInBaseTypes(PropertyInfo propertyInfo)
-        {
-            PropertyConfiguration baseProperty = this.DerivedProperties().Where(p => p.Name == propertyInfo.Name).FirstOrDefault();
-            if (baseProperty != null)
-            {
-                throw Error.Argument("propertyInfo", SRResources.CannotRedefineBaseTypeProperty, propertyInfo.Name, baseProperty.PropertyInfo.ReflectedType.FullName);
-            }
-        }
-
-        private void ValidatePropertyNotAlreadyDefinedInDerivedTypes(PropertyInfo propertyInfo)
-        {
-            foreach (EntityTypeConfiguration derivedEntity in ModelBuilder.DerivedTypes(this))
-            {
-                PropertyConfiguration propertyInDerivedType = derivedEntity.Properties.Where(p => p.Name == propertyInfo.Name).FirstOrDefault();
-                if (propertyInDerivedType != null)
-                {
-                    throw Error.Argument("propertyInfo", SRResources.PropertyAlreadyDefinedInDerivedType, propertyInfo.Name, FullName, derivedEntity.FullName);
-                }
-            }
         }
     }
 }

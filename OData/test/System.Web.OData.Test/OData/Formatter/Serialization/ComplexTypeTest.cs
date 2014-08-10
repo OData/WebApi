@@ -48,6 +48,10 @@ namespace System.Web.OData.Formatter.Serialization
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.ComplexType<Person>();
+
+            // Employee is derived from Person. Employee has a property named manager it's Employee type.
+            // It's not allowed to build inheritance complex type because a recursive loop of complex types is not allowed.
+            builder.Ignore<Employee>();
             return builder.GetEdmModel();
         }
     }

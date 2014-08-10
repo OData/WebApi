@@ -200,6 +200,7 @@
     <Compile Include="OData\Results\CreatedODataResult.cs" />
     <Compile Include="OData\Results\ResultHelpers.cs" />
     <Compile Include="OData\Results\UpdatedODataResult.cs" />
+    <Compile Include="OData\Routing\ComplexCastPathSegment.cs" />
     <Compile Include="OData\Routing\Conventions\NavigationSourceRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\SingletonRoutingConvention.cs" />
     <Compile Include="OData\Routing\CountPathSegment.cs" />
@@ -292,7 +293,7 @@
     <Compile Include="OData\Builder\CollectionTypeConfiguration.cs" />
     <Compile Include="OData\Builder\ComplexPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfiguration.cs" />
-    <Compile Include="OData\Builder\Conventions\AbstractEntityTypeDiscoveryConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\AbstractTypeDiscoveryConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NotMappedAttributeEdmPropertyConvention.cs" />

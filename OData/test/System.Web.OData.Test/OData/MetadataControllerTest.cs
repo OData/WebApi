@@ -119,6 +119,68 @@ namespace System.Web.OData.Builder
                 response.Content.ReadAsStringAsync().Result);
         }
 
+        [Fact]
+        public void DollarMetadata_Works_WithInheritanceOpenComplexType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<FormatterAddress>();
+            IEdmModel model = builder.GetEdmModel();
+
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(model);
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var response = client.GetAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Contains("<ComplexType Name=\"FormatterUsAddress\" BaseType=\"System.Web.OData.Formatter.FormatterAddress\" OpenType=\"true\">",
+                response.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void DollarMetadata_Works_WithDerivedOpenComplexType()
+        {
+            // Arrange
+            const string expectMetadata =
+@"<?xml version='1.0' encoding='utf-8'?>
+<edmx:Edmx Version='4.0' xmlns:edmx='http://docs.oasis-open.org/odata/ns/edmx'>
+  <edmx:DataServices>
+    <Schema Namespace='System.Web.OData.Formatter' xmlns='http://docs.oasis-open.org/odata/ns/edm'>
+      <ComplexType Name='ComplexBaseType'>
+        <Property Name='BaseProperty' Type='Edm.String' />
+      </ComplexType>
+      <ComplexType Name='ComplexDerivedOpenType' BaseType='System.Web.OData.Formatter.ComplexBaseType' OpenType='true'>
+        <Property Name='DerivedProperty' Type='Edm.String' />
+      </ComplexType>
+    </Schema>
+    <Schema Namespace='Default' xmlns='http://docs.oasis-open.org/odata/ns/edm'>
+      <EntityContainer Name='Container' />
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>";
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<ComplexBaseType>();
+            IEdmModel model = builder.GetEdmModel();
+
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(model);
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var response = client.GetAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Equal(expectMetadata.Replace("'", "\""), response.Content.ReadAsStringAsync().Result);
+        }
+
         private static void AssertHasEntitySet(HttpClient client, string uri, string entitySetName)
         {
             var response = client.GetAsync(uri).Result;

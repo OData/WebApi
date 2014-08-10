@@ -349,7 +349,7 @@
     <value>'{0}' does not inherit from '{1}'.</value>
   </data>
   <data name="PropertyAlreadyDefinedInDerivedType" xml:space="preserve">
-    <value>Cannot define property '{0}' in the base entity type '{1}' as the derived type '{2}' already defines it.</value>
+    <value>Cannot define property '{0}' in the base type '{1}' as the derived type '{2}' already defines it.</value>
   </data>
   <data name="ConvertToEnumFailed" xml:space="preserve">
     <value>Cannot compare an enum of type '{0}' to an expression of type '{1}'.</value>
@@ -359,6 +359,9 @@
   </data>
   <data name="CannotInstantiateAbstractEntityType" xml:space="preserve">
     <value>An instance of the abstract entity type '{0}' was found. Abstract entity types cannot be instantiated.</value>
+  </data>
+  <data name="CannotInstantiateAbstractComplexType" xml:space="preserve">
+    <value>An instance of the abstract complex type '{0}' was found. Abstract complex types cannot be instantiated.</value>
   </data>
   <data name="NullElementInCollection" xml:space="preserve">
     <value>Collections cannot contain null elements.</value>
@@ -494,6 +497,9 @@
   </data>
   <data name="EntityTypeNotInModel" xml:space="preserve">
     <value>Cannot find the entity type '{0}' in the model.</value>
+  </data>
+  <data name="ComplexTypeNotInModel" xml:space="preserve">
+    <value>Cannot find the complex type '{0}' in the model.</value>
   </data>
   <data name="ModelMissingFromReadContext" xml:space="preserve">
     <value>The EDM model is missing on the read context. The model is required on the read context to deserialize the payload.</value>
@@ -747,5 +753,11 @@
   </data>
   <data name="TypeOfDynamicPropertyNotSupported" xml:space="preserve">
     <value>The type '{0}' of dynamic property '{1}' is not supported.</value>
+  </data>
+  <data name="CannotReconfigEntityTypeAsComplexType" xml:space="preserve">
+    <value>The entity type '{0}' cannot be configured as a complex type because the derived type '{1}' is already configured as an entity type.</value>
+  </data>
+  <data name="CannotInferEdmType" xml:space="preserve">
+    <value>Cannot determine the Edm type for the CLR type '{0}' because the derived type '{1}' is configured as entity type and another derived type '{2}' is configured as complex type.</value>
   </data>
 </root>

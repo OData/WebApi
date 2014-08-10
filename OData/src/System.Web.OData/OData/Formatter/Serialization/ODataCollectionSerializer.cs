@@ -126,15 +126,21 @@ namespace System.Web.OData.Formatter.Serialization
                 ODataEdmTypeSerializer itemSerializer = null;
                 foreach (object item in enumerable)
                 {
-                    itemSerializer = itemSerializer ?? SerializerProvider.GetEdmTypeSerializer(elementType);
+                    IEdmTypeReference actualType = writeContext.GetEdmType(item, item.GetType());
+                    Contract.Assert(actualType != null);
+
+                    itemSerializer = itemSerializer ?? SerializerProvider.GetEdmTypeSerializer(actualType);
                     if (itemSerializer == null)
                     {
                         throw new SerializationException(
-                            Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                            Error.Format(SRResources.TypeCannotBeSerialized, actualType.FullName(),
+                            typeof(ODataMediaTypeFormatter).Name));
                     }
 
-                    // ODataCollectionWriter expects the individual elements in the collection to be the underlying values and not ODataValues.
-                    valueCollection.Add(itemSerializer.CreateODataValue(item, elementType, writeContext).GetInnerValue());
+                    // ODataCollectionWriter expects the individual elements in the collection to be the underlying
+                    // values and not ODataValues.
+                    valueCollection.Add(
+                        itemSerializer.CreateODataValue(item, actualType, writeContext).GetInnerValue());
                 }
             }
 

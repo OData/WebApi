@@ -13,6 +13,7 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Query;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -20,7 +21,7 @@ namespace System.Web.OData.Builder.Conventions
 {
     public class ODataConventionModelBuilderTests
     {
-        private const int _totalExpectedSchemaTypesForVehiclesModel = 8;
+        private const int _totalExpectedSchemaTypesForVehiclesModel = 10;
 
         [Fact]
         public void Ctor_ThrowsForNullConfiguration()
@@ -641,6 +642,492 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
+        public void ModelBuilder_Figures_AbstractnessOfComplexTypes()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Vehicle>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
+            Assert.True(model.AssertHasComplexType(typeof(Vehicle)).IsAbstract);
+            Assert.False(model.AssertHasComplexType(typeof(Motorcycle)).IsAbstract);
+            Assert.False(model.AssertHasComplexType(typeof(Car)).IsAbstract);
+            Assert.False(model.AssertHasComplexType(typeof(SportBike)).IsAbstract);
+            Assert.False(model.AssertHasComplexType(typeof(CarManufacturer)).IsAbstract);
+            Assert.False(model.AssertHasComplexType(typeof(MotorcycleManufacturer)).IsAbstract);
+            Assert.False(model.AssertHasComplexType(typeof(ManufacturerAddress)).IsAbstract);
+            Assert.False(model.AssertHasComplexType(typeof(CarManufacturerAddress)).IsAbstract);
+            Assert.False(model.AssertHasComplexType(typeof(MotorcycleManufacturerAddress)).IsAbstract);
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_IfOnlyMappedTheEntityTypeExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Zoo>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(5, model.SchemaElements.Count());
+            model.AssertHasEntityType(typeof(Zoo));
+            model.AssertHasEntityType(typeof(Animal));
+            model.AssertHasEntityType(typeof(Human), typeof(Animal));
+            model.AssertHasEntityType(typeof(Horse), typeof(Animal));
+
+            IEdmStructuredType creatureType = model.SchemaElements.OfType<IEdmStructuredType>()
+                .SingleOrDefault(t => model.GetEdmType(typeof(Creature)).IsEquivalentTo(t));
+            Assert.Null(creatureType);
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_IfOnlyMappedTheComplexTypeExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Zoo>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(5, model.SchemaElements.Count());
+            model.AssertHasComplexType(typeof(Zoo));
+            model.AssertHasComplexType(typeof(Animal));
+            model.AssertHasComplexType(typeof(Human), typeof(Animal));
+            model.AssertHasComplexType(typeof(Horse), typeof(Animal));
+
+            IEdmStructuredType creatureType = model.SchemaElements.OfType<IEdmStructuredType>()
+                .SingleOrDefault(t => model.GetEdmType(typeof(Creature)).IsEquivalentTo(t));
+            Assert.Null(creatureType);
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_IfOnlyMappedTheEntityTypeExplicitly_WithBaseAndDerivedTypeProperties()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Park>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(5, model.SchemaElements.Count());
+            model.AssertHasEntityType(typeof(Park));
+            model.AssertHasEntityType(typeof(Animal));
+            model.AssertHasEntityType(typeof(Human), typeof(Animal));
+            model.AssertHasEntityType(typeof(Horse), typeof(Animal));
+
+            IEdmStructuredType creatureType = model.SchemaElements.OfType<IEdmStructuredType>()
+                .SingleOrDefault(t => model.GetEdmType(typeof(Creature)).IsEquivalentTo(t));
+            Assert.Null(creatureType);
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_IfOnlyMappedTheComplexTypeExplicitly_WithBaseAndDerivedTypeProperties()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Park>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(5, model.SchemaElements.Count());
+            model.AssertHasComplexType(typeof(Park));
+            model.AssertHasComplexType(typeof(Animal));
+            model.AssertHasComplexType(typeof(Human), typeof(Animal));
+            model.AssertHasComplexType(typeof(Horse), typeof(Animal));
+
+            IEdmStructuredType creatureType = model.SchemaElements.OfType<IEdmStructuredType>()
+                .SingleOrDefault(t => model.GetEdmType(typeof(Creature)).IsEquivalentTo(t));
+            Assert.Null(creatureType);
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_EntityType_AndDerivedTypeMappedAsEntityTypeExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Zoo>();
+            builder.EntityType<Human>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(5, model.SchemaElements.Count());
+            model.AssertHasEntityType(typeof(Zoo));
+            model.AssertHasEntityType(typeof(Animal));
+            model.AssertHasEntityType(typeof(Human), typeof(Animal));
+            model.AssertHasEntityType(typeof(Horse), typeof(Animal));
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_EntityType_AndDerivedTypeMappedAsEntityTypeExplicitly_InReverseOrder()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Human>();
+            builder.EntityType<Zoo>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(5, model.SchemaElements.Count());
+            model.AssertHasEntityType(typeof(Zoo));
+            model.AssertHasEntityType(typeof(Animal));
+            model.AssertHasEntityType(typeof(Human), typeof(Animal));
+            model.AssertHasEntityType(typeof(Horse), typeof(Animal));
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_EntityType_AndDerivedTypeMappedAsEntityTypeExplicitly_DerivedTypeWithoutKey()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Zoo>();
+            builder.EntityType<Human>().Ignore(c => c.HumanId);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(5, model.SchemaElements.Count());
+            model.AssertHasEntityType(typeof(Zoo));
+            model.AssertHasEntityType(typeof(Animal));
+            model.AssertHasEntityType(typeof(Human), typeof(Animal));
+            model.AssertHasEntityType(typeof(Horse), typeof(Animal));
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_EntityType_AndDerivedTypeMappedAsComplexTypeExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Zoo>();
+            builder.ComplexType<Human>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(5, model.SchemaElements.Count());
+            model.AssertHasEntityType(typeof(Zoo));
+            model.AssertHasComplexType(typeof(Animal));
+            model.AssertHasComplexType(typeof(Human), typeof(Animal));
+            model.AssertHasComplexType(typeof(Horse), typeof(Animal));
+
+            IEdmStructuredType creatureType = model.SchemaElements.OfType<IEdmStructuredType>()
+                .SingleOrDefault(t => model.GetEdmType(typeof(Creature)).IsEquivalentTo(t));
+            Assert.Null(creatureType);
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_EntityType_AndDerivedTypeMappedAsComplexTypeExplicitly_InReverseOrder()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Human>();
+            builder.EntityType<Zoo>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(5, model.SchemaElements.Count());
+            model.AssertHasEntityType(typeof(Zoo));
+            model.AssertHasComplexType(typeof(Animal));
+            model.AssertHasComplexType(typeof(Human), typeof(Animal));
+            model.AssertHasComplexType(typeof(Horse), typeof(Animal));
+
+            IEdmStructuredType creatureType = model.SchemaElements.OfType<IEdmStructuredType>()
+                .SingleOrDefault(t => model.GetEdmType(typeof(Creature)).IsEquivalentTo(t));
+            Assert.Null(creatureType);
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_EntityType_AndBaseTypeMappedAsEntityTypeExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Zoo>();
+            builder.EntityType<Creature>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(6, model.SchemaElements.Count());
+            model.AssertHasEntityType(typeof(Zoo));
+            model.AssertHasEntityType(typeof(Creature));
+            model.AssertHasEntityType(typeof(Animal), typeof(Creature));
+            model.AssertHasEntityType(typeof(Human), typeof(Animal));
+            model.AssertHasEntityType(typeof(Horse), typeof(Animal));
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_EntityType_AndBaseTypeMappedAsComplexTypeExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Zoo>();
+            builder.ComplexType<Creature>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(6, model.SchemaElements.Count());
+            model.AssertHasEntityType(typeof(Zoo));
+            model.AssertHasComplexType(typeof(Creature));
+            model.AssertHasComplexType(typeof(Animal), typeof(Creature));
+            model.AssertHasComplexType(typeof(Human), typeof(Animal));
+            model.AssertHasComplexType(typeof(Horse), typeof(Animal));
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_EntityType_AndBaseTypeMappedAsComplexTypeExplicitly_InReverseOrder()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Creature>();
+            builder.EntityType<Zoo>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(6, model.SchemaElements.Count());
+            model.AssertHasEntityType(typeof(Zoo));
+            model.AssertHasComplexType(typeof(Creature));
+            model.AssertHasComplexType(typeof(Animal), typeof(Creature));
+            model.AssertHasComplexType(typeof(Human), typeof(Animal));
+            model.AssertHasComplexType(typeof(Horse), typeof(Animal));
+        }
+
+        [Fact]
+        public void ModelBuilder_ThrowsException_ComplexType_AndDerivedTypeMappedAsEntityTypeExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Zoo>();
+            builder.EntityType<Human>();
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => builder.GetEdmModel(),
+                "type",
+                "The type 'System.Web.OData.Builder.TestModels.Human' cannot be configured as a ComplexType. " +
+                "It was previously configured as an EntityType.");
+        }
+
+        [Fact]
+        public void ModelBuilder_ThrowsException_ComplexType_AndDerivedTypeMappedAsEntityTypeExplicitly_InReverseOrder()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Human>();
+            builder.ComplexType<Zoo>();
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => builder.GetEdmModel(),
+                "type",
+                "The type 'System.Web.OData.Builder.TestModels.Human' cannot be configured as a ComplexType. " +
+                "It was previously configured as an EntityType.");
+        }
+
+        [Fact]
+        public void ModelBuilder_ThrowsException_ComplexType_AndDerivedTypeMappedAsEntityTypeExplicitly_TheDerivedTypeWithoutKey()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Zoo>();
+            builder.EntityType<Human>().Ignore(c => c.HumanId);
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => builder.GetEdmModel(),
+                "type",
+                "The type 'System.Web.OData.Builder.TestModels.Human' cannot be configured as a ComplexType. " +
+                "It was previously configured as an EntityType.");
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_ComplexType_AndDerivedTypeMappedAsComplexTypeExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Zoo>();
+            builder.ComplexType<Human>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(5, model.SchemaElements.Count());
+            model.AssertHasComplexType(typeof(Zoo));
+            model.AssertHasComplexType(typeof(Animal));
+            model.AssertHasComplexType(typeof(Human), typeof(Animal));
+            model.AssertHasComplexType(typeof(Horse), typeof(Animal));
+        }
+
+        [Fact]
+        public void ModelBuilder_ThrowsException_ComplexType_AndBaseTypeMappedAsEntityTypeExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Zoo>();
+            builder.EntityType<Creature>();
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => builder.GetEdmModel(),
+                "type",
+                "The type 'System.Web.OData.Builder.TestModels.Animal' cannot be configured as an EntityType. " +
+                 "It was previously configured as a ComplexType.");
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_ComplexType_AndBaseTypeMappedAsComplexTypeExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Zoo>();
+            builder.ComplexType<Creature>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(6, model.SchemaElements.Count());
+            model.AssertHasComplexType(typeof(Zoo));
+            model.AssertHasComplexType(typeof(Creature));
+            model.AssertHasComplexType(typeof(Animal), typeof(Creature));
+            model.AssertHasComplexType(typeof(Human), typeof(Animal));
+            model.AssertHasComplexType(typeof(Horse), typeof(Animal));
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_EntityTypeWithBaseAndDerivedProperties_AndDerivedTypeMappedAsComplexTypeExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<ZooHorse>();
+            builder.ComplexType<Human>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(5, model.SchemaElements.Count());
+            IEdmEntityType zooHorse = model.AssertHasEntityType(typeof(ZooHorse));
+            model.AssertHasComplexType(typeof(Animal));
+            model.AssertHasComplexType(typeof(Human), typeof(Animal));
+            model.AssertHasComplexType(typeof(Horse), typeof(Animal));
+
+            IEdmProperty horseProperty = zooHorse.FindProperty("Horse");
+            Assert.NotNull(horseProperty);
+            Assert.Equal(EdmPropertyKind.Structural, horseProperty.PropertyKind);
+            Assert.IsType<EdmComplexType>(horseProperty.Type.Definition);
+            Assert.False(zooHorse.NavigationProperties().Any(c => c.Name == "Horse"));
+
+            IEdmProperty animalProperty = zooHorse.FindProperty("Animal");
+            Assert.NotNull(animalProperty);
+            Assert.Equal(EdmPropertyKind.Structural, animalProperty.PropertyKind);
+            Assert.IsType<EdmComplexType>(animalProperty.Type.Definition);
+            Assert.False(zooHorse.NavigationProperties().Any(c => c.Name == "Animal"));
+        }
+
+        [Fact]
+        public void ModelBuilder_ThrowsException_EntityType_AndDerivedTypesMappedDifferentTypesExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Zoo>();
+            builder.ComplexType<Human>();
+            builder.EntityType<Horse>();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
+                "Cannot determine the Edm type for the CLR type 'System.Web.OData.Builder.TestModels.Animal' " +
+                "because the derived type 'System.Web.OData.Builder.TestModels.Horse' is configured as entity type and another " +
+                "derived type 'System.Web.OData.Builder.TestModels.Human' is configured as complex type.");
+        }
+
+        [Fact]
+        public void ModelBuilder_Figures_EntityTypeWithBaseAndSilbingProperties_AndDerivedTypeMappedAsComplexTypeExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<PlantParkWithOceanPlantAndJasmine>();
+            builder.ComplexType<Mangrove>();
+            builder.EntityType<Flower>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Act & Assert
+            Assert.Equal(7, model.SchemaElements.Count());
+
+            // Verify Ocean sub-tree as complex types
+            model.AssertHasComplexType(typeof(OceanPlant));
+            model.AssertHasComplexType(typeof(Phycophyta), typeof(OceanPlant));
+            model.AssertHasComplexType(typeof(Mangrove), typeof(OceanPlant));
+
+            // Verify Land sub-tree as entity types
+            model.AssertHasEntityType(typeof(Flower));
+            model.AssertHasEntityType(typeof(Jasmine), typeof(Flower));
+
+            // Verify other types not in the model
+            Assert.False(model.SchemaElements.OfType<IEdmStructuredType>()
+                .Any(t => model.GetEdmType(typeof(Plant)).IsEquivalentTo(t)));
+
+            Assert.False(model.SchemaElements.OfType<IEdmStructuredType>()
+                .Any(t => model.GetEdmType(typeof(LandPlant)).IsEquivalentTo(t)));
+
+            Assert.False(model.SchemaElements.OfType<IEdmStructuredType>()
+                .Any(t => model.GetEdmType(typeof(Tree)).IsEquivalentTo(t)));
+
+            // Verify the properties
+            IEdmEntityType entityType = model.AssertHasEntityType(typeof(PlantParkWithOceanPlantAndJasmine));
+
+            IEdmProperty oceanProperty = entityType.FindProperty("OceanPant");
+            Assert.NotNull(oceanProperty);
+            Assert.Equal(EdmPropertyKind.Structural, oceanProperty.PropertyKind);
+            Assert.IsType<EdmComplexType>(oceanProperty.Type.Definition);
+            Assert.False(entityType.NavigationProperties().Any(c => c.Name == "OceanPant"));
+
+            IEdmProperty jaemineProperty = entityType.FindProperty("Jaemine");
+            Assert.NotNull(jaemineProperty);
+            Assert.Equal(EdmPropertyKind.Navigation, jaemineProperty.PropertyKind);
+            Assert.IsType<EdmEntityType>(jaemineProperty.Type.Definition);
+            Assert.True(entityType.NavigationProperties().Any(c => c.Name == "Jaemine"));
+        }
+
+        [Fact]
+        public void ModelBuilder_ThrowsException_EntityType_AndSubDerivedTypesMappedDifferentTypesExplicitly()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<PlantPark>();
+            builder.ComplexType<Phycophyta>();
+            builder.EntityType<Jasmine>();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
+                "Cannot determine the Edm type for the CLR type 'System.Web.OData.Builder.TestModels.Plant' " +
+                "because the derived type 'System.Web.OData.Builder.TestModels.Jasmine' is configured as entity type and another " +
+                "derived type 'System.Web.OData.Builder.TestModels.Phycophyta' is configured as complex type.");
+        }
+
+        [Fact]
         public void ModelBuilder_Doesnot_Override_AbstractnessOfEntityTypes_IfSet()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -652,6 +1139,23 @@ namespace System.Web.OData.Builder.Conventions
             Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
             Assert.True(model.AssertHasEntityType(typeof(Motorcycle)).IsAbstract);
             Assert.False(model.AssertHasEntityType(typeof(SportBike)).IsAbstract);
+        }
+
+        [Fact]
+        public void ModelBuilder_Doesnot_Override_AbstractnessOfComplexTypes_IfSet()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Vehicle>();
+            builder.ComplexType<Motorcycle>().Abstract();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
+            Assert.True(model.AssertHasComplexType(typeof(Motorcycle)).IsAbstract);
+            Assert.False(model.AssertHasComplexType(typeof(SportBike)).IsAbstract);
         }
 
         [Fact]
@@ -673,13 +1177,35 @@ namespace System.Web.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_TypesInInheritanceCanHaveComplexTypes()
         {
+            // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<Vehicle>("vehicles");
 
+            // Act
             IEdmModel model = builder.GetEdmModel();
 
+            // Assert
             Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel, model.SchemaElements.Count());
             model.AssertHasComplexType(typeof(ManufacturerAddress));
+            model.AssertHasComplexType(typeof(CarManufacturerAddress));
+            model.AssertHasComplexType(typeof(MotorcycleManufacturerAddress));
+        }
+
+        [Fact]
+        public void ModelBuilder_TypesInInheritance_CanSetBaseComplexTypes()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<ManufacturerAddress>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(4, model.SchemaElements.Count());
+            Assert.Null(model.AssertHasComplexType(typeof(ManufacturerAddress)).BaseComplexType());
+            model.AssertHasComplexType(typeof(CarManufacturerAddress), typeof(ManufacturerAddress));
+            model.AssertHasComplexType(typeof(MotorcycleManufacturerAddress), typeof(ManufacturerAddress));
         }
 
         [Fact]
@@ -1112,9 +1638,10 @@ namespace System.Web.OData.Builder.Conventions
             builder.AddComplexType(baseComplexType);
 
             IEdmModel model = builder.GetEdmModel();
-            Assert.Equal(3, model.SchemaElements.Count());
+            Assert.Equal(4, model.SchemaElements.Count());
             Assert.NotNull(model.FindType("DefaultNamespace.EntityType"));
             Assert.NotNull(model.FindType("DefaultNamespace.BaseComplexType"));
+            Assert.NotNull(model.FindType("DefaultNamespace.DerivedComplexType"));
         }
 
         public static TheoryDataSet<MockType> ModelBuilder_PrunesUnReachableTypes_Data
@@ -1408,6 +1935,33 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
+        public void DerivedComplexTypes_AreFlattened()
+        {
+            // Arrange
+            MockType complexBase = new MockType("ComplexBase").Property<string>("BaseProperty");
+            MockType complexDerived = new MockType("ComplexBase").BaseType(complexBase).Property<int>("DerivedProperty");
+
+            MockAssembly mockAssembly = new MockAssembly(complexBase, complexDerived);
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
+            builder.AddComplexType(complexBase);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(3, model.SchemaElements.Count());
+
+            IEdmComplexType complexBaseEdmType = model.AssertHasComplexType(complexBase);
+            complexBaseEdmType.AssertHasPrimitiveProperty(model, "BaseProperty", EdmPrimitiveTypeKind.String, true);
+
+            IEdmComplexType complexDerivedEdmType = model.AssertHasComplexType(complexDerived, complexBase);
+            complexDerivedEdmType.AssertHasPrimitiveProperty(model, "BaseProperty", EdmPrimitiveTypeKind.String, true);
+            complexDerivedEdmType.AssertHasPrimitiveProperty(model, "DerivedProperty", EdmPrimitiveTypeKind.Int32, false);
+        }
+
+        [Fact]
         public void OnModelCreating_IsInvoked_AfterConventionsAreRun()
         {
             // Arrange
@@ -1464,6 +2018,31 @@ namespace System.Web.OData.Builder.Conventions
             Assert.DoesNotContain("BaseTypeProperty", baseEntityType.Properties().Select(p => p.Name));
             IEdmEntityType derivedEntityType = model.AssertHasEntityType(derivedType);
             Assert.DoesNotContain("BaseTypeProperty", derivedEntityType.Properties().Select(p => p.Name));
+        }
+
+        [Fact]
+        public void IgnoredPropertyOnBaseComplexType_DoesnotShowupOnDerivedComplexType()
+        {
+            // Arrange
+            MockType baseType = new MockType("BaseType").Property<int>("BaseProperty");
+            MockType derivedType = new MockType("DerivedType").BaseType(baseType).Property<int>("DerivedProperty");
+
+            MockAssembly mockAssembly = new MockAssembly(baseType, derivedType);
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
+
+            // Act
+            ComplexTypeConfiguration baseComplex = builder.AddComplexType(baseType);
+            baseComplex.RemoveProperty(baseType.GetProperty("BaseProperty"));
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmComplexType baseComplexType = model.AssertHasComplexType(baseType);
+            Assert.DoesNotContain("BaseProperty", baseComplexType.Properties().Select(p => p.Name));
+
+            IEdmComplexType derivedComplexType = model.AssertHasComplexType(derivedType, baseType);
+            Assert.DoesNotContain("BaseProperty", derivedComplexType.Properties().Select(p => p.Name));
         }
 
         [Fact]
@@ -1802,6 +2381,20 @@ namespace System.Web.OData.Builder.Conventions
             IEdmProperty edmProperty = Assert.Single(entityType.Properties());
             Assert.Equal("Id", edmProperty.Name);
         }
+
+        [Fact]
+        public void GetEdmModel_ThrowsExpcetion_ForRecursiveLoopOfComplexType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<RecursiveEmployee>();
+
+            // Act & Assert
+            Assert.ThrowsArgument(() => builder.GetEdmModel(),
+                "propertyInfo",
+                "The complex type 'System.Web.OData.Builder.Conventions.RecursiveEmployee' has a reference to itself " +
+                "through the property 'Manager'. A recursive loop of complex types is not allowed.");
+        }
     }
 
     public class Product
@@ -2058,5 +2651,10 @@ namespace System.Web.OData.Builder.Conventions
     public class DerivedOpenEntityType : BaseOpenEntityType
     {
         public string DerivedProperty { get; set; }
+    }
+
+    public class RecursiveEmployee
+    {
+        public RecursiveEmployee Manager { get; set; }
     }
 }

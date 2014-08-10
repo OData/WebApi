@@ -156,7 +156,7 @@ namespace System.Web.OData.Builder
         /// <returns>The configuration object for the specified complex type.</returns>
         public ComplexTypeConfiguration<TComplexType> ComplexType<TComplexType>() where TComplexType : class
         {
-            return new ComplexTypeConfiguration<TComplexType>(AddComplexType(typeof(TComplexType)));
+            return new ComplexTypeConfiguration<TComplexType>(this, AddComplexType(typeof(TComplexType)));
         }
 
         /// <summary>

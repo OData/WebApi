@@ -90,4 +90,97 @@ namespace System.Web.OData.Builder.TestModels
     public class MotorcycleManufacturerAddress : ManufacturerAddress
     {
     }
+
+    public class Zoo
+    {
+        public int Id { get; set; }
+        public Animal SpecialAnimal { get; set; }
+    }
+
+    public class Creature
+    {
+        public int Id { get; set; }
+    }
+
+    public class Animal : Creature
+    {
+        public int Age { get; set; }
+    }
+
+    public class Human : Animal
+    {
+        public int HumanId { get; set; }
+    }
+
+    public class Park
+    {
+        public int Id { get; set; }
+        public Animal Animal { get; set; }
+        public Human Human { get; set; }
+    }
+
+    public class Horse : Animal
+    {
+        public int HorseId { get; set; }
+    }
+
+    public class ZooHorse
+    {
+        public int Id { get; set; }
+        public Horse Horse { get; set; }
+        public Animal Animal { get; set; }
+    }
+
+    public class Plant
+    {
+        public int PlantId { get; set; }
+    }
+
+    public class OceanPlant : Plant
+    {
+        public int OcentPlantId { get; set; }
+    }
+
+    public class Phycophyta : OceanPlant
+    {
+        public int PhycophytaProperty { get; set; }
+    }
+
+    public class Mangrove : OceanPlant
+    {
+        public int MangroveId { get; set; }
+    }
+
+    public class LandPlant : Plant
+    {
+        public int LandPlantId { get; set; }
+    }
+
+    public class Tree : LandPlant
+    {
+        public int TreeId { get; set; }
+    }
+
+    public class Flower : LandPlant
+    {
+        public int FlowerId { get; set; }
+    }
+
+    public class Jasmine : Flower
+    {
+        public int JasminePoperty { get; set; }
+    }
+
+    public class PlantParkWithOceanPlantAndJasmine
+    {
+        public int Id { get; set; }
+        public OceanPlant OceanPant { get; set; }
+        public Jasmine Jaemine { get; set; }
+    }
+
+    public class PlantPark
+    {
+        public int Id { get; set; }
+        public Plant Pant { get; set; }
+    }
 }

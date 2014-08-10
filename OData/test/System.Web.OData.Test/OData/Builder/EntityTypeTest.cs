@@ -296,7 +296,7 @@ namespace System.Web.OData.Builder
                         .EntityType<Vehicle>()
                         .Property(v => v.Model),
                 "propertyInfo",
-                "Cannot define property 'Model' in the base entity type 'System.Web.OData.Builder.TestModels.Vehicle' as the derived type 'System.Web.OData.Builder.TestModels.Motorcycle' already defines it.");
+                "Cannot define property 'Model' in the base type 'System.Web.OData.Builder.TestModels.Vehicle' as the derived type 'System.Web.OData.Builder.TestModels.Motorcycle' already defines it.");
         }
 
         [Fact]
@@ -363,7 +363,7 @@ namespace System.Web.OData.Builder
                     .EntityType<Motorcycle>()
                     .DerivesFrom<Vehicle>(),
                 "propertyInfo",
-                "Cannot define property 'Model' in the base entity type 'System.Web.OData.Builder.TestModels.Motorcycle' as the derived type 'System.Web.OData.Builder.TestModels.SportBike' already defines it.");
+                "Cannot define property 'Model' in the base type 'System.Web.OData.Builder.TestModels.Motorcycle' as the derived type 'System.Web.OData.Builder.TestModels.SportBike' already defines it.");
         }
 
         [Fact]

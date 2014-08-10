@@ -98,6 +98,7 @@ namespace System.Web.OData.Builder
             property.SetupGet(p => p.DeclaringType).Returns(type);
 
             Mock<StructuralTypeConfiguration> mock = new Mock<StructuralTypeConfiguration> { CallBase = true };
+            mock.Setup(e => e.ModelBuilder).Returns(new Mock<ODataModelBuilder>().Object);
             StructuralTypeConfiguration configuration = mock.Object;
             mock.SetupGet(c => c.ClrType).Returns(type);
 

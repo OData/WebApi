@@ -915,18 +915,17 @@ namespace System.Web.OData.Formatter.Serialization
         public void CreateStructuralProperty_Calls_CreateODataValueOnInnerSerializer()
         {
             // Arrange
-            Mock<IEdmTypeReference> propertyType = new Mock<IEdmTypeReference>();
-            propertyType.Setup(t => t.Definition).Returns(new EdmEntityType("Namespace", "Name"));
             Mock<IEdmStructuralProperty> property = new Mock<IEdmStructuralProperty>();
             property.Setup(p => p.Name).Returns("PropertyName");
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>(MockBehavior.Strict);
             var entity = new { PropertyName = 42 };
             Mock<ODataEdmTypeSerializer> innerSerializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Property);
             ODataValue propertyValue = new Mock<ODataValue>().Object;
+            IEdmTypeReference propertyType = _writeContext.GetEdmType(propertyValue, typeof(int));
 
-            property.Setup(p => p.Type).Returns(propertyType.Object);
-            serializerProvider.Setup(s => s.GetEdmTypeSerializer(propertyType.Object)).Returns(innerSerializer.Object);
-            innerSerializer.Setup(s => s.CreateODataValue(42, propertyType.Object, _writeContext)).Returns(propertyValue).Verifiable();
+            property.Setup(p => p.Type).Returns(propertyType);
+            serializerProvider.Setup(s => s.GetEdmTypeSerializer(propertyType)).Returns(innerSerializer.Object);
+            innerSerializer.Setup(s => s.CreateODataValue(42, propertyType, _writeContext)).Returns(propertyValue).Verifiable();
 
             var serializer = new ODataEntityTypeSerializer(serializerProvider.Object);
             EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, _customerType, entity);

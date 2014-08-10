@@ -29,6 +29,8 @@ namespace System.Web.OData.Routing
             builder.Singleton<RoutingCustomer>("VipCustomer");
             builder.Singleton<Product>("MyProduct");
             builder.EntitySet<DateTimeOffsetKeyCustomer>("DateTimeOffsetKeyCustomers");
+            builder.ComplexType<Dog>();
+            builder.ComplexType<Cat>();
 
             ActionConfiguration getRoutingCustomerById = builder.Action("GetRoutingCustomerById");
             getRoutingCustomerById.Parameter<int>("RoutingCustomerId");
@@ -226,6 +228,7 @@ namespace System.Web.OData.Routing
             public string Name { get; set; }
             public virtual List<Product> Products { get; set; }
             public Address Address { get; set; }
+            public Pet Pet { get; set; }
         }
 
         public class EmailAddress
@@ -240,6 +243,24 @@ namespace System.Web.OData.Routing
             public string Street { get; set; }
             public string City { get; set; }
             public string ZipCode { get; set; }
+        }
+
+        public class Pet
+        {
+            public string Name { get; set; }
+            public DateTimeOffset Birth { get; set; }
+        }
+
+        public class Dog : Pet
+        {
+            public bool CanBark { get; set; }
+            public int RunSpeed { get; set; }
+        }
+
+        public class Cat : Pet
+        {
+            public bool CanMeow { get; set; }
+            public int ClimbHeight { get; set; }
         }
 
         public class Product

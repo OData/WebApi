@@ -28,7 +28,7 @@ namespace System.Web.OData.TestCommon.Models
         public string UnserializableSSN { get; set; }
 
         [DataMember]
-        public IActivity FavoriteHobby { get; set; }
+        public HobbyActivity FavoriteHobby { get; set; }
 
         public Person(int index, ReferenceDepthContext context)
         {

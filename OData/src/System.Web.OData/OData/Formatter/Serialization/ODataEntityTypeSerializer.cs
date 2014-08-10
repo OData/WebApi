@@ -432,7 +432,18 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             object propertyValue = entityInstanceContext.GetPropertyValue(structuralProperty.Name);
-            return serializer.CreateProperty(propertyValue, structuralProperty.Type, structuralProperty.Name, writeContext);
+
+            IEdmTypeReference propertyType = structuralProperty.Type;
+            if (propertyValue != null)
+            {
+                IEdmTypeReference actualType = writeContext.GetEdmType(propertyValue, propertyValue.GetType());
+                if (propertyType != null && propertyType != actualType)
+                {
+                    propertyType = actualType;
+                }
+            }
+
+            return serializer.CreateProperty(propertyValue, propertyType, structuralProperty.Name, writeContext);
         }
 
         private IEnumerable<ODataAction> CreateODataActions(

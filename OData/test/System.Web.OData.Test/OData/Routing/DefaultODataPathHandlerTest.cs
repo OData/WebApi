@@ -520,6 +520,45 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
+        [InlineData("RoutingCustomers(112)/Pet/System.Web.OData.Routing.Dog")]
+        [InlineData("VipCustomer/Pet/System.Web.OData.Routing.Dog")]
+        public void CanParseComplexCastSegment(string odataPath)
+        {
+            // Arrange
+            const string ExpectedText = "System.Web.OData.Routing.Dog";
+            IEdmComplexType expectedType =
+                _model.SchemaElements.OfType<IEdmComplexType>().SingleOrDefault(e => e.Name == "Dog");
+
+            // Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
+            ODataPathSegment segment = path.Segments.Last();
+
+            // Assert
+            Assert.NotNull(segment);
+            Assert.IsType<ComplexCastPathSegment>(segment);
+            Assert.Equal(ExpectedText, segment.ToString());
+            Assert.Null(path.NavigationSource);
+            Assert.Same(expectedType, path.EdmType);
+        }
+
+        [Theory]
+        [InlineData("RoutingCustomers(112)/Pet/System.Web.OData.Routing.Dog/CanBark", "CanBark")]
+        [InlineData("VipCustomer/Pet/System.Web.OData.Routing.Cat/CanMeow", "CanMeow")]
+        public void CanParsePropertyValueAfterComplexCastSegment(string odataPath, string expectText)
+        {
+            // Arrange & Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
+            ODataPathSegment segment = path.Segments.Last();
+
+            // Assert
+            Assert.NotNull(segment);
+            Assert.Equal(expectText, segment.ToString());
+            Assert.Null(path.NavigationSource);
+            Assert.NotNull(path.EdmType);
+            Assert.Equal("Edm.Boolean", (path.EdmType as IEdmPrimitiveType).FullName());
+        }
+
+        [Theory]
         [InlineData("RoutingCustomers(1)/Name/$value")]
         [InlineData("VipCustomer/Name/$value")]
         public void CanParsePropertyValueSegment(string odataPath)

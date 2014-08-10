@@ -208,6 +208,228 @@ namespace System.Web.OData.Builder
             IEdmProperty edmProperty = Assert.Single(complexType.Properties());
             Assert.Equal("StringProperty", edmProperty.Name);
         }
+
+        [Fact]
+        public void CanCreateAbstractComplexType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.ComplexType<BaseComplexType>().Abstract();
+
+            // Arrange
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmComplexType baseComplexType = Assert.Single(model.SchemaElements.OfType<IEdmComplexType>());
+            Assert.True(baseComplexType.IsAbstract);
+        }
+
+        [Fact]
+        public void CanCreateDerivedComplexType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.ComplexType<BaseComplexType>().Abstract().Property(v => v.BaseProperty);
+            builder.ComplexType<DerivedComplexType>().DerivesFrom<BaseComplexType>().Property(v => v.DerivedProperty);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmComplexType baseComplexType = model.AssertHasComplexType(typeof(BaseComplexType));
+            Assert.Null(baseComplexType.BaseComplexType());
+            Assert.Equal(1, baseComplexType.Properties().Count());
+            baseComplexType.AssertHasPrimitiveProperty(model, "BaseProperty", EdmPrimitiveTypeKind.String, true);
+
+            IEdmComplexType derivedComplexType = model.AssertHasComplexType(typeof(DerivedComplexType));
+            Assert.Equal(baseComplexType, derivedComplexType.BaseComplexType());
+            Assert.Equal(2, derivedComplexType.Properties().Count());
+            derivedComplexType.AssertHasPrimitiveProperty(model, "BaseProperty", EdmPrimitiveTypeKind.String, true);
+            derivedComplexType.AssertHasPrimitiveProperty(model, "DerivedProperty", EdmPrimitiveTypeKind.Int32, false);
+        }
+
+        [Fact]
+        public void CanCreateDerivedComplexTypeInReverseOrder()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.ComplexType<DerivedComplexType>().DerivesFrom<BaseComplexType>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            model.AssertHasComplexType(typeof(BaseComplexType));
+            model.AssertHasComplexType(typeof(DerivedComplexType), typeof(BaseComplexType));
+        }
+
+        [Fact]
+        public void CanDefinePropertyOnDerivedType_NotPresentInBaseType_ButPresentInDerivedType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.ComplexType<DerivedComplexType>().DerivesFrom<BaseComplexType>().Property(m => m.BaseProperty);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmComplexType baseComplex = model.AssertHasComplexType(typeof(BaseComplexType));
+            Assert.Null(baseComplex.BaseComplexType());
+            Assert.Equal(0, baseComplex.Properties().Count());
+
+            IEdmComplexType derivedComplex = model.AssertHasComplexType(typeof(DerivedComplexType));
+            Assert.Equal(baseComplex, derivedComplex.BaseComplexType());
+            Assert.Equal(1, derivedComplex.Properties().Count());
+            derivedComplex.AssertHasPrimitiveProperty(model, "BaseProperty", EdmPrimitiveTypeKind.String, true);
+        }
+
+        [Fact]
+        public void AddProperty_Throws_WhenRedefineBaseTypeProperty_OnDerivedType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.ComplexType<BaseComplexType>().Property(v => v.BaseProperty);
+
+            // Act & Assert
+            Assert.ThrowsArgument(
+                () => builder.ComplexType<DerivedComplexType>().DerivesFrom<BaseComplexType>().Property(v => v.BaseProperty),
+                "propertyInfo",
+                "Cannot redefine property 'BaseProperty' already defined on the base type 'System.Web.OData.Builder.BaseComplexType'.");
+        }
+
+        [Fact]
+        public void AddProperty_Throws_WhenDefinePropertyOnBaseTypeAlreadyPresentInDerivedType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.ComplexType<DerivedComplexType>().DerivesFrom<BaseComplexType>().Property(m => m.BaseProperty);
+
+            // Act & Assert
+            Assert.ThrowsArgument(
+                () => builder.ComplexType<BaseComplexType>().Property(v => v.BaseProperty),
+                "propertyInfo",
+                "Cannot define property 'BaseProperty' in the base type 'System.Web.OData.Builder.BaseComplexType' " +
+                "as the derived type 'System.Web.OData.Builder.DerivedComplexType' already defines it.");
+        }
+
+        [Fact]
+        public void DerivesFrom_Throws_IfDerivedTypeDoesnotDeriveFromBaseType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act & Assert
+            Assert.ThrowsArgument(
+                () => builder.ComplexType<string>().DerivesFrom<BaseComplexType>(),
+                "baseType",
+                "'System.String' does not inherit from 'System.Web.OData.Builder.BaseComplexType'.");
+        }
+
+        [Fact]
+        public void DerivesFrom_Throws_WhenSettingTheBaseType_IfDuplicatePropertyInBaseType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            builder.ComplexType<BaseComplexType>().Property(v => v.BaseProperty);
+            ComplexTypeConfiguration<DerivedComplexType> derivedComplex = builder.ComplexType<DerivedComplexType>();
+            derivedComplex.Property(m => m.BaseProperty);
+
+            // Act & Assert
+            Assert.ThrowsArgument(
+                () => derivedComplex.DerivesFrom<BaseComplexType>(),
+                "propertyInfo",
+                "Cannot redefine property 'BaseProperty' already defined on the base type 'System.Web.OData.Builder.BaseComplexType'.");
+        }
+
+        [Fact]
+        public void DerivesFrom_Throws_WhenSettingTheBaseType_IfDuplicatePropertyInDerivedType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            builder.ComplexType<BaseComplexType>().Property(v => v.BaseProperty);
+            builder.ComplexType<SubDerivedComplexType>().DerivesFrom<DerivedComplexType>().Property(c => c.BaseProperty);
+
+            // Act & Assert
+            Assert.ThrowsArgument(
+                () => builder.ComplexType<DerivedComplexType>().DerivesFrom<BaseComplexType>(),
+                "propertyInfo",
+                "Cannot define property 'BaseProperty' in the base type 'System.Web.OData.Builder.DerivedComplexType' as " +
+                "the derived type 'System.Web.OData.Builder.SubDerivedComplexType' already defines it.");
+        }
+
+        [Fact]
+        public void DeriveFromItself_Throws()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act & Assert
+            Assert.ThrowsArgument(
+                () => builder.EntityType<BaseComplexType>().DerivesFrom<BaseComplexType>(),
+                "baseType",
+                "'System.Web.OData.Builder.BaseComplexType' does not inherit from 'System.Web.OData.Builder.BaseComplexType'.");
+        }
+
+        [Fact]
+        public void DerivesFrom_SetsBaseType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ComplexTypeConfiguration<DerivedComplexType> derivedComplex = builder.ComplexType<DerivedComplexType>();
+
+            // Act
+            derivedComplex.DerivesFrom<BaseComplexType>();
+
+            // Assert
+            Assert.NotNull(derivedComplex.BaseType);
+            Assert.Equal(typeof(BaseComplexType), derivedComplex.BaseType.ClrType);
+        }
+
+        [Fact]
+        public void CanDeriveFromNull()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ComplexTypeConfiguration<DerivedComplexType> derivedComplex = builder.ComplexType<DerivedComplexType>();
+
+            // Act
+            derivedComplex.DerivesFromNothing();
+
+            // Assert
+            Assert.Null(derivedComplex.BaseType);
+        }
+
+        [Fact]
+        public void BaseTypeConfigured_IsFalseByDefault()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act
+            ComplexTypeConfiguration derivedComplex = builder.AddComplexType(typeof(DerivedComplexType));
+
+            // Assert
+            Assert.False(derivedComplex.BaseTypeConfigured);
+        }
+
+        [Fact]
+        public void SettingBaseType_UpdatesBaseTypeConfigured()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ComplexTypeConfiguration derivedComplex = builder.AddComplexType(typeof(DerivedComplexType));
+            ComplexTypeConfiguration baseComplex = builder.AddComplexType(typeof(BaseComplexType));
+
+            // Act
+            derivedComplex.DerivesFrom(baseComplex);
+
+            // Assert
+            Assert.False(baseComplex.BaseTypeConfigured);
+            Assert.True(derivedComplex.BaseTypeConfigured);
+        }
     }
 
     public class ComplexTypeTestModel
@@ -264,5 +486,20 @@ namespace System.Web.OData.Builder
     {
         public string StringProperty { get; set; }
         public MyDynamicProperty MyProperties { get; set; }
+    }
+
+    public abstract class BaseComplexType
+    {
+        public string BaseProperty { get; set; }
+    }
+
+    public class DerivedComplexType : BaseComplexType
+    {
+        public int DerivedProperty { get; set; }
+    }
+
+    public class SubDerivedComplexType : DerivedComplexType
+    {
+        public int SubDerivedProperty { get; set; }
     }
 }

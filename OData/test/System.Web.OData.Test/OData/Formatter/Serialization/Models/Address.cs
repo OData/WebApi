@@ -14,4 +14,14 @@ namespace System.Web.OData.Formatter.Serialization.Models
 
         public string Country { get; set; }
     }
+
+    public class UsAddress : Address
+    {
+        public string UsProp { get; set; }
+    }
+
+    public class CnAddress : Address
+    {
+        public Guid CnProp { get; set; }
+    }
 }

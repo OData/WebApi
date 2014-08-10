@@ -203,4 +203,20 @@ namespace System.Web.OData.Formatter
         [Required]
         public IList<FormatterAddress> Addresses { get; set; } 
     }
+
+    public class FormatterUsAddress : FormatterAddress
+    {
+        public string UsProperty { get; set; }
+    }
+
+    public class ComplexBaseType
+    {
+        public string BaseProperty { get; set; }
+    }
+
+    public class ComplexDerivedOpenType : ComplexBaseType
+    {
+        public string DerivedProperty { get; set; }
+        public IDictionary<string, object> Properties { get; set; }
+    }
 }

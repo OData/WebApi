@@ -2,10 +2,12 @@
 
 using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Formatter.Deserialization
 {
@@ -78,12 +80,58 @@ namespace System.Web.OData.Formatter.Deserialization
                 throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
             }
 
-            object complexResource = CreateResource(complexType, readContext);
-            foreach (ODataProperty complexProperty in complexValue.Properties)
+            if (!String.IsNullOrEmpty(complexValue.TypeName) && complexType.FullName() != complexValue.TypeName)
             {
-                DeserializationHelpers.ApplyProperty(complexProperty, complexType, complexResource, DeserializerProvider, readContext);
+                // received a derived complex type in a base type deserializer.
+                IEdmModel model = readContext.Model;
+                if (model == null)
+                {
+                    throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
+                }
+
+                IEdmComplexType actualType = model.FindType(complexValue.TypeName) as IEdmComplexType;
+                if (actualType == null)
+                {
+                    throw new ODataException(Error.Format(SRResources.ComplexTypeNotInModel, complexValue.TypeName));
+                }
+
+                if (actualType.IsAbstract)
+                {
+                    string message = Error.Format(SRResources.CannotInstantiateAbstractComplexType,
+                        complexValue.TypeName);
+                    throw new ODataException(message);
+                }
+
+                IEdmTypeReference actualComplexType = new EdmComplexTypeReference(actualType, isNullable: false);
+                ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(actualComplexType);
+                if (deserializer == null)
+                {
+                    throw new SerializationException(
+                        Error.Format(SRResources.TypeCannotBeDeserialized, actualComplexType.FullName(),
+                            typeof(ODataMediaTypeFormatter).Name));
+                }
+
+                object resource = deserializer.ReadInline(complexValue, actualComplexType, readContext);
+
+                EdmStructuredObject structuredObject = resource as EdmStructuredObject;
+                if (structuredObject != null)
+                {
+                    structuredObject.ExpectedEdmType = complexType.ComplexDefinition();
+                }
+
+                return resource;
             }
-            return complexResource;
+            else
+            {
+                object complexResource = CreateResource(complexType, readContext);
+
+                foreach (ODataProperty complexProperty in complexValue.Properties)
+                {
+                    DeserializationHelpers.ApplyProperty(complexProperty, complexType, complexResource,
+                        DeserializerProvider, readContext);
+                }
+                return complexResource;
+            }
         }
 
         internal static object CreateResource(IEdmComplexTypeReference edmComplexType, ODataDeserializerContext readContext)

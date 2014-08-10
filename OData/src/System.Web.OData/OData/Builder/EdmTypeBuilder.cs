@@ -60,9 +60,17 @@ namespace System.Web.OData.Builder
                 if (config.Kind == EdmTypeKind.Complex)
                 {
                     ComplexTypeConfiguration complex = (ComplexTypeConfiguration)config;
+                    IEdmComplexType baseType = null;
+                    if (complex.BaseType != null)
+                    {
+                        CreateEdmTypeHeader(complex.BaseType);
+                        baseType = GetEdmType(complex.BaseType.ClrType) as IEdmComplexType;
 
-                    EdmComplexType complexType = new EdmComplexType(config.Namespace, config.Name, 
-                        null, false, complex.IsOpen);
+                        Contract.Assert(baseType != null);
+                    }
+
+                    EdmComplexType complexType = new EdmComplexType(config.Namespace, config.Name,
+                        baseType, complex.IsAbstract ?? false, complex.IsOpen);
 
                     _types.Add(config.ClrType, complexType);
 

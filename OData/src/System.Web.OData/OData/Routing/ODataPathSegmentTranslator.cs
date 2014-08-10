@@ -161,14 +161,19 @@ namespace System.Web.OData.Routing
         /// <returns>Translated WebApi path segment</returns>
         public override IEnumerable<ODataPathSegment> Translate(TypeSegment segment)
         {
-            if (segment.EdmType.TypeKind == EdmTypeKind.Entity)
+            IEdmType elementType = segment.EdmType;
+            if (segment.EdmType.TypeKind == EdmTypeKind.Collection)
             {
-                yield return new CastPathSegment((IEdmEntityType)segment.EdmType);
+                elementType = ((IEdmCollectionType)segment.EdmType).ElementType.Definition;
             }
-            else
+
+            if (elementType.TypeKind == EdmTypeKind.Entity)
             {
-                yield return new CastPathSegment(
-                    (IEdmEntityType)((IEdmCollectionType)segment.EdmType).ElementType.Definition);
+                yield return new CastPathSegment((IEdmEntityType)elementType);
+            }
+            else if (elementType.TypeKind == EdmTypeKind.Complex)
+            {
+                yield return new ComplexCastPathSegment((IEdmComplexType)elementType);
             }
         }
 

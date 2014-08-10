@@ -75,5 +75,10 @@ namespace System.Web.OData
         {
             return new EdmEntityTypeReference(entity, isNullable: false);
         }
+
+        public static IEdmComplexTypeReference AsReference(this IEdmComplexType complex)
+        {
+            return new EdmComplexTypeReference(complex, isNullable: false);
+        }
     }
 }

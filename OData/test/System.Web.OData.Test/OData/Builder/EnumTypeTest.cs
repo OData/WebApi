@@ -263,7 +263,7 @@ namespace System.Web.OData.Builder
                 () => builder.EntityType<BaseTypeWithEnumTypePropertyTestModel>()
                     .Property(b => b.Color),
                 "propertyInfo",
-                "Cannot define property 'Color' in the base entity type 'System.Web.OData.Builder.BaseTypeWithEnumTypePropertyTestModel' as the derived type 'System.Web.OData.Builder.DerivedTypeWithEnumTypePropertyTestModel' already defines it.");
+                "Cannot define property 'Color' in the base type 'System.Web.OData.Builder.BaseTypeWithEnumTypePropertyTestModel' as the derived type 'System.Web.OData.Builder.DerivedTypeWithEnumTypePropertyTestModel' already defines it.");
         }
 
         [Fact]

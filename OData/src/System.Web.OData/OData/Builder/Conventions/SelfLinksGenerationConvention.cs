@@ -39,8 +39,9 @@ namespace System.Web.OData.Builder.Conventions
 
             if (configuration.GetEditLink() == null)
             {
-                bool derivedTypesDefineNavigationProperty = model.DerivedTypes(configuration.EntityType).Any(e => e.NavigationProperties.Any());
-                
+                bool derivedTypesDefineNavigationProperty = model.DerivedTypes(configuration.EntityType)
+                    .OfType<EntityTypeConfiguration>().Any(e => e.NavigationProperties.Any());
+
                 // generate links with cast if any of the derived types define a navigation property
                 if (derivedTypesDefineNavigationProperty)
                 {

@@ -24,7 +24,7 @@ namespace System.Web.OData.Builder
         private static readonly List<IConvention> _conventions = new List<IConvention>
         {
             // type and property conventions (ordering is important here).
-            new AbstractEntityTypeDiscoveryConvention(),
+            new AbstractTypeDiscoveryConvention(),
             new DataContractAttributeEdmTypeConvention(),
             new NotMappedAttributeConvention(), // NotMappedAttributeConvention has to run before EntityKeyConvention
             new DataMemberAttributeEdmPropertyConvention(),
@@ -283,7 +283,7 @@ namespace System.Web.OData.Builder
             return _ignoredTypes.Contains(type);
         }
 
-        // patch up the base type for all entities that don't have any yet.
+        // patch up the base type for all types that don't have any yet.
         internal void DiscoverInheritanceRelationships()
         {
             Dictionary<Type, EntityTypeConfiguration> entityMap = StructuralTypes.OfType<EntityTypeConfiguration>().ToDictionary(e => e.ClrType);
@@ -310,6 +310,26 @@ namespace System.Web.OData.Builder
                         }
 
                         entity.DerivesFrom(baseEntityType);
+                        break;
+                    }
+
+                    baseClrType = baseClrType.BaseType;
+                }
+            }
+
+            Dictionary<Type, ComplexTypeConfiguration> complexMap =
+                StructuralTypes.OfType<ComplexTypeConfiguration>().ToDictionary(e => e.ClrType);
+            foreach (ComplexTypeConfiguration complex in
+                StructuralTypes.OfType<ComplexTypeConfiguration>().Where(e => !e.BaseTypeConfigured))
+            {
+                Type baseClrType = complex.ClrType.BaseType;
+                while (baseClrType != null)
+                {
+                    ComplexTypeConfiguration baseComplexType;
+                    if (complexMap.TryGetValue(baseClrType, out baseComplexType))
+                    {
+                        RemoveBaseTypeProperties(complex, baseComplexType);
+                        complex.DerivesFrom(baseComplexType);
                         break;
                     }
 
@@ -346,33 +366,64 @@ namespace System.Web.OData.Builder
             }
         }
 
-        // remove base type properties from the derived types.
-        internal void RemoveBaseTypeProperties(EntityTypeConfiguration derivedEntity, EntityTypeConfiguration baseEntity)
+        internal void MapDerivedTypes(ComplexTypeConfiguration complexType)
         {
-            IEnumerable<EntityTypeConfiguration> typesToLift = new[] { derivedEntity }.Concat(this.DerivedTypes(derivedEntity));
+            HashSet<Type> visitedComplexTypes = new HashSet<Type>();
 
-            foreach (PropertyConfiguration property in baseEntity.Properties.Concat(baseEntity.DerivedProperties()))
+            Queue<ComplexTypeConfiguration> complexTypeToBeVisited = new Queue<ComplexTypeConfiguration>();
+            complexTypeToBeVisited.Enqueue(complexType);
+
+            // populate all the derived complex types
+            while (complexTypeToBeVisited.Count != 0)
             {
-                foreach (EntityTypeConfiguration entity in typesToLift)
+                ComplexTypeConfiguration baseComplexType = complexTypeToBeVisited.Dequeue();
+                visitedComplexTypes.Add(baseComplexType.ClrType);
+
+                List<Type> derivedTypes;
+                if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(baseComplexType.ClrType, out derivedTypes))
                 {
-                    PropertyConfiguration derivedPropertyToRemove = entity.Properties.SingleOrDefault(
+                    foreach (Type derivedType in derivedTypes)
+                    {
+                        if (!visitedComplexTypes.Contains(derivedType) && !IsIgnoredType(derivedType))
+                        {
+                            ComplexTypeConfiguration derivedComplexType = AddComplexType(derivedType);
+                            complexTypeToBeVisited.Enqueue(derivedComplexType);
+                        }
+                    }
+                }
+            }
+        }
+
+        // remove the base type properties from the derived types.
+        internal void RemoveBaseTypeProperties(StructuralTypeConfiguration derivedStructrualType,
+            StructuralTypeConfiguration baseStructuralType)
+        {
+            IEnumerable<StructuralTypeConfiguration> typesToLift = new[] { derivedStructrualType }
+                .Concat(this.DerivedTypes(derivedStructrualType));
+
+            foreach (PropertyConfiguration property in baseStructuralType.Properties
+                .Concat(baseStructuralType.DerivedProperties()))
+            {
+                foreach (StructuralTypeConfiguration structuralType in typesToLift)
+                {
+                    PropertyConfiguration derivedPropertyToRemove = structuralType.Properties.SingleOrDefault(
                         p => p.PropertyInfo.Name == property.PropertyInfo.Name);
                     if (derivedPropertyToRemove != null)
                     {
-                        entity.RemoveProperty(derivedPropertyToRemove.PropertyInfo);
+                        structuralType.RemoveProperty(derivedPropertyToRemove.PropertyInfo);
                     }
                 }
             }
 
-            foreach (PropertyInfo ignoredProperty in baseEntity.IgnoredProperties())
+            foreach (PropertyInfo ignoredProperty in baseStructuralType.IgnoredProperties())
             {
-                foreach (EntityTypeConfiguration entity in typesToLift)
+                foreach (StructuralTypeConfiguration structuralType in typesToLift)
                 {
-                    PropertyConfiguration derivedPropertyToRemove = entity.Properties.SingleOrDefault(
+                    PropertyConfiguration derivedPropertyToRemove = structuralType.Properties.SingleOrDefault(
                         p => p.PropertyInfo.Name == ignoredProperty.Name);
                     if (derivedPropertyToRemove != null)
                     {
-                        entity.RemoveProperty(derivedPropertyToRemove.PropertyInfo);
+                        structuralType.RemoveProperty(derivedPropertyToRemove.PropertyInfo);
                     }
                 }
             }
@@ -389,52 +440,88 @@ namespace System.Web.OData.Builder
                                                                             .ToArray();
 
             ReconfigureEntityTypesAsComplexType(misconfiguredEntityTypes);
+
+            DiscoverInheritanceRelationships();
         }
 
         private void ReconfigureEntityTypesAsComplexType(EntityTypeConfiguration[] misconfiguredEntityTypes)
         {
-            IEnumerable<EntityTypeConfiguration> actualEntityTypes = StructuralTypes
-                                                                            .Except(misconfiguredEntityTypes)
-                                                                            .OfType<EntityTypeConfiguration>();
+            IList<EntityTypeConfiguration> actualEntityTypes =
+                StructuralTypes.Except(misconfiguredEntityTypes).OfType<EntityTypeConfiguration>().ToList();
 
+            HashSet<EntityTypeConfiguration> visitedEntityType = new HashSet<EntityTypeConfiguration>();
             foreach (EntityTypeConfiguration misconfiguredEntityType in misconfiguredEntityTypes)
             {
-                RemoveStructuralType(misconfiguredEntityType.ClrType);
+                if (visitedEntityType.Contains(misconfiguredEntityType))
+                {
+                    continue;
+                }
+
+                // If one of the base types is already configured as entity type, we should keep this type as entity type.
+                IEnumerable<EntityTypeConfiguration> basedTypes = misconfiguredEntityType
+                    .BaseTypes().OfType<EntityTypeConfiguration>();
+                if (actualEntityTypes.Any(e => basedTypes.Any(a => a.ClrType == e.ClrType)))
+                {
+                    visitedEntityType.Add(misconfiguredEntityType);
+                    continue;
+                }
+
+                // Make sure to remove current type and all the derived types
+                IList<EntityTypeConfiguration> thisAndDerivedTypes = this.DerivedTypes(misconfiguredEntityType)
+                    .Concat(new[] { misconfiguredEntityType }).OfType<EntityTypeConfiguration>().ToList();
+                foreach (EntityTypeConfiguration subEnityType in thisAndDerivedTypes)
+                {
+                    if (actualEntityTypes.Any(e => e.ClrType == subEnityType.ClrType))
+                    {
+                        throw Error.InvalidOperation(SRResources.CannotReconfigEntityTypeAsComplexType,
+                            misconfiguredEntityType.ClrType.FullName, subEnityType.ClrType.FullName);
+                    }
+
+                    RemoveStructuralType(subEnityType.ClrType);
+                }
 
                 // this is a wrongly inferred type. so just ignore any pending configuration from it.
                 AddComplexType(misconfiguredEntityType.ClrType);
 
-                foreach (EntityTypeConfiguration entityToBePatched in actualEntityTypes)
+                foreach (EntityTypeConfiguration subEnityType in thisAndDerivedTypes)
                 {
-                    NavigationPropertyConfiguration[] propertiesToBeRemoved = entityToBePatched
-                                                                            .NavigationProperties
-                                                                            .Where(navigationProperty => navigationProperty.RelatedClrType == misconfiguredEntityType.ClrType)
-                                                                            .ToArray();
-                    foreach (NavigationPropertyConfiguration propertyToBeRemoved in propertiesToBeRemoved)
+                    visitedEntityType.Add(subEnityType);
+
+                    foreach (EntityTypeConfiguration entityToBePatched in actualEntityTypes)
                     {
-                        string propertyNameAlias = propertyToBeRemoved.Name;
-                        PropertyConfiguration propertyConfiguration;
+                        NavigationPropertyConfiguration[] propertiesToBeRemoved = entityToBePatched
+                            .NavigationProperties
+                            .Where(navigationProperty => navigationProperty.RelatedClrType == subEnityType.ClrType)
+                            .ToArray();
 
-                        entityToBePatched.RemoveProperty(propertyToBeRemoved.PropertyInfo);
-
-                        if (propertyToBeRemoved.Multiplicity == EdmMultiplicity.Many)
+                        foreach (NavigationPropertyConfiguration propertyToBeRemoved in propertiesToBeRemoved)
                         {
-                            propertyConfiguration = entityToBePatched.AddCollectionProperty(propertyToBeRemoved.PropertyInfo);
+                            string propertyNameAlias = propertyToBeRemoved.Name;
+                            PropertyConfiguration propertyConfiguration;
+
+                            entityToBePatched.RemoveProperty(propertyToBeRemoved.PropertyInfo);
+
+                            if (propertyToBeRemoved.Multiplicity == EdmMultiplicity.Many)
+                            {
+                                propertyConfiguration =
+                                    entityToBePatched.AddCollectionProperty(propertyToBeRemoved.PropertyInfo);
+                            }
+                            else
+                            {
+                                propertyConfiguration =
+                                    entityToBePatched.AddComplexProperty(propertyToBeRemoved.PropertyInfo);
+                            }
+
+                            Contract.Assert(propertyToBeRemoved.AddedExplicitly == false);
+
+                            // The newly added property must be marked as added implicitly. This can make sure the property
+                            // conventions can be re-applied to the new property.
+                            propertyConfiguration.AddedExplicitly = false;
+
+                            ReapplyPropertyConvention(propertyConfiguration, entityToBePatched);
+
+                            propertyConfiguration.Name = propertyNameAlias;
                         }
-                        else
-                        {
-                            propertyConfiguration = entityToBePatched.AddComplexProperty(propertyToBeRemoved.PropertyInfo);
-                        }
-
-                        Contract.Assert(propertyToBeRemoved.AddedExplicitly == false);
-
-                        // The newly added property must be marked as added implicitly. This can make sure the property
-                        // conventions can be re-applied to the new property.
-                        propertyConfiguration.AddedExplicitly = false;
-
-                        ReapplyPropertyConvention(propertyConfiguration, entityToBePatched);
-
-                        propertyConfiguration.Name = propertyNameAlias;
                     }
                 }
             }
@@ -558,6 +645,8 @@ namespace System.Web.OData.Builder
                     }
                 }
             }
+
+            MapDerivedTypes(complexType);
         }
 
         private void MapStructuralProperty(StructuralTypeConfiguration type, PropertyInfo property, PropertyKind propertyKind, bool isCollection)
@@ -682,6 +771,37 @@ namespace System.Web.OData.Builder
                 return true;
             }
 
+            // If one of the base types is configured as complex type, the type of this property
+            // should be configured as complex type too.
+            Type baseType = propertyType.BaseType;
+            while (baseType != null && baseType != typeof(object))
+            {
+                IEdmTypeConfiguration baseMappedType = GetStructuralTypeOrNull(baseType);
+                if (baseMappedType != null)
+                {
+                    if (baseMappedType is ComplexTypeConfiguration)
+                    {
+                        propertyKind = PropertyKind.Complex;
+                        return true;
+                    }
+                }
+
+                baseType = baseType.BaseType;
+            }
+
+            // refer the Edm type from the derived types
+            PropertyKind referedPropertyKind = PropertyKind.Navigation;
+            if (InferEdmTypeFromDerivedTypes(propertyType, ref referedPropertyKind))
+            {
+                if (referedPropertyKind == PropertyKind.Complex)
+                {
+                    ReconfigInferedEntityTypeAsComplexType(propertyType);
+                }
+
+                propertyKind = referedPropertyKind;
+                return true;
+            }
+
             if (TypeHelper.IsEnum(propertyType))
             {
                 propertyKind = PropertyKind.Enum;
@@ -690,6 +810,109 @@ namespace System.Web.OData.Builder
 
             propertyKind = PropertyKind.Navigation;
             return false;
+        }
+
+        internal void ReconfigInferedEntityTypeAsComplexType(Type propertyType)
+        {
+            HashSet<Type> visitedTypes = new HashSet<Type>();
+
+            Queue<Type> typeToBeVisited = new Queue<Type>();
+            typeToBeVisited.Enqueue(propertyType);
+
+            IList<EntityTypeConfiguration> foundMappedTypes = new List<EntityTypeConfiguration>();
+            while (typeToBeVisited.Count != 0)
+            {
+                Type currentType = typeToBeVisited.Dequeue();
+                visitedTypes.Add(currentType);
+
+                List<Type> derivedTypes;
+                if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(currentType, out derivedTypes))
+                {
+                    foreach (Type derivedType in derivedTypes)
+                    {
+                        if (!visitedTypes.Contains(derivedType))
+                        {
+                            StructuralTypeConfiguration structuralType = StructuralTypes.Except(_explicitlyAddedTypes)
+                                .FirstOrDefault(c => c.ClrType == derivedType);
+
+                            if (structuralType != null && structuralType.Kind == EdmTypeKind.Entity)
+                            {
+                                foundMappedTypes.Add((EntityTypeConfiguration)structuralType);
+                            }
+
+                            typeToBeVisited.Enqueue(derivedType);
+                        }
+                    }
+                }
+            }
+
+            if (foundMappedTypes.Any())
+            {
+                ReconfigureEntityTypesAsComplexType(foundMappedTypes.ToArray());
+            }
+        }
+
+        internal bool InferEdmTypeFromDerivedTypes(Type propertyType, ref PropertyKind propertyKind)
+        {
+            HashSet<Type> visitedTypes = new HashSet<Type>();
+
+            Queue<Type> typeToBeVisited = new Queue<Type>();
+            typeToBeVisited.Enqueue(propertyType);
+
+            IList<StructuralTypeConfiguration> foundMappedTypes = new List<StructuralTypeConfiguration>();
+            while (typeToBeVisited.Count != 0)
+            {
+                Type currentType = typeToBeVisited.Dequeue();
+                visitedTypes.Add(currentType);
+
+                List<Type> derivedTypes;
+                if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(currentType, out derivedTypes))
+                {
+                    foreach (Type derivedType in derivedTypes)
+                    {
+                        if (!visitedTypes.Contains(derivedType))
+                        {
+                            StructuralTypeConfiguration structuralType =
+                                _explicitlyAddedTypes.FirstOrDefault(c => c.ClrType == derivedType);
+
+                            if (structuralType != null)
+                            {
+                                foundMappedTypes.Add(structuralType);
+                            }
+
+                            typeToBeVisited.Enqueue(derivedType);
+                        }
+                    }
+                }
+            }
+
+            if (!foundMappedTypes.Any())
+            {
+                return false;
+            }
+
+            IEnumerable<EntityTypeConfiguration> foundMappedEntityType =
+                foundMappedTypes.OfType<EntityTypeConfiguration>().ToList();
+            IEnumerable<ComplexTypeConfiguration> foundMappedComplexType =
+                foundMappedTypes.OfType<ComplexTypeConfiguration>().ToList();
+
+            if (!foundMappedEntityType.Any())
+            {
+                propertyKind = PropertyKind.Complex;
+                return true;
+            }
+            else if (!foundMappedComplexType.Any())
+            {
+                propertyKind = PropertyKind.Navigation;
+                return true;
+            }
+            else
+            {
+                throw Error.InvalidOperation(SRResources.CannotInferEdmType,
+                    propertyType.FullName,
+                    String.Join(",", foundMappedEntityType.Select(e => e.ClrType.FullName)),
+                    String.Join(",", foundMappedComplexType.Select(e => e.ClrType.FullName)));
+            }
         }
 
         // the convention model builder MapTypes() method might have went through deep object graphs and added a bunch of types
@@ -730,15 +953,31 @@ namespace System.Web.OData.Builder
                 }
 
                 // all derived types and the base type are also reachable
-                EntityTypeConfiguration currentEntityType = currentType as EntityTypeConfiguration;
-                if (currentEntityType != null)
+                if (currentType.Kind == EdmTypeKind.Entity)
                 {
+                    EntityTypeConfiguration currentEntityType = (EntityTypeConfiguration)currentType;
                     if (currentEntityType.BaseType != null && !visitedTypes.Contains(currentEntityType.BaseType))
                     {
                         reachableTypes.Enqueue(currentEntityType.BaseType);
                     }
 
                     foreach (EntityTypeConfiguration derivedType in this.DerivedTypes(currentEntityType))
+                    {
+                        if (!visitedTypes.Contains(derivedType))
+                        {
+                            reachableTypes.Enqueue(derivedType);
+                        }
+                    }
+                }
+                else if (currentType.Kind == EdmTypeKind.Complex)
+                {
+                    ComplexTypeConfiguration currentComplexType = (ComplexTypeConfiguration)currentType;
+                    if (currentComplexType.BaseType != null && !visitedTypes.Contains(currentComplexType.BaseType))
+                    {
+                        reachableTypes.Enqueue(currentComplexType.BaseType);
+                    }
+
+                    foreach (ComplexTypeConfiguration derivedType in this.DerivedTypes(currentComplexType))
                     {
                         if (!visitedTypes.Contains(derivedType))
                         {

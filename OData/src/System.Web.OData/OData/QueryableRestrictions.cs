@@ -5,7 +5,8 @@ using System.Web.OData.Builder;
 namespace System.Web.OData
 {
     /// <summary>
-    /// Represents a queryable restriction on an EDM property, including nonfilterable, unsortable, not navigable, not expandable.
+    /// Represents a queryable restriction on an EDM property, including nonfilterable, unsortable,
+    /// not navigable, not expandable, not countable.
     /// </summary>
     public class QueryableRestrictions
     {
@@ -26,6 +27,7 @@ namespace System.Web.OData
             Unsortable = propertyConfiguration.Unsortable;
             NotNavigable = propertyConfiguration.NotNavigable;
             NotExpandable = propertyConfiguration.NotExpandable;
+            NotCountable = propertyConfiguration.NotCountable;
         }
 
         /// <summary>
@@ -47,5 +49,10 @@ namespace System.Web.OData
         /// Gets or sets whether the property is not expandable. default is false.
         /// </summary>
         public bool NotExpandable { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the property is not countable. default is false.
+        /// </summary>
+        public bool NotCountable { get; set; }
     }
 }

@@ -5,7 +5,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Properties;
-using Microsoft.OData.Core;
+using System.Web.OData.Query.Validators;
 using Microsoft.OData.Core.UriParser;
 
 namespace System.Web.OData.Query
@@ -43,6 +43,7 @@ namespace System.Web.OData.Query
 
             Context = context;
             RawValue = rawValue;
+            Validator = new CountQueryValidator();
             _queryOptionParser = queryOptionParser;
         }
 
@@ -61,6 +62,7 @@ namespace System.Web.OData.Query
 
             Context = context;
             RawValue = rawValue;
+            Validator = new CountQueryValidator();
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,
@@ -92,6 +94,30 @@ namespace System.Web.OData.Query
 
                 Contract.Assert(_value.HasValue);
                 return _value.Value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the $count query validator.
+        /// </summary>
+        public CountQueryValidator Validator { get; set; }
+
+        /// <summary>
+        /// Validate the count query based on the given <paramref name="validationSettings"/>.
+        /// It throws an ODataException if validation failed.
+        /// </summary>
+        /// <param name="validationSettings">The <see cref="ODataValidationSettings"/> instance
+        /// which contains all the validation settings.</param>
+        public void Validate(ODataValidationSettings validationSettings)
+        {
+            if (validationSettings == null)
+            {
+                throw Error.ArgumentNull("validationSettings");
+            }
+
+            if (Validator != null)
+            {
+                Validator.Validate(this, validationSettings);
             }
         }
 

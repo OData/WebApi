@@ -286,7 +286,13 @@ namespace System.Web.OData.Formatter
             QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(edmProperty, edmModel);
             return annotation == null ? false : annotation.Restrictions.NotExpandable;
         }
-        
+
+        public static bool IsNotCountable(IEdmProperty edmProperty, IEdmModel edmModel)
+        {
+            QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(edmProperty, edmModel);
+            return annotation == null ? false : annotation.Restrictions.NotCountable;
+        }
+
         private static QueryableRestrictionsAnnotation GetPropertyRestrictions(IEdmProperty edmProperty, IEdmModel edmModel)
         {
             Contract.Assert(edmProperty != null);

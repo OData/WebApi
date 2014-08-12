@@ -45,9 +45,10 @@ namespace System.Web.OData
 
             ElementClrType = elementClrType;
             Model = model;
+            Path = path;
             NavigationSource = GetNavigationSource(Model, ElementType, path);
         }
-        
+
         /// <summary>
         /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" />, element EDM type,
         /// and <see cref="ODataPath" />.
@@ -68,6 +69,7 @@ namespace System.Web.OData
 
             Model = model;
             ElementType = elementType;
+            Path = path;
             NavigationSource = GetNavigationSource(Model, ElementType, path);
         }
 
@@ -95,11 +97,16 @@ namespace System.Web.OData
         /// Gets the <see cref="IEdmNavigationSource"/> that contains the element.
         /// </summary>
         public IEdmNavigationSource NavigationSource { get; private set; }
-        
+
         /// <summary>
         /// Gets the CLR type of the element.
         /// </summary>
         public Type ElementClrType { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="ODataPath"/>.
+        /// </summary>
+        public ODataPath Path { get; private set; }
 
         private static IEdmNavigationSource GetNavigationSource(IEdmModel model, IEdmType elementType, ODataPath odataPath)
         {

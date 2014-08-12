@@ -1240,6 +1240,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; cannot be used for $count..
+        /// </summary>
+        internal static string NotCountablePropertyUsedForCount {
+            get {
+                return ResourceManager.GetString("NotCountablePropertyUsedForCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The property &apos;{0}&apos; cannot be used in the $expand query option..
         /// </summary>
         internal static string NotExpandablePropertyUsedInExpand {

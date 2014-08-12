@@ -255,6 +255,12 @@ namespace System.Web.OData.Builder.Conventions
             prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "Category");
             Assert.True(prop.NotNavigable);
             Assert.True(prop.NotExpandable);
+
+            prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "CountableProperty");
+            Assert.False(prop.NotCountable);
+
+            prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "NotCountableProperty");
+            Assert.True(prop.NotCountable);
         }
 
         [Fact]
@@ -265,6 +271,7 @@ namespace System.Web.OData.Builder.Conventions
             entityTypeConf.AddProperty(typeof(ProductWithFilterSortable).GetProperty("NonFilterableProperty"));
             entityTypeConf.AddProperty(typeof(ProductWithFilterSortable).GetProperty("UnsortableProperty"));
             entityTypeConf.AddNavigationProperty(typeof(ProductWithFilterSortable).GetProperty("Category"), EdmMultiplicity.One);
+            entityTypeConf.AddCollectionProperty(typeof(ProductWithFilterSortable).GetProperty("NotCountableProperty"));
 
             var model = modelBuilder.GetEdmModel();
 
@@ -277,6 +284,9 @@ namespace System.Web.OData.Builder.Conventions
             prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "Category");
             Assert.False(prop.NotNavigable);
             Assert.False(prop.NotExpandable);
+
+            prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "NotCountableProperty");
+            Assert.False(prop.NotCountable);
         }
 
         [Fact]
@@ -1832,6 +1842,11 @@ namespace System.Web.OData.Builder.Conventions
 
         public string Name { get; set; }
 
+        public IEnumerable<DateTimeOffset> CountableProperty { get; set; }
+
+        [NotCountable]
+        public IEnumerable<DateTimeOffset> NotCountableProperty { get; set; }
+        
         [NonFilterable]
         public string NonFilterableProperty { get; set; }
 

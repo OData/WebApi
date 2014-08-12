@@ -667,6 +667,9 @@
   <data name="NotNavigablePropertyUsedInNavigation" xml:space="preserve">
     <value>The property '{0}' cannot be used for navigation.</value>
   </data>
+  <data name="NotCountablePropertyUsedForCount" xml:space="preserve">
+    <value>The property '{0}' cannot be used for $count.</value>
+  </data>
   <data name="EntityTypeDoesntHaveKeyDefined" xml:space="preserve">
     <value>The entity '{0}' does not have a key defined.</value>
   </data>

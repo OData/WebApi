@@ -82,11 +82,12 @@ namespace System.Web.OData.Builder
         public bool AddedExplicitly { get; set; }
 
         /// <summary>
-        /// Gets whether the property is restricted, i.e. nonfilterable, unsortable, not navigable, or not expandable.
+        /// Gets whether the property is restricted, i.e. nonfilterable, unsortable, not navigable,
+        /// not expandable, or not countable.
         /// </summary>
         public bool IsRestricted
         {
-            get { return NonFilterable || Unsortable || NotNavigable || NotExpandable; }
+            get { return NonFilterable || Unsortable || NotNavigable || NotExpandable || NotCountable; }
         }
 
         /// <summary>
@@ -108,6 +109,11 @@ namespace System.Web.OData.Builder
         /// Gets or sets whether the property is not expandable. default is false.
         /// </summary>
         public bool NotExpandable { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the property is not countable. default is false.
+        /// </summary>
+        public bool NotCountable { get; set; }
 
         /// <summary>
         /// Sets the property as nonfilterable.
@@ -180,6 +186,24 @@ namespace System.Web.OData.Builder
         public PropertyConfiguration IsExpandable()
         {
             NotExpandable = false;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the property as not countable.
+        /// </summary>
+        public PropertyConfiguration IsNotCountable()
+        {
+            NotCountable = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the property as countable.
+        /// </summary>
+        public PropertyConfiguration IsCountable()
+        {
+            NotCountable = false;
             return this;
         }
     }

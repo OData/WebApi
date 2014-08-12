@@ -39,6 +39,7 @@ namespace System.Web.OData.Builder
             new UnsortableAttributeEdmPropertyConvention(),
             new NotNavigableAttributeEdmPropertyConvention(),
             new NotExpandableAttributeEdmPropertyConvention(),
+            new NotCountableAttributeEdmPropertyConvention(),
 
             // INavigationSourceConvention's
             new SelfLinksGenerationConvention(),

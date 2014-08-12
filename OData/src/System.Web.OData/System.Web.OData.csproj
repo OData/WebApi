@@ -82,6 +82,7 @@
     <Compile Include="OData\Builder\ContainmentPathBuilder.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ComplexTypeAttributeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\NotCountableAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\TimestampAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\INavigationSourceConvention.cs" />
     <Compile Include="OData\Builder\NavigationSourceAndAnnotations.cs" />
@@ -107,7 +108,9 @@
     <Compile Include="OData\Formatter\ODataCountMediaTypeMapping.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
+    <Compile Include="OData\Query\NotCountableAttribute.cs" />
     <Compile Include="OData\Query\ParameterAliasNodeTranslator.cs" />
+    <Compile Include="OData\Query\Validators\CountQueryValidator.cs" />
     <Compile Include="OData\RequestPreferenceHelpers.cs" />
     <Compile Include="OData\FunctionImportComparer.cs" />
     <Compile Include="OData\Formatter\Deserialization\EnumDeserializationHelpers.cs" />

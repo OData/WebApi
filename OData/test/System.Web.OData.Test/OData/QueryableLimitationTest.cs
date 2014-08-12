@@ -36,12 +36,14 @@ namespace System.Web.OData
 
             // Can limit sorting and filtering primitive properties
             customers.EntityType.Property(p => p.Name).IsNonFilterable().IsUnsortable();
+            customers.EntityType.CollectionProperty(p => p.Addresses).IsNotCountable();
 
             // Can override the behavior specified by the attributes for primitive properties
             customers.EntityType.Property(p => p.Age).IsFilterable().IsSortable();
+            customers.EntityType.CollectionProperty(p => p.Numbers).IsCountable();
 
             // Can limit on relationships
-            customers.EntityType.HasMany(c => c.Orders).IsNotNavigable().IsNotExpandable();
+            customers.EntityType.HasMany(c => c.Orders).IsNotNavigable().IsNotExpandable().IsNotCountable();
 
             return builder.GetEdmModel();
         }
@@ -171,6 +173,94 @@ namespace System.Web.OData
                 responseString);
         }
 
+        [Theory]
+        [InlineData("QueryLimitCustomers(1)/Addresses?$count=true")]
+        [InlineData("QueryLimitCustomers(1)/Addresses/$count")]
+        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/Addresses?$count=true")]
+        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/Addresses/$count")]
+        public void QueryableLimitation_NotCountableFromModelTest(string uri)
+        {
+            // Arrange
+            string requestUri = BaseAddress + "/odata/" + uri;
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.False(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Contains("The query specified in the URI is not valid. The property 'Addresses' cannot be used for $count.",
+                responseString);
+        }
+
+        [Theory]
+        [InlineData("QueryLimitCustomers(1)/ImportantOrders?$count=true")]
+        [InlineData("QueryLimitCustomers(1)/ImportantOrders/$count")]
+        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/ImportantOrders?$count=true")]
+        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/ImportantOrders/$count")]
+        public void QueryableLimitation_NotCountableFromAttributeTest(string uri)
+        {
+            // Arrange
+            string requestUri = BaseAddress + "/odata/" + uri;
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.False(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Contains("The query specified in the URI is not valid. The property 'ImportantOrders' cannot be used for $count.",
+                responseString);
+        }
+
+        [Theory]
+        [InlineData("QueryLimitCustomers(1)/Numbers?$count=true")]
+        [InlineData("QueryLimitCustomers(1)/Numbers/$count")]
+        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/Numbers?$count=true")]
+        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/Numbers/$count")]
+        public void QueryableLimitation_NotCountableAttributeOverrideByModelTest(string uri)
+        {
+            // Arrange
+            string requestUri = BaseAddress + "/odata/" + uri;
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("QueryLimitCustomers(1)/Notes?$count=true")]
+        [InlineData("QueryLimitCustomers(1)/Notes/$count")]
+        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/Notes?$count=true")]
+        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/Notes/$count")]
+        public void QueryableLimitation_CountNotAllowedInQueryOptionsTest(string uri)
+        {
+            // Arrange
+            string requestUri = BaseAddress + "/odata/" + uri;
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.False(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Contains(
+                "The query specified in the URI is not valid. Query option 'Count' is not allowed. To allow it, " +
+                "set the 'AllowedQueryOptions' property on EnableQueryAttribute or QueryValidationSettings.",
+                responseString);
+        }
+
         // Controller
         public class QueryLimitCustomersController : ODataController
         {
@@ -182,7 +272,17 @@ namespace System.Web.OData
                         LastName = "LastName " + i,
                         Age = 30 + i,
                         Address = "Address " + i,
+                        Addresses = new[] { "Address " + i },
+                        Numbers = new[] { i },
+                        Notes = new[] { "Note " + i },
                         Orders = Enumerable.Range(0, i).Select(j =>
+                            new QueryLimitOrder
+                            {
+                                Id = j,
+                                OrderName = "Order_" + i + "_" + j,
+                                OrderValue = j
+                            }).ToList(),
+                        ImportantOrders = Enumerable.Range(0, i).Select(j =>
                             new QueryLimitOrder
                             {
                                 Id = j,
@@ -195,6 +295,30 @@ namespace System.Web.OData
             public IHttpActionResult Get()
             {
                 return Ok(customers);
+            }
+
+            [EnableQuery]
+            public IHttpActionResult GetAddresses(int key)
+            {
+                return Ok(customers.Single(customer => customer.Id == key).Addresses);
+            }
+
+            [EnableQuery]
+            public IHttpActionResult GetNumbers(int key)
+            {
+                return Ok(customers.Single(customer => customer.Id == key).Numbers);
+            }
+
+            [EnableQuery]
+            public IHttpActionResult GetImportantOrders(int key)
+            {
+                return Ok(customers.Single(customer => customer.Id == key).ImportantOrders);
+            }
+
+            [EnableQuery(AllowedQueryOptions = AllowedQueryOptions.All ^ AllowedQueryOptions.Count)]
+            public IHttpActionResult GetNotes(int key)
+            {
+                return Ok(customers.Single(customer => customer.Id == key).Notes);
             }
         }
 
@@ -216,7 +340,17 @@ namespace System.Web.OData
             [NotNavigable]
             public string Address { get; set; }
 
+            public IEnumerable<string> Addresses { get; set; }
+
+            [NotCountable]
+            public int[] Numbers { get; set; }
+
+            public string[] Notes { get; set; }
+
             public ICollection<QueryLimitOrder> Orders { get; set; }
+
+            [NotCountable]
+            public IList<QueryLimitOrder> ImportantOrders { get; set; }
         }
 
         public class QueryLimitOrder
@@ -224,6 +358,11 @@ namespace System.Web.OData
             public int Id { get; set; }
             public string OrderName { get; set; }
             public decimal OrderValue { get; set; }
+        }
+
+        public class DerivedQueryLimitCustomer : QueryLimitCustomer
+        {
+            public string DerivedName { get; set; }
         }
     }
 }

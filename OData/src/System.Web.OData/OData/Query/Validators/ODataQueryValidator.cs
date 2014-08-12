@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Web.Http;
+using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 
@@ -53,9 +54,14 @@ namespace System.Web.OData.Query.Validators
                 options.Filter.Validate(validationSettings);
             }
 
-            if (options.Count != null)
+            if (options.Count != null || ODataCountMediaTypeMapping.IsCountRequest(options.Request))
             {
                 ValidateQueryOptionAllowed(AllowedQueryOptions.Count, validationSettings.AllowedQueryOptions);
+
+                if (options.Count != null)
+                {
+                    options.Count.Validate(validationSettings);
+                }
             }
 
             if (options.RawValues.Expand != null)

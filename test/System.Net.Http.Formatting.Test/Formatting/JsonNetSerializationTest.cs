@@ -57,7 +57,10 @@ namespace System.Net.Http.Formatting
                     { ConsoleColor.DarkCyan, "3" },
                     { new DateTimeOffset(1999, 5, 27, 4, 34, 45, TimeSpan.Zero), "\"1999-05-27T04:34:45+00:00\"" },
                     { new TimeSpan(5, 30, 0), "\"05:30:00\"" },
-                    { new Uri("http://www.bing.com"), @"""http://www.bing.com/""" },
+                    { new Uri("http://www.bing.com"), @"""http://www.bing.com""" },
+                    { new Uri("http://www.bing.com/"), @"""http://www.bing.com/""" },
+                    { new Uri("http://www.bing.com/foo"), @"""http://www.bing.com/foo""" },
+                    { new Uri("http://www.bing.com/foo/"), @"""http://www.bing.com/foo/""" },
                     { new Guid("4ed1cd44-11d7-4b27-b623-0b8b553c8906"), "\"4ed1cd44-11d7-4b27-b623-0b8b553c8906\"" },
 
                     // Structs
@@ -120,7 +123,7 @@ namespace System.Net.Http.Formatting
                 {
                     // Null
                     { null, "null", typeof(POCOType) },
-                    { null, "null", typeof(JToken) },
+                    { JValue.CreateNull(), "null", typeof(JToken) },
 
                     // Nullables
                     { new int?(), "null", typeof(int?) },

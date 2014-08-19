@@ -1370,6 +1370,7 @@ namespace System.Web.OData.Routing
         [InlineData("RoutingCustomers(1)/ID/$value/$value/something")]
         [InlineData("RoutingCustomers(1)/ID/$value/something")]
         [InlineData("RoutingCustomers(1)/ID/$value/GetSpecialGuid()")]
+        [InlineData("EnumCustomers(1)/Color/$value/something")]
         public void DefaultODataPathHandler_ThrowsIfDollarValueIsNotTheLastSegment(string path)
         {
             // Arrange & Act & Assert

@@ -18,6 +18,7 @@ namespace Microsoft.AspNet.Facebook
         private readonly ConcurrentDictionary<object, object> _properties = new ConcurrentDictionary<object, object>();
         private string _appUrl;
         private string _authorizationRedirectPath;
+        private string _cannotCreateCookieRedirectPath;
 
         /// <summary>
         /// Gets or sets the App ID.
@@ -35,7 +36,9 @@ namespace Microsoft.AspNet.Facebook
         public string AppNamespace { get; set; }
 
         /// <summary>
-        /// Gets or sets the URL path that the <see cref="Microsoft.AspNet.Facebook.Authorization.FacebookAuthorizeFilter"/> will redirect to when the user did not grant the required permissions.
+        /// Gets or sets the URL path that the <see cref="Microsoft.AspNet.Facebook.Authorization.FacebookAuthorizeFilter"/> will 
+        /// redirect to when the user did not grant the required permissions. If value is not set it will result in a redirection
+        /// to Facebook's home page.
         /// </summary>
         public string AuthorizationRedirectPath
         {
@@ -45,12 +48,27 @@ namespace Microsoft.AspNet.Facebook
             }
             set
             {
-                // Check for '~/' prefix while allowing null or empty value to be set.
-                if (!String.IsNullOrEmpty(value) && !value.StartsWith("~/", StringComparison.Ordinal))
-                {
-                    throw new ArgumentException(Resources.InvalidAuthorizationRedirectPath, "value");
-                }
+                EnsureRedirectPath(value, "AuthorizationRedirectPath");
                 _authorizationRedirectPath = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the URL path that the <see cref="Microsoft.AspNet.Facebook.Authorization.FacebookAuthorizeFilter"/> will 
+        /// redirect to when the we determine that we are unable to create cookies. If value is not set it will result in a 
+        /// redirection to Facebook's home page.
+        /// </summary>
+        public string CannotCreateCookieRedirectPath
+        {
+            get
+            {
+                return _cannotCreateCookieRedirectPath;
+            }
+            set
+            {
+                EnsureRedirectPath(value, "CannotCreateCookieRedirectPath");
+
+                _cannotCreateCookieRedirectPath = value;
             }
         }
 
@@ -126,6 +144,22 @@ namespace Microsoft.AspNet.Facebook
             AppNamespace = ConfigurationManager.AppSettings[FacebookAppSettingKeys.AppNamespace];
             AppUrl = ConfigurationManager.AppSettings[FacebookAppSettingKeys.AppUrl];
             AuthorizationRedirectPath = ConfigurationManager.AppSettings[FacebookAppSettingKeys.AuthorizationRedirectPath];
+            CannotCreateCookieRedirectPath = 
+                ConfigurationManager.AppSettings[FacebookAppSettingKeys.CannotCreateCookiesRedirectPath];
+        }
+
+        private static void EnsureRedirectPath(string value, string redirectParameterName)
+        {
+            // Check for '~/' prefix while allowing null or empty value to be set.
+            if (!String.IsNullOrEmpty(value) && !value.StartsWith("~/", StringComparison.Ordinal))
+            {
+                throw new ArgumentException(
+                    String.Format(
+                        CultureInfo.CurrentCulture,
+                        Resources.InvalidRedirectPath,
+                        redirectParameterName),
+                    "value");
+            }
         }
 
         private string GetAppUrl()

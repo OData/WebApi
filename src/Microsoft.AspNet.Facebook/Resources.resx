@@ -126,8 +126,8 @@
   <data name="CircularReferenceNotSupported" xml:space="preserve">
     <value>Circular type references are not supported.</value>
   </data>
-  <data name="InvalidAuthorizationRedirectPath" xml:space="preserve">
-    <value>Invalid AuthorizationRedirectPath. The AuthorizationRedirectPath can only be set relative to the AppUrl. Prefix the path with '~/'.</value>
+  <data name="InvalidRedirectPath" xml:space="preserve">
+    <value>Invalid '{0}'. The '{0}' can only be set relative to the AppUrl. Prefix the path with '~/'.</value>
   </data>
   <data name="MissingRequiredHeader" xml:space="preserve">
     <value>The required header '{0}' is missing.</value>

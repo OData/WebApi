@@ -10,5 +10,6 @@ namespace Microsoft.AspNet.Facebook
         public static readonly string AppNamespace = "Facebook:AppNamespace";
         public static readonly string AppUrl = "Facebook:AppUrl";
         public static readonly string AuthorizationRedirectPath = "Facebook:AuthorizationRedirectPath";
+        public static readonly string CannotCreateCookiesRedirectPath = "Facebook:CannotCreateCookiesRedirectPath";
     }
 }

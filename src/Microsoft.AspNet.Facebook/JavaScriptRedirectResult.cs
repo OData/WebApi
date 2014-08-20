@@ -12,17 +12,21 @@ namespace Microsoft.AspNet.Facebook
     /// </summary>
     public class JavaScriptRedirectResult : ContentResult
     {
+        internal Uri RedirectUrl { get; private set; }
+
         /// <summary>
         /// Creates a JavaScript based redirect <see cref="ActionResult"/>.
         /// </summary>
         /// <param name="redirectUrl">The url to redirect to.</param>
         public JavaScriptRedirectResult(Uri redirectUrl)
         {
+            RedirectUrl = redirectUrl;
+
             ContentType = "text/html";
             Content = String.Format(
                 CultureInfo.InvariantCulture,
                 "<script>window.top.location = '{0}';</script>",
-                HttpUtility.JavaScriptStringEncode(redirectUrl.AbsoluteUri));
+                HttpUtility.JavaScriptStringEncode(RedirectUrl.AbsoluteUri));
         }
     }
 }

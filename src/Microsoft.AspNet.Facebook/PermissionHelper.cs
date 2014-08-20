@@ -73,6 +73,11 @@ namespace Microsoft.AspNet.Facebook
             responseCookies.Add(cookie);
         }
 
+        public static bool RequestedPermissionsCookieExists(HttpRequestBase request)
+        {
+            return request.Cookies.Get(RequestedPermissionCookieName) != null;
+        }
+
         private static IEnumerable<string> GetPermissionsWithStatus(PermissionsStatus permissionsStatus, 
                                                                     PermissionStatus status)
         {

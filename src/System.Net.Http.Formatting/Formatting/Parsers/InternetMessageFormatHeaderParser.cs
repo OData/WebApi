@@ -22,6 +22,7 @@ namespace System.Net.Http.Formatting.Parsers
         private HeaderFieldState _headerState;
         private HttpHeaders _headers;
         private CurrentHeaderFieldStore _currentHeader;
+        private readonly bool _ignoreHeaderValidation;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InternetMessageFormatHeaderParser"/> class.
@@ -29,6 +30,23 @@ namespace System.Net.Http.Formatting.Parsers
         /// <param name="headers">Concrete <see cref="HttpHeaders"/> instance where header fields are added as they are parsed.</param>
         /// <param name="maxHeaderSize">Maximum length of complete header containing all the individual header fields.</param>
         public InternetMessageFormatHeaderParser(HttpHeaders headers, int maxHeaderSize)
+            : this(headers, maxHeaderSize, ignoreHeaderValidation: false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InternetMessageFormatHeaderParser"/> class.
+        /// </summary>
+        /// <param name="headers">
+        /// Concrete <see cref="HttpHeaders"/> instance where header fields are added as they are parsed.
+        /// </param>
+        /// <param name="maxHeaderSize">
+        /// Maximum length of complete header containing all the individual header fields.
+        /// </param>
+        /// <param name="ignoreHeaderValidation">
+        /// Will validate content and names of headers if set to <c>false</c>.
+        /// </param>
+        public InternetMessageFormatHeaderParser(HttpHeaders headers, int maxHeaderSize, bool ignoreHeaderValidation)
         {
             // The minimum length which would be an empty header terminated by CRLF
             if (maxHeaderSize < InternetMessageFormatHeaderParser.MinHeaderSize)
@@ -43,6 +61,7 @@ namespace System.Net.Http.Formatting.Parsers
 
             _headers = headers;
             _maxHeaderSize = maxHeaderSize;
+            _ignoreHeaderValidation = ignoreHeaderValidation;
             _currentHeader = new CurrentHeaderFieldStore();
         }
 
@@ -92,7 +111,8 @@ namespace System.Net.Http.Formatting.Parsers
                     _maxHeaderSize,
                     ref _totalBytesConsumed,
                     _currentHeader,
-                    _headers);
+                    _headers,
+                    _ignoreHeaderValidation);
             }
             catch (Exception)
             {
@@ -111,7 +131,8 @@ namespace System.Net.Http.Formatting.Parsers
             int maximumHeaderLength,
             ref int totalBytesConsumed,
             CurrentHeaderFieldStore currentField,
-            HttpHeaders headers)
+            HttpHeaders headers,
+            bool ignoreHeaderValidation)
         {
             Contract.Assert((bytesReady - bytesConsumed) >= 0, "ParseHeaderFields()|(inputBufferLength - bytesParsed) < 0");
             Contract.Assert(maximumHeaderLength <= 0 || totalBytesConsumed <= maximumHeaderLength, "ParseHeaderFields()|Headers already read exceeds limit.");
@@ -232,7 +253,7 @@ namespace System.Net.Http.Formatting.Parsers
                 case HeaderFieldState.FoldingLine:
                     if (buffer[bytesConsumed] != ' ' && buffer[bytesConsumed] != '\t')
                     {
-                        currentField.CopyTo(headers);
+                        currentField.CopyTo(headers, ignoreHeaderValidation);
                         requestHeaderState = HeaderFieldState.Name;
                         if (bytesConsumed == effectiveMax)
                         {
@@ -293,9 +314,21 @@ namespace System.Net.Http.Formatting.Parsers
             /// Copies current header field to the provided <see cref="HttpHeaders"/> instance.
             /// </summary>
             /// <param name="headers">The headers.</param>
-            public void CopyTo(HttpHeaders headers)
+            /// <param name="ignoreHeaderValidation">Set to false to validate headers</param>
+            public void CopyTo(HttpHeaders headers, bool ignoreHeaderValidation)
             {
-                headers.Add(_name.ToString(), _value.ToString().Trim(CurrentHeaderFieldStore._linearWhiteSpace));
+                var name = _name.ToString();
+                var value = _value.ToString().Trim(CurrentHeaderFieldStore._linearWhiteSpace);
+
+                if (ignoreHeaderValidation)
+                {
+                    headers.TryAddWithoutValidation(name, value);
+                }
+                else
+                {
+                    headers.Add(name, value);
+                }
+
                 Clear();
             }
 

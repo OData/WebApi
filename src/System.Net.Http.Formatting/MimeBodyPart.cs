@@ -37,7 +37,10 @@ namespace System.Net.Http
             _parentContent = parentContent;
             Segments = new List<ArraySegment<byte>>(2);
             _headers = FormattingUtilities.CreateEmptyContentHeaders();
-            HeaderParser = new InternetMessageFormatHeaderParser(_headers, maxBodyPartHeaderSize);
+            HeaderParser = new InternetMessageFormatHeaderParser(
+                _headers, 
+                maxBodyPartHeaderSize, 
+                ignoreHeaderValidation: true);
         }
 
         /// <summary>

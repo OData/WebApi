@@ -42,13 +42,18 @@ namespace System.Net.Http
 
         private static HttpContent CreateContent(string boundary, params string[] bodyEntity)
         {
+            return CreateContentWithContentType(boundary, DefaultContentType, bodyEntity);
+        }
+
+        private static HttpContent CreateContentWithContentType(string boundary, string partContentType, params string[] bodyEntity)
+        {
             List<string> entities = new List<string>();
             int cnt = 0;
             foreach (var body in bodyEntity)
             {
                 byte[] header = InternetMessageFormatHeaderParserTests.CreateBuffer(
                     String.Format("N{0}: V{0}", cnt),
-                    String.Format("Content-Type: {0}", DefaultContentType),
+                    String.Format("Content-Type: {0}", partContentType),
                     String.Format("Content-Disposition: {0}; FileName=\"N{1}\"", DefaultContentDisposition, cnt));
                 entities.Add(Encoding.UTF8.GetString(header) + body);
                 cnt++;
@@ -163,6 +168,40 @@ namespace System.Net.Http
             successContent = CreateContent(boundary, "A", "B", "C");
             result = successContent.ReadAsMultipartAsync(new MultipartMemoryStreamProvider(), 1024).Result;
             Assert.Equal(3, result.Contents.Count);
+        }
+
+        [Fact]
+        public void ReadAsMultipartAsync_SkipsHeaderValidation()
+        {
+            // Arrange
+            var content = CreateContentWithContentType("--boundary", "invalid", "SomeContent");
+
+            // Act
+            var result = content.ReadAsMultipartAsync(CancellationToken.None).Result;
+
+            // Assert
+            Assert.Equal(1, result.Contents.Count);
+
+            var bodyPart = result.Contents[0];
+            Assert.Null(bodyPart.Headers.ContentType);
+            Assert.Equal("invalid", Assert.Single(bodyPart.Headers.GetValues("Content-Type")));
+        }
+
+        [Fact]
+        public void ReadAsMultipartAsync_SetsStronglyTypedHeader_WhenHeaderIsValid()
+        {
+            // Arrange
+            var content = CreateContentWithContentType("--boundary", "application/json", "SomeContent");
+
+            // Act
+            var result = content.ReadAsMultipartAsync(CancellationToken.None).Result;
+
+            // Assert
+            Assert.Equal(1, result.Contents.Count);
+
+            var bodyPart = result.Contents[0];
+            Assert.NotNull(bodyPart.Headers.ContentType);
+            Assert.Equal("application/json", bodyPart.Headers.ContentType.MediaType);
         }
 
         [Theory]

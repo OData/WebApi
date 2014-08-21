@@ -17,6 +17,20 @@ namespace Microsoft.AspNet.Facebook.Test
     public class FacebookAuthorizeFilterTest
     {
         [Fact]
+        public void AddCookieVerificationQuery_AddsQueryParams()
+        {
+            // Arrange
+            var collection = new NameValueCollection();
+            var filter = new CustomAuthorizeFilter();
+
+            // Act
+            filter.ExposedAddCookieVerificationQuery(collection);
+
+            // Assert
+            Assert.NotEmpty(collection);
+        }
+
+        [Fact]
         public void Constructor_ThrowsArgumentNullException()
         {
             Assert.ThrowsArgumentNull(
@@ -114,6 +128,19 @@ namespace Microsoft.AspNet.Facebook.Test
             Assert.Equal(
                 String.Format("<script>window.top.location = '{0}';</script>", expectedRedirectUrl),
                 result.Content);
+        }
+
+        private class CustomAuthorizeFilter : FacebookAuthorizeFilter
+        {
+            public CustomAuthorizeFilter()
+                : base(new FacebookConfiguration())
+            {
+            }
+
+            public void ExposedAddCookieVerificationQuery(NameValueCollection queries)
+            {
+                AddCookieVerificationQuery(queries);
+            }
         }
     }
 }

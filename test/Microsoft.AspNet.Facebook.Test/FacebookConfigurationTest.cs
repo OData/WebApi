@@ -15,6 +15,7 @@ namespace Microsoft.AspNet.Facebook.Test
             Assert.Null(config.AppSecret);
             Assert.NotNull(config.AppUrl);
             Assert.Null(config.AuthorizationRedirectPath);
+            Assert.Null(config.CannotCreateCookieRedirectPath);
             Assert.Null(config.ClientProvider);
             Assert.Null(config.PermissionService);
             Assert.NotNull(config.Properties);
@@ -56,6 +57,7 @@ namespace Microsoft.AspNet.Facebook.Test
             Assert.Equal("abcdefg", config.AppSecret);
             Assert.Equal("MyApp", config.AppNamespace);
             Assert.Equal("~/Authorize/Index", config.AuthorizationRedirectPath);
+            Assert.Equal("~/NoCookies/Index", config.CannotCreateCookieRedirectPath);
             Assert.Equal("https://apps.newfacebook.example.com/myapp", config.AppUrl);
         }
 
@@ -64,6 +66,13 @@ namespace Microsoft.AspNet.Facebook.Test
         {
             FacebookConfiguration config = new FacebookConfiguration();
             Assert.ThrowsArgument(() => config.AuthorizationRedirectPath = "Home/Permissions", "value");
+        }
+
+        [Fact]
+        public void CannotCreateCookieRedirectPath_ThrowsArgumentException()
+        {
+            FacebookConfiguration config = new FacebookConfiguration();
+            Assert.ThrowsArgument(() => config.CannotCreateCookieRedirectPath = "Home/Permissions", "value");
         }
     }
 }

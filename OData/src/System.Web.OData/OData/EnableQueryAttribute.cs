@@ -14,7 +14,6 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
-using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
@@ -652,19 +651,33 @@ namespace System.Web.OData
 
         internal static object SingleOrDefault(IQueryable queryable, HttpActionDescriptor actionDescriptor)
         {
-            IEnumerator enumerator = queryable.GetEnumerator();
-            object result = enumerator.MoveNext() ? enumerator.Current : null;
-
-            if (enumerator.MoveNext())
+            var enumerator = queryable.GetEnumerator();
+            try
             {
-                throw new InvalidOperationException(Error.Format(
-                    SRResources.SingleResultHasMoreThanOneEntity,
-                    actionDescriptor.ActionName,
-                    actionDescriptor.ControllerDescriptor.ControllerName,
-                    typeof(SingleResult).Name));
-            }
+                var result = enumerator.MoveNext() ? enumerator.Current : null;
 
-            return result;
+                if (enumerator.MoveNext())
+                {
+                    throw new InvalidOperationException(Error.Format(
+                        SRResources.SingleResultHasMoreThanOneEntity,
+                        actionDescriptor.ActionName,
+                        actionDescriptor.ControllerDescriptor.ControllerName,
+                        typeof(SingleResult).Name));
+                }
+
+                return result;
+            }
+            finally
+            {
+                // Fix for Issue #2097
+                // Ensure any active/open database objects that were created
+                // iterating over the IQueryable object are properly closed.
+                var disposable = enumerator as IDisposable;
+                if (disposable != null)
+                {
+                    disposable.Dispose();
+                }
+            }
         }
 
         internal static void ValidateSelectExpandOnly(ODataQueryOptions queryOptions)

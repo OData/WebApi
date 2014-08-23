@@ -620,8 +620,8 @@ namespace System.Web.Http.OData
             }
             finally
             {
-                // Fix for Issue 2097
-                // Ensure any open database related objects that were opened
+                // Fix for Issue #2097
+                // Ensure any active/open database objects that were created
                 // iterating over the IQueryable object are properly closed.
                 var disposable = enumerator as IDisposable;
                 if (disposable != null)

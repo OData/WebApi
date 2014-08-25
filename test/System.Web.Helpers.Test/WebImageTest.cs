@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -14,6 +15,7 @@ namespace System.Web.Helpers.Test
         private static readonly byte[] _JpgImageBytes = TestFile.Create("LambdaFinal.jpg").ReadAllBytes();
         private static readonly byte[] _BmpImageBytes = TestFile.Create("logo.bmp").ReadAllBytes();
         private static readonly byte[] _PngImageBytes = TestFile.Create("NETLogo.png").ReadAllBytes();
+        private static readonly byte[] _IcoImageBytes = TestFile.Create("Test.ico").ReadAllBytes();
 
         [Fact]
         public void ConstructorThrowsWhenFilePathIsNull()
@@ -246,15 +248,29 @@ namespace System.Web.Helpers.Test
             Assert.Null(WebImage.GetImageFromRequest(request.Object));
         }
 
-        [Fact]
-        public void GetImageFromRequestDeterminesMimeTypeFromExtension()
+        public static IEnumerable<object[]> GetImageFromRequestDeterminesMimeTypeFromExtensionData
+        {
+            get
+            {
+                yield return new object[] { "index.jpeg", _JpgImageBytes, "jpeg" };
+                yield return new object[] { "file1.jpg", _JpgImageBytes, "jpeg" };
+                yield return new object[] { "file4.png", _PngImageBytes, "png" };
+                yield return new object[] { "file5.ico", _IcoImageBytes, "icon" };
+            }
+        }
+
+        [Theory]
+        [PropertyData("GetImageFromRequestDeterminesMimeTypeFromExtensionData")]
+        public void GetImageFromRequestDeterminesMimeTypeFromExtension(string fileName,
+                                                                       byte[] content,
+                                                                       string expectedExtension)
         {
             // Arrange
             Mock<HttpPostedFileBase> postedFile = new Mock<HttpPostedFileBase>();
-            postedFile.Setup(c => c.FileName).Returns("index.jpeg");
+            postedFile.Setup(c => c.FileName).Returns(fileName);
             postedFile.Setup(c => c.ContentType).Returns("application/octet-stream");
             postedFile.Setup(c => c.ContentLength).Returns(1);
-            postedFile.Setup(c => c.InputStream).Returns(new MemoryStream(_JpgImageBytes));
+            postedFile.Setup(c => c.InputStream).Returns(new MemoryStream(content));
 
             Mock<HttpFileCollectionBase> files = new Mock<HttpFileCollectionBase>();
             files.Setup(c => c.Count).Returns(1);
@@ -267,7 +283,7 @@ namespace System.Web.Helpers.Test
 
             // Assert
             Assert.NotNull(image);
-            Assert.Equal("jpeg", image.ImageFormat);
+            Assert.Equal(expectedExtension, image.ImageFormat);
         }
 
         [Fact]

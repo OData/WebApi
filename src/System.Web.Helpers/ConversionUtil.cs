@@ -166,6 +166,7 @@ namespace System.Web.Helpers
 
                 case "icon":
                 case "ico":
+                case "x-icon":
                     return "icon";
             }
             return value;

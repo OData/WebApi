@@ -69,6 +69,7 @@
     <EmbeddedResource Include="TestFiles\LambdaFinal.jpg" />
     <EmbeddedResource Include="TestFiles\logo.bmp" />
     <EmbeddedResource Include="TestFiles\NETLogo.png" />
+    <EmbeddedResource Include="TestFiles\Test.ico" />
     <EmbeddedResource Include="TestFiles\xhtml11-flat.dtd" />
   </ItemGroup>
   <ItemGroup>

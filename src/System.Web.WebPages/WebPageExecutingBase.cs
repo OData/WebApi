@@ -217,14 +217,19 @@ namespace System.Web.WebPages
                     //
                     // Otherwise the value is another object (perhaps an IHtmlString), and we'll ask it to format itself.
                     string stringValue;
-                    bool? boolValue = val.Value as bool?;
-                    if (boolValue == true)
+
+                    // Intentionally using is+cast here for performance reasons. This is more performant than as+bool? 
+                    // because of boxing.
+                    if (val.Value is bool)
                     {
-                        stringValue = name;
-                    }
-                    else if (boolValue == false)
-                    {
-                        continue;
+                        if ((bool)val.Value)
+                        {
+                            stringValue = name;
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                     else
                     {
@@ -245,14 +250,26 @@ namespace System.Web.WebPages
                     int sourceLength = next.Position - attrVal.Value.Position;
 
                     BeginContext(writer, pageVirtualPath, attrVal.Value.Position, sourceLength, isLiteral: attrVal.Literal);
-                    if (attrVal.Literal)
+
+                    // The extra branching here is to ensure that we call the Write*To(string) overload when
+                    // possible.
+                    if (attrVal.Literal && stringValue != null)
                     {
-                        WriteLiteralTo(writer, stringValue ?? val.Value);
+                        WriteLiteralTo(writer, stringValue);
+                    }
+                    else if (attrVal.Literal)
+                    {
+                        WriteLiteralTo(writer, val.Value);
+                    }
+                    else if (stringValue != null)
+                    {
+                        WriteTo(writer, stringValue);
                     }
                     else
                     {
-                        WriteTo(writer, stringValue ?? val.Value); // Write value
+                        WriteTo(writer, val.Value);
                     }
+
                     EndContext(writer, pageVirtualPath, attrVal.Value.Position, sourceLength, isLiteral: attrVal.Literal);
                     wroteSomething = true;
                 }
@@ -290,8 +307,20 @@ namespace System.Web.WebPages
             writer.Write(HttpUtility.HtmlEncode(content));
         }
 
+        // Perf optimization to avoid calling string.ToString when we already know the type is a string.
+        private static void WriteTo(TextWriter writer, string content)
+        {
+            writer.Write(HttpUtility.HtmlEncode(content));
+        }
+
         // This method is called by generated code and needs to stay in sync with the parser
         public static void WriteLiteralTo(TextWriter writer, object content)
+        {
+            writer.Write(content);
+        }
+
+        // Perf optimization to avoid calling string.ToString when we already know the type is a string.
+        private static void WriteLiteralTo(TextWriter writer, string content)
         {
             writer.Write(content);
         }

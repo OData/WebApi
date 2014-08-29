@@ -11,6 +11,7 @@ namespace System.Web.WebPages.Instrumentation
     internal partial class PageInstrumentationServiceAdapter
     {
         private static readonly Type _targetType = typeof(HttpContext).Assembly.GetType("System.Web.Instrumentation.PageInstrumentationService");
+        private IReadOnlyList<PageExecutionListenerAdapter> _listenerAdapters;
 
         internal PageInstrumentationServiceAdapter()
         {
@@ -22,14 +23,19 @@ namespace System.Web.WebPages.Instrumentation
             Adaptee = existing;
         }
 
-        internal IEnumerable<PageExecutionListenerAdapter> ExecutionListeners
+        internal IReadOnlyList<PageExecutionListenerAdapter> ExecutionListeners
         {
             get
             {
-                IEnumerable<dynamic> inner = Adaptee.ExecutionListeners;
-                // Bug 235916: If we pass the type as an object, the callsite is limited to wherever the object is assigned to dynamic which avoids private reflection issues in
-                // partial trust.
-                return inner.Select(listener => new PageExecutionListenerAdapter((object)listener));
+                if (_listenerAdapters == null)
+                {
+                    IEnumerable<dynamic> inner = Adaptee.ExecutionListeners;
+                    // Bug 235916: If we pass the type as an object, the callsite is limited to wherever the object is assigned to 
+                    // dynamic which avoids private reflection issues in partial trust.
+                    _listenerAdapters = inner.Select(listener => new PageExecutionListenerAdapter((object)listener)).ToList();
+                }
+
+                return _listenerAdapters;
             }
         }
 

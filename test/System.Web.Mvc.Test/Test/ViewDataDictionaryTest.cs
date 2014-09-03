@@ -39,6 +39,20 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void ConstructorWithViewDataDictionaryUsesCopyOnWriteDictionary()
+        {
+            // Arrange
+            ViewDataDictionary originalVdd = new ViewDataDictionary();
+
+            // Act
+            ViewDataDictionary newVdd = new ViewDataDictionary(originalVdd);
+
+            // Assert
+            Assert.IsType<Dictionary<string, object>>(originalVdd.InnerDictionary);
+            Assert.IsType<CopyOnWriteDictionary<string, object>>(newVdd.InnerDictionary);
+        }
+
+        [Fact]
         public void DictionaryInterface()
         {
             // Arrange

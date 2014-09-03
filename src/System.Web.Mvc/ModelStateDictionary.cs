@@ -9,10 +9,11 @@ namespace System.Web.Mvc
     [Serializable]
     public class ModelStateDictionary : IDictionary<string, ModelState>
     {
-        private readonly Dictionary<string, ModelState> _innerDictionary = new Dictionary<string, ModelState>(StringComparer.OrdinalIgnoreCase);
+        private readonly IDictionary<string, ModelState> _innerDictionary;
 
         public ModelStateDictionary()
         {
+            _innerDictionary = new Dictionary<string, ModelState>(StringComparer.OrdinalIgnoreCase);
         }
 
         public ModelStateDictionary(ModelStateDictionary dictionary)
@@ -22,10 +23,8 @@ namespace System.Web.Mvc
                 throw new ArgumentNullException("dictionary");
             }
 
-            foreach (var entry in dictionary)
-            {
-                _innerDictionary.Add(entry.Key, entry.Value);
-            }
+            _innerDictionary = new CopyOnWriteDictionary<string, ModelState>(dictionary,
+                                                                             StringComparer.OrdinalIgnoreCase);
         }
 
         public int Count
@@ -35,7 +34,7 @@ namespace System.Web.Mvc
 
         public bool IsReadOnly
         {
-            get { return ((IDictionary<string, ModelState>)_innerDictionary).IsReadOnly; }
+            get { return _innerDictionary.IsReadOnly; }
         }
 
         public bool IsValid
@@ -64,9 +63,15 @@ namespace System.Web.Mvc
             set { _innerDictionary[key] = value; }
         }
 
+        // For unit testing
+        internal IDictionary<string, ModelState> InnerDictionary
+        {
+            get { return _innerDictionary; }
+        }
+
         public void Add(KeyValuePair<string, ModelState> item)
         {
-            ((IDictionary<string, ModelState>)_innerDictionary).Add(item);
+            _innerDictionary.Add(item);
         }
 
         public void Add(string key, ModelState value)
@@ -91,7 +96,7 @@ namespace System.Web.Mvc
 
         public bool Contains(KeyValuePair<string, ModelState> item)
         {
-            return ((IDictionary<string, ModelState>)_innerDictionary).Contains(item);
+            return _innerDictionary.Contains(item);
         }
 
         public bool ContainsKey(string key)
@@ -101,7 +106,7 @@ namespace System.Web.Mvc
 
         public void CopyTo(KeyValuePair<string, ModelState>[] array, int arrayIndex)
         {
-            ((IDictionary<string, ModelState>)_innerDictionary).CopyTo(array, arrayIndex);
+            _innerDictionary.CopyTo(array, arrayIndex);
         }
 
         public IEnumerator<KeyValuePair<string, ModelState>> GetEnumerator()
@@ -152,7 +157,7 @@ namespace System.Web.Mvc
 
         public bool Remove(KeyValuePair<string, ModelState> item)
         {
-            return ((IDictionary<string, ModelState>)_innerDictionary).Remove(item);
+            return _innerDictionary.Remove(item);
         }
 
         public bool Remove(string key)
@@ -174,7 +179,7 @@ namespace System.Web.Mvc
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)_innerDictionary).GetEnumerator();
+            return GetEnumerator();
         }
 
         #endregion

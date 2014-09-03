@@ -157,6 +157,7 @@
     <Compile Include="AreaReference.cs" />
     <Compile Include="ControllerDescriptorExtensions.cs" />
     <Compile Include="Async\IAsyncActionInvokerFactory.cs" />
+    <Compile Include="CopyOnWriteDictionary.cs" />
     <Compile Include="IActionInvokerFactory.cs" />
     <Compile Include="IMethodInfoActionDescriptor.cs" />
     <Compile Include="ITempDataProviderFactory.cs" />

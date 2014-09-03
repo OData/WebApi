@@ -10,10 +10,11 @@ namespace System.Web.Http.ModelBinding
     [Serializable]
     public class ModelStateDictionary : IDictionary<string, ModelState>
     {
-        private readonly Dictionary<string, ModelState> _innerDictionary = new Dictionary<string, ModelState>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, ModelState> _innerDictionary;
 
         public ModelStateDictionary()
         {
+            _innerDictionary = new Dictionary<string, ModelState>(StringComparer.OrdinalIgnoreCase);
         }
 
         public ModelStateDictionary(ModelStateDictionary dictionary)
@@ -23,10 +24,7 @@ namespace System.Web.Http.ModelBinding
                 throw Error.ArgumentNull("dictionary");
             }
 
-            foreach (var entry in dictionary)
-            {
-                _innerDictionary.Add(entry.Key, entry.Value);
-            }
+            _innerDictionary = new Dictionary<string, ModelState>(dictionary, StringComparer.OrdinalIgnoreCase);
         }
 
         public int Count

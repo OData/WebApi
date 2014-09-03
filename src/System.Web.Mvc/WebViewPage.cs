@@ -13,8 +13,8 @@ namespace System.Web.Mvc
         private ViewDataDictionary _viewData;
         private DynamicViewDataDictionary _dynamicViewData;
         private HttpContextBase _context;
-
-        public AjaxHelper<object> Ajax { get; set; }
+        private HtmlHelper<object> _html;
+        private AjaxHelper<object> _ajax;
 
         public override HttpContextBase Context
         {
@@ -23,7 +23,37 @@ namespace System.Web.Mvc
             set { _context = value; }
         }
 
-        public HtmlHelper<object> Html { get; set; }
+        public HtmlHelper<object> Html
+        {
+            get
+            {
+                if (_html == null && ViewContext != null)
+                {
+                    _html = new HtmlHelper<object>(ViewContext, this);
+                }
+                return _html;
+            }
+            set
+            {
+                _html = value;
+            }
+        }
+
+        public AjaxHelper<object> Ajax
+        {
+            get
+            {
+                if (_ajax == null && ViewContext != null)
+                {
+                    _ajax = new AjaxHelper<object>(ViewContext, this);
+                }
+                return _ajax;
+            }
+            set
+            {
+                _ajax = value;
+            }
+        }
 
         public object Model
         {
@@ -104,8 +134,11 @@ namespace System.Web.Mvc
 
         public virtual void InitHelpers()
         {
-            Ajax = new AjaxHelper<object>(ViewContext, this);
-            Html = new HtmlHelper<object>(ViewContext, this);
+            // Html and Ajax helpers are lazily initialized since they are not directly visible to a Razor page.
+            // In order to ensure back-compat, in the event that this instance gets re-used, we'll reset these
+            // properties so they get reinitialized the very next time they get accessed.
+            Html = null;
+            Ajax = null;
             Url = new UrlHelper(ViewContext.RequestContext);
         }
 

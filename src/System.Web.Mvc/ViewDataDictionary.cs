@@ -13,8 +13,8 @@ namespace System.Web.Mvc
 
     public class ViewDataDictionary : IDictionary<string, object>
     {
-        private readonly Dictionary<string, object> _innerDictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-        private readonly ModelStateDictionary _modelState = new ModelStateDictionary();
+        private readonly IDictionary<string, object> _innerDictionary;
+        private readonly ModelStateDictionary _modelState;
         private object _model;
         private ModelMetadata _modelMetadata;
         private TemplateInfo _templateMetadata;
@@ -28,6 +28,8 @@ namespace System.Web.Mvc
         public ViewDataDictionary(object model)
         {
             Model = model;
+            _innerDictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            _modelState = new ModelStateDictionary();
         }
 
         [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "See note on SetModel() method.")]
@@ -38,14 +40,8 @@ namespace System.Web.Mvc
                 throw new ArgumentNullException("dictionary");
             }
 
-            foreach (var entry in dictionary)
-            {
-                _innerDictionary.Add(entry.Key, entry.Value);
-            }
-            foreach (var entry in dictionary.ModelState)
-            {
-                ModelState.Add(entry.Key, entry.Value);
-            }
+            _innerDictionary = new CopyOnWriteDictionary<string, object>(dictionary, StringComparer.OrdinalIgnoreCase);
+            _modelState = new ModelStateDictionary(dictionary.ModelState);
 
             Model = dictionary.Model;
             TemplateInfo = dictionary.TemplateInfo;
@@ -61,7 +57,7 @@ namespace System.Web.Mvc
 
         public bool IsReadOnly
         {
-            get { return ((IDictionary<string, object>)_innerDictionary).IsReadOnly; }
+            get { return _innerDictionary.IsReadOnly; }
         }
 
         public ICollection<string> Keys
@@ -126,9 +122,15 @@ namespace System.Web.Mvc
             set { _innerDictionary[key] = value; }
         }
 
+        // For unit testing
+        internal IDictionary<string, object> InnerDictionary
+        {
+            get { return _innerDictionary; }
+        }
+
         public void Add(KeyValuePair<string, object> item)
         {
-            ((IDictionary<string, object>)_innerDictionary).Add(item);
+            _innerDictionary.Add(item);
         }
 
         public void Add(string key, object value)
@@ -143,7 +145,7 @@ namespace System.Web.Mvc
 
         public bool Contains(KeyValuePair<string, object> item)
         {
-            return ((IDictionary<string, object>)_innerDictionary).Contains(item);
+            return _innerDictionary.Contains(item);
         }
 
         public bool ContainsKey(string key)
@@ -153,7 +155,7 @@ namespace System.Web.Mvc
 
         public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
         {
-            ((IDictionary<string, object>)_innerDictionary).CopyTo(array, arrayIndex);
+            _innerDictionary.CopyTo(array, arrayIndex);
         }
 
         public object Eval(string expression)
@@ -202,7 +204,7 @@ namespace System.Web.Mvc
 
         public bool Remove(KeyValuePair<string, object> item)
         {
-            return ((IDictionary<string, object>)_innerDictionary).Remove(item);
+            return _innerDictionary.Remove(item);
         }
 
         public bool Remove(string key)
@@ -381,7 +383,7 @@ namespace System.Web.Mvc
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)_innerDictionary).GetEnumerator();
+            return _innerDictionary.GetEnumerator();
         }
 
         #endregion

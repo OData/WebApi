@@ -84,6 +84,20 @@ namespace System.Web.Mvc.Test
         }
 
         [Fact]
+        public void ConstructorWithDictionaryParameterUsesCopyOnWriteDictionary()
+        {
+            // Arrange
+            ModelStateDictionary oldDictionary = new ModelStateDictionary();
+
+            // Act
+            ModelStateDictionary newDictionary = new ModelStateDictionary(oldDictionary);
+
+            // Assert
+            Assert.IsType<Dictionary<string, ModelState>>(oldDictionary.InnerDictionary);
+            Assert.IsType<CopyOnWriteDictionary<string, ModelState>>(newDictionary.InnerDictionary);
+        }
+
+        [Fact]
         public void DictionaryInterface()
         {
             // Arrange

@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.Facebook.Test
             // Arrange
             var config = BuildConfiguration("~/home/permissions", cannotCreateCookiesRedirectPath);
             var authorizeFilter = new FacebookAuthorizeFilter(config);
-            var context = BuildSignedAuthorizationContext("http://contoso.com?__fb_mps=", "email");
+            var context = BuildSignedAuthorizationContext("http://contoso.com?__fb_mps=true", "email");
 
             // Act
             authorizeFilter.OnAuthorization(context);
@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.Facebook.Test
             // Arrange
             var config = BuildConfiguration("~/home/permissions");
             var authorizeFilter = new CustomDefaultAuthorizeFilter(config);
-            var context = BuildSignedAuthorizationContext("http://contoso.com?__fb_mps=", "email");
+            var context = BuildSignedAuthorizationContext("http://contoso.com?__fb_mps=true", "email");
 
             // Act
             authorizeFilter.OnAuthorization(context);
@@ -52,9 +52,9 @@ namespace Microsoft.AspNet.Facebook.Test
         }
 
         [Theory]
-        [InlineData("http://contoso.com?__fb_mps=", "email", true)]
+        [InlineData("http://contoso.com?__fb_mps=true", "email", true)]
         [InlineData("http://contoso.com", "email", false)]
-        [InlineData("http://contoso.com?__fb_mps=", null, false)]
+        [InlineData("http://contoso.com?__fb_mps=true", null, false)]
         public void OnAuthorization_TriggersCannotCreateCookiesHook(string requestUrl,
                                                                     string permission,
                                                                     bool expectedTrigger)
@@ -185,7 +185,7 @@ namespace Microsoft.AspNet.Facebook.Test
             // Arrange
             var config = BuildConfiguration("~/home/permissions");
             var authorizeFilter = new CustomInvalidAuthorizeFilter(config);
-            var context = BuildSignedAuthorizationContext("http://contoso.com?__fb_mps=", "email");
+            var context = BuildSignedAuthorizationContext("http://contoso.com?__fb_mps=true", "email");
 
             // Act
             authorizeFilter.OnAuthorization(context);
@@ -232,7 +232,7 @@ namespace Microsoft.AspNet.Facebook.Test
         public void OnAuthorization_CannotCreateCookiesHookCustomActionResultIsContextsResult()
         {
             // Arrange
-            var tempUrl = "http://contoso.com?__fb_mps=";
+            var tempUrl = "http://contoso.com?__fb_mps=true";
             var config = BuildConfiguration("~/home/permissions");
             var cannotCreateCookiesHookResult = new RedirectResult(tempUrl);
             var authorizeFilter = new CustomReturningAuthorizeFilter(config,

@@ -165,7 +165,7 @@ namespace Microsoft.AspNet.Facebook.Authorization
         protected static void AddCookieVerificationQuery(NameValueCollection queries)
         {
             // Add a query string parameter that enables us to identify if we've already prompted for missing permissions
-            queries.Add(MissingPermissionsQueryName, String.Empty);
+            queries.Add(MissingPermissionsQueryName, "true");
         }
 
         /// <summary>

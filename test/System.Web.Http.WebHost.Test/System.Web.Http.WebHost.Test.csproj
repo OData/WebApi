@@ -37,6 +37,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BatchingTest.cs" />
     <Compile Include="Routing\HttpRouteExceptionHandlerTests.cs" />
     <Compile Include="Routing\HttpRouteExceptionRouteHandlerTests.cs" />
     <Compile Include="Routing\HttpWebRouteTests.cs" />

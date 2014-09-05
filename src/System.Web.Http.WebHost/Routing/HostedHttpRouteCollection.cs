@@ -13,8 +13,14 @@ namespace System.Web.Http.WebHost.Routing
     internal class HostedHttpRouteCollection : HttpRouteCollection
     {
         private readonly RouteCollection _routeCollection;
+        private readonly string _virtualPathRoot;
 
         public HostedHttpRouteCollection(RouteCollection routeCollection)
+            : this(routeCollection, virtualPathRoot: null)
+        {
+        }
+
+        public HostedHttpRouteCollection(RouteCollection routeCollection, string virtualPathRoot)
         {
             if (routeCollection == null)
             {
@@ -22,12 +28,23 @@ namespace System.Web.Http.WebHost.Routing
             }
 
             _routeCollection = routeCollection;
+            _virtualPathRoot = virtualPathRoot;
         }
 
         /// <inheritdoc/>
         public override string VirtualPathRoot
         {
-            get { return HostingEnvironment.ApplicationVirtualPath; }
+            get
+            {
+                if (_virtualPathRoot == null)
+                {
+                    return HostingEnvironment.ApplicationVirtualPath;
+                }
+                else
+                {
+                    return _virtualPathRoot;
+                }
+            }
         }
 
         /// <inheritdoc/>

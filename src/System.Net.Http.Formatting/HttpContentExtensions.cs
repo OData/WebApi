@@ -17,6 +17,24 @@ namespace System.Net.Http
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpContentExtensions
     {
+        private static MediaTypeFormatterCollection _defaultMediaTypeFormatterCollection = null;
+
+        // Using the JsonMediaTypeFormatter for the first time is rather expensive (due to reflection cost
+        // when creating the default contract resolver). Hence we new up a static collection, such
+        // that the second call is much faster.
+        private static MediaTypeFormatterCollection DefaultMediaTypeFormatterCollection
+        {
+            get
+            {
+                if (_defaultMediaTypeFormatterCollection == null)
+                {
+                    _defaultMediaTypeFormatterCollection = new MediaTypeFormatterCollection();
+                }
+
+                return _defaultMediaTypeFormatterCollection;
+            }
+        }
+
         /// <summary>
         /// Returns a <see cref="Task"/> that will yield an object of the specified <paramref name="type"/>
         /// from the <paramref name="content"/> instance.
@@ -27,7 +45,7 @@ namespace System.Net.Http
         /// <returns>A task object representing reading the content as an object of the specified type.</returns>
         public static Task<object> ReadAsAsync(this HttpContent content, Type type)
         {
-            return content.ReadAsAsync(type, new MediaTypeFormatterCollection());
+            return content.ReadAsAsync(type, DefaultMediaTypeFormatterCollection);
         }
 
         /// <summary>
@@ -41,7 +59,7 @@ namespace System.Net.Http
         /// <returns>A task object representing reading the content as an object of the specified type.</returns>
         public static Task<object> ReadAsAsync(this HttpContent content, Type type, CancellationToken cancellationToken)
         {
-            return content.ReadAsAsync(type, new MediaTypeFormatterCollection(), cancellationToken);
+            return content.ReadAsAsync(type, DefaultMediaTypeFormatterCollection, cancellationToken);
         }
 
         /// <summary>
@@ -117,7 +135,7 @@ namespace System.Net.Http
         /// <returns>A task object representing reading the content as an object of the specified type.</returns>
         public static Task<T> ReadAsAsync<T>(this HttpContent content)
         {
-            return content.ReadAsAsync<T>(new MediaTypeFormatterCollection());
+            return content.ReadAsAsync<T>(DefaultMediaTypeFormatterCollection);
         }
 
         /// <summary>
@@ -131,7 +149,7 @@ namespace System.Net.Http
         /// <returns>A task object representing reading the content as an object of the specified type.</returns>
         public static Task<T> ReadAsAsync<T>(this HttpContent content, CancellationToken cancellationToken)
         {
-            return content.ReadAsAsync<T>(new MediaTypeFormatterCollection(), cancellationToken);
+            return content.ReadAsAsync<T>(DefaultMediaTypeFormatterCollection, cancellationToken);
         }
 
         /// <summary>

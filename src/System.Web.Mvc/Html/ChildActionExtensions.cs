@@ -153,7 +153,17 @@ namespace System.Web.Mvc.Html
             // 'direct route' routedata to reach it.
             if (route.IsDirectRoute())
             {
-                return RouteCollectionRoute.CreateDirectRouteMatch(route, new List<RouteData>() { routeData });
+                // Codeplex-2136 - ControllerContext.IsChildAction returns false inside Controller.Initialize()
+                //
+                // We're constructing a 'temp' route data to wrap the route data for the match we're invoking via
+                // an attribute route. The ControllerContext will look at datatokens to see if it's being invoked
+                // as a child action. 
+                //
+                // By sticking the view context on both route data ControllerContext will do the right thing
+                // at all parts of the pipeline.
+                var directRouteData = RouteCollectionRoute.CreateDirectRouteMatch(route, new List<RouteData>() { routeData });
+                directRouteData.DataTokens[ControllerContext.ParentActionViewContextToken] = parentViewContext;
+                return directRouteData;
             }
             else
             {

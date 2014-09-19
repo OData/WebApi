@@ -425,7 +425,7 @@ namespace System.Web.OData.Query.Expressions
             var filters = VerifyQueryDeserialization<DataTypes>(filter);
             var result = RunFilter(filters.WithoutNullPropagation, new DataTypes { StringProp = value });
 
-            Assert.Equal(result, expectedResult);
+            Assert.Equal(expectedResult, result);
         }
 
         // Issue: 477
@@ -1568,7 +1568,7 @@ namespace System.Web.OData.Query.Expressions
         [Theory]
         [InlineData("cast(NoSuchProperty,Edm.Int32) ne null", "Could not find a property named 'NoSuchProperty' on type 'System.Web.OData.Query.Expressions.DataTypes'.")]
         [InlineData("cast(null,Edm.Unknown) ne null", "The child type 'Edm.Unknown' in a cast was not an entity type. Casts can only be performed on entity types.")]
-        public void CastFails_UndefinedSourceOrTarget_Throws(string filter, string errorMessage)
+        public void CastFails_UndefinedSourceOrTarget_ThrowsODataException(string filter, string errorMessage)
         {
             Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), errorMessage);
         }
@@ -1663,6 +1663,350 @@ namespace System.Web.OData.Query.Expressions
             var castNode = Assert.IsType<SingleValueFunctionCallNode>(((BinaryOperatorNode)filterClause.Expression).Left);
             Assert.Equal("cast", castNode.Name);
             Assert.Equal("Microsoft.TestCommon.Types.SimpleEnum", ((ConstantNode)castNode.Parameters.Last()).Value);
+        }
+
+        public static TheoryDataSet<string> CastsWithQuotedTypeName
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    { "cast('Edm.Binary') eq null" },
+                    { "cast('Edm.Boolean') eq null" },
+                    { "cast('Edm.Byte') eq null" },
+                    { "cast('Edm.DateTimeOffset') eq null" },
+                    { "cast('Edm.Decimal') eq null" },
+                    { "cast('Edm.Double') eq null" },
+                    { "cast('Edm.Duration') eq null" },
+                    { "cast('Edm.Guid') eq null" },
+                    { "cast('Edm.Int16') eq null" },
+                    { "cast('Edm.Int32') eq null" },
+                    { "cast('Edm.Int64') eq null" },
+                    { "cast('Edm.SByte') eq null" },
+                    { "cast('Edm.Single') eq null" },
+                    { "cast('Edm.String') eq null" },
+
+                    { "cast(null,'Edm.Binary') eq null" },
+                    { "cast(null,'Edm.Boolean') eq null" },
+                    { "cast(null,'Edm.Byte') eq null" },
+                    { "cast(null,'Edm.DateTimeOffset') eq null" },
+                    { "cast(null,'Edm.Decimal') eq null" },
+                    { "cast(null,'Edm.Double') eq null" },
+                    { "cast(null,'Edm.Duration') eq null" },
+                    { "cast(null,'Edm.Guid') eq null" },
+                    { "cast(null,'Edm.Int16') eq null" },
+                    { "cast(null,'Edm.Int32') eq null" },
+                    { "cast(null,'Edm.Int64') eq null" },
+                    { "cast(null,'Edm.SByte') eq null" },
+                    { "cast(null,'Edm.Single') eq null" },
+                    { "cast(null,'Edm.String') eq null" },
+
+                    { "cast('hello','Edm.Binary') eq null" },
+                    { "cast(false,'Edm.Boolean') eq false" },
+                    { "cast(23,'Edm.Byte') eq 23" },
+                    { "cast(2001-01-01T12:00:00.000+08:00,'Edm.DateTimeOffset') eq 2001-01-01T12:00:00.000+08:00" },
+                    { "cast(23,'Edm.Decimal') eq 23" },
+                    { "cast(23,'Edm.Double') eq 23" },
+                    { "cast(duration'PT12H','Edm.Duration') eq duration'PT12H'" },
+                    { "cast(00000000-0000-0000-0000-000000000000,'Edm.Guid') eq 00000000-0000-0000-0000-000000000000" },
+                    { "cast(23,'Edm.Int16') eq 23" },
+                    { "cast(23,'Edm.Int32') eq 23" },
+                    { "cast(23,'Edm.Int64') eq 23" },
+                    { "cast(23,'Edm.SByte') eq 23" },
+                    { "cast(23,'Edm.Single') eq 23" },
+                    { "cast('hello','Edm.String') eq 'hello'" },
+
+                    { "cast(ByteArrayProp,'Edm.Binary') eq null" },
+                    { "cast(DateTimeOffsetProp,'Edm.DateTimeOffset') eq 2001-01-01T12:00:00.000+08:00" },
+                    { "cast(DecimalProp,'Edm.Decimal') eq 23" },
+                    { "cast(DoubleProp,'Edm.Double') eq 23" },
+                    { "cast(TimeSpanProp,'Edm.Duration') eq duration'PT23H'" },
+                    { "cast(GuidProp,'Edm.Guid') eq 0EFDAECF-A9F0-42F3-A384-1295917AF95E" },
+                    { "cast(NullableShortProp,'Edm.Int16') eq 23" },
+                    { "cast(IntProp,'Edm.Int32') eq 23" },
+                    { "cast(LongProp,'Edm.Int64') eq 23" },
+                    { "cast(FloatProp,'Edm.Single') eq 23" },
+                    { "cast(StringProp,'Edm.String') eq 'hello'" },
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("CastsWithQuotedTypeName")]
+        public void CastToNonEntityType_Succeeds(string filter)
+        {
+            // Arrange
+            var model = new DataTypes
+            {
+                DateTimeOffsetProp = DateTimeOffset.Parse("2001-01-01T12:00:00.000+08:00"),
+                DecimalProp = 23,
+                DoubleProp = 23,
+                GuidProp = Guid.Parse("0EFDAECF-A9F0-42F3-A384-1295917AF95E"),
+                NullableShortProp = 23,
+                IntProp = 23,
+                LongProp = 23,
+                FloatProp = 23,
+                StringProp = "hello",
+                TimeSpanProp = TimeSpan.FromHours(23),
+            };
+
+            // Act & Assert
+            var filters = VerifyQueryDeserialization<DataTypes>(
+                filter,
+                expectedResult: NotTesting,
+                expectedResultWithNullPropagation: NotTesting);
+            RunFilters(filters, model, expectedValue: new { WithNullPropagation = true, WithoutNullPropagation = true });
+        }
+
+        public static TheoryDataSet<string> CastToDateTimeType
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    { "cast('Edm.DateTime') eq null" },
+                    { "cast(null,'Edm.DateTime') eq null" },
+                    { "cast('2001-01-01T12:00:00.000','Edm.DateTime') eq null" },
+                    { "cast(DateTimeProp,'Edm.DateTime') eq null" },
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("CastToDateTimeType")]
+        public void CastToDateTimeType_ThrowsODataException(string filter)
+        {
+            var expectedMessage = "Cast or IsOf Function must have a type in its arguments.";
+            Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), expectedMessage);
+        }
+
+        [Theory]
+        [InlineData("cast('System.Web.Http.OData.Query.Expressions.DerivedProduct')/DerivedProductName eq null")]
+        [InlineData("cast(null,'System.Web.Http.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null")]
+        [InlineData("cast(null, 'System.Web.Http.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null")]
+        [InlineData("cast(Category,'System.Web.Http.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null")]
+        [InlineData("cast(Category, 'System.Web.Http.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null")]
+        public void CastToEntityType_ThrowsODataException(string filter)
+        {
+            var expectedMessage = "Cast or IsOf Function must have a type in its arguments.";
+            Assert.Throws<ODataException>(() => Bind<Product>(filter), expectedMessage);
+        }
+
+        #endregion
+
+        #region 'isof' in query option
+
+        [Theory]
+        [InlineData("isof(NoSuchProperty,Edm.Int32)",
+            "Could not find a property named 'NoSuchProperty' on type 'System.Web.OData.Query.Expressions.DataTypes'.")]
+        [InlineData("isof(null,Edm.Unknown)",
+            "The child type 'Edm.Unknown' in a cast was not an entity type. Casts can only be performed on entity types.")]
+        public void IsOfFails_UndefinedSourceOrTarget_ThrowsODataException(string filter, string errorMessage)
+        {
+            Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), errorMessage);
+        }
+
+        public static TheoryDataSet<string, string> IsOfUnsupportedTarget
+        {
+            get
+            {
+                return new TheoryDataSet<string, string>
+                {
+                    { "isof(Edm.DateTime)", "Edm.DateTime" },
+                    { "isof(Edm.Unknown)", "Edm.Unknown" },
+                    { "isof(System.Web.Http.OData.Query.Expressions.Address)", "System.Web.Http.OData.Query.Expressions.Address" },
+
+                    { "isof(null,Edm.DateTime)", "Edm.DateTime" },
+                    { "isof(null,Edm.Unknown)", "Edm.Unknown" },
+                    { "isof(null, System.Web.Http.OData.Query.Expressions.Address)", "System.Web.Http.OData.Query.Expressions.Address" },
+
+                    { "isof('2001-01-01T12:00:00.000',Edm.DateTime)", "Edm.DateTime" },
+                    { "isof('',Edm.Unknown)", "Edm.Unknown" },
+                    { "isof('', System.Web.Http.OData.Query.Expressions.Address)", "System.Web.Http.OData.Query.Expressions.Address" },
+
+                    { "isof(DateTimeProp,Edm.DateTime)", "Edm.DateTime" },
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("IsOfUnsupportedTarget")]
+        public void IsOfFails_UnsupportedTarget_ThrowsODataException(string filter, string typeName)
+        {
+            var expectedMessage = string.Format(
+                "The child type '{0}' in a cast was not an entity type. Casts can only be performed on entity types.",
+                typeName);
+            Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), expectedMessage);
+        }
+
+        public static TheoryDataSet<string> IsOfNonEntityType
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    { "isof(Edm.Binary)" },
+                    { "isof(Edm.Boolean)" },
+                    { "isof(Edm.Byte)" },
+                    { "isof(Edm.DateTimeOffset)" },
+                    { "isof(Edm.Decimal)" },
+                    { "isof(Edm.Double)" },
+                    { "isof(Edm.Duration)" },
+                    { "isof(Edm.Guid)" },
+                    { "isof(Edm.Int16)" },
+                    { "isof(Edm.Int32)" },
+                    { "isof(Edm.Int64)" },
+                    { "isof(Edm.SByte)" },
+                    { "isof(Edm.Single)" },
+                    { "isof(Edm.String)" },
+                    { "isof(Edm.Stream)" },
+                    { "isof(Microsoft.TestCommon.Types.SimpleEnum)" },
+
+                    { "isof(null,Edm.Binary)" },
+                    { "isof(null,Edm.Boolean)" },
+                    { "isof(null,Edm.Byte)" },
+                    { "isof(null,Edm.DateTimeOffset)" },
+                    { "isof(null,Edm.Decimal)" },
+                    { "isof(null,Edm.Double)" },
+                    { "isof(null,Edm.Duration)" },
+                    { "isof(null,Edm.Guid)" },
+                    { "isof(null,Edm.Int16)" },
+                    { "isof(null,Edm.Int32)" },
+                    { "isof(null,Edm.Int64)" },
+                    { "isof(null,Edm.SByte)" },
+                    { "isof(null,Edm.Single)" },
+                    { "isof(null,Edm.String)" },
+                    { "isof(null,Edm.Stream)" },
+                    { "isof(null,Microsoft.TestCommon.Types.SimpleEnum)" },
+
+                    { "isof('hello',Edm.Binary)" },
+                    { "isof(false,Edm.Boolean)" },
+                    { "isof(0,Edm.Byte)" },
+                    { "isof('2001-01-01T12:00:00.000+08:00',Edm.DateTimeOffset)" },
+                    { "isof(0,Edm.Decimal)" },
+                    { "isof(0,Edm.Double)" },
+                    { "isof('T12:00:00.000',Edm.Duration)" },
+                    { "isof('00000000-0000-0000-0000-000000000000',Edm.Guid)" },
+                    { "isof(0,Edm.Int16)" },
+                    { "isof(0,Edm.Int32)" },
+                    { "isof(0,Edm.Int64)" },
+                    { "isof(0,Edm.SByte)" },
+                    { "isof(0,Edm.Single)" },
+                    { "isof('hello',Edm.String)" },
+                    { "isof('hello',Edm.Stream)" },
+                    { "isof(0,Microsoft.TestCommon.Types.SimpleEnum)" },
+
+                    { "isof(ByteArrayProp,Edm.Binary)" },
+                    { "isof(DateTimeOffsetProp,Edm.DateTimeOffset)" },
+                    { "isof(DecimalProp,Edm.Decimal)" },
+                    { "isof(DoubleProp,Edm.Double)" },
+                    { "isof(GuidProp,Edm.Guid)" },
+                    { "isof(NullableShortProp,Edm.Int16)" },
+                    { "isof(IntProp,Edm.Int32)" },
+                    { "isof(LongProp,Edm.Int64)" },
+                    { "isof(FloatProp,Edm.Single)" },
+                    { "isof(StringProp,Edm.String)" },
+
+                    { "isof('Edm.Binary')" },
+                    { "isof('Edm.Boolean')" },
+                    { "isof('Edm.Byte')" },
+                    { "isof('Edm.DateTimeOffset')" },
+                    { "isof('Edm.Decimal')" },
+                    { "isof('Edm.Double')" },
+                    { "isof('Edm.Duration')" },
+                    { "isof('Edm.Guid')" },
+                    { "isof('Edm.Int16')" },
+                    { "isof('Edm.Int32')" },
+                    { "isof('Edm.Int64')" },
+                    { "isof('Edm.SByte')" },
+                    { "isof('Edm.Single')" },
+                    { "isof('Edm.String')" },
+
+                    { "isof(null,'Edm.Binary')" },
+                    { "isof(null,'Edm.Boolean')" },
+                    { "isof(null,'Edm.Byte')" },
+                    { "isof(null,'Edm.DateTimeOffset')" },
+                    { "isof(null,'Edm.Decimal')" },
+                    { "isof(null,'Edm.Double')" },
+                    { "isof(null,'Edm.Duration')" },
+                    { "isof(null,'Edm.Guid')" },
+                    { "isof(null,'Edm.Int16')" },
+                    { "isof(null,'Edm.Int32')" },
+                    { "isof(null,'Edm.Int64')" },
+                    { "isof(null,'Edm.SByte')" },
+                    { "isof(null,'Edm.Single')" },
+                    { "isof(null,'Edm.String')" },
+
+                    { "isof('hello','Edm.Binary')" },
+                    { "isof(false,'Edm.Boolean')" },
+                    { "isof(0,'Edm.Byte')" },
+                    { "isof('2001-01-01T12:00:00.000+08:00','Edm.DateTimeOffset')" },
+                    { "isof(0,'Edm.Decimal')" },
+                    { "isof(0,'Edm.Double')" },
+                    { "isof('T12:00:00.000','Edm.Duration')" },
+                    { "isof('00000000-0000-0000-0000-000000000000','Edm.Guid')" },
+                    { "isof(0,'Edm.Int16')" },
+                    { "isof(0,'Edm.Int32')" },
+                    { "isof(0,'Edm.Int64')" },
+                    { "isof(0,'Edm.SByte')" },
+                    { "isof(0,'Edm.Single')" },
+                    { "isof('hello','Edm.String')" },
+
+                    { "isof(ByteArrayProp,'Edm.Binary')" },
+                    { "isof(DateTimeOffsetProp,'Edm.DateTimeOffset')" },
+                    { "isof(DecimalProp,'Edm.Decimal')" },
+                    { "isof(DoubleProp,'Edm.Double')" },
+                    { "isof(TimeSpanProp,'Edm.Duration')" },
+                    { "isof(GuidProp,'Edm.Guid')" },
+                    { "isof(NullableShortProp,'Edm.Int16')" },
+                    { "isof(IntProp,'Edm.Int32')" },
+                    { "isof(LongProp,'Edm.Int64')" },
+                    { "isof(FloatProp,'Edm.Single')" },
+                    { "isof(StringProp,'Edm.String')" },
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("IsOfNonEntityType")]
+        public void IsOfNonEntityType_ThrowsNotImplemented(string filter)
+        {
+            var expectedMessage = "Unknown function 'isof'.";
+            Assert.Throws<NotImplementedException>(() => Bind<DataTypes>(filter), expectedMessage);
+        }
+
+        public static TheoryDataSet<string> IsOfDateTimeType
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    { "isof('Edm.DateTime')" },
+                    { "isof(null,'Edm.DateTime')" },
+                    { "isof('2001-01-01T12:00:00.000','Edm.DateTime')" },
+                    { "isof(DateTimeProp,'Edm.DateTime')" },
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("IsOfDateTimeType")]
+        public void IsOfDateTimeType_ThrowsODataException(string filter)
+        {
+            var expectedMessage = "Cast or IsOf Function must have a type in its arguments.";
+            Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), expectedMessage);
+        }
+
+        [Theory]
+        [InlineData("isof('System.Web.Http.OData.Query.Expressions.DerivedProduct')")]
+        [InlineData("isof(null,'System.Web.Http.OData.Query.Expressions.DerivedCategory')")]
+        [InlineData("isof(null, 'System.Web.Http.OData.Query.Expressions.DerivedCategory')")]
+        [InlineData("isof(Category,'System.Web.Http.OData.Query.Expressions.DerivedCategory')")]
+        [InlineData("isof(Category, 'System.Web.Http.OData.Query.Expressions.DerivedCategory')")]
+        public void IsOfEntityType_ThrowsODataException(string filter)
+        {
+            var expectedMessage = "Cast or IsOf Function must have a type in its arguments.";
+            Assert.Throws<ODataException>(() => Bind<Product>(filter), expectedMessage);
         }
 
         #endregion
@@ -1979,7 +2323,7 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                Assert.Equal(RunFilter(filterWithNullPropagation, product), expectedValue.WithNullPropagation);
+                Assert.Equal(expectedValue.WithNullPropagation, RunFilter(filterWithNullPropagation, product));
             }
 
             var filterWithoutNullPropagation = filters.WithoutNullPropagation as Expression<Func<T, bool>>;
@@ -1989,7 +2333,7 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                Assert.Equal(RunFilter(filterWithoutNullPropagation, product), expectedValue.WithoutNullPropagation);
+                Assert.Equal(expectedValue.WithoutNullPropagation, RunFilter(filterWithoutNullPropagation, product));
             }
         }
 
@@ -2068,6 +2412,12 @@ namespace System.Web.OData.Query.Expressions
             {
                 ODataModelBuilder model = new ODataConventionModelBuilder();
                 model.EntitySet<T>("Products");
+                if (key == typeof(Product))
+                {
+                    model.EntityType<DerivedProduct>().DerivesFrom<Product>();
+                    model.EntityType<DerivedCategory>().DerivesFrom<Category>();
+                }
+
                 value = _modelCache[key] = model.GetEdmModel();
             }
             return value;

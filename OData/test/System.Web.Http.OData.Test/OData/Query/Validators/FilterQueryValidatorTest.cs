@@ -48,11 +48,185 @@ namespace System.Web.Http.OData.Query.Validators
             }
         }
 
+        public static TheoryDataSet<AllowedFunctions, string, string> DateTimeFunctions
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    { AllowedFunctions.Day, "day(null) eq 20", "day" },
+                    { AllowedFunctions.Day, "day(DiscontinuedDate) eq 20", "day" },
+                    { AllowedFunctions.Hour, "hour(null) eq 10", "hour" },
+                    { AllowedFunctions.Hour, "hour(DiscontinuedDate) eq 10", "hour" },
+                    { AllowedFunctions.Minute, "minute(null) eq 20", "minute" },
+                    { AllowedFunctions.Minute, "minute(DiscontinuedDate) eq 20", "minute" },
+                    { AllowedFunctions.Month, "month(null) eq 10", "month" },
+                    { AllowedFunctions.Month, "month(DiscontinuedDate) eq 10", "month" },
+                    { AllowedFunctions.Second, "second(null) eq 20", "second" },
+                    { AllowedFunctions.Second, "second(DiscontinuedDate) eq 20", "second" },
+                    { AllowedFunctions.Year, "year(null) eq 2000", "year" },
+                    { AllowedFunctions.Year, "year(DiscontinuedDate) eq 2000", "year" },
+                };
+            }
+        }
+
+        // Some code remains supporting these TimeSpan functions e.g. in ClrCanonicalFunctions.
+        public static TheoryDataSet<AllowedFunctions, string, string> DateTimeFunctions_Unsupported
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    { AllowedFunctions.Days, "days(DiscontinuedSince) eq 6", "days" },
+                    { AllowedFunctions.Hours, "hours(DiscontinuedSince) eq 6", "hours" },
+                    { AllowedFunctions.Minutes, "minutes(DiscontinuedSince) eq 6", "minutes" },
+                    { AllowedFunctions.Months, "months(DiscontinuedSince) eq 6", "months" },
+                    { AllowedFunctions.Seconds, "seconds(DiscontinuedSince) eq 6", "seconds" },
+                    { AllowedFunctions.Years, "years(DiscontinuedSince) eq 6", "years" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, string, string> MathFunctions
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    { AllowedFunctions.Ceiling, "ceiling(null) eq 0", "ceiling" },
+                    { AllowedFunctions.Ceiling, "ceiling(Weight) eq 0", "ceiling" },
+                    { AllowedFunctions.Floor, "floor(null) eq 0", "floor" },
+                    { AllowedFunctions.Floor, "floor(Weight) eq 0", "floor" },
+                    { AllowedFunctions.Round, "round(null) eq 0", "round" },
+                    { AllowedFunctions.Round, "round(Weight) eq 0", "round" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, string, string> OtherFunctions
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    { AllowedFunctions.All, "AlternateIDs/all(t : null eq 1)", "all" },
+                    { AllowedFunctions.All, "AlternateIDs/all(t : t eq 1)", "all" },
+
+                    { AllowedFunctions.Any, "AlternateIDs/any()", "any" },
+                    { AllowedFunctions.Any, "AlternateIDs/any(t : null eq 1)", "any" },
+                    { AllowedFunctions.Any, "AlternateIDs/any(t : t eq 1)", "any" },
+
+                    { AllowedFunctions.Cast, "cast(null,'System.Web.Http.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null, 'System.Web.Http.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
+
+                    { AllowedFunctions.IsOf, "isof('System.Web.Http.OData.Query.Expressions.DerivedProduct')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null,'System.Web.Http.OData.Query.Expressions.DerivedCategory')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, 'System.Web.Http.OData.Query.Expressions.DerivedCategory')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Category,'System.Web.Http.OData.Query.Expressions.DerivedCategory')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Category, 'System.Web.Http.OData.Query.Expressions.DerivedCategory')", "isof" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, string, string> OtherFunctions_SomeSingleParameterCasts
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    // Single-parameter casts and single-parameter isof without quotes around the type name.
+                    { AllowedFunctions.Cast, "cast(System.Web.Http.OData.Query.Expressions.DerivedProduct)/DerivedProductName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast('System.Web.OData.Http.Query.Expressions.DerivedProduct')/DerivedProductName eq 'Name'", "cast" },
+
+                    { AllowedFunctions.IsOf, "isof(System.Web.Http.OData.Query.Expressions.DerivedProduct)", "isof" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, string, string> OtherFunctions_SomeTwoParameterCasts
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    // Two-parameter casts without quotes around the type name.
+                    { AllowedFunctions.Cast, "cast(null,System.Web.Http.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null, System.Web.Http.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Category,System.Web.Http.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Category, System.Web.Http.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
+
+                    { AllowedFunctions.IsOf, "isof(null,System.Web.Http.OData.Query.Expressions.DerivedCategory)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, System.Web.Http.OData.Query.Expressions.DerivedCategory)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Category,System.Web.Http.OData.Query.Expressions.DerivedCategory)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Category, System.Web.Http.OData.Query.Expressions.DerivedCategory)", "isof" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, string, string> OtherFunctions_Unsupported
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    { AllowedFunctions.Cast, "cast('System.Web.Http.OData.Query.Expressions.DerivedProduct')/DerivedProductName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Category,'System.Web.Http.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Category, 'System.Web.Http.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, string, string> StringFunctions
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    { AllowedFunctions.Concat, "concat(null,'Name') eq 'Name'", "concat" },
+                    { AllowedFunctions.Concat, "concat(null, 'Name') eq 'Name'", "concat" },
+                    { AllowedFunctions.Concat, "concat(ProductName,'Name') eq 'Name'", "concat" },
+                    { AllowedFunctions.Concat, "concat(ProductName, 'Name') eq 'Name'", "concat" },
+                    { AllowedFunctions.EndsWith, "endswith(null,'Name')", "endswith" },
+                    { AllowedFunctions.EndsWith, "endswith(null, 'Name')", "endswith" },
+                    { AllowedFunctions.EndsWith, "endswith(ProductName,'Name')", "endswith" },
+                    { AllowedFunctions.EndsWith, "endswith(ProductName, 'Name')", "endswith" },
+                    { AllowedFunctions.IndexOf, "indexof(null,'Name') eq 1", "indexof" },
+                    { AllowedFunctions.IndexOf, "indexof(null, 'Name') eq 1", "indexof" },
+                    { AllowedFunctions.IndexOf, "indexof(ProductName,'Name') eq 1", "indexof" },
+                    { AllowedFunctions.IndexOf, "indexof(ProductName, 'Name') eq 1", "indexof" },
+                    { AllowedFunctions.Length, "length(null) eq 6", "length" },
+                    { AllowedFunctions.Length, "length(ProductName) eq 6", "length" },
+                    { AllowedFunctions.StartsWith, "startswith(null,'Name')", "startswith" },
+                    { AllowedFunctions.StartsWith, "startswith(null, 'Name')", "startswith" },
+                    { AllowedFunctions.StartsWith, "startswith(ProductName,'Name')", "startswith" },
+                    { AllowedFunctions.StartsWith, "startswith(ProductName, 'Name')", "startswith" },
+                    { AllowedFunctions.Substring, "substring(null,1) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(null, 1) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(ProductName,1) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(ProductName, 1) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(null,1,2) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(null, 1, 2) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(ProductName,1,2) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(ProductName, 1, 2) eq 'Name'", "substring" },
+                    { AllowedFunctions.SubstringOf, "substringof(null,'Name')", "substringof" },
+                    { AllowedFunctions.SubstringOf, "substringof(null, 'Name')", "substringof" },
+                    { AllowedFunctions.SubstringOf, "substringof(ProductName,'Name')", "substringof" },
+                    { AllowedFunctions.SubstringOf, "substringof(ProductName, 'Name')", "substringof" },
+                    { AllowedFunctions.ToLower, "tolower(null) eq 'Name'", "tolower" },
+                    { AllowedFunctions.ToLower, "tolower(ProductName) eq 'Name'", "tolower" },
+                    { AllowedFunctions.ToUpper, "toupper(null) eq 'Name'", "toupper" },
+                    { AllowedFunctions.ToUpper, "toupper(ProductName) eq 'Name'", "toupper" },
+                    { AllowedFunctions.Trim, "trim(null) eq 'Name'", "trim" },
+                    { AllowedFunctions.Trim, "trim(ProductName) eq 'Name'", "trim" },
+                };
+            }
+        }
+
         public FilterQueryValidatorTest()
         {
             _validator = new MyFilterValidator();
             _context = ValidationTestHelper.CreateCustomerContext();
-            _productContext = ValidationTestHelper.CreateProductContext();
+            _productContext = ValidationTestHelper.CreateDerivedProductsContext();
         }
 
         [Fact]
@@ -241,21 +415,229 @@ namespace System.Web.Http.OData.Query.Validators
         }
 
         [Fact]
-        public void AllowedFunctions_ThrowsOnNotAllowedFunctions()
+        public void AllowedFunctionDataSets_CoverAllValues()
         {
             // Arrange
-            ODataValidationSettings settings = new ODataValidationSettings
+            // Get all values in the AlllowedFunctions enum.
+            var values = new HashSet<AllowedFunctions>(Enum.GetValues(typeof(AllowedFunctions)).Cast<AllowedFunctions>());
+
+            var groupValues = new[]
             {
-                AllowedFunctions = AllowedFunctions.All & ~AllowedFunctions.Length
+                AllowedFunctions.None,
+                AllowedFunctions.AllFunctions,
+                AllowedFunctions.AllDateTimeFunctions,
+                AllowedFunctions.AllMathFunctions,
+                AllowedFunctions.AllStringFunctions
             };
 
-            FilterQueryOption option = new FilterQueryOption("length(ProductName) eq 6", _productContext);
+            // No need to include OtherFunctions_* here since they cover enum values also in OtherFunctions.
+            var dataSets = DateTimeFunctions
+                .Concat(DateTimeFunctions_Unsupported)
+                .Concat(MathFunctions)
+                .Concat(OtherFunctions)
+                .Concat(StringFunctions);
+
+            // Act
+            // Remove the group items.
+            foreach (var allowed in groupValues)
+            {
+                values.Remove(allowed);
+            }
+
+            // Remove the individual items.
+            foreach (var allowed in dataSets.Select(item => (AllowedFunctions)(item[0])))
+            {
+                values.Remove(allowed);
+            }
+
+            // Assert
+            // Should have nothing left.
+            Assert.Empty(values);
+        }
+
+        [Theory]
+        [PropertyData("DateTimeFunctions")]
+        [PropertyData("MathFunctions")]
+        [PropertyData("OtherFunctions")]
+        [PropertyData("StringFunctions")]
+        public void AllowedFunctions_SucceedIfAllowed(AllowedFunctions allow, string query, string unused)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = allow,
+            };
+            var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(
-                () => _validator.Validate(option, settings),
-                "Function 'length' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.");
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
 
+        [Theory]
+        [PropertyData("DateTimeFunctions")]
+        [PropertyData("MathFunctions")]
+        [PropertyData("OtherFunctions")]
+        [PropertyData("StringFunctions")]
+        public void AllowedFunctions_ThrowOnNotAllowedFunctions(AllowedFunctions exclude, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions & ~exclude,
+            };
+            var expectedMessage = string.Format(
+                "Function '{0}' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("DateTimeFunctions")]
+        [PropertyData("MathFunctions")]
+        [PropertyData("OtherFunctions")]
+        [PropertyData("StringFunctions")]
+        public void AllowedFunctions_ThrowOnNoneAllowed(AllowedFunctions unused, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.None,
+            };
+            var expectedMessage = string.Format(
+                "Function '{0}' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("DateTimeFunctions")]
+        public void DateTimeFunctions_ThrowOnGroupExclusion(AllowedFunctions unused, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions & ~AllowedFunctions.AllDateTimeFunctions,
+            };
+            var expectedMessage = string.Format(
+                "Function '{0}' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("MathFunctions")]
+        public void MathFunctions_ThrowOnGroupExclusion(AllowedFunctions unused, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions & ~AllowedFunctions.AllMathFunctions,
+            };
+            var expectedMessage = string.Format(
+                "Function '{0}' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("StringFunctions")]
+        public void StringFunctions_ThrowOnGroupExclusion(AllowedFunctions unused, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions & ~AllowedFunctions.AllStringFunctions,
+            };
+            var expectedMessage = string.Format(
+                "Function '{0}' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("DateTimeFunctions_Unsupported")]
+        public void DateTimeFunctions_Unsupported_ThrowODataException(AllowedFunctions unused, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions,
+            };
+            var expectedMessage = string.Format(
+                "An unknown function with name '{0}' was found. " +
+                "This may also be a key lookup on a navigation property, which is not allowed.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("OtherFunctions_Unsupported")]
+        public void OtherFunctions_Unsupported_ThrowNotSupported(AllowedFunctions unused, string query, string unusedName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.None,
+            };
+            var expectedMessage =
+                "Validating OData QueryNode of kind SingleEntityFunctionCall is not supported by FilterQueryValidator.";
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<NotSupportedException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("OtherFunctions_SomeSingleParameterCasts")]
+        public void OtherFunctions_SomeSingleParameterCasts_ThrowODataException(AllowedFunctions unused, string query, string unusedName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions,
+            };
+            var expectedMessage = "Cast or IsOf Function must have a type in its arguments.";
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("OtherFunctions_SomeTwoParameterCasts")]
+        public void OtherFunctions_SomeTwoParameterCasts_ThrowODataException(AllowedFunctions unused, string query, string unusedName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions,
+            };
+            var expectedMessage = string.Format(
+                "Encountered invalid type cast. '{0}' is not assignable from '{1}'.",
+                typeof(DerivedCategory).FullName,
+                typeof(Product).FullName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Fact]

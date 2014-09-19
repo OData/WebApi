@@ -198,6 +198,9 @@
   <data name="QueryNodeBindingNotSupported" xml:space="preserve">
     <value>Binding OData QueryNode of kind {0} is not supported by {1}.</value>
   </data>
+  <data name="QueryNodeValidationNotSupported" xml:space="preserve">
+    <value>Validating OData QueryNode of kind {0} is not supported by {1}.</value>
+  </data>
   <data name="OrderByDuplicateProperty" xml:space="preserve">
     <value>Duplicate property named '{0}' is not supported in '$orderby'.</value>
   </data>

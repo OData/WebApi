@@ -153,6 +153,9 @@ namespace System.Web.Http.OData.Query.Expressions
                     case QueryNodeKind.EntityCollectionCast:
                         return BindEntityCollectionCastNode(node as EntityCollectionCastNode);
 
+                    case QueryNodeKind.CollectionFunctionCall:
+                    case QueryNodeKind.EntityCollectionFunctionCall:
+                        // Unused or have unknown uses.
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
                 }
@@ -198,6 +201,11 @@ namespace System.Web.Http.OData.Query.Expressions
                     case QueryNodeKind.SingleEntityCast:
                         return BindSingleEntityCastNode(node as SingleEntityCastNode);
 
+                    case QueryNodeKind.NamedFunctionParameter:
+                    case QueryNodeKind.SingleValueOpenPropertyAccess:
+                        // Unused or have unknown uses.
+                    case QueryNodeKind.SingleEntityFunctionCall:
+                        // Used for some 'cast' calls but not supported here or in FilterQueryValidator.
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
                 }

@@ -70,6 +70,7 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
+            ValidateFunction("all", settings);
             EnterLambda(settings);
 
             try
@@ -105,6 +106,7 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
+            ValidateFunction("any", settings);
             EnterLambda(settings);
 
             try
@@ -547,6 +549,12 @@ namespace System.Web.Http.OData.Query.Validators
                 case QueryNodeKind.EntityCollectionCast:
                     ValidateEntityCollectionCastNode(node as EntityCollectionCastNode, settings);
                     break;
+
+                case QueryNodeKind.CollectionFunctionCall:
+                case QueryNodeKind.EntityCollectionFunctionCall:
+                    // Unused or have unknown uses.
+                default:
+                    throw Error.NotSupported(SRResources.QueryNodeValidationNotSupported, node.Kind, typeof(FilterQueryValidator).Name);
             }
         }
 
@@ -607,6 +615,14 @@ namespace System.Web.Http.OData.Query.Validators
                 case QueryNodeKind.All:
                     ValidateAllNode(node as AllNode, settings);
                     break;
+
+                case QueryNodeKind.NamedFunctionParameter:
+                case QueryNodeKind.SingleValueOpenPropertyAccess:
+                    // Unused or have unknown uses.
+                case QueryNodeKind.SingleEntityFunctionCall:
+                    // Used for some 'cast' calls but not supported here or in FilterBinder.
+                default:
+                    throw Error.NotSupported(SRResources.QueryNodeValidationNotSupported, node.Kind, typeof(FilterQueryValidator).Name);
             }
         }
 
@@ -663,7 +679,7 @@ namespace System.Web.Http.OData.Query.Validators
                 case ClrCanonicalFunctions.IndexofFunctionName:
                     result = AllowedFunctions.IndexOf;
                     break;
-                case "IsOf":
+                case "isof":
                     result = AllowedFunctions.IsOf;
                     break;
                 case ClrCanonicalFunctions.LengthFunctionName:

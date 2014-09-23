@@ -163,7 +163,7 @@ namespace System.Web.Http.OData.Test
                     // Collection navigation property with casts
                     {"?$filter=Orders/any(o: o/System.Web.Http.OData.Test.DiscountedEnableQueryOrder/Discount eq 1)", "any"},
                     {"?$filter=Orders/all(o: o/System.Web.Http.OData.Test.DiscountedEnableQueryOrder/Discount eq 1)", "all"},
-                    {"?$filter=Orders/System.Web.OData.Test.DiscountedEnableQueryOrder/any()", "any"},
+                    {"?$filter=Orders/System.Web.Http.OData.Test.DiscountedEnableQueryOrder/any()", "any"},
                     {"?$filter=Orders/System.Web.Http.OData.Test.DiscountedEnableQueryOrder/any(o: o/Discount eq 1)", "any"},
                     {"?$filter=Orders/System.Web.Http.OData.Test.DiscountedEnableQueryOrder/all(o: o/Discount eq 1)", "all"},
                 };

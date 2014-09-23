@@ -1879,6 +1879,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Validating OData UnaryOperatorNode of kind {0} is not supported by {1}..
+        /// </summary>
+        internal static string UnaryNodeValidationNotSupported {
+            get {
+                return ResourceManager.GetString("UnaryNodeValidationNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The element type &apos;{0}&apos; of the given collection type &apos;{1}&apos; is not of the type &apos;{2}&apos;..
         /// </summary>
         internal static string UnexpectedElementType {

@@ -263,7 +263,7 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here
+            // No default validation logic here.
         }
 
         /// <summary>
@@ -287,7 +287,7 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here
+            // Validate child nodes but not the ConvertNode itself.
             ValidateQueryNode(convertNode.Source, settings);
         }
 
@@ -313,8 +313,6 @@ namespace System.Web.OData.Query.Validators
             {
                 throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, navigationProperty.Name));
             }
-
-            // no default validation logic here
 
             // recursion
             if (sourceNode != null)
@@ -344,7 +342,7 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here
+            // No default validation logic here.
         }
 
         /// <summary>
@@ -368,14 +366,13 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // Check whether the property is not filterable
+            // Check whether the property is filterable.
             IEdmProperty property = propertyAccessNode.Property;
             if (EdmLibHelpers.IsNotFilterable(property, _model))
             {
                 throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, property.Name));
             }
 
-            // no default validation logic here 
             ValidateQueryNode(propertyAccessNode.Source, settings);
         }
 
@@ -400,7 +397,13 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here 
+            // Check whether the property is filterable.
+            IEdmProperty property = propertyAccessNode.Property;
+            if (EdmLibHelpers.IsNotFilterable(property, _model))
+            {
+                throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, property.Name));
+            }
+
             ValidateQueryNode(propertyAccessNode.Source, settings);
         }
 
@@ -484,6 +487,9 @@ namespace System.Web.OData.Query.Validators
                         throw new ODataException(Error.Format(SRResources.NotAllowedLogicalOperator, unaryOperatorNode.OperatorKind, "AllowedLogicalOperators"));
                     }
                     break;
+
+                default:
+                    throw Error.NotSupported(SRResources.UnaryNodeValidationNotSupported, unaryOperatorNode.OperatorKind, typeof(FilterQueryValidator).Name);
             }
         }
 

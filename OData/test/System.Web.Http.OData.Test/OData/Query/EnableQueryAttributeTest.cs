@@ -795,6 +795,95 @@ namespace System.Web.Http.OData.Query
         }
 
         [Fact]
+        public void SingleOrDefault_DisposeCalled_EmptySequence()
+        {
+            // Arrange
+            var enumerator = new Mock<IEnumerator>(MockBehavior.Strict);
+            enumerator.Setup(mock => mock.MoveNext()).Returns(false);
+
+            var disposable = enumerator.As<IDisposable>();
+            disposable.Setup(mock => mock.Dispose()).Verifiable();
+
+            var queryable = new Mock<IQueryable>(MockBehavior.Strict);
+            queryable.Setup(mock => mock.GetEnumerator()).Returns(enumerator.Object);
+
+            var actionDescriptor = new ReflectedHttpActionDescriptor
+            {
+                Configuration = new HttpConfiguration(),
+                MethodInfo = GetType().GetMethod("SomeAction", BindingFlags.Instance | BindingFlags.NonPublic),
+                ControllerDescriptor = new HttpControllerDescriptor { ControllerName = "SomeName" }
+            };
+
+            // Act
+            EnableQueryAttribute.SingleOrDefault(queryable.Object, actionDescriptor);
+
+            // Assert
+            disposable.Verify();
+        }
+
+        [Fact]
+        public void SingleOrDefault_DisposeCalled_OneElementInSequence()
+        {
+            // Arrange
+            var enumerator = new Mock<IEnumerator>(MockBehavior.Strict);
+            enumerator.SetupSequence(mock => mock.MoveNext()).Returns(true).Returns(false);
+            enumerator.SetupGet(mock => mock.Current).Returns(new Customer());
+
+            var disposable = enumerator.As<IDisposable>();
+            disposable.Setup(mock => mock.Dispose()).Verifiable();
+
+            var queryable = new Mock<IQueryable>(MockBehavior.Strict);
+            queryable.Setup(mock => mock.GetEnumerator()).Returns(enumerator.Object);
+
+            var actionDescriptor = new ReflectedHttpActionDescriptor
+            {
+                Configuration = new HttpConfiguration(),
+                MethodInfo = GetType().GetMethod("SomeAction", BindingFlags.Instance | BindingFlags.NonPublic),
+                ControllerDescriptor = new HttpControllerDescriptor { ControllerName = "SomeName" }
+            };
+
+            // Act
+            EnableQueryAttribute.SingleOrDefault(queryable.Object, actionDescriptor);
+
+            // Assert
+            disposable.Verify();
+        }
+
+        public void SingleOrDefault_DisposeCalled_MultipleElementsInSequence()
+        {
+            // Arrange
+            var enumerator = new Mock<IEnumerator>(MockBehavior.Strict);
+            enumerator.Setup(mock => mock.MoveNext()).Returns(true);
+            enumerator.SetupGet(mock => mock.Current).Returns(new Customer());
+
+            var disposable = enumerator.As<IDisposable>();
+            disposable.Setup(mock => mock.Dispose()).Verifiable();
+
+            var queryable = new Mock<IQueryable>(MockBehavior.Strict);
+            queryable.Setup(mock => mock.GetEnumerator()).Returns(enumerator.Object);
+
+            var actionDescriptor = new ReflectedHttpActionDescriptor
+            {
+                Configuration = new HttpConfiguration(),
+                MethodInfo = GetType().GetMethod("SomeAction", BindingFlags.Instance | BindingFlags.NonPublic),
+                ControllerDescriptor = new HttpControllerDescriptor { ControllerName = "SomeName" }
+            };
+
+            // Act (will throw)
+            try
+            {
+                EnableQueryAttribute.SingleOrDefault(queryable.Object, actionDescriptor);
+            }
+            catch
+            {
+                // Other tests confirm the Exception.
+            }
+
+            // Assert
+            disposable.Verify();
+        }
+
+        [Fact]
         public void OnActionExecuted_SingleResult_ReturnsSingleItemEvenIfThereIsNoSelectExpand()
         {
             Customer customer = new Customer();

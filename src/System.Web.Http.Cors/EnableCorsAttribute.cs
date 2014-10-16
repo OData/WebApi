@@ -27,7 +27,13 @@ namespace System.Web.Http.Cors
         /// </summary>
         /// <param name="origins">Comma-separated list of origins that are allowed to access the resource. Use "*" to allow all.</param>
         /// <param name="headers">Comma-separated list of headers that are supported by the resource. Use "*" to allow all. Use null or empty string to allow none.</param>
-        /// <param name="methods">Comma-separated list of methods that are supported by the resource. Use "*" to allow all. Use null or empty string to allow none.</param>
+        /// <param name="methods">
+        /// Comma-separated list of methods that are supported by the resource. Use "*" to allow all. Use null or empty string to allow none.
+        /// Note:
+        /// Http verbs are case-sensitive, if you don't use "*", you should use upper case when specifying GET, PUT, POST, DELETE etc.
+        /// For example:
+        /// var cors = new EnableCorsAttribute("http://localhost:1234", "*", "GET,PUT,POST,DELETE");
+        /// </param>
         public EnableCorsAttribute(string origins, string headers, string methods)
             : this(origins, headers, methods, null)
         {
@@ -38,7 +44,13 @@ namespace System.Web.Http.Cors
         /// </summary>
         /// <param name="origins">Comma-separated list of origins that are allowed to access the resource. Use "*" to allow all.</param>
         /// <param name="headers">Comma-separated list of headers that are supported by the resource. Use "*" to allow all. Use null or empty string to allow none.</param>
-        /// <param name="methods">Comma-separated list of methods that are supported by the resource. Use "*" to allow all. Use null or empty string to allow none.</param>
+        /// <param name="methods">
+        /// Comma-separated list of methods that are supported by the resource. Use "*" to allow all. Use null or empty string to allow none.
+        /// Note:
+        /// Http verbs are case-sensitive, if you don't use "*", you should use upper case when specifying GET, PUT, POST, DELETE etc.
+        /// For example:
+        /// var cors = new EnableCorsAttribute("http://localhost:1234", "*", "GET,PUT,POST,DELETE");
+        /// </param>
         /// <param name="exposedHeaders">Comma-separated list of headers that the resource might use and can be exposed. Use null or empty string to expose none.</param>
         public EnableCorsAttribute(string origins, string headers, string methods, string exposedHeaders)
         {

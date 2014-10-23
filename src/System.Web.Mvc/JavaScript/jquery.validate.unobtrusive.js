@@ -372,7 +372,15 @@
         $.each(splitAndTrim(options.params.additionalfields || options.element.name), function (i, fieldName) {
             var paramName = appendModelPrefix(fieldName, prefix);
             value.data[paramName] = function () {
-                return $(options.form).find(":input").filter("[name='" + escapeAttributeValue(paramName) + "']").val();
+                var field = $(options.form).find(":input").filter("[name='" + escapeAttributeValue(paramName) + "']");
+                // For checkboxes and radio buttons, only pick up values from checked fields.
+                if (field.is(":checkbox")) {
+                    return field.filter(":checked").val() || field.filter(":hidden").val() || '';
+                }
+                else if (field.is(":radio")) {
+                    return field.filter(":checked").val() || '';
+                }
+                return field.val();
             };
         });
 

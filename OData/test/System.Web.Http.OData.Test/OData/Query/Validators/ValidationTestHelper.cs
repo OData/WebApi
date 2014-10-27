@@ -20,6 +20,11 @@ namespace System.Web.Http.OData.Query.Validators
             return new ODataQueryContext(GetProductsModel(), typeof(Product));
         }
 
+        internal static ODataQueryContext CreateDerivedProductsContext()
+        {
+            return new ODataQueryContext(GetDerivedProductsModel(), typeof(Product));
+        }
+
         private static IEdmModel GetCustomersModel()
         {
             HttpConfiguration configuration = new HttpConfiguration();
@@ -32,11 +37,26 @@ namespace System.Web.Http.OData.Query.Validators
 
         private static IEdmModel GetProductsModel()
         {
+            var builder = GetProductsBuilder();
+            return builder.GetEdmModel();
+        }
+
+        private static IEdmModel GetDerivedProductsModel()
+        {
+            var builder = GetProductsBuilder();
+            builder.EntitySet<Product>("Product");
+            builder.Entity<DerivedProduct>().DerivesFrom<Product>();
+            builder.Entity<DerivedCategory>().DerivesFrom<Category>();
+            return builder.GetEdmModel();
+        }
+
+        private static ODataConventionModelBuilder GetProductsBuilder()
+        {
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(typeof(Product)));
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
             builder.EntitySet<Product>("Product");
-            return builder.GetEdmModel();
+            return builder;
         }
     }
 }

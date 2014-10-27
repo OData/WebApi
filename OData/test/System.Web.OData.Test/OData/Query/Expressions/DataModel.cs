@@ -26,11 +26,15 @@ namespace System.Web.OData.Query.Expressions
         public bool? Discontinued { get; set; }
         public DateTimeOffset? DiscontinuedDate { get; set; }
         public DateTimeOffset NonNullableDiscontinuedDate { get; set; }
+        [NotFilterable]
+        public DateTimeOffset NotFilterableDiscontinuedDate { get; set; }
 
         public DateTimeOffset DiscontinuedOffset { get; set; }
         public TimeSpan DiscontinuedSince { get; set; }
 
         public ushort? UnsignedReorderLevel { get; set; }
+
+        public SimpleEnum Ranking { get; set; }
 
         public Category Category { get; set; }
 
@@ -38,6 +42,8 @@ namespace System.Web.OData.Query.Expressions
 
         public int[] AlternateIDs { get; set; }
         public Address[] AlternateAddresses { get; set; }
+        [NotFilterable]
+        public Address[] NotFilterableAlternateAddresses { get; set; }
     }
 
     public class Category

@@ -75,6 +75,7 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
+            ValidateFunction("all", settings);
             EnterLambda(settings);
 
             try
@@ -110,6 +111,7 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
+            ValidateFunction("any", settings);
             EnterLambda(settings);
 
             try
@@ -261,7 +263,7 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here
+            // No default validation logic here.
         }
 
         /// <summary>
@@ -285,7 +287,7 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here
+            // Validate child nodes but not the ConvertNode itself.
             ValidateQueryNode(convertNode.Source, settings);
         }
 
@@ -311,8 +313,6 @@ namespace System.Web.OData.Query.Validators
             {
                 throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, navigationProperty.Name));
             }
-
-            // no default validation logic here
 
             // recursion
             if (sourceNode != null)
@@ -342,7 +342,7 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here
+            // No default validation logic here.
         }
 
         /// <summary>
@@ -366,14 +366,13 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // Check whether the property is not filterable
+            // Check whether the property is filterable.
             IEdmProperty property = propertyAccessNode.Property;
             if (EdmLibHelpers.IsNotFilterable(property, _model))
             {
                 throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, property.Name));
             }
 
-            // no default validation logic here 
             ValidateQueryNode(propertyAccessNode.Source, settings);
         }
 
@@ -398,7 +397,13 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here 
+            // Check whether the property is filterable.
+            IEdmProperty property = propertyAccessNode.Property;
+            if (EdmLibHelpers.IsNotFilterable(property, _model))
+            {
+                throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, property.Name));
+            }
+
             ValidateQueryNode(propertyAccessNode.Source, settings);
         }
 
@@ -432,6 +437,35 @@ namespace System.Web.OData.Query.Validators
         }
 
         /// <summary>
+        /// Override this method to validate single entity function calls, such as 'cast'.
+        /// </summary>
+        /// <param name="node">The node to validate.</param>
+        /// <param name="settings">The settings to use while validating.</param>
+        /// <remarks>
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit
+        /// testing scenarios and is not intended to be called from user code. Call the Validate method to validate a
+        /// <see cref="FilterQueryOption" /> instance.
+        /// </remarks>
+        public virtual void ValidateSingleEntityFunctionCallNode(SingleEntityFunctionCallNode node, ODataValidationSettings settings)
+        {
+            if (node == null)
+            {
+                throw Error.ArgumentNull("node");
+            }
+
+            if (settings == null)
+            {
+                throw Error.ArgumentNull("settings");
+            }
+
+            ValidateFunction(node.Name, settings);
+            foreach (QueryNode argumentNode in node.Parameters)
+            {
+                ValidateQueryNode(argumentNode, settings);
+            }
+        }
+
+        /// <summary>
         /// Override this method to validate the Not operator.
         /// </summary>
         /// <remarks>
@@ -453,6 +487,9 @@ namespace System.Web.OData.Query.Validators
                         throw new ODataException(Error.Format(SRResources.NotAllowedLogicalOperator, unaryOperatorNode.OperatorKind, "AllowedLogicalOperators"));
                     }
                     break;
+
+                default:
+                    throw Error.NotSupported(SRResources.UnaryNodeValidationNotSupported, unaryOperatorNode.OperatorKind, typeof(FilterQueryValidator).Name);
             }
         }
 
@@ -566,6 +603,14 @@ namespace System.Web.OData.Query.Validators
                 case QueryNodeKind.EntityCollectionCast:
                     ValidateEntityCollectionCastNode(node as EntityCollectionCastNode, settings);
                     break;
+
+                case QueryNodeKind.CollectionFunctionCall:
+                case QueryNodeKind.EntityCollectionFunctionCall:
+                case QueryNodeKind.CollectionOpenPropertyAccess:
+                case QueryNodeKind.CollectionPropertyCast:
+                    // Unused or have unknown uses.
+                default:
+                    throw Error.NotSupported(SRResources.QueryNodeValidationNotSupported, node.Kind, typeof(FilterQueryValidator).Name);
             }
         }
 
@@ -610,6 +655,10 @@ namespace System.Web.OData.Query.Validators
                     ValidateSingleValueFunctionCallNode(node as SingleValueFunctionCallNode, settings);
                     break;
 
+                case QueryNodeKind.SingleEntityFunctionCall:
+                    ValidateSingleEntityFunctionCallNode((SingleEntityFunctionCallNode)node, settings);
+                    break;
+
                 case QueryNodeKind.SingleNavigationNode:
                     SingleNavigationNode navigationNode = node as SingleNavigationNode;
                     ValidateNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty, settings);
@@ -626,6 +675,17 @@ namespace System.Web.OData.Query.Validators
                 case QueryNodeKind.All:
                     ValidateAllNode(node as AllNode, settings);
                     break;
+
+                case QueryNodeKind.NamedFunctionParameter:
+                case QueryNodeKind.SingleValueOpenPropertyAccess:
+                case QueryNodeKind.ParameterAlias:
+                case QueryNodeKind.EntitySet:
+                case QueryNodeKind.KeyLookup:
+                case QueryNodeKind.SearchTerm:
+                case QueryNodeKind.SingleValueCast:
+                    // Unused or have unknown uses.
+                default:
+                    throw Error.NotSupported(SRResources.QueryNodeValidationNotSupported, node.Kind, typeof(FilterQueryValidator).Name);
             }
         }
 
@@ -685,7 +745,7 @@ namespace System.Web.OData.Query.Validators
                 case ClrCanonicalFunctions.IndexofFunctionName:
                     result = AllowedFunctions.IndexOf;
                     break;
-                case "IsOf":
+                case "isof":
                     result = AllowedFunctions.IsOf;
                     break;
                 case ClrCanonicalFunctions.LengthFunctionName:

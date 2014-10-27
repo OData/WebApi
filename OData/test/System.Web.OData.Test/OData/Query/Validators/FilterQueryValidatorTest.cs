@@ -48,11 +48,396 @@ namespace System.Web.OData.Query.Validators
             }
         }
 
+        public static TheoryDataSet<AllowedArithmeticOperators, string, string> ArithmeticOperators
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedArithmeticOperators, string, string>
+                {
+                    { AllowedArithmeticOperators.Add, "UnitPrice add 0 eq 23", "Add" },
+                    { AllowedArithmeticOperators.Divide, "UnitPrice div 23 eq 1", "Divide" },
+                    { AllowedArithmeticOperators.Modulo, "UnitPrice mod 23 eq 0", "Modulo" },
+                    { AllowedArithmeticOperators.Multiply, "UnitPrice mul 1 eq 23", "Multiply" },
+                    { AllowedArithmeticOperators.Subtract, "UnitPrice sub 0 eq 23", "Subtract" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<string> ArithmeticOperators_CheckArguments
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    { "day(DiscontinuedDate) add 0 eq 23" },
+                    { "day(DiscontinuedDate) div 23 eq 1" },
+                    { "day(DiscontinuedDate) mod 23 eq 0" },
+                    { "day(DiscontinuedDate) mul 1 eq 23" },
+                    { "day(DiscontinuedDate) sub 0 eq 23" },
+                    { "0 add day(DiscontinuedDate) eq 23" },
+                    { "23 div day(DiscontinuedDate) eq 1" },
+                    { "23 mod day(DiscontinuedDate) eq 0" },
+                    { "1 mul day(DiscontinuedDate) eq 23" },
+                    { "0 sub day(DiscontinuedDate) eq -23" },
+                };
+            }
+        }
+
+        // No support for OData v4 functions:
+        // date, fractionalseconds, maxdatetime, mindatetime, now, time, totaloffsetminutes, or totalseconds?
+        public static TheoryDataSet<AllowedFunctions, string, string> DateTimeFunctions
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    { AllowedFunctions.Day, "day(null) eq 20", "day" },
+                    { AllowedFunctions.Day, "day(DiscontinuedDate) eq 20", "day" },
+                    { AllowedFunctions.Hour, "hour(null) eq 10", "hour" },
+                    { AllowedFunctions.Hour, "hour(DiscontinuedDate) eq 10", "hour" },
+                    { AllowedFunctions.Minute, "minute(null) eq 20", "minute" },
+                    { AllowedFunctions.Minute, "minute(DiscontinuedDate) eq 20", "minute" },
+                    { AllowedFunctions.Month, "month(null) eq 10", "month" },
+                    { AllowedFunctions.Month, "month(DiscontinuedDate) eq 10", "month" },
+                    { AllowedFunctions.Second, "second(null) eq 20", "second" },
+                    { AllowedFunctions.Second, "second(DiscontinuedDate) eq 20", "second" },
+                    { AllowedFunctions.Year, "year(null) eq 2000", "year" },
+                    { AllowedFunctions.Year, "year(DiscontinuedDate) eq 2000", "year" },
+                };
+            }
+        }
+
+        // Not part of OData v4 but some code remains supporting these TimeSpan functions e.g. in ClrCanonicalFunctions.
+        public static TheoryDataSet<AllowedFunctions, string, string> DateTimeFunctions_Unsupported
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    { AllowedFunctions.Days, "days(DiscontinuedSince) eq 6", "days" },
+                    { AllowedFunctions.Hours, "hours(DiscontinuedSince) eq 6", "hours" },
+                    { AllowedFunctions.Minutes, "minutes(DiscontinuedSince) eq 6", "minutes" },
+                    { AllowedFunctions.Months, "months(DiscontinuedSince) eq 6", "months" },
+                    { AllowedFunctions.Seconds, "seconds(DiscontinuedSince) eq 6", "seconds" },
+                    { AllowedFunctions.Years, "years(DiscontinuedSince) eq 6", "years" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, string, string> MathFunctions
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    { AllowedFunctions.Ceiling, "ceiling(null) eq 0", "ceiling" },
+                    { AllowedFunctions.Ceiling, "ceiling(Weight) eq 0", "ceiling" },
+                    { AllowedFunctions.Floor, "floor(null) eq 0", "floor" },
+                    { AllowedFunctions.Floor, "floor(Weight) eq 0", "floor" },
+                    { AllowedFunctions.Round, "round(null) eq 0", "round" },
+                    { AllowedFunctions.Round, "round(Weight) eq 0", "round" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, string, string> OtherFunctions
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    { AllowedFunctions.All, "AlternateIDs/all(t : null eq 1)", "all" },
+                    { AllowedFunctions.All, "AlternateIDs/all(t : t eq 1)", "all" },
+                    { AllowedFunctions.All, "AlternateAddresses/all(t : null eq 'Redmond')", "all" },
+                    { AllowedFunctions.All, "AlternateAddresses/all(t : t/City eq 'Redmond')", "all" },
+                    { AllowedFunctions.All, "Category/QueryableProducts/all(t : null eq 'Name')", "all" },
+                    { AllowedFunctions.All, "Category/QueryableProducts/all(t : t/ProductName eq 'Name')", "all" },
+                    { AllowedFunctions.All, "Category/EnumerableProducts/all(t : null eq 'Name')", "all" },
+                    { AllowedFunctions.All, "Category/EnumerableProducts/all(t : t/ProductName eq 'Name')", "all" },
+
+                    { AllowedFunctions.Any, "AlternateIDs/any()", "any" },
+                    { AllowedFunctions.Any, "AlternateIDs/any(t : null eq 1)", "any" },
+                    { AllowedFunctions.Any, "AlternateIDs/any(t : t eq 1)", "any" },
+                    { AllowedFunctions.Any, "AlternateAddresses/any()", "any" },
+                    { AllowedFunctions.Any, "AlternateAddresses/any(t : null eq 'Redmond')", "any" },
+                    { AllowedFunctions.Any, "AlternateAddresses/any(t : t/City eq 'Redmond')", "any" },
+                    { AllowedFunctions.Any, "Category/QueryableProducts/any()", "any" },
+                    { AllowedFunctions.Any, "Category/QueryableProducts/any(t : null eq 'Name')", "any" },
+                    { AllowedFunctions.Any, "Category/QueryableProducts/any(t : t/ProductName eq 'Name')", "any" },
+                    { AllowedFunctions.Any, "Category/EnumerableProducts/any()", "any" },
+                    { AllowedFunctions.Any, "Category/EnumerableProducts/any(t : null eq 'Name')", "any" },
+                    { AllowedFunctions.Any, "Category/EnumerableProducts/any(t : t/ProductName eq 'Name')", "any" },
+
+                    { AllowedFunctions.Cast, "cast('Edm.Int64') eq 0", "cast" },
+                    { AllowedFunctions.Cast, "cast(Edm.String) eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast('Edm.String') eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast('System.Web.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
+                    { AllowedFunctions.Cast, "cast('System.Web.OData.Query.Expressions.DerivedProduct')/DerivedProductName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null,'Edm.Int64') eq 0", "cast" },
+                    { AllowedFunctions.Cast, "cast(null, 'Edm.Int64') eq 0", "cast" },
+                    { AllowedFunctions.Cast, "cast(null,Edm.String) eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null, Edm.String) eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null,'Edm.String') eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null, 'Edm.String') eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null,'Microsoft.TestCommon.Types.SimpleEnum') eq Microsoft.TestCommon.Types.SimpleEnum'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null, 'Microsoft.TestCommon.Types.SimpleEnum') eq Microsoft.TestCommon.Types.SimpleEnum'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null,'System.Web.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null, 'System.Web.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Microsoft.TestCommon.Types.SimpleEnum'First','Edm.String') eq 'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Microsoft.TestCommon.Types.SimpleEnum'First', 'Edm.String') eq 'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(CategoryID,'Edm.Int64') eq 0", "cast" },
+                    { AllowedFunctions.Cast, "cast(CategoryID, 'Edm.Int64') eq 0", "cast" },
+                    { AllowedFunctions.Cast, "cast(ReorderLevel,Edm.String) eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(ReorderLevel, Edm.String) eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(ReorderLevel,'Edm.String') eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(ReorderLevel, 'Edm.String') eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Ranking,'Edm.String') eq 'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Ranking, 'Edm.String') eq 'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(ProductName,'Microsoft.TestCommon.Types.SimpleEnum') eq Microsoft.TestCommon.Types.SimpleEnum'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(ProductName, 'Microsoft.TestCommon.Types.SimpleEnum') eq Microsoft.TestCommon.Types.SimpleEnum'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(SupplierAddress,'System.Web.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
+                    { AllowedFunctions.Cast, "cast(SupplierAddress, 'System.Web.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Category,'System.Web.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Category, 'System.Web.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
+
+                    { AllowedFunctions.IsOf, "isof('Edm.Int64')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Edm.String)", "isof" },
+                    { AllowedFunctions.IsOf, "isof('Edm.String')", "isof" },
+                    { AllowedFunctions.IsOf, "isof('Microsoft.TestCommon.Types.SimpleEnum')", "isof" },
+                    { AllowedFunctions.IsOf, "isof('System.Web.OData.Query.Expressions.Address')", "isof" },
+                    { AllowedFunctions.IsOf, "isof('System.Web.OData.Query.Expressions.DerivedCategory')", "isof" },
+                    { AllowedFunctions.IsOf, "isof('System.Web.OData.Query.Expressions.DerivedProduct')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null,'Edm.Int64')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, 'Edm.Int64')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null,Edm.String)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, Edm.String)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null,'Edm.String')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, 'Edm.String')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null,'Microsoft.TestCommon.Types.SimpleEnum')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, 'Microsoft.TestCommon.Types.SimpleEnum')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null,'System.Web.OData.Query.Expressions.Address')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, 'System.Web.OData.Query.Expressions.Address')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null,'System.Web.OData.Query.Expressions.DerivedCategory')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, 'System.Web.OData.Query.Expressions.DerivedCategory')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(CategoryID,'Edm.Int64')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(CategoryID, 'Edm.Int64')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(ReorderLevel,Edm.String)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(ReorderLevel, Edm.String)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(ReorderLevel,'Edm.String')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(ReorderLevel, 'Edm.String')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Ranking,'Microsoft.TestCommon.Types.SimpleEnum')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Ranking, 'Microsoft.TestCommon.Types.SimpleEnum')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(SupplierAddress,'System.Web.OData.Query.Expressions.Address')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(SupplierAddress, 'System.Web.OData.Query.Expressions.Address')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Category,'System.Web.OData.Query.Expressions.DerivedCategory')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Category, 'System.Web.OData.Query.Expressions.DerivedCategory')", "isof" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, string, string> OtherFunctions_SomeSingleParameterCasts
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    // Single-parameter casts without quotes around the type name.
+                    { AllowedFunctions.Cast, "cast(System.Web.OData.Query.Expressions.DerivedProduct)/DerivedProductName eq 'Name'", "cast" },
+                    { AllowedFunctions.IsOf, "isof(System.Web.OData.Query.Expressions.DerivedProduct)", "isof" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, string, string> OtherFunctions_SomeTwoParameterCasts
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    // Two-parameter casts without quotes around the type name.
+                    { AllowedFunctions.Cast, "cast(null,System.Web.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null, System.Web.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Category,System.Web.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Category, System.Web.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
+
+                    { AllowedFunctions.IsOf, "isof(null,System.Web.OData.Query.Expressions.DerivedCategory)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, System.Web.OData.Query.Expressions.DerivedCategory)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Category,System.Web.OData.Query.Expressions.DerivedCategory)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Category, System.Web.OData.Query.Expressions.DerivedCategory)", "isof" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, string, string> OtherFunctions_SomeQuotedTwoParameterCasts
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    // Cast null to an entity type. Note 'isof' with same arguments is fine.
+                    { AllowedFunctions.Cast, "cast(null,'System.Web.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null, 'System.Web.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, string, string> StringFunctions
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, string, string>
+                {
+                    { AllowedFunctions.Concat, "concat(null,'Name') eq 'Name'", "concat" },
+                    { AllowedFunctions.Concat, "concat(null, 'Name') eq 'Name'", "concat" },
+                    { AllowedFunctions.Concat, "concat(ProductName,'Name') eq 'Name'", "concat" },
+                    { AllowedFunctions.Concat, "concat(ProductName, 'Name') eq 'Name'", "concat" },
+                    { AllowedFunctions.EndsWith, "endswith(null,'Name')", "endswith" },
+                    { AllowedFunctions.EndsWith, "endswith(null, 'Name')", "endswith" },
+                    { AllowedFunctions.EndsWith, "endswith(ProductName,'Name')", "endswith" },
+                    { AllowedFunctions.EndsWith, "endswith(ProductName, 'Name')", "endswith" },
+                    { AllowedFunctions.IndexOf, "indexof(null,'Name') eq 1", "indexof" },
+                    { AllowedFunctions.IndexOf, "indexof(null, 'Name') eq 1", "indexof" },
+                    { AllowedFunctions.IndexOf, "indexof(ProductName,'Name') eq 1", "indexof" },
+                    { AllowedFunctions.IndexOf, "indexof(ProductName, 'Name') eq 1", "indexof" },
+                    { AllowedFunctions.Length, "length(null) eq 6", "length" },
+                    { AllowedFunctions.Length, "length(ProductName) eq 6", "length" },
+                    { AllowedFunctions.StartsWith, "startswith(null,'Name')", "startswith" },
+                    { AllowedFunctions.StartsWith, "startswith(null, 'Name')", "startswith" },
+                    { AllowedFunctions.StartsWith, "startswith(ProductName,'Name')", "startswith" },
+                    { AllowedFunctions.StartsWith, "startswith(ProductName, 'Name')", "startswith" },
+                    { AllowedFunctions.Substring, "substring(null,1) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(null, 1) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(ProductName,1) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(ProductName, 1) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(null,1,2) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(null, 1, 2) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(ProductName,1,2) eq 'Name'", "substring" },
+                    { AllowedFunctions.Substring, "substring(ProductName, 1, 2) eq 'Name'", "substring" },
+                    // Contains isn't in `AllowedFunctions` with expected name.
+                    { AllowedFunctions.SubstringOf, "contains(null,'Name')", "contains" },
+                    { AllowedFunctions.SubstringOf, "contains(null, 'Name')", "contains" },
+                    { AllowedFunctions.SubstringOf, "contains(ProductName,'Name')", "contains" },
+                    { AllowedFunctions.SubstringOf, "contains(ProductName, 'Name')", "contains" },
+                    { AllowedFunctions.ToLower, "tolower(null) eq 'Name'", "tolower" },
+                    { AllowedFunctions.ToLower, "tolower(ProductName) eq 'Name'", "tolower" },
+                    { AllowedFunctions.ToUpper, "toupper(null) eq 'Name'", "toupper" },
+                    { AllowedFunctions.ToUpper, "toupper(ProductName) eq 'Name'", "toupper" },
+                    { AllowedFunctions.Trim, "trim(null) eq 'Name'", "trim" },
+                    { AllowedFunctions.Trim, "trim(ProductName) eq 'Name'", "trim" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedFunctions, AllowedFunctions, string, string> Functions_CheckArguments
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedFunctions, AllowedFunctions, string, string>
+                {
+                    { AllowedFunctions.Ceiling, AllowedFunctions.IndexOf, "ceiling(indexof(ProductName, 'Name')) eq 0", "indexof" },
+                    { AllowedFunctions.Floor, AllowedFunctions.IndexOf, "floor(indexof(ProductName, 'Name')) eq 0", "indexof" },
+                    { AllowedFunctions.Round, AllowedFunctions.IndexOf, "round(indexof(ProductName, 'Name')) eq 0", "indexof" },
+
+                    { AllowedFunctions.All, AllowedFunctions.IndexOf, "AlternateAddresses/all(t : indexof(t/City, 'Name') eq 3)", "indexof" },
+                    { AllowedFunctions.Any, AllowedFunctions.IndexOf, "AlternateAddresses/any(t : indexof(t/City, 'Name') eq 3)", "indexof" },
+                    { AllowedFunctions.Cast, AllowedFunctions.IndexOf, "cast(indexof(ProductName, 'Name'), 'Edm.Int64') eq 0", "indexof" },
+                    { AllowedFunctions.IsOf, AllowedFunctions.IndexOf, "isof(indexof(ProductName, 'Name'), 'Edm.Int64')", "indexof" },
+
+                    { AllowedFunctions.Concat, AllowedFunctions.Substring, "concat(substring(ProductName, 1), 'Name') eq 'Name'", "substring" },
+                    { AllowedFunctions.Concat, AllowedFunctions.Substring, "concat(ProductName, substring(ProductName, 1)) eq 'Name'", "substring" },
+                    { AllowedFunctions.EndsWith, AllowedFunctions.Substring, "endswith(substring(ProductName, 1), 'Name')", "substring" },
+                    { AllowedFunctions.EndsWith, AllowedFunctions.Substring, "endswith(ProductName, substring(ProductName, 1))", "substring" },
+                    { AllowedFunctions.IndexOf, AllowedFunctions.Substring, "indexof(substring(ProductName, 1), 'Name') eq 1", "substring" },
+                    { AllowedFunctions.IndexOf, AllowedFunctions.Substring, "indexof(ProductName, substring(ProductName, 1)) eq 1", "substring" },
+                    { AllowedFunctions.Length, AllowedFunctions.Substring, "length(substring(ProductName, 1)) eq 6", "substring" },
+                    { AllowedFunctions.StartsWith, AllowedFunctions.Substring, "startswith(substring(ProductName, 1), 'Name')", "substring" },
+                    { AllowedFunctions.StartsWith, AllowedFunctions.Substring, "startswith(ProductName, substring(ProductName, 1))", "substring" },
+                    { AllowedFunctions.Substring, AllowedFunctions.Concat, "substring(concat(ProductName, 'Name'), 1) eq 'Name'", "concat" },
+                    { AllowedFunctions.Substring, AllowedFunctions.IndexOf, "substring(ProductName, indexof(ProductName, 'Name')) eq 'Name'", "indexof" },
+                    { AllowedFunctions.Substring, AllowedFunctions.Concat, "substring(concat(ProductName, 'Name'), 1, 2) eq 'Name'", "concat" },
+                    { AllowedFunctions.Substring, AllowedFunctions.IndexOf, "substring(ProductName, indexof(ProductName, 'Name'), 2) eq 'Name'", "indexof" },
+                    { AllowedFunctions.Substring, AllowedFunctions.IndexOf, "substring(ProductName, 1, indexof(ProductName, 'Name')) eq 'Name'", "indexof" },
+                    { AllowedFunctions.SubstringOf, AllowedFunctions.Substring, "contains(substring(ProductName, 1), 'Name')", "substring" },
+                    { AllowedFunctions.SubstringOf, AllowedFunctions.Substring, "contains(ProductName, substring(ProductName, 1))", "substring" },
+                    { AllowedFunctions.ToLower, AllowedFunctions.Substring, "tolower(substring(ProductName, 1)) eq 'Name'", "substring" },
+                    { AllowedFunctions.ToUpper, AllowedFunctions.Substring, "toupper(substring(ProductName, 1)) eq 'Name'", "substring" },
+                    { AllowedFunctions.Trim, AllowedFunctions.Substring, "trim(substring(ProductName, 1)) eq 'Name'", "substring" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<string, string> Functions_CheckNotFilterable
+        {
+            get
+            {
+                return new TheoryDataSet<string, string>
+                {
+                    { "day(NotFilterableDiscontinuedDate) eq 20", "NotFilterableDiscontinuedDate" },
+                    { "hour(NotFilterableDiscontinuedDate) eq 10", "NotFilterableDiscontinuedDate" },
+                    { "minute(NotFilterableDiscontinuedDate) eq 20", "NotFilterableDiscontinuedDate" },
+                    { "month(NotFilterableDiscontinuedDate) eq 10", "NotFilterableDiscontinuedDate" },
+                    { "second(NotFilterableDiscontinuedDate) eq 20", "NotFilterableDiscontinuedDate" },
+                    { "year(NotFilterableDiscontinuedDate) eq 2000", "NotFilterableDiscontinuedDate" },
+
+                    { "NotFilterableAlternateAddresses/all(t : t/City eq 'Redmond')", "NotFilterableAlternateAddresses" },
+                    { "NotFilterableAlternateAddresses/any(t : t/City eq 'Redmond')", "NotFilterableAlternateAddresses" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<AllowedLogicalOperators, string, string> LogicalOperators
+        {
+            get
+            {
+                return new TheoryDataSet<AllowedLogicalOperators, string, string>
+                {
+                    { AllowedLogicalOperators.And, "Discontinued and AlternateIDs/any()", "And" },
+                    { AllowedLogicalOperators.Equal, "UnitPrice add 0 eq UnitPrice", "Equal" },
+                    { AllowedLogicalOperators.GreaterThan, "UnitPrice add 1 gt UnitPrice", "GreaterThan" },
+                    { AllowedLogicalOperators.GreaterThanOrEqual, "UnitPrice add 0 ge UnitPrice", "GreaterThanOrEqual" },
+                    { AllowedLogicalOperators.Has, "Ranking has Microsoft.TestCommon.Types.SimpleEnum'First'", "Has" },
+                    { AllowedLogicalOperators.LessThan, "UnitPrice add -1 lt UnitPrice", "LessThan" },
+                    { AllowedLogicalOperators.LessThanOrEqual, "UnitPrice add 0 le UnitPrice", "LessThanOrEqual" },
+                    { AllowedLogicalOperators.Not, "not Discontinued", "Not" },
+                    { AllowedLogicalOperators.NotEqual, "UnitPrice add 1 ne UnitPrice", "NotEqual" },
+                    { AllowedLogicalOperators.Or, "Discontinued or AlternateIDs/any()", "Or" },
+                };
+            }
+        }
+
+        public static TheoryDataSet<string> LogicalOperators_CheckArguments
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    { "(UnitPrice add 0 eq UnitPrice) and AlternateIDs/any()" },
+                    { "UnitPrice add 0 eq UnitPrice" },
+                    { "UnitPrice add 1 gt UnitPrice" },
+                    { "UnitPrice add 0 ge UnitPrice" },
+                    { "UnitPrice add -1 lt UnitPrice" },
+                    { "UnitPrice add 0 le UnitPrice" },
+                    { "not (UnitPrice add 0 eq UnitPrice)" },
+                    { "UnitPrice add 1 ne UnitPrice" },
+                    { "(UnitPrice add 0 eq UnitPrice) or AlternateIDs/any()" },
+
+                    { "Discontinued and (UnitPrice add 0 eq UnitPrice)" },
+                    { "UnitPrice eq UnitPrice add 0" },
+                    { "UnitPrice gt UnitPrice add -1" },
+                    { "UnitPrice ge UnitPrice add 0" },
+                    { "UnitPrice lt UnitPrice add 1" },
+                    { "UnitPrice le UnitPrice add 0" },
+                    { "UnitPrice ne UnitPrice add 1" },
+                    { "Discontinued or (UnitPrice add 0 eq UnitPrice)" },
+                };
+            }
+        }
+
         public FilterQueryValidatorTest()
         {
             _validator = new MyFilterValidator();
             _context = ValidationTestHelper.CreateCustomerContext();
-            _productContext = ValidationTestHelper.CreateProductContext();
+            _productContext = ValidationTestHelper.CreateDerivedProductsContext();
         }
 
         [Fact]
@@ -67,58 +452,6 @@ namespace System.Web.OData.Query.Validators
         {
             Assert.Throws<ArgumentNullException>(() =>
                 _validator.Validate(new FilterQueryOption("Name eq 'abc'", _context), null));
-        }
-
-        [Fact]
-        public void ValidateThrowsIfSubStringIsNotAllowed()
-        {
-            Assert.DoesNotThrow(() =>
-                _validator.Validate(new FilterQueryOption("substring(Name,8,1) eq '7'", _context),
-                new ODataValidationSettings() { AllowedFunctions = AllowedFunctions.Substring }));
-
-            Assert.Throws<ODataException>(() =>
-                 _validator.Validate(new FilterQueryOption("substring(Name,8,1) eq '7'", _context),
-                new ODataValidationSettings() { AllowedFunctions = AllowedFunctions.AllMathFunctions }),
-                "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.");
-        }
-
-        [Fact]
-        public void ValidateThrowsIfNotIsNotAllowed()
-        {
-            Assert.DoesNotThrow(() =>
-                _validator.Validate(new FilterQueryOption("not (Name eq 'David')", _context),
-                new ODataValidationSettings() { AllowedLogicalOperators = AllowedLogicalOperators.Not | AllowedLogicalOperators.Equal }));
-
-            Assert.Throws<ODataException>(() =>
-                   _validator.Validate(new FilterQueryOption("not (Name eq 'David')", _context),
-                 new ODataValidationSettings() { AllowedLogicalOperators = AllowedLogicalOperators.Equal }),
-                "Logical operator 'Not' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on EnableQueryAttribute or QueryValidationSettings.");
-        }
-
-        [Fact]
-        public void ValidateThrowsIfModIsNotAllowed()
-        {
-            Assert.DoesNotThrow(() =>
-                _validator.Validate(new FilterQueryOption("Id mod 2 eq 0", _context),
-                new ODataValidationSettings() { AllowedArithmeticOperators = AllowedArithmeticOperators.All }));
-
-            Assert.Throws<ODataException>(() =>
-                   _validator.Validate(new FilterQueryOption("Id mod 2 eq 0", _context),
-                 new ODataValidationSettings() { AllowedArithmeticOperators = AllowedArithmeticOperators.Add }),
-                "Arithmetic operator 'Modulo' is not allowed. To allow it, set the 'AllowedArithmeticOperators' property on EnableQueryAttribute or QueryValidationSettings.");
-        }
-
-        [Fact]
-        public void ValidateThrowsIfHasIsNotAllowed()
-        {
-            Assert.DoesNotThrow(() =>
-                _validator.Validate(new FilterQueryOption("FavoriteColor has System.Web.OData.Builder.TestModels.Color'Red'", _context),
-                new ODataValidationSettings() { AllowedLogicalOperators = AllowedLogicalOperators.All }));
-
-            Assert.Throws<ODataException>(() =>
-                   _validator.Validate(new FilterQueryOption("FavoriteColor has System.Web.OData.Builder.TestModels.Color'Red'", _context),
-                 new ODataValidationSettings() { AllowedLogicalOperators = AllowedLogicalOperators.Equal }),
-                "Logical operator 'Has' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on EnableQueryAttribute or QueryValidationSettings.");
         }
 
         // want to test if all the virtual methods are being invoked correctly
@@ -273,55 +606,668 @@ namespace System.Web.OData.Query.Validators
         }
 
         [Fact]
-        public void AllowedArithmeticOperators_ThrowsOnNotAllowedOperators()
+        public void ArithmeticOperatorsDataSet_CoversAllValues()
         {
             // Arrange
-            ODataValidationSettings settings = new ODataValidationSettings
+            // Get all values in the AllowedArithmeticOperators enum.
+            var values = new HashSet<AllowedArithmeticOperators>(
+                Enum.GetValues(typeof(AllowedArithmeticOperators)).Cast<AllowedArithmeticOperators>());
+            var groupValues = new[]
             {
-                AllowedArithmeticOperators = AllowedArithmeticOperators.All & ~AllowedArithmeticOperators.Modulo
+                AllowedArithmeticOperators.All,
+                AllowedArithmeticOperators.None,
             };
 
-            FilterQueryOption option = new FilterQueryOption("ProductID mod 2 eq 0", _productContext);
+            // Act
+            // Remove the group items.
+            foreach (var allowed in groupValues)
+            {
+                values.Remove(allowed);
+            }
+
+            // Remove the individual items.
+            foreach (var allowed in ArithmeticOperators.Select(item => (AllowedArithmeticOperators)(item[0])))
+            {
+                values.Remove(allowed);
+            }
+
+            // Assert
+            // Should have nothing left.
+            Assert.Empty(values);
+        }
+
+        [Theory]
+        [PropertyData("ArithmeticOperators")]
+        public void AllowedArithmeticOperators_SucceedIfAllowed(AllowedArithmeticOperators allow, string query, string unused)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedArithmeticOperators = allow,
+            };
+            var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(
-                () => _validator.Validate(option, settings),
-                "Arithmetic operator 'Modulo' is not allowed. To allow it, set the 'AllowedArithmeticOperators' property on EnableQueryAttribute or QueryValidationSettings.");
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        [Theory]
+        [PropertyData("ArithmeticOperators")]
+        public void AllowedArithmeticOperators_ThrowIfNotAllowed(AllowedArithmeticOperators exclude, string query, string operatorName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedArithmeticOperators = AllowedArithmeticOperators.All & ~exclude,
+            };
+            var expectedMessage = string.Format(
+                "Arithmetic operator '{0}' is not allowed. " +
+                "To allow it, set the 'AllowedArithmeticOperators' property on EnableQueryAttribute or QueryValidationSettings.",
+                operatorName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("ArithmeticOperators")]
+        public void AllowedArithmeticOperators_ThrowIfNoneAllowed(AllowedArithmeticOperators unused, string query, string operatorName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedArithmeticOperators = AllowedArithmeticOperators.None,
+            };
+            var expectedMessage = string.Format(
+                "Arithmetic operator '{0}' is not allowed. " +
+                "To allow it, set the 'AllowedArithmeticOperators' property on EnableQueryAttribute or QueryValidationSettings.",
+                operatorName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("ArithmeticOperators_CheckArguments")]
+        public void ArithmeticOperators_CheckArguments_SucceedIfAllowed(string query)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.Day,
+            };
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        [Theory]
+        [PropertyData("ArithmeticOperators_CheckArguments")]
+        public void ArithmeticOperators_CheckArguments_ThrowIfNotAllowed(string query)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions & ~AllowedFunctions.Day,
+            };
+            var expectedMessage = string.Format(
+                "Function 'day' is not allowed. " +
+                "To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.");
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Fact]
-        public void AllowedFunctions_ThrowsOnNotAllowedFunctions()
+        public void AllowedFunctionDataSets_CoverAllValues()
         {
             // Arrange
-            ODataValidationSettings settings = new ODataValidationSettings
+            // Get all values in the AllowedFunctions enum.
+            var values = new HashSet<AllowedFunctions>(Enum.GetValues(typeof(AllowedFunctions)).Cast<AllowedFunctions>());
+
+            var groupValues = new[]
             {
-                AllowedFunctions = AllowedFunctions.All & ~AllowedFunctions.Length
+                AllowedFunctions.None,
+                AllowedFunctions.AllFunctions,
+                AllowedFunctions.AllDateTimeFunctions,
+                AllowedFunctions.AllMathFunctions,
+                AllowedFunctions.AllStringFunctions
             };
 
-            FilterQueryOption option = new FilterQueryOption("length(ProductName) eq 6", _productContext);
+            // No need to include OtherFunctions_* here since they cover enum values also in OtherFunctions.
+            var dataSets = DateTimeFunctions
+                .Concat(DateTimeFunctions_Unsupported)
+                .Concat(MathFunctions)
+                .Concat(OtherFunctions)
+                .Concat(StringFunctions);
+
+            // Act
+            // Remove the group items.
+            foreach (var allowed in groupValues)
+            {
+                values.Remove(allowed);
+            }
+
+            // Remove the individual items.
+            foreach (var allowed in dataSets.Select(item => (AllowedFunctions)(item[0])))
+            {
+                values.Remove(allowed);
+            }
+
+            // Assert
+            // Should have nothing left.
+            Assert.Empty(values);
+        }
+
+        [Theory]
+        [PropertyData("DateTimeFunctions")]
+        [PropertyData("MathFunctions")]
+        [PropertyData("OtherFunctions")]
+        [PropertyData("StringFunctions")]
+        public void AllowedFunctions_SucceedIfAllowed(AllowedFunctions allow, string query, string unused)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = allow,
+            };
+            var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(
-                () => _validator.Validate(option, settings),
-                "Function 'length' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.");
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
 
+        [Theory]
+        [PropertyData("DateTimeFunctions")]
+        [PropertyData("MathFunctions")]
+        [PropertyData("OtherFunctions")]
+        [PropertyData("StringFunctions")]
+        public void AllowedFunctions_ThrowIfNotAllowed(AllowedFunctions exclude, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions & ~exclude,
+            };
+            var expectedMessage = string.Format(
+                "Function '{0}' is not allowed. " +
+                "To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("DateTimeFunctions")]
+        [PropertyData("MathFunctions")]
+        [PropertyData("OtherFunctions")]
+        [PropertyData("StringFunctions")]
+        public void AllowedFunctions_ThrowIfNoneAllowed(AllowedFunctions unused, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.None,
+            };
+            var expectedMessage = string.Format(
+                "Function '{0}' is not allowed. " +
+                "To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("DateTimeFunctions")]
+        public void DateTimeFunctions_SucceedIfGroupAllowed(AllowedFunctions unused, string query, string unusedName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllDateTimeFunctions,
+            };
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        [Theory]
+        [PropertyData("DateTimeFunctions")]
+        public void DateTimeFunctions_ThrowIfGroupNotAllowed(AllowedFunctions unused, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions & ~AllowedFunctions.AllDateTimeFunctions,
+            };
+            var expectedMessage = string.Format(
+                "Function '{0}' is not allowed. " +
+                "To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("MathFunctions")]
+        public void MathFunctions_SucceedIfGroupAllowed(AllowedFunctions unused, string query, string unusedName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllMathFunctions,
+            };
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        [Theory]
+        [PropertyData("MathFunctions")]
+        public void MathFunctions_ThrowIfGroupNotAllowed(AllowedFunctions unused, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions & ~AllowedFunctions.AllMathFunctions,
+            };
+            var expectedMessage = string.Format(
+                "Function '{0}' is not allowed. " +
+                "To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("StringFunctions")]
+        public void StringFunctions_SucceedIfGroupAllowed(AllowedFunctions unused, string query, string unusedName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllStringFunctions,
+            };
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        [Theory]
+        [PropertyData("StringFunctions")]
+        public void StringFunctions_ThrowIfGroupNotAllowed(AllowedFunctions unused, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions & ~AllowedFunctions.AllStringFunctions,
+            };
+            var expectedMessage = string.Format(
+                "Function '{0}' is not allowed. " +
+                "To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("DateTimeFunctions_Unsupported")]
+        public void DateTimeFunctions_Unsupported_ThrowODataException(AllowedFunctions unused, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.None,
+            };
+            var expectedMessage = string.Format(
+                "An unknown function with name '{0}' was found. " +
+                "This may also be a function import or a key lookup on a navigation property, which is not allowed.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("OtherFunctions_SomeSingleParameterCasts")]
+        public void OtherFunctions_SomeSingleParameterCasts_ThrowODataException(AllowedFunctions unused, string query, string unusedName)
+        {
+            // Thrown at
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FunctionCallBinder.ValidateIsOfOrCast(BindingState state, ..., ref List<QueryNode> args) Line 600
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FunctionCallBinder.ValidateAndBuildCastArgs(BindingState state, ref List<QueryNode> args) Line 557
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FunctionCallBinder.CreateUnboundFunctionNode(FunctionCallToken functionCallToken, ..., BindingState state) Line 525
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FunctionCallBinder.BindAsBuiltInFunction(FunctionCallToken functionCallToken, ..., List<QueryNode> argumentNodes) Line 265
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FunctionCallBinder.BindFunctionCall(FunctionCallToken functionCallToken, BindingState state) Line 202
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.BindFunctionCall(FunctionCallToken functionCallToken) Line 323
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token) Line 172
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.DetermineParentNode(EndPathToken segmentToken, BindingState state) Line 188
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.BindEndPath(EndPathToken endPathToken, BindingState state) Line 138
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.BindEndPath(EndPathToken endPathToken) Line 312
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token) Line 169
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.GetOperandFromToken(BinaryOperatorKind operatorKind, QueryToken queryToken) Line 83
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken) Line 46
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken) Line 266
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token) Line 163
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FilterBinder.BindFilter(QueryToken filter) Line 51
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilterImplementation(string filter, ..., IEdmNavigationSource navigationSource) Line 250
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilter() Line 112
+            // System.Web.OData.dll!System.Web.OData.Query.FilterQueryOption.FilterClause.get() Line 99
+            // System.Web.OData.dll!System.Web.OData.Query.Validators.FilterQueryValidator.Validate(FilterQueryOption filterQueryOption, ODataValidationSettings settings) Line 54
+
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.None,
+            };
+            var expectedMessage = "Cast or IsOf Function must have a type in its arguments.";
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("OtherFunctions_SomeTwoParameterCasts")]
+        public void OtherFunctions_SomeTwoParameterCasts_ThrowODataException(AllowedFunctions unused, string query, string unusedName)
+        {
+            // Thrown at
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Metadata.UriEdmHelpers.CheckRelatedTo(IEdmType parentType, IEdmType childType) Line 108
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.DottedIdentifierBinder.BindDottedIdentifier(DottedIdentifierToken dottedIdentifierToken, BindingState state) Line 107
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.BindCast(DottedIdentifierToken dottedIdentifierToken) Line 288
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token) Line 175
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.BindFunctionParameter(FunctionParameterToken token) Line 223
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token) Line 184
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FunctionCallBinder.BindFunctionCall.AnonymousMethod__8(FunctionParameterToken ar) Line 201
+            // System.Core.dll!System.Linq.Enumerable.WhereSelectEnumerableIterator<FunctionParameterToken,QueryNode>.MoveNext() Line 285
+            // mscorlib.dll!System.Collections.Generic.List<QueryNode>.List(System.Collections.Generic.IEnumerable<QueryNode> collection) Line 105
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FunctionCallBinder.BindFunctionCall(FunctionCallToken functionCallToken, BindingState state) Line 201
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.BindFunctionCall(FunctionCallToken functionCallToken) Line 323
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token) Line 172
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.DetermineParentNode(EndPathToken segmentToken, BindingState state) Line 188
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.BindEndPath(EndPathToken endPathToken, BindingState state) Line 138
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.BindEndPath(EndPathToken endPathToken) Line 312
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token) Line 169
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.GetOperandFromToken(BinaryOperatorKind operatorKind, QueryToken queryToken) Line 83
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken) Line 46
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken) Line 266
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token) Line 163
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FilterBinder.BindFilter(QueryToken filter) Line 51
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilterImplementation(string filter, ..., IEdmNavigationSource navigationSource) Line 250
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilter() Line 112
+            // System.Web.OData.dll!System.Web.OData.Query.FilterQueryOption.FilterClause.get() Line 99
+            // System.Web.OData.dll!System.Web.OData.Query.Validators.FilterQueryValidator.Validate(FilterQueryOption filterQueryOption, ODataValidationSettings settings) Line 54
+
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.None,
+            };
+            var expectedMessage = string.Format(
+                "Encountered invalid type cast. '{0}' is not assignable from '{1}'.",
+                typeof(DerivedCategory).FullName,
+                typeof(Product).FullName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("OtherFunctions_SomeQuotedTwoParameterCasts")]
+        public void OtherFunctions_SomeQuotedTwoParameterCasts_ThrowArgumentException(AllowedFunctions unused, string query, string unusedName)
+        {
+            // Thrown at:
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Semantic.SingleValueFunctionCallNode.SingleValueFunctionCallNode(string name, ..., QueryNode source) Line 92
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Semantic.SingleValueFunctionCallNode.SingleValueFunctionCallNode(string name, ..., IEdmTypeReference returnedTypeReference) Line 63
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FunctionCallBinder.CreateUnboundFunctionNode(FunctionCallToken functionCallToken, ..., BindingState state) Line 546
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FunctionCallBinder.BindAsBuiltInFunction(FunctionCallToken functionCallToken, ..., List<QueryNode> argumentNodes) Line 265
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FunctionCallBinder.BindFunctionCall(FunctionCallToken functionCallToken, BindingState state) Line 202
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.BindFunctionCall(FunctionCallToken functionCallToken) Line 323
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token) Line 172
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.DetermineParentNode(EndPathToken segmentToken, BindingState state) Line 188
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.BindEndPath(EndPathToken endPathToken, BindingState state) Line 138
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.BindEndPath(EndPathToken endPathToken) Line 312
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token) Line 169
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.GetOperandFromToken(BinaryOperatorKind operatorKind, QueryToken queryToken) Line 83
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken) Line 46
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken) Line 266
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token) Line 163
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FilterBinder.BindFilter(QueryToken filter) Line 51
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilterImplementation(string filter, ..., IEdmNavigationSource navigationSource) Line 250
+            // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilter() Line 112
+            // System.Web.OData.dll!System.Web.OData.Query.FilterQueryOption.FilterClause.get() Line 99
+            // System.Web.OData.dll!System.Web.OData.Query.Validators.FilterQueryValidator.Validate(FilterQueryOption filterQueryOption, ODataValidationSettings settings) Line 54
+
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions,
+            };
+            var expectedMessage = "An instance of SingleValueFunctionCallNode can only be created with a primitive, " +
+                "complex or enum type. For functions returning a single entity, use SingleEntityFunctionCallNode instead.";
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("Functions_CheckArguments")]
+        public void Functions_CheckArguments_SucceedIfAllowed(AllowedFunctions outer, AllowedFunctions inner, string query, string unused)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = outer | inner,
+            };
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        [Theory]
+        [PropertyData("Functions_CheckArguments")]
+        public void Functions_CheckArguments_ThrowIfNotAllowed(AllowedFunctions outer, AllowedFunctions inner, string query, string functionName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = outer,
+            };
+            var expectedMessage = string.Format(
+                "Function '{0}' is not allowed. " +
+                "To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.",
+                functionName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("Functions_CheckNotFilterable")]
+        public void Functions_CheckNotFilterable_ThrowODataException(string query, string propertyName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedFunctions = AllowedFunctions.AllFunctions,
+            };
+            var expectedMessage = string.Format(
+                "The property '{0}' cannot be used in the $filter query option.",
+                propertyName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Fact]
-        public void AllowedLogicalOperators_ThrowsOnNotAllowedOperators()
+        public void LogicalOperatorsDataSet_CoversAllValues()
         {
             // Arrange
-            ODataValidationSettings settings = new ODataValidationSettings
+            // Get all values in the AllowedLogicalOperators enum.
+            var values = new HashSet<AllowedLogicalOperators>(
+                Enum.GetValues(typeof(AllowedLogicalOperators)).Cast<AllowedLogicalOperators>());
+            var groupValues = new[]
             {
-                AllowedLogicalOperators = AllowedLogicalOperators.All & ~AllowedLogicalOperators.NotEqual
+                AllowedLogicalOperators.All,
+                AllowedLogicalOperators.None,
             };
 
-            FilterQueryOption option = new FilterQueryOption("length(ProductName) ne 6", _productContext);
+            // Act
+            // Remove the group items.
+            foreach (var allowed in groupValues)
+            {
+                values.Remove(allowed);
+            }
+
+            // Remove the individual items.
+            foreach (var allowed in LogicalOperators.Select(item => (AllowedLogicalOperators)(item[0])))
+            {
+                values.Remove(allowed);
+            }
+
+            // Assert
+            // Should have nothing left.
+            Assert.Empty(values);
+        }
+
+        [Theory]
+        [PropertyData("LogicalOperators")]
+        public void AllowedLogicalOperators_SucceedIfAllowed(AllowedLogicalOperators allow, string query, string unused)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedLogicalOperators = allow,
+            };
+            var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(
-                () => _validator.Validate(option, settings),
-                "Logical operator 'NotEqual' is not allowed. To allow it, set the 'AllowedLogicalOperators' property on EnableQueryAttribute or QueryValidationSettings.");
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        [Theory]
+        [PropertyData("LogicalOperators")]
+        public void AllowedLogicalOperators_ThrowIfNotAllowed(AllowedLogicalOperators exclude, string query, string operatorName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedLogicalOperators = AllowedLogicalOperators.All & ~exclude,
+            };
+            var expectedMessage = string.Format(
+                "Logical operator '{0}' is not allowed. " +
+                "To allow it, set the 'AllowedLogicalOperators' property on EnableQueryAttribute or QueryValidationSettings.",
+                operatorName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("LogicalOperators")]
+        public void AllowedLogicalOperators_ThrowIfNoneAllowed(AllowedLogicalOperators unused, string query, string operatorName)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedLogicalOperators = AllowedLogicalOperators.None,
+            };
+            var expectedMessage = string.Format(
+                "Logical operator '{0}' is not allowed. " +
+                "To allow it, set the 'AllowedLogicalOperators' property on EnableQueryAttribute or QueryValidationSettings.",
+                operatorName);
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Theory]
+        [PropertyData("LogicalOperators_CheckArguments")]
+        public void LogicalOperators_CheckArguments_SucceedIfAllowed(string query)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedArithmeticOperators = AllowedArithmeticOperators.Add,
+            };
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        [Theory]
+        [PropertyData("LogicalOperators_CheckArguments")]
+        public void LogicalOperators_CheckArguments_ThrowIfNotAllowed(string query)
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedArithmeticOperators = AllowedArithmeticOperators.All & ~AllowedArithmeticOperators.Add,
+            };
+            var expectedMessage = string.Format(
+                "Arithmetic operator 'Add' is not allowed. " +
+                "To allow it, set the 'AllowedArithmeticOperators' property on EnableQueryAttribute or QueryValidationSettings.");
+            var option = new FilterQueryOption(query, _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+        }
+
+        [Fact]
+        public void ArithmeticNegation_SucceedsIfLogicalNotIsAllowed()
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedLogicalOperators = AllowedLogicalOperators.LessThan | AllowedLogicalOperators.Not,
+            };
+            var option = new FilterQueryOption("-UnitPrice lt 0", _productContext);
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+        }
+
+        // Note Negate is _not_ a logical operator.
+        [Fact]
+        public void ArithmeticNegation_ThrowsIfLogicalNotIsNotAllowed()
+        {
+            // Arrange
+            var settings = new ODataValidationSettings
+            {
+                AllowedLogicalOperators = AllowedLogicalOperators.LessThan,
+            };
+            var expectedMessage = string.Format(
+                "Logical operator 'Negate' is not allowed. " +
+                "To allow it, set the 'AllowedLogicalOperators' property on EnableQueryAttribute or QueryValidationSettings.");
+            var option = new FilterQueryOption("-UnitPrice lt 0", _productContext);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Fact]

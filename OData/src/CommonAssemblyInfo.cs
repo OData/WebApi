@@ -25,8 +25,8 @@ using System.Runtime.InteropServices;
 
 #if ASPNETODATA
 #if !BUILD_GENERATED_VERSION
-[assembly: AssemblyVersion("5.3.0.0")] // ASPNETODATA
-[assembly: AssemblyFileVersion("5.3.0.0")] // ASPNETODATA
+[assembly: AssemblyVersion("5.3.1.0")] // ASPNETODATA
+[assembly: AssemblyFileVersion("5.3.1.0")] // ASPNETODATA
 #endif
 [assembly: AssemblyProduct("Microsoft ASP.NET Web API OData")]
 #endif

@@ -159,6 +159,11 @@ namespace System.Web.OData.Query.Expressions
                     case QueryNodeKind.EntityCollectionCast:
                         return BindEntityCollectionCastNode(node as EntityCollectionCastNode);
 
+                    case QueryNodeKind.CollectionFunctionCall:
+                    case QueryNodeKind.EntityCollectionFunctionCall:
+                    case QueryNodeKind.CollectionOpenPropertyAccess:
+                    case QueryNodeKind.CollectionPropertyCast:
+                        // Unused or have unknown uses.
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
                 }
@@ -207,6 +212,14 @@ namespace System.Web.OData.Query.Expressions
                     case QueryNodeKind.SingleEntityFunctionCall:
                         return BindSingleEntityFunctionCallNode(node as SingleEntityFunctionCallNode);
 
+                    case QueryNodeKind.NamedFunctionParameter:
+                    case QueryNodeKind.SingleValueOpenPropertyAccess:
+                    case QueryNodeKind.ParameterAlias:
+                    case QueryNodeKind.EntitySet:
+                    case QueryNodeKind.KeyLookup:
+                    case QueryNodeKind.SearchTerm:
+                    case QueryNodeKind.SingleValueCast:
+                        // Unused or have unknown uses.
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
                 }

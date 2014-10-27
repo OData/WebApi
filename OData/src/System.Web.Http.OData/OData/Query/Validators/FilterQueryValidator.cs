@@ -70,6 +70,7 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
+            ValidateFunction("all", settings);
             EnterLambda(settings);
 
             try
@@ -105,6 +106,7 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
+            ValidateFunction("any", settings);
             EnterLambda(settings);
 
             try
@@ -255,7 +257,7 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here
+            // No default validation logic here.
         }
 
         /// <summary>
@@ -279,7 +281,7 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here
+            // Validate child nodes but not the ConvertNode itself.
             ValidateQueryNode(convertNode.Source, settings);
         }
 
@@ -300,7 +302,7 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here
+            // No default validation logic here.
 
             // recursion
             if (sourceNode != null)
@@ -330,7 +332,7 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here
+            // No default validation logic here.
         }
 
         /// <summary>
@@ -354,7 +356,7 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here 
+            // No default validation logic here.
             ValidateQueryNode(propertyAccessNode.Source, settings);
         }
 
@@ -379,7 +381,7 @@ namespace System.Web.Http.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
-            // no default validation logic here 
+            // No default validation logic here.
             ValidateQueryNode(propertyAccessNode.Source, settings);
         }
 
@@ -434,6 +436,9 @@ namespace System.Web.Http.OData.Query.Validators
                         throw new ODataException(Error.Format(SRResources.NotAllowedLogicalOperator, unaryOperatorNode.OperatorKind, "AllowedLogicalOperators"));
                     }
                     break;
+
+                default:
+                    throw Error.NotSupported(SRResources.UnaryNodeValidationNotSupported, unaryOperatorNode.OperatorKind, typeof(FilterQueryValidator).Name);
             }
         }
 
@@ -547,6 +552,12 @@ namespace System.Web.Http.OData.Query.Validators
                 case QueryNodeKind.EntityCollectionCast:
                     ValidateEntityCollectionCastNode(node as EntityCollectionCastNode, settings);
                     break;
+
+                case QueryNodeKind.CollectionFunctionCall:
+                case QueryNodeKind.EntityCollectionFunctionCall:
+                    // Unused or have unknown uses.
+                default:
+                    throw Error.NotSupported(SRResources.QueryNodeValidationNotSupported, node.Kind, typeof(FilterQueryValidator).Name);
             }
         }
 
@@ -607,6 +618,14 @@ namespace System.Web.Http.OData.Query.Validators
                 case QueryNodeKind.All:
                     ValidateAllNode(node as AllNode, settings);
                     break;
+
+                case QueryNodeKind.NamedFunctionParameter:
+                case QueryNodeKind.SingleValueOpenPropertyAccess:
+                    // Unused or have unknown uses.
+                case QueryNodeKind.SingleEntityFunctionCall:
+                    // Used for some 'cast' calls but not supported here or in FilterBinder.
+                default:
+                    throw Error.NotSupported(SRResources.QueryNodeValidationNotSupported, node.Kind, typeof(FilterQueryValidator).Name);
             }
         }
 
@@ -663,7 +682,7 @@ namespace System.Web.Http.OData.Query.Validators
                 case ClrCanonicalFunctions.IndexofFunctionName:
                     result = AllowedFunctions.IndexOf;
                     break;
-                case "IsOf":
+                case "isof":
                     result = AllowedFunctions.IsOf;
                     break;
                 case ClrCanonicalFunctions.LengthFunctionName:

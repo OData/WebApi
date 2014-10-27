@@ -127,6 +127,7 @@
     <Compile Include="OData\Builder\TestModels\PropertyAlias.cs" />
     <Compile Include="OData\Builder\TestModels\SpecialOrderLine.cs" />
     <Compile Include="OData\ClrPropertyInfoAnnotationTest.cs" />
+    <Compile Include="OData\EnableQueryTests.cs" />
     <Compile Include="OData\ODataContainmentTest.cs" />
     <Compile Include="OData\ContentIdHelpersTest.cs" />
     <Compile Include="OData\DollarFormatTest.cs" />

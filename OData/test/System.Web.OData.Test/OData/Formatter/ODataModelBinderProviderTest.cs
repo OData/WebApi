@@ -243,6 +243,36 @@ namespace System.Web.OData.Formatter
         }
 
         [Theory]
+        [InlineData(null, false)]
+        [InlineData(FlagsEnum.One, true)]
+        public void ODataModelBinderProvider_Works_ForNullableEnum(object value, bool expect)
+        {
+            // Arrange
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(ModelBinderProvider), new ODataModelBinderProvider());
+            configuration.MapODataServiceRoute("odata", "", GetEdmModel());
+
+            var controllers = new[] { typeof(ODataModelBinderProviderTestODataController) };
+            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
+            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+
+            HttpServer server = new HttpServer(configuration);
+            HttpClient client = new HttpClient(server);
+
+            // Act 
+            string url = String.Format(
+                "http://localhost/GetNullableFlagsEnum(flagsEnum={0})", 
+                value == null ? "null" : Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForValue(value)));
+            HttpResponseMessage response = client.GetAsync(url).Result;
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(
+                expect,
+                response.Content.ReadAsAsync(typeof(bool), configuration.Formatters).Result);
+        }
+
+        [Theory]
         [InlineData("abc", "GetEnum", "simpleEnum")]
         public void ResourceIsNotFound_IfContainsInvalidEnum(object value, string action, string parameterName)
         {
@@ -281,6 +311,9 @@ namespace System.Web.OData.Formatter
             FunctionConfiguration getFlagsEnum = builder.Function("GetFlagsEnum");
             getFlagsEnum.Parameter<FlagsEnum>("flagsEnum");
             getFlagsEnum.Returns<FlagsEnum>();
+
+            FunctionConfiguration function = builder.Function("GetNullableFlagsEnum").Returns<bool>();
+            function.Parameter<FlagsEnum?>("flagsEnum");
 
             return builder.GetEdmModel();
         }
@@ -488,5 +521,17 @@ namespace System.Web.OData.Formatter
             return flagsEnum;
         }
 
+        [HttpGet]
+        [ODataRoute("GetNullableFlagsEnum(flagsEnum={flagsEnum})")]
+        public bool GetNullableFlagsEnum(FlagsEnum? flagsEnum)
+        {
+            if (flagsEnum != null)
+            {
+                return true;
+            }
+
+            Assert.True(ModelState.IsValid);
+            return false;
+        }
     }
 }

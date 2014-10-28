@@ -120,8 +120,13 @@ namespace System.Web.OData.Formatter
                         valueString = values[1];
                     }
 
+                    if (type.IsNullable() && String.Equals(valueString, "null", StringComparison.Ordinal))
+                    {
+                        return null;
+                    }
+
                     Type enumType = TypeHelper.GetUnderlyingTypeOrSelf(type);
-                    object[] parameters = new[] { valueString, Enum.ToObject(type, 0) };
+                    object[] parameters = new[] { valueString, Enum.ToObject(enumType, 0) };
                     bool isSuccessful = (bool)enumTryParseMethod.MakeGenericMethod(enumType).Invoke(null, parameters);
 
                     if (!isSuccessful)

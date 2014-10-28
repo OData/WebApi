@@ -8,6 +8,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -114,6 +115,52 @@ namespace System.Web.OData
             JsonAssert.Equal(Resources.EnumComplexType, content.ReadAsStringAsync().Result);
         }
 
+        [Fact]
+        public void NullableEnumParameter_Works_WithNotNullEnumValue()
+        {
+            // Arrange
+            const string expect =
+                "{\r\n" +
+                "  \"@odata.context\":\"http://localhost/odata/$metadata#Edm.Boolean\",\"value\":true\r\n" +
+                "}";
+
+            HttpConfiguration config = new[] { typeof(NullableEnumValueController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute("odata", "odata", GetSampleModel());
+            HttpClient client = new HttpClient(new HttpServer(config));
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                "http://localhost/odata/NullableEnumFunction(ColorParameter=System.Web.OData.Builder.TestModels.Color'Red')");
+
+            // Act
+            HttpResponseMessage respone = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(expect, respone.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void NullableEnumParameter_Works_WithNullEnumValue()
+        {
+            // Arrange
+            const string expect =
+                "{\r\n" +
+                "  \"@odata.context\":\"http://localhost/odata/$metadata#Edm.Boolean\",\"value\":false\r\n" +
+                "}";
+
+            HttpConfiguration config = new[] { typeof(NullableEnumValueController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute("odata", "odata", GetSampleModel());
+            HttpClient client = new HttpClient(new HttpServer(config));
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                "http://localhost/odata/NullableEnumFunction(ColorParameter=null)");
+
+            // Act
+            HttpResponseMessage respone = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(expect, respone.Content.ReadAsStringAsync().Result);
+        }
+
         private static ODataMediaTypeFormatter GetFormatter()
         {
             var formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property })
@@ -140,6 +187,10 @@ namespace System.Web.OData
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.ComplexType<EnumComplex>();
+
+            FunctionConfiguration function = builder.Function("NullableEnumFunction").Returns<bool>();
+            function.Parameter<Color?>("ColorParameter");
+
             return builder.GetEdmModel();
         }
 
@@ -148,6 +199,23 @@ namespace System.Web.OData
             public Color RequiredColor { get; set; }
             public Color? NullableColor { get; set; }
             public Color UndefinedColor { get; set; }
+        }
+    }
+
+    public class NullableEnumValueController : ODataController
+    {
+        [HttpGet]
+        [ODataRoute("NullableEnumFunction(ColorParameter={colorParameter})")]
+        [EnableQuery]
+        public bool NullableEnumFunction([FromODataUri]Color? colorParameter)
+        {
+            if (colorParameter != null)
+            {
+                return true;
+            }
+
+            Assert.True(ModelState.IsValid);
+            return false;
         }
     }
 }

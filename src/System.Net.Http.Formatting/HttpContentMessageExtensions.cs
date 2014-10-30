@@ -187,6 +187,11 @@ namespace System.Net.Http
                     {
                         throw Error.InvalidOperation(Properties.Resources.HttpMessageParserError, headerConsumed, buffer);
                     }
+                    else if (bytesRead == 0)
+                    {
+                        // The http headers were malformed
+                        throw new IOException(Properties.Resources.HttpMessageErrorReading);
+                    }
                 }
             });
         }
@@ -277,6 +282,11 @@ namespace System.Net.Http
                     else if (parseStatus != ParserState.NeedMoreData)
                     {
                         throw Error.InvalidOperation(Properties.Resources.HttpMessageParserError, headerConsumed, buffer);
+                    }
+                    else if (bytesRead == 0)
+                    {
+                        // The http headers were malformed
+                        throw new IOException(Properties.Resources.HttpMessageErrorReading);
                     }
                 }
             });

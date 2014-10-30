@@ -26,6 +26,7 @@ namespace System.Web.Mvc
         /// </summary>
         private Dictionary<string, object> _additionalValues = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         private bool _convertEmptyStringToNull = true;
+        private bool _htmlEncode = true;
         private bool _isRequired;
         private object _model;
         private Func<object> _modelAccessor;
@@ -85,6 +86,12 @@ namespace System.Web.Mvc
         public virtual string EditFormatString { get; set; }
 
         public virtual bool HideSurroundingHtml { get; set; }
+
+        public virtual bool HtmlEncode
+        {
+            get { return _htmlEncode; }
+            set { _htmlEncode = value; }
+        }
 
         public virtual bool IsComplexType
         {

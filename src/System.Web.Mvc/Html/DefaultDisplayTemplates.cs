@@ -174,7 +174,13 @@ namespace System.Web.Mvc.Html
             if (templateInfo.TemplateDepth > 1)
             {
                 // DDB #224751
-                return modelMetadata.SimpleDisplayText;
+                string text = modelMetadata.SimpleDisplayText;
+                if (modelMetadata.HtmlEncode)
+                {
+                    text = html.Encode(text);
+                }
+
+                return text;
             }
 
             foreach (ModelMetadata propertyMetadata in modelMetadata.Properties.Where(pm => ShouldShow(pm, templateInfo)))

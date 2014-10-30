@@ -91,6 +91,13 @@ namespace System.Web.Mvc
                        : base.ComputeHideSurroundingHtml();
         }
 
+        protected override bool ComputeHtmlEncode()
+        {
+            return (PrototypeCache.DisplayFormat != null)
+                ? PrototypeCache.DisplayFormat.HtmlEncode
+                : base.ComputeHtmlEncode();
+        }
+
         protected override bool ComputeIsReadOnly()
         {
             if (PrototypeCache.Editable != null)

@@ -145,7 +145,7 @@ namespace System.Web.Mvc.Html
 
         internal static MvcHtmlString LabelHelper(HtmlHelper html, ModelMetadata metadata, string htmlFieldName, string labelText = null, IDictionary<string, object> htmlAttributes = null)
         {
-            string resolvedLabelText = labelText ?? metadata.DisplayName ?? metadata.PropertyName ?? htmlFieldName.Split(StringSplits.Period).Last();
+            string resolvedLabelText = labelText ?? metadata.DisplayName ?? metadata.PropertyName ?? htmlFieldName.Split('.').Last();
             if (String.IsNullOrEmpty(resolvedLabelText))
             {
                 return MvcHtmlString.Empty;

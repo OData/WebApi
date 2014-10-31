@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Text;
 using Microsoft.TestCommon;
 
 namespace System.Web.Mvc.Test
@@ -7,31 +8,33 @@ namespace System.Web.Mvc.Test
     public class DescriptorUtilTest
     {
         [Fact]
-        public void CreateUniqueId_FromIUniquelyIdentifiable()
+        public void AppendUniqueId_FromIUniquelyIdentifiable()
         {
             // Arrange
             CustomUniquelyIdentifiable custom = new CustomUniquelyIdentifiable("hello-world");
+            StringBuilder builder = new StringBuilder();
 
             // Act
-            string retVal = DescriptorUtil.CreateUniqueId(custom);
+            DescriptorUtil.AppendUniqueId(builder, custom);
 
             // Assert
-            Assert.Equal("[11]hello-world", retVal);
+            Assert.Equal("[11]hello-world", builder.ToString());
         }
 
         [Fact]
-        public void CreateUniqueId_FromMemberInfo()
+        public void AppendUniqueId_FromMemberInfo()
         {
             // Arrange
             string moduleVersionId = typeof(DescriptorUtilTest).Module.ModuleVersionId.ToString();
             string metadataToken = typeof(DescriptorUtilTest).MetadataToken.ToString();
             string expected = String.Format("[{0}]{1}[{2}]{3}", moduleVersionId.Length, moduleVersionId, metadataToken.Length, metadataToken);
+            StringBuilder builder = new StringBuilder();
 
             // Act
-            string retVal = DescriptorUtil.CreateUniqueId(typeof(DescriptorUtilTest));
+            DescriptorUtil.AppendUniqueId(builder, typeof(DescriptorUtilTest));
 
             // Assert
-            Assert.Equal(expected, retVal);
+            Assert.Equal(expected, builder.ToString());
         }
 
         [Fact]

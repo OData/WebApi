@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.Caching;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Web.Mvc.Properties;
 using System.Web.UI;
 
@@ -18,18 +19,23 @@ namespace System.Web.Mvc
     public class OutputCacheAttribute : ActionFilterAttribute, IExceptionFilter
     {
         private const string CacheKeyPrefix = "_MvcChildActionCache_";
+        private static readonly char[] _splitParameter = new[] { ';' };
         private static ObjectCache _childActionCache;
         private static object _childActionFilterFinishCallbackKey = new object();
+        private readonly Func<string[]> _splitVaryByParamThunk;
         private OutputCacheParameters _cacheSettings = new OutputCacheParameters { VaryByParam = "*" };
         private Func<ObjectCache> _childActionCacheThunk = () => ChildActionCache;
         private bool _locationWasSet;
         private bool _noStoreWasSet;
+        private string[] _tokenizedVaryByParams;
 
         public OutputCacheAttribute()
         {
+            _splitVaryByParamThunk = () => GetTokenizedVaryByParam(VaryByParam);
         }
 
         internal OutputCacheAttribute(ObjectCache childActionCache)
+            : this()
         {
             _childActionCacheThunk = () => childActionCache;
         }
@@ -110,7 +116,12 @@ namespace System.Web.Mvc
         public string VaryByParam
         {
             get { return _cacheSettings.VaryByParam ?? String.Empty; }
-            set { _cacheSettings.VaryByParam = value; }
+            set
+            {
+                // Reset the tokenized values if the property gets modified.
+                _tokenizedVaryByParams = null;
+                _cacheSettings.VaryByParam = value;
+            }
         }
 
         private static void ClearChildActionFilterFinishCallback(ControllerContext controllerContext)
@@ -145,7 +156,7 @@ namespace System.Web.Mvc
             uniqueIdBuilder.Append(filterContext.ActionDescriptor.UniqueId);
 
             // Unique ID from the VaryByCustom settings, if any
-            uniqueIdBuilder.Append(DescriptorUtil.CreateUniqueId(VaryByCustom));
+            DescriptorUtil.AppendUniqueId(uniqueIdBuilder, VaryByCustom);
             if (!String.IsNullOrEmpty(VaryByCustom))
             {
                 string varyByCustomResult = filterContext.HttpContext.ApplicationInstance.GetVaryByCustomString(HttpContext.Current, VaryByCustom);
@@ -153,7 +164,7 @@ namespace System.Web.Mvc
             }
 
             // Unique ID from the VaryByParam settings, if any
-            uniqueIdBuilder.Append(GetUniqueIdFromActionParameters(filterContext, VaryByParam));
+            BuildUniqueIdFromActionParameters(uniqueIdBuilder, filterContext);
 
             // The key is typically too long to be useful, so we use a cryptographic hash
             // as the actual key (better randomization and key distribution, so small vary
@@ -164,77 +175,50 @@ namespace System.Web.Mvc
             }
         }
 
-        private static string GetUniqueIdFromActionParameters(ActionExecutingContext filterContext, string varyByParam)
+        internal void BuildUniqueIdFromActionParameters(
+            StringBuilder builder,
+            ActionExecutingContext filterContext)
         {
-            if (string.Equals(varyByParam, "none", StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(VaryByParam, "none", StringComparison.OrdinalIgnoreCase))
             {
-                return "";
+                // nothing to do
+                return;
             }
-            var args = filterContext.ActionParameters;
-            if (args.Count == 0) return ""; // nothing to do
 
-            // Generate a unique ID of normalized key names + key values
-            var result = new StringBuilder();
-            if (string.Equals(varyByParam, "*", StringComparison.OrdinalIgnoreCase))
-            {   // use all available key/value pairs (without caring about order, so sort the keys)
-                string[] keys = new string[args.Count];
-                args.Keys.CopyTo(keys, 0);
-                Array.Sort(keys, StringComparer.OrdinalIgnoreCase);
-                for(int i = 0; i < keys.Length; i++)
-                {
-                    var key = keys[i];
-                    DescriptorUtil.AppendUniqueId(result, key.ToUpperInvariant());
-                    DescriptorUtil.AppendUniqueId(result, args[key]);
-                }
-            }
-            else
-            {   // use only the key/value pairs specified in the varyByParam string; lazily create a sorted
-                // dictionary to represent the selected keys (normalizes the order at the same time)
-                SortedList<string, object> keyValues = null;
-                foreach (var pair in args)
-                {
-                    if (ContainsToken(varyByParam, pair.Key))
-                    {
-                        if(keyValues == null) keyValues = new SortedList<string, object>(args.Count, StringComparer.OrdinalIgnoreCase);
-                        keyValues[pair.Key] = pair.Value;
-                    }
-                }
-                if (keyValues != null) // something to do
-                {
-                    foreach (var pair in keyValues)
-                    {
-                        DescriptorUtil.AppendUniqueId(result, pair.Key.ToUpperInvariant());
-                        DescriptorUtil.AppendUniqueId(result, pair.Value);
-                    }
-                }
-            }
-            return result.ToString();
-        }
-
-        // check a delimited string i.e. "a;bcd; e" contains the given part, without actually splitting it -
-        // by searching for the entire token, then checking whether the before/after is EOF, delimiter or white-space
-        public static bool ContainsToken(string value, string token)
-        {
-            if (string.IsNullOrEmpty(token)) return false;
-            if (string.IsNullOrEmpty(value)) return false;
-
-            const char delimiter = ';'; // could be parameterized easily enough
-
-            int lastIndex = -1, idx, endIndex = value.Length - token.Length, tokenLength = token.Length;
-            while ((idx = value.IndexOf(token, lastIndex + 1, StringComparison.OrdinalIgnoreCase)) > lastIndex)
+            if (String.Equals(VaryByParam, "*", StringComparison.Ordinal))
             {
-                lastIndex = idx;
-                char c;
-                if (
-                    (idx == 0 || ((c = value[idx - 1]) == delimiter) || char.IsWhiteSpace(c))
-                    &&
-                    (idx == endIndex || ((c = value[idx + tokenLength]) == delimiter) || char.IsWhiteSpace(c))
-                    )
+                // use all available key/value pairs. Keys need to be sorted so we end up with a stable identifier.
+                IEnumerable<KeyValuePair<string, object>> orderedParameters = filterContext
+                                                                .ActionParameters
+                                                                .OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase);
+
+                foreach (KeyValuePair<string, object> item in orderedParameters)
                 {
-                    return true;
+                    DescriptorUtil.AppendUniqueId(builder, item.Key.ToUpperInvariant());
+                    DescriptorUtil.AppendUniqueId(builder, item.Value);
                 }
+
+                return;
             }
-            return false;
+
+            LazyInitializer.EnsureInitialized(ref _tokenizedVaryByParams,
+                                              _splitVaryByParamThunk);
+
+            // By default, filterContext.ActionParameter is a case insensitive (StringComparer.OrdinalIgnoreCase)
+            // dictionary. If the user has replaced it with a dictionary that uses a different comparer, we'll
+            // wrap it in a Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+            // This allows us to lookup values for action parameters when the VaryByParam token key differs in case.
+            Dictionary<string, object> keyValues = GetCaseInsensitiveActionParametersDictionary(
+                                                        filterContext.ActionParameters);
+            for (int i = 0; i < _tokenizedVaryByParams.Length; i++)
+            {
+                string key = _tokenizedVaryByParams[i];
+                DescriptorUtil.AppendUniqueId(builder, key);
+
+                object value;
+                keyValues.TryGetValue(key, out value);
+                DescriptorUtil.AppendUniqueId(builder, value);
+            }
         }
 
         public static bool IsChildActionCacheActive(ControllerContext controllerContext)
@@ -394,9 +378,35 @@ namespace System.Web.Mvc
                 case OutputCacheLocation.Downstream:
                     return true;
 
-                default: 
+                default:
                     return false;
             }
+        }
+
+        private static string[] GetTokenizedVaryByParam(string varyByParam)
+        {
+            // Vary by specific parameters
+            IEnumerable<string> splitTokens = from part in varyByParam.Split(_splitParameter)
+                                              let trimmed = part.Trim()
+                                              where !String.IsNullOrEmpty(trimmed)
+                                              select trimmed.ToUpperInvariant();
+            return splitTokens.ToArray();
+        }
+
+        private static Dictionary<string, object> GetCaseInsensitiveActionParametersDictionary(
+            IDictionary<string, object> actionParameters)
+        {
+            // The ControllerActionInvoker starts off with a Dictionary<string, object> with
+            // StringComparer.OrdinalIgnoreCase. Check if we are working with this type to start with.
+            // If not produce a new dictionary from the existing one.
+
+            var dictionary = actionParameters as Dictionary<string, object>;
+            if (dictionary != null && dictionary.Comparer == StringComparer.OrdinalIgnoreCase)
+            {
+                return dictionary;
+            }
+
+            return new Dictionary<string, object>(actionParameters, StringComparer.OrdinalIgnoreCase);
         }
 
         [SuppressMessage("ASP.NET.Security", "CA5328:ValidateRequestShouldBeEnabled", Justification = "Instances of this type are not created in response to direct user input.")]

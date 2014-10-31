@@ -24,7 +24,7 @@ namespace System.Web.Mvc
             }
             if (controllerDescriptor.ControllerType.Namespace != null)
             {
-                return controllerDescriptor.ControllerType.Namespace.Split(StringSplits.Period).Last();
+                return controllerDescriptor.ControllerType.Namespace.Split('.').Last();
             }
 
             throw Error.InvalidOperation(MvcResources.AttributeRouting_CouldNotInferAreaNameFromMissingNamespace, controllerDescriptor.ControllerName);

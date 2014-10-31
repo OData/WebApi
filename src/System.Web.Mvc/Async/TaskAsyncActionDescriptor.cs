@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Mvc.Properties;
@@ -86,7 +87,9 @@ namespace System.Web.Mvc.Async
 
         private string CreateUniqueId()
         {
-            return base.UniqueId + DescriptorUtil.CreateUniqueId(TaskMethodInfo);
+            var builder = new StringBuilder(base.UniqueId);
+            DescriptorUtil.AppendUniqueId(builder, MethodInfo);
+            return builder.ToString();
         }
 
         [SuppressMessage("Microsoft.Web.FxCop", "MW1201:DoNotCallProblematicMethodsOnTask", Justification = "This is commented in great detail.")]

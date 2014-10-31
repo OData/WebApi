@@ -54,7 +54,7 @@ namespace System.Web.Mvc.Html
         {
             // We don't call ModelMetadata.GetDisplayName here because we want to fall back to the field name rather than the ModelType.
             // This is similar to how the LabelHelpers get the text of a label.
-            string resolvedDisplayName = metadata.DisplayName ?? metadata.PropertyName ?? htmlFieldName.Split(StringSplits.Period).Last();
+            string resolvedDisplayName = metadata.DisplayName ?? metadata.PropertyName ?? htmlFieldName.Split('.').Last();
 
             return new MvcHtmlString(HttpUtility.HtmlEncode(resolvedDisplayName));
         }

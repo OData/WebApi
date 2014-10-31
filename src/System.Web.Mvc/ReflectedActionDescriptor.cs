@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 using System.Web.Mvc.Properties;
 
 namespace System.Web.Mvc
@@ -73,7 +74,9 @@ namespace System.Web.Mvc
 
         private string CreateUniqueId()
         {
-            return base.UniqueId + DescriptorUtil.CreateUniqueId(MethodInfo);
+            var builder = new StringBuilder(base.UniqueId);
+            DescriptorUtil.AppendUniqueId(builder, MethodInfo);
+            return builder.ToString();
         }
 
         public override object Execute(ControllerContext controllerContext, IDictionary<string, object> parameters)

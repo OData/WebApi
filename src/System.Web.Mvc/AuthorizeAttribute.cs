@@ -11,6 +11,7 @@ namespace System.Web.Mvc
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = true)]
     public class AuthorizeAttribute : FilterAttribute, IAuthorizationFilter
     {
+        private static readonly char[] _splitParameter = new[] { ',' };
         private readonly object _typeId = new object();
 
         private string _roles;
@@ -144,7 +145,7 @@ namespace System.Web.Mvc
                 return new string[0];
             }
 
-            var split = from piece in original.Split(StringSplits.Comma)
+            var split = from piece in original.Split(_splitParameter)
                         let trimmed = piece.Trim()
                         where !String.IsNullOrEmpty(trimmed)
                         select trimmed;

@@ -85,8 +85,19 @@
     }
 
     function onReset(event) {  // 'this' is the form element
-        var $form = $(this);
-        $form.data("validator").resetForm();
+        var $form = $(this),
+            key = '__jquery_unobtrusive_validation_form_reset';
+        if ($form.data(key)) {
+            return;
+        }
+        // Set a flag that indicates we're currently resetting the form.
+        $form.data(key, true);
+        try {
+            $form.data("validator").resetForm();
+        } finally {
+            $form.removeData(key);
+        }
+
         $form.find(".validation-summary-errors")
             .addClass("validation-summary-valid")
             .removeClass("validation-summary-errors");

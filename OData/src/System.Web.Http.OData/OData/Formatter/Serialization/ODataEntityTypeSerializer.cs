@@ -3,6 +3,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
 using System.Web.Http.OData.Extensions;
@@ -172,9 +175,48 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 {
                     entry.EditLink = selfLinks.EditLink;
                 }
+
+                string etag = CreateETag(entityInstanceContext);
+                if (etag != null)
+                {
+                    entry.ETag = etag;
+                }
             }
 
             return entry;
+        }
+
+        /// <summary>
+        /// Creates the ETag for the given entity.
+        /// </summary>
+        /// <param name="entityInstanceContext">The context for the entity instance being written.</param>
+        /// <returns>The created ETag.</returns>
+        public virtual string CreateETag(EntityInstanceContext entityInstanceContext)
+        {
+            if (entityInstanceContext.Request != null)
+            {
+                HttpConfiguration configuration = entityInstanceContext.Request.GetConfiguration();
+                if (configuration == null)
+                {
+                    throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
+                }
+
+                IEnumerable<IEdmStructuralProperty> concurrencyProperties =
+                    entityInstanceContext.EntityType.GetConcurrencyProperties().OrderBy(c => c.Name);
+
+                IDictionary<string, object> properties = new Dictionary<string, object>();
+                foreach (IEdmStructuralProperty etagProperty in concurrencyProperties)
+                {
+                    properties.Add(etagProperty.Name, entityInstanceContext.GetPropertyValue(etagProperty.Name));
+                }
+                EntityTagHeaderValue etagHeaderValue = configuration.GetETagHandler().CreateETag(properties);
+                if (etagHeaderValue != null)
+                {
+                    return etagHeaderValue.ToString();
+                }
+            }
+
+            return null;
         }
 
         private void WriteNavigationLinks(

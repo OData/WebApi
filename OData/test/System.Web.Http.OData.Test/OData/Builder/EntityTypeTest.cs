@@ -311,7 +311,7 @@ namespace System.Web.Http.OData.Builder
         }
 
         [Fact]
-        public void DerivesFrom_Throws_IfDerivedTypeDoesntDeriveFromBaseType()
+        public void DerivesFrom_Throws_IfDerivedTypeDoesNotDeriveFromBaseType()
         {
             var builder = new ODataModelBuilder();
 

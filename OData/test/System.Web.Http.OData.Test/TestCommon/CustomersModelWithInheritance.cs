@@ -27,6 +27,8 @@ namespace System.Web.Http.TestCommon
             customer.AddKeys(customer.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
             customer.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
             customer.AddStructuralProperty("Address", new EdmComplexTypeReference(address, isNullable: true));
+            customer.AddStructuralProperty("City", EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, true),
+                defaultValue: null, concurrencyMode: EdmConcurrencyMode.Fixed);
             model.AddElement(customer);
 
             // derived entity type special customer

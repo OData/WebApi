@@ -16,11 +16,16 @@ namespace System.Web.Http.OData.Formatter.Serialization
             customerType.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32);
             customerType.AddStructuralProperty("FirstName", EdmPrimitiveTypeKind.String);
             customerType.AddStructuralProperty("LastName", EdmPrimitiveTypeKind.String);
+            IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance
+                .GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: true);
+            customerType.AddStructuralProperty("City", primitiveTypeReference, defaultValue: null,
+                concurrencyMode: EdmConcurrencyMode.Fixed);
             model.AddElement(customerType);
 
             var orderType = new EdmEntityType("Default", "Order");
             orderType.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32);
             orderType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            orderType.AddStructuralProperty("Shipment", EdmPrimitiveTypeKind.String);
             model.AddElement(orderType);
 
             var addressType = new EdmComplexType("Default", "Address");
@@ -32,8 +37,18 @@ namespace System.Web.Http.OData.Formatter.Serialization
             model.AddElement(addressType);
 
             // Add navigations
-            customerType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo() { Name = "Orders", Target = orderType, TargetMultiplicity = EdmMultiplicity.Many });
-            orderType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo() { Name = "Customer", Target = customerType, TargetMultiplicity = EdmMultiplicity.One });
+            customerType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo()
+            {
+                Name = "Orders",
+                Target = orderType,
+                TargetMultiplicity = EdmMultiplicity.Many
+            });
+            orderType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo()
+            {
+                Name = "Customer",
+                Target = customerType,
+                TargetMultiplicity = EdmMultiplicity.One
+            });
 
             var container = new EdmEntityContainer("Default", "Container");
             var customerSet = container.AddEntitySet("Customers", customerType);

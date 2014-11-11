@@ -1,10 +1,17 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Properties;
+using System.Web.Http.OData.Routing;
+using Microsoft.Data.Edm;
 using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Extensions
@@ -89,6 +96,85 @@ namespace System.Web.Http.OData.Extensions
                         MessageLanguage = oDataError.MessageLanguage
                     });
             }
+        }
+
+        /// <summary>
+        /// Gets the OData <see cref="ETag"/> from the given request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="entityTagHeaderValue">The entity tag header value.</param>
+        /// <returns>The parsed <see cref="ETag"/>.</returns>
+        public static ETag GetETag(this HttpRequestMessage request, EntityTagHeaderValue entityTagHeaderValue)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            if (entityTagHeaderValue != null)
+            {
+                if (entityTagHeaderValue.Equals(EntityTagHeaderValue.Any))
+                {
+                    return new ETag { IsAny = true };
+                }
+
+                HttpConfiguration configuration = request.GetConfiguration();
+                if (configuration == null)
+                {
+                    throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
+                }
+
+                // get the etag handler, and parse the etag
+                IDictionary<string, object> properties =
+                    configuration.GetETagHandler().ParseETag(entityTagHeaderValue) ?? new Dictionary<string, object>();
+                IList<object> parsedETagValues = properties.OrderBy(p => p.Key).Select(p => p.Value).AsList();
+
+                // get property names from request
+                ODataPath odataPath = request.ODataProperties().Path;
+                IEdmEntityType type = odataPath.EdmType as IEdmEntityType;
+                if (type != null)
+                {
+                    IList<string> concurrencyPropertyNames =
+                        type.GetConcurrencyProperties().OrderBy(c => c.Name).Select(c => c.Name).AsList();
+                    ETag etag = new ETag();
+
+                    if (parsedETagValues.Count != concurrencyPropertyNames.Count)
+                    {
+                        etag.IsWellFormed = false;
+                    }
+
+                    IEnumerable<KeyValuePair<string, object>> nameValues = concurrencyPropertyNames.Zip(
+                        parsedETagValues,
+                        (name, value) => new KeyValuePair<string, object>(name, value));
+                    foreach (var nameValue in nameValues)
+                    {
+                        etag[nameValue.Key] = nameValue.Value;
+                    }
+
+                    return etag;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ETag{TEntity}"/> from the given request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="entityTagHeaderValue">The entity tag header value.</param>
+        /// <returns>The parsed <see cref="ETag{TEntity}"/>.</returns>
+        public static ETag<TEntity> GetETag<TEntity>(this HttpRequestMessage request, EntityTagHeaderValue entityTagHeaderValue)
+        {
+            ETag etag = request.GetETag(entityTagHeaderValue);
+            return etag != null
+                ? new ETag<TEntity>
+                {
+                    ConcurrencyProperties = etag.ConcurrencyProperties,
+                    IsWellFormed = etag.IsWellFormed,
+                    IsAny = etag.IsAny,
+                }
+                : null;
         }
     }
 }

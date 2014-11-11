@@ -38,5 +38,10 @@ namespace System.Web.Http.OData.Builder
                 _optionalProperty = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this property is a concurrency token or not.
+        /// </summary>
+        public bool ConcurrencyToken { get; set; }
     }
 }

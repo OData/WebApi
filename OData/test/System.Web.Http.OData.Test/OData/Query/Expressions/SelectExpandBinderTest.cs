@@ -344,6 +344,25 @@ namespace System.Web.Http.OData.Query.Expressions
             Assert.Equal(customer.ID, customerWrapper.Container.ToDictionary(new IdentityPropertyMapper())["ID"]);
         }
 
+        [Theory]
+        [InlineData("Name")]
+        [InlineData("ModelWithInheritance.upgrade")]
+        public void ProjectAsWrapper_ProjectedValueContainsConcurrencyProperties_EvenIfNotPresentInSelectClause(string select)
+        {
+            // Arrange
+            Customer customer = new Customer { ID = 42, City = "any" };
+            SelectExpandClause selectExpand = new ODataUriParser(_model.Model, serviceRoot: null)
+                .ParseSelectAndExpand(select, null, _model.Customer, _model.Customers);
+            Expression source = Expression.Constant(customer);
+
+            // Act
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer);
+
+            // Assert
+            SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
+            Assert.Equal(customer.City, customerWrapper.Container.ToDictionary(new IdentityPropertyMapper())["City"]);
+        }
+
         [Fact]
         public void CreatePropertyNameExpression_NonDerivedProperty_ReturnsConstantExpression()
         {

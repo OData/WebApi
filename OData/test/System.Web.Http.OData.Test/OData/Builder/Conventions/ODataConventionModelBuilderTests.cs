@@ -294,6 +294,33 @@ namespace System.Web.Http.OData.Builder.Conventions
             version.AssertHasPrimitiveProperty(model, "Minor", EdmPrimitiveTypeKind.Int32, isNullable: false);
         }
 
+        [Fact]
+        public void ModelBuilder_ProductWithConcurrencyCheckAttribute()
+        {
+            // Arrange
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<ProductWithConcurrencyCheckAttribute>("Products");
+
+            // Act
+            var model = modelBuilder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(model.SchemaElements.OfType<IEdmSchemaType>().Count(), 1);
+
+            var product = model.AssertHasEntitySet(entitySetName: "Products",
+                mappedEntityClrType: typeof(ProductWithConcurrencyCheckAttribute));
+            Assert.Equal(2, product.StructuralProperties().Count());
+            Assert.Equal(0, product.NavigationProperties().Count());
+
+            product.AssertHasKey(model, "Id", EdmPrimitiveTypeKind.Int32);
+            IEdmStructuralProperty idProperty = product.AssertHasPrimitiveProperty(
+                model, "Id", EdmPrimitiveTypeKind.Int32, isNullable: false);
+            Assert.Equal(EdmConcurrencyMode.None, idProperty.ConcurrencyMode);
+            IEdmStructuralProperty nameProperty = product.AssertHasPrimitiveProperty(
+                model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
+            Assert.Equal(EdmConcurrencyMode.Fixed, nameProperty.ConcurrencyMode);
+        }
+
         [Theory]
         [InlineData(typeof(Version[]))]
         [InlineData(typeof(IEnumerable<Version>))]
@@ -1400,6 +1427,15 @@ namespace System.Web.Http.OData.Builder.Conventions
         public ProductVersion Version { get; set; }
 
         public CategoryWithKeyAttribute Category { get; set; }
+    }
+
+    public class ProductWithConcurrencyCheckAttribute
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [ConcurrencyCheck]
+        public string Name { get; set; }
     }
 
     public class CategoryWithKeyAttribute

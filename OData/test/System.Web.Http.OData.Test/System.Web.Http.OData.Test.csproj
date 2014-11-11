@@ -101,6 +101,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\ActionOnDeleteAttributeConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ForeignKeyAttributeConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\ForeignKeyDiscoveryConventionTest.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConventionTest.cs" />
     <Compile Include="OData\Builder\LinkGenerationHelpersTest.cs" />
     <Compile Include="OData\Builder\PropertyPairSelectorVisitorTest.cs" />
     <Compile Include="OData\ContentIdHelpersTest.cs" />
@@ -109,9 +110,13 @@
     <Compile Include="OData\EdmEntityCollectionObjectTest.cs" />
     <Compile Include="OData\EdmStructuredObjectTest.cs" />
     <Compile Include="OData\EnableQueryTest.cs" />
+    <Compile Include="OData\ETagMessageHandlerTest.cs" />
     <Compile Include="OData\FastPropertyAccessorTest.cs" />
     <Compile Include="OData\Formatter\ClrTypeCacheTest.cs" />
+    <Compile Include="OData\Formatter\DefaultODataETagHandlerTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerContextTest.cs" />
+    <Compile Include="OData\Formatter\ETagOfTEntityTypeTests.cs" />
+    <Compile Include="OData\Formatter\ETagTests.cs" />
     <Compile Include="OData\Formatter\ODataMessageWrapperTest.cs" />
     <Compile Include="OData\Formatter\Serialization\EdmEntityObjectTest.cs" />
     <Compile Include="OData\EntityInstanceContextTest.cs" />

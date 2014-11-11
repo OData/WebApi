@@ -1,16 +1,22 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Hosting;
 using System.Web.Http.OData.Extensions;
+using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Formatter.Serialization.Models;
 using System.Web.Http.OData.Routing;
+using System.Web.Http.TestCommon;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.Data.OData;
 using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.TestCommon;
 using Moq;
+using ODataPath = System.Web.Http.OData.Routing.ODataPath;
+using ODataPathSegment = System.Web.Http.OData.Routing.ODataPathSegment;
 
 namespace System.Net.Http
 {
@@ -197,6 +203,83 @@ namespace System.Net.Http
             Assert.NotNull(instance1);
             Assert.NotNull(instance2);
             Assert.Same(instance1, instance2);
+        }
+
+        [Fact]
+        public void GetETag_ThrowsArgumentNull_Request()
+        {
+            // Arrange
+            HttpRequestMessage request = null;
+            EntityTagHeaderValue value = new EntityTagHeaderValue("\"any\"");
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => request.GetETag(value), "request");
+        }
+
+        [Fact]
+        public void GetETag_ThrowsInvalidOperation_EmptyRequest()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            EntityTagHeaderValue value = new EntityTagHeaderValue("\"any\"");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => request.GetETag(value),
+                "Request message does not contain an HttpConfiguration object.");
+        }
+
+        [Fact]
+        public void GetETag_RoundTrip_ETagInHeader()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpConfiguration configuration = new HttpConfiguration();
+            request.SetConfiguration(configuration);
+            Dictionary<string, object> properties = new Dictionary<string, object> { { "City", "Foo" } };
+            EntityTagHeaderValue value = new DefaultODataETagHandler().CreateETag(properties);
+
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+
+            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
+            mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.Customer);
+            mockSegment.Setup(s => s.GetEntitySet(null)).Returns((IEdmEntitySet)null);
+            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+            request.ODataProperties().Path = odataPath;
+
+            // Act
+            ETag result = request.GetETag(value);
+            dynamic dynamicResult = result;
+
+            // Assert
+            Assert.Equal("Foo", result["City"]);
+            Assert.Equal("Foo", dynamicResult.City);
+        }
+
+        [Fact]
+        public void GetETagTentity_RoundTrip_ETagInHeader()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpConfiguration configuration = new HttpConfiguration();
+            request.SetConfiguration(configuration);
+            Dictionary<string, object> properties = new Dictionary<string, object> { { "City", "Foo" } };
+            EntityTagHeaderValue value = new DefaultODataETagHandler().CreateETag(properties);
+
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+
+            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
+            mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.Customer);
+            mockSegment.Setup(s => s.GetEntitySet(null)).Returns((IEdmEntitySet)null);
+            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+            request.ODataProperties().Path = odataPath;
+
+            // Act
+            ETag<Customer> result = request.GetETag<Customer>(value);
+            dynamic dynamicResult = result;
+
+            // Assert
+            Assert.Equal("Foo", result["City"]);
+            Assert.Equal("Foo", dynamicResult.City);
         }
 
         private SelectExpandClause GetMockSelectExpandClause()

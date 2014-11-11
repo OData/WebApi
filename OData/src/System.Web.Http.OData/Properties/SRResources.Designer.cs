@@ -189,6 +189,15 @@ namespace System.Web.Http.OData.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Cannot apply {0} of &apos;{1}&apos; to {2} of &apos;{3}&apos;..
         /// </summary>
+        internal static string CannotApplyETagOfT {
+            get {
+                return ResourceManager.GetString("CannotApplyETagOfT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot apply {0} of &apos;{1}&apos; to {2} of &apos;{3}&apos;..
+        /// </summary>
         internal static string CannotApplyODataQueryOptionsOfT {
             get {
                 return ResourceManager.GetString("CannotApplyODataQueryOptionsOfT", resourceCulture);
@@ -664,6 +673,15 @@ namespace System.Web.Http.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The ETag is not well-formed..
+        /// </summary>
+        internal static string ETagNotWellFormed {
+            get {
+                return ResourceManager.GetString("ETagNotWellFormed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot create an EDM model as the action &apos;{0}&apos; on controller &apos;{1}&apos; has a void return type..
         /// </summary>
         internal static string FailedToBuildEdmModelBecauseReturnTypeIsNull {
@@ -768,6 +786,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string InvalidEntitySetName {
             get {
                 return ResourceManager.GetString("InvalidEntitySetName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The ETag handler set in the configuration property is of type &apos;{0}&apos;, which does not implement IETagHandler..
+        /// </summary>
+        internal static string InvalidETagHandler {
+            get {
+                return ResourceManager.GetString("InvalidETagHandler", resourceCulture);
             }
         }
         
@@ -1191,6 +1218,15 @@ namespace System.Web.Http.OData.Properties {
         internal static string NullElementInCollection {
             get {
                 return ResourceManager.GetString("NullElementInCollection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The ETag handler set in the configuration property must not be null..
+        /// </summary>
+        internal static string NullETagHandler {
+            get {
+                return ResourceManager.GetString("NullETagHandler", resourceCulture);
             }
         }
         

@@ -2,6 +2,9 @@
 
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Web.Http.OData.Extensions;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
 
@@ -35,6 +38,28 @@ namespace System.Web.Http.OData.Query
         }
 
         /// <summary>
+        /// Gets the <see cref="ETag{TEntity}"/> from IfMatch header, if any.
+        /// </summary>
+        public new ETag<TEntity> IfMatch
+        {
+            get
+            {
+                return base.IfMatch as ETag<TEntity>;
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ETag{TEntity}"/> from IfNoneMatch header, if any.
+        /// </summary>
+        public new ETag<TEntity> IfNoneMatch
+        {
+            get
+            {
+                return base.IfNoneMatch as ETag<TEntity>;
+            }
+        }
+
+        /// <summary>
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
@@ -55,6 +80,11 @@ namespace System.Web.Http.OData.Query
         {
             ValidateQuery(query);
             return base.ApplyTo(query, querySettings);
+        }
+
+        internal override ETag GetETag(EntityTagHeaderValue etagHeaderValue)
+        {
+            return Request.GetETag<TEntity>(etagHeaderValue);
         }
 
         private static void ValidateQuery(IQueryable query)

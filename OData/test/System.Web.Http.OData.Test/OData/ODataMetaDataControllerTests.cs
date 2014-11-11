@@ -29,6 +29,26 @@ namespace System.Web.Http.OData.Builder
             Assert.Contains("<edmx:Edmx", response.Content.ReadAsStringAsync().Result);
         }
 
+
+        [Fact]
+        public void DollarMetaData_Works_WithConcurrencyCheckAttribute()
+        {
+            // Arrange
+            string expectedStringInMetadata = "<Property Name=\"Name\" Type=\"Edm.String\" ConcurrencyMode=\"Fixed\" />";
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<FormatterPersonWithConcurrencyCheck>("People");
+
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataServiceRoute(builder.GetEdmModel());
+
+            // Act
+            HttpClient client = new HttpClient(server);
+            var response = client.GetAsync("http://localhost/$metadata").Result;
+
+            // Assert            
+            Assert.Contains(expectedStringInMetadata, response.Content.ReadAsStringAsync().Result);
+        }
+
         [Fact]
         public void DollarMetaData_Works_WithDatabaseGeneratedAttribute()
         {

@@ -452,6 +452,12 @@ namespace System.Web.Http.OData.Formatter
             return matchingTypes.SingleOrDefault();
         }
 
+        public static IEnumerable<IEdmStructuralProperty> GetConcurrencyProperties(this IEdmEntityType type)
+        {
+            return type.StructuralProperties()
+                .Where(s => s.ConcurrencyMode == EdmConcurrencyMode.Fixed && s.Type.IsPrimitive());
+        }
+
         public static IEdmPrimitiveType GetEdmPrimitiveTypeOrNull(Type clrType)
         {
             Type underlyingType = Nullable.GetUnderlyingType(clrType) ?? clrType;

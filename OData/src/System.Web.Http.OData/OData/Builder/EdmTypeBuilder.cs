@@ -109,26 +109,7 @@ namespace System.Web.Http.OData.Builder
                 {
                     case PropertyKind.Primitive:
                         PrimitivePropertyConfiguration primitiveProperty = property as PrimitivePropertyConfiguration;
-
-                        EdmPrimitiveTypeKind typeKind = GetTypeKind(primitiveProperty.PropertyInfo.PropertyType);
-                        IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance.GetPrimitive(
-                            typeKind,
-                            primitiveProperty.OptionalProperty);
-
-                        var primitiveProp = new EdmStructuralProperty(
-                            type,
-                            primitiveProperty.PropertyInfo.Name,
-                            primitiveTypeReference);
-
-                        type.AddProperty(primitiveProp);
-                        edmProperty = primitiveProp;
-                        // Set Annotation StoreGeneratedPattern
-                        if (config.Kind == EdmTypeKind.Entity
-                            && primitiveProperty.StoreGeneratedPattern != DatabaseGeneratedOption.None)
-                        {
-                            _directValueAnnotations.Add(
-                                new StoreGeneratedPatternAnnotation(primitiveProp, primitiveProperty.StoreGeneratedPattern));
-                        }
+                        CreatePrimitiveProperty(primitiveProperty, type, config, out edmProperty);
                         break;
 
                     case PropertyKind.Complex:
@@ -180,6 +161,39 @@ namespace System.Web.Http.OData.Builder
             CreateStructuralTypeBody(type, config);
             IEdmStructuralProperty[] keys = config.Keys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.PropertyInfo.Name)).ToArray();
             type.AddKeys(keys);
+        }
+
+        private void CreatePrimitiveProperty(PrimitivePropertyConfiguration primitiveProperty, EdmStructuredType type, StructuralTypeConfiguration config, out IEdmProperty edmProperty)
+        {
+            EdmPrimitiveTypeKind typeKind = GetTypeKind(primitiveProperty.PropertyInfo.PropertyType);
+            IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance.GetPrimitive(
+                typeKind,
+                primitiveProperty.OptionalProperty);
+
+            // Set concurrency token if is entity type, and concurrency token is true
+            EdmConcurrencyMode concurrencyMode = EdmConcurrencyMode.None;
+            if (config.Kind == EdmTypeKind.Entity && primitiveProperty.ConcurrencyToken)
+            {
+                concurrencyMode = EdmConcurrencyMode.Fixed;
+            }
+
+            var primitiveProp = new EdmStructuralProperty(
+                type,
+                primitiveProperty.PropertyInfo.Name,
+                primitiveTypeReference,
+                defaultValueString: null,
+                concurrencyMode: concurrencyMode);
+
+            type.AddProperty(primitiveProp);
+            edmProperty = primitiveProp;
+
+            // Set Annotation StoreGeneratedPattern
+            if (config.Kind == EdmTypeKind.Entity
+                && primitiveProperty.StoreGeneratedPattern != DatabaseGeneratedOption.None)
+            {
+                _directValueAnnotations.Add(
+                    new StoreGeneratedPatternAnnotation(primitiveProp, primitiveProperty.StoreGeneratedPattern));
+            }
         }
 
         private void CreateNavigationProperty(EntityTypeConfiguration config)

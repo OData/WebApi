@@ -472,6 +472,16 @@ namespace System.Web.Http.OData.Query.Expressions
                         autoSelectedProperties.Add(keyProperty);
                     }
                 }
+
+                // add concurrency properties, if not added
+                IEnumerable<IEdmStructuralProperty> concurrencyProperties = entityType.GetConcurrencyProperties();
+                foreach (IEdmStructuralProperty concurrencyProperty in concurrencyProperties)
+                {
+                    if (!propertiesToInclude.Contains(concurrencyProperty))
+                    {
+                        autoSelectedProperties.Add(concurrencyProperty);
+                    }
+                }
             }
 
             return propertiesToInclude;

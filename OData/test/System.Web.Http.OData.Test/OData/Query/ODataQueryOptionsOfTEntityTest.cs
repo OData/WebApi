@@ -1,12 +1,19 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Library;
 using Microsoft.TestCommon;
+using Moq;
+using ODataPath = System.Web.Http.OData.Routing.ODataPath;
+using ODataPathSegment = System.Web.Http.OData.Routing.ODataPathSegment;
 
 namespace System.Web.Http.OData.Query
 {
@@ -135,6 +142,50 @@ namespace System.Web.Http.OData.Query
 
             Assert.DoesNotThrow(
                 () => query.ApplyTo(Enumerable.Empty<Customer>().AsQueryable(), new ODataQuerySettings()));
+        }
+
+        [Theory]
+        [InlineData("IfMatch")]
+        [InlineData("IfNoneMatch")]
+        public void GetIfMatchOrNoneMatch_ReturnsETag_SetETagHeaderValue(string header)
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpConfiguration cofiguration = new HttpConfiguration();
+            request.SetConfiguration(cofiguration);
+            Dictionary<string, object> properties = new Dictionary<string, object> { { "Name", "Foo" } };
+            EntityTagHeaderValue etagHeaderValue = new DefaultODataETagHandler().CreateETag(properties);
+            if (header.Equals("IfMatch"))
+            {
+                request.Headers.IfMatch.Add(etagHeaderValue);
+            }
+            else
+            {
+                request.Headers.IfNoneMatch.Add(etagHeaderValue);
+            }
+
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.Entity<Customer>();
+            customer.HasKey(c => c.Id);
+            customer.Property(c => c.Id);
+            customer.Property(c => c.Name).IsConcurrencyToken();
+            IEdmModel model = builder.GetEdmModel();
+
+            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
+            mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.GetEdmType(typeof(Customer)));
+            mockSegment.Setup(s => s.GetEntitySet(null)).Returns((IEdmEntitySet)null);
+            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+            request.ODataProperties().Path = odataPath;
+            ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));
+
+            // Act
+            ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
+            ETag result = header.Equals("IfMatch") ? query.IfMatch : query.IfNoneMatch;
+            dynamic dynamicResult = result;
+
+            // Assert
+            Assert.Equal("Foo", result["Name"]);
+            Assert.Equal("Foo", dynamicResult.Name);
         }
     }
 }

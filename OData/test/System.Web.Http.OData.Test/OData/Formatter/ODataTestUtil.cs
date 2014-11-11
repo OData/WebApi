@@ -182,4 +182,12 @@ namespace System.Web.Http.OData.Formatter
 
         public MultiForeignCustomer Customer { get; set; }
     }
+
+    public class FormatterPersonWithConcurrencyCheck
+    {
+        public int Id { get; set; }
+
+        [ConcurrencyCheck]
+        public string Name { get; set; }
+    }
 }

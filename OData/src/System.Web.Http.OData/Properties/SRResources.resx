@@ -704,4 +704,16 @@
   <data name="ReferentialConstraintAlreadyConfigured" xml:space="preserve">
     <value>The '{0}' property '{1}' is already configured to have a relationship with '{2}' property '{3}' in the referential constraint.</value>
   </data>
+  <data name="InvalidETagHandler" xml:space="preserve">
+    <value>The ETag handler set in the configuration property is of type '{0}', which does not implement IETagHandler.</value>
+  </data>
+  <data name="NullETagHandler" xml:space="preserve">
+    <value>The ETag handler set in the configuration property must not be null.</value>
+  </data>
+  <data name="CannotApplyETagOfT" xml:space="preserve">
+    <value>Cannot apply {0} of '{1}' to {2} of '{3}'.</value>
+  </data>
+  <data name="ETagNotWellFormed" xml:space="preserve">
+    <value>The ETag is not well-formed.</value>
+  </data>
 </root>

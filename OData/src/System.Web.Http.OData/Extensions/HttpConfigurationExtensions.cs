@@ -3,6 +3,8 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Web.Http.Filters;
+using System.Web.Http.OData.Formatter;
+using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query;
 
 namespace System.Web.Http.OData.Extensions
@@ -13,6 +15,8 @@ namespace System.Web.Http.OData.Extensions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpConfigurationExtensions
     {
+        private const string ETagHandlerKey = "System.Web.Http.OData.ETagHandler";
+
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
         /// type. To avoid processing unexpected or malicious queries, use the validation settings on
@@ -48,6 +52,59 @@ namespace System.Web.Http.OData.Extensions
             }
 
             configuration.Services.Add(typeof(IFilterProvider), new QueryFilterProvider(queryFilter));
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IETagHandler"/> from the configuration.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <returns>The <see cref="IETagHandler"/> for the configuration.</returns>
+        public static IETagHandler GetETagHandler(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            object handler;
+            if (!configuration.Properties.TryGetValue(ETagHandlerKey, out handler))
+            {
+                IETagHandler defaultETagHandler = new DefaultODataETagHandler();
+                configuration.SetETagHandler(defaultETagHandler);
+                return defaultETagHandler;
+            }
+
+            if (handler == null)
+            {
+                throw Error.InvalidOperation(SRResources.NullETagHandler);
+            }
+
+            IETagHandler etagHandler = handler as IETagHandler;
+            if (etagHandler == null)
+            {
+                throw Error.InvalidOperation(SRResources.InvalidETagHandler, handler.GetType());
+            }
+
+            return etagHandler;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="IETagHandler"/> on the configuration.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="handler">The <see cref="IETagHandler"/> for the configuration.</param>
+        public static void SetETagHandler(this HttpConfiguration configuration, IETagHandler handler)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+            if (handler == null)
+            {
+                throw Error.ArgumentNull("handler");
+            }
+
+            configuration.Properties[ETagHandlerKey] = handler;
         }
     }
 }

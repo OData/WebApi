@@ -3,8 +3,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Web.Http.OData.Builder;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Routing;
 using System.Web.Http.Routing;
 using System.Web.Http.TestCommon;
@@ -453,6 +455,110 @@ namespace System.Web.Http.OData.Formatter.Serialization
             // Assert
             Assert.Equal(actions, entry.Actions);
             serializer.Verify();
+        }
+
+        [Fact]
+        public void CreateEntry_SetsEtagToNull_IfRequestIsNull()
+        {
+            // Arrange
+            SelectExpandNode selectExpandNode = new SelectExpandNode
+            {
+                SelectedStructuralProperties = { new Mock<IEdmStructuralProperty>().Object, new Mock<IEdmStructuralProperty>().Object }
+            };
+            ODataProperty[] properties = new[] { new ODataProperty(), new ODataProperty() };
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
+            serializer.CallBase = true;
+
+            serializer
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), _entityInstanceContext))
+                .Returns(properties[0]);
+            serializer
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), _entityInstanceContext))
+                .Returns(properties[1]);
+
+            // Act
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, _entityInstanceContext);
+
+            // Assert
+            Assert.Null(entry.ETag);
+        }
+
+        [Fact]
+        public void CreateEntry_SetsETagToNull_IfModelDoesNotHaveConcurrencyProperty()
+        {
+            // Arrange
+            IEdmEntitySet orderSet = _model.FindDeclaredEntityContainer("Default.Container").FindEntitySet("Orders");
+            Order order = new Order()
+            {
+                Name = "Foo",
+                Shipment = "Bar",
+                ID = 10,
+            };
+            _writeContext.EntitySet = orderSet;
+            _entityInstanceContext = new EntityInstanceContext(_writeContext, orderSet.ElementType.AsReference(), order);
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode
+            {
+                SelectedStructuralProperties = { new Mock<IEdmStructuralProperty>().Object, new Mock<IEdmStructuralProperty>().Object }
+            };
+            ODataProperty[] properties = new[] { new ODataProperty(), new ODataProperty() };
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
+            serializer.CallBase = true;
+
+            serializer
+                 .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), _entityInstanceContext))
+                 .Returns(properties[0]);
+            serializer
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), _entityInstanceContext))
+                .Returns(properties[1]);
+
+            MockHttpRequestMessage request = new MockHttpRequestMessage();
+            request.SetConfiguration(new HttpConfiguration());
+            _entityInstanceContext.Request = request;
+
+            // Act
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, _entityInstanceContext);
+
+            // Assert
+            Assert.Null(entry.ETag);
+        }
+
+        [Fact]
+        public void CreateEntry_SetsEtagToNotNull_IfWithConcurrencyProperty()
+        {
+            // Arrange
+            Mock<IEdmStructuralProperty> mockConcurrencyProperty = new Mock<IEdmStructuralProperty>();
+            mockConcurrencyProperty.SetupGet(s => s.ConcurrencyMode).Returns(EdmConcurrencyMode.Fixed);
+            mockConcurrencyProperty.SetupGet(s => s.Name).Returns("City");
+            SelectExpandNode selectExpandNode = new SelectExpandNode
+            {
+                SelectedStructuralProperties = { new Mock<IEdmStructuralProperty>().Object, mockConcurrencyProperty.Object }
+            };
+            ODataProperty[] properties = new[] { new ODataProperty(), new ODataProperty() };
+            Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
+            serializer.CallBase = true;
+            serializer
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), _entityInstanceContext))
+                .Returns(properties[0]);
+            serializer
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), _entityInstanceContext))
+                .Returns(properties[1]);
+
+            MockHttpRequestMessage request = new MockHttpRequestMessage();
+            HttpConfiguration configuration = new HttpConfiguration();
+            Mock<IETagHandler> mockETagHandler = new Mock<IETagHandler>();
+            string tag = "\"'anycity'\"";
+            EntityTagHeaderValue etagHeaderValue = new EntityTagHeaderValue(tag, isWeak: true);
+            mockETagHandler.Setup(e => e.CreateETag(It.IsAny<IDictionary<string, object>>())).Returns(etagHeaderValue);
+            configuration.SetETagHandler(mockETagHandler.Object);
+            request.SetConfiguration(configuration);
+            _entityInstanceContext.Request = request;
+
+            // Act
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, _entityInstanceContext);
+
+            // Assert
+            Assert.Equal(etagHeaderValue.ToString(), entry.ETag);
         }
 
         [Fact]
@@ -1365,6 +1471,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
             public int ID { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }
+            public string City { get; set; }
             public IList<Order> Orders { get; private set; }
         }
 
@@ -1372,6 +1479,7 @@ namespace System.Web.Http.OData.Formatter.Serialization
         {
             public int ID { get; set; }
             public string Name { get; set; }
+            public string Shipment { get; set; }
             public Customer Customer { get; set; }
         }
 

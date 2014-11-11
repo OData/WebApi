@@ -7,10 +7,12 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.OData.Extensions;
+using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Query.Validators;
 using Microsoft.Data.Edm;
@@ -29,6 +31,14 @@ namespace System.Web.Http.OData.Query
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
         private IAssembliesResolver _assembliesResolver;
+
+        private ETag _etagIfMatch;
+
+        private bool _etagIfMatchChecked;
+
+        private ETag _etagIfNoneMatch;
+
+        private bool _etagIfNoneMatchChecked;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
@@ -167,6 +177,46 @@ namespace System.Web.Http.OData.Query
         /// Gets or sets the query validator.
         /// </summary>
         public ODataQueryValidator Validator { get; set; }
+
+        /// <summary>
+        /// Gets the <see cref="ETag"/> from the IfMatch header, if any.
+        /// </summary>
+        public virtual ETag IfMatch
+        {
+            get
+            {
+                if (!_etagIfMatchChecked)
+                {
+                    EntityTagHeaderValue etagHeaderValue = Request.Headers.IfMatch.SingleOrDefault();
+                    _etagIfMatch = GetETag(etagHeaderValue);
+                    _etagIfMatchChecked = true;
+                }
+
+                return _etagIfMatch;
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ETag"/> from the IfNoneMatch header, if any.
+        /// </summary>
+        public virtual ETag IfNoneMatch
+        {
+            get
+            {
+                if (!_etagIfNoneMatchChecked)
+                {
+                    EntityTagHeaderValue etagHeaderValue = Request.Headers.IfNoneMatch.SingleOrDefault();
+                    _etagIfNoneMatch = GetETag(etagHeaderValue);
+                    if (_etagIfNoneMatch != null)
+                    {
+                        _etagIfNoneMatch.IsIfNoneMatch = true;
+                    }
+                    _etagIfNoneMatchChecked = true;
+                }
+
+                return _etagIfNoneMatch;
+            }
+        }
 
         /// <summary>
         /// Check if the given query option is an OData system query option.
@@ -525,6 +575,11 @@ namespace System.Web.Http.OData.Query
                 Query = queryBuilder.ToString()
             };
             return uriBuilder.Uri;
+        }
+
+        internal virtual ETag GetETag(EntityTagHeaderValue etagHeaderValue)
+        {
+            return Request.GetETag(etagHeaderValue);
         }
     }
 }

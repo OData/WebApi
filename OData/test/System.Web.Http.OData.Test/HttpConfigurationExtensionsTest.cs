@@ -126,6 +126,33 @@ namespace System.Web.Http.OData
             Assert.Equal(100, ((EnableQueryAttribute)filters[0].Instance).PageSize);
         }
 
+        [Fact]
+        public void GetETagHandler_ReturnDefaultODataETagHandler_IfNotSet()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            IETagHandler eTagHandler = config.GetETagHandler();
+
+            // Assert
+            Assert.IsType<DefaultODataETagHandler>(eTagHandler);
+        }
+
+        [Fact]
+        public void SetETagHandler_ReturnsHandlerSet_UsingSetETagHandler()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            IETagHandler eTagHandler = new Mock<IETagHandler>().Object;
+
+            // Act
+            config.SetETagHandler(eTagHandler);
+
+            // Assert
+            Assert.Equal(eTagHandler, config.GetETagHandler());
+        }
+
         private static ODataMediaTypeFormatter CreateODataFormatter()
         {
             return new ODataMediaTypeFormatter(new ODataPayloadKind[0]);

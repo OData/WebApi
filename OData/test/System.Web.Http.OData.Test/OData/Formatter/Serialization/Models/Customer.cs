@@ -15,6 +15,7 @@ namespace System.Web.Http.OData.Formatter.Serialization.Models
         public string Name { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string City { get; set; }
         public IList<Order> Orders { get; private set; }
     }
 }

@@ -305,7 +305,7 @@ namespace System.Web.Http.OData.Builder
 
             // Act
             NavigationPropertyConfiguration navigationProperty =
-                builder.Entity<Role>().HasOptional(r => r.User, (r, u)=> r.UserForeignKey == u.UserId);
+                builder.Entity<Role>().HasOptional(r => r.User, (r, u) => r.UserForeignKey == u.UserId);
 
             // Assert
             PropertyInfo actualDependentPropertyInfo = Assert.Single(navigationProperty.DependentProperties);
@@ -530,6 +530,28 @@ namespace System.Web.Http.OData.Builder
                 String.Format(SRResources.ReferentialConstraintPropertyTypeNotValid, "System.Web.Http.OData.MockType"));
         }
 
+        [Fact]
+        public void GetEdmModel_PropertyWithConcurrency_IsConcurrencyToken()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder();
+            builder.Entity<Customer>().Property(c => c.Name).IsConcurrencyToken();
+            builder.Entity<Customer>().Property(c => c.Id);
+
+            // Act
+            var model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType type = model.AssertHasEntityType(typeof(Customer));
+            IEdmStructuralProperty nameProperty =
+                type.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
+            Assert.Equal(EdmConcurrencyMode.Fixed, nameProperty.ConcurrencyMode);
+
+            IEdmStructuralProperty idProperty =
+                type.AssertHasPrimitiveProperty(model, "Id", EdmPrimitiveTypeKind.Int32, isNullable: false);
+            Assert.Equal(EdmConcurrencyMode.None, idProperty.ConcurrencyMode);
+        }
+
         class User
         {
             public int UserId { get; set; }
@@ -565,7 +587,7 @@ namespace System.Web.Http.OData.Builder
             public MockType InvalidPrincipalKey { get; set; }
         }
 
-        class ForeignEntity
+        private class ForeignEntity
         {
             public MockType InvalidForeignKey { get; set; }
 

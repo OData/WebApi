@@ -72,5 +72,15 @@ namespace System.Web.Http.OData.Builder
             StoreGeneratedPattern = databaseGeneratedOption;
             return this;
         }
+
+        /// <summary>
+        /// Configures the property to be ConcurrencyCheck (OData: ETag).
+        /// </summary>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public PrimitivePropertyConfiguration IsConcurrencyToken()
+        {
+            ConcurrencyToken = true;
+            return this;
+        }
     }
 }

@@ -65,6 +65,12 @@
     <Compile Include="..\Common\TypeExtensions.cs">
       <Link>Common\TypeExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Common\CollectionExtensions.cs">
+      <Link>Common\CollectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\ListWrapperCollection.cs">
+      <Link>Common\ListWrapperCollection.cs</Link>
+    </Compile>
     <Compile Include="Extensions\HttpConfigurationExtensions.cs" />
     <Compile Include="Extensions\HttpErrorExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
@@ -103,7 +109,12 @@
     <Compile Include="OData\EdmEntityCollectionObject.cs" />
     <Compile Include="OData\EdmEntityObject.cs" />
     <Compile Include="OData\EdmStructuredObject.cs" />
+    <Compile Include="OData\ETagMessageHandler.cs" />
     <Compile Include="OData\Formatter\ClrTypeCache.cs" />
+    <Compile Include="OData\Formatter\DefaultODataETagHandler.cs" />
+    <Compile Include="OData\Formatter\ETag.cs" />
+    <Compile Include="OData\Formatter\ETagOfTEntity.cs" />
+    <Compile Include="OData\Formatter\IETagHandler.cs" />
     <Compile Include="OData\Formatter\Serialization\TypedEdmComplexObject.cs" />
     <Compile Include="OData\Formatter\Serialization\TypedEdmEntityObject.cs" />
     <Compile Include="OData\Formatter\Deserialization\DeserializationHelpers.cs" />
@@ -227,6 +238,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\NotMappedAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\DatabaseGeneratedAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\DataContractAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\IgnoreDataMemberAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\RequiredAttributeEdmPropertyConvention.cs" />

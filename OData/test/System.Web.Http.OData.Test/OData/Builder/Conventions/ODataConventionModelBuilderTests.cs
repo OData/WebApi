@@ -10,6 +10,7 @@ using System.Web.Http.OData.Builder.TestModels;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.TestCommon;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Library.Values;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -178,6 +179,85 @@ namespace System.Web.Http.OData.Builder.Conventions
             Assert.Equal(2, version.StructuralProperties().Count());
             version.AssertHasPrimitiveProperty(model, "Major", EdmPrimitiveTypeKind.Int32, isNullable: false);
             version.AssertHasPrimitiveProperty(model, "Minor", EdmPrimitiveTypeKind.Int32, isNullable: false);
+        }
+
+        [Fact]
+        public void ModelBuilder_ProductsWithDatabaseGeneratedOptionHasExpectedAnnotations()
+        {
+            // Arrange
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<ProductWithDatabaseGeneratedOption>("Products");
+
+            // Act
+            var model = modelBuilder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(2, model.SchemaElements.OfType<IEdmSchemaType>().Count());
+
+            var product = model.AssertHasEntitySet(entitySetName: "Products",
+                mappedEntityClrType: typeof(ProductWithDatabaseGeneratedOption));
+            Assert.Equal(2, product.StructuralProperties().Count());
+            Assert.Empty(product.NavigationProperties());
+            product.AssertHasKey(model, "ID", EdmPrimitiveTypeKind.Int32);
+            IEdmStructuralProperty idProperty =
+                product.AssertHasPrimitiveProperty(model, "ID", EdmPrimitiveTypeKind.Int32, isNullable: false);
+            var idAnnotation = model.GetAnnotationValue<EdmStringConstant>(
+                idProperty,
+                StoreGeneratedPatternAnnotation.AnnotationsNamespace,
+                StoreGeneratedPatternAnnotation.AnnotationName);
+            Assert.Equal(DatabaseGeneratedOption.Identity.ToString(), idAnnotation.Value);
+
+            IEdmStructuralProperty nameProperty =
+                product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
+            var nameAnnotation = model.GetAnnotationValue<EdmStringConstant>(
+                nameProperty,
+                StoreGeneratedPatternAnnotation.AnnotationsNamespace,
+                StoreGeneratedPatternAnnotation.AnnotationName);
+            Assert.Equal(DatabaseGeneratedOption.Computed.ToString(), nameAnnotation.Value);
+        }
+
+        [Fact]
+        public void ModelBuilder_DerivedProductsWithDatabaseGeneratedOptionHasExpectedAnnotations()
+        {
+            // Arrange
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<DerivedProductWithDatabaseGeneratedOption>("DerivedProducts");
+            modelBuilder.EntitySet<ProductWithDatabaseGeneratedOption>("Products");
+
+            // Act
+            var model = modelBuilder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(2, model.SchemaElements.OfType<IEdmSchemaType>().Count());
+
+            var product = model.AssertHasEntitySet(entitySetName: "DerivedProducts",
+                mappedEntityClrType: typeof(DerivedProductWithDatabaseGeneratedOption));
+            Assert.Equal(3, product.StructuralProperties().Count());
+            Assert.Equal(0, product.NavigationProperties().Count());
+            product.AssertHasKey(model, "ID", EdmPrimitiveTypeKind.Int32);
+            IEdmStructuralProperty idProperty =
+                product.AssertHasPrimitiveProperty(model, "ID", EdmPrimitiveTypeKind.Int32, isNullable: false);
+            var idAnnotation = model.GetAnnotationValue<EdmStringConstant>(
+                idProperty,
+                StoreGeneratedPatternAnnotation.AnnotationsNamespace,
+                StoreGeneratedPatternAnnotation.AnnotationName);
+            Assert.Equal(DatabaseGeneratedOption.Identity.ToString(), idAnnotation.Value);
+
+            IEdmStructuralProperty nameProperty =
+                product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
+            var nameAnnotation = model.GetAnnotationValue<EdmStringConstant>(
+                nameProperty,
+                StoreGeneratedPatternAnnotation.AnnotationsNamespace,
+                StoreGeneratedPatternAnnotation.AnnotationName);
+            Assert.Equal(DatabaseGeneratedOption.Computed.ToString(), nameAnnotation.Value);
+
+            IEdmStructuralProperty titleProperty =
+                product.AssertHasPrimitiveProperty(model, "Title", EdmPrimitiveTypeKind.String, isNullable: true);
+            var titleAnnotation = model.GetAnnotationValue<EdmStringConstant>(
+                titleProperty,
+                StoreGeneratedPatternAnnotation.AnnotationsNamespace,
+                StoreGeneratedPatternAnnotation.AnnotationName);
+            Assert.Equal(DatabaseGeneratedOption.Computed.ToString(), titleAnnotation.Value);
         }
 
         [Fact]
@@ -1155,7 +1235,7 @@ namespace System.Web.Http.OData.Builder.Conventions
                     foreach (var explicitlyAddedProperty in explicitlyAddedProperties)
                     {
                         Assert.True(explicitlyAddedProperty.AddedExplicitly);
-    }
+                    }
                     foreach (var inferredProperty in inferredProperties)
                     {
                         Assert.False(inferredProperty.AddedExplicitly);
@@ -1240,5 +1320,18 @@ namespace System.Web.Http.OData.Builder.Conventions
         public string[] Aliases { get; set; }
     }
 
+    public class ProductWithDatabaseGeneratedOption
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int ID { get; set; }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public string Name { get; set; }
+    }
+
+    public class DerivedProductWithDatabaseGeneratedOption : ProductWithDatabaseGeneratedOption
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public string Title { get; set; }
+    }
 }

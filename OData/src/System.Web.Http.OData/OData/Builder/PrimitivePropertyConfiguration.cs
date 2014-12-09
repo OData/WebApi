@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace System.Web.Http.OData.Builder
@@ -37,6 +38,11 @@ namespace System.Web.Http.OData.Builder
         }
 
         /// <summary>
+        /// Gets or sets a value indicating which StoreGeneratedPattern is this property.
+        /// </summary>
+        public DatabaseGeneratedOption StoreGeneratedPattern { get; set; }
+
+        /// <summary>
         /// Configures the property to be optional.
         /// </summary>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
@@ -53,6 +59,17 @@ namespace System.Web.Http.OData.Builder
         public PrimitivePropertyConfiguration IsRequired()
         {
             OptionalProperty = false;
+            return this;
+        }
+
+        /// <summary>
+        /// Configures the property to have the given <paramref name="databaseGeneratedOption"/>.
+        /// </summary>
+        /// <param name="databaseGeneratedOption">Target DatabaseGeneratedOption.</param>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public PrimitivePropertyConfiguration HasStoreGeneratedPattern(DatabaseGeneratedOption databaseGeneratedOption)
+        {
+            StoreGeneratedPattern = databaseGeneratedOption;
             return this;
         }
     }

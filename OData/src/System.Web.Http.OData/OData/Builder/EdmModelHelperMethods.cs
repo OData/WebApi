@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Annotations;
 using Microsoft.Data.Edm.Csdl;
 using Microsoft.Data.Edm.Expressions;
 using Microsoft.Data.Edm.Library;
@@ -167,11 +168,16 @@ namespace System.Web.Http.OData.Builder
             StructuralTypeConfiguration[] configTypes = types.ToArray();
 
             // build types
-            Dictionary<Type, IEdmStructuredType> edmTypes = EdmTypeBuilder.GetTypes(configTypes);
+            EdmTypeMap edmTypeMap = EdmTypeBuilder.GetTypesAndProperties(configTypes);
+            Dictionary<Type, IEdmStructuredType> edmTypes = edmTypeMap.EdmTypes;
 
             // Add an annotate types
             model.AddTypes(edmTypes);
             model.AddClrTypeAnnotations(edmTypes);
+
+            // Add direct value annotation
+            model.AddDirectValueAnnotations(edmTypeMap.DirectValueAnnotations);
+
             return edmTypes;
         }
 
@@ -210,6 +216,15 @@ namespace System.Web.Http.OData.Builder
                 IEdmStructuredType edmType = map.Value;
                 Type clrType = map.Key;
                 model.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(clrType));
+            }
+        }
+
+        private static void AddDirectValueAnnotations(this EdmModel model,
+            IEnumerable<IEdmDirectValueAnnotationBinding> directValueAnnotations)
+        {
+            foreach (IEdmDirectValueAnnotationBinding annotation in directValueAnnotations)
+            {
+                model.SetAnnotationValue(annotation.Element, annotation.NamespaceUri, annotation.Name, annotation.Value);
             }
         }
 

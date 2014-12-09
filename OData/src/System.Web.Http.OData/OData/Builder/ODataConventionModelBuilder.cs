@@ -31,6 +31,7 @@ namespace System.Web.Http.OData.Builder
             new EntityKeyConvention(),
             new KeyAttributeEdmPropertyConvention(),
             new IgnoreDataMemberAttributeEdmPropertyConvention(),
+            new DatabaseGeneratedAttributeEdmPropertyConvention(),
 
             // IEntitySetConvention's
             new SelfLinksGenerationConvention(),

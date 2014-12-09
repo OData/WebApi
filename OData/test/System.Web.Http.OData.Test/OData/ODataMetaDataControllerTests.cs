@@ -30,6 +30,29 @@ namespace System.Web.Http.OData.Builder
         }
 
         [Fact]
+        public void DollarMetaData_Works_WithDatabaseGeneratedAttribute()
+        {
+            // Arrange
+            string expectedString1 = string.Format(":{0}=\"Identity\"", StoreGeneratedPatternAnnotation.AnnotationName);
+            string expectedString2 = string.Format("=\"{0}\"", StoreGeneratedPatternAnnotation.AnnotationsNamespace);
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<FormatterPersonWithDatabaseGeneratedOption>("People");
+
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataServiceRoute(builder.GetEdmModel());
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var response = client.GetAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            string result = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains(expectedString1, result);
+            Assert.Contains(expectedString2, result);
+        }
+
+        [Fact]
         public void GetMetadata_Returns_EdmModelFromRequest()
         {
             IEdmModel model = new EdmModel();

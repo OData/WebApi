@@ -215,11 +215,13 @@
     <Compile Include="OData\Builder\CollectionTypeConfiguration.cs" />
     <Compile Include="OData\Builder\ComplexPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfiguration.cs" />
+    <Compile Include="OData\Builder\EdmTypeMap.cs" />
     <Compile Include="OData\Builder\Conventions\AbstractEntityTypeDiscoveryConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NotMappedAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AttributeEdmTypeConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\DatabaseGeneratedAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\DataContractAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\IgnoreDataMemberAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\RequiredAttributeEdmPropertyConvention.cs" />
@@ -320,6 +322,7 @@
     <Compile Include="Extensions\HttpActionDescriptorExtensions.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandler.cs" />
     <Compile Include="OData\Routing\ODataPathSegment.cs" />
+    <Compile Include="OData\StoreGeneratedPatternAnnotation.cs" />
     <Compile Include="OData\TypedDelta.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypeFormatter.cs" />

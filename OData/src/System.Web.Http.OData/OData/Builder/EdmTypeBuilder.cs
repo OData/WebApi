@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
+using Microsoft.Data.Edm.Annotations;
 using Microsoft.Data.Edm.Library;
 
 namespace System.Web.Http.OData.Builder
@@ -17,6 +19,7 @@ namespace System.Web.Http.OData.Builder
     {
         private readonly List<StructuralTypeConfiguration> _configurations;
         private readonly Dictionary<Type, IEdmStructuredType> _types = new Dictionary<Type, IEdmStructuredType>();
+        private readonly List<IEdmDirectValueAnnotationBinding> _directValueAnnotations = new List<IEdmDirectValueAnnotationBinding>();
 
         internal EdmTypeBuilder(IEnumerable<StructuralTypeConfiguration> configurations)
         {
@@ -27,6 +30,7 @@ namespace System.Web.Http.OData.Builder
         {
             // Reset
             _types.Clear();
+            _directValueAnnotations.Clear();
 
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
             foreach (StructuralTypeConfiguration config in _configurations)
@@ -95,10 +99,26 @@ namespace System.Web.Http.OData.Builder
                 {
                     case PropertyKind.Primitive:
                         PrimitivePropertyConfiguration primitiveProperty = property as PrimitivePropertyConfiguration;
-                        type.AddStructuralProperty(
-                            primitiveProperty.PropertyInfo.Name,
-                            GetTypeKind(primitiveProperty.PropertyInfo.PropertyType),
+
+                        EdmPrimitiveTypeKind typeKind = GetTypeKind(primitiveProperty.PropertyInfo.PropertyType);
+                        IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance.GetPrimitive(
+                            typeKind,
                             primitiveProperty.OptionalProperty);
+
+                        var primitiveProp = new EdmStructuralProperty(
+                            type,
+                            primitiveProperty.PropertyInfo.Name,
+                            primitiveTypeReference);
+
+                        type.AddProperty(primitiveProp);
+
+                        // Set Annotation StoreGeneratedPattern
+                        if (config.Kind == EdmTypeKind.Entity
+                            && primitiveProperty.StoreGeneratedPattern != DatabaseGeneratedOption.None)
+                        {
+                            _directValueAnnotations.Add(
+                                new StoreGeneratedPatternAnnotation(primitiveProp, primitiveProperty.StoreGeneratedPattern));
+                        }
                         break;
 
                     case PropertyKind.Complex:
@@ -172,6 +192,22 @@ namespace System.Web.Http.OData.Builder
 
             EdmTypeBuilder builder = new EdmTypeBuilder(configurations);
             return builder.GetEdmTypes();
+        }
+
+        /// <summary>
+        /// Builds <see cref="IEdmType"/> and <see cref="IEdmProperty"/>'s from <paramref name="configurations"/>
+        /// </summary>
+        /// <param name="configurations">A collection of <see cref="StructuralTypeConfiguration"/>'s</param>
+        /// <returns>The built dictionary of <see cref="IEdmStructuredType"/>'s indexed by their backing CLR type</returns>
+        public static EdmTypeMap GetTypesAndProperties(IEnumerable<StructuralTypeConfiguration> configurations)
+        {
+            if (configurations == null)
+            {
+                throw Error.ArgumentNull("configurations");
+            }
+
+            EdmTypeBuilder builder = new EdmTypeBuilder(configurations);
+            return new EdmTypeMap(builder.GetEdmTypes(), builder._directValueAnnotations);
         }
 
         /// <summary>

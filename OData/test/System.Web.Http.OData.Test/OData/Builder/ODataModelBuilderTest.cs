@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Csdl;
+using Microsoft.Data.Edm.Library.Values;
 using Microsoft.Data.OData;
 using Microsoft.TestCommon;
 using Moq;
@@ -176,6 +178,118 @@ namespace System.Web.Http.OData.Builder
                 model.EntityContainers().Single().Elements.OfType<IEdmFunctionImport>().Single();
             ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(functionImport);
             Assert.Equal(value, actionLinkBuilder.FollowsConventions);
+        }
+
+        [Fact]
+        public void GetEdmModel_PropertyWithDatabaseAttribute_SetStoreGeneratedPatternOnEntityType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.Entity<Customer>().Property(c => c.Name).HasStoreGeneratedPattern(DatabaseGeneratedOption.Computed);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType type = model.AssertHasEntityType(typeof(Customer));
+            IEdmStructuralProperty property = type.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
+            var idAnnotation = model.GetAnnotationValue<EdmStringConstant>(
+                property,
+                StoreGeneratedPatternAnnotation.AnnotationsNamespace,
+                StoreGeneratedPatternAnnotation.AnnotationName);
+            Assert.Equal(DatabaseGeneratedOption.Computed.ToString(), idAnnotation.Value);
+        }
+
+        [Fact]
+        public void GetEdmModel_PropertyWithDatabaseAttribute_CannotSetStoreGeneratedPatternOnComplexType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.ComplexType<Customer>().Property(c => c.Name).HasStoreGeneratedPattern(DatabaseGeneratedOption.Computed);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmComplexType type = model.AssertHasComplexType(typeof(Customer));
+            IEdmStructuralProperty property = type.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
+            var idAnnotation = model.GetAnnotationValue<EdmStringConstant>(
+                property,
+                StoreGeneratedPatternAnnotation.AnnotationsNamespace,
+                StoreGeneratedPatternAnnotation.AnnotationName);
+            Assert.Null(idAnnotation);
+        }
+
+        [Fact]
+        public void GetEdmModel_PropertyWithDatabaseAttribute_ConfigAnnotationOnPropertyOnEntityType()
+        {
+            // Arrange
+            MockType type =
+                new MockType("Entity")
+                .Property(typeof(int), "ID", new DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity))
+                .Property(typeof(int?), "Count");
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntity(type);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType entity = model.AssertHasEntityType(type);
+            IEdmStructuralProperty idProperty = entity.AssertHasPrimitiveProperty(model, "ID",
+                EdmPrimitiveTypeKind.Int32, isNullable: false);
+
+            var idAnnotation = model.GetAnnotationValue<EdmStringConstant>(
+                idProperty,
+                StoreGeneratedPatternAnnotation.AnnotationsNamespace,
+                StoreGeneratedPatternAnnotation.AnnotationName);
+            Assert.Equal(DatabaseGeneratedOption.Identity.ToString(), idAnnotation.Value);
+
+            IEdmStructuralProperty countProperty = entity.AssertHasPrimitiveProperty(model, "Count",
+                EdmPrimitiveTypeKind.Int32, isNullable: true);
+
+            var countAnnotation = model.GetAnnotationValue<EdmStringConstant>(
+                countProperty,
+                StoreGeneratedPatternAnnotation.AnnotationsNamespace,
+                StoreGeneratedPatternAnnotation.AnnotationName);
+            Assert.Null(countAnnotation);
+        }
+
+        [Fact]
+        public void GetEdmModel_PropertyWithDatabaseAttribute_CannotConfigAnnotationOnPropertyOnComplexType()
+        {
+            // Arrange
+            MockType type =
+                new MockType("Complex")
+                .Property(typeof(int), "ID", new DatabaseGeneratedAttribute(DatabaseGeneratedOption.Computed))
+                .Property(typeof(int?), "Count");
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddComplexType(type);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmComplexType entity = model.AssertHasComplexType(type);
+            IEdmStructuralProperty idProperty = entity.AssertHasPrimitiveProperty(model, "ID",
+                EdmPrimitiveTypeKind.Int32, isNullable: false);
+
+            var idAnnotation = model.GetAnnotationValue<EdmStringConstant>(
+                idProperty,
+                StoreGeneratedPatternAnnotation.AnnotationsNamespace,
+                StoreGeneratedPatternAnnotation.AnnotationName);
+            Assert.Null(idAnnotation);
+
+            IEdmStructuralProperty countProperty = entity.AssertHasPrimitiveProperty(model, "Count",
+                EdmPrimitiveTypeKind.Int32, isNullable: true);
+
+            var countAnnotation = model.GetAnnotationValue<EdmStringConstant>(
+                countProperty,
+                StoreGeneratedPatternAnnotation.AnnotationsNamespace,
+                StoreGeneratedPatternAnnotation.AnnotationName);
+            Assert.Null(countAnnotation);
         }
     }
 }

@@ -799,19 +799,25 @@ namespace System.Net.Http
                 return Enumerable.Empty<KeyValuePair<string, string>>();
             }
 
-            IEnumerable<KeyValuePair<string, string>> queryString;
-            if (!request.Properties.TryGetValue<IEnumerable<KeyValuePair<string, string>>>(HttpPropertyKeys.RequestQueryNameValuePairsKey, out queryString))
+            IEnumerable<KeyValuePair<string, string>> queryStringData;
+            string cachedQueryString;
+
+            request.Properties.TryGetValue<IEnumerable<KeyValuePair<string, string>>>(HttpPropertyKeys.RequestQueryNameValuePairsKey, out queryStringData);
+            request.Properties.TryGetValue<string>(HttpPropertyKeys.CachedRequestQueryKey, out cachedQueryString);
+
+            if (queryStringData == null ||
+               (cachedQueryString != null && !Object.ReferenceEquals(cachedQueryString, uri.Query ?? String.Empty)))
             {
-                // Uri --> FormData --> NVC
                 FormDataCollection formData = new FormDataCollection(uri);
 
                 // The ToArray call here avoids reparsing the query string, and avoids storing an Enumerator state
                 // machine in the request state.
-                queryString = formData.GetJQueryNameValuePairs().ToArray();
-                request.Properties.Add(HttpPropertyKeys.RequestQueryNameValuePairsKey, queryString);
+                queryStringData = formData.GetJQueryNameValuePairs().ToArray();
+                request.Properties[HttpPropertyKeys.RequestQueryNameValuePairsKey] = queryStringData;
+                request.Properties[HttpPropertyKeys.CachedRequestQueryKey] = uri.Query ?? String.Empty;
             }
 
-            return queryString;
+            return queryStringData;
         }
 
         /// <summary>

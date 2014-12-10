@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http.Formatting;
 using System.Net.Http.Formatting.Mocks;
 using System.Net.Http.Headers;
@@ -1232,6 +1233,185 @@ namespace System.Net.Http
 
             Assert.Same(returned, cached);
             Assert.Same(returned, request.GetQueryNameValuePairs());
+        }
+
+        [Fact]
+        public void GetQueryNameValuePairs_ReplacesResultWhenUriChanges()
+        {
+            // Arrange
+            var request = CreateRequest();
+            request.RequestUri = new Uri("http://localhost/api/Person/10?x=7&y=cool");
+            request.GetQueryNameValuePairs();
+
+            // Act
+            request.RequestUri = new Uri("http://localhost/api/Person/10?x=7&y=verycool");
+            var returned = request.GetQueryNameValuePairs();
+
+            // Assert
+            IEnumerable<KeyValuePair<string, string>> cached;
+            string queryString;
+
+            Assert.True(request.Properties.TryGetValue<IEnumerable<KeyValuePair<string, string>>>(HttpPropertyKeys.RequestQueryNameValuePairsKey, out cached));
+            Assert.True(request.Properties.TryGetValue<string>(HttpPropertyKeys.CachedRequestQueryKey, out queryString));
+
+            Assert.Same(returned, cached);
+            Assert.Same(returned, request.GetQueryNameValuePairs());
+            Assert.Same(request.RequestUri.Query, queryString);
+        }
+
+        [InlineData("http://localhost/api/Person/10?", "http://localhost/api/Person/10?x=7&y=verycool")]
+        [InlineData("http://localhost/api/Person/10", "http://localhost/api/Person/10?x=7&y=verycool")]
+        [Theory]
+        public void GetQueryNameValuePairs_ReplacesResultWhenUriChangesFromEmpty(string firstUri, string secondUri)
+        {
+            // Arrange
+            var request = CreateRequest();
+            request.RequestUri = new Uri(firstUri);
+            request.GetQueryNameValuePairs();
+
+            // Act
+            request.RequestUri = new Uri(secondUri);
+            var returned = request.GetQueryNameValuePairs();
+
+            // Assert
+            IEnumerable<KeyValuePair<string, string>> cached;
+            string queryString;
+
+            Assert.True(request.Properties.TryGetValue<IEnumerable<KeyValuePair<string, string>>>(HttpPropertyKeys.RequestQueryNameValuePairsKey, out cached));
+            Assert.True(request.Properties.TryGetValue<string>(HttpPropertyKeys.CachedRequestQueryKey, out queryString));
+
+            Assert.Same(returned, cached);
+            Assert.Same(returned, request.GetQueryNameValuePairs());
+            Assert.Same(request.RequestUri.Query, queryString);
+        }
+
+        [InlineData("http://localhost/api/Person/10?x=7&y=verycool", "http://localhost/api/Person/10?")]
+        [InlineData("http://localhost/api/Person/10?x=7&y=verycool", "http://localhost/api/Person/10")]
+        [Theory]
+        public void GetQueryNameValuePairs_ReplacesResultWhenUriChangesToEmpty(string firstUri, string secondUri)
+        {
+            // Arrange
+            var request = CreateRequest();
+            request.RequestUri = new Uri(firstUri);
+            IEnumerable<KeyValuePair<string, string>> original = request.GetQueryNameValuePairs();
+
+            // Act
+            request.RequestUri = new Uri(secondUri);
+            var returned = request.GetQueryNameValuePairs();
+
+            // Assert
+            IEnumerable<KeyValuePair<string, string>> cached;
+            string queryString;
+
+            // Cache is not cleared when the query is empty, but it is when the query is ?.
+            Assert.True(request.Properties.TryGetValue<IEnumerable<KeyValuePair<string, string>>>(HttpPropertyKeys.RequestQueryNameValuePairsKey, out cached));
+            Assert.True(request.Properties.TryGetValue<string>(HttpPropertyKeys.CachedRequestQueryKey, out queryString));
+
+            if (request.RequestUri.Query == "?")
+            {
+                Assert.Same(returned, cached);
+                Assert.Same(request.RequestUri.Query, queryString);
+                Assert.Equal(returned, Enumerable.Empty<KeyValuePair<string, string>>());
+            }
+            else
+            {
+                Assert.Same(original, cached);
+                Assert.NotSame(returned, cached);
+                Assert.NotSame(request.RequestUri.Query, queryString);
+                Assert.Same(returned, Enumerable.Empty<KeyValuePair<string, string>>());
+            }
+
+            Assert.Same(returned, request.GetQueryNameValuePairs());
+        }
+
+        [Fact]
+        public void GetQueryNameValuePairs_ReplacesResultWhenUriChanges_AndUserRemovedCache()
+        {
+            // This test verifies that users following the existing workaround for the issue
+            // https://aspnetwebstack.codeplex.com/workitem/2200 are not broken.
+
+            // Arrange
+            var request = CreateRequest();
+            request.RequestUri = new Uri("http://localhost/api/Person/10?x=7&y=cool");
+            request.GetQueryNameValuePairs();
+            request.Properties.Remove(HttpPropertyKeys.RequestQueryNameValuePairsKey);
+
+            Assert.False(request.Properties.ContainsKey(HttpPropertyKeys.RequestQueryNameValuePairsKey));
+
+            // Act
+            request.RequestUri = new Uri("http://localhost/api/Person/10?x=7&y=verycool");
+            var returned = request.GetQueryNameValuePairs();
+
+            // Assert
+            IEnumerable<KeyValuePair<string, string>> cached;
+            string queryString;
+
+            Assert.True(request.Properties.TryGetValue<IEnumerable<KeyValuePair<string, string>>>(HttpPropertyKeys.RequestQueryNameValuePairsKey, out cached));
+            Assert.True(request.Properties.TryGetValue<string>(HttpPropertyKeys.CachedRequestQueryKey, out queryString));
+
+            Assert.Same(returned, cached);
+            Assert.Same(returned, request.GetQueryNameValuePairs());
+            Assert.Same(request.RequestUri.Query, queryString);
+        }
+
+        [Fact]
+        public void GetQueryNameValuePairs_ReplacesResultWhenUriChangesToEmpty_AndUserRemovedCache()
+        {
+            // This test verifies that users following the existing workaround for the issue
+            // https://aspnetwebstack.codeplex.com/workitem/2200 are not broken.
+
+            // Arrange
+            var request = CreateRequest();
+            request.RequestUri = new Uri("http://localhost/api/Person/10?x=7&y=cool");
+            request.GetQueryNameValuePairs();
+            request.Properties.Remove(HttpPropertyKeys.RequestQueryNameValuePairsKey);
+
+            Assert.False(request.Properties.ContainsKey(HttpPropertyKeys.RequestQueryNameValuePairsKey));
+
+            // Act
+            request.RequestUri = new Uri("http://localhost/api/Person/10");
+            var returned = request.GetQueryNameValuePairs();
+
+            // Assert
+            IEnumerable<KeyValuePair<string, string>> cached;
+            string queryString;
+
+            Assert.False(request.Properties.TryGetValue<IEnumerable<KeyValuePair<string, string>>>(HttpPropertyKeys.RequestQueryNameValuePairsKey, out cached));
+            Assert.True(request.Properties.TryGetValue<string>(HttpPropertyKeys.CachedRequestQueryKey, out queryString)); // this will not get cleared.
+
+            Assert.Same(returned, Enumerable.Empty<KeyValuePair<string, string>>());
+            Assert.Same(returned, request.GetQueryNameValuePairs());
+            Assert.NotSame(request.RequestUri.Query, queryString);
+        }
+
+        [Fact]
+        public void GetQueryNameValuePairs_ReplacesResultWhenUriChangesFromEmpty_AndUserRemovedCache()
+        {
+            // This test verifies that users following the existing workaround for the issue
+            // https://aspnetwebstack.codeplex.com/workitem/2200 are not broken.
+
+            // Arrange
+            var request = CreateRequest();
+            request.RequestUri = new Uri("http://localhost/api/Person/10");
+            request.GetQueryNameValuePairs();
+            request.Properties.Remove(HttpPropertyKeys.RequestQueryNameValuePairsKey);
+
+            Assert.False(request.Properties.ContainsKey(HttpPropertyKeys.RequestQueryNameValuePairsKey));
+
+            // Act
+            request.RequestUri = new Uri("http://localhost/api/Person/10?x=7&y=verycool");
+            var returned = request.GetQueryNameValuePairs();
+
+            // Assert
+            IEnumerable<KeyValuePair<string, string>> cached;
+            string queryString;
+
+            Assert.True(request.Properties.TryGetValue<IEnumerable<KeyValuePair<string, string>>>(HttpPropertyKeys.RequestQueryNameValuePairsKey, out cached));
+            Assert.True(request.Properties.TryGetValue<string>(HttpPropertyKeys.CachedRequestQueryKey, out queryString));
+
+            Assert.Same(returned, cached);
+            Assert.Same(returned, request.GetQueryNameValuePairs());
+            Assert.Same(request.RequestUri.Query, queryString);
         }
 
         private class TraceIdScope : IDisposable

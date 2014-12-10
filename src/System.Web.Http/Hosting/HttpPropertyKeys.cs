@@ -85,6 +85,12 @@ namespace System.Web.Http.Hosting
         public static readonly string RequestQueryNameValuePairsKey = "MS_QueryNameValuePairs";
 
         /// <summary>
+        /// Provides the original query string for the parsed query string stored in <see cref="HttpRequestMessage.Properties"/>
+        /// under the key <see cref="HttpPropertyKeys.RequestQueryNameValuePairsKey" />.
+        /// </summary>
+        public static readonly string CachedRequestQueryKey = "MS_CachedRequestQuery";
+
+        /// <summary>
         /// Provides a key that indicates whether the request is a batch request.
         /// </summary>
         public static readonly string IsBatchRequest = "MS_BatchRequest";

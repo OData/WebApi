@@ -187,6 +187,14 @@ namespace System.Web.OData.Routing
             overloadUnboundFunction.Parameter<int>("P2");
             overloadUnboundFunction.Parameter<string>("P3");
 
+            var functionWithComplexTypeParameter =
+                builder.EntityType<RoutingCustomer>().Function("CanMoveToAddress").Returns<bool>();
+            functionWithComplexTypeParameter.Parameter<Address>("address");
+
+            var functionWithCollectionOfComplexTypeParameter =
+                builder.EntityType<RoutingCustomer>().Function("MoveToAddresses").Returns<bool>();
+            functionWithCollectionOfComplexTypeParameter.CollectionParameter<Address>("addresses");
+
             return builder.GetEdmModel();
         }
 

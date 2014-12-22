@@ -1241,6 +1241,44 @@ namespace System.Web.OData.Routing
             return functionSegment.GetParameterValue("Parameter");
         }
 
+        [Fact]
+        public void CanParse_ComplexTypeAsFunctionParameter_ParametersAlias()
+        {
+            // Arrange
+            string complexAlias = "{\"@odata.type\":\"System.Web.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"}";
+
+            // Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot,
+                "RoutingCustomers(1)/Default.CanMoveToAddress(address=@address)?@address=" + complexAlias);
+
+            // Assert
+            Assert.Equal("~/entityset/key/function", path.PathTemplate);
+            BoundFunctionPathSegment functionSegment = (BoundFunctionPathSegment)path.Segments.Last();
+
+            object parameterValue = functionSegment.GetParameterValue("address");
+            ODataComplexValue address = Assert.IsType<ODataComplexValue>(parameterValue);
+            Assert.Equal("System.Web.OData.Routing.Address", address.TypeName);
+        }
+
+        [Fact]
+        public void CanParse_CollectionOfComplexTypeAsFunctionParameter_ParametersAlias()
+        {
+            // Arrange
+            string complexAlias = "[{\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"},{\"Street\":\"Pine St.\",\"City\":\"Seattle\"}]";
+
+            // Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot,
+                "RoutingCustomers(1)/Default.MoveToAddresses(addresses=@addresses)?@addresses=" + complexAlias);
+
+            // Assert
+            Assert.Equal("~/entityset/key/function", path.PathTemplate);
+            BoundFunctionPathSegment functionSegment = (BoundFunctionPathSegment)path.Segments.Last();
+
+            object parameterValue = functionSegment.GetParameterValue("addresses");
+            ODataCollectionValue addresses = Assert.IsType<ODataCollectionValue>(parameterValue);
+            Assert.Equal("Collection(System.Web.OData.Routing.Address)", addresses.TypeName);
+        }
+
         [Theory]
         [InlineData("unBoundWithoutParams", 1, "Edm.Boolean", "~/unboundfunction")]
         [InlineData("unBoundWithoutParams()", 1, "Edm.Boolean", "~/unboundfunction")]

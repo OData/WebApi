@@ -25,6 +25,8 @@ namespace System.Web.OData.Query.Expressions
         public short? ReorderLevel { get; set; }
         public bool? Discontinued { get; set; }
         public DateTimeOffset? DiscontinuedDate { get; set; }
+        public DateTime Birthday { get; set; }
+
         public DateTimeOffset NonNullableDiscontinuedDate { get; set; }
         [NotFilterable]
         public DateTimeOffset NotFilterableDiscontinuedDate { get; set; }

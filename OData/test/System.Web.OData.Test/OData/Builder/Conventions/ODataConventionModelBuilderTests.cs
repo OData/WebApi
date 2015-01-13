@@ -2246,21 +2246,6 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
-        public void ODataConventionModelBuilder_GetEdmModel_ThrowsException_IfHasDateTimeProperty()
-        {
-            // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.EntityType<EntityTypeWithDateTime>();
-
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => builder.GetEdmModel(),
-                "The type 'System.DateTime' of property 'ReleaseDate' in the 'System.Web.OData.Builder.Conventions.EntityTypeWithDateTime' " +
-                "type is not a supported type. Change to use 'System.DateTimeOffset' or ignore this type by calling " +
-                "Ignore<System.Web.OData.Builder.Conventions.EntityTypeWithDateTime>() on " +
-                "'System.Web.OData.Builder.ODataModelBuilder'.\r\nParameter name: navigationProperty");
-        }
-
-        [Fact]
         public void AddDynamicDictionary_ThrowsException_IfMoreThanOneDynamicPropertyInOpenEntityType()
         {
             // Arrange
@@ -2288,6 +2273,38 @@ namespace System.Web.OData.Builder.Conventions
                 "Found more than one dynamic property container in type 'BadDerivedOpenEntityType'. " +
                 "Each open type must have at most one dynamic property container.\r\n" +
                 "Parameter name: propertyInfo");
+        }
+
+        [Fact]
+        public void GetEdmModel_Works_ForDateTime()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<DateTimeModel>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType entityType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
+            Assert.Equal("DateTimeModel", entityType.Name);
+
+            IEdmProperty edmProperty = Assert.Single(entityType.Properties().Where(e => e.Name == "BirthdayA"));
+            Assert.Equal("Edm.DateTimeOffset", edmProperty.Type.FullName());
+            Assert.False(edmProperty.Type.IsNullable);
+
+            edmProperty = Assert.Single(entityType.Properties().Where(e => e.Name == "BirthdayB"));
+            Assert.Equal("Edm.DateTimeOffset", edmProperty.Type.FullName());
+            Assert.True(edmProperty.Type.IsNullable);
+
+            edmProperty = Assert.Single(entityType.Properties().Where(e => e.Name == "BirthdayC"));
+            Assert.Equal("Collection(Edm.DateTimeOffset)", edmProperty.Type.FullName());
+            Assert.False(edmProperty.Type.IsNullable);
+
+            edmProperty = Assert.Single(entityType.Properties().Where(e => e.Name == "BirthdayD"));
+            Assert.Equal("Collection(Edm.DateTimeOffset)", edmProperty.Type.FullName());
+            Assert.True(edmProperty.Type.IsNullable);
         }
 
         [Fact]

@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -30,7 +31,7 @@ namespace System.Web.OData.Formatter.Deserialization
         [PropertyData("CopyItemsToCollectionData")]
         public void CopyItemsToCollection(IList oldCollection, IEnumerable newCollection)
         {
-            oldCollection.AddToCollection(newCollection, typeof(int), typeof(CollectionDeserializationHelpersTest), "PropertyName", newCollection.GetType());
+            oldCollection.AddToCollection(newCollection, typeof(int), typeof(CollectionDeserializationHelpersTest), "PropertyName", newCollection.GetType(), timeZoneInfo: null);
 
             Assert.Equal(
                 new[] { 1, 2, 3 },
@@ -43,9 +44,91 @@ namespace System.Web.OData.Formatter.Deserialization
             IList source = new List<SimpleEnum> { SimpleEnum.First, SimpleEnum.Second, SimpleEnum.Third };
             IEnumerable newCollection = new CustomCollectionWithAdd<SimpleEnum>();
 
-            source.AddToCollection(newCollection, typeof(SimpleEnum), typeof(CollectionDeserializationHelpersTest), "PropertyName", newCollection.GetType());
+            source.AddToCollection(newCollection, typeof(SimpleEnum), typeof(CollectionDeserializationHelpersTest), "PropertyName", newCollection.GetType(), timeZoneInfo: null);
 
             Assert.Equal(new[] { SimpleEnum.First, SimpleEnum.Second, SimpleEnum.Third }, newCollection as IEnumerable<SimpleEnum>);
+        }
+
+        [Fact]
+        public void CopyItemsToCollection_CanConvertUtcDateTime()
+        {
+            // Arrange
+            DateTime dt1 = new DateTime(1978, 11, 15, 0, 0, 0, DateTimeKind.Utc);
+            DateTime dt2 = new DateTime(2014, 10, 27, 0, 0, 0, DateTimeKind.Utc);
+            IList<DateTimeOffset> source = new List<DateTimeOffset> { new DateTimeOffset(dt1), new DateTimeOffset(dt2) };
+
+            IEnumerable<DateTime> expect =
+                source.Select(e => e.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime);
+
+            IEnumerable newCollection = new CustomCollectionWithAdd<DateTime>();
+
+            // Act
+            source.AddToCollection(newCollection, typeof(DateTime), typeof(CollectionDeserializationHelpersTest),
+                "PropertyName", newCollection.GetType(), timeZoneInfo: null);
+
+            // Assert
+            Assert.Equal(expect, newCollection as IEnumerable<DateTime>);
+        }
+
+        [Fact]
+        public void CopyItemsToCollection_CanConvertUtcDateTime_ToDestinationTimeZone()
+        {
+            // Arrange
+            DateTime dt1 = new DateTime(1978, 11, 15, 10, 20, 30, DateTimeKind.Utc);
+            DateTime dt2 = new DateTime(2014, 10, 27, 10, 20, 30, DateTimeKind.Utc);
+            IList source = new List<DateTimeOffset> { new DateTimeOffset(dt1), new DateTimeOffset(dt2) };
+            IEnumerable newCollection = new CustomCollectionWithAdd<DateTime>();
+            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"); // -8:00
+
+            // Act
+            source.AddToCollection(newCollection, typeof(DateTime), typeof(CollectionDeserializationHelpersTest),
+                "PropertyName", newCollection.GetType(), tzi);
+
+            // Assert
+            Assert.Equal(new[] { dt1.AddHours(-8), dt2.AddHours(-8) }, newCollection as IEnumerable<DateTime>);
+        }
+
+        [Fact]
+        public void CopyItemsToCollection_CanConvertLocalDateTime_ToDestinationTimeZone()
+        {
+            // Arrange
+            DateTimeOffset dto1 = DateTimeOffset.Parse("2014-12-16T01:02:03+8:00");
+            DateTimeOffset dto2 = DateTimeOffset.Parse("2014-12-16T01:02:03-2:00");
+            IList source = new List<DateTimeOffset> { dto1, dto2 };
+            IEnumerable<DateTime> expect = new List<DateTime>
+            {
+                dto1.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime,
+                dto2.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime
+            };
+
+            IEnumerable newCollection = new CustomCollectionWithAdd<DateTime>();
+
+            // Act
+            source.AddToCollection(newCollection, typeof(DateTime), typeof(CollectionDeserializationHelpersTest),
+                "PropertyName", newCollection.GetType(), timeZoneInfo: null);
+
+            // Assert
+            Assert.Equal(expect, newCollection as IEnumerable<DateTime>);
+        }
+
+        [Fact]
+        public void CopyItemsToCollection_CanConvertLocalDateTime()
+        {
+            // Arrange
+            DateTimeOffset dto1 = DateTimeOffset.Parse("2014-12-16T01:02:03+8:00");
+            DateTimeOffset dto2 = DateTimeOffset.Parse("2014-12-16T01:02:03-2:00");
+            IList source = new List<DateTimeOffset> { dto1, dto2 };
+            IEnumerable newCollection = new CustomCollectionWithAdd<DateTime>();
+            IEdmModel model = new EdmModel();
+            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"); // -8:00
+
+            // Act
+            source.AddToCollection(newCollection, typeof(DateTime), typeof(CollectionDeserializationHelpersTest),
+                "PropertyName", newCollection.GetType(), tzi);
+
+            // Assert
+            Assert.Equal(new[] { new DateTime(2014, 12, 15, 9, 2, 3), new DateTime(2014, 12, 15, 19, 2, 3) },
+                newCollection as IEnumerable<DateTime>);
         }
 
         [Theory]

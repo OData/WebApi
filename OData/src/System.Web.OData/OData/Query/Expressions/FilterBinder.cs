@@ -18,8 +18,6 @@ using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library.Values;
-using Microsoft.OData.Edm.Values;
 
 namespace System.Web.OData.Query.Expressions
 {
@@ -1251,6 +1249,10 @@ namespace System.Web.OData.Query.Expressions
 
                         case TypeCode.Char:
                             convertedExpression = Expression.Call(ExtractValueFromNullableExpression(source), "ToString", typeArguments: null, arguments: null);
+                            break;
+
+                        case TypeCode.DateTime:
+                            convertedExpression = source;
                             break;
 
                         case TypeCode.Object:

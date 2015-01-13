@@ -27,6 +27,8 @@ namespace System.Web.OData.Extensions
         // and those of the v3 assembly.
         private const string ETagHandlerKey = "System.Web.OData.ETagHandler";
 
+        private const string TimeZoneInfoKey = "System.Web.OData.TimeZoneInfo";
+
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
         /// type. To avoid processing unexpected or malicious queries, use the validation settings on
@@ -109,7 +111,58 @@ namespace System.Web.OData.Extensions
 
             configuration.Properties[ETagHandlerKey] = handler;
         }
-        
+
+        /// <summary>
+        /// Gets the <see cref="TimeZoneInfo"/> from the configuration.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <returns>The <see cref="TimeZoneInfo"/> for the configuration.</returns>
+        public static TimeZoneInfo GetTimeZoneInfo(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            object value;
+            TimeZoneInfo timeZoneInfo;
+            if (!configuration.Properties.TryGetValue(TimeZoneInfoKey, out value))
+            {
+                timeZoneInfo = TimeZoneInfo.Local;
+                configuration.SetTimeZoneInfo(timeZoneInfo);
+                return timeZoneInfo;
+            }
+
+            timeZoneInfo = value as TimeZoneInfo;
+            if (timeZoneInfo == null)
+            {
+                throw Error.InvalidOperation(SRResources.InvalidTimeZoneInfo, value.GetType(), typeof(TimeZoneInfo));
+            }
+
+            return timeZoneInfo;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="TimeZoneInfo"/> on the configuration.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="timeZoneInfo">The <see cref="TimeZoneInfo"/> for the configuration.</param>
+        /// <returns></returns>
+        public static void SetTimeZoneInfo(this HttpConfiguration configuration, TimeZoneInfo timeZoneInfo)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            if (timeZoneInfo == null)
+            {
+                throw Error.ArgumentNull("timeZoneInfo");
+            }
+
+            configuration.Properties[TimeZoneInfoKey] = timeZoneInfo;
+        }
+
         /// <summary>
         /// Maps the specified OData route and the OData route attributes.
         /// </summary>
@@ -275,7 +328,7 @@ namespace System.Web.OData.Extensions
             routes.Add(routeName, route);
             return route;
         }
-        
+
         private static string RemoveTrailingSlash(string routePrefix)
         {
             if (!String.IsNullOrEmpty(routePrefix))

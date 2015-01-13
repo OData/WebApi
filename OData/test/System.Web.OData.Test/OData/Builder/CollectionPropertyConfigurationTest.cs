@@ -36,7 +36,9 @@ namespace System.Web.OData.Builder
                     { type.GetProperty("RandomListStrings"), typeof(string) },
                     { type.GetProperty("RandomListBools"), typeof(bool) },
                     { type.GetProperty("RandomListGuids"), typeof(Guid) },
-                    { type.GetProperty("RandomRandomComplexType"), typeof(RandomComplexType) }
+                    { type.GetProperty("RandomRandomComplexType"), typeof(RandomComplexType) },
+                    { type.GetProperty("CollectionDateTimes"), typeof(DateTime) },
+                    { type.GetProperty("CollectionNullableDateTimes"), typeof(DateTime?) }
                 };
             }
         }
@@ -100,6 +102,8 @@ namespace System.Web.OData.Builder
             public RandomList<Guid> RandomListGuids { get; set; }
             public RandomList<RandomComplexType> RandomRandomComplexType { get; set; }
             public string NonCollectionProperty { get; set; }
+            public IEnumerable<DateTime> CollectionDateTimes { get; set; }
+            public IEnumerable<DateTime?> CollectionNullableDateTimes { get; set; }
         }
 
         internal class RandomComplexType { }

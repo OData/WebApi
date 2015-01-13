@@ -102,7 +102,6 @@
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\TimestampAttributeEdmPropertyConventionTests.cs" />
     <Compile Include="OData\Builder\DynamicPropertyDictionaryAnnotationTest.cs" />
-    <Compile Include="OData\Builder\EntityTypeConfigurationTest.cs" />
     <Compile Include="OData\Builder\SingletonLinkConfigurationTest.cs" />
     <Compile Include="OData\Builder\SingletonConfigurationTest.cs" />
     <Compile Include="OData\Builder\EnumTypeTest.cs" />
@@ -116,6 +115,7 @@
     <Compile Include="OData\Builder\TestModels\Client.cs" />
     <Compile Include="OData\Builder\TestModels\Color.cs" />
     <Compile Include="OData\Builder\TestModels\Company.cs" />
+    <Compile Include="OData\Builder\TestModels\DateTimeModel.cs" />
     <Compile Include="OData\Builder\TestModels\Employee.cs" />
     <Compile Include="OData\Builder\TestModels\Gift.cs" />
     <Compile Include="OData\Builder\TestModels\ModelAlias.cs" />
@@ -127,6 +127,7 @@
     <Compile Include="OData\Builder\TestModels\PropertyAlias.cs" />
     <Compile Include="OData\Builder\TestModels\SpecialOrderLine.cs" />
     <Compile Include="OData\ClrPropertyInfoAnnotationTest.cs" />
+    <Compile Include="OData\DateTimeTest.cs" />
     <Compile Include="OData\EnableQueryTests.cs" />
     <Compile Include="OData\ODataContainmentTest.cs" />
     <Compile Include="OData\ContentIdHelpersTest.cs" />

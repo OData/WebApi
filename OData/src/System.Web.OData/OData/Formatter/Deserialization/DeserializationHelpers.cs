@@ -76,7 +76,7 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             if (propertyKind == EdmTypeKind.Collection)
             {
-                SetCollectionProperty(resource, edmProperty, propertyValue, propertyName);
+                SetCollectionProperty(resource, edmProperty, propertyValue, propertyName, readContext.TimeZoneInfo);
             }
             else
             {
@@ -85,7 +85,7 @@ namespace System.Web.OData.Formatter.Deserialization
                     if (propertyKind == EdmTypeKind.Primitive)
                     {
                         propertyValue = EdmPrimitiveHelpers.ConvertPrimitiveValue(propertyValue,
-                            GetPropertyType(resource, propertyName));
+                            GetPropertyType(resource, propertyName), readContext.TimeZoneInfo);
                     }
                     else if (propertyKind == EdmTypeKind.Enum)
                     {
@@ -98,15 +98,15 @@ namespace System.Web.OData.Formatter.Deserialization
             }
         }
 
-        internal static void SetCollectionProperty(object resource, IEdmProperty edmProperty, object value, string propertyName)
+        internal static void SetCollectionProperty(object resource, IEdmProperty edmProperty, object value, string propertyName, TimeZoneInfo timeZoneInfo)
         {
             Contract.Assert(edmProperty != null);
 
-            SetCollectionProperty(resource, propertyName, edmProperty.Type.AsCollection(), value, clearCollection: false);
+            SetCollectionProperty(resource, propertyName, edmProperty.Type.AsCollection(), value, clearCollection: false, timeZoneInfo: timeZoneInfo);
         }
 
         internal static void SetCollectionProperty(object resource, string propertyName,
-            IEdmCollectionTypeReference edmPropertyType, object value, bool clearCollection)
+            IEdmCollectionTypeReference edmPropertyType, object value, bool clearCollection, TimeZoneInfo timeZoneInfo)
         {
             if (value != null)
             {
@@ -129,7 +129,7 @@ namespace System.Web.OData.Formatter.Deserialization
                     CollectionDeserializationHelpers.TryCreateInstance(propertyType, edmPropertyType, elementType, out newCollection))
                 {
                     // settable collections
-                    collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType);
+                    collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType, timeZoneInfo);
                     if (propertyType.IsArray)
                     {
                         newCollection = CollectionDeserializationHelpers.ToArray(newCollection, elementType);
@@ -152,7 +152,7 @@ namespace System.Web.OData.Formatter.Deserialization
                         newCollection.Clear(propertyName, resourceType);
                     }
 
-                    collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType);
+                    collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType, timeZoneInfo);
                 }
             }
         }
@@ -175,7 +175,7 @@ namespace System.Web.OData.Formatter.Deserialization
             if (CollectionDeserializationHelpers.TryCreateInstance(propertyType, edmPropertyType, elementType,
                 out newCollection))
             {
-                collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType);
+                collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType, readContext.TimeZoneInfo);
                 SetDynamicProperty(resource, propertyName, newCollection, structuredType, readContext);
             }
         }

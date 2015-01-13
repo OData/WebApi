@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Web.Http;
 using System.Web.Http.Controllers;
+using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 
@@ -79,6 +81,23 @@ namespace System.Web.OData.Formatter.Deserialization
             }
 
             return ODataMediaTypeFormatter.GetExpectedPayloadType(type, Path, Model);
+        }
+
+        internal TimeZoneInfo TimeZoneInfo
+        {
+            get
+            {
+                if (Request != null)
+                {
+                    HttpConfiguration config = Request.GetConfiguration();
+                    if (config != null)
+                    {
+                        return config.GetTimeZoneInfo();
+                    }
+                }
+
+                return null;
+            }
         }
     }
 }

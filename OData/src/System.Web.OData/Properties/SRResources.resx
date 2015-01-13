@@ -318,6 +318,9 @@
   <data name="PropertyMustBeString" xml:space="preserve">
     <value>The value must be a string.</value>
   </data>
+  <data name="PropertyMustBeDateTimeOffset" xml:space="preserve">
+    <value>The value must be a DateTimeOffset.</value>
+  </data>
   <data name="PropertyMustBeStringLengthOne" xml:space="preserve">
     <value>The value must be a string with a length of 1.</value>
   </data>
@@ -664,6 +667,9 @@
   <data name="NullETagHandler" xml:space="preserve">
     <value>The ETag handler set in the configuration property must not be null.</value>
   </data>
+  <data name="InvalidTimeZoneInfo" xml:space="preserve">
+    <value>The time zone info set in the configuration property is of type '{0}'. The time zone info type must be type '{1}'.</value>
+  </data>
   <data name="CannotApplyETagOfT" xml:space="preserve">
     <value>Cannot apply {0} of '{1}' to {2} of '{3}'.</value>
   </data>
@@ -729,18 +735,6 @@
   </data>
   <data name="InvalidPropertyInfoForDynamicPropertyAnnotation" xml:space="preserve">
     <value>Type '{0}' is not supported as dynamic property annotation. Referenced property must be of type '{1}'.</value>
-  </data>
-  <data name="DateTimeTypePropertyNotSupported" xml:space="preserve">
-    <value>The type '{0}' of property '{1}' in the '{2}' type is not a supported type. Change to use '{3}' or ignore this type by calling Ignore&lt;{2}&gt;() on '{4}'.</value>
-  </data>
-  <data name="DateTimeTypeNotSupported" xml:space="preserve">
-    <value>The type '{0}' is not a supported type.</value>
-  </data>
-  <data name="DateTimeTypeParametersNotSupported" xml:space="preserve">
-    <value>The type '{0}' is not a supported parameter type for the parameter {1}.</value>
-  </data>
-  <data name="DateTimeTypeReturnTypeNotSupported" xml:space="preserve">
-    <value>The type '{0}' is not a supported return type.</value>
   </data>
   <data name="RequestUriTooShortForODataPath" xml:space="preserve">
     <value>Request URI '{0}' too short to contain OData path '{1}'.</value>

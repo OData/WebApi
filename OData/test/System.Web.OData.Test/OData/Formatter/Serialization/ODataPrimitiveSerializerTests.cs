@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Data.Linq;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Web.Http;
+using System.Web.OData.Extensions;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -25,6 +28,22 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
+        public static TheoryDataSet<DateTime, DateTimeOffset> NonEdmPrimitiveConversionDateTime
+        {
+            get
+            {
+                DateTime dtUtc = new DateTime(2014, 12, 12, 1, 2, 3, DateTimeKind.Utc);
+                DateTime dtLocal = new DateTime(2014, 12, 12, 1, 2, 3, DateTimeKind.Local);
+                DateTime unspecified = new DateTime(2014, 12, 12, 1, 2, 3, DateTimeKind.Unspecified);
+                return new TheoryDataSet<DateTime, DateTimeOffset>
+                {
+                    { dtUtc, DateTimeOffset.Parse("2014-12-11T17:02:03-8:00") },
+                    { dtLocal, new DateTimeOffset(dtLocal.ToUniversalTime()).ToOffset(new TimeSpan(-8, 0, 0)) },
+                    { unspecified, DateTimeOffset.Parse("2014-12-12T01:02:03-8:00") }
+                };
+            }
+        }
+
         public static TheoryDataSet<object> NonEdmPrimitiveData
         {
             get
@@ -39,7 +58,8 @@ namespace System.Web.OData.Formatter.Serialization
                     (UInt64)1,
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
                     new XElement(XName.Get("element","namespace")), 
-                    new Binary(new byte[] {1})
+                    new Binary(new byte[] {1}),
+                    new DateTime(2014, 11, 19)
                 };
             }
         }
@@ -54,8 +74,6 @@ namespace System.Web.OData.Formatter.Serialization
                     (string)"1",
                     (Boolean)true,
                     (Byte)1,
-                    // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
-                    // (DateTime)DateTime.Now,
                     (Decimal)1,
                     (Double)1,
                     (Guid)Guid.Empty,
@@ -124,6 +142,49 @@ namespace System.Web.OData.Formatter.Serialization
             var odataValue = serializer.CreateODataValue(null, edmPrimitiveType, new ODataSerializerContext());
 
             Assert.IsType<ODataNullValue>(odataValue);
+        }
+
+        [Fact]
+        public void CreateODataValue_ReturnsDateTimeOffset_ForDateTime_ByDefault()
+        {
+            // Arrange
+            IEdmPrimitiveTypeReference edmPrimitiveType =
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(DateTime));
+            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
+            DateTime dt = new DateTime(2014, 10, 27);
+
+            // Act
+            ODataValue odataValue = serializer.CreateODataValue(dt, edmPrimitiveType, new ODataSerializerContext());
+
+            // Assert
+            ODataPrimitiveValue primitiveValue = Assert.IsType<ODataPrimitiveValue>(odataValue);
+            Assert.Equal(new DateTimeOffset(dt), primitiveValue.Value);
+        }
+
+        [Theory]
+        [PropertyData("NonEdmPrimitiveConversionDateTime")]
+        public void CreateODataValue_ReturnsDateTimeOffset_ForDateTime_WithDifferentTimeZone(DateTime value, DateTimeOffset expect)
+        {
+            // Arrange
+            IEdmPrimitiveTypeReference edmPrimitiveType =
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(DateTime));
+            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
+
+            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.SetTimeZoneInfo(tzi);
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetConfiguration(configuration);
+
+            ODataSerializerContext context = new ODataSerializerContext{ Request = request };
+
+            // Act
+            ODataValue odataValue = serializer.CreateODataValue(value, edmPrimitiveType, context);
+
+            // Assert
+            ODataPrimitiveValue primitiveValue = Assert.IsType<ODataPrimitiveValue>(odataValue);
+            Assert.Equal(expect, primitiveValue.Value);
         }
 
         [Theory]
@@ -207,6 +268,33 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.Equal(
                 result,
                 ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(graph));
+        }
+
+        [Theory]
+        [PropertyData("NonEdmPrimitiveConversionDateTime")]
+        public void ConvertUnsupportedDateTime_NonStandardEdmPrimitives(DateTime graph, DateTimeOffset result)
+        {
+            // Arrange & Act
+            object value = ODataPrimitiveSerializer.ConvertUnsupportedDateTime(graph, timeZoneInfo: null);
+
+            // Assert
+            DateTimeOffset actual = Assert.IsType<DateTimeOffset>(value);
+            Assert.Equal(new DateTimeOffset(graph), actual);
+        }
+
+        [Theory]
+        [PropertyData("NonEdmPrimitiveConversionDateTime")]
+        public void ConvertUnsupportedDateTime_NonStandardEdmPrimitives_TimeZone(DateTime graph, DateTimeOffset result)
+        {
+            // Arrange
+            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+
+            // Act
+            object value = ODataPrimitiveSerializer.ConvertUnsupportedDateTime(graph, tzi);
+
+            // Assert
+            DateTimeOffset actual = Assert.IsType<DateTimeOffset>(value);
+            Assert.Equal(result, actual);
         }
 
         [Theory]

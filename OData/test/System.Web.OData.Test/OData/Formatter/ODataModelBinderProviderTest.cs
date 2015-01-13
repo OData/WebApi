@@ -58,7 +58,6 @@ namespace System.Web.OData.Formatter
                     { (byte)1, "GetByte" },
                     { "123", "GetString" },
                     { Guid.Empty, "GetGuid" },
-                    // TODO 1559: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
                     { TimeSpan.FromTicks(424242), "GetTimeSpan" },
                     { DateTimeOffset.MaxValue, "GetDateTimeOffset" },
                     { float.NaN, "GetFloat" },
@@ -74,14 +73,14 @@ namespace System.Web.OData.Formatter
                 return new TheoryDataSet<object, string>
                 {
                     { "123", "GetBool" },
-                    // TODO 1559: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
+                    { 123, "GetDateTime" },
                     { "abc", "GetInt32" },
                     { "abc", "GetGuid" },
                     { "abc", "GetByte" },
                     { "abc", "GetFloat" },
                     { "abc", "GetDouble" },
                     { "abc", "GetDecimal" },
-                    // TODO 1559: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
+                    { "abc", "GetDateTime" },
                     { "abc", "GetTimeSpan" },
                     { "abc", "GetDateTimeOffset" },
                     { -1, "GetUInt16"},
@@ -144,6 +143,20 @@ namespace System.Web.OData.Formatter
                 "http://localhost/ODataModelBinderProviderTest/{0}({1})",
                 action,
                 Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForValue(value)));
+            HttpResponseMessage response = _client.GetAsync(url).Result;
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(
+                value,
+                response.Content.ReadAsAsync(value.GetType(), _configuration.Formatters).Result);
+        }
+
+        [Fact]
+        public void ODataModelBinderProvider_Works_DateTime()
+        {
+            DateTime value = new DateTime(2014, 11, 5, 0, 0, 0, DateTimeKind.Local);
+            string url = String.Format(
+                "http://localhost/ODataModelBinderProviderTest/GetDateTime({0})",
+                Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForDateTime(value, timeZoneInfo: null)));
             HttpResponseMessage response = _client.GetAsync(url).Result;
             response.EnsureSuccessStatusCode();
             Assert.Equal(
@@ -428,8 +441,12 @@ namespace System.Web.OData.Formatter
             return id;
         }
 
-        // TODO 1559: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
-        
+        public DateTime GetDateTime(DateTime id)
+        {
+            ThrowIfInsideThrowsController();
+            return id;
+        }
+
         public TimeSpan GetTimeSpan(TimeSpan id)
         {
             ThrowIfInsideThrowsController();

@@ -143,6 +143,33 @@ namespace System.Web.OData
             Assert.Same(etagHandler, config.GetETagHandler());
         }
 
+        [Fact]
+        public void GetTimeZoneInfo_ReturnsLocalTimeZone_IfNotSet()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            TimeZoneInfo timeZoneInfo = config.GetTimeZoneInfo();
+
+            // Assert
+            Assert.Same(TimeZoneInfo.Local, timeZoneInfo);
+        }
+
+        [Fact]
+        public void SetTimeZoneInfo_ReturnsTimeZoneInfo_UsingSetTimeZoneInfo()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            TimeZoneInfo tiemZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("UTC");
+
+            // Act
+            config.SetTimeZoneInfo(tiemZoneInfo);
+
+            // Assert
+            Assert.Same(tiemZoneInfo, config.GetTimeZoneInfo());
+        }
+
         private static ODataMediaTypeFormatter CreateODataFormatter()
         {
             return new ODataMediaTypeFormatter(new ODataPayloadKind[0]);

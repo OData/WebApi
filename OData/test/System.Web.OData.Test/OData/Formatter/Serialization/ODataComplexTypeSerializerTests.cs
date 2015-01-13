@@ -200,6 +200,7 @@ namespace System.Web.OData.Formatter.Serialization
             address.Properties.Add("EnumProperty", SimpleEnum.Fourth);
             address.Properties.Add("GuidProperty", new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"));
             address.Properties.Add("DoubleProperty", 99.109);
+            address.Properties.Add("DateTimeProperty", new DateTime(2014, 10, 27));
 
             // Act
             var odataValue = serializer.CreateODataComplexValue(address, addressTypeRef, context);
@@ -208,7 +209,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
 
             Assert.Equal(complexValue.TypeName, "Default.Address");
-            Assert.Equal(5, complexValue.Properties.Count());
+            Assert.Equal(6, complexValue.Properties.Count());
 
             // Verify the declared properties
             ODataProperty street = Assert.Single(complexValue.Properties.Where(p => p.Name == "Street"));
@@ -228,6 +229,10 @@ namespace System.Web.OData.Formatter.Serialization
 
             ODataProperty doubleProperty = Assert.Single(complexValue.Properties.Where(p => p.Name == "DoubleProperty"));
             Assert.Equal(99.109, doubleProperty.Value);
+
+            ODataProperty dateTimeProperty =
+                Assert.Single(complexValue.Properties.Where(p => p.Name == "DateTimeProperty"));
+            Assert.Equal(new DateTimeOffset(new DateTime(2014, 10, 27)), dateTimeProperty.Value);
         }
 
         [Fact]

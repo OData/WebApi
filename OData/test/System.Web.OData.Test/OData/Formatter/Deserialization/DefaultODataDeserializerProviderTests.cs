@@ -31,6 +31,7 @@ namespace System.Web.OData.Formatter.Deserialization
         [InlineData(typeof(int), EdmPrimitiveTypeKind.Int32)]
         [InlineData(typeof(Decimal), EdmPrimitiveTypeKind.Decimal)]
         [InlineData(typeof(DateTimeOffset), EdmPrimitiveTypeKind.DateTimeOffset)]
+        [InlineData(typeof(DateTime), EdmPrimitiveTypeKind.DateTimeOffset)]
         [InlineData(typeof(double), EdmPrimitiveTypeKind.Double)]
         [InlineData(typeof(byte[]), EdmPrimitiveTypeKind.Binary)]
         [InlineData(typeof(bool), EdmPrimitiveTypeKind.Boolean)]

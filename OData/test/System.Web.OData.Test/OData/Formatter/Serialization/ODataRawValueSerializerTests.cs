@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
+using System.Xml;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 using Moq;
@@ -53,6 +54,40 @@ namespace System.Web.OData.Formatter.Serialization
             TextReader reader = new StreamReader(stream);
 
             Assert.Equal(value.ToString(), reader.ReadToEnd());
+        }
+
+        public static TheoryDataSet<object, DateTimeOffset> DateTimeTestData
+        {
+            get
+            {
+                DateTime dt = DateTime.UtcNow;
+                DateTimeOffset dto = new DateTimeOffset(dt.ToUniversalTime()).ToOffset(TimeZoneInfo.Local.BaseUtcOffset);
+                return new TheoryDataSet<object, DateTimeOffset>
+                {
+                    { dt, dto},
+                    { new DateTime?(dt), dto}
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("DateTimeTestData")]
+        public void SerializesDateTimeTypes(object value, DateTimeOffset expect)
+        {
+            // Arrange
+            ODataRawValueSerializer serializer = new ODataRawValueSerializer();
+            Mock<IODataRequestMessage> mockRequest = new Mock<IODataRequestMessage>();
+            Stream stream = new MemoryStream();
+            mockRequest.Setup(r => r.GetStream()).Returns(stream);
+            ODataMessageWriter messageWriter = new ODataMessageWriter(mockRequest.Object);
+
+            // Act
+            serializer.WriteObject(value, value.GetType(), messageWriter, null);
+            stream.Seek(0, SeekOrigin.Begin);
+            TextReader reader = new StreamReader(stream);
+
+            // Assert
+            Assert.Equal(expect, DateTimeOffset.Parse(reader.ReadToEnd()));
         }
 
         [Fact]

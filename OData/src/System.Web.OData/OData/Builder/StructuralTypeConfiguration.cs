@@ -53,11 +53,6 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("clrType");
             }
 
-            if (clrType == typeof(DateTime) || clrType == typeof(DateTime?))
-            {
-                throw Error.Argument("clrType", SRResources.DateTimeTypeNotSupported, clrType.FullName);
-            }
-
             ClrType = clrType;
             ModelBuilder = modelBuilder;
             _name = clrType.EdmName();
@@ -268,13 +263,6 @@ namespace System.Web.OData.Builder
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
 
-            if (propertyInfo.PropertyType == typeof(DateTime) || propertyInfo.PropertyType == typeof(DateTime?))
-            {
-                throw Error.Argument("propertyInfo", SRResources.DateTimeTypePropertyNotSupported,
-                    propertyInfo.PropertyType.FullName, propertyInfo.Name, propertyInfo.DeclaringType.FullName,
-                    typeof(DateTimeOffset).FullName, typeof(ODataModelBuilder).FullName);
-            }
-
             ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
@@ -374,13 +362,6 @@ namespace System.Web.OData.Builder
                 throw Error.Argument("propertyInfo", SRResources.RecursiveComplexTypesNotAllowed, ClrType.FullName, propertyInfo.Name);
             }
 
-            if (propertyInfo.PropertyType == typeof(DateTime) || propertyInfo.PropertyType == typeof(DateTime?))
-            {
-                throw Error.Argument("propertyInfo", SRResources.DateTimeTypePropertyNotSupported,
-                    propertyInfo.PropertyType.FullName, propertyInfo.Name, propertyInfo.DeclaringType.FullName,
-                    typeof(DateTimeOffset).FullName, typeof(ODataModelBuilder).FullName);
-            }
-
             ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
@@ -448,15 +429,6 @@ namespace System.Web.OData.Builder
             }
             else
             {
-                Type elementType;
-                if (propertyInfo.PropertyType.IsCollection(out elementType) && (
-                    elementType == typeof(DateTime) || elementType == typeof(DateTime?)))
-                {
-                    throw Error.Argument("propertyInfo", SRResources.DateTimeTypePropertyNotSupported,
-                        propertyInfo.PropertyType.FullName, propertyInfo.Name, propertyInfo.DeclaringType.FullName,
-                        typeof(DateTimeOffset).FullName, typeof(ODataModelBuilder).FullName);
-                }
-
                 propertyConfiguration = new CollectionPropertyConfiguration(propertyInfo, this);
                 ExplicitProperties[propertyInfo] = propertyConfiguration;
 

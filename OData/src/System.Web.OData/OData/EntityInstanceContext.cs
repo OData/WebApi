@@ -12,7 +12,7 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData
 {
     /// <summary>
-    /// An instance of <see cref="EntityInstanceContext{TEntityType}"/> gets passed to the self link (
+    /// An instance of <see cref="EntityInstanceContext"/> gets passed to the self link (
     /// <see cref="M:NavigationSourceConfiguration.HasIdLink"/>,
     /// <see cref="M:NavigationSourceConfiguration.HasEditLink"/>,
     /// <see cref="M:NavigationSourceConfiguration.HasReadLink"/>
@@ -77,7 +77,7 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="IEdmModel"/> to which this instance belogs.
+        /// Gets or sets the <see cref="IEdmModel"/> to which this instance belongs.
         /// </summary>
         public IEdmModel EdmModel
         {
@@ -170,6 +170,11 @@ namespace System.Web.OData
             }
         }
 
+        internal TimeZoneInfo TimeZoneInfo
+        {
+            get { return SerializerContext.TimeZoneInfo; }
+        }
+
         /// <summary>
         /// Gets the value of the property with the given name from the <see cref="IEdmObject"/> of this instance if present; throws if the property is
         /// not present.
@@ -229,7 +234,7 @@ namespace System.Web.OData
                 {
                     if (value.GetType().IsCollection())
                     {
-                        DeserializationHelpers.SetCollectionProperty(resource, property, value, property.Name);
+                        DeserializationHelpers.SetCollectionProperty(resource, property, value, property.Name, TimeZoneInfo);
                     }
                     else
                     {

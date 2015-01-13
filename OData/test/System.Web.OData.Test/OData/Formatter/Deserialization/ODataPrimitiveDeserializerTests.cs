@@ -2,7 +2,10 @@
 
 using System.Data.Linq;
 using System.IO;
+using System.Net.Http;
+using System.Web.Http;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Formatter.Serialization.Models;
 using Microsoft.OData.Core;
@@ -31,6 +34,27 @@ namespace System.Web.OData.Formatter.Deserialization
                     { (UInt64)1, (long)1 },
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
                     { new Binary(new byte[] {1}), new byte[] {1} }
+                };
+            }
+        }
+
+        public static TheoryDataSet<DateTimeOffset, DateTime, TimeZoneInfo> DateTimePrimitiveData
+        {
+            get
+            {
+                DateTime dtUtc = new DateTime(2014, 10, 16, 1, 2, 3, DateTimeKind.Utc);
+                DateTime dtLocal = new DateTime(2014, 10, 16, 1, 2, 3, DateTimeKind.Local);
+                DateTime dtUnpsecified = new DateTime(2014, 10, 16, 1, 2, 3, DateTimeKind.Unspecified);
+                TimeZoneInfo pacificStandard = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+                TimeZoneInfo chinaStandard = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
+                return new TheoryDataSet<DateTimeOffset, DateTime, TimeZoneInfo>
+                {
+                    { DateTimeOffset.Parse("2014-10-16T01:02:03Z"), dtUtc, null },
+                    { new DateTimeOffset(dtLocal), dtLocal, null },
+                    { new DateTimeOffset(new DateTime(2014, 10, 16, 1, 2, 3, DateTimeKind.Unspecified)), dtUnpsecified, null },
+                    { DateTimeOffset.Parse("2014-10-16T09:02:03+8:00"), dtUtc, chinaStandard },
+                    { new DateTimeOffset(dtLocal).ToOffset(new TimeSpan(+8,0,0)), dtLocal, chinaStandard },
+                    { DateTimeOffset.Parse("2014-10-16T00:02:03-8:00"), dtUnpsecified, pacificStandard },
                 };
             }
         }
@@ -131,7 +155,6 @@ namespace System.Web.OData.Formatter.Deserialization
         public void Read_MappedPrimitive(object obj, object expected)
         {
             // Arrange
-            IEdmPrimitiveTypeReference primitive = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
             IEdmModel model = CreateModel();
             ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
             ODataPrimitiveDeserializer deserializer = new ODataPrimitiveDeserializer();
@@ -156,6 +179,44 @@ namespace System.Web.OData.Formatter.Deserialization
 
             // Act && Assert
             Assert.Equal(expected, deserializer.Read(messageReader, type, readContext));
+        }
+
+        [Theory]
+        [PropertyData("DateTimePrimitiveData")]
+        public void Read_DateTimePrimitive(DateTimeOffset expected, DateTime value, TimeZoneInfo timeZoneInfo)
+        {
+            // Arrange
+            IEdmModel model = CreateModel();
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetConfiguration(new HttpConfiguration());
+            if (timeZoneInfo != null)
+            {
+                request.GetConfiguration().SetTimeZoneInfo(timeZoneInfo);
+            }
+
+            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
+            ODataPrimitiveDeserializer deserializer = new ODataPrimitiveDeserializer();
+
+            MemoryStream stream = new MemoryStream();
+            ODataMessageWrapper message = new ODataMessageWrapper(stream);
+
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings
+            {
+                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
+            };
+            settings.SetContentType(ODataFormat.Json);
+
+            ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, model);
+            ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model, Request = request };
+            ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model, Request = request };
+
+            serializer.WriteObject(value, typeof(DateTimeOffset), messageWriter, writeContext);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            // Act && Assert
+            Assert.Equal(expected, deserializer.Read(messageReader, typeof(DateTimeOffset), readContext));
         }
 
         private static IEdmModel CreateModel()

@@ -25,7 +25,6 @@ namespace System.Web.OData.Formatter
             {
                 MediaTypeHeaderValue fullMetadata = ODataMediaTypes.ApplicationJsonODataFullMetadata;
                 MediaTypeHeaderValue noMetadata = ODataMediaTypes.ApplicationJsonODataNoMetadata;
-                MediaTypeHeaderValue xml = ODataMediaTypes.ApplicationXml;
 
                 return new TheoryDataSet<Type, object, MediaTypeHeaderValue, string>
                 {
@@ -34,8 +33,6 @@ namespace System.Web.OData.Formatter
                     {typeof(bool), true, fullMetadata, "BooleanFullMetadata.json"},
                     {typeof(byte), (byte)64, fullMetadata, "ByteFullMetadata.json"},
                     {typeof(byte[]), new byte[] { 0, 2, 32, 64, 128, 255 }, fullMetadata, "ArrayOfByteFullMetadata.json"},
-                    // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
-                    //{typeof(DateTime), new DateTime(2010, 1, 1), fullMetadata, "DateTimeFullMetadata.json"},
                     {typeof(DateTimeOffset), new DateTimeOffset(2010, 1, 1, 0, 0, 0, TimeSpan.Zero), fullMetadata, "DateTimeOffsetFullMetadata.json"},
                     {typeof(decimal), 12345.99999M, fullMetadata, "DecimalFullMetadata.json"},
                     {typeof(double), 99999.12345, fullMetadata, "DoubleFullMetadata.json"},

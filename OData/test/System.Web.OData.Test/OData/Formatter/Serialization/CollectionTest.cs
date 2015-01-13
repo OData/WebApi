@@ -10,6 +10,7 @@ using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using Newtonsoft.Json.Linq;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -62,6 +63,77 @@ namespace System.Web.OData.Formatter.Serialization
 
             // Act & Assert
             JsonAssert.Equal(Resources.ListOfString, content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void ListOfDateTimeSerializesAsOData()
+        {
+            // Arrange
+            DateTime dt1 = new DateTime(1978, 11, 15, 01, 12, 13, DateTimeKind.Local);
+            DateTime dt2 = new DateTime(2014, 10, 27, 12, 25, 26, DateTimeKind.Local);
+            List<DateTime> listOfDateTime = new List<DateTime> { dt1, dt2 };
+
+            ObjectContent<List<DateTime>> content = new ObjectContent<List<DateTime>>(listOfDateTime,
+                _formatter, ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+
+            // Act & Assert
+            dynamic result = JObject.Parse(content.ReadAsStringAsync().Result);
+
+            Assert.Equal(2, result["value"].Count);
+            DateTimeOffset dto = (DateTimeOffset)result["value"][0];
+            Assert.Equal(new DateTimeOffset(dt1), dto);
+
+            dto = (DateTimeOffset)result["value"][1];
+            Assert.Equal(new DateTimeOffset(dt2), dto);
+        }
+
+        [Fact]
+        public void ListOfNullableDateTimeSerializesAsOData()
+        {
+            // Arrange
+            DateTime dt1 = new DateTime(1978, 11, 15, 01, 12, 13, DateTimeKind.Local);
+            DateTime dt2 = new DateTime(2014, 10, 27, 12, 25, 26, DateTimeKind.Local);
+            List<DateTime?> listOfDateTime = new List<DateTime?> { dt1, null, dt2 };
+
+            ObjectContent<List<DateTime?>> content = new ObjectContent<List<DateTime?>>(listOfDateTime,
+                _formatter, ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+
+            // Act & Assert
+            dynamic result = JObject.Parse(content.ReadAsStringAsync().Result);
+
+            Assert.Equal(3, result["value"].Count);
+            DateTimeOffset? dto = (DateTimeOffset?)result["value"][0];
+            Assert.Equal(new DateTimeOffset(dt1), dto.Value);
+
+            dto = (DateTimeOffset?)result["value"][1];
+            Assert.Null(dto);
+
+            dto = (DateTimeOffset?)result["value"][2];
+            Assert.Equal(new DateTimeOffset(dt2), dto.Value);
+        }
+
+        [Fact]
+        public void ListOfDateTimeSerializesAsOData_CustomTimeZone()
+        {
+            // Arrange
+            const string expect =
+                "{" +
+                    "\"@odata.context\":\"http://localhost/$metadata#Collection(Edm.DateTimeOffset)\",\"value\":[" +
+                    "\"1978-11-14T17:12:13-08:00\",\"2014-10-27T04:25:26-08:00\"" +
+                    "]" +
+                "}";
+
+            List<DateTime> listOfDateTime = new List<DateTime>();
+            listOfDateTime.Add(new DateTime(1978, 11, 15, 01, 12, 13, DateTimeKind.Utc));
+            listOfDateTime.Add(new DateTime(2014, 10, 27, 12, 25, 26, DateTimeKind.Utc));
+
+            _formatter.Request.GetConfiguration()
+                .SetTimeZoneInfo(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"));
+            ObjectContent<List<DateTime>> content = new ObjectContent<List<DateTime>>(listOfDateTime,
+                _formatter, ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+
+            // Act & Assert
+            JsonAssert.Equal(expect, content.ReadAsStringAsync().Result);
         }
 
         [Fact]

@@ -25,8 +25,7 @@ namespace System.Web.OData.Query
                     typeof(byte[]),
                     typeof(bool),
                     typeof(byte),
-                    // TODO: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
-                    // typeof(DateTime),
+                    typeof(DateTime),
                     typeof(DateTimeOffset),
                     typeof(decimal),
                     typeof(double),

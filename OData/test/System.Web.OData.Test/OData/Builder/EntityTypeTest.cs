@@ -503,6 +503,33 @@ namespace System.Web.OData.Builder
             Assert.True(entityType.Properties().Where(c => c.Name == "Name").Any());
         }
 
+        [Fact]
+        public void GetEdmModel_WorksOnModelBuilder_WithDateTime()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<DateTimeModel> entity = builder.EntityType<DateTimeModel>();
+            entity.HasKey(c => c.BirthdayA);
+            entity.Property(c => c.BirthdayB);
+            entity.CollectionProperty(c => c.BirthdayC);
+            entity.CollectionProperty(c => c.BirthdayD);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType entityType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
+            Assert.Equal("BirthdayA", entityType.DeclaredKey.Single().Name);
+
+            IList<IEdmProperty> properties = entityType.Properties().ToList();
+            Assert.Equal(4, properties.Count);
+            Assert.Equal("BirthdayA", properties[0].Name);
+            Assert.Equal("BirthdayB", properties[1].Name);
+            Assert.Equal("BirthdayC", properties[2].Name);
+            Assert.Equal("BirthdayD", properties[3].Name);
+        }
+
         public class SimpleOpenEntityType
         {
             public int Id { get; set; }

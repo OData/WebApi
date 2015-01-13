@@ -29,7 +29,7 @@ namespace System.Web.OData.Formatter.Serialization
                     { typeof(byte[]), EdmPrimitiveTypeKind.Binary },
                     { typeof(bool), EdmPrimitiveTypeKind.Boolean },
                     { typeof(byte), EdmPrimitiveTypeKind.Byte },
-                    // TODO 1559: Investigate how to add support for DataTime in webapi.odata, ODataLib v4 does not support it.
+                    { typeof(DateTime), EdmPrimitiveTypeKind.DateTimeOffset },
                     { typeof(DateTimeOffset), EdmPrimitiveTypeKind.DateTimeOffset },
                     { typeof(decimal), EdmPrimitiveTypeKind.Decimal },
                     { typeof(double), EdmPrimitiveTypeKind.Double },

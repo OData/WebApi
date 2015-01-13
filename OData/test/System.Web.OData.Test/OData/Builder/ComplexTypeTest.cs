@@ -103,6 +103,7 @@ namespace System.Web.OData.Builder
             // Assert.True(complexType.Property(t => t.StreamProperty).OptionalProperty);
             Assert.True(complexType.Property(t => t.StringProperty).OptionalProperty);
             Assert.True(complexType.Property(t => t.ByteArrayProperty).OptionalProperty);
+            Assert.True(complexType.Property(t => t.NullableDateTimeProperty).OptionalProperty);
         }
 
         [Fact]
@@ -121,6 +122,7 @@ namespace System.Web.OData.Builder
             Assert.False(complexType.Property(t => t.LongProperty).OptionalProperty);
             Assert.False(complexType.Property(t => t.ShortProperty).OptionalProperty);
             Assert.False(complexType.Property(t => t.TimeSpanProperty).OptionalProperty);
+            Assert.False(complexType.Property(t => t.DateTimeProperty).OptionalProperty);
         }
 
         [Fact]
@@ -460,6 +462,9 @@ namespace System.Web.OData.Builder
 
         public DateTimeOffset DateTimeOffsetProperty { get; set; }
         public DateTimeOffset? NullableDateTimeOffsetProperty { get; set; }
+
+        public DateTime DateTimeProperty { get; set; }
+        public DateTime? NullableDateTimeProperty { get; set; }
 
         public string StringProperty { get; set; }
         public Stream StreamProperty { get; set; }

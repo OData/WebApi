@@ -830,6 +830,7 @@ namespace System.Web.OData.Formatter.Serialization
             customer.CustomerProperties.Add("EnumProperty", SimpleEnum.Fourth);
             customer.CustomerProperties.Add("GuidProperty", new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"));
             customer.CustomerProperties.Add("ListProperty", new List<int>{5,4,3,2,1});
+            customer.CustomerProperties.Add("DateTimeProperty", new DateTime(2014, 10, 24));
 
             EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext,
                 customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
@@ -839,7 +840,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             // Assert
             Assert.Equal(entry.TypeName, "Default.Customer");
-            Assert.Equal(6, entry.Properties.Count());
+            Assert.Equal(7, entry.Properties.Count());
 
             // Verify the declared properties
             ODataProperty street = Assert.Single(entry.Properties.Where(p => p.Name == "CustomerId"));
@@ -871,6 +872,9 @@ namespace System.Web.OData.Formatter.Serialization
             ODataCollectionValue collectionValue = Assert.IsType<ODataCollectionValue>(listProperty.Value);
             Assert.Equal(new List<int>{5,4,3,2,1}, collectionValue.Items.OfType<int>().ToList());
             Assert.Equal("Collection(Edm.Int32)", collectionValue.TypeName);
+
+            ODataProperty dateTimeProperty = Assert.Single(entry.Properties.Where(p => p.Name == "DateTimeProperty"));
+            Assert.Equal(new DateTimeOffset(new DateTime(2014, 10, 24)), dateTimeProperty.Value);
         }
 
         [Fact]

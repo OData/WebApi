@@ -126,6 +126,17 @@ namespace System.Web.OData.Formatter.Serialization
                 ODataEdmTypeSerializer itemSerializer = null;
                 foreach (object item in enumerable)
                 {
+                    if (item == null)
+                    {
+                        if (elementType.IsNullable)
+                        {
+                            valueCollection.Add(value: null);
+                            continue;
+                        }
+
+                        throw new SerializationException(SRResources.NullElementInCollection);
+                    }
+
                     IEdmTypeReference actualType = writeContext.GetEdmType(item, item.GetType());
                     Contract.Assert(actualType != null);
 

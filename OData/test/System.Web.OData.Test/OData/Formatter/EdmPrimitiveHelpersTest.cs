@@ -3,6 +3,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Data.Linq;
 using System.Xml.Linq;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Formatter
@@ -31,12 +33,50 @@ namespace System.Web.OData.Formatter
             }
         }
 
+        public static TheoryDataSet<DateTimeOffset> ConvertDateTime_NonStandardPrimitives_Data
+        {
+            get
+            {
+                return new TheoryDataSet<DateTimeOffset>
+                {
+                    DateTimeOffset.Parse("2014-12-12T01:02:03Z"),
+                    DateTimeOffset.Parse("2014-12-12T01:02:03-8:00"),
+                    DateTimeOffset.Parse("2014-12-12T01:02:03+8:00"),
+                };
+            }
+        }
+
         [Theory]
         [PropertyData("ConvertPrimitiveValue_NonStandardPrimitives_Data")]
         public void ConvertPrimitiveValue_NonStandardPrimitives(object valueToConvert, object result, Type conversionType)
         {
-            Assert.Equal(result.GetType(), EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, conversionType).GetType());
-            Assert.Equal(result.ToString(), EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, conversionType).ToString());
+            Assert.Equal(result.GetType(), EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, conversionType, timeZoneInfo: null).GetType());
+            Assert.Equal(result.ToString(), EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, conversionType, timeZoneInfo: null).ToString());
+        }
+
+        [Theory]
+        [PropertyData("ConvertDateTime_NonStandardPrimitives_Data")]
+        public void ConvertDateTimeValue_NonStandardPrimitives_DefaultTimeZoneInfo(DateTimeOffset valueToConvert)
+        {
+            // Arrange & Act
+            object actual = EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, typeof(DateTime), timeZoneInfo: null);
+
+            // Assert
+            DateTime dt = Assert.IsType<DateTime>(actual);
+            Assert.Equal(valueToConvert.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime, dt);
+        }
+
+        [Theory]
+        [PropertyData("ConvertDateTime_NonStandardPrimitives_Data")]
+        public void ConvertDateTimeValue_NonStandardPrimitives_CustomTimeZoneInfo(DateTimeOffset valueToConvert)
+        {
+            // Arrange & Act
+            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+            object actual = EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, typeof(DateTime), tzi);
+
+            // Assert
+            DateTime dt = Assert.IsType<DateTime>(actual);
+            Assert.Equal(valueToConvert.ToUniversalTime().ToOffset(new TimeSpan(-8, 0, 0)).DateTime, dt);
         }
 
         [Theory]
@@ -45,7 +85,7 @@ namespace System.Web.OData.Formatter
         public void ConvertPrimitiveValueToChar_Throws(string input)
         {
             Assert.Throws<ValidationException>(
-                () => EdmPrimitiveHelpers.ConvertPrimitiveValue(input, typeof(char)),
+                () => EdmPrimitiveHelpers.ConvertPrimitiveValue(input, typeof(char), timeZoneInfo: null),
                 "The value must be a string with a length of 1.");
         }
 
@@ -53,7 +93,7 @@ namespace System.Web.OData.Formatter
         public void ConvertPrimitiveValueToNullableChar_Throws()
         {
             Assert.Throws<ValidationException>(
-                () => EdmPrimitiveHelpers.ConvertPrimitiveValue("123", typeof(char?)),
+                () => EdmPrimitiveHelpers.ConvertPrimitiveValue("123", typeof(char?), timeZoneInfo: null),
                 "The value must be a string with a maximum length of 1.");
         }
 
@@ -61,7 +101,7 @@ namespace System.Web.OData.Formatter
         public void ConvertPrimitiveValueToXElement_Throws_IfInputIsNotString()
         {
             Assert.Throws<ValidationException>(
-                () => EdmPrimitiveHelpers.ConvertPrimitiveValue(123, typeof(XElement)),
+                () => EdmPrimitiveHelpers.ConvertPrimitiveValue(123, typeof(XElement), timeZoneInfo: null),
                 "The value must be a string.");
         }
     }

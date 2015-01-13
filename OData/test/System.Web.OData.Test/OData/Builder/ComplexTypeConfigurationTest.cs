@@ -10,13 +10,9 @@ namespace System.Web.OData.Builder.Test
         [Theory]
         [InlineData(typeof(DateTime))]
         [InlineData(typeof(DateTime?))]
-        public void Ctor_ThrowsIfPropertyIsDateTime(Type type)
+        public void Ctor_DoesnotThrows_IfPropertyIsDateTime(Type type)
         {
-            // Act & Assert
-            Assert.ThrowsArgument(() =>
-                new ComplexTypeConfiguration(Mock.Of<ODataModelBuilder>(), type),
-                "clrType",
-                string.Format("The type '{0}' is not a supported type.", type.FullName));
+            Assert.DoesNotThrow(() => new ComplexTypeConfiguration(Mock.Of<ODataModelBuilder>(), type));
         }
     }
 }

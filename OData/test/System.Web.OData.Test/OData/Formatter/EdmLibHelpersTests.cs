@@ -39,6 +39,8 @@ namespace System.Web.OData.Formatter
         [InlineData(typeof(char[]), typeof(string))]
         [InlineData(typeof(Binary), typeof(byte[]))]
         [InlineData(typeof(XElement), typeof(string))]
+        [InlineData(typeof(DateTime), typeof(DateTimeOffset))]
+        [InlineData(typeof(DateTime?), typeof(DateTimeOffset?))]
         public void IsNonstandardEdmPrimitive_Returns_True(Type primitiveType, Type mappedType)
         {
             bool isNonstandardEdmPrimtive;
@@ -56,7 +58,6 @@ namespace System.Web.OData.Formatter
         [InlineData(typeof(bool))]
         [InlineData(typeof(byte))]
         [InlineData(typeof(sbyte))]
-        // [InlineData(typeof(DateTime))]   // OData v4 does not support DateTime
         [InlineData(typeof(DateTimeOffset))]
         [InlineData(typeof(TimeSpan))]
         public void IsNonstandardEdmPrimitive_Returns_False(Type primitiveType)
@@ -140,7 +141,6 @@ namespace System.Web.OData.Formatter
         {
             Assert.Equal(isNullable, EdmLibHelpers.IsNullable(type));
         }
-
 
         public static TheoryDataSet<IEdmType, bool, Type> ToEdmTypeReferenceTestData
         {

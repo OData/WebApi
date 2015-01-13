@@ -1092,6 +1092,18 @@ namespace System.Web.OData.Query.Expressions
         }
 
         [Theory]
+        [InlineData("year(Birthday) eq 100", "$it => ($it.Birthday.Year == 100)")]
+        [InlineData("month(Birthday) eq 100", "$it => ($it.Birthday.Month == 100)")]
+        [InlineData("day(Birthday) eq 100", "$it => ($it.Birthday.Day == 100)")]
+        [InlineData("hour(Birthday) eq 100", "$it => ($it.Birthday.Hour == 100)")]
+        [InlineData("minute(Birthday) eq 100", "$it => ($it.Birthday.Minute == 100)")]
+        [InlineData("second(Birthday) eq 100", "$it => ($it.Birthday.Second == 100)")]
+        public void DateTimeFunctions(string filter, string expression)
+        {
+            VerifyQueryDeserialization(filter, expression);
+        }
+
+        [Theory]
         [InlineData("years(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Years == 100")]
         [InlineData("months(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Months == 100")]
         [InlineData("days(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Days == 100")]

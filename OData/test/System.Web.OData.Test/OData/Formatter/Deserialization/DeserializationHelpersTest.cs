@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using Microsoft.OData.Core;
@@ -41,7 +42,7 @@ namespace System.Web.OData.Formatter.Deserialization
             object value = new SampleClassWithSettableCollectionProperties();
             IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
 
-            DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name);
+            DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name, timeZoneInfo: null);
 
             Assert.Equal(
                 new[] { 1, 2, 3 },
@@ -57,7 +58,7 @@ namespace System.Web.OData.Formatter.Deserialization
             IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
 
             Assert.Throws<SerializationException>(
-                () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name),
+                () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name, timeZoneInfo: null),
                 String.Format("The property '{0}' on type 'System.Web.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithSettableCollectionProperties' returned a null value. " +
                 "The input stream contains collection items which cannot be added if the instance is null.", propertyName));
         }
@@ -74,7 +75,7 @@ namespace System.Web.OData.Formatter.Deserialization
             object value = new SampleClassWithNonSettableCollectionProperties();
             IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
 
-            DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name);
+            DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name, timeZoneInfo: null);
 
             Assert.Equal(
                 new[] { 1, 2, 3 },
@@ -91,7 +92,7 @@ namespace System.Web.OData.Formatter.Deserialization
             IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
 
             Assert.Throws<SerializationException>(
-                () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name),
+                () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name, timeZoneInfo: null),
                 String.Format("The value of the property '{0}' on type 'System.Web.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithNonSettableCollectionProperties' is an array. " +
                 "Consider adding a setter for the property.", propertyName));
         }
@@ -105,7 +106,7 @@ namespace System.Web.OData.Formatter.Deserialization
             IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
 
             Assert.Throws<SerializationException>(
-                () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name),
+                () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name, timeZoneInfo: null),
                 String.Format("The type '{0}' of the property '{1}' on type 'System.Web.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithNonSettableCollectionProperties' does not have an Add method. " +
                 "Consider using a collection type that does have an Add method - for example IList<T> or ICollection<T>.", propertyType.FullName, propertyName));
         }
@@ -126,7 +127,7 @@ namespace System.Web.OData.Formatter.Deserialization
             IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
 
             Assert.Throws<SerializationException>(
-                 () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name),
+                () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name, timeZoneInfo: null),
                  String.Format("The property '{0}' on type 'System.Web.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithNonSettableCollectionProperties' returned a null value. " +
                  "The input stream contains collection items which cannot be added if the instance is null.", propertyName));
         }
@@ -137,11 +138,60 @@ namespace System.Web.OData.Formatter.Deserialization
             SampleClassWithDifferentCollectionProperties value = new SampleClassWithDifferentCollectionProperties();
             IEdmProperty edmProperty = GetMockEdmProperty("UnsignedArray", EdmPrimitiveTypeKind.Int32);
 
-            DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name);
+            DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name, timeZoneInfo: null);
 
             Assert.Equal(
                 new uint[] { 1, 2, 3 },
                value.UnsignedArray);
+        }
+
+        [Fact]
+        public void SetCollectionProperty_CanConvertDataTime_ByDefault()
+        {
+            // Arrange
+            SampleClassWithDifferentCollectionProperties source = new SampleClassWithDifferentCollectionProperties();
+            IEdmProperty edmProperty = GetMockEdmProperty("DateTimeList", EdmPrimitiveTypeKind.DateTimeOffset);
+
+            DateTime dt = new DateTime(2014, 11, 15, 1, 2, 3);
+            IList<DateTimeOffset> dtos = new List<DateTimeOffset>
+            {
+                new DateTimeOffset(dt, TimeSpan.Zero),
+                new DateTimeOffset(dt, new TimeSpan(+7, 0, 0)),
+                new DateTimeOffset(dt, new TimeSpan(-8, 0, 0))
+            };
+
+            IEnumerable<DateTime> expects =
+                dtos.Select(e => e.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime);
+
+            // Act
+            DeserializationHelpers.SetCollectionProperty(source, edmProperty, dtos, edmProperty.Name, timeZoneInfo: null);
+
+            // Assert
+            Assert.Equal(expects, source.DateTimeList);
+        }
+
+        [Fact]
+        public void SetCollectionProperty_CanConvertDataTime_ByTimeZoneInfo()
+        {
+            // Arrange
+            SampleClassWithDifferentCollectionProperties source = new SampleClassWithDifferentCollectionProperties();
+            IEdmProperty edmProperty = GetMockEdmProperty("DateTimeList", EdmPrimitiveTypeKind.DateTimeOffset);
+
+            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+
+            DateTime dt = new DateTime(2014, 11, 15, 1, 2, 3);
+            IList<DateTimeOffset> dtos = new List<DateTimeOffset>
+            {
+                new DateTimeOffset(dt, TimeSpan.Zero),
+                new DateTimeOffset(dt, new TimeSpan(+7, 0, 0)),
+                new DateTimeOffset(dt, new TimeSpan(-8, 0, 0))
+            };
+
+            // Act
+            DeserializationHelpers.SetCollectionProperty(source, edmProperty, dtos, edmProperty.Name, tzi);
+
+            // Assert
+            Assert.Equal(new List<DateTime> { dt.AddHours(-8), dt.AddHours(-15), dt }, source.DateTimeList);
         }
 
         [Fact]
@@ -154,7 +204,8 @@ namespace System.Web.OData.Formatter.Deserialization
                 value,
                 edmProperty,
                 value: new List<FlagsEnum> { FlagsEnum.One, FlagsEnum.Four | FlagsEnum.Two | (FlagsEnum)123 },
-                propertyName: edmProperty.Name);
+                propertyName: edmProperty.Name,
+                timeZoneInfo: null);
 
             Assert.Equal(
                 new FlagsEnum[] { FlagsEnum.One, FlagsEnum.Four | FlagsEnum.Two | (FlagsEnum)123 },
@@ -171,7 +222,7 @@ namespace System.Web.OData.Formatter.Deserialization
             IEdmProperty edmProperty = GetMockEdmProperty(propertyName, EdmPrimitiveTypeKind.Int32);
 
             Assert.Throws<SerializationException>(
-            () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name),
+                () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name, timeZoneInfo: null),
             Error.Format(
             "The type '{0}' of the property '{1}' on type 'System.Web.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithDifferentCollectionProperties' must be a collection.",
             propertyType.FullName,
@@ -200,7 +251,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 };
 
             // Act
-            DeserializationHelpers.SetCollectionProperty(resource, propertyName, null, value, clearCollection: true);
+            DeserializationHelpers.SetCollectionProperty(resource, propertyName, null, value, clearCollection: true, timeZoneInfo: null);
 
             // Assert
             Assert.Equal(
@@ -313,6 +364,8 @@ namespace System.Web.OData.Formatter.Deserialization
             public uint[] UnsignedArray { get; set; }
 
             public FlagsEnum[] FlagsEnum { get; set; }
+
+            public IList<DateTime> DateTimeList { get; set; }
         }
 
         private class CustomCollection : List<int> { }

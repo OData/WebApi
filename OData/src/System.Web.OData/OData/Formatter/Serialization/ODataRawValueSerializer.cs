@@ -37,7 +37,15 @@ namespace System.Web.OData.Formatter.Serialization
             }
             else
             {
-                messageWriter.WriteValue(ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(graph));
+                if (graph is DateTime)
+                {
+                    messageWriter.WriteValue(ODataPrimitiveSerializer.ConvertUnsupportedDateTime((DateTime)graph,
+                        writeContext != null ? writeContext.TimeZoneInfo : null));
+                }
+                else
+                {
+                    messageWriter.WriteValue(ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(graph));
+                }
             }
         }
     }

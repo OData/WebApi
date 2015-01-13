@@ -43,80 +43,6 @@ namespace System.Web.OData.Builder
             Assert.Equal(1, builder.Procedures.Count());
         }
 
-        [Theory]
-        [InlineData(typeof(DateTime))]
-        [InlineData(typeof(DateTime?))]
-        public void Parameter_ThrowsInvalidOperationIfGenericArgumentIsDateTime(Type type)
-        {
-            // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
-            ActionConfiguration action = builder.Action("Format");
-            MethodInfo method = typeof(ActionConfiguration)
-                .GetMethod("Parameter", new[] { typeof(string) })
-                .MakeGenericMethod(type);
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(
-                () => method.Invoke(action, new[] { "test" }),
-                string.Format("The type '{0}' is not a supported parameter type for the parameter test.", type.FullName));
-        }
-
-        [Theory]
-        [InlineData(typeof(DateTime))]
-        [InlineData(typeof(DateTime?))]
-        public void CollectionParameter_ThrowsInvalidOperationIfGenericArgumentIsDateTime(Type type)
-        {
-            // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
-            ActionConfiguration action = builder.Action("Format");
-            MethodInfo method = typeof(ActionConfiguration)
-                .GetMethod("CollectionParameter", new[] { typeof(string) })
-                .MakeGenericMethod(type);
-            string typeName = typeof(IEnumerable<>).MakeGenericType(type).FullName;
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(
-                () => method.Invoke(action, new[] { "test" }),
-                string.Format("The type '{0}' is not a supported parameter type for the parameter test.", typeName));
-        }
-
-        [Theory]
-        [InlineData(typeof(DateTime))]
-        [InlineData(typeof(DateTime?))]
-        public void Returns_ThrowsInvalidOperationIfGenericArgumentIsDateTime(Type type)
-        {
-            // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
-            ActionConfiguration action = builder.Action("Format");
-            MethodInfo method = typeof(ActionConfiguration)
-                .GetMethod("Returns")
-                .MakeGenericMethod(type);
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(
-                () => method.Invoke(action, new object[] { }),
-                string.Format("The type '{0}' is not a supported return type.", type.FullName));
-        }
-
-        [Theory]
-        [InlineData(typeof(DateTime))]
-        [InlineData(typeof(DateTime?))]
-        public void ReturnsCollection_ThrowsInvalidOperationIfGenericArgumentIsDateTime(Type type)
-        {
-            // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
-            ActionConfiguration action = builder.Action("Format");
-            MethodInfo method = typeof(ActionConfiguration)
-                .GetMethod("ReturnsCollection")
-                .MakeGenericMethod(type);
-            string typeName = typeof(IEnumerable<>).MakeGenericType(type).FullName;
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(
-                () => method.Invoke(action, new object[] { }),
-                string.Format("The type '{0}' is not a supported return type.", typeName));
-        }
-
         [Fact]
         public void AttemptToRemoveNonExistantEntityReturnsFalse()
         {
@@ -450,6 +376,42 @@ namespace System.Web.OData.Builder
             Assert.False(action.FindParameter("int").Type.IsNullable);
             Assert.True(action.FindParameter("nullableOfInt").Type.IsNullable);
             Assert.True(action.FindParameter("string").Type.IsNullable);
+        }
+
+        [Fact]
+        public void GetEdmModel_SetsDateTimeAsParameterType()
+        {
+            // Arrange
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            var actionBuilder = movie.Action("DateTimeAction");
+            actionBuilder.Parameter<DateTime>("dateTime");
+            actionBuilder.Parameter<DateTime?>("nullableDateTime");
+            actionBuilder.CollectionParameter<DateTime>("collectionDateTime");
+            actionBuilder.CollectionParameter<DateTime?>("nullableCollectionDateTime");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            //Assert
+            IEdmOperation action = Assert.Single(model.SchemaElements.OfType<IEdmAction>());
+            Assert.Equal("DateTimeAction", action.Name);
+
+            IEdmOperationParameter parameter = action.FindParameter("dateTime");
+            Assert.Equal("Edm.DateTimeOffset", parameter.Type.FullName());
+            Assert.False(parameter.Type.IsNullable);
+
+            parameter = action.FindParameter("nullableDateTime");
+            Assert.Equal("Edm.DateTimeOffset", parameter.Type.FullName());
+            Assert.True(parameter.Type.IsNullable);
+
+            parameter = action.FindParameter("collectionDateTime");
+            Assert.Equal("Collection(Edm.DateTimeOffset)", parameter.Type.FullName());
+            Assert.False(parameter.Type.IsNullable);
+
+            parameter = action.FindParameter("nullableCollectionDateTime");
+            Assert.Equal("Collection(Edm.DateTimeOffset)", parameter.Type.FullName());
+            Assert.True(parameter.Type.IsNullable);
         }
 
         [Theory]

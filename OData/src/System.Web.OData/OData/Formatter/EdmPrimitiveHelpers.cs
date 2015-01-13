@@ -7,12 +7,13 @@ using System.Globalization;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Xml.Linq;
+using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Formatter
 {
     internal static class EdmPrimitiveHelpers
     {
-        public static object ConvertPrimitiveValue(object value, Type type)
+        public static object ConvertPrimitiveValue(object value, Type type, TimeZoneInfo timeZoneInfo)
         {
             Contract.Assert(value != null);
             Contract.Assert(type != null);
@@ -76,6 +77,23 @@ namespace System.Web.OData.Formatter
                     }
 
                     return Enum.Parse(type, str);
+                }
+                else if (type == typeof(DateTime))
+                {
+                    if (value is DateTimeOffset)
+                    {
+                        DateTimeOffset dateTimeOffsetValue = (DateTimeOffset)value;
+
+                        if (timeZoneInfo == null)
+                        {
+                            timeZoneInfo = TimeZoneInfo.Local;
+                        }
+
+                        dateTimeOffsetValue = dateTimeOffsetValue.ToUniversalTime().ToOffset(timeZoneInfo.BaseUtcOffset);
+                        return dateTimeOffsetValue.DateTime;
+                    }
+
+                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeDateTimeOffset));
                 }
                 else
                 {

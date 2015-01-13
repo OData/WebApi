@@ -533,6 +533,28 @@ namespace System.Web.OData.Builder
             {
                 MapType(edmType);
             }
+
+            // Apply foreign key conventions after the type mapping, because foreign key conventions depend on
+            // entity key setting to be finished.
+            ApplyForeignKeyConventions();
+        }
+
+        private void ApplyForeignKeyConventions()
+        {
+            ForeignKeyAttributeConvention foreignKeyAttributeConvention = new ForeignKeyAttributeConvention();
+            ForeignKeyDiscoveryConvention foreignKeyDiscoveryConvention = new ForeignKeyDiscoveryConvention();
+            ActionOnDeleteAttributeConvention actionOnDeleteConvention = new ActionOnDeleteAttributeConvention();
+            foreach (EntityTypeConfiguration edmType in StructuralTypes.OfType<EntityTypeConfiguration>())
+            {
+                foreach (PropertyConfiguration property in edmType.Properties)
+                {
+                    // ForeignKeyDiscoveryConvention has to run after ForeignKeyAttributeConvention
+                    foreignKeyAttributeConvention.Apply(property, edmType, this);
+                    foreignKeyDiscoveryConvention.Apply(property, edmType, this);
+
+                    actionOnDeleteConvention.Apply(property, edmType, this);
+                }
+            }
         }
 
         private void MapType(StructuralTypeConfiguration edmType)

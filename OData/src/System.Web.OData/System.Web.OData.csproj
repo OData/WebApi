@@ -79,10 +79,14 @@
     <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensions.cs" />
+    <Compile Include="OData\Builder\ActionOnDeleteAttribute.cs" />
     <Compile Include="OData\Builder\ContainedAttribute.cs" />
     <Compile Include="OData\Builder\ContainmentPathBuilder.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\ActionOnDeleteAttributeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ComplexTypeAttributeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\ForeignKeyAttributeConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\ForeignKeyDiscoveryConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\NotCountableAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\TimestampAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\INavigationSourceConvention.cs" />
@@ -90,6 +94,7 @@
     <Compile Include="OData\Builder\INavigationSourceConfiguration.cs" />
     <Compile Include="OData\Builder\NavigationSourceConfigurationOfTEntityType.cs" />
     <Compile Include="OData\Builder\NavigationSourceLinkBuilderAnnotation.cs" />
+    <Compile Include="OData\Builder\PropertyPairSelectorVisitor.cs" />
     <Compile Include="OData\Builder\ReturnedEntitySetAnnotation.cs" />
     <Compile Include="OData\Builder\SingletonAttribute.cs" />
     <Compile Include="OData\Builder\SingletonConfigurationOfTEntityType.cs" />
@@ -411,16 +416,16 @@
     <Compile Include="OData\Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerContext.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataServiceDocumentSerializer.cs" />
-    <Compile Include="Properties\SRResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SRResources.resx</DependentUpon>
-    </Compile>
     <Compile Include="OData\EnableQueryAttribute.cs" />
     <Compile Include="OData\TypeHelper.cs" />
     <Compile Include="OData\Query\Expressions\ClrCanonicalFunctions.cs" />
     <Compile Include="OData\Query\Expressions\FilterBinder.cs" />
     <Compile Include="OData\Builder\PropertySelectorVisitor.cs" />
+    <Compile Include="Properties\SRResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SRResources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Common\CommonWebApiResources.resx">

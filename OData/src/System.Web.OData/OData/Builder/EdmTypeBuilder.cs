@@ -15,7 +15,7 @@ using Microsoft.OData.Edm.Library.Values;
 namespace System.Web.OData.Builder
 {
     /// <summary>
-    /// <see cref="EdmTypeBuilder"/> builds <see cref="IEdmType"/>'s from <see cref=" StructuralTypeConfiguration"/>'s.
+    /// <see cref="EdmTypeBuilder"/> builds <see cref="IEdmType"/>'s from <see cref="StructuralTypeConfiguration"/>'s.
     /// </summary>
     internal class EdmTypeBuilder
     {
@@ -48,6 +48,11 @@ namespace System.Web.OData.Builder
             foreach (IEdmTypeConfiguration config in _configurations)
             {
                 CreateEdmTypeBody(config);
+            }
+
+            foreach (EntityTypeConfiguration entity in _configurations.OfType<EntityTypeConfiguration>())
+            {
+                CreateNavigationProperty(entity);
             }
 
             return _types;
@@ -284,6 +289,13 @@ namespace System.Web.OData.Builder
             CreateStructuralTypeBody(type, config);
             IEnumerable<IEdmStructuralProperty> keys = config.Keys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.Name));
             type.AddKeys(keys);
+        }
+
+        private void CreateNavigationProperty(EntityTypeConfiguration config)
+        {
+            Contract.Assert(config != null);
+
+            EdmEntityType type = (EdmEntityType)(GetEdmType(config.ClrType));
 
             foreach (NavigationPropertyConfiguration navProp in config.NavigationProperties)
             {
@@ -292,8 +304,24 @@ namespace System.Web.OData.Builder
                     Name = navProp.Name,
                     TargetMultiplicity = navProp.Multiplicity,
                     Target = GetEdmType(navProp.RelatedClrType) as IEdmEntityType,
-                    ContainsTarget = navProp.ContainsTarget
+                    ContainsTarget = navProp.ContainsTarget,
+                    OnDelete = navProp.OnDeleteAction
                 };
+
+                // Principal properties
+                if (navProp.PrincipalProperties.Any())
+                {
+                    info.PrincipalProperties = navProp.PrincipalProperties
+                        .Select(p => _properties[p]).OfType<IEdmStructuralProperty>().ToList();
+                }
+
+                // Dependent properties
+                if (navProp.DependentProperties.Any())
+                {
+                    info.DependentProperties = navProp.DependentProperties
+                        .Select(property => _properties[property]).OfType<IEdmStructuralProperty>().ToList();
+                }
+
                 IEdmProperty edmProperty = type.AddUnidirectionalNavigation(info);
                 if (navProp.PropertyInfo != null && edmProperty != null)
                 {

@@ -144,14 +144,23 @@
   <data name="LambdaExpressionMustHaveExactlyOneParameter" xml:space="preserve">
     <value>The LambdaExpression must have exactly one parameter.</value>
   </data>
+  <data name="LambdaExpressionMustHaveExactlyTwoParameters" xml:space="preserve">
+    <value>The LambdaExpression must have exactly two parameters.</value>
+  </data>
   <data name="MemberExpressionsMustBeBoundToLambdaParameter" xml:space="preserve">
     <value>MemberExpressions must be bound to the LambdaExpression parameter.</value>
   </data>
   <data name="MemberExpressionsMustBeProperties" xml:space="preserve">
     <value>Member '{0}.{1}' is not a property.</value>
   </data>
+  <data name="EqualExpressionsMustHaveSameTypes" xml:space="preserve">
+    <value>The type of left property '{0}.{1}' is '{2}' while the type of right property '{3}.{4}' is '{5}'. The left and right type of the equal expression must be same.</value>
+  </data>
   <data name="UnsupportedExpressionNodeType" xml:space="preserve">
     <value>Unsupported Expression NodeType.</value>
+  </data>
+  <data name="UnsupportedExpressionNodeTypeWithName" xml:space="preserve">
+    <value>Unsupported Expression NodeType '{0}'.</value>
   </data>
   <data name="FailedToBuildEdmModelBecauseReturnTypeIsNull" xml:space="preserve">
     <value>Cannot create an EDM model as the action '{0}' on controller '{1}' has a void return type.</value>
@@ -759,5 +768,17 @@
   </data>
   <data name="CannotInferEdmType" xml:space="preserve">
     <value>Cannot determine the Edm type for the CLR type '{0}' because the derived type '{1}' is configured as entity type and another derived type '{2}' is configured as complex type.</value>
+  </data>
+  <data name="DependentAndPrincipalTypeNotMatch" xml:space="preserve">
+    <value>The dependent property type '{0}' is not same as the principal property type '{1}. The dependent and principal properties must have must have same types in the same order.</value>
+  </data>
+  <data name="ReferentialConstraintPropertyTypeNotValid" xml:space="preserve">
+    <value>The property type '{0}' of the referential constraint is not valid. The referential constraint property type must be primitive type.</value>
+  </data>
+  <data name="ReferentialConstraintOnManyNavigationPropertyNotSupported" xml:space="preserve">
+    <value>Referential constraint for navigation property '{0}' on type '{1}' is not supported. Only required or optional navigation properties support referential constraint.</value>
+  </data>
+  <data name="ReferentialConstraintAlreadyConfigured" xml:space="preserve">
+    <value>The '{0}' property '{1}' is already configured to have a relationship with '{2}' property '{3}' in the referential constraint.</value>
   </data>
 </root>

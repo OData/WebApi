@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -218,5 +219,60 @@ namespace System.Web.OData.Formatter
     {
         public string DerivedProperty { get; set; }
         public IDictionary<string, object> Properties { get; set; }
+    }
+
+    public class ForeignCustomer
+    {
+        public int ForeignCustomerId { get; set; }
+
+        public int OtherCustomerKey { get; set; }
+
+        public IList<ForeignOrder> Orders { get; set; }
+    }
+
+    public class ForeignOrder
+    {
+        public int ForeignOrderId { get; set; }
+
+        public int CustomerId { get; set; }
+
+        [ForeignKey("CustomerId")]
+        public ForeignCustomer Customer { get; set; }
+    }
+
+    public class ForeignCustomer2
+    {
+        public int Id { get; set; }
+
+        public IList<ForeignOrder2> Orders { get; set; }
+    }
+
+    public class ForeignOrder2
+    {
+        public int Id { get; set; }
+
+        [ForeignKey("Customer")]
+        public int CustomerId { get; set; }
+
+        [ActionOnDelete(EdmOnDeleteAction.Cascade)]
+        public ForeignCustomer2 Customer { get; set; }
+    }
+
+    public class MultiForeignCustomer
+    {
+        public int CustomerId1 { get; set; }
+        public string CustomerId2 { get; set; }
+
+        public IList<MultiForeignOrder> Orders { get; set; }
+    }
+
+    public class MultiForeignOrder
+    {
+        public int ForeignOrderId { get; set; }
+
+        public int CustomerForeignKey1 { get; set; }
+        public string CustomerForeignKey2 { get; set; }
+
+        public MultiForeignCustomer Customer { get; set; }
     }
 }

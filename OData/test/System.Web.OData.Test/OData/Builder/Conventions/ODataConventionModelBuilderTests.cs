@@ -2246,6 +2246,54 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
+        public void ODataConventionModelBuilder_ForeignKeyAttribute_WorksOnNavigationProperty()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<ForeignKeyCustomer>("Customers");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType orderType = model.AssertHasEntityType(typeof(ForeignKeyOrder));
+
+            IEdmNavigationProperty navigation = orderType.AssertHasNavigationProperty(model, "Customer",
+                typeof(ForeignKeyCustomer), true, EdmMultiplicity.ZeroOrOne);
+
+            IEdmStructuralProperty dependentProperty = Assert.Single(navigation.DependentProperties());
+            Assert.Equal("CustomerId", dependentProperty.Name);
+
+            IEdmStructuralProperty principalProperty = Assert.Single(navigation.PrincipalProperties());
+            Assert.Equal("Id", principalProperty.Name);
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_ForeignKeyDiscovery_WorksOnNavigationProperty()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<ForeignKeyCustomer>("Customers");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType orderType = model.AssertHasEntityType(typeof(ForeignKeyCategory));
+
+            IEdmNavigationProperty navigation = orderType.AssertHasNavigationProperty(model, "Customer",
+                typeof(ForeignKeyCustomer), true, EdmMultiplicity.ZeroOrOne);
+
+            IEdmStructuralProperty dependentProperty = Assert.Single(navigation.DependentProperties());
+            Assert.Equal("ForeignKeyCustomerId", dependentProperty.Name);
+
+            IEdmStructuralProperty principalProperty = Assert.Single(navigation.PrincipalProperties());
+            Assert.Equal("Id", principalProperty.Name);
+        }
+
+        [Fact]
         public void AddDynamicDictionary_ThrowsException_IfMoreThanOneDynamicPropertyInOpenEntityType()
         {
             // Arrange
@@ -2673,5 +2721,33 @@ namespace System.Web.OData.Builder.Conventions
     public class RecursiveEmployee
     {
         public RecursiveEmployee Manager { get; set; }
+    }
+
+    public class ForeignKeyCustomer
+    {
+        public int Id { get; set; }
+
+        public IList<ForeignKeyOrder> Orders { get; set; }
+
+        public IList<ForeignKeyCategory> Categories { get; set; }
+    }
+
+    public class ForeignKeyOrder
+    {
+        public int ForeignKeyOrderId { get; set; }
+
+        public int CustomerId { get; set; }
+
+        [ForeignKey("CustomerId")]
+        public ForeignKeyCustomer Customer { get; set; }
+    }
+
+    public class ForeignKeyCategory
+    {
+        public int Id { get; set; }
+
+        public int ForeignKeyCustomerId { get; set; }
+
+        public ForeignKeyCustomer Customer { get; set; }
     }
 }

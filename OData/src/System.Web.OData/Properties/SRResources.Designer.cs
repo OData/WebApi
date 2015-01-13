@@ -403,6 +403,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The dependent property type &apos;{0}&apos; is not same as the principal property type &apos;{1}. The dependent and principal properties must have must have same types in the same order..
+        /// </summary>
+        internal static string DependentAndPrincipalTypeNotMatch {
+            get {
+                return ResourceManager.GetString("DependentAndPrincipalTypeNotMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; does not support Read..
         /// </summary>
         internal static string DeserializerDoesNotSupportRead {
@@ -597,6 +606,15 @@ namespace System.Web.OData.Properties {
         internal static string EnumValueCannotBeLong {
             get {
                 return ResourceManager.GetString("EnumValueCannotBeLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type of left property &apos;{0}.{1}&apos; is &apos;{2}&apos; while the type of right property &apos;{3}.{4}&apos; is &apos;{5}&apos;. The left and right type of the equal expression must be same..
+        /// </summary>
+        internal static string EqualExpressionsMustHaveSameTypes {
+            get {
+                return ResourceManager.GetString("EqualExpressionsMustHaveSameTypes", resourceCulture);
             }
         }
         
@@ -876,6 +894,15 @@ namespace System.Web.OData.Properties {
         internal static string LambdaExpressionMustHaveExactlyOneParameter {
             get {
                 return ResourceManager.GetString("LambdaExpressionMustHaveExactlyOneParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The LambdaExpression must have exactly two parameters..
+        /// </summary>
+        internal static string LambdaExpressionMustHaveExactlyTwoParameters {
+            get {
+                return ResourceManager.GetString("LambdaExpressionMustHaveExactlyTwoParameters", resourceCulture);
             }
         }
         
@@ -1591,6 +1618,33 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; property &apos;{1}&apos; is already configured to have a relationship with &apos;{2}&apos; property &apos;{3}&apos; in the referential constraint..
+        /// </summary>
+        internal static string ReferentialConstraintAlreadyConfigured {
+            get {
+                return ResourceManager.GetString("ReferentialConstraintAlreadyConfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Referential constraint for navigation property &apos;{0}&apos; on type &apos;{1}&apos; is not supported. Only required or optional navigation properties support referential constraint..
+        /// </summary>
+        internal static string ReferentialConstraintOnManyNavigationPropertyNotSupported {
+            get {
+                return ResourceManager.GetString("ReferentialConstraintOnManyNavigationPropertyNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property type &apos;{0}&apos; of the referential constraint is not valid. The referential constraint property type must be primitive type..
+        /// </summary>
+        internal static string ReferentialConstraintPropertyTypeNotValid {
+            get {
+                return ResourceManager.GetString("ReferentialConstraintPropertyTypeNotValid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Request message does not contain an HttpConfiguration object..
         /// </summary>
         internal static string RequestMustContainConfiguration {
@@ -1911,6 +1965,15 @@ namespace System.Web.OData.Properties {
         internal static string UnsupportedExpressionNodeType {
             get {
                 return ResourceManager.GetString("UnsupportedExpressionNodeType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsupported Expression NodeType &apos;{0}&apos;..
+        /// </summary>
+        internal static string UnsupportedExpressionNodeTypeWithName {
+            get {
+                return ResourceManager.GetString("UnsupportedExpressionNodeTypeWithName", resourceCulture);
             }
         }
         

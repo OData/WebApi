@@ -1,3 +1,0 @@
-@Imports ROOT_PROJECT_NAMESPACE.Areas.HelpPage.ModelDescriptions
-@ModelType SimpleTypeModelDescription
-@Model.Documentation

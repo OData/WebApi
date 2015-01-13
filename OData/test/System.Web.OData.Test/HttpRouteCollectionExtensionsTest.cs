@@ -183,6 +183,25 @@ namespace System.Web.OData
             Assert.DoesNotThrow(() => configuration.EnsureInitialized());
         }
 
+        [Fact]
+        public void MapODataServiceRoute_ConfiguresARoute_RelexVersionConstraints()
+        {
+            // Arrange
+            HttpRouteCollection routes = new HttpRouteCollection();
+            HttpConfiguration config = new HttpConfiguration(routes);
+            IEdmModel model = new EdmModel();
+            string routeName = "name";
+            string routePrefix = "prefix";
+
+            // Act
+            config.MapODataServiceRoute(routeName, routePrefix, model).HasRelaxedODataVersionConstraint();
+
+            // Assert
+            IHttpRoute odataRoute = routes[routeName];
+            var odataVersionConstraint = Assert.Single(odataRoute.Constraints.Values.OfType<ODataVersionConstraint>());
+            Assert.Equal(true, odataVersionConstraint.IsRelaxedMatch);
+        }
+
         public class Customer
         {
             public int ID { get; set; }

@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Extensions;
-using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 
 namespace System.Web.OData.Routing
@@ -38,10 +37,21 @@ namespace System.Web.OData.Routing
         /// </summary>
         public ODataVersion Version { get; private set; }
 
+        /// <summary>
+        /// If set to true, allow passing in both OData V4 and previous version headers.
+        /// </summary>
+        public bool IsRelaxedMatch { get; set; }
+
         /// <inheritdoc />
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName,
             IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
+            // The match behaviour depends on value of IsRelaxedMatch.
+            // If users select using relaxed match logic, the header contains both V3 (or before) and V4 style version
+            // will be regarded as valid. While under non-relaxed match logic, both version headers presented will be
+            // regarded as invalid. The behavior for other situations are the same. When non version headers present,
+            // assume using V4 version.
+
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
@@ -52,7 +62,7 @@ namespace System.Web.OData.Routing
                 return true;
             }
 
-            if (ContainsPreviousVersionHeaders(request))
+            if (!ValidateVersionHeaders(request))
             {
                 return false;
             }
@@ -61,21 +71,28 @@ namespace System.Web.OData.Routing
             return requestVersion.HasValue && requestVersion.Value == Version;
         }
 
-        private static bool ContainsPreviousVersionHeaders(HttpRequestMessage request)
+        private bool ValidateVersionHeaders(HttpRequestMessage request)
         {
-            return request.Headers.Contains(PreviousODataVersionHeaderName) ||
-                   request.Headers.Contains(PreviousODataMinVersionHeaderName) ||
-                   request.Headers.Contains(PreviousODataMaxVersionHeaderName);
+            bool containPreviousVersionHeaders =
+                request.Headers.Contains(PreviousODataVersionHeaderName) ||
+                request.Headers.Contains(PreviousODataMinVersionHeaderName) ||
+                request.Headers.Contains(PreviousODataMaxVersionHeaderName);
+            bool containPreviousMaxVersionHeaderOnly =
+                request.Headers.Contains(PreviousODataMaxVersionHeaderName) &&
+                !request.Headers.Contains(PreviousODataVersionHeaderName) &&
+                !request.Headers.Contains(PreviousODataMinVersionHeaderName);
+            bool containCurrentMaxVersionHeader = request.Headers.Contains(HttpRequestMessageProperties.ODataMaxServiceVersionHeader);
+
+            return IsRelaxedMatch
+                ? !containPreviousVersionHeaders || (containCurrentMaxVersionHeader && containPreviousMaxVersionHeaderOnly)
+                : !containPreviousVersionHeaders;
         }
 
         private ODataVersion? GetVersion(HttpRequestMessage request)
         {
-            // The logic is as follows. We check DataServiceVersion first and if not present we check MaxDataServiceVersion.
-            // In order to consider any header valid, it needs to have exactly one valid value, for example a header with
-            // value 3.0 will be considered valid, but a header with two values 3.0, 4.0 won't. The user experience is 
-            // better if you fail with a 404 here than if you "guess" the version. The moment we see an invalid header 
-            // we return a null version. The spec says that in the case of an invalid odata version the service should
-            // return 4xx.
+            // The logic is as follows. We check OData-Version first and if not present we check OData-MaxVersion.
+            // If both OData-Version and OData-MaxVersion do not present, we assume the version is V4
+
             int versionHeaderCount = GetHeaderCount(HttpRequestMessageProperties.ODataServiceVersionHeader, request);
             int maxVersionHeaderCount = GetHeaderCount(HttpRequestMessageProperties.ODataMaxServiceVersionHeader, request);
 

@@ -46,5 +46,19 @@ namespace System.Web.Http.OData.Routing
                 httpRoute.GetVirtualPath(request, new HttpRouteValueDictionary { { "odataPath", odataPath }, { "httproute", true } }).VirtualPath,
                 odataRoute.GetVirtualPath(request, new HttpRouteValueDictionary { { "odataPath", odataPath }, { "httproute", true } }).VirtualPath);
         }
+
+        [Fact]
+        public void HasRelaxedODataVersionConstraint_DefaultValueIsFalse()
+        {
+            ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null);
+            Assert.False(((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
+        }
+
+        [Fact]
+        public void HasRelaxedODataVersionConstraint_SetValue()
+        {
+            ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null).HasRelaxedODataVersionConstraint();
+            Assert.True(((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
+        }
     }
 }

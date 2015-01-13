@@ -3,9 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http;
 using System.Web.Http.OData.Extensions;
-using System.Web.Http.OData.Properties;
 using System.Web.Http.Routing;
 using Microsoft.Data.OData;
 
@@ -69,10 +67,21 @@ namespace System.Web.Http.OData.Routing
         /// </summary>
         public ODataVersion MinVersion { get; private set; }
 
+        /// <summary>
+        /// If set to true, allow passing in both OData V1-V3 and next version headers.
+        /// </summary>
+        public bool IsRelaxedMatch { get; set; }
+
         /// <inheritdoc />
         public bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName,
             IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
+            // The match behaviour depends on value of IsRelaxedMatch.
+            // If users select using relaxed match logic, the header contains both V3 (or before) and V4 style version
+            // will be regarded as valid. While under non-relaxed match logic, both version headers presented will be
+            // regarded as invalid. The behavior for other situations are the same. When non version headers present,
+            // assume using MaxVersion.
+
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
@@ -83,7 +92,7 @@ namespace System.Web.Http.OData.Routing
                 return true;
             }
 
-            if (ContainsNextVersionHeaders(request))
+            if (!ValidateVersionHeaders(request))
             {
                 return false;
             }
@@ -92,10 +101,19 @@ namespace System.Web.Http.OData.Routing
             return requestVersion.HasValue && requestVersion.Value >= MinVersion && requestVersion.Value <= MaxVersion;
         }
 
-        private static bool ContainsNextVersionHeaders(HttpRequestMessage request)
+        private bool ValidateVersionHeaders(HttpRequestMessage request)
         {
-            return request.Headers.Contains(NextODataVersionHeaderName) ||
-                   request.Headers.Contains(NextODataMaxVersionHeaderName);
+            bool containNextVersionHeaders =
+                request.Headers.Contains(NextODataVersionHeaderName) ||
+                request.Headers.Contains(NextODataMaxVersionHeaderName);
+            bool containNextMaxVersionHeaderOnly =
+                request.Headers.Contains(NextODataMaxVersionHeaderName) &&
+                !request.Headers.Contains(NextODataVersionHeaderName);
+            bool containCurrentMaxVersionHeader = request.Headers.Contains(HttpRequestMessageProperties.ODataMaxServiceVersionHeader);
+
+            return IsRelaxedMatch
+                ? !containNextVersionHeaders || (containCurrentMaxVersionHeader && containNextMaxVersionHeaderOnly)
+                : !containNextVersionHeaders;
         }
 
         private ODataVersion? GetVersion(HttpRequestMessage request)
@@ -104,11 +122,8 @@ namespace System.Web.Http.OData.Routing
             int maxVersionHeaderCount = GetHeaderCount(HttpRequestMessageProperties.ODataMaxServiceVersionHeader, request);
 
             // The logic is as follows. We check DataServiceVersion first and if not present we check MaxDataServiceVersion.
-            // In order to consider any header valid, it needs to have exactly one valid value, for example a header with
-            // value 3.0 will be considered valid, but a header with two values 3.0, 4.0 won't. The user experience is 
-            // better if you fail with a 404 here than if you "guess" the version. The moment we see an invalid header 
-            // we return a null version. The spec says that in the case of an invalid odata version the service should
-            // return 4xx.
+            // If both DataServiceVersion and MaxDataServiceVersion do not present, we assume the version is MaxVersion.
+
             if ((versionHeaderCount == 1 && request.ODataProperties().ODataServiceVersion != null))
             {
                 return request.ODataProperties().ODataServiceVersion;

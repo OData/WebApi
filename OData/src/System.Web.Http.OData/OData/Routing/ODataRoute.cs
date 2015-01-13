@@ -3,10 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Web.Http.OData.Routing.Conventions;
 using System.Web.Http.Routing;
-using Microsoft.Data.Edm;
 
 namespace System.Web.Http.OData.Routing
 {
@@ -100,6 +97,21 @@ namespace System.Web.Http.OData.Routing
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Relax the version constraint. The service will allow clients to send both OData V1 to V3 and next max version headers.
+        /// Headers for the next max version will be ignored.
+        /// </summary>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public ODataRoute HasRelaxedODataVersionConstraint()
+        {
+            object constraint;
+            if (Constraints.TryGetValue(ODataRouteConstants.VersionConstraintName, out constraint))
+            {
+                ((ODataVersionConstraint)constraint).IsRelaxedMatch = true;
+            }
+            return this;
         }
 
         internal HttpVirtualPathData GenerateLinkDirectly(HttpRequestMessage request, string odataPath)

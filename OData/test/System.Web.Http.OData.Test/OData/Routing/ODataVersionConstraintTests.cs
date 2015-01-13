@@ -69,7 +69,7 @@ namespace System.Web.Http.OData.Routing.Test
         [Theory]
         [InlineData("OData-Version")]
         [InlineData("OData-MaxVersion")]
-        public void DoesntMatch_IfNextVersionHeadersExist(string headerName)
+        public void DoesNotMatch_IfNextVersionHeadersExist(string headerName)
         {
             // Arrange
             ODataVersionConstraint constraint = new ODataVersionConstraint(ODataVersion.V2);
@@ -81,6 +81,127 @@ namespace System.Web.Http.OData.Routing.Test
 
             // Assert
             Assert.False(result);
+        }
+
+        [Theory]
+        [InlineData("OData-Version")]
+        [InlineData("OData-MaxVersion")]
+        public void DoesNotMatch_IfOnlyNextVersionHeadersExistWithEnabledRelaxFlag(string headerName)
+        {
+            // Arrange
+            ODataVersionConstraint constraint = new ODataVersionConstraint
+            {
+                IsRelaxedMatch = true
+            };
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.TryAddWithoutValidation(headerName, "4.0");
+
+            // Act
+            bool result = constraint.Match(request, route: null, parameterName: null, values: null,
+                routeDirection: HttpRouteDirection.UriResolution);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Theory]
+        [InlineData("OData-Version")]
+        [InlineData("OData-MaxVersion")]
+        public void DoesNotMatch_IfNextVersionHeadersExistWithEnabledRelaxFlag(string headerName)
+        {
+            // Arrange
+            ODataVersionConstraint constraint = new ODataVersionConstraint
+            {
+                IsRelaxedMatch = true
+            };
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.TryAddWithoutValidation("DataServiceVersion", "3.0");
+            request.Headers.TryAddWithoutValidation(headerName, "4.0");
+
+            // Act
+            bool result = constraint.Match(request, route: null, parameterName: null, values: null,
+                routeDirection: HttpRouteDirection.UriResolution);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void Matches_IfBothMaxVersionHeadersExistWithEnabledRelaxFlag()
+        {
+            // Arrange
+            ODataVersionConstraint constraint = new ODataVersionConstraint
+            {
+                IsRelaxedMatch = true
+            };
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.TryAddWithoutValidation("MaxDataServiceVersion", "3.0");
+            request.Headers.TryAddWithoutValidation("OData-MaxVersion", "4.0");
+
+            // Act
+            bool result = constraint.Match(request, route: null, parameterName: null, values: null,
+                routeDirection: HttpRouteDirection.UriResolution);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void DoesNotMatch_IfBothMaxVersionAndNextVersionHeadersExistWithEnabledRelaxFlag()
+        {
+            // Arrange
+            ODataVersionConstraint constraint = new ODataVersionConstraint
+            {
+                IsRelaxedMatch = true
+            };
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.TryAddWithoutValidation("MaxDataServiceVersion", "3.0");
+            request.Headers.TryAddWithoutValidation("OData-MaxVersion", "4.0");
+            request.Headers.TryAddWithoutValidation("OData-Version", "4.0");
+
+            // Act
+            bool result = constraint.Match(request, route: null, parameterName: null, values: null,
+                routeDirection: HttpRouteDirection.UriResolution);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void Matches_WithoutVersionHeadersExistWithEnabledRelaxFlag()
+        {
+            // Arrange
+            ODataVersionConstraint constraint = new ODataVersionConstraint
+            {
+                IsRelaxedMatch = true
+            };
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+
+            // Act
+            bool result = constraint.Match(request, route: null, parameterName: null, values: null,
+                routeDirection: HttpRouteDirection.UriResolution);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void Matches_IfOnlyVersionHeadersExistWithEnabledRelaxFlag()
+        {
+            // Arrange
+            ODataVersionConstraint constraint = new ODataVersionConstraint
+            {
+                IsRelaxedMatch = true
+            };
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.TryAddWithoutValidation("DataServiceVersion", "3.0");
+
+            // Act
+            bool result = constraint.Match(request, route: null, parameterName: null, values: null,
+                routeDirection: HttpRouteDirection.UriResolution);
+
+            // Assert
+            Assert.True(result);
         }
 
         [Fact]

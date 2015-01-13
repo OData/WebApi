@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http;
 using System.Web.Http.Routing;
 
 namespace System.Web.OData.Routing
@@ -81,13 +80,6 @@ namespace System.Web.OData.Routing
             }
         }
 
-        private static string GetRouteTemplate(string prefix)
-        {
-            return String.IsNullOrEmpty(prefix) ?
-                ODataRouteConstants.ODataPathTemplate :
-                prefix + '/' + ODataRouteConstants.ODataPathTemplate;
-        }
-
         /// <inheritdoc />
         public override IHttpVirtualPathData GetVirtualPath(HttpRequestMessage request, IDictionary<string, object> values)
         {
@@ -117,6 +109,21 @@ namespace System.Web.OData.Routing
             return null;
         }
 
+        /// <summary>
+        /// Relax the version constraint. The service will allow clients to send both OData V4 and previous max version headers.
+        /// Headers for the previous max version will be ignored.
+        /// </summary>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public ODataRoute HasRelaxedODataVersionConstraint()
+        {
+            object constraint;
+            if (Constraints.TryGetValue(ODataRouteConstants.VersionConstraintName, out constraint))
+            {
+                ((ODataVersionConstraint)constraint).IsRelaxedMatch = true;
+            }
+            return this;
+        }
+
         internal HttpVirtualPathData GenerateLinkDirectly(string odataPath)
         {
             Contract.Assert(odataPath != null);
@@ -125,6 +132,13 @@ namespace System.Web.OData.Routing
             string link = CombinePathSegments(RoutePrefix, odataPath);
             link = UriEncode(link);
             return new HttpVirtualPathData(this, link);
+        }
+
+        private static string GetRouteTemplate(string prefix)
+        {
+            return String.IsNullOrEmpty(prefix) ?
+                ODataRouteConstants.ODataPathTemplate :
+                prefix + '/' + ODataRouteConstants.ODataPathTemplate;
         }
 
         private static string CombinePathSegments(string routePrefix, string odataPath)

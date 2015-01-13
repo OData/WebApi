@@ -39,7 +39,7 @@ namespace System.Web.OData.Routing
         {
             // Arrange
             ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null);
-            
+
             // Act
             var virtualPathData = odataRoute.GenerateLinkDirectly("odataPath");
 
@@ -69,6 +69,20 @@ namespace System.Web.OData.Routing
             Assert.True(odataRoute.CanGenerateDirectLink);
             Assert.NotNull(virtualPathData);
             Assert.Equal("odataPath", virtualPathData.VirtualPath);
+        }
+
+        [Fact]
+        public void HasRelaxedODataVersionConstraint_DefaultValueIsFalse()
+        {
+            ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null);
+            Assert.False(((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
+        }
+
+        [Fact]
+        public void HasRelaxedODataVersionConstraint_SetValue()
+        {
+            ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null).HasRelaxedODataVersionConstraint();
+            Assert.True(((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
         }
 
         [Theory]

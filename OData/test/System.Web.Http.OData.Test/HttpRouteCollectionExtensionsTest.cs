@@ -40,7 +40,7 @@ namespace System.Web.Http.OData
             Assert.NotNull(odataPathConstraint.RoutingConventions);
 
             var odataVersionConstraint = Assert.Single(odataRoute.Constraints.Values.OfType<ODataVersionConstraint>());
-            Assert.Equal(ODataVersion.V1, odataVersionConstraint.MinVersion);            
+            Assert.Equal(ODataVersion.V1, odataVersionConstraint.MinVersion);
             Assert.Equal(ODataVersion.V3, odataVersionConstraint.MaxVersion);
         }
 
@@ -92,6 +92,25 @@ namespace System.Web.Http.OData
             Assert.NotNull(batchRoute);
             Assert.Same(batchHandler, batchRoute.Handler);
             Assert.Equal("prefix/$batch", batchRoute.RouteTemplate);
+        }
+
+        [Fact]
+        public void MapODataServiceRoute_ConfiguresARoute_RelexVersionConstraints()
+        {
+            // Arrange
+            HttpRouteCollection routes = new HttpRouteCollection();
+            HttpConfiguration config = new HttpConfiguration(routes);
+            IEdmModel model = new EdmModel();
+            string routeName = "name";
+            string routePrefix = "prefix";
+
+            // Act
+            config.Routes.MapODataServiceRoute(routeName, routePrefix, model).HasRelaxedODataVersionConstraint();
+
+            // Assert
+            IHttpRoute odataRoute = routes[routeName];
+            var odataVersionConstraint = Assert.Single(odataRoute.Constraints.Values.OfType<ODataVersionConstraint>());
+            Assert.Equal(true, odataVersionConstraint.IsRelaxedMatch);
         }
     }
 }

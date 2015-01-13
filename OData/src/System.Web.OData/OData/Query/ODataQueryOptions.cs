@@ -83,6 +83,14 @@ namespace System.Web.OData.Query
                 context.ElementType,
                 context.NavigationSource,
                 queryParameters);
+
+            HttpConfiguration configuration = Request.GetConfiguration();
+            if (configuration != null)
+            {
+                ODataUriResolverSetttings resolverSettings = configuration.GetResolverSettings();
+                _queryOptionParser.Resolver = resolverSettings.CreateResolver();
+            }
+
             BuildQueryOptions(queryParameters);
 
             Validator = new ODataQueryValidator();
@@ -194,6 +202,24 @@ namespace System.Web.OData.Query
                  queryOptionName == "$select" ||
                  queryOptionName == "$format" ||
                  queryOptionName == "$skiptoken";
+        }
+
+        /// <summary>
+        /// Check if the given query option is the supported query option.
+        /// </summary>
+        /// <param name="queryOptionName">The name of the query option.</param>
+        /// <returns>Returns <c>true</c> if the query option is the supported query option.</returns>
+        [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase",
+            Justification = "Need lower case string here.")]
+        public bool IsSupportedQueryOption(string queryOptionName)
+        {
+            if (!_queryOptionParser.Resolver.EnableCaseInsensitive)
+            {
+                return IsSystemQueryOption(queryOptionName);
+            }
+
+            string lowcaseQueryOptionName = queryOptionName.ToLowerInvariant();
+            return IsSystemQueryOption(lowcaseQueryOptionName);
         }
 
         /// <summary>
@@ -566,11 +592,13 @@ namespace System.Web.OData.Query
             return Request.GetETag(etagHeaderValue);
         }
 
+        [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase",
+            Justification = "Need lower case string here.")]
         private void BuildQueryOptions(IDictionary<string, string> queryParameters)
         {
             foreach (KeyValuePair<string, string> kvp in queryParameters)
             {
-                switch (kvp.Key)
+                switch (kvp.Key.ToLowerInvariant())
                 {
                     case "$filter":
                         ThrowIfEmpty(kvp.Value, "$filter");

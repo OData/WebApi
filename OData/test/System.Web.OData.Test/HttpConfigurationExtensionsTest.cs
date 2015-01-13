@@ -170,6 +170,63 @@ namespace System.Web.OData
             Assert.Same(tiemZoneInfo, config.GetTimeZoneInfo());
         }
 
+        [Fact]
+        public void GetResolverSettings_ReturnDefaultResolverSettings_IfNotSet()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            ODataUriResolverSetttings resolverSetttings = config.GetResolverSettings();
+
+            // Assert
+            Assert.False(resolverSetttings.CaseInsensitive);
+            Assert.False(resolverSetttings.UnqualifiedNameCall);
+            Assert.False(resolverSetttings.EnumPrefixFree);
+        }
+
+        [Fact]
+        public void EnableCaseInsensitive_Sets_KeyWordAndMetadataFlag()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            config.EnableCaseInsensitive(caseInsensitive: true);
+            ODataUriResolverSetttings resolverSetttings = config.GetResolverSettings();
+
+            // Assert
+            Assert.True(resolverSetttings.CaseInsensitive);
+        }
+
+        [Fact]
+        public void EnableUnqualifedCall_Sets_UnqualifedCallFlag()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            config.EnableUnqualifiedNameCall(unqualifiedNameCall: true);
+            ODataUriResolverSetttings resolverSetttings = config.GetResolverSettings();
+
+            // Assert
+            Assert.True(resolverSetttings.UnqualifiedNameCall);
+        }
+
+        [Fact]
+        public void EnableEnumPrefixFree_Sets_EnumPrefixFreeFlag()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            config.EnableEnumPrefixFree(enumPrefixFree: true);
+            ODataUriResolverSetttings resolverSetttings = config.GetResolverSettings();
+
+            // Assert
+            Assert.True(resolverSetttings.EnumPrefixFree);
+        }
+
         private static ODataMediaTypeFormatter CreateODataFormatter()
         {
             return new ODataMediaTypeFormatter(new ODataPayloadKind[0]);

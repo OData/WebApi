@@ -56,6 +56,28 @@ namespace System.Web.OData.Query
             Assert.Equal(new[] { 22 }, customers.Select(c => c.Id));
         }
 
+        [Theory]
+        [InlineData(false, false, "The query parameter '$fIlTer' is not supported.")]
+        [InlineData(true, true, "[{\"Name\":\"Highest\",\"Add")]
+        public void QueryComposition_WorkAsExpect_ForCaseInsensitive(bool caseInsensitive, bool expect, string contains)
+        {
+            // Arrange
+            const string caseInSensitive = "?$fIlTer=iD Eq 33";
+            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", useCustomEdmModel: true));
+            HttpClient client = new HttpClient(server);
+
+            server.Configuration.EnableCaseInsensitive(caseInsensitive);
+
+            // Act
+            HttpResponseMessage response = client.GetAsync(
+                "http://localhost:8080/QueryCompositionCustomer" + caseInSensitive)
+                .Result;
+
+            // Assert
+            Assert.Equal(expect, response.IsSuccessStatusCode);
+            Assert.Contains(contains, response.Content.ReadAsStringAsync().Result);
+        }
+
         [Fact]
         public void ODataQueryOptionsOfT_Works()
         {

@@ -168,6 +168,7 @@
     <Compile Include="OData\ETagMessageHandlerTest.cs" />
     <Compile Include="OData\ODataNullValueMessageHandlerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\SelectExpandNodeTest.cs" />
+    <Compile Include="OData\ODataUriResolverExtensionTest.cs" />
     <Compile Include="OData\OpenEntityTypeTest.cs" />
     <Compile Include="OData\PerRequestContentNegotiatorTest.cs" />
     <Compile Include="OData\ODataRoutingAttributeTest.cs" />
@@ -178,6 +179,7 @@
     <Compile Include="OData\OpenComplexTypeTest.cs" />
     <Compile Include="OData\QueryableLimitationTest.cs" />
     <Compile Include="OData\Query\ODataSingletonQueryOptionTest.cs" />
+    <Compile Include="OData\Query\ODataQueryOptionParserExtensionTest.cs" />
     <Compile Include="OData\Query\ParameterAliasNodeTranslatorTest.cs" />
     <Compile Include="OData\Query\TruncatedCollectionTest.cs" />
     <Compile Include="OData\Query\Validators\CountQueryValidatorTest.cs" />

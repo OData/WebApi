@@ -21,6 +21,14 @@ namespace System.Web.OData.Routing
     /// </summary>
     public class DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler
     {
+        private ODataUriResolverSetttings _resolverSettings = new ODataUriResolverSetttings();
+
+        internal ODataUriResolverSetttings ResolverSetttings
+        {
+            get { return _resolverSettings; }
+            set { _resolverSettings = value; }
+        }
+
         /// <summary>
         /// Parses the specified OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
         /// </summary>
@@ -43,7 +51,7 @@ namespace System.Web.OData.Routing
                 throw Error.ArgumentNull("odataPath");
             }
 
-            return Parse(model, serviceRoot, odataPath, enableUriTemplateParsing: false);
+            return Parse(model, serviceRoot, odataPath, ResolverSetttings, enableUriTemplateParsing: false);
         }
 
         /// <summary>
@@ -65,7 +73,8 @@ namespace System.Web.OData.Routing
             }
 
             return Templatify(
-                Parse(model, serviceRoot: null, odataPath: odataPathTemplate, enableUriTemplateParsing: true),
+                Parse(model, serviceRoot: null, odataPath: odataPathTemplate, resolverSettings: ResolverSetttings,
+                enableUriTemplateParsing: true),
                 odataPathTemplate);
         }
 
@@ -90,6 +99,7 @@ namespace System.Web.OData.Routing
             IEdmModel model,
             string serviceRoot,
             string odataPath,
+            ODataUriResolverSetttings resolverSettings,
             bool enableUriTemplateParsing)
         {
             ODataUriParser uriParser;
@@ -115,6 +125,8 @@ namespace System.Web.OData.Routing
                 queryString = fullUri.ParseQueryString();
                 uriParser = new ODataUriParser(model, serviceRootUri, fullUri);
             }
+
+            uriParser.Resolver = resolverSettings.CreateResolver();
 
             Semantic.ODataPath path;
             UnresolvedPathSegment unresolvedPathSegment = null;

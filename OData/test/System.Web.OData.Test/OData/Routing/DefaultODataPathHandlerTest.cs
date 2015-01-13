@@ -1851,6 +1851,185 @@ namespace System.Web.OData.Routing
                 "Found an unresolved path segment 'Order' in the OData path template 'Customers(ID={key})/Order'.");
         }
 
+        public static TheoryDataSet<string, string, string> PathSegmentIdentifierCaseInsensitiveCases
+        {
+            get
+            {
+                // $batch, $metadata, $count, $ref, $value
+                return new TheoryDataSet<string, string, string>()
+                {
+                    { "$BatcH", "~/$batch", "$batch"},
+                    { "$meTadata", "~/$metadata", "$metadata"},
+                    { "RoutingCUsTomers(1)/Name/$VALuE", "~/entityset/key/property/$value",
+                        "RoutingCustomers(1)/Name/$value" },
+                    { "RoutingCUsTomers(1)/Products/$rEf", "~/entityset/key/navigation/$ref",
+                        "RoutingCustomers(1)/Products/$ref" },
+                    { "RoutingCUsTomers/$CounT", "~/entityset/$count", "RoutingCustomers/$count" }
+                };
+            }
+        }
+
+        public static TheoryDataSet<string, string, string> UserMetadataCaseInsensitiveCases
+        {
+            get
+            {
+                return new TheoryDataSet<string, string, string>()
+                {
+                    // EntitySet/Singleton name
+                    { "routingCUSTOMERS", "~/entityset", "RoutingCustomers" },
+                    { "routingCUSTOMERS(112)", "~/entityset/key", "RoutingCustomers(112)" },
+                    { "vIpCustomEr", "~/singleton", "VipCustomer" },
+
+                    // Property name
+                    { "RoutingCusTomers(100)/proDucts", "~/entityset/key/navigation", "RoutingCustomers(100)/Products" },
+                    { "EnumCusTomers(1)/COloR", "~/entityset/key/property", "EnumCustomers(1)/Color" },
+                    { "vIpCustomEr/prOduCts", "~/singleton/navigation", "VipCustomer/Products" },
+
+                    // Type Name
+                    { "rouTingcustomers/system.WEB.ODATA.RouTing.VIP", "~/entityset/cast", "RoutingCustomers/System.Web.OData.Routing.VIP" },
+                    { "vIpCustomEr/System.Web.ODATA.Routing.VIP", "~/singleton/cast", "VipCustomer/System.Web.OData.Routing.VIP" },
+
+                    // Action
+                    { "gETroutingCUstomerById()", "~/unboundaction", "GetRoutingCustomerById" },
+                    { "routINGCustomers(112)/dEfAulT.GetRelatedRoutingCustomers", "~/entityset/key/action",
+                        "RoutingCustomers(112)/Default.GetRelatedRoutingCustomers" },
+
+                    // Function name/parameter name
+                    { "UnBOUNDFunction()", "~/unboundfunction", "UnboundFunction()" },
+                    { "routINGCustomers(112)/Default.GeTordersCount(faCTor=1)", "~/entityset/key/function",
+                        "RoutingCustomers(112)/Default.GetOrdersCount(factor=1)" },
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("PathSegmentIdentifierCaseInsensitiveCases")]
+        [PropertyData("UserMetadataCaseInsensitiveCases")]
+        public void DefaultUriResolverHandler_Throws_ForCaseSensitive(string path, string template, string expect)
+        {
+            Assert.Throws<ODataUnrecognizedPathException>(
+                () => new DefaultODataPathHandler().Parse(_model, _serviceRoot, path));
+        }
+
+        [Theory]
+        [PropertyData("PathSegmentIdentifierCaseInsensitiveCases")]
+        [PropertyData("UserMetadataCaseInsensitiveCases")]
+        public void DefaultUriResolverHandler_Works_CaseInsensitive(string path, string template, string expect)
+        {
+            // Arrange & Act
+            DefaultODataPathHandler pathHandler = new DefaultODataPathHandler
+            {
+                ResolverSetttings = new ODataUriResolverSetttings
+                {
+                    CaseInsensitive = true,
+                }
+            };
+
+            ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path);
+
+            // Assert
+            Assert.NotNull(odataPath);
+            Assert.Equal(template, odataPath.PathTemplate);
+            Assert.Equal(expect, odataPath.ToString());
+        }
+
+        public static TheoryDataSet<string, string, string> UnqualifiedCallCases
+        {
+            get
+            {
+                return new TheoryDataSet<string, string, string>()
+                {
+                    // Bound Action
+                    { "routINGCustomers(112)/GetRelaTEDRoutingCustomers", "~/entityset/key/action",
+                        "RoutingCustomers(112)/Default.GetRelatedRoutingCustomers" },
+
+                    // Bound Function name/parameter name
+                    { "routINGCustomers(112)/GeTORDersCount(faCTor=1)", "~/entityset/key/function",
+                        "RoutingCustomers(112)/Default.GetOrdersCount(factor=1)" },
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("UnqualifiedCallCases")]
+        public void Unqualified_Throws_DefaultUriResolverHandler(string path, string template, string expect)
+        {
+            Assert.Throws<ODataUnrecognizedPathException>(
+                () => new DefaultODataPathHandler().Parse(_model, _serviceRoot, path));
+        }
+
+        [Theory]
+        [PropertyData("UnqualifiedCallCases")]
+        public void Unqualified_Works_CustomUriResolverHandler(string path, string template, string expect)
+        {
+            // Arrange
+            DefaultODataPathHandler pathHandler = new DefaultODataPathHandler
+            {
+                ResolverSetttings = new ODataUriResolverSetttings
+                {
+                    CaseInsensitive = true,
+                    UnqualifiedNameCall = true
+                }
+            };
+
+            // Act
+            ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path);
+
+            // Assert
+            Assert.NotNull(odataPath);
+            Assert.Equal(template, odataPath.PathTemplate);
+            Assert.Equal(expect, odataPath.ToString());
+        }
+
+         public static TheoryDataSet<string, string, string> PrefixFreeEnumCases
+        {
+            get
+            {
+                return new TheoryDataSet<string, string, string>()
+                {
+                    { "UnboundFuncWithEnumParameters(LongEnum='ThirdLong', FlagsEnum='7')",
+                      "~/unboundfunction",
+                      "UnboundFuncWithEnumParameters(LongEnum=ThirdLong,FlagsEnum=7)" },
+
+                    { "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum='1', FlagsEnum='One, Four')",
+                      "~/entityset/function",
+                      "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum=1,FlagsEnum=One, Four)"}
+                };
+            }
+        }
+
+         [Theory]
+         [PropertyData("PrefixFreeEnumCases")]
+         public void PrefixFreeEnumValue_Throws_DefaultResolver(string path, string template, string expect)
+         {
+             Assert.Throws<ODataException>(
+                 () => new DefaultODataPathHandler().Parse(_model, _serviceRoot, path));
+         }
+
+        [Theory]
+        [PropertyData("PrefixFreeEnumCases")]
+        public void PrefixFreeEnumValue_Works_PrefixFreeResolver(string path, string template, string expect)
+        {
+            // Arrange & Act
+            // Arrange
+            DefaultODataPathHandler pathHandler = new DefaultODataPathHandler
+            {
+                ResolverSetttings = new ODataUriResolverSetttings
+                {
+                    EnumPrefixFree = true
+                }
+            };
+
+            // Act
+            ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path);
+
+            // Assert
+            Assert.NotNull(odataPath);
+            Assert.Equal(template, odataPath.PathTemplate);
+            Console.WriteLine(odataPath.ToString());
+            Assert.Equal(expect, odataPath.ToString());
+        }
+
         private static void AssertTypeMatchesExpectedTypeForSingleton(string odataPath, string expectedSingletonName, string expectedTypeName, bool isCollection)
         {
             var expectedSet = _model.EntityContainer.FindSingleton(expectedSingletonName);

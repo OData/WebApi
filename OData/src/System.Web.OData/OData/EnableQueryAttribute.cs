@@ -468,7 +468,7 @@ namespace System.Web.OData
             IEnumerable<KeyValuePair<string, string>> queryParameters = request.GetQueryNameValuePairs();
             foreach (KeyValuePair<string, string> kvp in queryParameters)
             {
-                if (!ODataQueryOptions.IsSystemQueryOption(kvp.Key) &&
+                if (!queryOptions.IsSupportedQueryOption(kvp.Key) &&
                      kvp.Key.StartsWith("$", StringComparison.Ordinal))
                 {
                     // we don't support any custom query options that start with $

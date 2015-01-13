@@ -75,6 +75,7 @@
     <Compile Include="Extensions\HttpErrorExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
+    <Compile Include="OData\ODataUriResolverSetttings.cs" />
     <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensions.cs" />
@@ -397,6 +398,7 @@
     <Compile Include="OData\Routing\DefaultODataPathHandler.cs" />
     <Compile Include="OData\Routing\ODataPathSegment.cs" />
     <Compile Include="OData\TypedDelta.cs" />
+    <Compile Include="OData\UnqualifiedCallAndEnumPrefixFreeResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OData\Formatter\ODataMediaTypeFormatter.cs" />
     <Compile Include="OData\Formatter\Serialization\DefaultODataSerializerProvider.cs" />

@@ -29,6 +29,8 @@ namespace System.Web.OData.Extensions
 
         private const string TimeZoneInfoKey = "System.Web.OData.TimeZoneInfo";
 
+        private const string ResolverSettingsKey = "System.Web.OData.ResolverSettingsKey";
+
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
         /// type. To avoid processing unexpected or malicious queries, use the validation settings on
@@ -164,6 +166,73 @@ namespace System.Web.OData.Extensions
         }
 
         /// <summary>
+        /// Sets the case insensitive flag for the Uri parser on the configuration. Both metadata and key words
+        /// are impacted by this flag.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="caseInsensitive"><c>true</c> to enable case insensitive, <c>false</c> otherwise.</param>
+        public static void EnableCaseInsensitive(this HttpConfiguration configuration, bool caseInsensitive)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            ODataUriResolverSetttings settings = configuration.GetResolverSettings();
+            settings.CaseInsensitive = caseInsensitive;
+        }
+
+        /// <summary>
+        /// Sets the un-qualified function and action name call flag for the Uri parser on the configuration.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="unqualifiedNameCall"><c>true</c> to enable un-qualified name call, <c>false</c> otherwise.</param>
+        public static void EnableUnqualifiedNameCall(this HttpConfiguration configuration, bool unqualifiedNameCall)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            ODataUriResolverSetttings settings = configuration.GetResolverSettings();
+            settings.UnqualifiedNameCall = unqualifiedNameCall;
+        }
+
+        /// <summary>
+        /// Sets the Enum prefix free flag for the Uri parser on the configuration.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="enumPrefixFree"><c>true</c> to enable Enum prefix free, <c>false</c> otherwise.</param>
+        public static void EnableEnumPrefixFree(this HttpConfiguration configuration, bool enumPrefixFree)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            ODataUriResolverSetttings settings = configuration.GetResolverSettings();
+            settings.EnumPrefixFree = enumPrefixFree;
+        }
+
+        internal static ODataUriResolverSetttings GetResolverSettings(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            object value;
+            if (configuration.Properties.TryGetValue(ResolverSettingsKey, out value))
+            {
+                return value as ODataUriResolverSetttings;
+            }
+
+            ODataUriResolverSetttings defaultSettings = new ODataUriResolverSetttings();
+            configuration.Properties[ResolverSettingsKey] = defaultSettings;
+            return defaultSettings;
+        }
+
+        /// <summary>
         /// Maps the specified OData route and the OData route attributes.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
@@ -267,6 +336,12 @@ namespace System.Web.OData.Extensions
                 routes.MapHttpBatchRoute(routeName + "Batch", batchTemplate, batchHandler);
             }
 
+            DefaultODataPathHandler odataPathHanlder = pathHandler as DefaultODataPathHandler;
+            if (odataPathHanlder != null)
+            {
+                odataPathHanlder.ResolverSetttings = configuration.GetResolverSettings();
+            }
+
             ODataPathRouteConstraint routeConstraint =
                 new ODataPathRouteConstraint(pathHandler, model, routeName, routingConventions);
             ODataRoute route = new ODataRoute(routePrefix, routeConstraint);
@@ -315,6 +390,12 @@ namespace System.Web.OData.Extensions
 
             HttpRouteCollection routes = configuration.Routes;
             routePrefix = RemoveTrailingSlash(routePrefix);
+
+            DefaultODataPathHandler odataPathHanlder = pathHandler as DefaultODataPathHandler;
+            if (odataPathHanlder != null)
+            {
+                odataPathHanlder.ResolverSetttings = configuration.GetResolverSettings();
+            }
 
             ODataPathRouteConstraint routeConstraint =
                 new ODataPathRouteConstraint(pathHandler, model, routeName, routingConventions);

@@ -142,4 +142,44 @@ namespace System.Web.Http.OData.Formatter
 
         public string Name { get; set; }
     }
+
+    public class ForeignCustomer
+    {
+        public int ForeignCustomerId { get; set; }
+
+        public int OtherCustomerKey { get; set; }
+
+        public IList<ForeignOrder> Orders { get; set; }
+    }
+
+    public class ForeignOrder
+    {
+        public int ForeignOrderId { get; set; }
+
+        public int CustomerId { get; set; }
+
+        [ForeignKey("CustomerId")]
+        [ActionOnDelete(EdmOnDeleteAction.Cascade)]
+        public ForeignCustomer Customer { get; set; }
+    }
+
+    public class MultiForeignCustomer
+    {
+        public int CustomerId1 { get; set; }
+
+        public string CustomerId2 { get; set; }
+
+        public IList<MultiForeignOrder> Orders { get; set; }
+    }
+
+    public class MultiForeignOrder
+    {
+        public int ForeignOrderId { get; set; }
+
+        public int CustomerForeignKey1 { get; set; }
+
+        public string CustomerForeignKey2 { get; set; }
+
+        public MultiForeignCustomer Customer { get; set; }
+    }
 }

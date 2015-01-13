@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Reflection;
+using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.TestCommon.Models;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Csdl;
@@ -262,8 +265,8 @@ namespace System.Web.Http.OData.Builder
             // Arrange
             MockType type =
                 new MockType("Complex")
-                .Property(typeof(int), "ID", new DatabaseGeneratedAttribute(DatabaseGeneratedOption.Computed))
-                .Property(typeof(int?), "Count");
+                    .Property(typeof(int), "ID", new DatabaseGeneratedAttribute(DatabaseGeneratedOption.Computed))
+                    .Property(typeof(int?), "Count");
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.AddComplexType(type);
@@ -290,6 +293,283 @@ namespace System.Web.Http.OData.Builder
                 StoreGeneratedPatternAnnotation.AnnotationsNamespace,
                 StoreGeneratedPatternAnnotation.AnnotationName);
             Assert.Null(countAnnotation);
+        }
+
+        [Fact]
+        public void HasOptional_CanSetSingleForeignKeyProperty_ForReferentialConstraint()
+        {
+            // Arrange
+            PropertyInfo expectPrincipalPropertyInfo = typeof(User).GetProperty("UserId");
+            PropertyInfo expectDependentPropertyInfo = typeof(Role).GetProperty("UserForeignKey");
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act
+            NavigationPropertyConfiguration navigationProperty =
+                builder.Entity<Role>().HasOptional(r => r.User, (r, u)=> r.UserForeignKey == u.UserId);
+
+            // Assert
+            PropertyInfo actualDependentPropertyInfo = Assert.Single(navigationProperty.DependentProperties);
+            Assert.Same(expectDependentPropertyInfo, actualDependentPropertyInfo);
+
+            PropertyInfo actualPrincipalPropertyInfo = Assert.Single(navigationProperty.PrincipalProperties);
+            Assert.Same(expectPrincipalPropertyInfo, actualPrincipalPropertyInfo);
+
+            PropertyConfiguration propertyConfiguration = Assert.Single(navigationProperty.DeclaringEntityType.Properties
+                .Where(e => e.PropertyInfo == actualDependentPropertyInfo));
+
+            PrimitivePropertyConfiguration primitiveProperty =
+                Assert.IsType<PrimitivePropertyConfiguration>(propertyConfiguration);
+            Assert.False(primitiveProperty.OptionalProperty);
+        }
+
+        [Fact]
+        public void HasRequired_CanSetSingleForeignKeyProperty_ForReferentialConstraint()
+        {
+            // Arrange
+            PropertyInfo expectPrincipalPropertyInfo = typeof(User).GetProperty("UserId");
+            PropertyInfo expectDependentPropertyInfo = typeof(Role).GetProperty("UserForeignKey");
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act
+            NavigationPropertyConfiguration navigationProperty =
+                builder.Entity<Role>().HasRequired(r => r.User, (r, u) => r.UserForeignKey == u.UserId);
+
+            // Assert
+            PropertyInfo actualDependentPropertyInfo = Assert.Single(navigationProperty.DependentProperties);
+            Assert.Same(expectDependentPropertyInfo, actualDependentPropertyInfo);
+
+            PropertyInfo actualPrincipalPropertyInfo = Assert.Single(navigationProperty.PrincipalProperties);
+            Assert.Same(expectPrincipalPropertyInfo, actualPrincipalPropertyInfo);
+
+            PropertyConfiguration propertyConfiguration = Assert.Single(navigationProperty.DeclaringEntityType.Properties
+                .Where(e => e.PropertyInfo == actualDependentPropertyInfo));
+
+            PrimitivePropertyConfiguration primitiveProperty =
+                Assert.IsType<PrimitivePropertyConfiguration>(propertyConfiguration);
+            Assert.False(primitiveProperty.OptionalProperty);
+        }
+
+        [Fact]
+        public void CanAddPrimitiveProperty_ForDependentEntityType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act
+            builder.Entity<Role>().HasRequired(r => r.User, (r, u) => r.UserForeignKey == u.UserId);
+
+            // Assert
+            EntityTypeConfiguration dependentEntityType =
+                builder.StructuralTypes.OfType<EntityTypeConfiguration>().FirstOrDefault(e => e.Name == "Role");
+            Assert.NotNull(dependentEntityType);
+
+            PrimitivePropertyConfiguration primitiveConfig =
+                Assert.Single(dependentEntityType.Properties.OfType<PrimitivePropertyConfiguration>());
+            Assert.Equal("UserForeignKey", primitiveConfig.Name);
+            Assert.Equal("System.Int32", primitiveConfig.RelatedClrType.FullName);
+            Assert.False(primitiveConfig.OptionalProperty);
+        }
+
+        [Fact]
+        public void HasOptional_CanSetMultipleForeignKeyProperties_ForReferencialConstraint()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act
+            NavigationPropertyConfiguration navigationProperty =
+                builder.Entity<MultiRole>()
+                    .HasOptional(r => r.User, (r, u) => r.UserKey1 == u.UserId1 && r.UserKey2 == u.UserId2);
+
+            // Assert
+            Assert.Equal(2, navigationProperty.DependentProperties.Count());
+            Assert.Same(typeof(MultiRole).GetProperty("UserKey1"), navigationProperty.DependentProperties.First());
+            Assert.Same(typeof(MultiRole).GetProperty("UserKey2"), navigationProperty.DependentProperties.Last());
+
+            Assert.Equal(2, navigationProperty.PrincipalProperties.Count());
+            Assert.Same(typeof(MultiUser).GetProperty("UserId1"), navigationProperty.PrincipalProperties.First());
+            Assert.Same(typeof(MultiUser).GetProperty("UserId2"), navigationProperty.PrincipalProperties.Last());
+        }
+
+        [Fact]
+        public void HasRequired_CanSetMultipleForeignKeyProperties_ForReferencialConstraint()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act
+            NavigationPropertyConfiguration navigationProperty =
+                builder.Entity<MultiRole>()
+                    .HasRequired(r => r.User, (r, u) => r.UserKey1 == u.UserId1 && r.UserKey2 == u.UserId2);
+
+            // Assert
+            Assert.Equal(2, navigationProperty.DependentProperties.Count());
+            Assert.Same(typeof(MultiRole).GetProperty("UserKey1"), navigationProperty.DependentProperties.First());
+            Assert.Same(typeof(MultiRole).GetProperty("UserKey2"), navigationProperty.DependentProperties.Last());
+
+            Assert.Equal(2, navigationProperty.PrincipalProperties.Count());
+            Assert.Same(typeof(MultiUser).GetProperty("UserId1"), navigationProperty.PrincipalProperties.First());
+            Assert.Same(typeof(MultiUser).GetProperty("UserId2"), navigationProperty.PrincipalProperties.Last());
+        }
+
+        [Fact]
+        public void GetEdmModel_Works_WithSingleForeignKeyProperty()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<User> userType = builder.Entity<User>();
+            userType.HasKey(u => u.UserId).HasMany(u => u.Roles);
+
+            EntityTypeConfiguration<Role> roleType = builder.Entity<Role>();
+            roleType.HasKey(r => r.RoleId)
+                .HasRequired(r => r.User, (r, u) => r.UserForeignKey == u.UserId)
+                .CascadeOnDelete();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType roleEntityType = model.AssertHasEntityType(typeof(Role));
+
+            IEdmNavigationProperty usersNav = roleEntityType.AssertHasNavigationProperty(model, "User",
+                typeof(User), false, EdmMultiplicity.One);
+
+            Assert.Equal(EdmOnDeleteAction.Cascade, usersNav.OnDelete);
+
+            IEdmStructuralProperty dependentProperty = Assert.Single(usersNav.DependentProperties);
+            Assert.Equal("UserForeignKey", dependentProperty.Name);
+
+            IEdmProperty edmProperty = Assert.Single(roleEntityType.Properties().Where(c => c.Name == "UserForeignKey"));
+            Assert.False(edmProperty.Type.IsNullable);
+        }
+
+        [Fact]
+        public void GetEdmModel_Works_WithMultiForeignKeys()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<MultiUser> userType = builder.Entity<MultiUser>();
+            userType.HasKey(u => new { u.UserId1, u.UserId2 })
+                .HasMany(u => u.Roles);
+
+            EntityTypeConfiguration<MultiRole> roleType = builder.Entity<MultiRole>();
+            roleType.HasKey(r => r.RoleId)
+                .HasOptional(r => r.User, (r, u) => r.UserKey1 == u.UserId1 && r.UserKey2 == u.UserId2)
+                .CascadeOnDelete();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType roleEntityType = model.AssertHasEntityType(typeof(MultiRole));
+
+            IEdmNavigationProperty usersNav = roleEntityType.AssertHasNavigationProperty(model, "User",
+                typeof(MultiUser), true, EdmMultiplicity.ZeroOrOne);
+
+            Assert.Equal(EdmOnDeleteAction.Cascade, usersNav.OnDelete);
+
+            Assert.Equal(2, usersNav.DependentProperties.Count());
+            Assert.Equal("UserKey1", usersNav.DependentProperties.First().Name);
+            Assert.Equal("UserKey2", usersNav.DependentProperties.Last().Name);
+
+            IEdmProperty edmProperty = Assert.Single(roleEntityType.Properties().Where(c => c.Name == "UserKey1"));
+            Assert.False(edmProperty.Type.IsNullable);
+
+            edmProperty = Assert.Single(roleEntityType.Properties().Where(c => c.Name == "UserKey2"));
+            Assert.False(edmProperty.Type.IsNullable);
+        }
+
+        [Fact]
+        public void GetEdmModel_ThrowsException_WithDifferentNumber()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            builder.Entity<MultiUser>().HasKey(u => u.UserId1);
+            builder.Entity<MultiRole>()
+                .HasRequired(r => r.User, (r, u) => r.UserKey1 == u.UserId1 && r.UserKey2 == u.UserId2);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => builder.GetEdmModel(),
+                String.Format(SRResources.DependentPropertiesNotMatchWithPrincipalKeys,
+                "System.Int32,System.String", "System.Int32"));
+        }
+
+        [Fact]
+        public void GetEdmModel_ThrowsException_WithDifferentTypes()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            builder.Entity<MultiUser>()
+                .HasKey(u => new { u.UserId1, u.UserId2 });
+
+            builder.Entity<MultiRole>()
+                .HasRequired(r => r.User, (r, u) => r.UserKey2 == u.UserId2 && r.UserKey3 == u.UserId3);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => builder.GetEdmModel(),
+                String.Format(SRResources.DependentPropertiesNotMatchWithPrincipalKeys,
+                "System.String,System.Guid", "System.Int32,System.String"));
+        }
+
+        [Fact]
+        public void SetNonPrimitiveProperty_ThrowsException()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => builder.Entity<ForeignEntity>().HasRequired(c => c.Principal,
+                    (c, r) => c.InvalidForeignKey == r.InvalidPrincipalKey),
+                String.Format(SRResources.ReferentialConstraintPropertyTypeNotValid, "System.Web.Http.OData.MockType"));
+        }
+
+        class User
+        {
+            public int UserId { get; set; }
+            public IList<Role> Roles { get; set; }
+        }
+
+        class Role
+        {
+            public int RoleId { get; set; }
+            public int UserForeignKey { get; set; }
+            public User User { get; set; }
+        }
+
+        class MultiUser
+        {
+            public int UserId1 { get; set; }
+            public string UserId2 { get; set; }
+            public Guid UserId3 { get; set; }
+            public IList<MultiRole> Roles { get; set; }
+        }
+
+        class MultiRole
+        {
+            public int RoleId { get; set; }
+            public int UserKey1 { get; set; }
+            public string UserKey2 { get; set; }
+            public Guid UserKey3 { get; set; }
+            public MultiUser User { get; set; }
+        }
+
+        class ForeignPrincipal
+        {
+            public MockType InvalidPrincipalKey { get; set; }
+        }
+
+        class ForeignEntity
+        {
+            public MockType InvalidForeignKey { get; set; }
+
+            public ForeignPrincipal Principal { get; set; }
         }
     }
 }

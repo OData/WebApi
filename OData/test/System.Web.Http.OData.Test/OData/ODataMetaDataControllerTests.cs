@@ -138,6 +138,144 @@ namespace System.Web.Http.OData.Builder
         }
 
         [Fact]
+        public void DollarMetadata_Works_WithReferentialConstraint()
+        {
+            // Arrange
+            const string expect =
+                "        <ReferentialConstraint>\r\n" +
+                "          <Principal Role=\"Customer\">\r\n" +
+                "            <PropertyRef Name=\"ForeignCustomerId\" />\r\n" +
+                "          </Principal>\r\n" +
+                "          <Dependent Role=\"CustomerPartner\">\r\n" +
+                "            <PropertyRef Name=\"CustomerId\" />\r\n" +
+                "          </Dependent>\r\n" +
+                "        </ReferentialConstraint>";
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<ForeignCustomer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataServiceRoute("odata", "odata", model);
+
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+            string payload = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Contains("<OnDelete Action=\"Cascade\" />", payload);
+            Assert.Contains(expect, payload);
+        }
+
+        [Fact]
+        public void DollarMetadata_Works_WithMultipleReferentialConstraints_WithModelBuilder()
+        {
+            // Arrange
+            const string expect =
+                "      <Association Name=\"System_Web_Http_OData_Formatter_MultiForeignOrder_Customer_System_Web_Http_OData_Formatter_MultiForeignCustomer_CustomerPartner\">\r\n" +
+                "        <End Type=\"System.Web.Http.OData.Formatter.MultiForeignCustomer\" Role=\"Customer\" Multiplicity=\"1\" />\r\n" +
+                "        <End Type=\"System.Web.Http.OData.Formatter.MultiForeignOrder\" Role=\"CustomerPartner\" Multiplicity=\"0..1\">\r\n" +
+                "          <OnDelete Action=\"Cascade\" />\r\n" +
+                "        </End>\r\n" +
+                "        <ReferentialConstraint>\r\n" +
+                "          <Principal Role=\"Customer\">\r\n" +
+                "            <PropertyRef Name=\"CustomerId2\" />\r\n" +
+                "            <PropertyRef Name=\"CustomerId1\" />\r\n" +
+                "          </Principal>\r\n" +
+                "          <Dependent Role=\"CustomerPartner\">\r\n" +
+                "            <PropertyRef Name=\"CustomerForeignKey2\" />\r\n" +
+                "            <PropertyRef Name=\"CustomerForeignKey1\" />\r\n" +
+                "          </Dependent>\r\n" +
+                "        </ReferentialConstraint>\r\n" +
+                "      </Association>";
+
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.Entity<MultiForeignCustomer>()
+                .HasKey(c => new { c.CustomerId2, c.CustomerId1 })
+                .HasMany(c => c.Orders);
+
+            builder.Entity<MultiForeignOrder>()
+                .HasKey(o => o.ForeignOrderId)
+                .HasRequired(o => o.Customer, (o, c) => o.CustomerForeignKey2 == c.CustomerId2 && o.CustomerForeignKey1 == c.CustomerId1)
+                .CascadeOnDelete();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataServiceRoute("odata", "odata", model);
+
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+
+            Assert.Contains(expect, response.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void DollarMetadata_Works_WithMultipleReferentialConstraints_ForUntypedModel()
+        {
+            // Arrange
+            EdmModel model = new EdmModel();
+
+            EdmEntityType customer = new EdmEntityType("DefaultNamespace", "Customer");
+            customer.AddKeys(customer.AddStructuralProperty("CustomerId", EdmCoreModel.Instance.GetInt32(false)));
+            customer.AddStructuralProperty("Name", EdmCoreModel.Instance.GetString(false));
+            model.AddElement(customer);
+
+            EdmEntityType order = new EdmEntityType("DefaultNamespace", "Order");
+            order.AddKeys(order.AddStructuralProperty("OrderId", EdmCoreModel.Instance.GetInt32(false)));
+            EdmStructuralProperty orderCustomerId = order.AddStructuralProperty("CustomerForeignKey", EdmCoreModel.Instance.GetInt32(true));
+            model.AddElement(order);
+
+            customer.AddBidirectionalNavigation(
+                new EdmNavigationPropertyInfo
+                {
+                    Name = "Orders",
+                    Target = order,
+                    TargetMultiplicity = EdmMultiplicity.Many
+                },
+                new EdmNavigationPropertyInfo
+                {
+                    Name = "Customer",
+                    TargetMultiplicity = EdmMultiplicity.ZeroOrOne,
+                    DependentProperties = new[] { orderCustomerId },
+                });
+
+            const string expect =
+                "        <ReferentialConstraint>\r\n" +
+                "          <Principal Role=\"Customer\">\r\n" +
+                "            <PropertyRef Name=\"CustomerId\" />\r\n" +
+                "          </Principal>\r\n" +
+                "          <Dependent Role=\"Orders\">\r\n" +
+                "            <PropertyRef Name=\"CustomerForeignKey\" />\r\n" +
+                "          </Dependent>\r\n" +
+                "        </ReferentialConstraint>";
+
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataServiceRoute("odata", "odata", model);
+
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Contains(expect, response.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
         public void Controller_DoesNotAppear_InApiDescriptions()
         {
             var config = new HttpConfiguration();

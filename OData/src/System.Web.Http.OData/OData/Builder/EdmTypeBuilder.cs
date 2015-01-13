@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 using System.Web.Http.OData.Formatter;
 using System.Web.Http.OData.Properties;
 using Microsoft.Data.Edm;
@@ -20,6 +21,7 @@ namespace System.Web.Http.OData.Builder
         private readonly List<StructuralTypeConfiguration> _configurations;
         private readonly Dictionary<Type, IEdmStructuredType> _types = new Dictionary<Type, IEdmStructuredType>();
         private readonly List<IEdmDirectValueAnnotationBinding> _directValueAnnotations = new List<IEdmDirectValueAnnotationBinding>();
+        private readonly Dictionary<PropertyInfo, IEdmProperty> _properties = new Dictionary<PropertyInfo, IEdmProperty>();
 
         internal EdmTypeBuilder(IEnumerable<StructuralTypeConfiguration> configurations)
         {
@@ -31,6 +33,7 @@ namespace System.Web.Http.OData.Builder
             // Reset
             _types.Clear();
             _directValueAnnotations.Clear();
+            _properties.Clear();
 
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
             foreach (StructuralTypeConfiguration config in _configurations)
@@ -41,6 +44,11 @@ namespace System.Web.Http.OData.Builder
             foreach (StructuralTypeConfiguration config in _configurations)
             {
                 CreateEdmTypeBody(config);
+            }
+
+            foreach (EntityTypeConfiguration entity in _configurations.OfType<EntityTypeConfiguration>())
+            {
+                CreateNavigationProperty(entity);
             }
 
             return _types;
@@ -95,6 +103,8 @@ namespace System.Web.Http.OData.Builder
         {
             foreach (PropertyConfiguration property in config.Properties)
             {
+                IEdmProperty edmProperty = null;
+
                 switch (property.Kind)
                 {
                     case PropertyKind.Primitive:
@@ -111,7 +121,7 @@ namespace System.Web.Http.OData.Builder
                             primitiveTypeReference);
 
                         type.AddProperty(primitiveProp);
-
+                        edmProperty = primitiveProp;
                         // Set Annotation StoreGeneratedPattern
                         if (config.Kind == EdmTypeKind.Entity
                             && primitiveProperty.StoreGeneratedPattern != DatabaseGeneratedOption.None)
@@ -125,7 +135,7 @@ namespace System.Web.Http.OData.Builder
                         ComplexPropertyConfiguration complexProperty = property as ComplexPropertyConfiguration;
                         IEdmComplexType complexType = _types[complexProperty.RelatedClrType] as IEdmComplexType;
 
-                        type.AddStructuralProperty(
+                        edmProperty = type.AddStructuralProperty(
                             complexProperty.PropertyInfo.Name,
                             new EdmComplexTypeReference(complexType, complexProperty.OptionalProperty));
                         break;
@@ -142,7 +152,7 @@ namespace System.Web.Http.OData.Builder
                         {
                             elementTypeReference = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(collectionProperty.ElementType);
                         }
-                        type.AddStructuralProperty(
+                        edmProperty = type.AddStructuralProperty(
                             collectionProperty.PropertyInfo.Name,
                             new EdmCollectionTypeReference(
                                 new EdmCollectionType(elementTypeReference),
@@ -151,6 +161,11 @@ namespace System.Web.Http.OData.Builder
 
                     default:
                         break;
+                }
+
+                if (edmProperty != null && property.PropertyInfo != null)
+                {
+                    _properties[property.PropertyInfo] = edmProperty;
                 }
             }
         }
@@ -165,6 +180,13 @@ namespace System.Web.Http.OData.Builder
             CreateStructuralTypeBody(type, config);
             IEdmStructuralProperty[] keys = config.Keys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.PropertyInfo.Name)).ToArray();
             type.AddKeys(keys);
+        }
+
+        private void CreateNavigationProperty(EntityTypeConfiguration config)
+        {
+            Contract.Assert(config != null);
+
+            EdmEntityType entityType = (EdmEntityType)(_types[config.ClrType]);
 
             foreach (NavigationPropertyConfiguration navProp in config.NavigationProperties)
             {
@@ -172,9 +194,16 @@ namespace System.Web.Http.OData.Builder
                 info.Name = navProp.Name;
                 info.TargetMultiplicity = navProp.Multiplicity;
                 info.Target = _types[navProp.RelatedClrType] as IEdmEntityType;
+                info.OnDelete = navProp.OnDeleteAction;
+
+                if (navProp.ReferentialConstraint.Any())
+                {
+                    info.DependentProperties = ReorderDependentProperties(navProp);
+                }
+
                 //TODO: If target end has a multiplity of 1 this assumes the source end is 0..1.
                 //      I think a better default multiplicity is *
-                type.AddUnidirectionalNavigation(info);
+                entityType.AddUnidirectionalNavigation(info);
             }
         }
 
@@ -224,6 +253,46 @@ namespace System.Web.Http.OData.Builder
             }
 
             return primitiveType.PrimitiveKind;
+        }
+
+        private IEnumerable<IEdmStructuralProperty> ReorderDependentProperties(
+            NavigationPropertyConfiguration navProperty)
+        {
+            EntityTypeConfiguration principalEntity = _configurations.OfType<EntityTypeConfiguration>()
+                .FirstOrDefault(e => e.ClrType == navProperty.RelatedClrType);
+            Contract.Assert(principalEntity != null);
+
+            int keyCount = principalEntity.Keys.Count();
+            if (keyCount != navProperty.PrincipalProperties.Count())
+            {
+                throw Error.InvalidOperation(SRResources.DependentPropertiesNotMatchWithPrincipalKeys,
+                    String.Join(",", navProperty.DependentProperties.Select(e => e.PropertyType.FullName)),
+                    String.Join(",", principalEntity.Keys.Select(e => e.PropertyInfo.PropertyType.FullName)));
+            }
+
+            // OData V3 spec says:
+            // The property references for the principal entity MUST be the same property references specified
+            // in the edm:Key of the principal entity type.
+            IList<IEdmStructuralProperty> dependentProperties = new List<IEdmStructuralProperty>();
+            foreach (PrimitivePropertyConfiguration key in principalEntity.Keys)
+            {
+                PropertyInfo dependent =
+                    navProperty.ReferentialConstraint.FirstOrDefault(r => r.Value == key.PropertyInfo).Key;
+
+                if (dependent != null)
+                {
+                    dependentProperties.Add(_properties[dependent] as IEdmStructuralProperty);
+                }
+            }
+
+            if (keyCount != dependentProperties.Count)
+            {
+                throw Error.InvalidOperation(SRResources.DependentPropertiesNotMatchWithPrincipalKeys,
+                    String.Join(",", navProperty.DependentProperties.Select(e => e.PropertyType.FullName)),
+                    String.Join(",", principalEntity.Keys.Select(e => e.PropertyInfo.PropertyType.FullName)));
+            }
+
+            return dependentProperties;
         }
     }
 }

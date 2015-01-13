@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -373,6 +372,28 @@ namespace System.Web.Http.OData.Builder
             foreach (StructuralTypeConfiguration edmType in _explicitlyAddedTypes)
             {
                 MapType(edmType);
+            }
+
+            // Apply foreign key conventions after the type mapping, because foreign key conventions depend on
+            // entity key setting to be finished.
+            ApplyForeignKeyConventions();
+        }
+
+        private void ApplyForeignKeyConventions()
+        {
+            ForeignKeyAttributeConvention foreignKeyAttributeConvention = new ForeignKeyAttributeConvention();
+            ForeignKeyDiscoveryConvention foreignKeyDiscoveryConvention = new ForeignKeyDiscoveryConvention();
+            ActionOnDeleteAttributeConvention actionOnDeleteConvention = new ActionOnDeleteAttributeConvention();
+            foreach (EntityTypeConfiguration edmType in StructuralTypes.OfType<EntityTypeConfiguration>())
+            {
+                foreach (PropertyConfiguration property in edmType.Properties)
+                {
+                    // ForeignKeyDiscoveryConvention has to run after ForeignKeyAttributeConvention
+                    foreignKeyAttributeConvention.Apply(property, edmType);
+                    foreignKeyDiscoveryConvention.Apply(property, edmType);
+
+                    actionOnDeleteConvention.Apply(property, edmType);
+                }
             }
         }
 

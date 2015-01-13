@@ -1244,6 +1244,116 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             Assert.DoesNotThrow(() => builder.GetEdmModel());
         }
+
+        [Fact]
+        public void ODataConventionModelBuilder_ForeignKeyAttribute_WorksOnNavigationProperty()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<ForeignKeyCustomer>("Customers");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType orderType = model.AssertHasEntityType(typeof(ForeignKeyOrder));
+
+            IEdmNavigationProperty navigation = orderType.AssertHasNavigationProperty(model, "OrderCustomer",
+                typeof(ForeignKeyCustomer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            IEdmStructuralProperty dependentProperty = Assert.Single(navigation.DependentProperties);
+            Assert.Equal("OrderCustomerId", dependentProperty.Name);
+
+            Assert.False(dependentProperty.Type.IsNullable);
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_ForeignKeyAttribute_WorksOnForeignKeyProperty()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<ForeignKeyCustomer>("Customers");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType categoryType = model.AssertHasEntityType(typeof(ForeignKeyCategory));
+
+            IEdmNavigationProperty navigation = categoryType.AssertHasNavigationProperty(model, "CategoryCustomer",
+                typeof(ForeignKeyCustomer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
+
+            IEdmStructuralProperty dependentProperty = Assert.Single(navigation.DependentProperties);
+            Assert.Equal("MyCustomerId", dependentProperty.Name);
+
+            Assert.False(dependentProperty.Type.IsNullable);
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_ForeignKeyDiscovery_WorksOnNavigationProperty()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<ForeignKeyCustomer>("Customers");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType productType = model.AssertHasEntityType(typeof(ForeignKeyProduct));
+
+            IEdmNavigationProperty navigation = productType.AssertHasNavigationProperty(model, "ProductCustomer",
+                typeof(ForeignKeyCustomer), isNullable: false, multiplicity: EdmMultiplicity.One);
+
+            IEdmStructuralProperty dependentProperty = Assert.Single(navigation.DependentProperties);
+            Assert.Equal("ForeignKeyCustomerId", dependentProperty.Name);
+
+            Assert.False(dependentProperty.Type.IsNullable);
+        }
+
+        class ForeignKeyCustomer
+        {
+            public int Id { get; set; }
+
+            public IList<ForeignKeyOrder> Orders { get; set; }
+
+            public IList<ForeignKeyCategory> Categories { get; set; }
+
+            public IList<ForeignKeyProduct> Products { get; set; }
+        }
+
+        class ForeignKeyOrder
+        {
+            public int ForeignKeyOrderId { get; set; }
+
+            public int OrderCustomerId { get; set; }
+
+            [ForeignKey("OrderCustomerId")]
+            public ForeignKeyCustomer OrderCustomer { get; set; }
+        }
+
+        class ForeignKeyCategory
+        {
+            public int Id { get; set; }
+
+            [ForeignKey("CategoryCustomer")]
+            public int MyCustomerId { get; set; }
+
+            public ForeignKeyCustomer CategoryCustomer { get; set; }
+        }
+
+        class ForeignKeyProduct
+        {
+            public int Id { get; set; }
+
+            public int ForeignKeyCustomerId { get; set; }
+
+            [Required]
+            public ForeignKeyCustomer ProductCustomer { get; set; }
+        }
     }
 
     public class Product

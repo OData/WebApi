@@ -73,6 +73,11 @@
     <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensions.cs" />
+    <Compile Include="OData\Builder\ActionOnDeleteAttribute.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\ActionOnDeleteAttributeConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\ForeignKeyAttributeConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\ForeignKeyDiscoveryConvention.cs" />
+    <Compile Include="OData\Builder\PropertyPairSelectorVistor.cs" />
     <Compile Include="OData\EdmModelExtensions.cs" />
     <Compile Include="OData\Builder\LinkGenerationHelpers.cs" />
     <Compile Include="OData\ContentIdHelpers.cs" />

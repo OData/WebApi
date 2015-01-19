@@ -247,6 +247,36 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void DollarMetadata_Works_WithPrincipalKeyOnBaseType_ButBaseTypeNotInEdmModel()
+        {
+            // Arrange
+            const string expect =
+                "        <NavigationProperty Name=\"DerivedProp\" Type=\"System.Web.OData.Formatter.DerivedPrincipalEntity\">\r\n" +
+                "          <ReferentialConstraint Property=\"DerivedPrincipalEntityId\" ReferencedProperty=\"Id\" />\r\n" +
+                "        </NavigationProperty>";
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<DerivedPrincipalEntity>("Principals");
+            builder.EntitySet<DependentEntity>("Dependents");
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpConfiguration config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            HttpServer server = new HttpServer(config);
+            config.MapODataServiceRoute("odata", "odata", model);
+
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+
+            Assert.Contains(expect, response.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
         public void DollarMetadata_Works_WithMultipleReferentialConstraints_ForUntypeModel()
         {
             // Arrange

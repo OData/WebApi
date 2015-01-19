@@ -98,10 +98,14 @@
     <Compile Include="OData\Batch\DefaultODataBatchHandlerTest.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfigurationTest.cs" />
     <Compile Include="OData\Builder\ContainmentPathBuilderTest.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\ActionOnDeleteAttributeConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ComplexTypeAttributeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConventionTest.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\ForeignKeyAttributeConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\TimestampAttributeEdmPropertyConventionTests.cs" />
+    <Compile Include="OData\Builder\Conventions\ForeignKeyDiscoveryConventionTest.cs" />
     <Compile Include="OData\Builder\DynamicPropertyDictionaryAnnotationTest.cs" />
+    <Compile Include="OData\Builder\PropertyPairSelectorVisitorTest.cs" />
     <Compile Include="OData\Builder\SingletonLinkConfigurationTest.cs" />
     <Compile Include="OData\Builder\SingletonConfigurationTest.cs" />
     <Compile Include="OData\Builder\EnumTypeTest.cs" />

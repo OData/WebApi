@@ -311,15 +311,13 @@ namespace System.Web.OData.Builder
                 // Principal properties
                 if (navProp.PrincipalProperties.Any())
                 {
-                    info.PrincipalProperties = navProp.PrincipalProperties
-                        .Select(p => _properties[p]).OfType<IEdmStructuralProperty>().ToList();
+                    info.PrincipalProperties = GetDeclaringPropertyInfo(navProp.PrincipalProperties);
                 }
 
                 // Dependent properties
                 if (navProp.DependentProperties.Any())
                 {
-                    info.DependentProperties = navProp.DependentProperties
-                        .Select(property => _properties[property]).OfType<IEdmStructuralProperty>().ToList();
+                    info.DependentProperties = GetDeclaringPropertyInfo(navProp.DependentProperties);
                 }
 
                 IEdmProperty edmProperty = type.AddUnidirectionalNavigation(info);
@@ -333,6 +331,39 @@ namespace System.Web.OData.Builder
                     _propertiesRestrictions[edmProperty] = new QueryableRestrictions(navProp);
                 }
             }
+        }
+
+        private IList<IEdmStructuralProperty> GetDeclaringPropertyInfo(IEnumerable<PropertyInfo> propertyInfos)
+        {
+            IList<IEdmProperty> edmProperties = new List<IEdmProperty>();
+            foreach (PropertyInfo propInfo in propertyInfos)
+            {
+                IEdmProperty edmProperty;
+                if (_properties.TryGetValue(propInfo, out edmProperty))
+                {
+                    edmProperties.Add(edmProperty);
+                }
+                else
+                {
+                    Contract.Assert(propInfo.ReflectedType != null);
+                    Type baseType = propInfo.ReflectedType.BaseType;
+                    while (baseType != null)
+                    {
+                        PropertyInfo basePropInfo = baseType.GetProperty(propInfo.Name);
+                        if (_properties.TryGetValue(basePropInfo, out edmProperty))
+                        {
+                            edmProperties.Add(edmProperty);
+                            break;
+                        }
+
+                        baseType = baseType.BaseType;
+                    }
+
+                    Contract.Assert(baseType != null);
+                }
+            }
+
+            return edmProperties.OfType<IEdmStructuralProperty>().ToList();
         }
 
         private void CreateEnumTypeBody(EdmEnumType type, EnumTypeConfiguration config)

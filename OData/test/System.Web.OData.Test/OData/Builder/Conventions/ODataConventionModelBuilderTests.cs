@@ -2281,13 +2281,65 @@ namespace System.Web.OData.Builder.Conventions
 
             // Assert
             Assert.NotNull(model);
-            IEdmEntityType orderType = model.AssertHasEntityType(typeof(ForeignKeyCategory));
+            IEdmEntityType categoryType = model.AssertHasEntityType(typeof(ForeignKeyCategory));
 
-            IEdmNavigationProperty navigation = orderType.AssertHasNavigationProperty(model, "Customer",
+            IEdmNavigationProperty navigation = categoryType.AssertHasNavigationProperty(model, "Customer",
                 typeof(ForeignKeyCustomer), true, EdmMultiplicity.ZeroOrOne);
 
             IEdmStructuralProperty dependentProperty = Assert.Single(navigation.DependentProperties());
             Assert.Equal("ForeignKeyCustomerId", dependentProperty.Name);
+
+            IEdmStructuralProperty principalProperty = Assert.Single(navigation.PrincipalProperties());
+            Assert.Equal("Id", principalProperty.Name);
+        }
+
+        [Theory]
+        [InlineData(typeof(ForeignKeyCustomer))]
+        [InlineData(typeof(ForeignKeyVipCustomer))]
+        public void ODataConventionModelBuilder_ForeignKeyAttribute_WorksOnNavigationProperty_PrincipalOnBaseType(Type entityType)
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntityType(entityType);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType orderType = model.AssertHasEntityType(typeof(ForeignKeyVipOrder));
+
+            IEdmNavigationProperty navigation = orderType.AssertHasNavigationProperty(model, "VipCustomer",
+                typeof(ForeignKeyVipCustomer), true, EdmMultiplicity.ZeroOrOne);
+
+            IEdmStructuralProperty dependentProperty = Assert.Single(navigation.DependentProperties());
+            Assert.Equal("CustomerId", dependentProperty.Name);
+
+            IEdmStructuralProperty principalProperty = Assert.Single(navigation.PrincipalProperties());
+            Assert.Equal("Id", principalProperty.Name);
+        }
+
+        [Theory]
+        [InlineData(typeof(ForeignKeyCustomer))]
+        [InlineData(typeof(ForeignKeyVipCustomer))]
+        public void ODataConventionModelBuilder_ForeignKeyDiscovery_WorksOnNavigationProperty_PrincipalOnBaseType(Type entityType)
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntityType(entityType);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType categoryType = model.AssertHasEntityType(typeof(ForeignKeyVipCatogory));
+
+            IEdmNavigationProperty navigation = categoryType.AssertHasNavigationProperty(model, "VipCustomer",
+                typeof(ForeignKeyVipCustomer), true, EdmMultiplicity.ZeroOrOne);
+
+            IEdmStructuralProperty dependentProperty = Assert.Single(navigation.DependentProperties());
+            Assert.Equal("ForeignKeyVipCustomerId", dependentProperty.Name);
 
             IEdmStructuralProperty principalProperty = Assert.Single(navigation.PrincipalProperties());
             Assert.Equal("Id", principalProperty.Name);
@@ -2749,5 +2801,31 @@ namespace System.Web.OData.Builder.Conventions
         public int ForeignKeyCustomerId { get; set; }
 
         public ForeignKeyCustomer Customer { get; set; }
+    }
+
+    public class ForeignKeyVipCustomer : ForeignKeyCustomer
+    {
+        public IList<ForeignKeyVipOrder> VipOrders { get; set; }
+
+        public IList<ForeignKeyVipCatogory> VipCategories { get; set; }
+    }
+
+    public class ForeignKeyVipOrder
+    {
+        public int Id { get; set; }
+
+        public int CustomerId { get; set; }
+
+        [ForeignKey("CustomerId")]
+        public ForeignKeyVipCustomer VipCustomer { get; set; }
+    }
+
+    public class ForeignKeyVipCatogory
+    {
+        public int Id { get; set; }
+
+        public int ForeignKeyVipCustomerId { get; set; }
+
+        public ForeignKeyVipCustomer VipCustomer { get; set; }
     }
 }

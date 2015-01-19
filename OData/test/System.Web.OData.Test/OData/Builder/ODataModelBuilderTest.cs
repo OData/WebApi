@@ -759,5 +759,46 @@ namespace System.Web.OData.Builder
 
             public ForeignPrincipal Principal { get; set; }
         }
+
+        [Fact]
+        public void CanSetBasePrincipalProperty_ForReferencialConstraint()
+        {
+            // Arrange
+            PropertyInfo expectPrincipalPropertyInfo = typeof(DerivedPrincipal).GetProperty("PrincipalId");
+            PropertyInfo expectDependentPropertyInfo = typeof(DependentEntity).GetProperty("PrincipalKey");
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act
+            NavigationPropertyConfiguration navigationProperty =
+                builder.EntityType<DependentEntity>().HasRequired(d => d.Principal, (d, p) => d.PrincipalKey == p.PrincipalId);
+
+            // Assert
+            PropertyInfo actualPropertyInfo = Assert.Single(navigationProperty.DependentProperties);
+            Assert.Same(expectDependentPropertyInfo, actualPropertyInfo);
+
+            actualPropertyInfo = Assert.Single(navigationProperty.PrincipalProperties);
+            Assert.NotSame(expectPrincipalPropertyInfo, actualPropertyInfo);
+
+            Assert.Same(typeof(BasePrincipal).GetProperty("PrincipalId"), actualPropertyInfo);
+        }
+
+        class BasePrincipal
+        {
+            public int PrincipalId { get; set; }
+        }
+
+        class DerivedPrincipal : BasePrincipal
+        {
+            public string Name { get; set; }
+        }
+
+        class DependentEntity
+        {
+            public string Id { get; set; }
+
+            public int PrincipalKey { get; set; }
+
+            public DerivedPrincipal Principal { get; set; }
+        }
     }
 }

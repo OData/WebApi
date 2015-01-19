@@ -276,7 +276,7 @@ namespace System.Web.Http.OData.Builder
                 .FirstOrDefault(e => e.ClrType == navProperty.RelatedClrType);
             Contract.Assert(principalEntity != null);
 
-            int keyCount = principalEntity.Keys.Count();
+            int keyCount = principalEntity.Keys().Count();
             if (keyCount != navProperty.PrincipalProperties.Count())
             {
                 throw Error.InvalidOperation(SRResources.DependentPropertiesNotMatchWithPrincipalKeys,
@@ -288,10 +288,11 @@ namespace System.Web.Http.OData.Builder
             // The property references for the principal entity MUST be the same property references specified
             // in the edm:Key of the principal entity type.
             IList<IEdmStructuralProperty> dependentProperties = new List<IEdmStructuralProperty>();
-            foreach (PrimitivePropertyConfiguration key in principalEntity.Keys)
+            foreach (PropertyConfiguration key in principalEntity.Keys())
             {
                 PropertyInfo dependent =
-                    navProperty.ReferentialConstraint.FirstOrDefault(r => r.Value == key.PropertyInfo).Key;
+                    navProperty.ReferentialConstraint.FirstOrDefault(r => r.Value.PropertyType == key.PropertyInfo.PropertyType &&
+                        r.Value.Name == key.PropertyInfo.Name).Key;
 
                 if (dependent != null)
                 {

@@ -1341,7 +1341,53 @@ namespace System.Web.Http.OData.Builder.Conventions
             Assert.False(dependentProperty.Type.IsNullable);
         }
 
-        class ForeignKeyCustomer
+        [Theory]
+        [InlineData(typeof(ForeignKeyCustomer))]
+        [InlineData(typeof(ForeignKeyVipCustomer))]
+        public void ODataConventionModelBuilder_ForeignKeyAttribute_WorksOnNavigationProperty_PrincipalOnBaseType(Type entityType)
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntity(entityType);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType orderType = model.AssertHasEntityType(typeof(ForeignKeyVipOrder));
+
+            IEdmNavigationProperty navigation = orderType.AssertHasNavigationProperty(model, "VipCustomer",
+                typeof(ForeignKeyVipCustomer), true, EdmMultiplicity.ZeroOrOne);
+
+            IEdmStructuralProperty dependentProperty = Assert.Single(navigation.DependentProperties);
+            Assert.Equal("CustomerId", dependentProperty.Name);
+        }
+
+        [Theory]
+        [InlineData(typeof(ForeignKeyCustomer))]
+        [InlineData(typeof(ForeignKeyVipCustomer))]
+        public void ODataConventionModelBuilder_ForeignKeyDiscovery_WorksOnNavigationProperty_PrincipalOnBaseType(Type entityType)
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntity(entityType);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType categoryType = model.AssertHasEntityType(typeof(ForeignKeyVipCatogory));
+
+            IEdmNavigationProperty navigation = categoryType.AssertHasNavigationProperty(model, "VipCustomer",
+                typeof(ForeignKeyVipCustomer), true, EdmMultiplicity.ZeroOrOne);
+
+            IEdmStructuralProperty dependentProperty = Assert.Single(navigation.DependentProperties);
+            Assert.Equal("ForeignKeyVipCustomerId", dependentProperty.Name);
+        }
+
+        public class ForeignKeyCustomer
         {
             public int Id { get; set; }
 
@@ -1352,7 +1398,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             public IList<ForeignKeyProduct> Products { get; set; }
         }
 
-        class ForeignKeyOrder
+        public class ForeignKeyOrder
         {
             public int ForeignKeyOrderId { get; set; }
 
@@ -1362,7 +1408,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             public ForeignKeyCustomer OrderCustomer { get; set; }
         }
 
-        class ForeignKeyCategory
+        public class ForeignKeyCategory
         {
             public int Id { get; set; }
 
@@ -1372,7 +1418,7 @@ namespace System.Web.Http.OData.Builder.Conventions
             public ForeignKeyCustomer CategoryCustomer { get; set; }
         }
 
-        class ForeignKeyProduct
+        public class ForeignKeyProduct
         {
             public int Id { get; set; }
 
@@ -1380,6 +1426,32 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             [Required]
             public ForeignKeyCustomer ProductCustomer { get; set; }
+        }
+
+        public class ForeignKeyVipCustomer : ForeignKeyCustomer
+        {
+            public IList<ForeignKeyVipOrder> VipOrders { get; set; }
+
+            public IList<ForeignKeyVipCatogory> VipCategories { get; set; }
+        }
+
+        public class ForeignKeyVipOrder
+        {
+            public int Id { get; set; }
+
+            public int CustomerId { get; set; }
+
+            [ForeignKey("CustomerId")]
+            public ForeignKeyVipCustomer VipCustomer { get; set; }
+        }
+
+        public class ForeignKeyVipCatogory
+        {
+            public int Id { get; set; }
+
+            public int ForeignKeyVipCustomerId { get; set; }
+
+            public ForeignKeyVipCustomer VipCustomer { get; set; }
         }
     }
 

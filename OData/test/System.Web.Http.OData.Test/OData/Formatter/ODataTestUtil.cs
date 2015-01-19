@@ -190,4 +190,23 @@ namespace System.Web.Http.OData.Formatter
         [ConcurrencyCheck]
         public string Name { get; set; }
     }
+
+    public class BasePrincipalEntity
+    {
+        public int Id { get; set; }
+    }
+
+    public class DerivedPrincipalEntity : BasePrincipalEntity
+    {
+        public string Name { get; set; }
+    }
+
+    public class DependentEntity
+    {
+        [Key]
+        public int MyId { get; set; }
+
+        public int DerivedPrincipalEntityId { get; set; }
+        public DerivedPrincipalEntity DerivedProp { get; set; }
+    }
 }

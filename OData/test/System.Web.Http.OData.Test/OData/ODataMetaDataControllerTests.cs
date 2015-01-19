@@ -241,6 +241,46 @@ namespace System.Web.Http.OData.Builder
             Assert.Contains(expect, response.Content.ReadAsStringAsync().Result);
         }
 
+        [Theory]
+        [InlineData(typeof(BasePrincipalEntity))]
+        [InlineData(typeof(DerivedPrincipalEntity))]
+        public void DollarMetadata_Works_WithPrincipalKeyOnBaseType_ButBaseTypeNotInEdmModel(Type entityType)
+        {
+            // Arrange
+            const string expect =
+               "      <Association Name=\"System_Web_Http_OData_Formatter_DependentEntity_DerivedProp_System_Web_Http_OData_Formatter_DerivedPrincipalEntity_DerivedPropPartner\">\r\n" +
+               "        <End Type=\"System.Web.Http.OData.Formatter.DerivedPrincipalEntity\" Role=\"DerivedProp\" Multiplicity=\"0..1\" />\r\n" +
+               "        <End Type=\"System.Web.Http.OData.Formatter.DependentEntity\" Role=\"DerivedPropPartner\" Multiplicity=\"0..1\" />\r\n" +
+               "        <ReferentialConstraint>\r\n" +
+               "          <Principal Role=\"DerivedProp\">\r\n" +
+               "            <PropertyRef Name=\"Id\" />\r\n" +
+               "          </Principal>\r\n" +
+               "          <Dependent Role=\"DerivedPropPartner\">\r\n" +
+               "            <PropertyRef Name=\"DerivedPrincipalEntityId\" />\r\n" +
+               "          </Dependent>\r\n" +
+               "        </ReferentialConstraint>\r\n" +
+               "      </Association>";
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntity(entityType);
+            builder.Entity<DependentEntity>();
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpServer server = new HttpServer();
+            server.Configuration.Routes.MapODataServiceRoute("odata", "odata", model);
+
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+
+            Assert.Contains(expect, response.Content.ReadAsStringAsync().Result);
+        }
+
         [Fact]
         public void DollarMetadata_Works_WithMultipleReferentialConstraints_ForUntypedModel()
         {

@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Data.Linq;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -23,6 +24,45 @@ namespace System.Web.Http.OData.Query.Expressions
         private static readonly Uri _serviceBaseUri = new Uri("http://server/service/");
 
         private static Dictionary<Type, IEdmModel> _modelCache = new Dictionary<Type, IEdmModel>();
+
+        public static TheoryDataSet<decimal?, bool, object> MathRoundDecimal_DataSet
+        {
+            get
+            {
+                return new TheoryDataSet<decimal?, bool, object>
+                {
+                    { null, false, typeof(InvalidOperationException) },
+                    { 5.9m, true, true },
+                    { 5.4m, false, false },
+                };
+            }
+        }
+
+        public static TheoryDataSet<decimal?, bool, object> MathFloorDecimal_DataSet
+        {
+            get
+            {
+                return new TheoryDataSet<decimal?, bool, object>
+                {
+                    { null, false, typeof(InvalidOperationException) },
+                    { 5.4m, true, true },
+                    { 4.4m, false, false },
+                };
+            }
+        }
+
+        public static TheoryDataSet<decimal?, bool, object> MathCeilingDecimal_DataSet
+        {
+            get
+            {
+                return new TheoryDataSet<decimal?, bool, object>
+                {
+                    { null, false, typeof(InvalidOperationException) },
+                    { 4.1m, true, true },
+                    { 5.9m, false, false },
+                };
+            }
+        }
 
         #region Inequalities
         [Theory]
@@ -1074,14 +1114,12 @@ namespace System.Web.Http.OData.Query.Expressions
 
         #region Math Functions
         [Theory]
-        [InlineData(null, false, typeof(InvalidOperationException))]
-        [InlineData(5.9, true, true)]
-        [InlineData(5.4, false, false)]
-        public void MathRound(object unitPrice, bool withNullPropagation, object withoutNullPropagation)
+        [PropertyData("MathRoundDecimal_DataSet")]
+        public void MathRoundDecimal(decimal? unitPrice, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
                 "round(UnitPrice) gt 5.00m",
-                Error.Format("$it => ($it.UnitPrice.Value.Round() > {0:0.00})", 5.0),
+                String.Format(CultureInfo.InvariantCulture, "$it => ($it.UnitPrice.Value.Round() > {0:0.00})", 5.0),
                 NotTesting);
 
             RunFilters(filters,
@@ -1091,13 +1129,43 @@ namespace System.Web.Http.OData.Query.Expressions
 
         [Theory]
         [InlineData(null, false, typeof(InvalidOperationException))]
-        [InlineData(5.4, true, true)]
-        [InlineData(4.4, false, false)]
-        public void MathFloor(object unitPrice, bool withNullPropagation, object withoutNullPropagation)
+        [InlineData(5.9d, true, true)]
+        [InlineData(5.4d, false, false)]
+        public void MathRoundDouble(double? weight, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "floor(UnitPrice) eq 5m",
-                "$it => ($it.UnitPrice.Value.Floor() == 5)",
+                "round(Weight) gt 5d",
+                String.Format(CultureInfo.InvariantCulture, "$it => ($it.Weight.Value.Round() > {0})", 5),
+                NotTesting);
+
+            RunFilters(filters,
+               new Product { Weight = ToNullable<double>(weight) },
+               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [InlineData(null, false, typeof(InvalidOperationException))]
+        [InlineData(5.9f, true, true)]
+        [InlineData(5.4f, false, false)]
+        public void MathRoundFloat(float? width, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "round(Width) gt 5f",
+                String.Format(CultureInfo.InvariantCulture, "$it => (Convert($it.Width).Value.Round() > Convert({0}))", 5),
+                NotTesting);
+
+            RunFilters(filters,
+               new Product { Width = ToNullable<float>(width) },
+               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [PropertyData("MathFloorDecimal_DataSet")]
+        public void MathFloorDecimal(decimal? unitPrice, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "floor(UnitPrice) eq 5",
+                "$it => ($it.UnitPrice.Value.Floor() == Convert(5))",
                 NotTesting);
 
             RunFilters(filters,
@@ -1107,17 +1175,79 @@ namespace System.Web.Http.OData.Query.Expressions
 
         [Theory]
         [InlineData(null, false, typeof(InvalidOperationException))]
-        [InlineData(4.1, true, true)]
-        [InlineData(5.9, false, false)]
-        public void MathCeiling(object unitPrice, bool withNullPropagation, object withoutNullPropagation)
+        [InlineData(5.4d, true, true)]
+        [InlineData(4.4d, false, false)]
+        public void MathFloorDouble(double? weight, bool withNullPropagation, object withoutNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
-                "ceiling(UnitPrice) eq 5m",
-                "$it => ($it.UnitPrice.Value.Ceiling() == 5)",
+                "floor(Weight) eq 5",
+                "$it => ($it.Weight.Value.Floor() == Convert(5))",
+                NotTesting);
+
+            RunFilters(filters,
+               new Product { Weight = ToNullable<double>(weight) },
+               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [InlineData(null, false, typeof(InvalidOperationException))]
+        [InlineData(5.4f, true, true)]
+        [InlineData(4.4f, false, false)]
+        public void MathFloorFloat(float? width, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "floor(Width) eq 5",
+                "$it => (Convert($it.Width).Value.Floor() == Convert(5))",
+                NotTesting);
+
+            RunFilters(filters,
+               new Product { Width = ToNullable<float>(width) },
+               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [PropertyData("MathCeilingDecimal_DataSet")]
+        public void MathCeilingDecimal(object unitPrice, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "ceiling(UnitPrice) eq 5",
+                "$it => ($it.UnitPrice.Value.Ceiling() == Convert(5))",
                 NotTesting);
 
             RunFilters(filters,
                new Product { UnitPrice = ToNullable<decimal>(unitPrice) },
+               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [InlineData(null, false, typeof(InvalidOperationException))]
+        [InlineData(4.1d, true, true)]
+        [InlineData(5.9d, false, false)]
+        public void MathCeilingDouble(double? weight, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "ceiling(Weight) eq 5",
+                "$it => ($it.Weight.Value.Ceiling() == Convert(5))",
+                NotTesting);
+
+            RunFilters(filters,
+               new Product { Weight = ToNullable<double>(weight) },
+               new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [InlineData(null, false, typeof(InvalidOperationException))]
+        [InlineData(4.1f, true, true)]
+        [InlineData(5.9f, false, false)]
+        public void MathCeilingFloat(float? width, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "ceiling(Width) eq 5",
+                "$it => (Convert($it.Width).Value.Ceiling() == Convert(5))",
+                NotTesting);
+
+            RunFilters(filters,
+               new Product { Width = ToNullable<float>(width) },
                new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
         }
 

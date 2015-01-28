@@ -662,6 +662,31 @@ namespace System.Web.OData.Query
         }
 
         [Theory]
+        [PropertyData("EnumModelTestFilters")]
+        public void ApplyToEnums_ReturnsCorrectQueryabl_IfEnableConstantParameterizationSetFalse(string filter, int[] enumModelIds)
+        {
+            // Arrange
+            var model = GetEnumModel();
+            var context = new ODataQueryContext(model, typeof(EnumModel));
+            var filterOption = new FilterQueryOption(filter, context);
+            IEnumerable<EnumModel> enumModels = EnumModelTestData;
+
+            // Act
+            IQueryable queryable = filterOption.ApplyTo(enumModels.AsQueryable(),
+                new ODataQuerySettings
+                {
+                    HandleNullPropagation = HandleNullPropagationOption.True,
+                    EnableConstantParameterization = false
+                });
+
+            // Assert
+            Assert.NotNull(queryable);
+            IEnumerable<EnumModel> actualCustomers = Assert.IsAssignableFrom<IEnumerable<EnumModel>>(queryable);
+            Assert.Equal(
+                enumModelIds,
+                actualCustomers.Select(enumModel => enumModel.Id));
+        }
+        [Theory]
         [InlineData("Simple has null", typeof(ODataException))]
         [InlineData("null has Microsoft.TestCommon.Types.SimpleEnum'First'", typeof(ODataException))]
         [InlineData("Id has Microsoft.TestCommon.Types.SimpleEnum'First'", typeof(ODataException))]

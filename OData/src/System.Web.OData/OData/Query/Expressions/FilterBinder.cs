@@ -1416,12 +1416,6 @@ namespace System.Web.OData.Query.Expressions
                             parameterizedConstantValue, enumUnderlyingType, CultureInfo.InvariantCulture));
                 }
             }
-            else if (expression.NodeType == ExpressionType.Constant)
-            {
-                // only null constants are not parameterized.
-                Contract.Assert((expression as ConstantExpression).Value == null);
-                return expression;
-            }
             else if (expression.Type == enumType)
             {
                 return Expression.Convert(expression, enumUnderlyingType);
@@ -1429,6 +1423,10 @@ namespace System.Web.OData.Query.Expressions
             else if (Nullable.GetUnderlyingType(expression.Type) == enumType)
             {
                 return Expression.Convert(expression, typeof(Nullable<>).MakeGenericType(enumUnderlyingType));
+            }
+            else if (expression.NodeType == ExpressionType.Constant && ((ConstantExpression)expression).Value == null)
+            {
+                return expression;
             }
             else
             {

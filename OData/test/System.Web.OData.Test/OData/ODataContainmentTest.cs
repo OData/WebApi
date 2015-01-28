@@ -68,6 +68,26 @@ namespace System.Web.OData
                 "http://localhost/odata/$metadata#MyOrders(1)/OrderLines/System.Web.OData.Builder.TestModels.SpecialOrderLine",
                 (string)result["@odata.context"]);
         }
+
+        [Theory]
+        [InlineData("/odata/MyOrders(2)/System.Web.OData.Builder.TestModels.MySpecialOrder", "http://localhost/odata/$metadata#MyOrders/System.Web.OData.Builder.TestModels.MySpecialOrder/$entity")]
+        [InlineData("/odata/MyOrders(2)", "http://localhost/odata/$metadata#MyOrders/$entity")]
+        public void GetMyOrder_WithOrWithoutCastType_Containment(string url, string expectedContext)
+        {
+            // Arrange
+            var requestUri = BaseAddress + url;
+
+            // Act
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            var response = _client.SendAsync(request).Result;
+            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Contains(
+                expectedContext,
+                (string)result["@odata.context"]);
+        }
         
         [Fact]
         public void GetOrderLine_Containment()
@@ -439,6 +459,14 @@ namespace System.Web.OData
             public SingleResult<MyOrder> Get(int orderId)
             {
                 var result = _myOrders.AsQueryable().Where(mo => mo.ID == orderId);
+                return SingleResult.Create(result);
+            }
+
+            [EnableQuery]
+            [ODataRoute("MyOrders({orderId})/System.Web.OData.Builder.TestModels.MySpecialOrder")]
+            public SingleResult<MySpecialOrder> GetMySpecialOrder(int orderId)
+            {
+                var result = _myOrders.AsQueryable().Where(mo => mo.ID == orderId).OfType<MySpecialOrder>();
                 return SingleResult.Create(result);
             }
 

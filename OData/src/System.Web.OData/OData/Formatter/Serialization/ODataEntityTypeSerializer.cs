@@ -51,7 +51,13 @@ namespace System.Web.OData.Formatter.Serialization
                 throw new SerializationException(SRResources.NavigationSourceMissingDuringSerialization);
             }
 
-            ODataWriter writer = messageWriter.CreateODataEntryWriter(navigationSource, navigationSource.EntityType());
+            var path = writeContext.Path;
+            if (path == null)
+            {
+                throw new SerializationException(SRResources.ODataPathMissing);
+            }
+
+            ODataWriter writer = messageWriter.CreateODataEntryWriter(navigationSource, path.EdmType as IEdmEntityType);
             WriteObjectInline(graph, navigationSource.EntityType().ToEdmTypeReference(isNullable: false), writer, writeContext);
         }
 

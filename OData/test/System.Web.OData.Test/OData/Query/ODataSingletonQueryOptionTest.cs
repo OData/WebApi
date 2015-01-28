@@ -39,7 +39,7 @@ namespace System.Web.OData.Query
         {
             // Arrange
             const string expectedPayload = "{\r\n" +
-                "  \"@odata.context\":\"http://localhost/odata/$metadata#Me(Birthday)\"," +
+                "  \"@odata.context\":\"http://localhost/odata/$metadata#Me/System.Web.OData.Formatter.Serialization.Models.SpecialCustomer(Birthday)\"," +
                 "\"Birthday\":\"1991-01-12T09:03:40-00:05\"\r\n" +
                 "}";
 

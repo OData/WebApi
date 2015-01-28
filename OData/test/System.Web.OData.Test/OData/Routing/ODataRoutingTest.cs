@@ -292,6 +292,18 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
+        [InlineData("DELETE", "RoutingCustomers(1)/Products/$ref?$id=http://localhost/MyRoot/odata/SpecialProducts(5)")]
+        public async Task RoutesCorrectly_DeleteRefWithDerivedNavigationProperty(string httpMethod, string uri)
+        {
+            // Arrange & Act
+            HttpResponseMessage response = await _fixedPrefixClient.SendAsync(new HttpRequestMessage(
+                new HttpMethod(httpMethod), "http://localhost/MyRoot/odata/" + uri));
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+        }
+
+        [Theory]
         [PropertyData("ServiceAndMetadataRoutes")]
         [PropertyData("ControllerRoutes")]
         [InlineData("DELETE",

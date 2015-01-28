@@ -22,6 +22,7 @@ namespace System.Web.OData.Routing
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
             builder.EntitySet<RoutingCustomer>("RoutingCustomers");
             builder.EntitySet<Product>("Products");
+            builder.EntitySet<SpecialProduct>("SpecialProducts");
             builder.EntitySet<SalesPerson>("SalesPeople");
             builder.EntitySet<EmailAddress>("EmailAddresses");
             builder.EntitySet<üCategory>("üCategories");
@@ -276,6 +277,11 @@ namespace System.Web.OData.Routing
             public int ID { get; set; }
             public string Name { get; set; }
             public virtual List<RoutingCustomer> RoutingCustomers { get; set; }
+        }
+
+        public class SpecialProduct : Product
+        {
+            public int Value { get; set; }
         }
 
         public class SalesPerson

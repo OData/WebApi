@@ -192,7 +192,7 @@ namespace System.Web.OData.Routing
 
                     if (exceptionThrown ||
                         (entityIdSegment != null &&
-                            (id == null || lastSegmentEdmType.ElementType.Definition != id.EdmType)))
+                            (id == null || !id.EdmType.IsOrInheritsFrom(lastSegmentEdmType.ElementType.Definition))))
                     {
                         throw new ODataException(Error.Format(SRResources.InvalidDollarId, queryString.Get("$id")));
                     }

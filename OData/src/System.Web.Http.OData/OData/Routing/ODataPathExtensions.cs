@@ -26,5 +26,24 @@ namespace System.Web.Http.OData.Routing
 
             return navigationSegment.NavigationProperty;
         }
+
+        public static IEdmEntitySet GetEntitySet(this ODataPath path)
+        {
+            if (path == null)
+            {
+                throw Error.ArgumentNull("path");
+            }
+
+            Contract.Assert(path.Segments != null);
+            EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)path.Segments.FirstOrDefault(
+                s => s is EntitySetPathSegment);
+
+            if (entitySetSegment == null)
+            {
+                return null;
+            }
+
+            return entitySetSegment.EntitySet;
+        }
     }
 }

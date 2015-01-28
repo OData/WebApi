@@ -24,6 +24,11 @@ namespace System.Web.Http.OData.Routing.Conventions
         [InlineData("POST", new[] { "CreateLinkToOrders" }, "CreateLinkToOrders")]
         [InlineData("POST", new[] { "CreateLinkToOrders", "CreateLink" }, "CreateLinkToOrders")]
         [InlineData("POST", new[] { "CreateLinkToOrders", "CreateLinkToOrdersFromCustomer" }, "CreateLinkToOrdersFromCustomer")]
+        [InlineData("GET", new string[] { }, null)]
+        [InlineData("GET", new[] { "UnrelatedAction" }, null)]
+        [InlineData("GET", new[] { "GetLinkToOrders" }, "GetLinkToOrders")]
+        [InlineData("GET", new[] { "GetLinkToOrders", "GetLink" }, "GetLinkToOrders")]
+        [InlineData("GET", new[] { "GetLinkToOrders", "GetLinkToOrdersFromCustomer" }, "GetLinkToOrdersFromCustomer")]
         public void SelectAction_Returns_ExpectedMethodOnBaseType(string method, string[] methodsInController,
             string expectedSelectedAction)
         {
@@ -66,6 +71,11 @@ namespace System.Web.Http.OData.Routing.Conventions
         [InlineData("POST", new[] { "CreateLinkToSpecialOrders" }, "CreateLinkToSpecialOrders")]
         [InlineData("POST", new[] { "CreateLinkToSpecialOrders", "CreateLinkToOrders" }, "CreateLinkToSpecialOrders")]
         [InlineData("POST", new[] { "CreateLinkToSpecialOrders", "CreateLinkToSpecialOrdersFromSpecialCustomer" }, "CreateLinkToSpecialOrdersFromSpecialCustomer")]
+        [InlineData("GET", new string[] { }, null)]
+        [InlineData("GET", new[] { "UnrelatedAction" }, null)]
+        [InlineData("GET", new[] { "GetLinkToSpecialOrders" }, "GetLinkToSpecialOrders")]
+        [InlineData("GET", new[] { "GetLinkToSpecialOrders", "GetLinkToOrders" }, "GetLinkToSpecialOrders")]
+        [InlineData("GET", new[] { "GetLinkToSpecialOrders", "GetLinkToSpecialOrdersFromSpecialCustomer" }, "GetLinkToSpecialOrdersFromSpecialCustomer")]
         public void SelectAction_Returns_ExpectedMethodOnDerivedType(string method, string[] methodsInController,
             string expectedSelectedAction)
         {
@@ -136,6 +146,29 @@ namespace System.Web.Http.OData.Routing.Conventions
 
             HttpControllerContext controllerContext = CreateControllerContext("POST");
             var actionMap = new[] { GetMockActionDescriptor("CreateLink") }.ToLookup(a => a.ActionName);
+
+            // Act
+            new LinksRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            var routeData = controllerContext.RouteData;
+
+            // Assert
+            Assert.Equal(key, routeData.Values["key"]);
+            Assert.Equal("SpecialOrders", routeData.Values["navigationProperty"]);
+        }
+
+        [Fact]
+        public void SelectAction_SetsRouteData_ForGetLinkRequests()
+        {
+            // Arrange
+            string key = "42";
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
+
+            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
+                new CastPathSegment(model.SpecialCustomer), new LinksPathSegment(), new NavigationPathSegment(specialOrdersProperty));
+
+            HttpControllerContext controllerContext = CreateControllerContext("GET");
+            var actionMap = new[] { GetMockActionDescriptor("GetLink") }.ToLookup(a => a.ActionName);
 
             // Act
             new LinksRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);

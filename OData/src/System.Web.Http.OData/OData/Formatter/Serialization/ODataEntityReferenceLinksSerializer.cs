@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Web.Http.OData.Extensions;
 using System.Web.Http.OData.Properties;
 using System.Web.Http.OData.Routing;
 using Microsoft.Data.Edm;
@@ -36,15 +37,15 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            IEdmEntitySet entitySet = writeContext.EntitySet;
-            if (entitySet == null)
-            {
-                throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
-            }
-
             if (writeContext.Path == null)
             {
                 throw new SerializationException(SRResources.ODataPathMissing);
+            }
+
+            IEdmEntitySet entitySet = writeContext.Path.GetEntitySet();
+            if (entitySet == null)
+            {
+                throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
             }
 
             IEdmNavigationProperty navigationProperty = writeContext.Path.GetNavigationProperty();
@@ -68,6 +69,10 @@ namespace System.Web.Http.OData.Formatter.Serialization
                     {
                         Links = uris.Select(uri => new ODataEntityReferenceLink { Url = uri })
                     };
+                    if (writeContext.Request != null)
+                    {
+                        entityReferenceLinks.Count = writeContext.Request.ODataProperties().TotalCount;
+                    }
                 }
 
                 messageWriter.WriteEntityReferenceLinks(entityReferenceLinks, entitySet, navigationProperty);

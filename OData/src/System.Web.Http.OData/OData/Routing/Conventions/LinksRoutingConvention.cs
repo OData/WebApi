@@ -15,6 +15,7 @@ namespace System.Web.Http.OData.Routing.Conventions
     {
         private const string DeleteLinkActionNamePrefix = "DeleteLink";
         private const string CreateLinkActionNamePrefix = "CreateLink";
+        private const string GetLinkActionNamePrefix = "GetLink";
 
         /// <summary>
         /// Selects the action.
@@ -82,7 +83,11 @@ namespace System.Web.Http.OData.Routing.Conventions
             IEdmNavigationProperty navigationProperty, IEdmEntityType declaringType, HttpMethod method)
         {
             string actionNamePrefix;
-            if (method == HttpMethod.Delete)
+            if (method == HttpMethod.Get)
+            {
+                actionNamePrefix = GetLinkActionNamePrefix;
+            }
+            else if (method == HttpMethod.Delete)
             {
                 actionNamePrefix = DeleteLinkActionNamePrefix;
             }

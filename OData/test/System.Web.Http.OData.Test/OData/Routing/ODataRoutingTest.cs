@@ -50,6 +50,7 @@ namespace System.Web.Http.OData.Routing
         [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/Name", "GetName(10)")]
         [InlineData("GET", "RoutingCustomers(10)/System.Web.Http.OData.Routing.VIP/Company", "GetCompanyFromVIP(10)")]
         // links
+        [InlineData("GET", "RoutingCustomers(1)/$links/Products", "GetLink(1)(Products)")]
         [InlineData("PUT", "RoutingCustomers(1)/$links/Products", "CreateLink(1)(Products)")]
         [InlineData("POST", "RoutingCustomers(1)/$links/Products", "CreateLink(1)(Products)")]
         [InlineData("DELETE", "RoutingCustomers(1)/$links/Products", "DeleteLink(1)(Products)")]
@@ -134,6 +135,11 @@ namespace System.Web.Http.OData.Routing
         public string GetCompanyFromVIP(int key)
         {
             return String.Format(CultureInfo.InvariantCulture, "GetCompanyFromVIP({0})", key);
+        }
+
+        public string GetLink(int key, string navigationProperty)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "GetLink({0})({1})", key, navigationProperty);
         }
 
         [AcceptVerbs("POST", "PUT")]

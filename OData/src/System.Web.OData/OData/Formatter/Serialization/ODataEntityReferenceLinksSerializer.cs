@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
@@ -52,6 +53,11 @@ namespace System.Web.OData.Formatter.Serialization
                     {
                         Links = uris.Select(uri => new ODataEntityReferenceLink { Url = uri })
                     };
+
+                    if (writeContext.Request != null)
+                    {
+                        entityReferenceLinks.Count = writeContext.Request.ODataProperties().TotalCount;
+                    }
                 }
 
                 messageWriter.WriteEntityReferenceLinks(entityReferenceLinks);

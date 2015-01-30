@@ -14,7 +14,7 @@
     <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\test\TestResults\</TestResultsDirectory>
     <SkipStrongNamesExe>$(MSBuildThisFileDirectory)packages\Microsoft.Web.SkipStrongNames.1.0.0\tools\SkipStrongNames.exe</SkipStrongNamesExe>
     <SkipStrongNamesXml>$(MSBuildThisFileDirectory)tools\SkipStrongNames.xml</SkipStrongNamesXml>
-    <NuGetExe>.nuget\NuGet.exe</NuGetExe>
+    <NuGetExe>$(MSBuildThisFileDirectory).nuget\NuGet.exe</NuGetExe>
   </PropertyGroup>
 
   <ItemGroup>

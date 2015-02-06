@@ -13,3 +13,6 @@ The master branch has the following libraries:
 cd OData
 build
 ```
+
+### Contribution
+Please refer to the [CONTRIBUTION.md](https://github.com/OData/WebApi/blob/master/CONTRIBUTION.md).

@@ -28,7 +28,7 @@ namespace System.Web.OData.Query
         /// Initializes a new instance of the <see cref="SelectExpandQueryOption"/> class.
         /// </summary>
         /// <param name="select">The $select query parameter value.</param>
-        /// <param name="expand">The $select query parameter value.</param>
+        /// <param name="expand">The $expand query parameter value.</param>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information.</param>
         /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
         public SelectExpandQueryOption(string select, string expand, ODataQueryContext context,

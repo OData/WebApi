@@ -281,10 +281,7 @@ namespace System.Web.OData.Routing
         /// <returns>Translated WebApi path segment.</returns>
         public override IEnumerable<ODataPathSegment> Translate(OpenPropertySegment segment)
         {
-            throw new ODataException(Error.Format(
-                SRResources.TargetKindNotImplemented,
-                typeof(Semantic.ODataPathSegment).Name,
-                typeof(OpenPropertySegment).Name));
+            yield return new OpenPropertyPathSegment(segment.PropertyName);
         }
 
         /// <summary>

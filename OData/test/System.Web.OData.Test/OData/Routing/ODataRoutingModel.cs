@@ -304,10 +304,17 @@ namespace System.Web.OData.Routing
 
         public class SalesPerson
         {
+            public SalesPerson()
+            {
+                this.OpenProperties = new Dictionary<string, object>();
+            }
+
             public int ID { get; set; }
             public string Name { get; set; }
             public virtual List<VIP> ManagedRoutingCustomers { get; set; }
             public virtual List<ImportantProduct> ManagedProducts { get; set; }
+
+            public IDictionary<string, object> OpenProperties { get; set; }
         }
 
         public class VIP : RoutingCustomer

@@ -118,6 +118,9 @@ namespace System.Web.OData
                     { "$filter=cast(Id,Edm.String) eq '3'", "$filter=cASt(iD,Edm.String) eq '3'" },
                     { "$expand=Orders", "$expand=orDeRs" },
                     { "$expand=Orders", "$eXpAnd=OrDeRs" },
+                    { "$orderby=Title desc&$count=true", "$orderby=tiTle desc&$count=true" },
+                    { "$orderby=Title desc&$top=3&$count=true", "$orderby=tiTle desc&$top=3&$count=true" },
+                    { "$orderby=Title desc&$skip=2&$count=true", "$orderby=tiTle desc&$skip=2&$count=true" },
                 };
             }
         }
@@ -151,6 +154,29 @@ namespace System.Web.OData
 
             // Assert
             response.EnsureSuccessStatusCode();
+        }
+
+        [Theory]
+        [PropertyData("QueryOptionCaseInsensitiveCases")]
+        public void ExtensionResolver_ReturnsSameResult_ForCaseSensitiveAndCaseInsensitive(string queryOption, string caseInsensitive)
+        {
+            // Arrange
+            HttpClient caseSensitiveclient = new HttpClient(new HttpServer(GetQueryOptionConfiguration(caseInsensitive: false)));
+            HttpClient caseInsensitiveclient = new HttpClient(new HttpServer(GetQueryOptionConfiguration(caseInsensitive: true)));
+
+            // Act
+            HttpResponseMessage response = caseSensitiveclient.SendAsync(new HttpRequestMessage(
+                HttpMethod.Get, "http://localhost/query/ParserExtenstionCustomers?" + queryOption)).Result;
+            response.EnsureSuccessStatusCode(); // Guard
+            string caseSensitivePayload = response.Content.ReadAsStringAsync().Result;
+
+            response = caseInsensitiveclient.SendAsync(new HttpRequestMessage(
+                HttpMethod.Get, "http://localhost/query/ParserExtenstionCustomers?" + caseInsensitive)).Result;
+            response.EnsureSuccessStatusCode(); // Guard
+            string caseInsensitivePayload = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(caseSensitivePayload, caseInsensitivePayload);
         }
 
         private static HttpConfiguration GetQueryOptionConfiguration(bool caseInsensitive)

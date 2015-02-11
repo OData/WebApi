@@ -77,6 +77,16 @@ namespace System.Web.OData.Query
                 new Dictionary<string, string> { { "$orderby", rawValue } });
         }
 
+        internal OrderByQueryOption(OrderByQueryOption orderBy)
+        {
+            Context = orderBy.Context;
+            RawValue = orderBy.RawValue;
+            Validator = orderBy.Validator;
+            _queryOptionParser = orderBy._queryOptionParser;
+            _orderByClause = orderBy._orderByClause;
+            _orderByNodes = orderBy._orderByNodes;
+        }
+
         /// <summary>
         ///  Gets the given <see cref="ODataQueryContext"/>.
         /// </summary>

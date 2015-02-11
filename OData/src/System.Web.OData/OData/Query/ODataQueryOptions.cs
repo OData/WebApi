@@ -470,7 +470,7 @@ namespace System.Web.OData.Query
                 // Clone the given one and add the remaining properties to end, thereby making
                 // the sort stable but preserving the user's original intent for the major
                 // sort order.
-                orderBy = new OrderByQueryOption(orderBy.RawValue, context);
+                orderBy = new OrderByQueryOption(orderBy);
 
                 foreach (IEdmStructuralProperty property in propertiesToAdd)
                 {

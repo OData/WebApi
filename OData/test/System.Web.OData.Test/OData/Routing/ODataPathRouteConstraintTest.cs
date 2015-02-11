@@ -149,35 +149,6 @@ namespace System.Web.OData.Routing
             Assert.Same(_pathHandler, request.ODataProperties().PathHandler);
         }
 
-        [Fact]
-        public void Match_ReturnsFalse_IfODataPathHasNotImplementedSegment()
-        {
-            // Arrange
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://any/Customers(1)/OpenProperty");
-            HttpRouteCollection httpRouteCollection = new HttpRouteCollection();
-            httpRouteCollection.Add(_routeName, new HttpRoute());
-            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
-
-            var model = new EdmModel();
-            var customer = new EdmEntityType(
-                namespaceName: "NS",
-                name: "Customer",
-                baseType: null,
-                isAbstract: false,
-                isOpen: true);
-            customer.AddKeys(customer.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
-            model.AddElement(customer);
-            var container = new EdmEntityContainer("NS", "Container");
-            container.AddEntitySet("Customers", customer);
-            model.AddElement(container);
-
-            var values = new Dictionary<string, object>() { { "odataPath", "Customers(1)/OpenProperty" } };
-            var constraint = new ODataPathRouteConstraint(_pathHandler, model, _routeName, _conventions);
-
-            // Act & Assert
-            Assert.False(constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution));
-        }
-
         [Theory]
         [PropertyData("PrefixStrings")]
         public void Match_DeterminesExpectedServiceRoot_ForMetadata(string prefixString)

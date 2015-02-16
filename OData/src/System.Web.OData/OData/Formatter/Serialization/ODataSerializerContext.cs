@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
-using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
@@ -140,23 +139,6 @@ namespace System.Web.OData.Formatter.Serialization
             private set
             {
                 _items = value;
-            }
-        }
-
-        internal TimeZoneInfo TimeZoneInfo
-        {
-            get
-            {
-                if (Request != null)
-                {
-                    HttpConfiguration config = Request.GetConfiguration();
-                    if (config != null)
-                    {
-                        return config.GetTimeZoneInfo();
-                    }
-                }
-
-                return null;
             }
         }
 

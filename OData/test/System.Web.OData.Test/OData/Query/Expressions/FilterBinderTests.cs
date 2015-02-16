@@ -1092,15 +1092,18 @@ namespace System.Web.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("year(Birthday) eq 100", "$it => ($it.Birthday.Year == 100)")]
-        [InlineData("month(Birthday) eq 100", "$it => ($it.Birthday.Month == 100)")]
-        [InlineData("day(Birthday) eq 100", "$it => ($it.Birthday.Day == 100)")]
-        [InlineData("hour(Birthday) eq 100", "$it => ($it.Birthday.Hour == 100)")]
-        [InlineData("minute(Birthday) eq 100", "$it => ($it.Birthday.Minute == 100)")]
-        [InlineData("second(Birthday) eq 100", "$it => ($it.Birthday.Second == 100)")]
+        [InlineData("year(Birthday) eq 100", "$it => {0}.Year == 100)")]
+        [InlineData("month(Birthday) eq 100", "$it => {0}.Month == 100)")]
+        [InlineData("day(Birthday) eq 100", "$it => {0}.Day == 100)")]
+        [InlineData("hour(Birthday) eq 100", "$it => {0}.Hour == 100)")]
+        [InlineData("minute(Birthday) eq 100", "$it => {0}.Minute == 100)")]
+        [InlineData("second(Birthday) eq 100", "$it => {0}.Second == 100)")]
         public void DateTimeFunctions(string filter, string expression)
         {
-            VerifyQueryDeserialization(filter, expression);
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
+            string expect = String.Format(expression,
+                "(IIF((($it.Birthday.Kind == Utc) OrElse ($it.Birthday.Kind == Local)), new DateTimeOffset($it.Birthday.ToUniversalTime()).ToOffset(00:00:00), new DateTimeOffset($it.Birthday, UTC.GetUtcOffset($it.Birthday)).ToUniversalTime().ToOffset(00:00:00))");
+            VerifyQueryDeserialization(filter, expect);
         }
 
         [Theory]

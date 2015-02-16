@@ -152,6 +152,7 @@ namespace System.Web.OData.Formatter.Serialization
                 EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(DateTime));
             ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
             DateTime dt = new DateTime(2014, 10, 27);
+            TimeZoneInfoHelper.TimeZone = null;
 
             // Act
             ODataValue odataValue = serializer.CreateODataValue(dt, edmPrimitiveType, new ODataSerializerContext());
@@ -275,7 +276,8 @@ namespace System.Web.OData.Formatter.Serialization
         public void ConvertUnsupportedDateTime_NonStandardEdmPrimitives(DateTime graph, DateTimeOffset result)
         {
             // Arrange & Act
-            object value = ODataPrimitiveSerializer.ConvertUnsupportedDateTime(graph, timeZoneInfo: null);
+            TimeZoneInfoHelper.TimeZone = null;
+            object value = ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(graph);
 
             // Assert
             DateTimeOffset actual = Assert.IsType<DateTimeOffset>(value);
@@ -288,9 +290,10 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+            TimeZoneInfoHelper.TimeZone = tzi;
 
             // Act
-            object value = ODataPrimitiveSerializer.ConvertUnsupportedDateTime(graph, tzi);
+            object value = ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(graph);
 
             // Assert
             DateTimeOffset actual = Assert.IsType<DateTimeOffset>(value);

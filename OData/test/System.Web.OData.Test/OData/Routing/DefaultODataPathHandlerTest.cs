@@ -2026,7 +2026,6 @@ namespace System.Web.OData.Routing
             // Assert
             Assert.NotNull(odataPath);
             Assert.Equal(template, odataPath.PathTemplate);
-            Console.WriteLine(odataPath.ToString());
             Assert.Equal(expect, odataPath.ToString());
         }
 

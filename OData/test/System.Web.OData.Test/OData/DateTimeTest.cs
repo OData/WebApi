@@ -135,12 +135,46 @@ namespace System.Web.OData
             Assert.Equal(Expected, response.Content.ReadAsStringAsync().Result);
         }
 
-        [Fact]
-        public void CanFilter_OnDateTimeProperty()
+        [Theory]
+        [InlineData("UTC")] // +0:00
+        [InlineData("Pacific Standard Time")] // -8:00
+        [InlineData("China Standard Time")] // +8:00
+        public void CanFilter_OnDateTimeProperty_WithDifferentTimeZoneInfo(string timeZoneId)
+        {
+            // Arrange
+            const string uri1 = "http://localhost/odata/DateTimeModels?$filter=BirthdayB lt cast(2015-04-01T04:11:31%2B08:00,Edm.DateTimeOffset)";
+            const string uri2 = "http://localhost/odata/DateTimeModels?$filter=cast(2015-04-01T04:11:31%2B08:00,Edm.DateTimeOffset) ge BirthdayB";
+
+            var client1 = GetClient(timeZoneInfo: null);
+            var client2 = GetClient(timeZoneInfo: TimeZoneInfo.FindSystemTimeZoneById(timeZoneId));
+
+            // Act
+            var response1 = client1.GetAsync(uri1).Result;
+            var response2 = client2.GetAsync(uri2).Result;
+
+            // Assert
+            Assert.True(response1.IsSuccessStatusCode);
+            Assert.True(response2.IsSuccessStatusCode);
+
+            string payload1 = response1.Content.ReadAsStringAsync().Result;
+            string payload2 = response2.Content.ReadAsStringAsync().Result;
+            Assert.Equal(payload1, payload2);
+
+            var result = JObject.Parse(payload1);
+            Assert.Equal(2, result["value"].Count());
+            Assert.Equal(DateTimeOffset.Parse("2016-01-01T04:12:30+08:00"), result["value"][0]["BirthdayA"]);
+            Assert.Equal(DateTimeOffset.Parse("2017-01-01T04:12:30+08:00"), result["value"][1]["BirthdayA"]);
+        }
+
+        [Theory]
+        [InlineData("UTC", 5)] // +0:00
+        [InlineData("Pacific Standard Time", 5)] // -8:00
+        [InlineData("China Standard Time", 4)] // +8:00
+        public void CanFilter_OnDateTimePropertyWithBuiltInFunction(string timeZoneId, int expectId)
         {
             // Arrange
             const string Uri = "http://localhost/odata/DateTimeModels?$filter=year(BirthdayA) eq 2019";
-            HttpClient client = GetClient(timeZoneInfo: null);
+            HttpClient client = GetClient(timeZoneInfo: TimeZoneInfo.FindSystemTimeZoneById(timeZoneId));
             var request = new HttpRequestMessage(HttpMethod.Get, Uri);
 
             // Act
@@ -148,8 +182,38 @@ namespace System.Web.OData
 
             Assert.True(response.IsSuccessStatusCode);
             var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Console.WriteLine(response.Content.ReadAsStringAsync().Result);
             Assert.Single(result["value"]);
-            Assert.Equal(DateTimeOffset.Parse("2019-12-31T20:12:30Z"), result["value"][0]["BirthdayA"]);
+            Assert.Equal(expectId, result["value"][0]["Id"]);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("UTC")] // +0:00
+        [InlineData("Pacific Standard Time")] // -8:00
+        [InlineData("China Standard Time")] // +8:00
+        public void CanOrderBy_OnDateTimeProperty(string timeZoneId)
+        {
+            // Arrange
+            TimeZoneInfo tzi = String.IsNullOrEmpty(timeZoneId) ? null : TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            const string Uri = "http://localhost/odata/DateTimeModels?$orderby=BirthdayA desc";
+            HttpClient client = GetClient(timeZoneInfo: tzi);
+            var request = new HttpRequestMessage(HttpMethod.Get, Uri);
+
+            // Act
+            var response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+
+            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(5, result["value"].Count());
+
+            Assert.Equal(DateTimeOffset.Parse("2020-01-01T04:12:30+08:00"), result["value"][0]["BirthdayA"]);
+            Assert.Equal(DateTimeOffset.Parse("2019-01-01T04:12:30+08:00"), result["value"][1]["BirthdayA"]);
+            Assert.Equal(DateTimeOffset.Parse("2018-01-01T04:12:30+08:00"), result["value"][2]["BirthdayA"]);
+            Assert.Equal(DateTimeOffset.Parse("2017-01-01T04:12:30+08:00"), result["value"][3]["BirthdayA"]);
+            Assert.Equal(DateTimeOffset.Parse("2016-01-01T04:12:30+08:00"), result["value"][4]["BirthdayA"]);
         }
 
         [Fact]
@@ -259,6 +323,10 @@ namespace System.Web.OData
             if (timeZoneInfo != null)
             {
                 config.SetTimeZoneInfo(timeZoneInfo);
+            }
+            else
+            {
+                config.SetTimeZoneInfo(TimeZoneInfo.Local);
             }
 
             config.MapODataServiceRoute("odata", "odata", GetEdmModel());

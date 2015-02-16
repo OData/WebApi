@@ -50,8 +50,8 @@ namespace System.Web.OData.Formatter
         [PropertyData("ConvertPrimitiveValue_NonStandardPrimitives_Data")]
         public void ConvertPrimitiveValue_NonStandardPrimitives(object valueToConvert, object result, Type conversionType)
         {
-            Assert.Equal(result.GetType(), EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, conversionType, timeZoneInfo: null).GetType());
-            Assert.Equal(result.ToString(), EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, conversionType, timeZoneInfo: null).ToString());
+            Assert.Equal(result.GetType(), EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, conversionType).GetType());
+            Assert.Equal(result.ToString(), EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, conversionType).ToString());
         }
 
         [Theory]
@@ -59,7 +59,8 @@ namespace System.Web.OData.Formatter
         public void ConvertDateTimeValue_NonStandardPrimitives_DefaultTimeZoneInfo(DateTimeOffset valueToConvert)
         {
             // Arrange & Act
-            object actual = EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, typeof(DateTime), timeZoneInfo: null);
+            TimeZoneInfoHelper.TimeZone = null;
+            object actual = EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, typeof(DateTime));
 
             // Assert
             DateTime dt = Assert.IsType<DateTime>(actual);
@@ -71,8 +72,8 @@ namespace System.Web.OData.Formatter
         public void ConvertDateTimeValue_NonStandardPrimitives_CustomTimeZoneInfo(DateTimeOffset valueToConvert)
         {
             // Arrange & Act
-            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
-            object actual = EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, typeof(DateTime), tzi);
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+            object actual = EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, typeof(DateTime));
 
             // Assert
             DateTime dt = Assert.IsType<DateTime>(actual);
@@ -85,7 +86,7 @@ namespace System.Web.OData.Formatter
         public void ConvertPrimitiveValueToChar_Throws(string input)
         {
             Assert.Throws<ValidationException>(
-                () => EdmPrimitiveHelpers.ConvertPrimitiveValue(input, typeof(char), timeZoneInfo: null),
+                () => EdmPrimitiveHelpers.ConvertPrimitiveValue(input, typeof(char)),
                 "The value must be a string with a length of 1.");
         }
 
@@ -93,7 +94,7 @@ namespace System.Web.OData.Formatter
         public void ConvertPrimitiveValueToNullableChar_Throws()
         {
             Assert.Throws<ValidationException>(
-                () => EdmPrimitiveHelpers.ConvertPrimitiveValue("123", typeof(char?), timeZoneInfo: null),
+                () => EdmPrimitiveHelpers.ConvertPrimitiveValue("123", typeof(char?)),
                 "The value must be a string with a maximum length of 1.");
         }
 
@@ -101,7 +102,7 @@ namespace System.Web.OData.Formatter
         public void ConvertPrimitiveValueToXElement_Throws_IfInputIsNotString()
         {
             Assert.Throws<ValidationException>(
-                () => EdmPrimitiveHelpers.ConvertPrimitiveValue(123, typeof(XElement), timeZoneInfo: null),
+                () => EdmPrimitiveHelpers.ConvertPrimitiveValue(123, typeof(XElement)),
                 "The value must be a string.");
         }
     }

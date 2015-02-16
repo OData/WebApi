@@ -109,17 +109,7 @@ namespace System.Web.OData.Formatter.Serialization
                 return null;
             }
 
-            object supportedValue;
-            if (value is DateTime)
-            {
-                supportedValue = ConvertUnsupportedDateTime((DateTime)value,
-                    writeContext != null ? writeContext.TimeZoneInfo : null);
-            }
-            else
-            {
-                supportedValue = ConvertUnsupportedPrimitives(value);
-            }
-
+            object supportedValue = ConvertUnsupportedPrimitives(value);
             ODataPrimitiveValue primitive = new ODataPrimitiveValue(supportedValue);
 
             if (writeContext != null)
@@ -151,6 +141,17 @@ namespace System.Web.OData.Formatter.Serialization
                     case TypeCode.UInt64:
                         return checked((long)(ulong)value);
 
+                    case TypeCode.DateTime:
+                        DateTime dateTime = (DateTime)value;
+                        TimeZoneInfo timeZone = TimeZoneInfoHelper.TimeZone;
+                        if (dateTime.Kind == DateTimeKind.Utc || dateTime.Kind == DateTimeKind.Local)
+                        {
+                            return new DateTimeOffset(dateTime.ToUniversalTime()).ToOffset(timeZone.BaseUtcOffset);
+                        }
+
+                        DateTimeOffset dateTimeOffset = new DateTimeOffset(dateTime, timeZone.GetUtcOffset(dateTime));
+                        return dateTimeOffset.ToUniversalTime().ToOffset(timeZone.BaseUtcOffset);
+
                     default:
                         if (type == typeof(char[]))
                         {
@@ -169,22 +170,6 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             return value;
-        }
-
-        internal static DateTimeOffset ConvertUnsupportedDateTime(DateTime value, TimeZoneInfo timeZoneInfo)
-        {
-            if (timeZoneInfo == null)
-            {
-                timeZoneInfo = TimeZoneInfo.Local;
-            }
-
-            if (value.Kind == DateTimeKind.Utc || value.Kind == DateTimeKind.Local)
-            {
-                return new DateTimeOffset(value.ToUniversalTime()).ToOffset(timeZoneInfo.BaseUtcOffset);
-            }
-
-            DateTimeOffset dateTimeOffset = new DateTimeOffset(value, timeZoneInfo.GetUtcOffset(value));
-            return dateTimeOffset.ToUniversalTime().ToOffset(timeZoneInfo.BaseUtcOffset);
         }
 
         internal static bool CanTypeBeInferredInJson(object value)

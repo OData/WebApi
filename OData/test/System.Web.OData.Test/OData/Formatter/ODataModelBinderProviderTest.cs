@@ -153,10 +153,11 @@ namespace System.Web.OData.Formatter
         [Fact]
         public void ODataModelBinderProvider_Works_DateTime()
         {
+            TimeZoneInfoHelper.TimeZone = null;
             DateTime value = new DateTime(2014, 11, 5, 0, 0, 0, DateTimeKind.Local);
             string url = String.Format(
                 "http://localhost/ODataModelBinderProviderTest/GetDateTime({0})",
-                Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForDateTime(value, timeZoneInfo: null)));
+                Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForValue(value)));
             HttpResponseMessage response = _client.GetAsync(url).Result;
             response.EnsureSuccessStatusCode();
             Assert.Equal(

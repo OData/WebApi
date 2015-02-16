@@ -147,12 +147,6 @@ namespace System.Web.OData.Builder.Conventions
             return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4);
         }
 
-        public static string GetUriRepresentationForDateTime(DateTime dateTime, TimeZoneInfo timeZoneInfo)
-        {
-            object value = ODataPrimitiveSerializer.ConvertUnsupportedDateTime(dateTime, timeZoneInfo);
-            return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4);
-        }
-
         private static string GetUriRepresentationForKeyValue(IEdmProperty key, EntityInstanceContext entityInstanceContext)
         {
             Contract.Assert(key != null);
@@ -163,11 +157,6 @@ namespace System.Web.OData.Builder.Conventions
             {
                 IEdmTypeReference edmType = entityInstanceContext.EdmObject.GetEdmType();
                 throw Error.InvalidOperation(SRResources.KeyValueCannotBeNull, key.Name, edmType.Definition);
-            }
-
-            if (value is DateTime)
-            {
-                return GetUriRepresentationForDateTime((DateTime)value, entityInstanceContext.TimeZoneInfo);
             }
 
             return GetUriRepresentationForValue(value);

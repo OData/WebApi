@@ -38,6 +38,9 @@ namespace System.Web.OData.Query.Expressions
         private static readonly Expression _zeroConstant = Expression.Constant(0);
         private static readonly Expression _ordinalStringComparisonConstant = Expression.Constant(StringComparison.Ordinal);
 
+        private readonly Expression _utcKind = Expression.Constant(DateTimeKind.Utc, typeof(DateTimeKind));
+        private readonly Expression _localKind = Expression.Constant(DateTimeKind.Local, typeof(DateTimeKind));
+
         private static readonly MethodInfo _enumTryParseMethod = typeof(Enum).GetMethods()
                         .Single(m => m.Name == "TryParse" && m.GetParameters().Length == 2);
 
@@ -658,18 +661,23 @@ namespace System.Web.OData.Query.Expressions
                 // only null propagation generates conditional expressions
                 if (expression.NodeType == ExpressionType.Conditional)
                 {
-                    expression = (expression as ConditionalExpression).IfFalse;
-                    Contract.Assert(expression != null);
-
-                    if (expression.NodeType == ExpressionType.Convert)
+                    // make sure to skip the DateTime IFF clause
+                    ConditionalExpression conditionalExpr = (ConditionalExpression)expression;
+                    if (conditionalExpr.Test.NodeType != ExpressionType.OrElse)
                     {
-                        UnaryExpression unaryExpression = expression as UnaryExpression;
-                        Contract.Assert(unaryExpression != null);
+                        expression = conditionalExpr.IfFalse;
+                        Contract.Assert(expression != null);
 
-                        if (Nullable.GetUnderlyingType(unaryExpression.Type) == unaryExpression.Operand.Type)
+                        if (expression.NodeType == ExpressionType.Convert)
                         {
-                            // this is a cast from T to Nullable<T> which is redundant.
-                            expression = unaryExpression.Operand;
+                            UnaryExpression unaryExpression = expression as UnaryExpression;
+                            Contract.Assert(unaryExpression != null);
+
+                            if (Nullable.GetUnderlyingType(unaryExpression.Type) == unaryExpression.Operand.Type)
+                            {
+                                // this is a cast from T to Nullable<T> which is redundant.
+                                expression = unaryExpression.Operand;
+                            }
                         }
                     }
                 }
@@ -1252,7 +1260,7 @@ namespace System.Web.OData.Query.Expressions
                             break;
 
                         case TypeCode.DateTime:
-                            convertedExpression = source;
+                            convertedExpression = ConvertDateTimeType(source);
                             break;
 
                         case TypeCode.Object:
@@ -1291,6 +1299,53 @@ namespace System.Web.OData.Query.Expressions
             }
 
             return source;
+        }
+
+        // Convert DateTime expression to DateTimeOffset expression with the TimeZone setting.
+        private Expression ConvertDateTimeType(Expression source)
+        {
+            Expression expression = ExtractValueFromNullableExpression(source);
+
+            Expression baseUtcOffset = Expression.Constant(TimeZoneInfoHelper.TimeZone.BaseUtcOffset, typeof(TimeSpan));
+
+            // $it.DateTime.ToUniversalTime()
+            Expression universalTimeCall = MakeFunctionCall(ClrCanonicalFunctions.ToUniversalTimeDateTime, expression);
+
+            Expression newDateTimeOffset = Expression.New(typeof(DateTimeOffset).GetConstructor(new[] { typeof(DateTime) }),
+                universalTimeCall);
+
+            // Call DateTimeOffset.ToOffset(TimeSpan)
+            Expression newDateTimeOffsetWithTimeZone = MakeFunctionCall(ClrCanonicalFunctions.ToOffsetFunction, newDateTimeOffset,
+                baseUtcOffset);
+
+            // Call TimeZoneInfo.GetUtcOffset(DateTime)
+            Expression timeZoneUtcOffset = MakeFunctionCall(ClrCanonicalFunctions.GetUtcOffset,
+                Expression.Constant(TimeZoneInfoHelper.TimeZone, typeof(TimeZoneInfo)), expression);
+
+            newDateTimeOffset = Expression.New(typeof(DateTimeOffset).GetConstructor(new[] { typeof(DateTime), typeof(TimeSpan) }),
+                expression, timeZoneUtcOffset);
+
+            // Call DateTimeOffset.ToUniversalTime()
+            Expression universalTimeCallOffset = MakeFunctionCall(ClrCanonicalFunctions.ToUniversalTimeDateTimeOffset, newDateTimeOffset);
+            Expression toOffsetOffset = MakeFunctionCall(ClrCanonicalFunctions.ToOffsetFunction, universalTimeCallOffset, baseUtcOffset);
+
+            return Expression.Condition(
+                test: CreateDateTimeCondition(expression),
+                ifTrue: newDateTimeOffsetWithTimeZone,
+                ifFalse: toOffsetOffset);
+        }
+
+        private Expression CreateDateTimeCondition(Expression source)
+        {
+            Contract.Assert(source.Type == typeof(DateTime));
+
+            Expression dateTimeKind = MakeFunctionCall(ClrCanonicalFunctions.DateTimeKindPropertyInfo, source);
+
+            Expression leftKind = Expression.Equal(dateTimeKind, _utcKind);
+            Expression rightKind = Expression.Equal(dateTimeKind, _localKind);
+
+            // $it.DateTime.Kind == DateTimeKind.Utc || $it.DateTime.Kind == DateTimeKind.Local
+            return Expression.OrElse(leftKind, rightKind);
         }
 
         private void EnterLambdaScope()

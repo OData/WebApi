@@ -516,7 +516,7 @@ namespace System.Web.OData.Formatter.Deserialization
             object value = deserializer.ReadInline(feed, navigationProperty.Type, readContext);
 
             string propertyName = EdmLibHelpers.GetClrPropertyName(navigationProperty, readContext.Model);
-            DeserializationHelpers.SetCollectionProperty(entityResource, navigationProperty, value, propertyName, readContext.TimeZoneInfo);
+            DeserializationHelpers.SetCollectionProperty(entityResource, navigationProperty, value, propertyName);
         }
     }
 }

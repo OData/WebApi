@@ -194,6 +194,10 @@ namespace System.Web.OData.Formatter.Deserialization
             {
                 request.GetConfiguration().SetTimeZoneInfo(timeZoneInfo);
             }
+            else
+            {
+                request.GetConfiguration().SetTimeZoneInfo(TimeZoneInfo.Local);
+            }
 
             ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
             ODataPrimitiveDeserializer deserializer = new ODataPrimitiveDeserializer();

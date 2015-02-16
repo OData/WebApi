@@ -51,7 +51,7 @@ namespace System.Web.OData
             if (_isCollection)
             {
                 DeserializationHelpers.SetCollectionProperty(entity, _property.Name, edmPropertyType: null,
-                    value: value, clearCollection: true, timeZoneInfo: null);
+                    value: value, clearCollection: true);
             }
             else
             {

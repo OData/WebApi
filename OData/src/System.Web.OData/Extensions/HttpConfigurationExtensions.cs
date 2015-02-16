@@ -163,6 +163,7 @@ namespace System.Web.OData.Extensions
             }
 
             configuration.Properties[TimeZoneInfoKey] = timeZoneInfo;
+            TimeZoneInfoHelper.TimeZone = timeZoneInfo;
         }
 
         /// <summary>

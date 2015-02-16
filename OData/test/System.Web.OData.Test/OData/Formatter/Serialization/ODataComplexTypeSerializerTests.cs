@@ -40,6 +40,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             _serializer = new ODataComplexTypeSerializer(serializerProvider);
+            TimeZoneInfoHelper.TimeZone = null;
         }
 
         [Fact]

@@ -104,6 +104,13 @@ namespace System.Web.OData.Query.Expressions
         // String Properties
         public static readonly PropertyInfo Length = typeof(string).GetProperty("Length");
 
+        // PropertyInfo and MethodInfo of DateTime & DateTimeOffset related.
+        public static readonly PropertyInfo DateTimeKindPropertyInfo = typeof(DateTime).GetProperty("Kind");
+        public static readonly MethodInfo ToUniversalTimeDateTime = typeof(DateTime).GetMethod("ToUniversalTime", BindingFlags.Instance | BindingFlags.Public);
+        public static readonly MethodInfo ToUniversalTimeDateTimeOffset = typeof(DateTimeOffset).GetMethod("ToUniversalTime", BindingFlags.Instance | BindingFlags.Public);
+        public static readonly MethodInfo ToOffsetFunction = typeof(DateTimeOffset).GetMethod("ToOffset", BindingFlags.Instance | BindingFlags.Public);
+        public static readonly MethodInfo GetUtcOffset = typeof(TimeZoneInfo).GetMethod("GetUtcOffset", new[] { typeof(DateTime) });
+
         [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline", Justification = "Initialization is order dependent")]
         static ClrCanonicalFunctions()
         {

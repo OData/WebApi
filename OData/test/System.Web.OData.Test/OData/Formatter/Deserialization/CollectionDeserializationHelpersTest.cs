@@ -31,7 +31,7 @@ namespace System.Web.OData.Formatter.Deserialization
         [PropertyData("CopyItemsToCollectionData")]
         public void CopyItemsToCollection(IList oldCollection, IEnumerable newCollection)
         {
-            oldCollection.AddToCollection(newCollection, typeof(int), typeof(CollectionDeserializationHelpersTest), "PropertyName", newCollection.GetType(), timeZoneInfo: null);
+            oldCollection.AddToCollection(newCollection, typeof(int), typeof(CollectionDeserializationHelpersTest), "PropertyName", newCollection.GetType());
 
             Assert.Equal(
                 new[] { 1, 2, 3 },
@@ -44,7 +44,7 @@ namespace System.Web.OData.Formatter.Deserialization
             IList source = new List<SimpleEnum> { SimpleEnum.First, SimpleEnum.Second, SimpleEnum.Third };
             IEnumerable newCollection = new CustomCollectionWithAdd<SimpleEnum>();
 
-            source.AddToCollection(newCollection, typeof(SimpleEnum), typeof(CollectionDeserializationHelpersTest), "PropertyName", newCollection.GetType(), timeZoneInfo: null);
+            source.AddToCollection(newCollection, typeof(SimpleEnum), typeof(CollectionDeserializationHelpersTest), "PropertyName", newCollection.GetType());
 
             Assert.Equal(new[] { SimpleEnum.First, SimpleEnum.Second, SimpleEnum.Third }, newCollection as IEnumerable<SimpleEnum>);
         }
@@ -59,12 +59,12 @@ namespace System.Web.OData.Formatter.Deserialization
 
             IEnumerable<DateTime> expect =
                 source.Select(e => e.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime);
-
+            TimeZoneInfoHelper.TimeZone = null;
             IEnumerable newCollection = new CustomCollectionWithAdd<DateTime>();
 
             // Act
             source.AddToCollection(newCollection, typeof(DateTime), typeof(CollectionDeserializationHelpersTest),
-                "PropertyName", newCollection.GetType(), timeZoneInfo: null);
+                "PropertyName", newCollection.GetType());
 
             // Assert
             Assert.Equal(expect, newCollection as IEnumerable<DateTime>);
@@ -78,11 +78,11 @@ namespace System.Web.OData.Formatter.Deserialization
             DateTime dt2 = new DateTime(2014, 10, 27, 10, 20, 30, DateTimeKind.Utc);
             IList source = new List<DateTimeOffset> { new DateTimeOffset(dt1), new DateTimeOffset(dt2) };
             IEnumerable newCollection = new CustomCollectionWithAdd<DateTime>();
-            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"); // -8:00
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"); // -8:00
 
             // Act
             source.AddToCollection(newCollection, typeof(DateTime), typeof(CollectionDeserializationHelpersTest),
-                "PropertyName", newCollection.GetType(), tzi);
+                "PropertyName", newCollection.GetType());
 
             // Assert
             Assert.Equal(new[] { dt1.AddHours(-8), dt2.AddHours(-8) }, newCollection as IEnumerable<DateTime>);
@@ -100,12 +100,12 @@ namespace System.Web.OData.Formatter.Deserialization
                 dto1.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime,
                 dto2.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime
             };
-
+            TimeZoneInfoHelper.TimeZone = null;
             IEnumerable newCollection = new CustomCollectionWithAdd<DateTime>();
 
             // Act
             source.AddToCollection(newCollection, typeof(DateTime), typeof(CollectionDeserializationHelpersTest),
-                "PropertyName", newCollection.GetType(), timeZoneInfo: null);
+                "PropertyName", newCollection.GetType());
 
             // Assert
             Assert.Equal(expect, newCollection as IEnumerable<DateTime>);
@@ -120,11 +120,11 @@ namespace System.Web.OData.Formatter.Deserialization
             IList source = new List<DateTimeOffset> { dto1, dto2 };
             IEnumerable newCollection = new CustomCollectionWithAdd<DateTime>();
             IEdmModel model = new EdmModel();
-            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"); // -8:00
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"); // -8:00
 
             // Act
             source.AddToCollection(newCollection, typeof(DateTime), typeof(CollectionDeserializationHelpersTest),
-                "PropertyName", newCollection.GetType(), tzi);
+                "PropertyName", newCollection.GetType());
 
             // Assert
             Assert.Equal(new[] { new DateTime(2014, 12, 15, 9, 2, 3), new DateTime(2014, 12, 15, 19, 2, 3) },

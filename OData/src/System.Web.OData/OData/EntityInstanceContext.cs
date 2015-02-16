@@ -170,11 +170,6 @@ namespace System.Web.OData
             }
         }
 
-        internal TimeZoneInfo TimeZoneInfo
-        {
-            get { return SerializerContext.TimeZoneInfo; }
-        }
-
         /// <summary>
         /// Gets the value of the property with the given name from the <see cref="IEdmObject"/> of this instance if present; throws if the property is
         /// not present.
@@ -234,7 +229,7 @@ namespace System.Web.OData
                 {
                     if (value.GetType().IsCollection())
                     {
-                        DeserializationHelpers.SetCollectionProperty(resource, property, value, property.Name, TimeZoneInfo);
+                        DeserializationHelpers.SetCollectionProperty(resource, property, value, property.Name);
                     }
                     else
                     {

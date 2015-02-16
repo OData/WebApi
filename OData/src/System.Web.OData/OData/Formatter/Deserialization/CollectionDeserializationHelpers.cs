@@ -19,7 +19,7 @@ namespace System.Web.OData.Formatter.Deserialization
         private static readonly MethodInfo _toArrayMethodInfo = typeof(Enumerable).GetMethod("ToArray");
 
         public static void AddToCollection(this IEnumerable items, IEnumerable collection, Type elementType,
-            Type resourceType, string propertyName, Type propertyType, TimeZoneInfo timeZoneInfo)
+            Type resourceType, string propertyName, Type propertyType)
         {
             Contract.Assert(items != null);
             Contract.Assert(collection != null);
@@ -56,7 +56,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 if (isNonstandardEdmPrimitiveCollection && element != null)
                 {
                     // convert non-standard edm primitives if required.
-                    element = EdmPrimitiveHelpers.ConvertPrimitiveValue(element, elementType, timeZoneInfo);
+                    element = EdmPrimitiveHelpers.ConvertPrimitiveValue(element, elementType);
                 }
 
                 if (list != null)

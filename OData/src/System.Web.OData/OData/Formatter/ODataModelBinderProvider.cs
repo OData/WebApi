@@ -2,20 +2,16 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
-using System.Net.Http;
 using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ValueProviders;
-using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Formatter
 {
@@ -77,10 +73,8 @@ namespace System.Web.OData.Formatter
 
                 try
                 {
-                    HttpConfiguration config = actionContext.Request.GetConfiguration();
-                    TimeZoneInfo timeZoneInfo = config.GetTimeZoneInfo();
                     string valueString = value.RawValue as string;
-                    object model = ConvertTo(valueString, bindingContext.ModelType, timeZoneInfo);
+                    object model = ConvertTo(valueString, bindingContext.ModelType);
                     bindingContext.Model = model;
                     return true;
                 }
@@ -106,7 +100,7 @@ namespace System.Web.OData.Formatter
                 }
             }
 
-            internal static object ConvertTo(string valueString, Type type, TimeZoneInfo timeZoneInfo)
+            internal static object ConvertTo(string valueString, Type type)
             {
                 if (valueString == null)
                 {
@@ -149,7 +143,7 @@ namespace System.Web.OData.Formatter
 
                 if (isNonStandardEdmPrimitive)
                 {
-                    return EdmPrimitiveHelpers.ConvertPrimitiveValue(value, type, timeZoneInfo);
+                    return EdmPrimitiveHelpers.ConvertPrimitiveValue(value, type);
                 }
                 else
                 {

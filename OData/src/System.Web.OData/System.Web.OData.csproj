@@ -402,6 +402,7 @@
     <Compile Include="Extensions\HttpActionDescriptorExtensions.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandler.cs" />
     <Compile Include="OData\Routing\ODataPathSegment.cs" />
+    <Compile Include="OData\TimeZoneInfoHelper.cs" />
     <Compile Include="OData\TypedDelta.cs" />
     <Compile Include="OData\UnqualifiedCallAndEnumPrefixFreeResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

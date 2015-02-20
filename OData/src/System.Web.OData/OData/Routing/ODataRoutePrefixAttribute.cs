@@ -8,7 +8,7 @@ namespace System.Web.OData.Routing
     /// Represents an attribute that can be placed on an OData controller to specify
     /// the prefix that will be used for all actions of that controller.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class ODataRoutePrefixAttribute : Attribute
     {
         /// <summary>

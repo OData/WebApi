@@ -1,12 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Web.Http;
+using System.Web.Http.Dispatcher;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
@@ -25,11 +27,14 @@ namespace System.Web.OData.Query.Expressions
         private ODataQueryContext _context;
         private IEdmModel _model;
         private ODataQuerySettings _settings;
+        private IAssembliesResolver _assembliesResolver;
         private string _modelID;
 
-        public SelectExpandBinder(ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
+        public SelectExpandBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver,
+            SelectExpandQueryOption selectExpandQuery)
         {
             Contract.Assert(settings != null);
+            Contract.Assert(assembliesResolver != null);
             Contract.Assert(selectExpandQuery != null);
             Contract.Assert(selectExpandQuery.Context != null);
             Contract.Assert(selectExpandQuery.Context.Model != null);
@@ -40,21 +45,24 @@ namespace System.Web.OData.Query.Expressions
             _model = _context.Model;
             _modelID = ModelContainer.GetModelID(_model);
             _settings = settings;
+            _assembliesResolver = assembliesResolver;
         }
 
-        public static IQueryable Bind(IQueryable queryable, ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
+        public static IQueryable Bind(IQueryable queryable, ODataQuerySettings settings,
+            IAssembliesResolver assembliesResolver, SelectExpandQueryOption selectExpandQuery)
         {
             Contract.Assert(queryable != null);
 
-            SelectExpandBinder binder = new SelectExpandBinder(settings, selectExpandQuery);
+            SelectExpandBinder binder = new SelectExpandBinder(settings, assembliesResolver, selectExpandQuery);
             return binder.Bind(queryable);
         }
 
-        public static object Bind(object entity, ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
+        public static object Bind(object entity, ODataQuerySettings settings, IAssembliesResolver assembliesResolver,
+            SelectExpandQueryOption selectExpandQuery)
         {
             Contract.Assert(entity != null);
 
-            SelectExpandBinder binder = new SelectExpandBinder(settings, selectExpandQuery);
+            SelectExpandBinder binder = new SelectExpandBinder(settings, assembliesResolver, selectExpandQuery);
             return binder.Bind(entity);
         }
 
@@ -150,6 +158,16 @@ namespace System.Web.OData.Query.Expressions
             Contract.Assert(property != null);
             Contract.Assert(source != null);
 
+            return CreatePropertyValueExpressionWithFilter(elementType, property, source, filterClause: null);
+        }
+
+        internal Expression CreatePropertyValueExpressionWithFilter(IEdmEntityType elementType, IEdmProperty property,
+            Expression source, FilterClause filterClause)
+        {
+            Contract.Assert(elementType != null);
+            Contract.Assert(property != null);
+            Contract.Assert(source != null);
+
             IEdmEntityType declaringType = property.DeclaringType as IEdmEntityType;
             Contract.Assert(declaringType != null, "only entity types are projected.");
 
@@ -159,7 +177,8 @@ namespace System.Web.OData.Query.Expressions
                 Type castType = EdmLibHelpers.GetClrType(declaringType, _model);
                 if (castType == null)
                 {
-                    throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType, declaringType.FullName()));
+                    throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType,
+                        declaringType.FullName()));
                 }
 
                 source = Expression.TypeAs(source, castType);
@@ -167,19 +186,51 @@ namespace System.Web.OData.Query.Expressions
 
             string propertyName = EdmLibHelpers.GetClrPropertyName(property, _model);
             Expression propertyValue = Expression.Property(source, propertyName);
+            Type nullablePropertyType = propertyValue.Type.ToNullable();
+            Expression nullablePropertyValue = ExpressionHelpers.ToNullable(propertyValue);
+
+            if (filterClause != null && property.Type.IsCollection())
+            {
+                IEdmTypeReference edmElementType = property.Type.AsCollection().ElementType();
+                Type clrElementType = EdmLibHelpers.GetClrType(edmElementType, _model);
+
+                Expression filterSource =
+                    typeof(IEnumerable).IsAssignableFrom(source.Type.GetProperty(propertyName).PropertyType)
+                        ? Expression.Call(
+                            ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(clrElementType),
+                            nullablePropertyValue)
+                        : nullablePropertyValue;
+
+                Expression filterPredicate = FilterBinder.Bind(
+                    filterClause,
+                    clrElementType,
+                    _model,
+                    _assembliesResolver,
+                    _settings);
+                MethodCallExpression filterResult = Expression.Call(
+                    ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(clrElementType),
+                    filterSource,
+                    filterPredicate);
+
+                nullablePropertyType = filterResult.Type;
+                nullablePropertyValue = Expression.Condition(
+                    test: Expression.Equal(nullablePropertyValue, Expression.Constant(value: null)),
+                    ifTrue: Expression.Constant(value: null, type: nullablePropertyType),
+                    ifFalse: filterResult);
+            }
 
             if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
                 // source == null ? null : propertyValue
                 propertyValue = Expression.Condition(
-                        test: Expression.Equal(source, Expression.Constant(null)),
-                        ifTrue: Expression.Constant(null, propertyValue.Type.ToNullable()),
-                        ifFalse: ExpressionHelpers.ToNullable(propertyValue));
+                    test: Expression.Equal(source, Expression.Constant(value: null)),
+                    ifTrue: Expression.Constant(value: null, type: nullablePropertyType),
+                    ifFalse: nullablePropertyValue);
             }
             else
             {
                 // need to cast this to nullable as EF would fail while materializing if the property is not nullable and source is null.
-                propertyValue = ExpressionHelpers.ToNullable(propertyValue);
+                propertyValue = nullablePropertyValue;
             }
 
             return propertyValue;
@@ -231,7 +282,7 @@ namespace System.Web.OData.Query.Expressions
             // source => new Wrapper { Container =  new PropertyContainer { .... } }
             if (selectExpandClause != null)
             {
-                Dictionary<IEdmNavigationProperty, SelectExpandClause> propertiesToExpand = GetPropertiesToExpandInQuery(selectExpandClause);
+                Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand = GetPropertiesToExpandInQuery(selectExpandClause);
                 ISet<IEdmStructuralProperty> autoSelectedProperties;
                 ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, out autoSelectedProperties);
 
@@ -254,18 +305,20 @@ namespace System.Web.OData.Query.Expressions
         }
 
         private Expression BuildPropertyContainer(IEdmEntityType elementType, Expression source,
-            Dictionary<IEdmNavigationProperty, SelectExpandClause> propertiesToExpand,
+            Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand,
             ISet<IEdmStructuralProperty> propertiesToInclude, ISet<IEdmStructuralProperty> autoSelectedProperties)
         {
             IList<NamedPropertyExpression> includedProperties = new List<NamedPropertyExpression>();
 
-            foreach (KeyValuePair<IEdmNavigationProperty, SelectExpandClause> kvp in propertiesToExpand)
+            foreach (KeyValuePair<IEdmNavigationProperty, ExpandedNavigationSelectItem> kvp in propertiesToExpand)
             {
                 IEdmNavigationProperty propertyToExpand = kvp.Key;
-                SelectExpandClause projection = kvp.Value;
+                ExpandedNavigationSelectItem expandItem = kvp.Value;
+                SelectExpandClause projection = expandItem.SelectAndExpand;
 
                 Expression propertyName = CreatePropertyNameExpression(elementType, propertyToExpand, source);
-                Expression propertyValue = CreatePropertyValueExpression(elementType, propertyToExpand, source);
+                Expression propertyValue = CreatePropertyValueExpressionWithFilter(elementType, propertyToExpand, source,
+                    expandItem.FilterOption);
                 Expression nullCheck = Expression.Equal(propertyValue, Expression.Constant(null));
 
                 // projection can be null if the expanded navigation property is not further projected or expanded.
@@ -424,9 +477,9 @@ namespace System.Web.OData.Query.Expressions
             return ExpressionHelperMethods.EnumerableSelectGeneric.MakeGenericMethod(elementType, resultType);
         }
 
-        private static Dictionary<IEdmNavigationProperty, SelectExpandClause> GetPropertiesToExpandInQuery(SelectExpandClause selectExpandClause)
+        private static Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> GetPropertiesToExpandInQuery(SelectExpandClause selectExpandClause)
         {
-            Dictionary<IEdmNavigationProperty, SelectExpandClause> properties = new Dictionary<IEdmNavigationProperty, SelectExpandClause>();
+            Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> properties = new Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem>();
 
             foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
             {
@@ -440,7 +493,7 @@ namespace System.Web.OData.Query.Expressions
                         throw new ODataException(SRResources.UnsupportedSelectExpandPath);
                     }
 
-                    properties[navigationSegment.NavigationProperty] = expandItem.SelectAndExpand;
+                    properties[navigationSegment.NavigationProperty] = expandItem;
                 }
             }
 

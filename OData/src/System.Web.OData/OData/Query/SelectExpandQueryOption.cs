@@ -3,9 +3,9 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
+using System.Web.Http.Dispatcher;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
@@ -20,6 +20,7 @@ namespace System.Web.OData.Query
     /// </summary>
     public class SelectExpandQueryOption
     {
+        private static readonly IAssembliesResolver _defaultAssembliesResolver = new DefaultAssembliesResolver();
         private SelectExpandClause _selectExpandClause;
         private ODataQueryOptionParser _queryOptionParser;
         private int _levelsMaxLiteralExpansionDepth = ODataValidationSettings.DefaultMaxExpansionDepth;
@@ -174,6 +175,20 @@ namespace System.Web.OData.Query
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "stopgap. will be used later.")]
         public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings)
         {
+            return ApplyTo(queryable, settings, _defaultAssembliesResolver);
+        }
+
+        /// <summary>
+        /// Applies the $select and $expand query options to the given <see cref="IQueryable"/> using the given
+        /// <see cref="ODataQuerySettings"/>.
+        /// </summary>
+        /// <param name="queryable">The original <see cref="IQueryable"/>.</param>
+        /// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
+        /// <param name="assembliesResolver">The <see cref="IAssembliesResolver"/> to use.</param>
+        /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "stopgap. will be used later.")]
+        public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings, IAssembliesResolver assembliesResolver)
+        {
             if (queryable == null)
             {
                 throw Error.ArgumentNull("queryable");
@@ -195,7 +210,7 @@ namespace System.Web.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(queryable);
             }
 
-            return SelectExpandBinder.Bind(queryable, updatedSettings, this);
+            return SelectExpandBinder.Bind(queryable, updatedSettings, assembliesResolver, this);
         }
 
         /// <summary>
@@ -205,6 +220,18 @@ namespace System.Web.OData.Query
         /// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
         /// <returns>The new entity after the $select and $expand query has been applied to.</returns>
         public object ApplyTo(object entity, ODataQuerySettings settings)
+        {
+            return ApplyTo(entity, settings, _defaultAssembliesResolver);
+        }
+
+        /// <summary>
+        /// Applies the $select and $expand query options to the given entity using the given <see cref="ODataQuerySettings"/>.
+        /// </summary>
+        /// <param name="entity">The original entity.</param>
+        /// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
+        /// <param name="assembliesResolver">The <see cref="IAssembliesResolver"/> to use.</param>
+        /// <returns>The new entity after the $select and $expand query has been applied to.</returns>
+        public object ApplyTo(object entity, ODataQuerySettings settings, IAssembliesResolver assembliesResolver)
         {
             if (entity == null)
             {
@@ -227,7 +254,7 @@ namespace System.Web.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOption.True;
             }
 
-            return SelectExpandBinder.Bind(entity, updatedSettings, this);
+            return SelectExpandBinder.Bind(entity, updatedSettings, assembliesResolver, this);
         }
 
         /// <summary>

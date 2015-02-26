@@ -36,7 +36,7 @@ namespace System.Web.OData
                     typeof(AttributedSelectExpandCustomersController), typeof(SelectExpandTestCustomer),
                     typeof(SelectExpandTestSpecialCustomer), typeof(SelectExpandTestCustomerWithAlias),
                     typeof(SelectExpandTestOrder), typeof(SelectExpandTestSpecialOrder),
-                    typeof(SelectExpandTestSpecialOrderWithAlias)
+                    typeof(SelectExpandTestSpecialOrderWithAlias),
                 }.GetHttpConfiguration();
             _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
@@ -69,6 +69,24 @@ namespace System.Web.OData
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
             Assert.Equal("http://localhost/odata/$metadata#SelectExpandTestCustomers(ID,Orders)", result["@odata.context"]);
             ValidateCustomer(result["value"][0]);
+        }
+
+        [Fact]
+        public void SelectExpand_Works_WithNestedFilter()
+        {
+            // Arrange
+            var uri = "/odata/SelectExpandTestCustomers?$expand=Orders($filter=ID eq 28)";
+            // Act
+            var response = GetResponse(uri, AcceptJson);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            var content = response.Content.ReadAsStringAsync().Result;
+            dynamic result = JObject.Parse(content);
+            var customer = result.value[0];
+            var orders = customer.Orders;
+            Assert.Single(orders);
+            Assert.Equal(10, (int)orders[0].Amount);
         }
 
         [Fact]
@@ -242,7 +260,7 @@ namespace System.Web.OData
             Assert.Equal(42, result["PreviousCustomer"]["PreviousCustomer"]["ID"]);
             Assert.Null(result["PreviousCustomer"]["PreviousCustomer"]["PreviousCustomer"]);
         }
-
+        
         [Fact]
         public void SelectExpand_Works_ForSelectAction_WithNamespaceQualifiedName()
         {
@@ -299,7 +317,7 @@ namespace System.Web.OData
             Assert.Null(customer["Name"]);
             var orders = customer["Orders"] as JArray;
             Assert.NotNull(orders);
-            Assert.Equal(1, orders.Count);
+            Assert.Equal(2, orders.Count);
             var order = orders[0];
             Assert.Equal(24, order["ID"]);
             Assert.Equal(100, order["Amount"]);
@@ -379,7 +397,13 @@ namespace System.Web.OData
             {
                 SelectExpandTestCustomer customer = new SelectExpandTestCustomer { ID = 42, Name = "Name" };
                 SelectExpandTestOrder order = new SelectExpandTestOrder { ID = 24, Amount = 100, Customer = customer };
-                customer.Orders = new[] { order };
+                SelectExpandTestOrder anotherOrder = new SelectExpandTestSpecialOrder
+                {
+                    ID = 28,
+                    Amount = 10,
+                    Customer = customer,
+                };
+                customer.Orders = new[] { order, anotherOrder };
 
                 SelectExpandTestSpecialCustomer specialCustomer = new SelectExpandTestSpecialCustomer
                 {
@@ -394,7 +418,6 @@ namespace System.Web.OData
                     Amount = 100,
                     SpecialDiscount = 100,
                     SpecialCustomer = specialCustomer
-
                 };
                 specialCustomer.SpecialOrders = new[] { specialOrder };
 

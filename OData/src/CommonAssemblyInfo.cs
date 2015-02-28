@@ -1,4 +1,5 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
 using System.Reflection;
@@ -6,8 +7,8 @@ using System.Resources;
 using System.Runtime.InteropServices;
 
 #if !BUILD_GENERATED_VERSION
-[assembly: AssemblyCompany("Microsoft Open Technologies, Inc.")]
-[assembly: AssemblyCopyright("© Microsoft Open Technologies, Inc. All rights reserved.")]
+[assembly: AssemblyCompany("Microsoft Corporation.")]
+[assembly: AssemblyCopyright("© Microsoft Corporation. All rights reserved.")]
 #endif
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
@@ -28,5 +29,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("5.4.0.0")] // ASPNETODATA
 [assembly: AssemblyFileVersion("5.4.0.0")] // ASPNETODATA
 #endif
-[assembly: AssemblyProduct("Microsoft ASP.NET Web API OData")]
+[assembly: AssemblyProduct("Microsoft OData Web API")]
 #endif

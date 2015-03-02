@@ -412,6 +412,98 @@ namespace System.Web.OData.Builder
             Assert.Equal(expectMetadata.Replace("'", "\""), response.Content.ReadAsStringAsync().Result);
         }
 
+        [Fact]
+        public void DollarMetadata_Works_WithActionParameterNullable_ReturnTypeNullable()
+        {
+            // Arrange
+            const string expectMetadata =
+@"<Schema Namespace='Default' xmlns='http://docs.oasis-open.org/odata/ns/edm'>
+      <Action Name='NullableAction' IsBound='true'>
+        <Parameter Name='bindingParameter' Type='System.Web.OData.Formatter.FormatterPerson' />
+        <Parameter Name='param' Type='Edm.String' Unicode='false' />
+        <ReturnType Type='System.Web.OData.Formatter.FormatterAddress' />
+      </Action>
+      <Action Name='NonNullableAction' IsBound='true'>
+        <Parameter Name='bindingParameter' Type='System.Web.OData.Formatter.FormatterPerson' />
+        <Parameter Name='param' Type='Edm.String' Nullable='false' Unicode='false' />
+        <ReturnType Type='System.Web.OData.Formatter.FormatterAddress' Nullable='false' />
+      </Action>
+      <EntityContainer Name='Container' />
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>";
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            EntityTypeConfiguration<FormatterPerson> person = builder.EntityType<FormatterPerson>();
+
+            ActionConfiguration action = person.Action("NullableAction").Returns<FormatterAddress>();
+            action.Parameter<string>("param");
+
+            action = person.Action("NonNullableAction").Returns<FormatterAddress>();
+            action.OptionalReturn = false;
+            action.Parameter<string>("param").OptionalParameter = false;
+            IEdmModel model = builder.GetEdmModel();
+
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(model);
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var response = client.GetAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Contains(expectMetadata.Replace("'", "\""), response.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void DollarMetadata_Works_WithFunctionParameterNullable_ReturnTypeNullable()
+        {
+            // Arrange
+            const string expectMetadata =
+@"<Schema Namespace='Default' xmlns='http://docs.oasis-open.org/odata/ns/edm'>
+      <Function Name='NullableFunction' IsBound='true'>
+        <Parameter Name='bindingParameter' Type='System.Web.OData.Formatter.FormatterPerson' />
+        <Parameter Name='param' Type='Edm.String' Unicode='false' />
+        <ReturnType Type='System.Web.OData.Formatter.FormatterAddress' />
+      </Function>
+      <Function Name='NonNullableFunction' IsBound='true'>
+        <Parameter Name='bindingParameter' Type='System.Web.OData.Formatter.FormatterPerson' />
+        <Parameter Name='param' Type='Edm.String' Nullable='false' Unicode='false' />
+        <ReturnType Type='System.Web.OData.Formatter.FormatterAddress' Nullable='false' />
+      </Function>
+      <EntityContainer Name='Container' />
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>";
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            EntityTypeConfiguration<FormatterPerson> person = builder.EntityType<FormatterPerson>();
+
+            FunctionConfiguration function = person.Function("NullableFunction").Returns<FormatterAddress>();
+            function.Parameter<string>("param");
+
+            function = person.Function("NonNullableFunction").Returns<FormatterAddress>();
+            function.OptionalReturn = false;
+            function.Parameter<string>("param").OptionalParameter = false;
+            IEdmModel model = builder.GetEdmModel();
+
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(model);
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var response = client.GetAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Contains(expectMetadata.Replace("'", "\""), response.Content.ReadAsStringAsync().Result);
+        }
+
         private static void AssertHasEntitySet(HttpClient client, string uri, string entitySetName)
         {
             var response = client.GetAsync(uri).Result;

@@ -80,6 +80,7 @@ namespace System.Web.OData.Builder.Conventions
             ActionConfiguration action = new ActionConfiguration(builder, "IgnoreAction");
             Mock<IEdmTypeConfiguration> mockBindingParameterType = new Mock<IEdmTypeConfiguration>();
             mockBindingParameterType.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
+            mockBindingParameterType.Setup(o => o.ClrType).Returns(typeof(int));
             action.SetBindingParameter("IgnoreParameter", mockBindingParameterType.Object);
             ActionLinkGenerationConvention convention = new ActionLinkGenerationConvention();
 

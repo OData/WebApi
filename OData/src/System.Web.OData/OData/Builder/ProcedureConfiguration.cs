@@ -82,6 +82,11 @@ namespace System.Web.OData.Builder
         public IEdmTypeConfiguration ReturnType { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the return is optional or not.
+        /// </summary>
+        public bool OptionalReturn { get; set; }
+
+        /// <summary>
         /// The Navigation Source that are returned from.
         /// </summary>
         public NavigationSourceConfiguration NavigationSource { get; set; }
@@ -140,6 +145,7 @@ namespace System.Web.OData.Builder
             ModelBuilder.EntitySet<TEntityType>(entitySetName);
             NavigationSource = ModelBuilder.EntitySets.Single(s => s.Name == entitySetName);
             ReturnType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TEntityType));
+            OptionalReturn = true;
         }
 
         /// <summary>
@@ -155,6 +161,7 @@ namespace System.Web.OData.Builder
             NavigationSource = ModelBuilder.EntitySets.Single(s => s.Name == entitySetName);
             IEdmTypeConfiguration elementType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TElementEntityType));
             ReturnType = new CollectionTypeConfiguration(elementType, clrCollectionType);
+            OptionalReturn = true;
         }
 
         /// <summary>
@@ -166,6 +173,7 @@ namespace System.Web.OData.Builder
         {
             ReturnType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TEntityType));
             EntitySetPath = entitySetPath;
+            OptionalReturn = true;
         }
 
         /// <summary>
@@ -179,6 +187,7 @@ namespace System.Web.OData.Builder
             IEdmTypeConfiguration elementType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TElementEntityType));
             ReturnType = new CollectionTypeConfiguration(elementType, clrCollectionType);
             EntitySetPath = entitySetPath;
+            OptionalReturn = true;
         }
 
         /// <summary>
@@ -188,8 +197,10 @@ namespace System.Web.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
         internal void ReturnsImplementation<TReturnType>()
         {
-            IEdmTypeConfiguration configuration = GetProcedureTypeConfiguration(typeof(TReturnType));
+            Type returnType = typeof(TReturnType);
+            IEdmTypeConfiguration configuration = GetProcedureTypeConfiguration(returnType);
             ReturnType = configuration;
+            OptionalReturn = EdmLibHelpers.IsNullable(returnType);
         }
 
         /// <summary>
@@ -207,6 +218,7 @@ namespace System.Web.OData.Builder
             Type clrElementType = typeof(TReturnElementType);
             IEdmTypeConfiguration edmElementType = GetProcedureTypeConfiguration(clrElementType);
             ReturnType = new CollectionTypeConfiguration(edmElementType, clrCollectionType);
+            OptionalReturn = EdmLibHelpers.IsNullable(clrElementType);
         }
 
         /// <summary>

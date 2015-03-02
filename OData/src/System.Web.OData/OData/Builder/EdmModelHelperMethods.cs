@@ -163,8 +163,7 @@ namespace System.Web.OData.Builder
         {
             foreach (ParameterConfiguration parameter in procedure.Parameters)
             {
-                // TODO: http://aspnetwebstack.codeplex.com/workitem/417
-                bool isParameterOptional = EdmLibHelpers.IsNullable(parameter.TypeConfiguration.ClrType);
+                bool isParameterOptional = parameter.OptionalParameter;
                 IEdmTypeReference parameterTypeReference = GetEdmTypeReference(edmTypeMap, parameter.TypeConfiguration, nullable: isParameterOptional);
                 IEdmOperationParameter operationParameter = new EdmOperationParameter(operation, parameter.Name, parameterTypeReference);
                 operation.AddParameter(operationParameter);
@@ -216,10 +215,9 @@ namespace System.Web.OData.Builder
 
             foreach (ProcedureConfiguration procedure in configurations)
             {
-                IEdmTypeReference returnReference = GetEdmTypeReference(
-                    edmTypeMap,
+                IEdmTypeReference returnReference = GetEdmTypeReference(edmTypeMap,
                     procedure.ReturnType,
-                    procedure.ReturnType != null && EdmLibHelpers.IsNullable(procedure.ReturnType.ClrType));
+                    procedure.ReturnType != null && procedure.OptionalReturn);
                 IEdmExpression expression = GetEdmEntitySetExpression(edmNavigationSourceMap, procedure);
                 IEdmPathExpression pathExpression = procedure.EntitySetPath != null
                     ? new EdmPathExpression(procedure.EntitySetPath)
@@ -511,10 +509,9 @@ namespace System.Web.OData.Builder
             EdmTypeKind kind = configuration.Kind;
             if (kind == EdmTypeKind.Collection)
             {
-                CollectionTypeConfiguration collectionType = configuration as CollectionTypeConfiguration;
-                bool elementNullable = EdmLibHelpers.IsNullable(collectionType.ElementType.ClrType);
+                CollectionTypeConfiguration collectionType = (CollectionTypeConfiguration)configuration;
                 EdmCollectionType edmCollectionType =
-                    new EdmCollectionType(GetEdmTypeReference(availableTypes, collectionType.ElementType, elementNullable));
+                    new EdmCollectionType(GetEdmTypeReference(availableTypes, collectionType.ElementType, nullable));
                 return new EdmCollectionTypeReference(edmCollectionType);
             }
             else

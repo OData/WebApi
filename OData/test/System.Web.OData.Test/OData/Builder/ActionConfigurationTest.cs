@@ -211,6 +211,61 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void CanCreateActionWithReturnTypeAsNullableByDefault()
+        {
+            // Arrange & Act
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ActionConfiguration action = builder.Action("MyAction").Returns<Address>();
+
+            // Assert
+            Assert.True(action.OptionalReturn);
+        }
+
+        [Fact]
+        public void CanCreateActionWithReturnTypeAsNullableByOptionalReturn()
+        {
+            // Arrange & Act
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ActionConfiguration action = builder.Action("MyAction").Returns<Address>();
+            action.OptionalReturn = false;
+
+            // Assert
+            Assert.False(action.OptionalReturn);
+        }
+
+        [Fact]
+        public void CanCreateActionWithNonbindingParametersAsNullable()
+        {
+            // Arrange & Act
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ActionConfiguration action = builder.Action("MyAction");
+            action.Parameter<string>("p0");
+            action.Parameter<string>("p1").OptionalParameter = false;
+            action.Parameter<int>("p2").OptionalParameter = true;
+            action.Parameter<int>("p3");
+            action.Parameter<Address>("p4");
+            action.Parameter<Address>("p5").OptionalParameter = false;
+
+            action.CollectionParameter<ZipCode>("p6");
+            action.CollectionParameter<ZipCode>("p7").OptionalParameter = false;
+
+            Dictionary<string, ParameterConfiguration> parameters = action.Parameters.ToDictionary(e => e.Name, e => e);
+
+            // Assert
+            Assert.True(parameters["p0"].OptionalParameter);
+            Assert.False(parameters["p1"].OptionalParameter);
+
+            Assert.True(parameters["p2"].OptionalParameter);
+            Assert.False(parameters["p3"].OptionalParameter);
+
+            Assert.True(parameters["p4"].OptionalParameter);
+            Assert.False(parameters["p5"].OptionalParameter);
+
+            Assert.True(parameters["p6"].OptionalParameter);
+            Assert.False(parameters["p7"].OptionalParameter);
+        }
+
+        [Fact]
         public void CanCreateEdmModel_WithBindableAction()
         {
             // Arrange
@@ -359,7 +414,7 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void GetEdmModel_SetsNullableIffParameterTypeIsNullable()
+        public void GetEdmModel_SetsNullableIfParameterTypeIsNullable()
         {
             // Arrange
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
@@ -377,6 +432,59 @@ namespace System.Web.OData.Builder
             Assert.False(action.FindParameter("int").Type.IsNullable);
             Assert.True(action.FindParameter("nullableOfInt").Type.IsNullable);
             Assert.True(action.FindParameter("string").Type.IsNullable);
+        }
+
+        [Fact]
+        public void GetEdmModel_SetsNullableIfParameterTypeIsReferenceType()
+        {
+            // Arrange
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            var actionBuilder = movie.Action("Watch");
+
+            actionBuilder.Parameter<string>("string").OptionalParameter = false;
+            actionBuilder.Parameter<string>("nullaleString");
+
+            actionBuilder.Parameter<Address>("address").OptionalParameter = false;
+            actionBuilder.Parameter<Address>("nullableAddress");
+
+            actionBuilder.CollectionParameter<Address>("addresses").OptionalParameter = false;
+            actionBuilder.CollectionParameter<Address>("nullableAddresses");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            //Assert
+            IEdmOperation action = Assert.Single(model.SchemaElements.OfType<IEdmAction>());
+
+            Assert.False(action.FindParameter("string").Type.IsNullable);
+            Assert.True(action.FindParameter("nullaleString").Type.IsNullable);
+
+            Assert.False(action.FindParameter("address").Type.IsNullable);
+            Assert.True(action.FindParameter("nullableAddress").Type.IsNullable);
+
+            Assert.False(action.FindParameter("addresses").Type.IsNullable);
+            Assert.True(action.FindParameter("nullableAddresses").Type.IsNullable);
+        }
+
+        [Fact]
+        public void GetEdmModel_SetReturnTypeAsNullable()
+        {
+            // Arrange
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            movie.Action("Watch1").Returns<Address>();
+            movie.Action("Watch2").Returns<Address>().OptionalReturn = false;
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            //Assert
+            IEdmOperation action = model.SchemaElements.OfType<IEdmAction>().First(e => e.Name == "Watch1");
+            Assert.True(action.ReturnType.IsNullable);
+
+            action = model.SchemaElements.OfType<IEdmAction>().First(e => e.Name == "Watch2");
+            Assert.False(action.ReturnType.IsNullable);
         }
 
         [Fact]
@@ -425,6 +533,7 @@ namespace System.Web.OData.Builder
             ActionConfiguration action = new ActionConfiguration(builder, "IgnoreAction");
             Mock<IEdmTypeConfiguration> bindingParameterTypeMock = new Mock<IEdmTypeConfiguration>();
             bindingParameterTypeMock.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
+            bindingParameterTypeMock.Setup(o => o.ClrType).Returns(typeof(int));
             IEdmTypeConfiguration bindingParameterType = bindingParameterTypeMock.Object;
             action.SetBindingParameter("IgnoreParameter", bindingParameterType);
 

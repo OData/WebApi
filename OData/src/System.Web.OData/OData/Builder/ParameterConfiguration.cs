@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Web.Http;
+using System.Web.OData.Formatter;
 
 namespace System.Web.OData.Builder
 {
@@ -14,7 +15,7 @@ namespace System.Web.OData.Builder
         /// Initializes a new instance of the <see cref="ParameterConfiguration"/> class.
         /// </summary>
         /// <param name="name">The name of the parameter.</param>
-        /// <param name="parameterType">The EDM type of the paramter.</param>
+        /// <param name="parameterType">The EDM type of the parameter.</param>
         protected ParameterConfiguration(string name, IEdmTypeConfiguration parameterType)
         {
             if (name == null)
@@ -23,10 +24,16 @@ namespace System.Web.OData.Builder
             }
             if (parameterType == null)
             {
-                throw Error.ArgumentNull("bindingParameterType");
+                throw Error.ArgumentNull("parameterType");
             }
+
             Name = name;
             TypeConfiguration = parameterType;
+
+            Type elementType;
+            OptionalParameter = parameterType.ClrType.IsCollection(out elementType)
+                ? EdmLibHelpers.IsNullable(elementType)
+                : EdmLibHelpers.IsNullable(parameterType.ClrType);
         }
 
         /// <summary>
@@ -38,5 +45,10 @@ namespace System.Web.OData.Builder
         /// The type of the parameter
         /// </summary>
         public IEdmTypeConfiguration TypeConfiguration { get; protected set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this parameter is optional or not.
+        /// </summary>
+        public bool OptionalParameter { get; set; }
     }
 }

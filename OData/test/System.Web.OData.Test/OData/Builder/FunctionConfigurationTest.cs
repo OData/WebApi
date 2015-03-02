@@ -249,6 +249,61 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void CanCreateFunctionWithReturnTypeAsNullableByDefault()
+        {
+            // Arrange & Act
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("MyFunction").Returns<Address>();
+
+            // Assert
+            Assert.True(function.OptionalReturn);
+        }
+
+        [Fact]
+        public void CanCreateFunctionWithReturnTypeAsNullableByOptionalReturn()
+        {
+            // Arrange & Act
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("MyFunction").Returns<Address>();
+            function.OptionalReturn = false;
+
+            // Assert
+            Assert.False(function.OptionalReturn);
+        }
+
+        [Fact]
+        public void CanCreateFunctionWithNonbindingParametersAsNullable()
+        {
+            // Arrange & Act
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("MyFunction");
+            function.Parameter<string>("p0");
+            function.Parameter<string>("p1").OptionalParameter = false;
+            function.Parameter<int>("p2").OptionalParameter = true;
+            function.Parameter<int>("p3");
+            function.Parameter<Address>("p4");
+            function.Parameter<Address>("p5").OptionalParameter = false;
+
+            function.CollectionParameter<ZipCode>("p6");
+            function.CollectionParameter<ZipCode>("p7").OptionalParameter = false;
+
+            Dictionary<string, ParameterConfiguration> parameters = function.Parameters.ToDictionary(e => e.Name, e => e);
+
+            // Assert
+            Assert.True(parameters["p0"].OptionalParameter);
+            Assert.False(parameters["p1"].OptionalParameter);
+
+            Assert.True(parameters["p2"].OptionalParameter);
+            Assert.False(parameters["p3"].OptionalParameter);
+
+            Assert.True(parameters["p4"].OptionalParameter);
+            Assert.False(parameters["p5"].OptionalParameter);
+
+            Assert.True(parameters["p6"].OptionalParameter);
+            Assert.False(parameters["p7"].OptionalParameter);
+        }
+
+        [Fact]
         public void CanCreateEdmModel_WithBindableFunction()
         {
             // Arrange
@@ -335,7 +390,7 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void GetEdmModel_SetsNullableIffParameterTypeIsNullable()
+        public void GetEdmModel_SetsNullableIfParameterTypeIsNullable()
         {
             // Arrange
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
@@ -354,6 +409,60 @@ namespace System.Web.OData.Builder
             Assert.False(function.FindParameter("int").Type.IsNullable);
             Assert.True(function.FindParameter("nullableOfInt").Type.IsNullable);
             Assert.True(function.FindParameter("string").Type.IsNullable);
+        }
+
+        [Fact]
+        public void GetEdmModel_SetsNullableIfParameterTypeIsReferenceType()
+        {
+            // Arrange
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            var functionBuilder = movie.Function("Watch");
+
+            functionBuilder.Parameter<string>("string").OptionalParameter = false;
+            functionBuilder.Parameter<string>("nullaleString");
+
+            functionBuilder.Parameter<Address>("address").OptionalParameter = false;
+            functionBuilder.Parameter<Address>("nullableAddress");
+
+            functionBuilder.CollectionParameter<Address>("addresses").OptionalParameter = false;
+            functionBuilder.CollectionParameter<Address>("nullableAddresses");
+            functionBuilder.Returns<int>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            //Assert
+            IEdmOperation function = Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
+
+            Assert.False(function.FindParameter("string").Type.IsNullable);
+            Assert.True(function.FindParameter("nullaleString").Type.IsNullable);
+
+            Assert.False(function.FindParameter("address").Type.IsNullable);
+            Assert.True(function.FindParameter("nullableAddress").Type.IsNullable);
+
+            Assert.False(function.FindParameter("addresses").Type.IsNullable);
+            Assert.True(function.FindParameter("nullableAddresses").Type.IsNullable);
+        }
+
+        [Fact]
+        public void GetEdmModel_SetReturnTypeAsNullable()
+        {
+            // Arrange
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            movie.Function("Watch1").Returns<Address>();
+            movie.Function("Watch2").Returns<Address>().OptionalReturn = false;
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            //Assert
+            IEdmOperation function = model.SchemaElements.OfType<IEdmFunction>().First(e => e.Name == "Watch1");
+            Assert.True(function.ReturnType.IsNullable);
+
+            function = model.SchemaElements.OfType<IEdmFunction>().First(e => e.Name == "Watch2");
+            Assert.False(function.ReturnType.IsNullable);
         }
 
         [Fact]
@@ -406,6 +515,7 @@ namespace System.Web.OData.Builder
             FunctionConfiguration function = new FunctionConfiguration(builder, "IgnoreFunction");
             Mock<IEdmTypeConfiguration> bindingParameterTypeMock = new Mock<IEdmTypeConfiguration>();
             bindingParameterTypeMock.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
+            bindingParameterTypeMock.Setup(o => o.ClrType).Returns(typeof(int));
             IEdmTypeConfiguration bindingParameterType = bindingParameterTypeMock.Object;
             function.SetBindingParameter("IgnoreParameter", bindingParameterType);
 

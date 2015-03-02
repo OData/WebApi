@@ -1182,6 +1182,36 @@ namespace System.Web.OData.Routing
             Assert.Equal(2, p2);
         }
 
+        [Fact]
+        public void CanParse_UntouchedFunctionParametersAlias_WithUnresolvedPathSegment()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<ConventionCustomer>("Customers");
+            FunctionConfiguration function = builder.Function("UnboundFunction");
+            function.Parameter<int>("P1");
+            function.Parameter<int>("P2");
+            function.ReturnsFromEntitySet<ConventionCustomer>("Customers");
+            function.IsComposable = true;
+            IEdmModel model = builder.GetEdmModel();
+
+            // Act
+            ODataPath path = _parser.Parse(
+                model,
+                _serviceRoot,
+                "UnboundFunction(P1=@p1,P2=@p2)/unknownFunc(a=@p4)?@p1=1&@p3=2&@p2=@p3&@p4='abc'");
+
+            var functionSegment = (UnboundFunctionPathSegment)path.Segments.First();
+            object p1 = functionSegment.GetParameterValue("P1");
+            object p2 = functionSegment.GetParameterValue("P2");
+
+            // Assert
+            Assert.Equal(1, p1);
+            Assert.Equal(2, p2);
+            Assert.IsType<UnresolvedPathSegment>(path.Segments.Last());
+            Assert.Equal("unknownFunc(a=@p4)", ((UnresolvedPathSegment)path.Segments.Last()).SegmentValue);
+        }
+
         [Theory]
         [PropertyData("NullFunctionParameterData")]
         public void CanParse_NullFunctionParameters(object value, Type type)
@@ -1982,7 +2012,7 @@ namespace System.Web.OData.Routing
             Assert.Equal(expect, odataPath.ToString());
         }
 
-         public static TheoryDataSet<string, string, string> PrefixFreeEnumCases
+        public static TheoryDataSet<string, string, string> PrefixFreeEnumCases
         {
             get
             {
@@ -1999,13 +2029,13 @@ namespace System.Web.OData.Routing
             }
         }
 
-         [Theory]
-         [PropertyData("PrefixFreeEnumCases")]
-         public void PrefixFreeEnumValue_Throws_DefaultResolver(string path, string template, string expect)
-         {
-             Assert.Throws<ODataException>(
-                 () => new DefaultODataPathHandler().Parse(_model, _serviceRoot, path));
-         }
+        [Theory]
+        [PropertyData("PrefixFreeEnumCases")]
+        public void PrefixFreeEnumValue_Throws_DefaultResolver(string path, string template, string expect)
+        {
+            Assert.Throws<ODataException>(
+                () => new DefaultODataPathHandler().Parse(_model, _serviceRoot, path));
+        }
 
         [Theory]
         [PropertyData("PrefixFreeEnumCases")]

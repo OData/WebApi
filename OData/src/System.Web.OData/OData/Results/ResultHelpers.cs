@@ -36,8 +36,8 @@ namespace System.Web.OData.Results
             if (entityContext.NavigationSource.NavigationSourceKind() == EdmNavigationSourceKind.ContainedEntitySet)
             {
                 return GenerateContainmentODataPathSegments(entityContext, isEntityId);
-            } 
-            
+            }
+
             NavigationSourceLinkBuilderAnnotation linkBuilder =
                 entityContext.EdmModel.GetNavigationSourceLinkBuilder(entityContext.NavigationSource);
             Contract.Assert(linkBuilder != null);
@@ -100,8 +100,7 @@ namespace System.Web.OData.Results
                 unresolvedPathSegment: null,
                 id: null,
                 enableUriTemplateParsing: false,
-                parameterAliasNodes: new Dictionary<string, ODL.SingleValueNode>(),
-                queryString: new NameValueCollection());
+                parameterAliasNodes: new Dictionary<string, ODL.SingleValueNode>());
 
             List<ODataPathSegment> odataPath = path.Segments.ToList();
             odataPath.Add(new EntitySetPathSegment((IEdmEntitySetBase)entityContext.NavigationSource));

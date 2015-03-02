@@ -206,11 +206,7 @@ namespace System.Web.OData.Routing
                 unresolvedPathSegment,
                 id,
                 enableUriTemplateParsing,
-                unresolvedPathSegment == null ?
-                    uriParser.ParameterAliasNodes :
-                // We can't get parameter alias if ODataUnrecognizedPathException was thrown.
-                    new Dictionary<string, Semantic.SingleValueNode>(),
-                unresolvedPathSegment == null ? null : queryString);
+                uriParser.ParameterAliasNodes);
 
             CheckNavigableProperty(webAPIPath, model);
             return webAPIPath;

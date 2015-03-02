@@ -24,7 +24,6 @@ namespace System.Web.OData.Routing
         private readonly IEdmModel _model;
         private readonly bool _enableUriTemplateParsing;
         private IDictionary<string, SingleValueNode> _parameterAliasValueNodes;
-        private NameValueCollection _queryString;
 
         /// <summary>
         /// Translates an ODL path to Web API path.
@@ -35,7 +34,6 @@ namespace System.Web.OData.Routing
         /// <param name="id">The key segment from $id.</param>
         /// <param name="enableUriTemplateParsing">Specifies the ODL path is template or not.</param>
         /// <param name="parameterAliasNodes">The parameter alias nodes info.</param>
-        /// <param name="queryString">The query string.</param>
         /// <returns>The translated Web API path.</returns>
         public static ODataPath TranslateODLPathToWebAPIPath(
             Semantic.ODataPath path,
@@ -43,8 +41,7 @@ namespace System.Web.OData.Routing
             UnresolvedPathSegment unresolvedPathSegment,
             KeySegment id,
             bool enableUriTemplateParsing,
-            IDictionary<string, SingleValueNode> parameterAliasNodes,
-            NameValueCollection queryString)
+            IDictionary<string, SingleValueNode> parameterAliasNodes)
         {
             if (path == null)
             {
@@ -60,7 +57,7 @@ namespace System.Web.OData.Routing
             }
 
             IList<ODataPathSegment> segments = path.WalkWith(
-                new ODataPathSegmentTranslator(model, enableUriTemplateParsing, parameterAliasNodes, queryString))
+                new ODataPathSegmentTranslator(model, enableUriTemplateParsing, parameterAliasNodes))
                 .SelectMany(s => s).ToList();
 
             if (unresolvedPathSegment != null)
@@ -86,12 +83,10 @@ namespace System.Web.OData.Routing
         /// <param name="model">The model used to parse the path.</param>
         /// <param name="enableUriTemplateParsing">Specifies parsing path template or not.</param>
         /// <param name="parameterAliasNodes">The parameter alias nodes info.</param>
-        /// <param name="queryString">The query string.</param>
         public ODataPathSegmentTranslator(
             IEdmModel model,
             bool enableUriTemplateParsing,
-            IDictionary<string, SingleValueNode> parameterAliasNodes,
-            NameValueCollection queryString)
+            IDictionary<string, SingleValueNode> parameterAliasNodes)
         {
             if (model == null)
             {
@@ -106,7 +101,6 @@ namespace System.Web.OData.Routing
             _model = model;
             _enableUriTemplateParsing = enableUriTemplateParsing;
             _parameterAliasValueNodes = parameterAliasNodes;
-            _queryString = queryString;
         }
 
         /// <summary>
@@ -475,36 +469,12 @@ namespace System.Web.OData.Routing
                 node.GetType().FullName);
         }
 
-        // Translate parameter alias to string literal.
-        // Use the query string to do the translataion if it is not null,
-        // otherwise use the parameter alias node mapping from ODL parser.
-        // The query string is not null if and only if there is some unresolved path segment.
+        // Translate parameter alias to string literal by using the parameter alias node mapping from ODL parser.
         private string TranslateParameterAlias(string alias)
         {
             if (alias == null)
             {
                 throw Error.ArgumentNull("alias");
-            }
-
-            if (_queryString != null)
-            {
-                string value = _queryString.Get(alias);
-
-                if (value == null)
-                {
-                    return null;
-                }
-
-                value = value.Trim();
-
-                if (value.StartsWith("@", StringComparison.Ordinal))
-                {
-                    return TranslateParameterAlias(value);
-                }
-                else
-                {
-                    return value;
-                }
             }
 
             SingleValueNode singleValueNode;

@@ -208,7 +208,7 @@ namespace System.Web.OData.Routing.Conventions
                     ILookup<string, HttpActionDescriptor> actionMapping = actionSelector.GetActionMapping(controller);
                     HttpActionDescriptor[] actions = actionMapping.SelectMany(a => a).ToArray();
  
-                    foreach (string prefix in AttributeRoutingConvention.GetODataRoutePrefixes(controller))
+                    foreach (string prefix in GetODataRoutePrefixes(controller))
                     {
                         foreach (HttpActionDescriptor action in actions)
                         {

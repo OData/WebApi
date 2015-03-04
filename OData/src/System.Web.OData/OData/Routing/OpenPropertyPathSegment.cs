@@ -65,7 +65,7 @@ namespace System.Web.OData.Routing
         /// </returns>
         public override string ToString()
         {
-            return this.PropertyName;
+            return PropertyName;
         }
 
         /// <inheritdoc/>
@@ -73,7 +73,7 @@ namespace System.Web.OData.Routing
         {
             return
                 pathSegment.SegmentKind == ODataSegmentKinds.OpenProperty &&
-                ((OpenPropertyPathSegment)pathSegment).PropertyName == this.PropertyName;
+                ((OpenPropertyPathSegment)pathSegment).PropertyName == PropertyName;
         }
     }
 }

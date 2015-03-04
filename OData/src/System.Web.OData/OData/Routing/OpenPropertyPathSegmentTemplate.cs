@@ -25,18 +25,18 @@ namespace System.Web.OData.Routing
                 throw Error.ArgumentNull("openPropertyPathSegment");
             }
 
-            this.PropertyName = openPropertyPathSegment.PropertyName;
-            this.TreatPropertyNameAsParameterName = false;
+            PropertyName = openPropertyPathSegment.PropertyName;
+            TreatPropertyNameAsParameterName = false;
 
-            if (OpenPropertyPathSegmentTemplate.IsRouteParameter(this.PropertyName))
+            if (OpenPropertyPathSegmentTemplate.IsRouteParameter(PropertyName))
             {
-                this.PropertyName = this.PropertyName.Substring(1, this.PropertyName.Length - 2);
-                this.TreatPropertyNameAsParameterName = true;
+                PropertyName = PropertyName.Substring(1, PropertyName.Length - 2);
+                TreatPropertyNameAsParameterName = true;
 
-                if (String.IsNullOrEmpty(this.PropertyName))
+                if (String.IsNullOrEmpty(PropertyName))
                 {
                     throw new ODataException(
-                        Error.Format(SRResources.EmptyParameterAlias, this.PropertyName, openPropertyPathSegment));
+                        Error.Format(SRResources.EmptyParameterAlias, PropertyName, openPropertyPathSegment));
                 }
             }
         }
@@ -60,13 +60,13 @@ namespace System.Web.OData.Routing
 
                 // If we're treating the property name as a parameter store the provided name in our values collection
                 // using the name from the template as the key.
-                if (this.TreatPropertyNameAsParameterName)
+                if (TreatPropertyNameAsParameterName)
                 {
-                    values[this.PropertyName] = openPropertyPathSegment.PropertyName;
+                    values[PropertyName] = openPropertyPathSegment.PropertyName;
                     return true;
                 }
 
-                if (this.PropertyName == openPropertyPathSegment.PropertyName)
+                if (PropertyName == openPropertyPathSegment.PropertyName)
                 {
                     return true;
                 }

@@ -195,7 +195,7 @@ namespace System.Web.OData.Formatter.Deserialization
             IEdmModel model = builder.GetEdmModel();
             IEdmComplexTypeReference addressTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenAddress)).AsComplex();
 
-            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
+            var deserializerProvider = new DefaultODataDeserializerProvider();
             var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
 
             ODataEnumValue enumValue = new ODataEnumValue("Third", typeof(SimpleEnum).FullName);

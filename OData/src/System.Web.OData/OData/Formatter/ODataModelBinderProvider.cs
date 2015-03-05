@@ -163,14 +163,13 @@ namespace System.Web.OData.Formatter
                 ODataEnumValue enumValue = oDataValue as ODataEnumValue;
                 if (enumValue != null)
                 {
-                    if (!readContext.IsUntyped)
-                    {
-                        return EnumDeserializationHelpers.ConvertEnumValue(enumValue, bindingContext.ModelType);
-                    }
+                    IEdmEnumTypeReference edmEnumType = edmTypeReference.AsEnum();
+                    Contract.Assert(edmEnumType != null);
 
-                    // Enum (de)serialization on un-type doesn't work
-                    // Currently, just return the "string" value of the ODataEnumValue for un-type enum type.
-                    return enumValue.Value;
+                    ODataEnumDeserializer deserializer =
+                        (ODataEnumDeserializer)DeserializerProvider.GetEdmTypeDeserializer(edmEnumType);
+
+                    return deserializer.ReadInline(enumValue, edmEnumType, readContext);
                 }
 
                 // primitive value

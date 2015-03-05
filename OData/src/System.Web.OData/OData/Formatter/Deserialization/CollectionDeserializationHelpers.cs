@@ -129,6 +129,11 @@ namespace System.Web.OData.Formatter.Deserialization
                 instance = new EdmEntityObjectCollection(edmCollectionType);
                 return true;
             }
+            else if (collectionType == typeof(EdmEnumObjectCollection))
+            {
+                instance = new EdmEnumObjectCollection(edmCollectionType);
+                return true;
+            }
             else if (collectionType.IsGenericType)
             {
                 Type genericDefinition = collectionType.GetGenericTypeDefinition();

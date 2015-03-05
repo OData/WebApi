@@ -94,6 +94,15 @@ namespace System.Web.OData.Formatter.Deserialization
                     }
                     return complexCollection;
                 }
+                else if (readContext.IsUntyped && elementType.IsEnum())
+                {
+                    EdmEnumObjectCollection enumCollection = new EdmEnumObjectCollection(collectionType);
+                    foreach (EdmEnumObject enumObject in result)
+                    {
+                        enumCollection.Add(enumObject);
+                    }
+                    return enumCollection;
+                } 
                 else
                 {
                     Type elementClrType = EdmLibHelpers.GetClrType(elementType, readContext.Model);

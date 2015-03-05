@@ -132,6 +132,8 @@
     <Compile Include="OData\Builder\TestModels\SpecialOrderLine.cs" />
     <Compile Include="OData\ClrPropertyInfoAnnotationTest.cs" />
     <Compile Include="OData\DateTimeTest.cs" />
+    <Compile Include="OData\EdmEnumObjectCollectionTest.cs" />
+    <Compile Include="OData\EdmEnumObjectTest.cs" />
     <Compile Include="OData\EnableQueryTests.cs" />
     <Compile Include="OData\Formatter\ODataFunctionTests.cs" />
     <Compile Include="OData\ODataContainmentTest.cs" />

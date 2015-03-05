@@ -29,6 +29,9 @@ namespace System.Web.OData.Formatter
         private const string ComplexValue = "(address=@p)?@p=" + ComplexValue1;
         private const string CollectionComplex = "(addresses=@p)?@p=[" + ComplexValue1 + "," + ComplexValue2 + "]";
 
+        private const string EnumValue = "(color=NS.Color'Red')";
+        private const string CollectionEnum = "(colors=@p)?@p=['Red', 'Green']";
+
         private const string EntityValue1 = "{\"@odata.type\":\"%23NS.Customer\",\"Id\":91,\"Name\":\"John\",\"Location\":" + ComplexValue1 + "}";
         private const string EntityValue2 = "{\"@odata.type\":\"%23NS.SpecialCustomer\",\"Id\":92,\"Name\":\"Mike\",\"Location\":" + ComplexValue2 + ",\"Title\":\"883F50C5-F554-4C49-98EA-F7CACB41658C\"}";
 
@@ -74,6 +77,10 @@ namespace System.Web.OData.Formatter
 
                     { GetBoundFunction("ComplexCollectionFunction", CollectionComplex) },
 
+                    { GetBoundFunction("EnumFunction", EnumValue) },
+
+                    { GetBoundFunction("EnumCollectionFunction", CollectionEnum) },
+
                     { GetBoundFunction("EntityFunction", EntityValue) },
                     { GetBoundFunction("EntityFunction", EntityReference) },// reference
 
@@ -94,6 +101,10 @@ namespace System.Web.OData.Formatter
                     { GetUnboundFunction("UnboundComplexFunction", ComplexValue) },
 
                     { GetUnboundFunction("UnboundComplexCollectionFunction", CollectionComplex) },
+
+                    { GetUnboundFunction("UnboundEnumFunction", EnumValue) },
+
+                    { GetUnboundFunction("UnboundEnumCollectionFunction", CollectionEnum) },
 
                     { GetUnboundFunction("UnboundEntityFunction", EntityValue) },
                     { GetUnboundFunction("UnboundEntityFunction", EntityReference) },// reference
@@ -206,6 +217,9 @@ namespace System.Web.OData.Formatter
             EdmComplexTypeReference complexType = new EdmComplexTypeReference(address, isNullable: false);
             EdmCollectionTypeReference complexCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(complexType));
 
+            EdmEnumTypeReference enumType = new EdmEnumTypeReference(colorEnum, isNullable: false);
+            EdmCollectionTypeReference enumCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(enumType));
+
             EdmEntityTypeReference entityType = new EdmEntityTypeReference(customer, isNullable: false);
             EdmCollectionTypeReference entityCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(entityType));
 
@@ -219,6 +233,10 @@ namespace System.Web.OData.Formatter
 
             BoundFunction(model, "ComplexCollectionFunction", "addresses", complexCollectionType, entityType);
 
+            BoundFunction(model, "EnumFunction", "color", enumType, entityType);
+
+            BoundFunction(model, "EnumCollectionFunction", "colors", enumCollectionType, entityType);
+
             BoundFunction(model, "EntityFunction", "customer", entityType, entityType);
 
             BoundFunction(model, "CollectionEntityFunction", "customers", entityCollectionType, entityType);
@@ -229,6 +247,10 @@ namespace System.Web.OData.Formatter
             UnboundFunction(container, "UnboundComplexFunction", "address", complexType);
 
             UnboundFunction(container, "UnboundComplexCollectionFunction", "addresses", complexCollectionType);
+
+            UnboundFunction(container, "UnboundEnumFunction", "color", enumType);
+
+            UnboundFunction(container, "UnboundEnumCollectionFunction", "colors", enumCollectionType);
 
             UnboundFunction(container, "UnboundEntityFunction", "customer", entityType);
 
@@ -275,6 +297,41 @@ namespace System.Web.OData.Formatter
             Assert.Equal(7, values[3]);
             Assert.Equal(8, values[4]);
 
+            return true;
+        }
+
+        [HttpGet]
+        [ODataRoute("FCustomers({key})/NS.EnumFunction(color={color})")]
+        [ODataRoute("UnboundEnumFunction(key={key},color={color})")]
+        public bool EnumFunction(int key, [FromODataUri] EdmEnumObject color)
+        {
+            Assert.NotNull(color);
+            Assert.Equal("NS.Color", color.GetEdmType().FullName());
+            Assert.Equal("0", color.Value);
+            return true;
+        }
+
+        [HttpGet]
+        [ODataRoute("FCustomers({key})/NS.EnumCollectionFunction(colors={colors})")]
+        [ODataRoute("UnboundEnumCollectionFunction(key={key},colors={colors})")]
+        public bool EnumCollectionFunction(int key, [FromODataUri] EdmEnumObjectCollection colors)
+        {
+            Assert.NotNull(colors);
+            IList<IEdmEnumObject> results = colors.ToList();
+
+            Assert.Equal(2, results.Count);
+
+            // #1
+            EdmEnumObject color = results[0] as EdmEnumObject;
+            Assert.NotNull(color);
+            Assert.Equal("NS.Color", color.GetEdmType().FullName());
+            Assert.Equal("Red", color.Value);
+
+            // #2
+            EdmEnumObject color2 = results[1] as EdmEnumObject;
+            Assert.NotNull(color2);
+            Assert.Equal("NS.Color", color2.GetEdmType().FullName());
+            Assert.Equal("Green", color2.Value);
             return true;
         }
 

@@ -75,6 +75,9 @@
     <Compile Include="Extensions\HttpErrorExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
+    <Compile Include="OData\EdmEnumObjectCollection.cs" />
+    <Compile Include="OData\EdmEnumObject.cs" />
+    <Compile Include="OData\IEdmEnumObject.cs" />
     <Compile Include="OData\ODataUriResolverSetttings.cs" />
     <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />

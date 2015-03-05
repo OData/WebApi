@@ -293,7 +293,8 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("DELETE", "RoutingCustomers(1)/Products/$ref?$id=http://localhost/MyRoot/odata/SpecialProducts(5)")]
+        [InlineData("DELETE", "RoutingCustomers(1)/SpecialProducts/$ref?$id=http://localhost/MyRoot/odata/Products(5)")]
+        [InlineData("DELETE", "Destinations(1)/Parents/$ref?$id=http://localhost/MyRoot/odata/Destinations(5)")]
         public async Task RoutesCorrectly_DeleteRefWithDerivedNavigationProperty(string httpMethod, string uri)
         {
             // Arrange & Act
@@ -360,7 +361,8 @@ namespace System.Web.OData.Routing
                 typeof(MetadataController),
                 typeof(RoutingCustomersController),
                 typeof(ProductsController),
-                typeof(EnumCustomersController)
+                typeof(EnumCustomersController),
+                typeof(DestinationsController)
             };
 
             TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
@@ -479,7 +481,11 @@ namespace System.Web.OData.Routing
         {
             return "GetProducts";
         }
-
+        [AcceptVerbs("POST")]
+        public string GetSpecialProducts()
+        {
+            return "GetSpecialProducts";
+        }
         [AcceptVerbs("POST")]
         public string GetMostProfitableOnCollectionOfVIP()
         {
@@ -621,6 +627,30 @@ namespace System.Web.OData.Routing
         public string TopProductOfAllByCityAndModel(string city, int model)
         {
             return String.Format(CultureInfo.InvariantCulture, "TopProductOfAllByCityAndModel({0}, {1})", city, model);
+        }
+    }
+
+    public class DestinationsController : ODataController
+    {
+        public string Get(int key)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "Get({0})", key);
+        }
+
+        [AcceptVerbs("POST", "PUT")]
+        public string CreateRef(int key, string navigationProperty)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "CreateRef({0})({1})", key, navigationProperty);
+        }
+
+        public string DeleteRef(int key, string navigationProperty)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "DeleteRef({0})({1})", key, navigationProperty);
+        }
+
+        public string DeleteRef(int key, int relatedKey, string navigationProperty)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "DeleteRef({0})({1})({2})", key, relatedKey, navigationProperty);
         }
     }
 

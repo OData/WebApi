@@ -481,6 +481,7 @@ namespace System.Web.OData.Routing
         {
             return "GetProducts";
         }
+
         [AcceptVerbs("POST")]
         public string GetSpecialProducts()
         {

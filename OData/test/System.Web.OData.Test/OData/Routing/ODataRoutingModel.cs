@@ -23,7 +23,6 @@ namespace System.Web.OData.Routing
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
             builder.EntitySet<RoutingCustomer>("RoutingCustomers");
             builder.EntitySet<Product>("Products");
-            builder.EntitySet<SpecialProduct>("SpecialProducts");
             builder.EntitySet<SalesPerson>("SalesPeople");
             builder.EntitySet<EmailAddress>("EmailAddresses");
             builder.EntitySet<üCategory>("üCategories");
@@ -31,6 +30,7 @@ namespace System.Web.OData.Routing
             builder.Singleton<RoutingCustomer>("VipCustomer");
             builder.Singleton<Product>("MyProduct");
             builder.EntitySet<DateTimeOffsetKeyCustomer>("DateTimeOffsetKeyCustomers");
+            builder.EntitySet<Destination>("Destinations");
             builder.ComplexType<Dog>();
             builder.ComplexType<Cat>();
 
@@ -237,6 +237,7 @@ namespace System.Web.OData.Routing
             public int ID { get; set; }
             public string Name { get; set; }
             public virtual List<Product> Products { get; set; }
+            public virtual List<SpecialProduct> SpecialProducts { get; set; }
             public Address Address { get; set; }
             public Pet Pet { get; set; }
         }
@@ -323,6 +324,18 @@ namespace System.Web.OData.Routing
         public class DateTimeOffsetKeyCustomer
         {
             public DateTimeOffset ID { get; set; }
+        }
+
+        public class Destination
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public virtual List<DestinationGroup> Parents { get; set; }
+        }
+
+        public class DestinationGroup : Destination
+        {
+            public virtual List<Destination> Children { get; set; }
         }
     }
 }

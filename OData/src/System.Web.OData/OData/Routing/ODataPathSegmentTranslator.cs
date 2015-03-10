@@ -281,7 +281,7 @@ namespace System.Web.OData.Routing
         /// <returns>Translated WebApi path segment.</returns>
         public override IEnumerable<ODataPathSegment> Translate(OpenPropertySegment segment)
         {
-            yield return new OpenPropertyPathSegment(segment.PropertyName);
+            yield return new DynamicPropertyPathSegment(segment.PropertyName);
         }
 
         /// <summary>

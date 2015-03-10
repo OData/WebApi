@@ -10,25 +10,25 @@ using Microsoft.OData.Core;
 namespace System.Web.OData.Routing
 {
     /// <summary>
-    /// Represents a template that can match a <see cref="OpenPropertyPathSegment"/>.
+    /// Represents a template that can match a <see cref="DynamicPropertyPathSegment"/>.
     /// </summary>
-    public class OpenPropertyPathSegmentTemplate : ODataPathSegmentTemplate
+    public class DynamicPropertyPathSegmentTemplate : ODataPathSegmentTemplate
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenPropertyPathSegmentTemplate"/> class.
+        /// Initializes a new instance of the <see cref="DynamicPropertyPathSegmentTemplate"/> class.
         /// </summary>
-        /// <param name="openPropertyPathSegment">The key value segment to be parsed as a template.</param>
-        public OpenPropertyPathSegmentTemplate(OpenPropertyPathSegment openPropertyPathSegment)
+        /// <param name="dynamicPropertyPathSegment">The key value segment to be parsed as a template.</param>
+        public DynamicPropertyPathSegmentTemplate(DynamicPropertyPathSegment dynamicPropertyPathSegment)
         {
-            if (openPropertyPathSegment == null)
+            if (dynamicPropertyPathSegment == null)
             {
-                throw Error.ArgumentNull("openPropertyPathSegment");
+                throw Error.ArgumentNull("dynamicPropertyPathSegment");
             }
 
-            PropertyName = openPropertyPathSegment.PropertyName;
+            PropertyName = dynamicPropertyPathSegment.PropertyName;
             TreatPropertyNameAsParameterName = false;
 
-            if (OpenPropertyPathSegmentTemplate.IsRouteParameter(PropertyName))
+            if (IsRouteParameter(PropertyName))
             {
                 PropertyName = PropertyName.Substring(1, PropertyName.Length - 2);
                 TreatPropertyNameAsParameterName = true;
@@ -36,13 +36,13 @@ namespace System.Web.OData.Routing
                 if (String.IsNullOrEmpty(PropertyName))
                 {
                     throw new ODataException(
-                        Error.Format(SRResources.EmptyParameterAlias, PropertyName, openPropertyPathSegment));
+                        Error.Format(SRResources.EmptyParameterAlias, PropertyName, dynamicPropertyPathSegment));
                 }
             }
         }
 
         /// <summary>
-        /// The parameter name of the open property.
+        /// The parameter name of the dynamic property.
         /// </summary>
         public string PropertyName { get; private set; }
 
@@ -54,19 +54,19 @@ namespace System.Web.OData.Routing
         /// <inheritdoc />
         public override bool TryMatch(ODataPathSegment pathSegment, IDictionary<string, object> values)
         {
-            if (pathSegment.SegmentKind == ODataSegmentKinds.OpenProperty)
+            if (pathSegment.SegmentKind == ODataSegmentKinds.DynamicProperty)
             {
-                var openPropertyPathSegment = (OpenPropertyPathSegment)pathSegment;
+                var dynamicPropertyPathSegment = (DynamicPropertyPathSegment)pathSegment;
 
                 // If we're treating the property name as a parameter store the provided name in our values collection
                 // using the name from the template as the key.
                 if (TreatPropertyNameAsParameterName)
                 {
-                    values[PropertyName] = openPropertyPathSegment.PropertyName;
+                    values[PropertyName] = dynamicPropertyPathSegment.PropertyName;
                     return true;
                 }
 
-                if (PropertyName == openPropertyPathSegment.PropertyName)
+                if (PropertyName == dynamicPropertyPathSegment.PropertyName)
                 {
                     return true;
                 }

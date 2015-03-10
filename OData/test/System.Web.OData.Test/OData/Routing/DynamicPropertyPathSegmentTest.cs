@@ -5,19 +5,19 @@ using Microsoft.TestCommon;
 
 namespace System.Web.OData.Routing
 {
-    public class OpenPropertyPathSegmentTest
+    public class DynamicPropertyPathSegmentTest
     {
         [Fact]
         public void Ctor_ThrowsArgumentNull_PropertyName()
         {
-            Assert.ThrowsArgumentNull(() => new OpenPropertyPathSegment(propertyName: null), "propertyName");
+            Assert.ThrowsArgumentNull(() => new DynamicPropertyPathSegment(propertyName: null), "propertyName");
         }
 
         [Fact]
         public void TryMatch()
         {
-            OpenPropertyPathSegment leftSegment = new OpenPropertyPathSegment("property");
-            OpenPropertyPathSegment rightSegment = new OpenPropertyPathSegment("property");
+            DynamicPropertyPathSegment leftSegment = new DynamicPropertyPathSegment("property");
+            DynamicPropertyPathSegment rightSegment = new DynamicPropertyPathSegment("property");
 
             // Act
             Dictionary<string, object> values = new Dictionary<string, object>();
@@ -30,8 +30,8 @@ namespace System.Web.OData.Routing
         [Fact]
         public void TryMatch_DifferentName()
         {
-            OpenPropertyPathSegment leftSegment = new OpenPropertyPathSegment("property");
-            OpenPropertyPathSegment rightSegment = new OpenPropertyPathSegment("nomatch");
+            DynamicPropertyPathSegment leftSegment = new DynamicPropertyPathSegment("property");
+            DynamicPropertyPathSegment rightSegment = new DynamicPropertyPathSegment("nomatch");
 
             // Act
             Dictionary<string, object> values = new Dictionary<string, object>();
@@ -44,7 +44,7 @@ namespace System.Web.OData.Routing
         [Fact]
         public void TryMatch_DifferentType()
         {
-            OpenPropertyPathSegment leftSegment = new OpenPropertyPathSegment("property");
+            DynamicPropertyPathSegment leftSegment = new DynamicPropertyPathSegment("property");
             KeyValuePathSegment rightSegment = new KeyValuePathSegment("value");
 
             // Act

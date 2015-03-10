@@ -288,7 +288,7 @@ namespace System.Web.OData.Routing
         {
             public SalesPerson()
             {
-                this.OpenProperties = new Dictionary<string, object>();
+                this.DynamicProperties = new Dictionary<string, object>();
             }
 
             public int ID { get; set; }
@@ -296,7 +296,7 @@ namespace System.Web.OData.Routing
             public virtual List<VIP> ManagedRoutingCustomers { get; set; }
             public virtual List<ImportantProduct> ManagedProducts { get; set; }
 
-            public IDictionary<string, object> OpenProperties { get; set; }
+            public IDictionary<string, object> DynamicProperties { get; set; }
         }
 
         public class VIP : RoutingCustomer

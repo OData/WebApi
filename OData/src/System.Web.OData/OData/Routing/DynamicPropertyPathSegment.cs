@@ -7,15 +7,15 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData.Routing
 {
     /// <summary>
-    /// An <see cref="ODataPathSegment"/> implementation representing an open property.
+    /// An <see cref="ODataPathSegment"/> implementation representing a dynamic property.
     /// </summary>
-    public class OpenPropertyPathSegment : ODataPathSegment
+    public class DynamicPropertyPathSegment : ODataPathSegment
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenPropertyPathSegment" /> class.
+        /// Initializes a new instance of the <see cref="DynamicPropertyPathSegment" /> class.
         /// </summary>
-        /// <param name="propertyName">The name of the open property.</param>
-        public OpenPropertyPathSegment(string propertyName)
+        /// <param name="propertyName">The name of the dynamic property.</param>
+        public DynamicPropertyPathSegment(string propertyName)
         {
             if (propertyName == null)
             {
@@ -26,7 +26,7 @@ namespace System.Web.OData.Routing
         }
 
         /// <summary>
-        /// Gets the name of the open property.
+        /// Gets the name of the dynamic property.
         /// </summary>
         public string PropertyName
         {
@@ -41,7 +41,7 @@ namespace System.Web.OData.Routing
         {
             get
             {
-                return ODataSegmentKinds.OpenProperty;
+                return ODataSegmentKinds.DynamicProperty;
             }
         }
 
@@ -72,8 +72,8 @@ namespace System.Web.OData.Routing
         public override bool TryMatch(ODataPathSegment pathSegment, IDictionary<string, object> values)
         {
             return
-                pathSegment.SegmentKind == ODataSegmentKinds.OpenProperty &&
-                ((OpenPropertyPathSegment)pathSegment).PropertyName == PropertyName;
+                pathSegment.SegmentKind == ODataSegmentKinds.DynamicProperty &&
+                ((DynamicPropertyPathSegment)pathSegment).PropertyName == PropertyName;
         }
     }
 }

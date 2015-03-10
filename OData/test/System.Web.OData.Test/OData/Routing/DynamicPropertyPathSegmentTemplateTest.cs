@@ -5,19 +5,19 @@ using Microsoft.TestCommon;
 
 namespace System.Web.OData.Routing
 {
-    public class OpenPropertyPathSegmentTemplateTest
+    public class DynamicPropertyPathSegmentTemplateTest
     {
         [Fact]
-        public void Ctor_ThrowsArgumentNull_OpenPropertyPathSegment()
+        public void Ctor_ThrowsArgumentNull_DynamicPropertyPathSegment()
         {
-            Assert.ThrowsArgumentNull(() => new OpenPropertyPathSegmentTemplate(openPropertyPathSegment: null), "openPropertyPathSegment");
+            Assert.ThrowsArgumentNull(() => new DynamicPropertyPathSegmentTemplate(dynamicPropertyPathSegment: null), "dynamicPropertyPathSegment");
         }
 
         [Fact]
         public void TryMatch_AlwaysTrueWhenParameterName()
         {
-            OpenPropertyPathSegmentTemplate template = new OpenPropertyPathSegmentTemplate(new OpenPropertyPathSegment("{parameter}"));
-            OpenPropertyPathSegment segment = new OpenPropertyPathSegment("property");
+            DynamicPropertyPathSegmentTemplate template = new DynamicPropertyPathSegmentTemplate(new DynamicPropertyPathSegment("{parameter}"));
+            DynamicPropertyPathSegment segment = new DynamicPropertyPathSegment("property");
 
             // Act
             Dictionary<string, object> values = new Dictionary<string, object>();
@@ -32,11 +32,11 @@ namespace System.Web.OData.Routing
         [Fact]
         public void TryMatch_ConditionalWhenPropertyName()
         {
-            OpenPropertyPathSegmentTemplate template = new OpenPropertyPathSegmentTemplate(new OpenPropertyPathSegment("matchingproperty"));
+            DynamicPropertyPathSegmentTemplate template = new DynamicPropertyPathSegmentTemplate(new DynamicPropertyPathSegment("matchingproperty"));
 
             foreach (bool b in new bool[] { true, false })
             {
-                OpenPropertyPathSegment segment = new OpenPropertyPathSegment(b ? "matchingproperty" : "notmatchingproperty");
+                DynamicPropertyPathSegment segment = new DynamicPropertyPathSegment(b ? "matchingproperty" : "notmatchingproperty");
 
                 // Act
                 Dictionary<string, object> values = new Dictionary<string, object>();

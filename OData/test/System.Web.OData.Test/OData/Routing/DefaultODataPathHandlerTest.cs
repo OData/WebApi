@@ -177,7 +177,7 @@ namespace System.Web.OData.Routing
         [InlineData("RoutingCustomers/$count", "~/entityset/$count", "RoutingCustomers/$count")]
         [InlineData("RoutingCustomers(100)/Products/$count", "~/entityset/key/navigation/$count", "RoutingCustomers(100)/Products/$count")]
         [InlineData("UnboundFunction()/$count", "~/unboundfunction/$count", "UnboundFunction()/$count")]
-        [InlineData("SalesPeople(100)/Foo", "~/entityset/key/openproperty", "SalesPeople(100)/Foo")]
+        [InlineData("SalesPeople(100)/Foo", "~/entityset/key/dynamicproperty", "SalesPeople(100)/Foo")]
         public void Parse_ReturnsPath_WithCorrectTemplateAndPathString(string odataPath, string template, string pathString)
         {
             ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
@@ -485,8 +485,8 @@ namespace System.Web.OData.Routing
             Assert.NotNull(segment);
             Assert.Equal("Foo", segment.ToString());
             Assert.Null(path.NavigationSource);
-            OpenPropertyPathSegment openProperty = Assert.IsType<OpenPropertyPathSegment>(segment);
-            Assert.Equal("Foo", openProperty.PropertyName);
+            DynamicPropertyPathSegment dynamicPropertyPathSegment = Assert.IsType<DynamicPropertyPathSegment>(segment);
+            Assert.Equal("Foo", dynamicPropertyPathSegment.PropertyName);
         }
 
         [Theory]

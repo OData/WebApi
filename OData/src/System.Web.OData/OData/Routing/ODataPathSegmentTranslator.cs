@@ -448,6 +448,13 @@ namespace System.Web.OData.Routing
                     }
                 }
 
+                // Make the enum prefix free to work.
+                ODataEnumValue enumValue = constantNode.Value as ODataEnumValue;
+                if (enumValue != null)
+                {
+                    return ODataUriUtils.ConvertToUriLiteral(enumValue, ODataVersion.V4);
+                }
+
                 return constantNode.LiteralText;
             }
 

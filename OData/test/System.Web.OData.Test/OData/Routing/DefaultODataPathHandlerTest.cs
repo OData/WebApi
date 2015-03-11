@@ -2020,11 +2020,11 @@ namespace System.Web.OData.Routing
                 {
                     { "UnboundFuncWithEnumParameters(LongEnum='ThirdLong', FlagsEnum='7')",
                       "~/unboundfunction",
-                      "UnboundFuncWithEnumParameters(LongEnum=ThirdLong,FlagsEnum=7)" },
+                      "UnboundFuncWithEnumParameters(LongEnum=Microsoft.TestCommon.Types.LongEnum'2',FlagsEnum=Microsoft.TestCommon.Types.FlagsEnum'7')" },
 
                     { "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum='1', FlagsEnum='One, Four')",
                       "~/entityset/function",
-                      "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum=1,FlagsEnum=One, Four)"}
+                      "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum=Microsoft.TestCommon.Types.SimpleEnum'1',FlagsEnum=Microsoft.TestCommon.Types.FlagsEnum'5')"}
                 };
             }
         }

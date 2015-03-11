@@ -9,6 +9,7 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
+using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
@@ -188,11 +189,46 @@ namespace System.Web.OData
             return config;
         }
 
+        [Theory]
+        [InlineData("gender='Male'", true, HttpStatusCode.OK)]
+        [InlineData("gender='Male'", false, HttpStatusCode.NotFound)]
+        [InlineData("gender=System.Web.OData.TestCommon.Models.Gender'Male'", true, HttpStatusCode.OK)]
+        [InlineData("gender=System.Web.OData.TestCommon.Models.Gender'Male'", false, HttpStatusCode.OK)]
+        [InlineData("gender='SomeUnknowValue'", true, HttpStatusCode.NotFound)]
+        [InlineData("gender=System.Web.OData.TestCommon.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.NotFound)]
+        public void ExtensionResolver_Works_EnumPrefixFree(string parameter, bool enableEnumPrefix, HttpStatusCode statusCode)
+        {
+            // Arrange
+            IEdmModel model = GetEdmModel();
+            HttpConfiguration config = new[] { typeof(ParserExtenstionCustomersController) }.GetHttpConfiguration();
+            config.EnableEnumPrefixFree(enableEnumPrefix);
+            config.MapODataServiceRoute("odata", "odata", model);
+            HttpClient client = new HttpClient(new HttpServer(config));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                String.Format("http://localhost/odata/ParserExtenstionCustomers/Default.GetCustomerByGender({0})", parameter));
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(statusCode, response.StatusCode);
+
+            if (statusCode == HttpStatusCode.OK)
+            {
+                Assert.Equal("GetCustomerByGender/Male", (response.Content as ObjectContent<string>).Value);
+            }
+        }
+
         private static IEdmModel GetEdmModel()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<ParserExtenstionCustomer>("ParserExtenstionCustomers");
             builder.EntitySet<ParserExtenstionOrder>("ParserExtenstionOrders");
+
+            builder.EntityType<ParserExtenstionCustomer>()
+                .Collection.Function("GetCustomerByGender")
+                .Returns<string>()
+                .Parameter<Gender>("gender");
             return builder.GetEdmModel();
         }
     }
@@ -210,6 +246,12 @@ namespace System.Web.OData
         {
             ParserExtenstionCustomer customer = ParserExtensionCustomersContext.customers.First(c => c.Id == key);
             return Ok(customer.Orders);
+        }
+
+        [HttpGet]
+        public IHttpActionResult GetCustomerByGender(Gender gender)
+        {
+            return Ok("GetCustomerByGender/" + gender);
         }
     }
 

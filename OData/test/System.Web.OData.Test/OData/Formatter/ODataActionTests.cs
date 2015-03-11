@@ -47,7 +47,9 @@ namespace System.Web.OData.Formatter
                 ""p1"": 1, 
                 ""p2"": { ""StreetAddress"": ""1 Microsoft Way"", ""City"": ""Redmond"", ""State"": ""WA"", ""ZipCode"": 98052 }, 
                 ""p3"": [ ""one"", ""two"" ],  
-                ""p4"": [ { ""StreetAddress"": ""1 Microsoft Way"", ""City"": ""Redmond"", ""State"": ""WA"", ""ZipCode"": 98052 } ]
+                ""p4"": [ { ""StreetAddress"": ""1 Microsoft Way"", ""City"": ""Redmond"", ""State"": ""WA"", ""ZipCode"": 98052 } ],
+                ""color"": ""Red"",
+                ""colors"": [""Red"", null, ""Green""]
             }";
 
             request.Content = new StringContent(payload);
@@ -108,8 +110,10 @@ namespace System.Web.OData.Formatter
             ActionConfiguration action = customer.Action("DoSomething");
             action.Parameter<int>("p1");
             action.Parameter<Address>("p2");
+            action.Parameter<Color?>("color");
             action.CollectionParameter<string>("p3");
             action.CollectionParameter<Address>("p4");
+            action.CollectionParameter<Color?>("colors");
             return builder.GetEdmModel();
         }
 
@@ -125,6 +129,13 @@ namespace System.Web.OData.Formatter
             public string City { get; set; }
             public string State { get; set; }
             public int ZipCode { get; set; }
+        }
+
+        public enum Color
+        {
+            Red,
+            Blue,
+            Green
         }
     }
 
@@ -156,6 +167,16 @@ namespace System.Web.OData.Formatter
             ValidateAddress(parameters["p2"] as ODataActionTests.Address);
             ValidateNumbers((parameters["p3"] as IEnumerable<string>).ToList());
             ValidateAddresses((parameters["p4"] as IEnumerable<ODataActionTests.Address>).ToList());
+            Assert.Equal(ODataActionTests.Color.Red, parameters["color"]);
+
+            Assert.NotNull(parameters["colors"]);
+            IList<ODataActionTests.Color?> colors = (parameters["colors"] as IEnumerable<ODataActionTests.Color?>).ToList();
+            Assert.NotNull(colors);
+
+            Assert.Equal(ODataActionTests.Color.Red, colors[0]);
+            Assert.Null(colors[1]);
+            Assert.Equal(ODataActionTests.Color.Green, colors[2]);
+
             return true;
         }
 

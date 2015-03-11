@@ -231,7 +231,13 @@ namespace System.Web.OData.Formatter
             }
             else
             {
-                return GetClrType(edmTypeReference.Definition, edmModel, assembliesResolver);
+                Type clrType = GetClrType(edmTypeReference.Definition, edmModel, assembliesResolver);
+                if (clrType != null && clrType.IsEnum && edmTypeReference.IsNullable)
+                {
+                    return clrType.ToNullable();
+                }
+
+                return clrType;
             }
         }
 

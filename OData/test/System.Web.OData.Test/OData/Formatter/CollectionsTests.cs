@@ -61,6 +61,24 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
+        public void NullableEnumCollectionProperty_Deserialize()
+        {
+            // Arrange
+            string message = "{ \"ID\" : 42, \"NullableColors\" : [ \"Red\", null, \"Green\" ]}";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
+            request.Content = new StringContent(message);
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+            // Act
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            JToken result = JToken.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(new[] { "Red", null, "Green" }, result["NullableColors"].Values<string>());
+        }
+
+        [Fact]
         public void ComplexCollectionProperty_Deserialize()
         {
             string message = "{ \"ID\" : 42, \"ComplexCollection\" : [  { \"A\": 1 }, { \"A\": 2 }, { \"A\": 3 } ] }";
@@ -157,6 +175,7 @@ namespace System.Web.OData.Formatter
             Collection = new Collection<int> { 42 };
             ComplexCollection = new Complex[] { new Complex { A = 42 } };
             CustomCollection = new CustomCollection_CollectionsTestsModel<int> { 42 };
+            NullableColors = new Color?[] {};
         }
 
         public int ID { get; set; }
@@ -180,6 +199,8 @@ namespace System.Web.OData.Formatter
         public Vehicle Vehicle { get; set; }
 
         public CustomCollection_CollectionsTestsModel<int> CustomCollection { get; set; }
+
+        public IEnumerable<Color?> NullableColors { get; set; }
     }
 
     public class Complex

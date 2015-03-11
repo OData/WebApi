@@ -186,18 +186,55 @@ namespace System.Web.OData.Formatter
             Assert.IsAssignableFrom(expectedType, result);
         }
 
+        public static TheoryDataSet<IEdmTypeReference, Type> GetClrTypeTestData
+        {
+            get
+            {
+                IEdmPrimitiveType primitive = EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32);
+                IEdmModel edmModel = GetEdmModel();
+                IEdmEnumType enumType = edmModel.SchemaElements.OfType<IEdmEnumType>().First(e => e.Name == "AEnumType");
+                IEdmComplexType complex = edmModel.SchemaElements.OfType<IEdmComplexType>().First(e => e.Name == "AComplexType");
+                IEdmEntityType entity = edmModel.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "DerivedTypeA");
+                return new TheoryDataSet<IEdmTypeReference, Type>
+                {
+                    // non-nullable
+                    { new EdmPrimitiveTypeReference(primitive, isNullable: false), typeof(int) },
+                    { new EdmEnumTypeReference(enumType, isNullable: false), typeof(AEnumType) },
+                    { new EdmComplexTypeReference(complex, isNullable: false), typeof(AComplexType) },
+                    { new EdmEntityTypeReference(entity, isNullable: false), typeof(DerivedTypeA) },
+
+                    // nullable
+                    { new EdmPrimitiveTypeReference(primitive, isNullable: true), typeof(int?) },
+                    { new EdmEnumTypeReference(enumType, isNullable: true), typeof(AEnumType?) },
+                    { new EdmComplexTypeReference(complex, isNullable: true), typeof(AComplexType) },
+                    { new EdmEntityTypeReference(entity, isNullable: true), typeof(DerivedTypeA) },
+                };
+            }
+        }
+
+        [Theory]
+        [PropertyData("GetClrTypeTestData")]
+        public void GetClrType_ReturnsRightClrType(IEdmTypeReference edmTypeReference, Type expectedType)
+        {
+            Assert.Same(expectedType, EdmLibHelpers.GetClrType(edmTypeReference, GetEdmModel()));
+        }
+
+        private static IEdmModel _edmModel;
         private static IEdmModel GetEdmModel()
         {
-            ODataModelBuilder modelBuilder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
-            modelBuilder
-                .EntityType<DerivedTypeA>()
-                .DerivesFrom<BaseType>();
+            if (_edmModel == null)
+            {
+                ODataModelBuilder modelBuilder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+                modelBuilder.EntityType<DerivedTypeA>().DerivesFrom<BaseType>();
+                modelBuilder.EntityType<DerivedTypeB>().DerivesFrom<BaseType>();
 
-            modelBuilder
-                .EntityType<DerivedTypeB>()
-                .DerivesFrom<BaseType>();
+                modelBuilder.ComplexType<AComplexType>();
+                modelBuilder.EnumType<AEnumType>();
 
-            return modelBuilder.GetEdmModel();
+                _edmModel = modelBuilder.GetEdmModel();
+            }
+
+            return _edmModel;
         }
 
         public class BaseType
@@ -213,6 +250,14 @@ namespace System.Web.OData.Formatter
         }
 
         public class DerivedTypeAA : DerivedTypeA
+        {
+        }
+
+        public class AComplexType
+        {
+        }
+
+        public enum AEnumType
         {
         }
 

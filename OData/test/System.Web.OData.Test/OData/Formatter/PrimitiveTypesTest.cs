@@ -13,6 +13,7 @@ using System.Web.OData.Routing;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -35,6 +36,8 @@ namespace System.Web.OData.Formatter
                     {typeof(byte), (byte)64, fullMetadata, "ByteFullMetadata.json"},
                     {typeof(byte[]), new byte[] { 0, 2, 32, 64, 128, 255 }, fullMetadata, "ArrayOfByteFullMetadata.json"},
                     {typeof(DateTimeOffset), new DateTimeOffset(2010, 1, 1, 0, 0, 0, TimeSpan.Zero), fullMetadata, "DateTimeOffsetFullMetadata.json"},
+                    {typeof(Date), new Date(2014, 10, 14), fullMetadata, "DateFullMetadata.json"},
+                    {typeof(TimeOfDay), new TimeOfDay(12, 13, 14, 15), fullMetadata, "TimeOfDayFullMetadata.json"},
                     {typeof(decimal), 12345.99999M, fullMetadata, "DecimalFullMetadata.json"},
                     {typeof(double), 99999.12345, fullMetadata, "DoubleFullMetadata.json"},
                     {typeof(Guid), new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902d"), fullMetadata, "GuidFullMetadata.json"},
@@ -87,16 +90,7 @@ namespace System.Web.OData.Formatter
                 }
             }
 
-            bool isJson = resourceName.EndsWith(".json");
-
-            if (isJson)
-            {
-                JsonAssert.Equal(expectedEntity, actualEntity);
-            }
-            else
-            {
-                Assert.Xml.Equal(expectedEntity, actualEntity);
-            }
+            JsonAssert.Equal(expectedEntity, actualEntity);
         }
 
         [Theory]

@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -39,7 +40,11 @@ namespace System.Web.OData.Builder
                     { type.GetProperty("RandomListGuids"), typeof(Guid) },
                     { type.GetProperty("RandomRandomComplexType"), typeof(RandomComplexType) },
                     { type.GetProperty("CollectionDateTimes"), typeof(DateTime) },
-                    { type.GetProperty("CollectionNullableDateTimes"), typeof(DateTime?) }
+                    { type.GetProperty("CollectionNullableDateTimes"), typeof(DateTime?) },
+                    { type.GetProperty("CollectionDates"), typeof(Date) },
+                    { type.GetProperty("CollectionNullableDates"), typeof(Date?) },
+                    { type.GetProperty("CollectionTimesOfDays"), typeof(TimeOfDay) },
+                    { type.GetProperty("CollectionNullableTimesOfDays"), typeof(TimeOfDay?) },
                 };
             }
         }
@@ -105,6 +110,11 @@ namespace System.Web.OData.Builder
             public string NonCollectionProperty { get; set; }
             public IEnumerable<DateTime> CollectionDateTimes { get; set; }
             public IEnumerable<DateTime?> CollectionNullableDateTimes { get; set; }
+
+            public IEnumerable<Date> CollectionDates { get; set; }
+            public IEnumerable<Date?> CollectionNullableDates { get; set; }
+            public IEnumerable<TimeOfDay> CollectionTimesOfDays { get; set; }
+            public IEnumerable<TimeOfDay?> CollectionNullableTimesOfDays { get; set; }
         }
 
         internal class RandomComplexType { }

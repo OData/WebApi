@@ -13,6 +13,7 @@ using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -521,6 +522,40 @@ namespace System.Web.OData.Builder
             parameter = action.FindParameter("nullableCollectionDateTime");
             Assert.Equal("Collection(Edm.DateTimeOffset)", parameter.Type.FullName());
             Assert.True(parameter.Type.IsNullable);
+        }
+
+        [Theory]
+        [InlineData(typeof(Date), "Edm.Date")]
+        [InlineData(typeof(Date?), "Edm.Date")]
+        [InlineData(typeof(TimeOfDay), "Edm.TimeOfDay")]
+        [InlineData(typeof(TimeOfDay?), "Edm.TimeOfDay")]
+        public void CanCreateEdmModel_WithDateAndTimeOfDay_AsActionParameter(Type paramType, string expect)
+        {
+            // Arrange
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            var actionBuilder = movie.Action("ActionName");
+
+            MethodInfo method = typeof(ProcedureConfiguration).GetMethod("Parameter", BindingFlags.Instance | BindingFlags.Public);
+            method.MakeGenericMethod(paramType).Invoke(actionBuilder, new[] { "p1" });
+
+            method = typeof(ProcedureConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
+            method.MakeGenericMethod(paramType).Invoke(actionBuilder, new[] { "p2" });
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            //Assert
+            IEdmOperation action = Assert.Single(model.SchemaElements.OfType<IEdmAction>());
+            Assert.Equal("ActionName", action.Name);
+
+            IEdmOperationParameter parameter = action.FindParameter("p1");
+            Assert.Equal(expect, parameter.Type.FullName());
+            Assert.Equal(paramType.IsNullable(), parameter.Type.IsNullable);
+
+            parameter = action.FindParameter("p2");
+            Assert.Equal("Collection(" + expect + ")", parameter.Type.FullName());
+            Assert.Equal(paramType.IsNullable(), parameter.Type.IsNullable);
         }
 
         [Theory]

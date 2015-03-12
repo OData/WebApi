@@ -20,6 +20,7 @@ using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 
@@ -61,8 +62,24 @@ namespace System.Web.OData.Formatter
                     { Guid.Empty, "GetGuid" },
                     { TimeSpan.FromTicks(424242), "GetTimeSpan" },
                     { DateTimeOffset.MaxValue, "GetDateTimeOffset" },
+                    { Date.MaxValue, "GetDate" },
+                    { TimeOfDay.MinValue, "GetTimeOfDay" },
                     { float.NaN, "GetFloat" },
                     // TODO 1560: ODataLib v4 issue on decimal handling, bug filed.
+                };
+            }
+        }
+
+        public static TheoryDataSet<object, Type, string> ODataModelBinderProvider_Works_NullableTestData
+        {
+            get
+            {
+                return new TheoryDataSet<object, Type, string>
+                {
+                    { Date.MaxValue, typeof(Date?), "GetNullableDate" },
+                    { null, typeof(Date?), "GetNullableDate" },
+                    { TimeOfDay.MaxValue, typeof(TimeOfDay?), "GetNullableTimeOfDay" },
+                    { null, typeof(TimeOfDay?), "GetNullableTimeOfDay" },
                 };
             }
         }
@@ -84,6 +101,8 @@ namespace System.Web.OData.Formatter
                     { "abc", "GetDateTime" },
                     { "abc", "GetTimeSpan" },
                     { "abc", "GetDateTimeOffset" },
+                    { "abc", "GetDate" },
+                    { "abc", "GetTimeOfDay" },
                     { -1, "GetUInt16"},
                     { -1, "GetUInt32" },
                     { -1, "GetUInt64"},
@@ -140,15 +159,39 @@ namespace System.Web.OData.Formatter
         [PropertyData("ODataModelBinderProvider_Works_TestData")]
         public void ODataModelBinderProvider_Works(object value, string action)
         {
-            string url = String.Format(
-                "http://localhost/ODataModelBinderProviderTest/{0}({1})",
+            // Arrange
+            string url = String.Format("http://localhost/ODataModelBinderProviderTest/{0}({1})",
                 action,
                 Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForValue(value)));
+
+            // Act
             HttpResponseMessage response = _client.GetAsync(url).Result;
+
+            // Assert
             response.EnsureSuccessStatusCode();
+
             Assert.Equal(
                 value,
                 response.Content.ReadAsAsync(value.GetType(), _configuration.Formatters).Result);
+        }
+
+        [Theory]
+        [PropertyData("ODataModelBinderProvider_Works_NullableTestData")]
+        public void ODataModelBinderProvider_Works_ForNullable(object value, Type type, string action)
+        {
+            // Arrange
+            string url = String.Format("http://localhost/ODataModelBinderProviderTest/{0}({1})", action,
+                value == null ? "null" : Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForValue(value)));
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync(url).Result;
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+
+            Assert.Equal(
+                value,
+                response.Content.ReadAsAsync(type, _configuration.Formatters).Result);
         }
 
         [Fact]
@@ -456,6 +499,30 @@ namespace System.Web.OData.Formatter
         }
 
         public DateTimeOffset GetDateTimeOffset(DateTimeOffset id)
+        {
+            ThrowIfInsideThrowsController();
+            return id;
+        }
+
+        public Date GetDate([FromODataUri]Date id)
+        {
+            ThrowIfInsideThrowsController();
+            return id;
+        }
+
+        public Date? GetNullableDate([FromODataUri] Date? id)
+        {
+            ThrowIfInsideThrowsController();
+            return id;
+        }
+
+        public TimeOfDay GetTimeOfDay([FromODataUri]TimeOfDay id)
+        {
+            ThrowIfInsideThrowsController();
+            return id;
+        }
+
+        public TimeOfDay? GetNullableTimeOfDay([FromODataUri]TimeOfDay? id)
         {
             ThrowIfInsideThrowsController();
             return id;

@@ -32,6 +32,8 @@ namespace System.Web.OData.Formatter.Serialization
                     { typeof(byte), EdmPrimitiveTypeKind.Byte },
                     { typeof(DateTime), EdmPrimitiveTypeKind.DateTimeOffset },
                     { typeof(DateTimeOffset), EdmPrimitiveTypeKind.DateTimeOffset },
+                    { typeof(Date), EdmPrimitiveTypeKind.Date },
+                    { typeof(TimeOfDay), EdmPrimitiveTypeKind.TimeOfDay },
                     { typeof(decimal), EdmPrimitiveTypeKind.Decimal },
                     { typeof(double), EdmPrimitiveTypeKind.Double },
                     { typeof(Guid), EdmPrimitiveTypeKind.Guid },
@@ -143,6 +145,7 @@ namespace System.Web.OData.Formatter.Serialization
         [InlineData("UnboundFunctionReturnsPrimitveCollection()/$count", typeof(int))]
         [InlineData("UnboundFunctionReturnsEnumCollection()/$count", typeof(Color))]
         [InlineData("UnboundFunctionReturnsDateTimeOffsetCollection()/$count", typeof(DateTimeOffset))]
+        [InlineData("UnboundFunctionReturnsDateCollection()/$count", typeof(Date))]
         [InlineData("UnboundFunctionReturnsComplexCollection()/$count", typeof(ODataCountTest.DollarCountComplex))]
         [InlineData("UnboundFunctionReturnsEntityCollection()/$count", typeof(ODataCountTest.DollarCountEntity))]
         [InlineData("DollarCountEntities/Default.BoundFunctionReturnsPrimitveCollection()/$count", typeof(DateTimeOffset))]

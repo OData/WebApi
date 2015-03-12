@@ -451,6 +451,8 @@
     <EmbeddedResource Include="Resources\PresidentInJsonLightNoMetadata.json" />
     <EmbeddedResource Include="Resources\PresidentInJsonLightMinimalMetadata.json" />
     <EmbeddedResource Include="Resources\PresidentInJsonLightFullMetadata.json" />
+    <EmbeddedResource Include="Resources\DateFullMetadata.json" />
+    <EmbeddedResource Include="Resources\TimeOfDayFullMetadata.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\System.Web.OData\System.Web.OData.csproj">

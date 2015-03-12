@@ -61,11 +61,17 @@ namespace System.Web.OData.Formatter
         [InlineData(typeof(sbyte))]
         [InlineData(typeof(DateTimeOffset))]
         [InlineData(typeof(TimeSpan))]
+        [InlineData(typeof(Date))]
+        [InlineData(typeof(TimeOfDay))]
         public void IsNonstandardEdmPrimitive_Returns_False(Type primitiveType)
         {
+            // Arrange
             bool isNonstandardEdmPrimtive;
+
+            // Act
             Type resultMappedType = EdmLibHelpers.IsNonstandardEdmPrimitive(primitiveType, out isNonstandardEdmPrimtive);
 
+            // Assert
             Assert.False(isNonstandardEdmPrimtive);
             Assert.Equal(primitiveType, resultMappedType);
         }

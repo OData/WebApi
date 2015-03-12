@@ -19,6 +19,7 @@ using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Query.Expressions
 {
@@ -590,18 +591,15 @@ namespace System.Web.OData.Query.Expressions
                 case ClrCanonicalFunctions.YearFunctionName:
                 case ClrCanonicalFunctions.MonthFunctionName:
                 case ClrCanonicalFunctions.DayFunctionName:
+                    return BindDateRelatedProperty(node); // Date & DateTime & DateTimeOffset
+
                 case ClrCanonicalFunctions.HourFunctionName:
                 case ClrCanonicalFunctions.MinuteFunctionName:
                 case ClrCanonicalFunctions.SecondFunctionName:
-                    return BindDateOrDateTimeOffsetProperty(node);
+                    return BindTimeRelatedProperty(node); // TimeOfDay & DateTime & DateTimeOffset
 
-                case ClrCanonicalFunctions.YearsFunctionName:
-                case ClrCanonicalFunctions.MonthsFunctionName:
-                case ClrCanonicalFunctions.DaysFunctionName:
-                case ClrCanonicalFunctions.HoursFunctionName:
-                case ClrCanonicalFunctions.MinutesFunctionName:
-                case ClrCanonicalFunctions.SecondsFunctionName:
-                    return BindTimeSpanProperty(node);
+                case ClrCanonicalFunctions.FractionalSecondsFunctionName:
+                    return BindFractionalSeconds(node);
 
                 case ClrCanonicalFunctions.RoundFunctionName:
                     return BindRound(node);
@@ -614,6 +612,12 @@ namespace System.Web.OData.Query.Expressions
 
                 case ClrCanonicalFunctions.CastFunctionName:
                     return BindCastSingleValue(node);
+
+                case ClrCanonicalFunctions.DateFunctionName:
+                    return BindDate(node);
+
+                case ClrCanonicalFunctions.TimeFunctionName:
+                    return BindTime(node);
 
                 default:
                     throw new NotImplementedException(Error.Format(SRResources.ODataFunctionNotSupported, node.Name));
@@ -696,12 +700,12 @@ namespace System.Web.OData.Query.Expressions
             if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
                 // we don't have to check if the argument is null inside the function call as we do it already
-                // before calling the function. So remove the redunadant null checks.
+                // before calling the function. So remove the redundant null checks.
                 functionCallArguments = arguments.Select(a => RemoveInnerNullPropagation(a));
             }
 
             // if the argument is of type Nullable<T>, then translate the argument to Nullable<T>.Value as none 
-            // of the cannonical functions have overloads for Nullable<> arguments.
+            // of the canonical functions have overloads for Nullable<> arguments.
             functionCallArguments = ExtractValueFromNullableArguments(functionCallArguments);
 
             Expression functionCall;
@@ -724,6 +728,23 @@ namespace System.Web.OData.Query.Expressions
             }
 
             return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+        }
+
+        private Expression MakePropertyAccess(PropertyInfo propertyInfo, Expression argument)
+        {
+            Expression propertyArgument = argument;
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
+            {
+                // we don't have to check if the argument is null inside the function call as we do it already
+                // before calling the function. So remove the redundant null checks.
+                propertyArgument = RemoveInnerNullPropagation(argument);
+            }
+
+            // if the argument is of type Nullable<T>, then translate the argument to Nullable<T>.Value as none 
+            // of the canonical functions have overloads for Nullable<> arguments.
+            propertyArgument = ExtractValueFromNullableExpression(propertyArgument);
+
+            return Expression.Property(propertyArgument, propertyInfo);
         }
 
         private Expression BindCastSingleValue(SingleValueFunctionCallNode node)
@@ -907,14 +928,112 @@ namespace System.Web.OData.Query.Expressions
             return MakeFunctionCall(round, arguments);
         }
 
-        private Expression BindDateOrDateTimeOffsetProperty(SingleValueFunctionCallNode node)
+        private Expression BindDate(SingleValueFunctionCallNode node)
         {
-            Expression[] arguments = BindArguments(node.Parameters);
+            Contract.Assert("date" == node.Name);
 
+            Expression[] arguments = BindArguments(node.Parameters);
             Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
 
+            // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
+            // Because DateTime is transferred to DateTimeOffset by default.
+            Expression parameter = arguments[0];
+            if (IsDateTime(arguments[0].Type))
+            {
+                parameter = ConvertDateTimeType(parameter);
+            }
+
+            Dictionary<string, PropertyInfo> propertyInfos = ClrCanonicalFunctions.DateTimeOffsetProperties;
+
+            // Year, Month, Day
+            Expression year = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.YearFunctionName], parameter);
+            Expression month = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.MonthFunctionName], parameter);
+            Expression day = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.DayFunctionName], parameter);
+
+            Type intType = typeof(int);
+            Expression constructor = Expression.New(typeof(Date).GetConstructor(new[] { intType, intType, intType }), year, month, day);
+
+            return CreateFunctionCallWithNullPropagation(constructor, arguments);
+        }
+
+        private Expression BindTime(SingleValueFunctionCallNode node)
+        {
+            Contract.Assert("time" == node.Name);
+
+            Expression[] arguments = BindArguments(node.Parameters);
+            Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
+
+            // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
+            // Because DateTime is transferred to DateTimeOffset by default.
+            Expression parameter = arguments[0];
+            if (IsDateTime(arguments[0].Type))
+            {
+                parameter = ConvertDateTimeType(parameter);
+            }
+
+            Dictionary<string, PropertyInfo> propertyInfos = ClrCanonicalFunctions.DateTimeOffsetProperties;
+
+            // Hour, Minute, Second, Millisecond
+            Expression hour = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.HourFunctionName], parameter);
+            Expression minute = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.MinuteFunctionName], parameter);
+            Expression second = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.SecondFunctionName], parameter);
+            Expression millisecond = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.MillisecondFunctionName], parameter);
+
+            Type intType = typeof(int);
+            Expression constructor = Expression.New(typeof(TimeOfDay).GetConstructor(new[] { intType, intType, intType, intType }),
+                hour, minute, second, millisecond);
+
+            return CreateFunctionCallWithNullPropagation(constructor, arguments);
+        }
+
+        private Expression BindFractionalSeconds(SingleValueFunctionCallNode node)
+        {
+            Contract.Assert("fractionalseconds" == node.Name);
+
+            Expression[] arguments = BindArguments(node.Parameters);
+            Contract.Assert(arguments.Length == 1 && (IsTimeRelated(arguments[0].Type)));
+
+            // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
+            // Because DateTime is transferred to DateTimeOffset by default.
+            Expression parameter = arguments[0];
+            if (IsDateTime(arguments[0].Type))
+            {
+                parameter = ConvertDateTimeType(parameter);
+            }
+
             PropertyInfo property;
-            if (IsDate(arguments[0].Type))
+            if (IsTimeOfDay(parameter.Type))
+            {
+                property = ClrCanonicalFunctions.TimeOfDayProperties[ClrCanonicalFunctions.MillisecondFunctionName];
+            }
+            else
+            {
+                property = ClrCanonicalFunctions.DateTimeOffsetProperties[ClrCanonicalFunctions.MillisecondFunctionName];
+            }
+
+            // Millisecond
+            Expression milliSecond = MakePropertyAccess(property, parameter);
+            Expression decimalMilliSecond = Expression.Convert(milliSecond, typeof(decimal));
+            Expression fractionalSeconds = Expression.Divide(decimalMilliSecond, Expression.Constant(1000m, typeof(decimal)));
+
+            return CreateFunctionCallWithNullPropagation(fractionalSeconds, arguments);
+        }
+
+        private Expression BindDateRelatedProperty(SingleValueFunctionCallNode node)
+        {
+            Expression[] arguments = BindArguments(node.Parameters);
+            Contract.Assert(arguments.Length == 1 && IsDateRelated(arguments[0].Type));
+
+            // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
+            // Because DateTime is transferred to DateTimeOffset by default.
+            Expression parameter = arguments[0];
+            if (IsDateTime(arguments[0].Type))
+            {
+                parameter = ConvertDateTimeType(parameter);
+            }
+
+            PropertyInfo property;
+            if (IsDate(parameter.Type))
             {
                 Contract.Assert(ClrCanonicalFunctions.DateProperties.ContainsKey(node.Name));
                 property = ClrCanonicalFunctions.DateProperties[node.Name];
@@ -925,17 +1044,35 @@ namespace System.Web.OData.Query.Expressions
                 property = ClrCanonicalFunctions.DateTimeOffsetProperties[node.Name];
             }
 
-            return MakeFunctionCall(property, arguments);
+            return MakeFunctionCall(property, parameter);
         }
 
-        private Expression BindTimeSpanProperty(SingleValueFunctionCallNode node)
+        private Expression BindTimeRelatedProperty(SingleValueFunctionCallNode node)
         {
             Expression[] arguments = BindArguments(node.Parameters);
+            Contract.Assert(arguments.Length == 1 && (IsTimeRelated(arguments[0].Type)));
 
-            Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
-            Contract.Assert(ClrCanonicalFunctions.TimeSpanProperties.ContainsKey(node.Name));
+            // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
+            // Because DateTime is transferred to DateTimeOffset by default.
+            Expression parameter = arguments[0];
+            if (IsDateTime(arguments[0].Type))
+            {
+                parameter = ConvertDateTimeType(parameter);
+            }
 
-            return MakeFunctionCall(ClrCanonicalFunctions.TimeSpanProperties[node.Name], arguments);
+            PropertyInfo property;
+            if (IsTimeOfDay(parameter.Type))
+            {
+                Contract.Assert(ClrCanonicalFunctions.TimeOfDayProperties.ContainsKey(node.Name));
+                property = ClrCanonicalFunctions.TimeOfDayProperties[node.Name];
+            }
+            else
+            {
+                Contract.Assert(ClrCanonicalFunctions.DateTimeOffsetProperties.ContainsKey(node.Name));
+                property = ClrCanonicalFunctions.DateTimeOffsetProperties[node.Name];
+            }
+
+            return MakeFunctionCall(property, parameter);
         }
 
         private Expression BindConcat(SingleValueFunctionCallNode node)
@@ -1330,10 +1467,26 @@ namespace System.Web.OData.Query.Expressions
             Expression universalTimeCallOffset = MakeFunctionCall(ClrCanonicalFunctions.ToUniversalTimeDateTimeOffset, newDateTimeOffset);
             Expression toOffsetOffset = MakeFunctionCall(ClrCanonicalFunctions.ToOffsetFunction, universalTimeCallOffset, baseUtcOffset);
 
-            return Expression.Condition(
+            Expression result = Expression.Condition(
                 test: CreateDateTimeCondition(expression),
                 ifTrue: newDateTimeOffsetWithTimeZone,
                 ifFalse: toOffsetOffset);
+
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
+            {
+                Expression nullTest = CheckForNull(source);
+                if (nullTest == null)
+                {
+                    return result;
+                }
+
+                return Expression.Condition(
+                    test: nullTest,
+                    ifTrue: Expression.Constant(null, typeof(DateTimeOffset?)),
+                    ifFalse: ToNullable(result));
+            }
+
+            return result;
         }
 
         private Expression CreateDateTimeCondition(Expression source)
@@ -1651,14 +1804,34 @@ namespace System.Web.OData.Query.Expressions
             return IsType<double>(type) || IsType<decimal>(type);
         }
 
-        private static bool IsDate(Type type)
+        private static bool IsDateRelated(Type type)
         {
-            return IsType<DateTime>(type);
+            return IsType<Date>(type) || IsType<DateTime>(type) || IsType<DateTimeOffset>(type);
+        }
+
+        private static bool IsTimeRelated(Type type)
+        {
+            return IsType<TimeOfDay>(type) || IsType<DateTime>(type) || IsType<DateTimeOffset>(type);
         }
 
         private static bool IsDateOrOffset(Type type)
         {
             return IsType<DateTime>(type) || IsType<DateTimeOffset>(type);
+        }
+
+        private static bool IsDateTime(Type type)
+        {
+            return IsType<DateTime>(type);
+        }
+
+        private static bool IsTimeOfDay(Type type)
+        {
+            return IsType<TimeOfDay>(type);
+        }
+
+        private static bool IsDate(Type type)
+        {
+            return IsType<Date>(type);
         }
 
         private static bool IsInteger(Type type)

@@ -821,6 +821,7 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Equal(product.Rating, 4);
             Assert.Equal(product.Price, 2.5m);
             Assert.Equal(product.ReleaseDate, new DateTimeOffset(new DateTime(1992, 1, 1, 0, 0, 0), TimeSpan.Zero));
+            Assert.Equal(product.PublishDate, new Date(1997, 7, 1));
             Assert.Null(product.DiscontinuedDate);
         }
 
@@ -944,6 +945,8 @@ namespace System.Web.OData.Formatter.Deserialization
             public DateTimeOffset? ReleaseDate { get; set; }
 
             public DateTimeOffset? DiscontinuedDate { get; set; }
+
+            public Date PublishDate { get; set; }
 
             public int Rating { get; set; }
 

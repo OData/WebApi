@@ -27,7 +27,9 @@ namespace System.Web.OData.Builder.Conventions
                     { new byte[] { 1,2 }, "binary'AQI='" },
                     { false, "false" },
                     { true, "true" },
-                    { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), "dddddddd-dddd-dddd-dddd-dddddddddddd" }
+                    { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), "dddddddd-dddd-dddd-dddd-dddddddddddd" },
+                    { new Date(2014, 10, 14), "2014-10-14"},
+                    { new TimeOfDay(15, 38, 25, 109), "15:38:25.1090000"},
                 };
             }
         }
@@ -66,6 +68,8 @@ namespace System.Web.OData.Builder.Conventions
                     { FlagsEnum.One | FlagsEnum.Two, "Microsoft.TestCommon.Types.FlagsEnum'One, Two'" },
                     { (SimpleEnum)123, "Microsoft.TestCommon.Types.SimpleEnum'123'" },
                     { (FlagsEnum)123, "Microsoft.TestCommon.Types.FlagsEnum'123'" },
+                    { new Date(2014, 10, 14), "2014-10-14"},
+                    { new TimeOfDay(15, 38, 25, 109), "15:38:25.1090000"},
                 };
             }
         }
@@ -215,6 +219,25 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
+        public void GetEntityKeyValue_MultipleKeys_ForDateAndTimeOfDay()
+        {
+            // Arrange
+            var entityInstance = new { Key1 = new Date(2015, 12, 2), Key2 = new TimeOfDay(4, 3, 2, 1) };
+            EdmEntityType entityType = new EdmEntityType("NS", "Name");
+            entityType.AddKeys(entityType.AddStructuralProperty("Key1", EdmPrimitiveTypeKind.Date));
+            entityType.AddKeys(entityType.AddStructuralProperty("Key2", EdmPrimitiveTypeKind.TimeOfDay));
+
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext,
+                entityType.AsReference(), entityInstance);
+
+            // Act
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
+
+            // Assert
+            Assert.Equal("Key1=2015-12-02,Key2=04:03:02.0010000", keyValue);
+        }
+
+        [Fact]
         public void GetEntityKeyValue_ThrowsForNullKeys()
         {
             // Arrange
@@ -284,6 +307,26 @@ namespace System.Web.OData.Builder.Conventions
 
             // Assert
             Assert.Equal("Key1='key1',Key2=2,Key3=true", keyValue);
+        }
+
+        [Fact]
+        public void GetEntityKeyValue_MultipleKeys_DerivedType_ForDateAndTimeOfDay()
+        {
+            // Arrange
+            var entityInstance = new { Key1 = new Date(2015, 2, 26), Key2 = new TimeOfDay(1, 2, 3, 4) };
+            EdmEntityType baseEntityType = new EdmEntityType("NS", "Name");
+            baseEntityType.AddKeys(baseEntityType.AddStructuralProperty("Key1", EdmPrimitiveTypeKind.Date));
+            baseEntityType.AddKeys(baseEntityType.AddStructuralProperty("Key2", EdmPrimitiveTypeKind.TimeOfDay));
+            EdmEntityType derivedEntityType = new EdmEntityType("NS", "Derived", baseEntityType);
+
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext,
+                derivedEntityType.AsReference(), entityInstance);
+
+            // Act
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
+
+            // Assert
+            Assert.Equal("Key1=2015-02-26,Key2=01:02:03.0040000", keyValue);
         }
 
         [Theory]

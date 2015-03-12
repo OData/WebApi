@@ -36,6 +36,8 @@ namespace System.Web.OData.Routing
                 data.Add(null, typeof(double?));
                 data.Add(null, typeof(string));
                 data.Add(null, typeof(DateTimeOffset?));
+                data.Add(null, typeof(Date?));
+                data.Add(null, typeof(TimeOfDay?));
                 data.Add(null, typeof(TimeSpan?));
                 data.Add(null, typeof(Guid?));
                 data.Add(null, typeof(SimpleEnum?));
@@ -67,6 +69,9 @@ namespace System.Web.OData.Routing
                 data.Add((Single)1.23, typeof(Single));
                 data.Add(4.56, typeof(double));
                 data.Add(new DateTimeOffset(new DateTime(2000, 1, 2, 3, 4, 5, DateTimeKind.Utc)), typeof(DateTimeOffset));
+                // Enable the following if fix https://github.com/OData/odata.net/issues/83
+                // data.Add(new Date(1997, 7, 1), typeof(Date));
+                data.Add(new TimeOfDay(10, 11, 12, 13), typeof(TimeOfDay));
                 data.Add(new TimeSpan(23, 59, 59), typeof(TimeSpan));
                 data.Add(Guid.NewGuid(), typeof(Guid));
 
@@ -77,6 +82,9 @@ namespace System.Web.OData.Routing
                 data.Add(1.23, typeof(double?));
                 data.Add("abc", typeof(string));
                 data.Add(new DateTimeOffset(new DateTime(2000, 1, 1, 1, 1, 1, DateTimeKind.Utc)), typeof(DateTimeOffset?));
+                // Enable the following if fix https://github.com/OData/odata.net/issues/83
+                // data.Add(new Date(1997, 7, 1), typeof(Date?));
+                data.Add(new TimeOfDay(10, 11, 12, 13), typeof(TimeOfDay?));
                 data.Add(new TimeSpan(1, 2, 3), typeof(TimeSpan?));
                 data.Add(Guid.Empty, typeof(Guid?));
                 return data;

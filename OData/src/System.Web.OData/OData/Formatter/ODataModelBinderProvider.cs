@@ -13,6 +13,8 @@ using System.Web.Http.ValueProviders;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Formatter
 {
@@ -108,6 +110,11 @@ namespace System.Web.OData.Formatter
                     return null;
                 }
 
+                if (type.IsNullable() && String.Equals(valueString, "null", StringComparison.Ordinal))
+                {
+                    return null;
+                }
+
                 // TODO 1668: ODL beta1's ODataUriUtils.ConvertFromUriLiteral does not support converting uri literal
                 // to ODataEnumValue, but beta1's ODataUriUtils.ConvertToUriLiteral supports converting ODataEnumValue
                 // to uri literal.
@@ -120,11 +127,6 @@ namespace System.Web.OData.Formatter
                         valueString = values[1];
                     }
 
-                    if (type.IsNullable() && String.Equals(valueString, "null", StringComparison.Ordinal))
-                    {
-                        return null;
-                    }
-
                     Type enumType = TypeHelper.GetUnderlyingTypeOrSelf(type);
                     object[] parameters = new[] { valueString, Enum.ToObject(enumType, 0) };
                     bool isSuccessful = (bool)enumTryParseMethod.MakeGenericMethod(enumType).Invoke(null, parameters);
@@ -135,6 +137,18 @@ namespace System.Web.OData.Formatter
                     }
 
                     return parameters[1];
+                }
+
+                // The logic of "public static object ConvertFromUriLiteral(string value, ODataVersion version);" treats
+                // the date value string (for example: 2015-01-02) as DateTimeOffset literal, and return a DateTimeOffset
+                // object. However, the logic of
+                // "object ConvertFromUriLiteral(string value, ODataVersion version, IEdmModel model, IEdmTypeReference typeReference);"
+                // can return the correct Date object.
+                if (type == typeof(Date) || type == typeof(Date?))
+                {
+                    EdmCoreModel model = EdmCoreModel.Instance;
+                    IEdmPrimitiveTypeReference dateTypeReference = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(type);
+                    return ODataUriUtils.ConvertFromUriLiteral(valueString, ODataVersion.V4, model, dateTypeReference);
                 }
 
                 object value = ODataUriUtils.ConvertFromUriLiteral(valueString, ODataVersion.V4);

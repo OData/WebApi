@@ -13,6 +13,7 @@ using System.Web.OData.TestCommon;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -159,7 +160,9 @@ namespace System.Web.OData.Formatter.Deserialization
             // Arrange
             const int Quantity = 1;
             const string ProductCode = "PCode";
-            string body = "{" + string.Format(@" ""Quantity"": {0} , ""ProductCode"": ""{1}"" ", Quantity, ProductCode) + "}";
+            string body = "{" +
+                string.Format(@" ""Quantity"": {0} , ""ProductCode"": ""{1}"" , ""Birthday"": ""2015-02-27"" ", Quantity, ProductCode) +
+                "}";
 
             ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(body));
             message.SetHeader("Content-Type", "application/json");
@@ -177,6 +180,9 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Equal(Quantity, payload["Quantity"]);
             Assert.True(payload.ContainsKey("ProductCode"));
             Assert.Equal(ProductCode, payload["ProductCode"]);
+
+            Assert.True(payload.ContainsKey("Birthday"));
+            Assert.Equal(new Date(2015, 2, 27), payload["Birthday"]);
         }
 
         [Theory]
@@ -213,7 +219,8 @@ namespace System.Web.OData.Formatter.Deserialization
         public void Can_DeserializePayload_WithPrimitiveCollections_InUntypedMode(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
-            const string Body = @"{ ""Name"": ""Avatar"", ""Ratings"": [ 5, 5, 3, 4, 5, 5, 4, 5, 5, 4 ] }";
+            const string Body =
+                @"{ ""Name"": ""Avatar"", ""Ratings"": [ 5, 5, 3, 4, 5, 5, 4, 5, 5, 4 ], ""Time"": [""01:02:03.0040000"", ""12:13:14.1150000""]}";
             int[] expectedRatings = new int[] { 5, 5, 3, 4, 5, 5, 4, 5, 5, 4 };
             ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(Body));
             message.SetHeader("Content-Type", "application/json");
@@ -235,6 +242,11 @@ namespace System.Web.OData.Formatter.Deserialization
             IEnumerable<int> ratings = payload["Ratings"] as IEnumerable<int>;
             Assert.Equal(10, ratings.Count());
             Assert.True(expectedRatings.Zip(ratings, (expected, actual) => expected - actual).All(diff => diff == 0));
+
+            Assert.True(payload.ContainsKey("Time"));
+            IEnumerable<TimeOfDay> times = payload["Time"] as IEnumerable<TimeOfDay>;
+            Assert.Equal(2, times.Count());
+            Assert.Equal(new[] { new TimeOfDay(1, 2, 3, 4), new TimeOfDay(12, 13, 14, 115) }, times.ToList());
         }
 
         [Theory]
@@ -303,7 +315,8 @@ namespace System.Web.OData.Formatter.Deserialization
         public void Can_DeserializePayload_WithPrimitiveCollectionParameters(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
-            const string Body = @"{ ""Name"": ""Avatar"", ""Ratings"": [ 5, 5, 3, 4, 5, 5, 4, 5, 5, 4 ] }";
+            const string Body =
+                @"{ ""Name"": ""Avatar"", ""Ratings"": [ 5, 5, 3, 4, 5, 5, 4, 5, 5, 4 ], ""Time"": [""01:02:03.0040000"", ""12:13:14.1150000""] }";
             int[] expectedRatings = new int[] { 5, 5, 3, 4, 5, 5, 4, 5, 5, 4 };
 
             ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(Body));
@@ -325,6 +338,11 @@ namespace System.Web.OData.Formatter.Deserialization
             IEnumerable<int> ratings = payload["Ratings"] as IEnumerable<int>;
             Assert.Equal(10, ratings.Count());
             Assert.True(expectedRatings.Zip(ratings, (expected, actual) => expected - actual).All(diff => diff == 0));
+
+            Assert.True(payload.ContainsKey("Time"));
+            IEnumerable<TimeOfDay> times = payload["Time"] as IEnumerable<TimeOfDay>;
+            Assert.Equal(2, times.Count());
+            Assert.Equal(new[] {new TimeOfDay(1, 2, 3, 4), new TimeOfDay(12, 13, 14, 115) }, times.ToList());
         }
 
         [Theory]
@@ -418,6 +436,7 @@ namespace System.Web.OData.Formatter.Deserialization
             ActionConfiguration primitive = customer.Action("Primitive");
             primitive.Parameter<int>("Quantity");
             primitive.Parameter<string>("ProductCode");
+            primitive.Parameter<Date>("Birthday");
 
             ActionConfiguration complex = customer.Action("Complex");
             complex.Parameter<int>("Quantity");
@@ -426,6 +445,7 @@ namespace System.Web.OData.Formatter.Deserialization
             ActionConfiguration primitiveCollection = customer.Action("PrimitiveCollection");
             primitiveCollection.Parameter<string>("Name");
             primitiveCollection.CollectionParameter<int>("Ratings");
+            primitiveCollection.CollectionParameter<TimeOfDay>("Time");
 
             ActionConfiguration complexCollection = customer.Action("ComplexCollection");
             complexCollection.Parameter<string>("Name");
@@ -435,6 +455,7 @@ namespace System.Web.OData.Formatter.Deserialization
             ActionConfiguration unboundPrimitive = builder.Action("UnboundPrimitive");
             unboundPrimitive.Parameter<int>("Quantity");
             unboundPrimitive.Parameter<string>("ProductCode");
+            unboundPrimitive.Parameter<Date>("Birthday");
 
             ActionConfiguration unboundComplex = builder.Action("UnboundComplex");
             unboundComplex.Parameter<int>("Quantity");
@@ -443,6 +464,7 @@ namespace System.Web.OData.Formatter.Deserialization
             ActionConfiguration unboundPrimitiveCollection = builder.Action("UnboundPrimitiveCollection");
             unboundPrimitiveCollection.Parameter<string>("Name");
             unboundPrimitiveCollection.CollectionParameter<int>("Ratings");
+            unboundPrimitiveCollection.CollectionParameter<TimeOfDay>("Time");
 
             ActionConfiguration unboundComplexCollection = builder.Action("UnboundComplexCollection");
             unboundComplexCollection.Parameter<string>("Name");

@@ -48,17 +48,14 @@ namespace System.Web.OData.Query
                 return new TheoryDataSet<AllowedFunctions>
                 {
                     AllowedFunctions.Year,
-                    AllowedFunctions.Years,
                     AllowedFunctions.Month,
-                    AllowedFunctions.Months,
                     AllowedFunctions.Day,
-                    AllowedFunctions.Days,
                     AllowedFunctions.Hour,
-                    AllowedFunctions.Hours,
                     AllowedFunctions.Minute,
-                    AllowedFunctions.Minutes,
                     AllowedFunctions.Second,
-                    AllowedFunctions.Seconds,
+                    AllowedFunctions.FractionalSeconds,
+                    AllowedFunctions.Date,
+                    AllowedFunctions.Time,
                 };
             }
         }

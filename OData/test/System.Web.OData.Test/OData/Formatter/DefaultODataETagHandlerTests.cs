@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Formatter
@@ -26,6 +27,10 @@ namespace System.Web.OData.Formatter
                     new DateTimeOffset(DateTime.FromBinary(0), TimeSpan.Zero),
                     TimeSpan.FromSeconds(86456),
                     DateTimeOffset.FromFileTime(0).ToUniversalTime(),
+
+                    // ODL has bug in ConvertFromUriLiteral, please uncomment it after fix https://github.com/OData/odata.net/issues/77.
+                    // new Date(1997, 7, 1), 
+                    new TimeOfDay(10, 11, 12, 13),
                 };
             }
         }

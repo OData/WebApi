@@ -10,6 +10,7 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -41,6 +42,8 @@ namespace System.Web.OData
             Assert.Equal("VipCustomer", result["Name"]);
             Assert.Equal("#Collection(Int32)", result["ListProp@odata.type"]);
             Assert.Equal(new JArray(new[] { 200, 100, 300, 0, 400 }), result["ListProp"]);
+            Assert.Equal("0001-01-01", result["DateList"][0]);
+            Assert.Equal("9999-12-31", result["DateList"][1]);
         }
 
         [Fact]
@@ -199,7 +202,11 @@ namespace System.Web.OData
                     City = "Vip City ",
                 },
                 VipNum = "99-001",
-                CustomerProperties = new Dictionary<string, object> { { "ListProp", IntValues } }
+                CustomerProperties = new Dictionary<string, object>
+                {
+                    { "ListProp", IntValues },
+                    { "DateList", new[] { Date.MinValue, Date.MaxValue } }
+                }
             };
 
             customers.Add(vipCustomer);

@@ -122,7 +122,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
         [Theory]
         [TestDataSet(typeof(ODataPrimitiveSerializerTests), "EdmPrimitiveData")]
-        public void Read_Primitive(object obj)
+        public void Read_Primitive(object obj, string edmType, string value)
         {
             // Arrange
             IEdmModel model = CreateModel();

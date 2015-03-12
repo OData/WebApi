@@ -409,7 +409,7 @@ namespace System.Web.OData.Query.Validators
         }
 
         /// <summary>
-        /// Override this method to validate Function calls, such as 'length', 'years', etc.
+        /// Override this method to validate Function calls, such as 'length', 'year', etc.
         /// </summary>
         /// <remarks>
         /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
@@ -728,9 +728,6 @@ namespace System.Web.OData.Query.Validators
                 case ClrCanonicalFunctions.DayFunctionName:
                     result = AllowedFunctions.Day;
                     break;
-                case ClrCanonicalFunctions.DaysFunctionName:
-                    result = AllowedFunctions.Days;
-                    break;
                 case ClrCanonicalFunctions.EndswithFunctionName:
                     result = AllowedFunctions.EndsWith;
                     break;
@@ -739,9 +736,6 @@ namespace System.Web.OData.Query.Validators
                     break;
                 case ClrCanonicalFunctions.HourFunctionName:
                     result = AllowedFunctions.Hour;
-                    break;
-                case ClrCanonicalFunctions.HoursFunctionName:
-                    result = AllowedFunctions.Hours;
                     break;
                 case ClrCanonicalFunctions.IndexofFunctionName:
                     result = AllowedFunctions.IndexOf;
@@ -755,23 +749,14 @@ namespace System.Web.OData.Query.Validators
                 case ClrCanonicalFunctions.MinuteFunctionName:
                     result = AllowedFunctions.Minute;
                     break;
-                case ClrCanonicalFunctions.MinutesFunctionName:
-                    result = AllowedFunctions.Minutes;
-                    break;
                 case ClrCanonicalFunctions.MonthFunctionName:
                     result = AllowedFunctions.Month;
-                    break;
-                case ClrCanonicalFunctions.MonthsFunctionName:
-                    result = AllowedFunctions.Months;
                     break;
                 case ClrCanonicalFunctions.RoundFunctionName:
                     result = AllowedFunctions.Round;
                     break;
                 case ClrCanonicalFunctions.SecondFunctionName:
                     result = AllowedFunctions.Second;
-                    break;
-                case ClrCanonicalFunctions.SecondsFunctionName:
-                    result = AllowedFunctions.Seconds;
                     break;
                 case ClrCanonicalFunctions.StartswithFunctionName:
                     result = AllowedFunctions.StartsWith;
@@ -791,8 +776,14 @@ namespace System.Web.OData.Query.Validators
                 case ClrCanonicalFunctions.YearFunctionName:
                     result = AllowedFunctions.Year;
                     break;
-                case ClrCanonicalFunctions.YearsFunctionName:
-                    result = AllowedFunctions.Years;
+                case ClrCanonicalFunctions.DateFunctionName:
+                    result = AllowedFunctions.Date;
+                    break;
+                case ClrCanonicalFunctions.TimeFunctionName:
+                    result = AllowedFunctions.Time;
+                    break;
+                case ClrCanonicalFunctions.FractionalSecondsFunctionName:
+                    result = AllowedFunctions.FractionalSeconds;
                     break;
                 default:
                     // should never be here

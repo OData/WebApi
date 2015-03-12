@@ -60,7 +60,7 @@ namespace System.Web.OData.Query
         ///
         /// e.g. ~/Customers?$filter=length(CompanyName) eq 19
         ///
-        /// DateTime related: year, years, month, months, day, days, hour, hours, minute, minutes, second, seconds
+        /// Date and Time related: year, month, day, hour, minute, second, fractionalseconds, date, time
         ///
         /// e.g. ~/Employees?$filter=year(BirthDate) eq 1971
         ///

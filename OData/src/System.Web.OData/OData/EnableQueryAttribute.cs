@@ -188,7 +188,7 @@ namespace System.Web.OData
         /// </item>
         /// <item>
         /// <term>DateTime related:</term>
-        /// <description>year, years, month, months, day, days, hour, hours, minute, minutes, second, seconds
+        /// <description>year, month, day, hour, minute, second, fractionalseconds, date, time
         /// e.g. ~/Employees?$filter=year(BirthDate) eq 1971</description>
         /// </item>
         /// <item>

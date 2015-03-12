@@ -154,20 +154,26 @@ namespace System.Web.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_Products()
         {
+            // Arrange
             var modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.EntitySet<Product>("Products");
             modelBuilder.Singleton<Product>("Book"); // singleton
 
+            // Act
             var model = modelBuilder.GetEdmModel();
+
+            // Assert
             Assert.Equal(model.SchemaElements.OfType<IEdmSchemaType>().Count(), 3);
 
             var product = model.AssertHasEntitySet(entitySetName: "Products", mappedEntityClrType: typeof(Product));
-            Assert.Equal(4, product.StructuralProperties().Count());
+            Assert.Equal(6, product.StructuralProperties().Count());
             Assert.Equal(1, product.NavigationProperties().Count());
             product.AssertHasKey(model, "ID", EdmPrimitiveTypeKind.Int32);
             product.AssertHasPrimitiveProperty(model, "ID", EdmPrimitiveTypeKind.Int32, isNullable: false);
             product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
             product.AssertHasPrimitiveProperty(model, "ReleaseDate", EdmPrimitiveTypeKind.DateTimeOffset, isNullable: true);
+            product.AssertHasPrimitiveProperty(model, "PublishDate", EdmPrimitiveTypeKind.Date, isNullable: false);
+            product.AssertHasPrimitiveProperty(model, "ShowTime", EdmPrimitiveTypeKind.TimeOfDay, isNullable: true);
             product.AssertHasComplexProperty(model, "Version", typeof(ProductVersion), isNullable: true);
             product.AssertHasNavigationProperty(model, "Category", typeof(Category), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
@@ -2522,6 +2528,10 @@ namespace System.Web.OData.Builder.Conventions
         public string Name { get; set; }
 
         public DateTimeOffset? ReleaseDate { get; set; }
+
+        public Date PublishDate { get; set; }
+
+        public TimeOfDay? ShowTime { get; set; }
 
         public ProductVersion Version { get; set; }
 

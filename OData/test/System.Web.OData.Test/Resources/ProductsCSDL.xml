@@ -14,6 +14,7 @@
         <Property Name="Description" Type="Edm.String" />
         <Property Name="ReleaseDate" Type="Edm.DateTimeOffset" Nullable="false" />
         <Property Name="DiscontinuedDate" Type="Edm.DateTimeOffset" />
+        <Property Name="PublishDate" Type="Edm.Date" />
         <Property Name="Rating" Type="Edm.Int32" Nullable="false" />
         <Property Name="Price" Type="Edm.Decimal" Nullable="false" />
         <NavigationProperty Name="Category" Type="ODataDemo.Category" Partner="Products" />

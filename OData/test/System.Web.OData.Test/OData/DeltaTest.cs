@@ -18,6 +18,7 @@ using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData
@@ -453,6 +454,10 @@ namespace System.Web.OData
                     { "DateTimeOffsetProperty", "'1992-01-01'", new DateTimeOffset(new DateTime(1992, 1, 1)) },
                     { "NullableDateTimeOffsetProperty", "'1992-01-01'", new DateTimeOffset(new DateTime(1992, 1, 1)) },
                     { "NullableDateTimeOffsetProperty", "null", null },
+                    { "DateProperty", "'1997-07-01'", new Date(1997, 7, 1) },
+                    { "NullableDateProperty", "null", null },
+                    { "TimeOfDayProperty", "'10:11:12.0130000'", new TimeOfDay(10, 11, 12, 13) },
+                    { "NullableTimeOfDayProperty", "null", null },
                     { "StringProperty", "'42'", "42" },
                     { "ComplexModelProperty", "{ 'ComplexIntProperty' : 42 }", new ComplexModel { ComplexIntProperty = 42 } },
                     { "CollectionProperty", "[ 1, 2, 3 ]", new Collection<int> { 1, 2, 3} },
@@ -606,6 +611,14 @@ namespace System.Web.OData
             public DateTimeOffset DateTimeOffsetProperty { get; set; }
 
             public DateTimeOffset? NullableDateTimeOffsetProperty { get; set; }
+
+            public Date DateProperty { get; set; }
+
+            public Date? NullableDateProperty { get; set; }
+
+            public TimeOfDay TimeOfDayProperty { get; set; }
+
+            public TimeOfDay? NullableTimeOfDayProperty { get; set; }
 
             public string StringProperty { get; set; }
 

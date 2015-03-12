@@ -28,6 +28,8 @@ namespace System.Web.OData.Query
                     typeof(byte),
                     typeof(DateTime),
                     typeof(DateTimeOffset),
+                    typeof(Date),
+                    typeof(TimeOfDay),
                     typeof(decimal),
                     typeof(double),
                     typeof(Guid),

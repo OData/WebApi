@@ -12,6 +12,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Query;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Test
@@ -248,6 +249,28 @@ namespace System.Web.OData.Test
                     {"?$filter=hour(AbsoluteBirthDate) eq 1987", "hour"},
                     {"?$filter=minute(AbsoluteBirthDate) eq 1987", "minute"},
                     {"?$filter=second(AbsoluteBirthDate) eq 1987", "second"},
+
+                    {"?$filter=year(Date) eq 2015", "year"},
+                    {"?$filter=month(Date) eq 2015", "month"},
+                    {"?$filter=day(Date) eq 2015", "day"},
+                    {"?$filter=year(NullableDate) eq null", "year"},
+                    {"?$filter=month(NullableDate) eq null", "month"},
+                    {"?$filter=day(NullableDate) eq null", "day"},
+
+                    {"?$filter=hour(TimeOfDay) eq 1", "hour"},
+                    {"?$filter=minute(TimeOfDay) eq 1", "minute"},
+                    {"?$filter=second(TimeOfDay) eq 1", "second"},
+                    {"?$filter=hour(NullableTimeOfDay) eq null", "hour"},
+                    {"?$filter=minute(NullableTimeOfDay) eq null", "minute"},
+                    {"?$filter=second(NullableTimeOfDay) eq null", "second"},
+
+                    {"?$filter=date(AbsoluteBirthDate) eq 2014-01-02", "date"},
+                    {"?$filter=time(AbsoluteBirthDate) eq 01:02:03.0040000", "time"},
+                    {"?$filter=fractionalseconds(AbsoluteBirthDate) eq 0.4", "fractionalseconds"},
+
+                     {"?$filter=date(NullableBirthDate) eq null", "date"},
+                    {"?$filter=time(NullableBirthDate) eq null", "time"},
+                    {"?$filter=fractionalseconds(NullableBirthDate) eq null", "fractionalseconds"},
                 };
             }
         }
@@ -616,6 +639,7 @@ namespace System.Web.OData.Test
             customer.Points = Enumerable.Range(1, 10).ToList();
             customer.Address = new EnableQueryAddress { ZipCode = 1 };
             customer.Addresses = Enumerable.Range(1, 10).Select(j => new EnableQueryAddress { ZipCode = j }).ToList();
+            customer.NullableBirthDate = null;
 
             customer.Category = new PremiumEnableQueryCategory
             {
@@ -650,6 +674,16 @@ namespace System.Web.OData.Test
             public EnableQueryAddress Address { get; set; }
 
             public DateTimeOffset AbsoluteBirthDate { get; set; }
+
+            public DateTimeOffset? NullableBirthDate { get; set; }
+
+            public Date Date { get; set; }
+
+            public TimeOfDay TimeOfDay { get; set; }
+
+            public Date? NullableDate { get; set; }
+
+            public TimeOfDay? NullableTimeOfDay { get; set; }
 
             public TimeSpan Time { get; set; }
 

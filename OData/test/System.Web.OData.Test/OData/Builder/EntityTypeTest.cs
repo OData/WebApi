@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Builder
@@ -69,6 +70,26 @@ namespace System.Web.OData.Builder
             Assert.Equal(2, customerType.DeclaredKey.Count());
             Assert.NotNull(customerType.DeclaredKey.SingleOrDefault(k => k.Name == "CustomerId"));
             Assert.NotNull(customerType.DeclaredKey.SingleOrDefault(k => k.Name == "Name"));
+        }
+
+        [Fact]
+        public void CanCreateEntityWithCompoundKey_ForDateAndTimeOfDay()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder();
+            var entity = builder.EntityType<EntityTypeWithDateAndTimeOfDay>();
+            entity.HasKey(e => new { e.Date, e.TimeOfDay });
+
+            // Act
+            var model = builder.GetServiceModel();
+
+            // Assert
+            var entityType =
+                model.SchemaElements.OfType<IEdmEntityType>().Single(e => e.Name == "EntityTypeWithDateAndTimeOfDay");
+            Assert.Equal(2, entityType.Properties().Count());
+            Assert.Equal(2, entityType.DeclaredKey.Count());
+            Assert.NotNull(entityType.DeclaredKey.SingleOrDefault(k => k.Name == "Date"));
+            Assert.NotNull(entityType.DeclaredKey.SingleOrDefault(k => k.Name == "TimeOfDay"));
         }
 
         [Fact]
@@ -536,6 +557,12 @@ namespace System.Web.OData.Builder
             public int Id { get; set; }
             public string Name { get; set; }
             public IDictionary<string, object> DynamicProperties { get; set; }
+        }
+
+        public class EntityTypeWithDateAndTimeOfDay
+        {
+            public Date Date { get; set; }
+            public TimeOfDay TimeOfDay { get; set; }
         }
     }
 }

@@ -11,6 +11,7 @@ using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.Query;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -51,6 +52,7 @@ namespace System.Web.OData.Routing
                 data.Add("UnboundFunctionReturnsPrimitveCollection()/$count", 6);
                 data.Add("UnboundFunctionReturnsEnumCollection()/$count", 7);
                 data.Add("UnboundFunctionReturnsDateTimeOffsetCollection()/$count", 8);
+                data.Add("UnboundFunctionReturnsDateCollection()/$count", 18);
                 data.Add("UnboundFunctionReturnsComplexCollection()/$count", 9);
                 data.Add("UnboundFunctionReturnsEntityCollection()/$count", 10);
                 data.Add("UnboundFunctionReturnsEntityCollection()/System.Web.OData.Routing.DerivedDollarCountEntity/$count", 11);
@@ -133,6 +135,10 @@ namespace System.Web.OData.Routing
             function = builder.Function("UnboundFunctionReturnsDateTimeOffsetCollection");
             function.IsComposable = true;
             function.ReturnsCollection<DateTimeOffset>();
+
+            function = builder.Function("UnboundFunctionReturnsDateCollection");
+            function.IsComposable = true;
+            function.ReturnsCollection<Date>();
 
             function = builder.Function("UnboundFunctionReturnsComplexCollection");
             function.IsComposable = true;
@@ -301,6 +307,13 @@ namespace System.Web.OData.Routing
             public IHttpActionResult UnboundFunctionReturnsDateTimeOffsetCollectionWithDollarCount()
             {
                 return Ok(8);
+            }
+
+            [HttpGet]
+            [ODataRoute("UnboundFunctionReturnsDateCollection()/$count")]
+            public IHttpActionResult UnboundFunctionReturnsDateCollectionWithDollarCount()
+            {
+                return Ok(18);
             }
 
             [HttpGet]

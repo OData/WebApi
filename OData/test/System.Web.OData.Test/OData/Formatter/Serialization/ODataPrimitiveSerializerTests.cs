@@ -45,47 +45,48 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
-        public static TheoryDataSet<object> NonEdmPrimitiveData
+        public static TheoryDataSet<object, string, string> NonEdmPrimitiveData
         {
             get
             {
-                return new TheoryDataSet<object>
+                return new TheoryDataSet<object, string, string>
                 {
-                    null,
-                    (char)'1',
-                    (char[]) new char[] {'1' },
-                    (UInt16)1,
-                    (UInt32)1,
-                    (UInt64)1,
+                    { null, "Edm.Null", "true" },
+                    { (char)'1', "Edm.String", "\"1\"" },
+                    { (char[]) new char[] {'1' }, "Edm.String", "\"1\"" },
+                    { (UInt16)1, "Edm.Int32", "1" },
+                    { (UInt32)1, "Edm.Int64", "1" },
+                    { (UInt64)1, "Edm.Int64", "1" },
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
-                    new XElement(XName.Get("element","namespace")), 
-                    new Binary(new byte[] {1}),
-                    new DateTime(2014, 11, 19)
+                    { new XElement(XName.Get("element","namespace")), "Edm.String", "\"<element xmlns=\\\"namespace\\\" />\"" },
+                    { new Binary(new byte[] {1}), "Edm.Binary", "\"AQ==\"" },
                 };
             }
         }
 
-        public static TheoryDataSet<object> EdmPrimitiveData
+        public static TheoryDataSet<object, string, string> EdmPrimitiveData
         {
             get
             {
-                return new TheoryDataSet<object>
+                return new TheoryDataSet<object, string, string>
                 {
-                    null,
-                    (string)"1",
-                    (Boolean)true,
-                    (Byte)1,
-                    (Decimal)1,
-                    (Double)1,
-                    (Guid)Guid.Empty,
-                    (Int16)1,
-                    (Int32)1,
-                    (Int64)1,
-                    (SByte)1,
-                    (Single)1,
-                    new byte[] { 1 },
-                    new TimeSpan(),
-                    new DateTimeOffset()
+                    { null, "Edm.Null", "true" },
+                    { "1", "Edm.String", "\"1\"" },
+                    { true, "Edm.Boolean", "true" },
+                    { (Byte)1, "Edm.Byte", "1" },
+                    { (Decimal)1, "Edm.Decimal", "1" },
+                    { (Double)1, "Edm.Double", "1.0" },
+                    { (Guid)Guid.Empty, "Edm.Guid", "\"00000000-0000-0000-0000-000000000000\"" },
+                    { (Int16)1, "Edm.Int16", "1" },
+                    { (Int32)1, "Edm.Int32", "1" },
+                    { (Int64)1, "Edm.Int64", "1" },
+                    { (SByte)1, "Edm.SByte", "1" },
+                    { (Single)1, "Edm.Single", "1" },
+                    { new byte[] { 1 }, "Edm.Binary", "\"AQ==\"" },
+                    { new TimeSpan(), "Edm.Duration", "\"PT0S\"" },
+                    { new DateTimeOffset(), "Edm.DateTimeOffset", "\"0001-01-01T00:00:00Z\"" },
+                    { new Date(2014, 10, 13), "Edm.Date", "\"2014-10-13\"" },
+                    { new TimeOfDay(15, 38, 25, 109), "Edm.TimeOfDay", "\"15:38:25.1090000\"" },
                 };
             }
         }
@@ -192,21 +193,42 @@ namespace System.Web.OData.Formatter.Serialization
         [Theory]
         [PropertyData("EdmPrimitiveData")]
         [PropertyData("NonEdmPrimitiveData")]
-        public void WriteObject_EdmPrimitives(object graph)
+        public void WriteObject_EdmPrimitives(object graph, string type, string value)
         {
-            IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int));
-            var serializer = new ODataPrimitiveSerializer();
-            ODataSerializerContext writecontext = new ODataSerializerContext() { RootElementName = "PropertyName", Model = EdmCoreModel.Instance };
+            // Arrange
+            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
+            ODataSerializerContext writecontext = new ODataSerializerContext()
+            {
+                RootElementName = "PropertyName",
+                Model = EdmCoreModel.Instance
+            };
 
             ODataMessageWriterSettings settings = new ODataMessageWriterSettings
             {
                 ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
             };
-            ODataMessageWriter writer = new ODataMessageWriter(
-                new ODataMessageWrapper(new MemoryStream()) as IODataResponseMessage,
-                settings);
 
-            Assert.DoesNotThrow(() => serializer.WriteObject(graph, typeof(int), writer, writecontext));
+            MemoryStream stream = new MemoryStream();
+            ODataMessageWriter writer = new ODataMessageWriter(
+                new ODataMessageWrapper(stream) as IODataResponseMessage, settings);
+
+            string expect = "{\"@odata.context\":\"http://any/$metadata#" + type + "\",";
+            if (type == "Edm.Null")
+            {
+                expect += "\"@odata.null\":" + value + "}";
+            }
+            else
+            {
+                expect += "\"value\":" + value + "}";
+            }
+
+            // Act
+            serializer.WriteObject(graph, typeof(int), writer, writecontext);
+
+            // Assert
+            stream.Seek(0, SeekOrigin.Begin);
+            string result = new StreamReader(stream).ReadToEnd();
+            Assert.Equal(expect, result);
         }
 
         [Fact]
@@ -256,7 +278,7 @@ namespace System.Web.OData.Formatter.Serialization
 
         [Theory]
         [PropertyData("EdmPrimitiveData")]
-        public void ConvertUnsupportedPrimitives_DoesntChangeStandardEdmPrimitives(object graph)
+        public void ConvertUnsupportedPrimitives_DoesntChangeStandardEdmPrimitives(object graph, string type, string value)
         {
             Assert.Equal(
                 graph,

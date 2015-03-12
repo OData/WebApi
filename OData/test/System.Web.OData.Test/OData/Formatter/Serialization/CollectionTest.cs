@@ -10,6 +10,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -64,6 +65,100 @@ namespace System.Web.OData.Formatter.Serialization
 
             // Act & Assert
             JsonAssert.Equal(Resources.ListOfString, content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void ListOfDatesSerializesAsOData()
+        {
+            // Arrange
+            const string expect =
+                "{" +
+                    "\"@odata.context\":\"http://localhost/$metadata#Collection(Edm.Date)\",\"value\":[" +
+                    "\"0001-01-01\",\"2015-02-26\",\"9999-12-31\"" +
+                    "]" +
+                "}";
+
+            List<Date> listOfDates = new List<Date>();
+            listOfDates.Add(Date.MinValue);
+            listOfDates.Add(new Date(2015, 2, 26));
+            listOfDates.Add(Date.MaxValue);
+
+            ObjectContent<List<Date>> content = new ObjectContent<List<Date>>(listOfDates, _formatter,
+                ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+
+            // Act & Assert
+            JsonAssert.Equal(expect, content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void ListOfNullableDatesSerializesAsOData()
+        {
+            // Arrange
+            const string expect =
+                "{" +
+                    "\"@odata.context\":\"http://localhost/$metadata#Collection(Edm.Date)\",\"value\":[" +
+                    "\"0001-01-01\",\"2015-02-26\",null,\"9999-12-31\"" +
+                    "]" +
+                "}";
+
+            List<Date?> listOfDates = new List<Date?>();
+            listOfDates.Add(Date.MinValue);
+            listOfDates.Add(new Date(2015, 2, 26));
+            listOfDates.Add(null);
+            listOfDates.Add(Date.MaxValue);
+
+            ObjectContent<List<Date?>> content = new ObjectContent<List<Date?>>(listOfDates, _formatter,
+                ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+
+            // Act & Assert
+            JsonAssert.Equal(expect, content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void ListOfTimeOfDaysSerializesAsOData()
+        {
+            // Arrange
+            const string expect =
+                "{" +
+                    "\"@odata.context\":\"http://localhost/$metadata#Collection(Edm.TimeOfDay)\",\"value\":[" +
+                    "\"00:00:00.0000000\",\"01:02:03.0040000\",\"23:59:59.9999999\"" +
+                    "]" +
+                "}";
+
+            List<TimeOfDay> listOfDates = new List<TimeOfDay>();
+            listOfDates.Add(TimeOfDay.MinValue);
+            listOfDates.Add(new TimeOfDay(1, 2, 3, 4));
+            listOfDates.Add(TimeOfDay.MaxValue);
+
+            ObjectContent<List<TimeOfDay>> content = new ObjectContent<List<TimeOfDay>>(listOfDates, _formatter,
+                ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+
+            // Act & Assert
+            JsonAssert.Equal(expect, content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void ListOfNullableTimeOfDaysSerializesAsOData()
+        {
+            // Arrange
+            const string expect =
+                "{" +
+                    "\"@odata.context\":\"http://localhost/$metadata#Collection(Edm.TimeOfDay)\",\"value\":[" +
+                    "\"00:00:00.0000000\",\"01:02:03.0040000\",null,\"23:59:59.9999999\"" +
+                    "]" +
+                "}";
+
+            List<TimeOfDay?> listOfDates = new List<TimeOfDay?>();
+            listOfDates.Add(TimeOfDay.MinValue);
+            listOfDates.Add(new TimeOfDay(1, 2, 3, 4));
+            listOfDates.Add(null);
+            listOfDates.Add(TimeOfDay.MaxValue);
+
+            ObjectContent<List<TimeOfDay?>> content = new ObjectContent<List<TimeOfDay?>>(listOfDates, _formatter,
+                ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+
+            // Act & Assert
+            JsonAssert.Equal(expect, content.ReadAsStringAsync().Result);
         }
 
         [Fact]

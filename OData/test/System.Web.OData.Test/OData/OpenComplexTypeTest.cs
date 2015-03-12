@@ -10,6 +10,7 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -41,6 +42,7 @@ namespace System.Web.OData
             Assert.Equal("300", result["IntProp"]);
             Assert.Equal("My Dynamic Country", result["Country"]);
             Assert.Equal("2c1f450a-a2a7-4fe1-a25d-4d9332fc0694", result["Token"]);
+            Assert.Equal("2015-03-02", result["Birthday"]);
         }
 
         [Fact]
@@ -53,7 +55,9 @@ namespace System.Web.OData
               "\"Address\":{" +
                 "\"Street\":\"Street 6\",\"City\":\"City 6\",\"Country\":\"Earth\",\"Token@odata.type\":\"#Guid\"," +
                 "\"Token\":\"4DB52263-4382-4BCB-A63E-3129C1B5FA0D\"," +
-                "\"Number\":990" +
+                "\"Number\":990," +
+                "\"BirthTime@odata.type\":\"#TimeOfDay\"," +
+                "\"BirthTime\":\"11:12:13.0140000\"" +
               "}" +
             "}";
 
@@ -76,6 +80,7 @@ namespace System.Web.OData
             Assert.Equal("Earth", result["Address"]["Country"]);
             Assert.Equal(990, result["Address"]["Number"]);
             Assert.Equal("4DB52263-4382-4BCB-A63E-3129C1B5FA0D".ToLower(), result["Address"]["Token"]);
+            Assert.Equal("11:12:13.0140000", result["Address"]["BirthTime"]);
         }
 
         private static IEdmModel GetEdmModel()
@@ -122,6 +127,7 @@ namespace System.Web.OData
             // Add more dynamic properties
             address.DynamicProperties.Add("Country", "My Dynamic Country");
             address.DynamicProperties.Add("Token", new Guid("2C1F450A-A2A7-4FE1-A25D-4D9332FC0694"));
+            address.DynamicProperties.Add("Birthday", new Date(2015, 3, 2));
             return Ok(address);
         }
 
@@ -131,22 +137,29 @@ namespace System.Web.OData
             object countryValue;
             customer.Address.DynamicProperties.TryGetValue("Country", out countryValue);
             Assert.NotNull(countryValue);
-            Assert.Equal(typeof(String), countryValue.GetType());
+            Assert.IsType<string>(countryValue);
             Assert.Equal("Earth", countryValue);
 
             // Verify there is an int dynamic property
             object numberValue;
             customer.Address.DynamicProperties.TryGetValue("Number", out numberValue);
             Assert.NotNull(numberValue);
-            Assert.Equal(typeof(Int32), numberValue.GetType());
+            Assert.IsType<Int32>(numberValue);
             Assert.Equal(990, numberValue);
 
             // Verify there is a Guid dynamic property
             object tokenValue;
             customer.Address.DynamicProperties.TryGetValue("Token", out tokenValue);
             Assert.NotNull(tokenValue);
-            Assert.Equal(typeof(Guid), tokenValue.GetType());
+            Assert.IsType<Guid>(tokenValue);
             Assert.Equal(new Guid("4DB52263-4382-4BCB-A63E-3129C1B5FA0D"), tokenValue);
+
+            // Verify there is a TimeOfDay dynamic property
+            object timeOfDayValue;
+            customer.Address.DynamicProperties.TryGetValue("BirthTime", out timeOfDayValue);
+            Assert.NotNull(timeOfDayValue);
+            Assert.IsType<TimeOfDay>(timeOfDayValue);
+            Assert.Equal(new TimeOfDay(11, 12, 13, 14), timeOfDayValue);
 
             return Ok(customer);
         }

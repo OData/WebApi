@@ -75,9 +75,9 @@ namespace System.Web.OData.Query
         Year = 0x800,
 
         /// <summary>
-        /// A value that corresponds to allowing 'Years' function in $filter.
+        /// A value that corresponds to allowing 'Date' function in $filter.
         /// </summary>
-        Years = 0x1000,
+        Date = 0x1000,
 
         /// <summary>
         /// A value that corresponds to allowing 'Month' function in $filter.
@@ -85,9 +85,9 @@ namespace System.Web.OData.Query
         Month = 0x2000,
 
         /// <summary>
-        /// A value that corresponds to allowing 'Months' function in $filter.
+        /// A value that corresponds to allowing 'Time' function in $filter.
         /// </summary>
-        Months = 0x4000,
+        Time = 0x4000,
 
         /// <summary>
         /// A value that corresponds to allowing 'Day' function in $filter.
@@ -95,19 +95,9 @@ namespace System.Web.OData.Query
         Day = 0x8000,
 
         /// <summary>
-        /// A value that corresponds to allowing 'Days' function in $filter.
-        /// </summary>
-        Days = 0x10000,
-
-        /// <summary>
         /// A value that corresponds to allowing 'Hour' function in $filter.
         /// </summary>
         Hour = 0x20000,
-
-        /// <summary>
-        /// A value that corresponds to allowing 'Hours' function in $filter.
-        /// </summary>
-        Hours = 0x40000,
 
         /// <summary>
         /// A value that corresponds to allowing 'Minute' function in $filter.
@@ -115,19 +105,14 @@ namespace System.Web.OData.Query
         Minute = 0x80000,
 
         /// <summary>
-        /// A value that corresponds to allowing 'Minutes' function in $filter.
-        /// </summary>
-        Minutes = 0x100000,
-
-        /// <summary>
         /// A value that corresponds to allowing 'Second' function in $filter.
         /// </summary>
         Second = 0x200000,
 
         /// <summary>
-        /// A value that corresponds to allowing 'Seconds' function in $filter.
+        /// A value that corresponds to allowing 'Fractionalseconds' function in $filter.
         /// </summary>
-        Seconds = 0x400000,
+        FractionalSeconds = 0x400000,
 
         /// <summary>
         /// A value that corresponds to allowing 'Round' function in $filter.
@@ -167,7 +152,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// A value that corresponds to allowing all datetime related functions in $filter.
         /// </summary>
-        AllDateTimeFunctions = Year | Years | Month | Months | Day | Days | Hour | Hours | Minute | Minutes | Second | Seconds,
+        AllDateTimeFunctions = Year | Month | Day | Hour | Minute | Second | FractionalSeconds | Date | Time,
 
         /// <summary>
         /// A value that corresponds to allowing math related functions in $filter.

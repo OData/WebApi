@@ -85,7 +85,7 @@ namespace System.Web.OData.Query.Validators
         }
 
         // No support for OData v4 functions:
-        // date, fractionalseconds, maxdatetime, mindatetime, now, time, totaloffsetminutes, or totalseconds?
+        // maxdatetime, mindatetime, now, totaloffsetminutes, or totalseconds?
         public static TheoryDataSet<AllowedFunctions, string, string> DateTimeFunctions
         {
             get
@@ -104,23 +104,12 @@ namespace System.Web.OData.Query.Validators
                     { AllowedFunctions.Second, "second(DiscontinuedDate) eq 20", "second" },
                     { AllowedFunctions.Year, "year(null) eq 2000", "year" },
                     { AllowedFunctions.Year, "year(DiscontinuedDate) eq 2000", "year" },
-                };
-            }
-        }
-
-        // Not part of OData v4 but some code remains supporting these TimeSpan functions e.g. in ClrCanonicalFunctions.
-        public static TheoryDataSet<AllowedFunctions, string, string> DateTimeFunctions_Unsupported
-        {
-            get
-            {
-                return new TheoryDataSet<AllowedFunctions, string, string>
-                {
-                    { AllowedFunctions.Days, "days(DiscontinuedSince) eq 6", "days" },
-                    { AllowedFunctions.Hours, "hours(DiscontinuedSince) eq 6", "hours" },
-                    { AllowedFunctions.Minutes, "minutes(DiscontinuedSince) eq 6", "minutes" },
-                    { AllowedFunctions.Months, "months(DiscontinuedSince) eq 6", "months" },
-                    { AllowedFunctions.Seconds, "seconds(DiscontinuedSince) eq 6", "seconds" },
-                    { AllowedFunctions.Years, "years(DiscontinuedSince) eq 6", "years" },
+                    { AllowedFunctions.Date, "date(null) eq 2015-02-26", "date" },
+                    { AllowedFunctions.Date, "date(DiscontinuedDate) eq 2015-02-26", "date" },
+                    { AllowedFunctions.Time, "time(null) eq 03:4:05.90100", "time" },
+                    { AllowedFunctions.Time, "time(DiscontinuedDate) eq 03:4:05.90100", "time" },
+                    { AllowedFunctions.FractionalSeconds, "fractionalseconds(null) eq 0.05", "fractionalseconds" },
+                    { AllowedFunctions.FractionalSeconds, "fractionalseconds(DiscontinuedDate) eq 0.050", "fractionalseconds" },
                 };
             }
         }
@@ -379,6 +368,10 @@ namespace System.Web.OData.Query.Validators
                     { "month(NotFilterableDiscontinuedDate) eq 10", "NotFilterableDiscontinuedDate" },
                     { "second(NotFilterableDiscontinuedDate) eq 20", "NotFilterableDiscontinuedDate" },
                     { "year(NotFilterableDiscontinuedDate) eq 2000", "NotFilterableDiscontinuedDate" },
+
+                    { "date(NotFilterableDiscontinuedDate) eq 2015-02-26", "NotFilterableDiscontinuedDate" },
+                    { "time(NotFilterableDiscontinuedDate) eq 03:4:05.90100", "NotFilterableDiscontinuedDate" },
+                    { "fractionalseconds(NotFilterableDiscontinuedDate) eq 0.1", "NotFilterableDiscontinuedDate" },
 
                     { "NotFilterableAlternateAddresses/all(t : t/City eq 'Redmond')", "NotFilterableAlternateAddresses" },
                     { "NotFilterableAlternateAddresses/any(t : t/City eq 'Redmond')", "NotFilterableAlternateAddresses" },
@@ -741,7 +734,6 @@ namespace System.Web.OData.Query.Validators
 
             // No need to include OtherFunctions_* here since they cover enum values also in OtherFunctions.
             var dataSets = DateTimeFunctions
-                .Concat(DateTimeFunctions_Unsupported)
                 .Concat(MathFunctions)
                 .Concat(OtherFunctions)
                 .Concat(StringFunctions);
@@ -921,25 +913,6 @@ namespace System.Web.OData.Query.Validators
             var expectedMessage = string.Format(
                 "Function '{0}' is not allowed. " +
                 "To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.",
-                functionName);
-            var option = new FilterQueryOption(query, _productContext);
-
-            // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
-        }
-
-        [Theory]
-        [PropertyData("DateTimeFunctions_Unsupported")]
-        public void DateTimeFunctions_Unsupported_ThrowODataException(AllowedFunctions unused, string query, string functionName)
-        {
-            // Arrange
-            var settings = new ODataValidationSettings
-            {
-                AllowedFunctions = AllowedFunctions.None,
-            };
-            var expectedMessage = string.Format(
-                "An unknown function with name '{0}' was found. " +
-                "This may also be a function import or a key lookup on a navigation property, which is not allowed.",
                 functionName);
             var option = new FilterQueryOption(query, _productContext);
 

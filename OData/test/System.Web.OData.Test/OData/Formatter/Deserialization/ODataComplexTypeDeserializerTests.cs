@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.OData.Builder;
-using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Formatter.Serialization.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -212,7 +211,8 @@ namespace System.Web.OData.Formatter.Deserialization
                     // dynamic properties
                     new ODataProperty { Name = "GuidProperty", Value = new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA") },
                     new ODataProperty { Name = "EnumValue", Value = enumValue },
-                    new ODataProperty { Name = "DateTimeProperty", Value = new DateTimeOffset(new DateTime(1992, 1, 1)) }
+                    new ODataProperty { Name = "DateTimeProperty", Value = new DateTimeOffset(new DateTime(1992, 1, 1)) },
+                    new ODataProperty { Name = "DateProperty", Value = new Date(1997, 7, 1)}
                 },
                 TypeName = typeof(SimpleOpenAddress).FullName
             };
@@ -235,10 +235,11 @@ namespace System.Web.OData.Formatter.Deserialization
 
             // Verify the dynamic properties
             Assert.NotNull(address.Properties);
-            Assert.Equal(3, address.Properties.Count());
+            Assert.Equal(4, address.Properties.Count());
             Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), address.Properties["GuidProperty"]);
             Assert.Equal(SimpleEnum.Third, address.Properties["EnumValue"]);
             Assert.Equal(new DateTimeOffset(new DateTime(1992, 1, 1)), address.Properties["DateTimeProperty"]);
+            Assert.Equal(new Date(1997, 7, 1), address.Properties["DateProperty"]);
         }
 
         [Fact]

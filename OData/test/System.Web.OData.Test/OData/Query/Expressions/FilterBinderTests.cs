@@ -1029,6 +1029,7 @@ namespace System.Web.OData.Query.Expressions
                new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
 
+        [Fact]
         public void DateDayNonNullable()
         {
             VerifyQueryDeserialization(
@@ -1108,22 +1109,87 @@ namespace System.Web.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("years(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Years == 100")]
-        [InlineData("months(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Months == 100")]
-        [InlineData("days(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Days == 100")]
-        [InlineData("hours(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Hours == 100")]
-        [InlineData("minutes(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Minutes == 100")]
-        [InlineData("seconds(DiscontinuedSince) eq 100", "$it => $it.DiscontinuedSince.Seconds == 100")]
-        public void TimespanFunctions(string filter, string expression)
+        [InlineData("year(NullableDateProperty) eq 2015", "$it => ($it.NullableDateProperty.Value.Year == 2015)")]
+        [InlineData("month(NullableDateProperty) eq 12", "$it => ($it.NullableDateProperty.Value.Month == 12)")]
+        [InlineData("day(NullableDateProperty) eq 23", "$it => ($it.NullableDateProperty.Value.Day == 23)")]
+        public void DateFunctions_Nullable(string filter, string expression)
         {
-            // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
-            // the test once the bug is fixed).
-            // The following assert shows the behavior with the bug and should be removed once the bug is fixed.
-            Assert.Throws<ODataException>(() => Bind(filter));
+            VerifyQueryDeserialization(filter, expression, NotTesting);
+        }
 
-            // TODO: Timespans are not handled well in the uri parser
-            // The following call shows the behavior without the bug, and should be enabled once the bug is fixed.
-            //VerifyQueryDeserialization(filter, expression);
+        [Theory]
+        [InlineData("year(DateProperty) eq 2015", "$it => ($it.DateProperty.Year == 2015)")]
+        [InlineData("month(DateProperty) eq 12", "$it => ($it.DateProperty.Month == 12)")]
+        [InlineData("day(DateProperty) eq 23", "$it => ($it.DateProperty.Day == 23)")]
+        public void DateFunctions_NonNullable(string filter, string expression)
+        {
+            VerifyQueryDeserialization(filter, expression);
+        }
+
+        [Theory]
+        [InlineData("hour(NullableTimeOfDayProperty) eq 10", "$it => ($it.NullableTimeOfDayProperty.Value.Hours == 10)")]
+        [InlineData("minute(NullableTimeOfDayProperty) eq 20", "$it => ($it.NullableTimeOfDayProperty.Value.Minutes == 20)")]
+        [InlineData("second(NullableTimeOfDayProperty) eq 30", "$it => ($it.NullableTimeOfDayProperty.Value.Seconds == 30)")]
+        public void TimeOfDayFunctions_Nullable(string filter, string expression)
+        {
+            VerifyQueryDeserialization(filter, expression, NotTesting);
+        }
+
+        [Theory]
+        [InlineData("hour(TimeOfDayProperty) eq 10", "$it => ($it.TimeOfDayProperty.Hours == 10)")]
+        [InlineData("minute(TimeOfDayProperty) eq 20", "$it => ($it.TimeOfDayProperty.Minutes == 20)")]
+        [InlineData("second(TimeOfDayProperty) eq 30", "$it => ($it.TimeOfDayProperty.Seconds == 30)")]
+        public void TimeOfDayFunctions_NonNullable(string filter, string expression)
+        {
+            VerifyQueryDeserialization(filter, expression);
+        }
+
+        [Theory]
+        [InlineData("fractionalseconds(DiscontinuedDate) eq 0.2", "$it => ((Convert($it.DiscontinuedDate.Value.Millisecond) / 1000) == 0.2)")]
+        [InlineData("fractionalseconds(NullableTimeOfDayProperty) eq 0.2", "$it => ((Convert($it.NullableTimeOfDayProperty.Value.Milliseconds) / 1000) == 0.2)")]
+        public void FractionalsecondsFunction_Nullable(string filter, string expression)
+        {
+            VerifyQueryDeserialization(filter, expression, NotTesting);
+        }
+
+        [Theory]
+        [InlineData("fractionalseconds(NonNullableDiscontinuedDate) eq 0.2", "$it => ((Convert($it.NonNullableDiscontinuedDate.Millisecond) / 1000) == 0.2)")]
+        [InlineData("fractionalseconds(TimeOfDayProperty) eq 0.2", "$it => ((Convert($it.TimeOfDayProperty.Milliseconds) / 1000) == 0.2)")]
+        public void FractionalsecondsFunction_NonNullable(string filter, string expression)
+        {
+            VerifyQueryDeserialization(filter, expression);
+        }
+
+        [Theory]
+        [InlineData("date(DiscontinuedDate) eq 2015-02-26",
+            "$it => (new Date($it.DiscontinuedDate.Value.Year, $it.DiscontinuedDate.Value.Month, $it.DiscontinuedDate.Value.Day) == 2015-02-26)")]
+        public void DateFunction_Nullable(string filter, string expression)
+        {
+            VerifyQueryDeserialization(filter, expression, NotTesting);
+        }
+
+        [Theory]
+        [InlineData("date(NonNullableDiscontinuedDate) eq 2015-02-26",
+            "$it => (new Date($it.NonNullableDiscontinuedDate.Year, $it.NonNullableDiscontinuedDate.Month, $it.NonNullableDiscontinuedDate.Day) == 2015-02-26)")]
+        public void DateFunction_NonNullable(string filter, string expression)
+        {
+            VerifyQueryDeserialization(filter, expression);
+        }
+
+        [Theory]
+        [InlineData("time(DiscontinuedDate) eq 01:02:03.0040000",
+            "$it => (new TimeOfDay($it.DiscontinuedDate.Value.Hour, $it.DiscontinuedDate.Value.Minute, $it.DiscontinuedDate.Value.Second, $it.DiscontinuedDate.Value.Millisecond) == 01:02:03.0040000)")]
+        public void TimeFunction_Nullable(string filter, string expression)
+        {
+            VerifyQueryDeserialization(filter, expression, NotTesting);
+        }
+
+        [Theory]
+        [InlineData("time(NonNullableDiscontinuedDate) eq 01:02:03.0040000",
+            "$it => (new TimeOfDay($it.NonNullableDiscontinuedDate.Hour, $it.NonNullableDiscontinuedDate.Minute, $it.NonNullableDiscontinuedDate.Second, $it.NonNullableDiscontinuedDate.Millisecond) == 01:02:03.0040000)")]
+        public void TimeFunction_NonNullable(string filter, string expression)
+        {
+            VerifyQueryDeserialization(filter, expression);
         }
 
         #endregion

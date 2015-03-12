@@ -33,17 +33,22 @@ namespace System.Web.OData.Formatter.Deserialization
         [InlineData(typeof(Decimal), EdmPrimitiveTypeKind.Decimal)]
         [InlineData(typeof(DateTimeOffset), EdmPrimitiveTypeKind.DateTimeOffset)]
         [InlineData(typeof(DateTime), EdmPrimitiveTypeKind.DateTimeOffset)]
+        [InlineData(typeof(Date), EdmPrimitiveTypeKind.Date)]
+        [InlineData(typeof(TimeOfDay), EdmPrimitiveTypeKind.TimeOfDay)]
         [InlineData(typeof(double), EdmPrimitiveTypeKind.Double)]
         [InlineData(typeof(byte[]), EdmPrimitiveTypeKind.Binary)]
         [InlineData(typeof(bool), EdmPrimitiveTypeKind.Boolean)]
         [InlineData(typeof(int?), EdmPrimitiveTypeKind.Int32)]
         public void GetODataDeserializer_Primitive(Type type, EdmPrimitiveTypeKind primitiveKind)
         {
+            // Arrange
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
+            // Act
             ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(_edmModel, type, request);
 
+            // Assert
             Assert.NotNull(deserializer);
             ODataPrimitiveDeserializer rawValueDeserializer = Assert.IsType<ODataPrimitiveDeserializer>(deserializer);
             Assert.Equal(ODataPayloadKind.Property, rawValueDeserializer.ODataPayloadKind);

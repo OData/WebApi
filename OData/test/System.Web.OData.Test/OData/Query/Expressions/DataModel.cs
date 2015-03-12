@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data.Linq;
 using System.Linq;
 using System.Xml.Linq;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon.Types;
 
 namespace System.Web.OData.Query.Expressions
@@ -34,6 +35,12 @@ namespace System.Web.OData.Query.Expressions
 
         public DateTimeOffset DiscontinuedOffset { get; set; }
         public TimeSpan DiscontinuedSince { get; set; }
+
+        public Date DateProperty { get; set; }
+        public Date? NullableDateProperty { get; set; }
+
+        public TimeOfDay TimeOfDayProperty { get; set; }
+        public TimeOfDay? NullableTimeOfDayProperty { get; set; }
 
         public ushort? UnsignedReorderLevel { get; set; }
 

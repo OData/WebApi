@@ -7,6 +7,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Query.Expressions
 {
@@ -27,21 +28,19 @@ namespace System.Web.OData.Query.Expressions
         internal const string TrimFunctionName = "trim";
         internal const string ConcatFunctionName = "concat";
         internal const string YearFunctionName = "year";
-        internal const string YearsFunctionName = "years";
         internal const string MonthFunctionName = "month";
-        internal const string MonthsFunctionName = "months";
         internal const string DayFunctionName = "day";
-        internal const string DaysFunctionName = "days";
         internal const string HourFunctionName = "hour";
-        internal const string HoursFunctionName = "hours";
         internal const string MinuteFunctionName = "minute";
-        internal const string MinutesFunctionName = "minutes";
         internal const string SecondFunctionName = "second";
-        internal const string SecondsFunctionName = "seconds";
+        internal const string MillisecondFunctionName = "millisecond";
+        internal const string FractionalSecondsFunctionName = "fractionalseconds";
         internal const string RoundFunctionName = "round";
         internal const string FloorFunctionName = "floor";
         internal const string CeilingFunctionName = "ceiling";
         internal const string CastFunctionName = "cast";
+        internal const string DateFunctionName = "date";
+        internal const string TimeFunctionName = "time";
 
         // string functions
         public static readonly MethodInfo StartsWith;
@@ -72,12 +71,9 @@ namespace System.Web.OData.Query.Expressions
         // Date properties
         public static readonly Dictionary<string, PropertyInfo> DateProperties = new[]
         {
-            new KeyValuePair<string, PropertyInfo>(YearFunctionName, typeof(DateTime).GetProperty("Year")),
-            new KeyValuePair<string, PropertyInfo>(MonthFunctionName, typeof(DateTime).GetProperty("Month")),
-            new KeyValuePair<string, PropertyInfo>(DayFunctionName, typeof(DateTime).GetProperty("Day")),
-            new KeyValuePair<string, PropertyInfo>(HourFunctionName, typeof(DateTime).GetProperty("Hour")),
-            new KeyValuePair<string, PropertyInfo>(MinuteFunctionName, typeof(DateTime).GetProperty("Minute")),
-            new KeyValuePair<string, PropertyInfo>(SecondFunctionName, typeof(DateTime).GetProperty("Second")),
+            new KeyValuePair<string, PropertyInfo>(YearFunctionName, typeof(Date).GetProperty("Year")),
+            new KeyValuePair<string, PropertyInfo>(MonthFunctionName, typeof(Date).GetProperty("Month")),
+            new KeyValuePair<string, PropertyInfo>(DayFunctionName, typeof(Date).GetProperty("Day")),
         }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
         // DateTimeOffset properties
@@ -89,17 +85,17 @@ namespace System.Web.OData.Query.Expressions
             new KeyValuePair<string, PropertyInfo>(HourFunctionName, typeof(DateTimeOffset).GetProperty("Hour")),
             new KeyValuePair<string, PropertyInfo>(MinuteFunctionName, typeof(DateTimeOffset).GetProperty("Minute")),
             new KeyValuePair<string, PropertyInfo>(SecondFunctionName, typeof(DateTimeOffset).GetProperty("Second")),
+            new KeyValuePair<string, PropertyInfo>(MillisecondFunctionName, typeof(DateTimeOffset).GetProperty("Millisecond")),
         }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-        // TimeSpan properties
-        public static readonly Dictionary<string, PropertyInfo> TimeSpanProperties = new[]
+        // TimeOfDay properties
+        // ODL uses the Hour(s), Minute(s), Second(s), It's the wrong property name. It should be Hour, Minute, Second.
+        public static readonly Dictionary<string, PropertyInfo> TimeOfDayProperties = new[]
         {
-            new KeyValuePair<string, PropertyInfo>(YearsFunctionName, typeof(TimeSpan).GetProperty("Years")),
-            new KeyValuePair<string, PropertyInfo>(MonthsFunctionName, typeof(TimeSpan).GetProperty("Months")),
-            new KeyValuePair<string, PropertyInfo>(DaysFunctionName, typeof(TimeSpan).GetProperty("Days")),
-            new KeyValuePair<string, PropertyInfo>(HoursFunctionName, typeof(TimeSpan).GetProperty("Hours")),
-            new KeyValuePair<string, PropertyInfo>(MinutesFunctionName, typeof(TimeSpan).GetProperty("Minutes")),
-            new KeyValuePair<string, PropertyInfo>(SecondsFunctionName, typeof(TimeSpan).GetProperty("Seconds")),
+            new KeyValuePair<string, PropertyInfo>(HourFunctionName, typeof(TimeOfDay).GetProperty("Hours")),
+            new KeyValuePair<string, PropertyInfo>(MinuteFunctionName, typeof(TimeOfDay).GetProperty("Minutes")),
+            new KeyValuePair<string, PropertyInfo>(SecondFunctionName, typeof(TimeOfDay).GetProperty("Seconds")),
+            new KeyValuePair<string, PropertyInfo>(MillisecondFunctionName, typeof(TimeOfDay).GetProperty("Milliseconds")),
         }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
         // String Properties

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Web.OData.Builder.TestModels;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Builder
@@ -100,6 +101,8 @@ namespace System.Web.OData.Builder
             Assert.True(complexType.Property(t => t.NullableLongProperty).OptionalProperty);
             Assert.True(complexType.Property(t => t.NullableShortProperty).OptionalProperty);
             Assert.True(complexType.Property(t => t.NullableTimeSpanProperty).OptionalProperty);
+            Assert.True(complexType.Property(t => t.NullableDateProperty).OptionalProperty);
+            Assert.True(complexType.Property(t => t.NullableTimeOfDayProperty).OptionalProperty);
 
             // Assert.True(complexType.Property(t => t.StreamProperty).OptionalProperty);
             Assert.True(complexType.Property(t => t.StringProperty).OptionalProperty);
@@ -124,6 +127,8 @@ namespace System.Web.OData.Builder
             Assert.False(complexType.Property(t => t.ShortProperty).OptionalProperty);
             Assert.False(complexType.Property(t => t.TimeSpanProperty).OptionalProperty);
             Assert.False(complexType.Property(t => t.DateTimeProperty).OptionalProperty);
+            Assert.False(complexType.Property(t => t.DateProperty).OptionalProperty);
+            Assert.False(complexType.Property(t => t.TimeOfDayProperty).OptionalProperty);
         }
 
         [Fact]
@@ -466,6 +471,12 @@ namespace System.Web.OData.Builder
 
         public DateTime DateTimeProperty { get; set; }
         public DateTime? NullableDateTimeProperty { get; set; }
+
+        public Date DateProperty { get; set; }
+        public Date? NullableDateProperty { get; set; }
+
+        public TimeOfDay TimeOfDayProperty { get; set; }
+        public TimeOfDay? NullableTimeOfDayProperty { get; set; }
 
         public string StringProperty { get; set; }
         public Stream StreamProperty { get; set; }

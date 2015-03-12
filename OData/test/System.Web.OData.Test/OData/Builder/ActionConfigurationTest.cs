@@ -189,14 +189,22 @@ namespace System.Web.OData.Builder
             action.CollectionParameter<string>("p3");
             action.CollectionParameter<int>("p4");
             action.CollectionParameter<ZipCode>("p5");
+            action.EntityParameter<Customer>("p6");
+            action.CollectionEntityParameter<Employee>("p7");
             ParameterConfiguration[] parameters = action.Parameters.ToArray();
             ComplexTypeConfiguration[] complexTypes = builder.StructuralTypes.OfType<ComplexTypeConfiguration>().ToArray();
+            EntityTypeConfiguration[] entityTypes = builder.StructuralTypes.OfType<EntityTypeConfiguration>().ToArray();
 
             // Assert
             Assert.Equal(2, complexTypes.Length);
             Assert.Equal(typeof(Address).FullName, complexTypes[0].FullName);
             Assert.Equal(typeof(ZipCode).FullName, complexTypes[1].FullName);
-            Assert.Equal(6, parameters.Length);
+
+            Assert.Equal(2, entityTypes.Length);
+            Assert.Equal(typeof(Customer).FullName, entityTypes[0].FullName);
+            Assert.Equal(typeof(Employee).FullName, entityTypes[1].FullName);
+
+            Assert.Equal(8, parameters.Length);
             Assert.Equal("p0", parameters[0].Name);
             Assert.Equal("Edm.String", parameters[0].TypeConfiguration.FullName);
             Assert.Equal("p1", parameters[1].Name);
@@ -209,6 +217,12 @@ namespace System.Web.OData.Builder
             Assert.Equal("Collection(Edm.Int32)", parameters[4].TypeConfiguration.FullName);
             Assert.Equal("p5", parameters[5].Name);
             Assert.Equal(string.Format("Collection({0})", typeof(ZipCode).FullName), parameters[5].TypeConfiguration.FullName);
+
+            Assert.Equal("p6", parameters[6].Name);
+            Assert.Equal(typeof(Customer).FullName, parameters[6].TypeConfiguration.FullName);
+
+            Assert.Equal("p7", parameters[7].Name);
+            Assert.Equal(string.Format("Collection({0})", typeof(Employee).FullName), parameters[7].TypeConfiguration.FullName);
         }
 
         [Fact]
@@ -250,6 +264,11 @@ namespace System.Web.OData.Builder
             action.CollectionParameter<ZipCode>("p6");
             action.CollectionParameter<ZipCode>("p7").OptionalParameter = false;
 
+            action.EntityParameter<Customer>("p8");
+            action.EntityParameter<Customer>("p9").OptionalParameter = false;
+
+            action.CollectionEntityParameter<Customer>("p10");
+            action.CollectionEntityParameter<Customer>("p11").OptionalParameter = false;
             Dictionary<string, ParameterConfiguration> parameters = action.Parameters.ToDictionary(e => e.Name, e => e);
 
             // Assert
@@ -264,6 +283,12 @@ namespace System.Web.OData.Builder
 
             Assert.True(parameters["p6"].OptionalParameter);
             Assert.False(parameters["p7"].OptionalParameter);
+
+            Assert.True(parameters["p8"].OptionalParameter);
+            Assert.False(parameters["p9"].OptionalParameter);
+
+            Assert.True(parameters["p10"].OptionalParameter);
+            Assert.False(parameters["p11"].OptionalParameter);
         }
 
         [Fact]
@@ -276,7 +301,7 @@ namespace System.Web.OData.Builder
             customer.Property(c => c.Name);
 
             // Act
-            ActionConfiguration sendEmail = customer.Action("ActionName");
+            customer.Action("ActionName");
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
@@ -449,8 +474,14 @@ namespace System.Web.OData.Builder
             actionBuilder.Parameter<Address>("address").OptionalParameter = false;
             actionBuilder.Parameter<Address>("nullableAddress");
 
+            actionBuilder.EntityParameter<Customer>("customer").OptionalParameter = false;
+            actionBuilder.EntityParameter<Customer>("nullableCustomer");
+
             actionBuilder.CollectionParameter<Address>("addresses").OptionalParameter = false;
             actionBuilder.CollectionParameter<Address>("nullableAddresses");
+
+            actionBuilder.CollectionEntityParameter<Customer>("customers").OptionalParameter = false;
+            actionBuilder.CollectionEntityParameter<Customer>("nullableCustomers");
 
             // Act
             IEdmModel model = builder.GetEdmModel();
@@ -464,8 +495,15 @@ namespace System.Web.OData.Builder
             Assert.False(action.FindParameter("address").Type.IsNullable);
             Assert.True(action.FindParameter("nullableAddress").Type.IsNullable);
 
+            Assert.False(action.FindParameter("customer").Type.IsNullable);
+            Assert.True(action.FindParameter("nullableCustomer").Type.IsNullable);
+
             Assert.False(action.FindParameter("addresses").Type.IsNullable);
             Assert.True(action.FindParameter("nullableAddresses").Type.IsNullable);
+
+            // Follow up: https://github.com/OData/odata.net/issues/98
+            // Assert.False(action.FindParameter("customers").Type.IsNullable);
+            Assert.True(action.FindParameter("nullableCustomers").Type.IsNullable);
         }
 
         [Fact]

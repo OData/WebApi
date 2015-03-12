@@ -808,15 +808,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid parameter type &apos;{0}&apos;. A non-binding parameter type must be either Primitive, Complex, Collection of Primitive or a Collection of Complex..
-        /// </summary>
-        internal static string InvalidParameterType {
-            get {
-                return ResourceManager.GetString("InvalidParameterType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The URI segment &apos;{0}&apos; is invalid after the segment &apos;{1}&apos;..
         /// </summary>
         internal static string InvalidPathSegment {

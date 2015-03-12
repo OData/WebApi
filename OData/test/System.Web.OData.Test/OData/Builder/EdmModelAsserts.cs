@@ -117,6 +117,19 @@ namespace System.Web.OData.Builder
             return navigationProperty;
         }
 
+        public static IEdmOperationParameter AssertHasParameter(this IEdmFunction function, IEdmModel model, string parameterName, Type parameterType, bool isNullable)
+        {
+            IEdmOperationParameter parameter = function.FindParameter(parameterName);
+            Assert.NotNull(parameter);
+
+            IEdmType edmType = model.GetEdmType(parameterType);
+            Assert.Equal(edmType.FullTypeName(), parameter.Type.FullName());
+
+            Assert.Equal(isNullable, parameter.Type.IsNullable);
+
+            return parameter;
+        }
+
         public static TPropertyType AssertHasProperty<TPropertyType>(this IEdmStructuredType edmType, IEdmModel model, string propertyName, Type propertyType, bool isNullable, bool isCollection = false)
             where TPropertyType : IEdmProperty
         {

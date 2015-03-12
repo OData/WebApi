@@ -345,9 +345,6 @@
   <data name="InvalidBindingParameterType" xml:space="preserve">
     <value>Invalid bindingParameter type '{0}'. A bindingParameter must be either an EntityType or a Collection of EntityTypes.</value>
   </data>
-  <data name="InvalidParameterType" xml:space="preserve">
-    <value>Invalid parameter type '{0}'. A non-binding parameter type must be either Primitive, Complex, Collection of Primitive or a Collection of Complex.</value>
-  </data>
   <data name="MoreThanOneProcedureFound" xml:space="preserve">
     <value>More than one Procedure called '{0}' was found. Try using the other RemoveProcedure override.</value>
   </data>

@@ -227,14 +227,22 @@ namespace System.Web.OData.Builder
             function.CollectionParameter<string>("p3");
             function.CollectionParameter<int>("p4");
             function.CollectionParameter<ZipCode>("p5");
+            function.EntityParameter<Customer>("p6");
+            function.CollectionEntityParameter<Employee>("p7");
             ParameterConfiguration[] parameters = function.Parameters.ToArray();
             ComplexTypeConfiguration[] complexTypes = builder.StructuralTypes.OfType<ComplexTypeConfiguration>().ToArray();
+            EntityTypeConfiguration[] entityTypes = builder.StructuralTypes.OfType<EntityTypeConfiguration>().ToArray();
 
             // Assert
             Assert.Equal(2, complexTypes.Length);
             Assert.Equal(typeof(Address).FullName, complexTypes[0].FullName);
             Assert.Equal(typeof(ZipCode).FullName, complexTypes[1].FullName);
-            Assert.Equal(6, parameters.Length);
+
+            Assert.Equal(2, entityTypes.Length);
+            Assert.Equal(typeof(Customer).FullName, entityTypes[0].FullName);
+            Assert.Equal(typeof(Employee).FullName, entityTypes[1].FullName);
+
+            Assert.Equal(8, parameters.Length);
             Assert.Equal("p0", parameters[0].Name);
             Assert.Equal("Edm.String", parameters[0].TypeConfiguration.FullName);
             Assert.Equal("p1", parameters[1].Name);
@@ -247,6 +255,12 @@ namespace System.Web.OData.Builder
             Assert.Equal("Collection(Edm.Int32)", parameters[4].TypeConfiguration.FullName);
             Assert.Equal("p5", parameters[5].Name);
             Assert.Equal(string.Format("Collection({0})", typeof(ZipCode).FullName), parameters[5].TypeConfiguration.FullName);
+
+            Assert.Equal("p6", parameters[6].Name);
+            Assert.Equal(typeof(Customer).FullName, parameters[6].TypeConfiguration.FullName);
+
+            Assert.Equal("p7", parameters[7].Name);
+            Assert.Equal(string.Format("Collection({0})", typeof(Employee).FullName), parameters[7].TypeConfiguration.FullName);
         }
 
         [Fact]
@@ -361,6 +375,70 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void CanCreateEdmModel_ForBindableFunction_WithSupportedParameterType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
+            customer.HasKey(c => c.CustomerId);
+            customer.Property(c => c.Name);
+
+            // Act
+            FunctionConfiguration functionBuilder = customer.Function("FunctionName");
+            functionBuilder.Parameter<int>("primitive");
+            functionBuilder.CollectionParameter<int>("collectionPrimitive");
+
+            functionBuilder.Parameter<bool?>("nullablePrimitive");
+            functionBuilder.CollectionParameter<bool?>("nullableCollectionPrimitive");
+
+            functionBuilder.Parameter<Color>("enum");
+            functionBuilder.CollectionParameter<Color>("collectionEnum");
+
+            functionBuilder.Parameter<Color?>("nullableEnum");
+            functionBuilder.CollectionParameter<Color?>("nullableCollectionEnum");
+
+            functionBuilder.Parameter<Address>("complex");
+            functionBuilder.CollectionParameter<Address>("collectionComplex");
+
+            functionBuilder.EntityParameter<Customer>("entity");
+            functionBuilder.CollectionEntityParameter<Customer>("collectionEntity");
+
+            functionBuilder.Returns<bool>();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(1, model.SchemaElements.OfType<IEdmFunction>().Count());
+            IEdmFunction function = Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
+            Assert.False(function.IsComposable);
+            Assert.True(function.IsBound);
+            Assert.Equal("FunctionName", function.Name);
+            Assert.NotNull(function.ReturnType);
+
+            Assert.Equal(13, function.Parameters.Count());
+
+            function.AssertHasParameter(model, BindingParameterConfiguration.DefaultBindingParameterName, typeof(Customer), true);
+
+            function.AssertHasParameter(model, parameterName: "primitive", parameterType: typeof(int), isNullable: false);
+            function.AssertHasParameter(model, parameterName: "collectionPrimitive", parameterType: typeof(IList<int>), isNullable: false);
+
+            function.AssertHasParameter(model, parameterName: "nullablePrimitive", parameterType: typeof(bool?), isNullable: true);
+            function.AssertHasParameter(model, parameterName: "nullableCollectionPrimitive", parameterType: typeof(IList<bool?>), isNullable: true);
+
+            function.AssertHasParameter(model, parameterName: "enum", parameterType: typeof(Color), isNullable: false);
+            function.AssertHasParameter(model, parameterName: "collectionEnum", parameterType: typeof(IList<Color>), isNullable: false);
+
+            function.AssertHasParameter(model, parameterName: "nullableEnum", parameterType: typeof(Color?), isNullable: true);
+            function.AssertHasParameter(model, parameterName: "nullableCollectionEnum", parameterType: typeof(IList<Color?>), isNullable: true);
+
+            function.AssertHasParameter(model, parameterName: "complex", parameterType: typeof(Address), isNullable: true);
+            function.AssertHasParameter(model, parameterName: "collectionComplex", parameterType: typeof(IList<Address>), isNullable: true);
+
+            function.AssertHasParameter(model, parameterName: "entity", parameterType: typeof(Customer), isNullable: true);
+            function.AssertHasParameter(model, parameterName: "collectionEntity", parameterType: typeof(IList<Customer>), isNullable: true);
+        }
+
+        [Fact]
         public void CanManuallyConfigureFunctionLinkFactory()
         {
             // Arrange
@@ -400,6 +478,8 @@ namespace System.Web.OData.Builder
             functionBuilder.Parameter<int>("int");
             functionBuilder.Parameter<Nullable<int>>("nullableOfInt");
             functionBuilder.Parameter<string>("string");
+            functionBuilder.EntityParameter<Customer>("customer");
+            functionBuilder.CollectionEntityParameter<Customer>("customers");
             functionBuilder.Returns<int>();
 
             // Act
@@ -410,6 +490,9 @@ namespace System.Web.OData.Builder
             Assert.False(function.FindParameter("int").Type.IsNullable);
             Assert.True(function.FindParameter("nullableOfInt").Type.IsNullable);
             Assert.True(function.FindParameter("string").Type.IsNullable);
+
+            Assert.True(function.FindParameter("customer").Type.IsNullable);
+            Assert.True(function.FindParameter("customers").Type.IsNullable);
         }
 
         [Fact]

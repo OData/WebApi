@@ -316,24 +316,25 @@ namespace System.Web.OData
             return customers;
         }
 
+        [EnableQuery]
         public IQueryable<SimpleOpenCustomer> Get(ODataQueryOptions<SimpleOpenCustomer> options)
         {
             var queryable = CreateCustomers().AsQueryable();
-            if (options.Filter != null)
-                queryable = options.Filter.ApplyTo(queryable, new ODataQuerySettings()) as IQueryable<SimpleOpenCustomer>;
+            //if (options.Filter != null)
+            //    queryable = options.Filter.ApplyTo(queryable, new ODataQuerySettings()) as IQueryable<SimpleOpenCustomer>;
 
-            if (options.OrderBy != null)
-                queryable = options.OrderBy.ApplyTo(queryable);
+            //if (options.OrderBy != null)
+            //    queryable = options.OrderBy.ApplyTo(queryable);
 
-            if (options.Skip != null)
-                queryable = options.Skip.ApplyTo(queryable, new ODataQuerySettings());
-            if (options.Top != null)
-                queryable = options.Top.ApplyTo(queryable, new ODataQuerySettings());
+            //if (options.Skip != null)
+            //    queryable = options.Skip.ApplyTo(queryable, new ODataQuerySettings());
+            //if (options.Top != null)
+            //    queryable = options.Top.ApplyTo(queryable, new ODataQuerySettings());
 
-            if (options.SelectExpand != null)
-            {
-                Request.ODataProperties().SelectExpandClause = options.SelectExpand.SelectExpandClause;
-            }
+            //if (options.SelectExpand != null)
+            //{
+            //    Request.ODataProperties().SelectExpandClause = options.SelectExpand.SelectExpandClause;
+            //}
 
             return queryable;
         }

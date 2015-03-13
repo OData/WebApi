@@ -267,6 +267,22 @@ namespace System.Web.OData
             }
         }
 
+        [Fact]
+        public void SelectExpand_Works_ForSelectInstanceFunction()
+        {
+            // Arrange
+            const string URI = "/odata2/Players?$select=Name,Default.PlayerFunction1";
+
+            // Act
+            HttpResponseMessage response = GetResponse(URI, AcceptJsonFullMetadata);
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            JObject result = JObject.Parse(responseString);
+            Assert.Equal(5, result["value"].Count());
+        }
+
         [Theory]
         [InlineData("Default.Container.*")]
         [InlineData("Container.*")]

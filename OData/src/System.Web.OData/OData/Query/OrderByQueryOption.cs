@@ -206,12 +206,13 @@ namespace System.Web.OData.Query
             bool alreadyOrdered = false;
             IQueryable querySoFar = query;
 
-            HashSet<IEdmProperty> propertiesSoFar = new HashSet<IEdmProperty>();
+            HashSet<string> propertiesSoFar = new HashSet<string>();
             bool orderByItSeen = false;
 
             foreach (OrderByNode node in nodes)
             {
                 OrderByPropertyNode propertyNode = node as OrderByPropertyNode;
+                OrderByOpenPropertyNode openPropertyNode = node as OrderByOpenPropertyNode;
 
                 if (propertyNode != null)
                 {
@@ -219,29 +220,38 @@ namespace System.Web.OData.Query
                     OrderByDirection direction = propertyNode.Direction;
 
                     // This check prevents queries with duplicate properties (e.g. $orderby=Id,Id,Id,Id...) from causing stack overflows
-                    if (propertiesSoFar.Contains(property))
+                    if (propertiesSoFar.Contains(property.Name))
                     {
                         throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, property.Name));
                     }
-                    propertiesSoFar.Add(property);
+                    propertiesSoFar.Add(property.Name);
 
                     if (propertyNode.OrderByClause != null)
                     {
-                        // Ensure we have decided how to handle null propagation
-                        ODataQuerySettings updatedSettings = querySettings;
-                        if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
-                        {
-                            updatedSettings = new ODataQuerySettings(updatedSettings);
-                            updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
-                        }
-
-                        LambdaExpression orderByExpression =
-                            FilterBinder.Bind(propertyNode.OrderByClause, Context.ElementClrType, Context.Model, updatedSettings);
-                        querySoFar = ExpressionHelpers.OrderBy(querySoFar, orderByExpression, direction, Context.ElementClrType, alreadyOrdered);
+                        querySoFar = AddOrderByQueryForProperty(query, querySettings, propertyNode.OrderByClause, querySoFar, direction, alreadyOrdered);
                     }
                     else
                     {
                         querySoFar = ExpressionHelpers.OrderByProperty(querySoFar, Context.Model, property, direction, Context.ElementClrType, alreadyOrdered);
+                    }
+                    alreadyOrdered = true;
+                }
+                else if (openPropertyNode != null)
+                {
+                    // This check prevents queries with duplicate properties (e.g. $orderby=Id,Id,Id,Id...) from causing stack overflows
+                    if (propertiesSoFar.Contains(openPropertyNode.PropertyName))
+                    {
+                        throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, openPropertyNode.PropertyName));
+                    }
+                    propertiesSoFar.Add(openPropertyNode.PropertyName);
+
+                    if (openPropertyNode.OrderByClause != null)
+                    {
+                        querySoFar = AddOrderByQueryForProperty(query, querySettings, openPropertyNode.OrderByClause, querySoFar, openPropertyNode.Direction, alreadyOrdered);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException(string.Format("Error ordering the dynamic property {0} on type {1}", openPropertyNode.PropertyName, Context.ElementClrType.FullName));
                     }
                     alreadyOrdered = true;
                 }
@@ -260,6 +270,25 @@ namespace System.Web.OData.Query
             }
 
             return querySoFar as IOrderedQueryable;
+        }
+
+        private IQueryable AddOrderByQueryForProperty(IQueryable query, ODataQuerySettings querySettings,
+            OrderByClause orderbyClause, IQueryable querySoFar, OrderByDirection direction, bool alreadyOrdered)
+        {
+            // Ensure we have decided how to handle null propagation
+            ODataQuerySettings updatedSettings = querySettings;
+            if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
+            {
+                updatedSettings = new ODataQuerySettings(updatedSettings);
+                updatedSettings.HandleNullPropagation =
+                    HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
+            }
+
+            LambdaExpression orderByExpression =
+                FilterBinder.Bind(orderbyClause, Context.ElementClrType, Context.Model, updatedSettings);
+            querySoFar = ExpressionHelpers.OrderBy(querySoFar, orderByExpression, direction, Context.ElementClrType,
+                alreadyOrdered);
+            return querySoFar;
         }
 
         private OrderByClause TranslateParameterAlias(OrderByClause orderBy)

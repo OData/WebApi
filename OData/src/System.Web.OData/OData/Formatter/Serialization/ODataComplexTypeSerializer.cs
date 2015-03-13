@@ -113,7 +113,7 @@ namespace System.Web.OData.Formatter.Serialization
             if (complexType.ComplexDefinition().IsOpen)
             {
                 List<ODataProperty> dynamicProperties = 
-                    AppendDynamicProperties(complexObject, complexType, writeContext, propertyCollection);
+                    AppendDynamicProperties(complexObject, complexType, writeContext, propertyCollection, new string[0]);
 
                 if (dynamicProperties != null)
                 {

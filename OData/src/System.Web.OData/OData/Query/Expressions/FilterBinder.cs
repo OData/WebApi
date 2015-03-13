@@ -32,6 +32,8 @@ namespace System.Web.OData.Query.Expressions
     {
         private const string ODataItParameterName = "$it";
 
+        private static readonly string _dictionaryStringObjectIndexerName = typeof (Dictionary<string, object>).GetDefaultMembers()[0].Name;
+
         private static readonly MethodInfo _stringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
 
         private static readonly Expression _nullConstant = Expression.Constant(null);
@@ -193,6 +195,9 @@ namespace System.Web.OData.Query.Expressions
                     case QueryNodeKind.SingleValuePropertyAccess:
                         return BindPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
 
+                    case QueryNodeKind.SingleValueOpenPropertyAccess:
+                        return BindOpenPropertyAccessQueryNode(node as SingleValueOpenPropertyAccessNode);
+                    
                     case QueryNodeKind.UnaryOperator:
                         return BindUnaryOperatorNode(node as UnaryOperatorNode);
 
@@ -216,7 +221,6 @@ namespace System.Web.OData.Query.Expressions
                         return BindSingleEntityFunctionCallNode(node as SingleEntityFunctionCallNode);
 
                     case QueryNodeKind.NamedFunctionParameter:
-                    case QueryNodeKind.SingleValueOpenPropertyAccess:
                     case QueryNodeKind.ParameterAlias:
                     case QueryNodeKind.EntitySet:
                     case QueryNodeKind.KeyLookup:
@@ -231,6 +235,57 @@ namespace System.Web.OData.Query.Expressions
             {
                 throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
             }
+        }
+
+        private Expression BindOpenPropertyAccessQueryNode(SingleValueOpenPropertyAccessNode openNode)
+        {
+            var prop = GetOpenTypeProperty(openNode);
+            var propertyAccessExpression = BindPropertyAccessExpression(openNode, prop);
+
+            var dynamicDictIsNotNull = Expression.NotEqual(propertyAccessExpression, Expression.Constant(null));
+            var containsKeyExpression = Expression.Call(propertyAccessExpression, propertyAccessExpression.Type.GetMethod("ContainsKey"), Expression.Constant(openNode.Name));
+            var dynamicDictExitsAndIsNotNull = Expression.AndAlso(dynamicDictIsNotNull, containsKeyExpression);
+            var nullExpression = Expression.Constant(null);
+            var readDictionaryIndexerExpression = Expression.Property(propertyAccessExpression, _dictionaryStringObjectIndexerName, Expression.Constant(openNode.Name));
+            return Expression.Condition(
+                dynamicDictExitsAndIsNotNull,
+                readDictionaryIndexerExpression,
+                nullExpression
+                );
+        }
+
+        private Expression BindPropertyAccessExpression(SingleValueOpenPropertyAccessNode openNode, PropertyInfo prop)
+        {
+            var source = Bind(openNode.Source);
+            Expression propertyAccessExpression;
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True &&
+                IsNullable(source.Type) && source != _lambdaParameters[ODataItParameterName])
+                propertyAccessExpression = Expression.Property(RemoveInnerNullPropagation(source), prop.Name);
+            else
+            {
+                propertyAccessExpression = Expression.Property(source, prop.Name);
+            }
+            return propertyAccessExpression;
+        }
+
+        private PropertyInfo GetOpenTypeProperty(SingleValueOpenPropertyAccessNode openNode)
+        {
+            IEdmStructuredType edmEntityType;
+            var edmTypeReference = openNode.Source.TypeReference;
+            if (edmTypeReference.IsEntity())
+            {
+                edmEntityType = edmTypeReference.AsEntity().EntityDefinition();
+            }
+            else if (edmTypeReference.IsComplex())
+            {
+                edmEntityType = edmTypeReference.AsComplex().ComplexDefinition();
+            }
+            else
+            {
+                throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, openNode.Kind, typeof (FilterBinder).Name);
+            }
+            var prop = EdmLibHelpers.GetDynamicPropertyDictionary(edmEntityType, _model);
+            return prop;
         }
 
         private Expression BindSingleEntityFunctionCallNode(SingleEntityFunctionCallNode node)

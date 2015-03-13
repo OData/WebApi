@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
+using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -44,6 +45,102 @@ namespace System.Web.OData
             Assert.Equal(new JArray(new[] { 200, 100, 300, 0, 400 }), result["ListProp"]);
             Assert.Equal("0001-01-01", result["DateList"][0]);
             Assert.Equal("9999-12-31", result["DateList"][1]);
+        }
+
+        [Fact]
+        public void Get_OpenEntityTypeWithOrderbyAscending()
+        {
+            // Arrange
+            const string RequestUri = "http://localhost/odata/SimpleOpenCustomers?$orderby=Token&$filter=Token ne null";
+            var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var resultArray = result["value"] as JArray;
+            Assert.Equal(2, resultArray.Count);
+            Assert.Equal(2, resultArray[0]["CustomerId"]);
+            Assert.Equal(4, resultArray[1]["CustomerId"]);
+        }
+
+        [Fact]
+        public void Get_OpenEntityTypeWithOrderbyDescending()
+        {
+            // Arrange
+            const string RequestUri = "http://localhost/odata/SimpleOpenCustomers?$orderby=Token desc&$filter=Token ne null";
+            var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var resultArray = result["value"] as JArray;
+            Assert.Equal(2, resultArray.Count);
+            Assert.Equal(4, resultArray[0]["CustomerId"]);
+            Assert.Equal(2, resultArray[1]["CustomerId"]);
+        }
+
+        [Fact]
+        public void Get_OpenEntityTypeWithFilter()
+        {
+            // Arrange
+            const string RequestUri = "http://localhost/odata/SimpleOpenCustomers?$filter=Token ne null";
+            var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var resultArray = result["value"] as JArray;
+            Assert.Equal(2, resultArray.Count);
+            Assert.Equal(2, resultArray[0]["CustomerId"]);
+            Assert.Equal(4, resultArray[1]["CustomerId"]);
+        }
+
+        [Fact]
+        public void Get_OpenEntityTypeWithSelect()
+        {
+            // Arrange
+            const string RequestUri = "http://localhost/odata/SimpleOpenCustomers?$select=Token";
+            var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var resultArray = result["value"] as JArray;
+            Assert.Equal(6, resultArray.Count);
+            Assert.NotNull(resultArray[2]["Token"]);//customer 2 has a token
+            Assert.NotNull(resultArray[4]["Token"]);//customer 3 has a token
         }
 
         [Fact]
@@ -185,6 +282,12 @@ namespace System.Web.OData
                 {"IntList", new List<int> { 1, 2, 3, 4, 5, 6, 7 }},
             };
 
+            customers[4].CustomerProperties = new Dictionary<string, object>
+            {
+                {"Token", new Guid("A6A594ED-375B-424E-AC0A-945D89CF7B9B")},
+                {"IntList", new List<int> { 1, 2, 3, 4, 5, 6, 7 }},
+            };
+
             SimpleOpenAddress address = new SimpleOpenAddress
             {
                 Street = "SubStreet",
@@ -211,6 +314,28 @@ namespace System.Web.OData
 
             customers.Add(vipCustomer);
             return customers;
+        }
+
+        public IQueryable<SimpleOpenCustomer> Get(ODataQueryOptions<SimpleOpenCustomer> options)
+        {
+            var queryable = CreateCustomers().AsQueryable();
+            if (options.Filter != null)
+                queryable = options.Filter.ApplyTo(queryable, new ODataQuerySettings()) as IQueryable<SimpleOpenCustomer>;
+
+            if (options.OrderBy != null)
+                queryable = options.OrderBy.ApplyTo(queryable);
+
+            if (options.Skip != null)
+                queryable = options.Skip.ApplyTo(queryable, new ODataQuerySettings());
+            if (options.Top != null)
+                queryable = options.Top.ApplyTo(queryable, new ODataQuerySettings());
+
+            if (options.SelectExpand != null)
+            {
+                Request.ODataProperties().SelectExpandClause = options.SelectExpand.SelectExpandClause;
+            }
+
+            return queryable;
         }
 
         public IHttpActionResult Get(int key)

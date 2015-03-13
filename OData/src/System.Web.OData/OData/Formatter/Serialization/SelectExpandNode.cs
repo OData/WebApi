@@ -28,6 +28,7 @@ namespace System.Web.OData.Formatter.Serialization
             SelectedNavigationProperties = new HashSet<IEdmNavigationProperty>();
             ExpandedNavigationProperties = new Dictionary<IEdmNavigationProperty, SelectExpandClause>();
             SelectedActions = new HashSet<IEdmAction>();
+            SelectedFunctions = new HashSet<IEdmFunction>();
             SelectedDynamicProperties = new HashSet<string>();
         }
 

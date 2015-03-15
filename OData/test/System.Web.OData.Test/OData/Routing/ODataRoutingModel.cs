@@ -313,7 +313,6 @@ namespace System.Web.OData.Routing
             public string Name { get; set; }
             public virtual List<VIP> ManagedRoutingCustomers { get; set; }
             public virtual List<ImportantProduct> ManagedProducts { get; set; }
-
             public IDictionary<string, object> DynamicProperties { get; set; }
         }
 

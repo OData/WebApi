@@ -115,7 +115,7 @@ namespace System.Web.OData.Routing
         public static readonly string Property = _Property;
 
         /// <summary>
-        /// Represents a segment indicating an open property access.
+        /// Represents a segment indicating an dynamic property access.
         /// </summary>
         public static readonly string DynamicProperty = _DynamicProperty;
 

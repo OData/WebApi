@@ -482,10 +482,12 @@ namespace System.Web.OData.Routing
             Assert.Same(expectedEdmElement, propertyAccess.Property);
         }
 
-        [Theory]
-        [InlineData("SalesPeople(100)/Foo")]
-        public void CanParseOpenPropertySegment(string odataPath)
+        [Fact]
+        public void CanParseDynamicPropertySegment()
         {
+            // Arrange
+            string odataPath = "SalesPeople(100)/Foo";
+
             // Act
             ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();

@@ -1,4 +1,5 @@
-﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
 using Microsoft.TestCommon;
@@ -16,6 +17,7 @@ namespace System.Web.OData.Routing
         [Fact]
         public void TryMatch()
         {
+            // Arrange
             DynamicPropertyPathSegment leftSegment = new DynamicPropertyPathSegment("property");
             DynamicPropertyPathSegment rightSegment = new DynamicPropertyPathSegment("property");
 
@@ -30,6 +32,7 @@ namespace System.Web.OData.Routing
         [Fact]
         public void TryMatch_DifferentName()
         {
+            // Arrange
             DynamicPropertyPathSegment leftSegment = new DynamicPropertyPathSegment("property");
             DynamicPropertyPathSegment rightSegment = new DynamicPropertyPathSegment("nomatch");
 
@@ -44,6 +47,7 @@ namespace System.Web.OData.Routing
         [Fact]
         public void TryMatch_DifferentType()
         {
+            // Arrange
             DynamicPropertyPathSegment leftSegment = new DynamicPropertyPathSegment("property");
             KeyValuePathSegment rightSegment = new KeyValuePathSegment("value");
 

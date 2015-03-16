@@ -251,16 +251,55 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void HasKeyOnDerivedTypes_Throws()
+        public void HasKeyOnDerivedTypes_Throws_IfCallDerivedFromFirst_ThenHasKey()
         {
-            var builder = new ODataModelBuilder();
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<Vehicle>().Abstract();
+            builder.EntityType<Motorcycle>().DerivesFrom<Vehicle>().HasKey(m => m.ID);
+            EntityTypeConfiguration<SportBike> sportBikeType = builder.EntityType<SportBike>();
 
-            Assert.Throws<InvalidOperationException>(
-                () => builder
-                        .EntityType<Motorcycle>()
-                        .DerivesFrom<Vehicle>()
-                        .HasKey(m => m.ID),
-                "Cannot define keys on type 'System.Web.OData.Builder.TestModels.Motorcycle' deriving from 'System.Web.OData.Builder.TestModels.Vehicle'. Only the root type in the entity inheritance hierarchy can contain keys.");
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => sportBikeType.DerivesFrom<Motorcycle>().HasKey(s => s.SportBikeProperty_NotVisible),
+                "Cannot define keys on type 'System.Web.OData.Builder.TestModels.SportBike' deriving from 'System.Web.OData.Builder.TestModels.Motorcycle'. " +
+                "The base type in the entity inheritance hierarchy already contains keys.");
+        }
+
+        [Fact]
+        public void HasKeyOnDerivedTypes_Throws_IfCallHasKeyFirst_ThenDerivedFrom()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<Vehicle>().Abstract();
+            builder.EntityType<Motorcycle>().DerivesFrom<Vehicle>().HasKey(m => m.ID);
+            EntityTypeConfiguration<SportBike> sportBikeType = builder.EntityType<SportBike>();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => sportBikeType.HasKey(s => s.SportBikeProperty_NotVisible).DerivesFrom<Motorcycle>(),
+                "Cannot define keys on type 'System.Web.OData.Builder.TestModels.SportBike' deriving from 'System.Web.OData.Builder.TestModels.Motorcycle'. " +
+                "The base type in the entity inheritance hierarchy already contains keys.");
+        }
+
+        [Fact]
+        public void HasKeyOnDerivedTypes_Works_ForBaseTypeWithoutKey()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder();
+            builder.EntityType<Vehicle>().Abstract();
+            builder.EntityType<Motorcycle>().DerivesFrom<Vehicle>().HasKey(m => m.ID);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType vehicleType = model.AssertHasEntityType(typeof(Vehicle));
+            Assert.True(vehicleType.IsAbstract);
+            Assert.Null(vehicleType.DeclaredKey);
+
+            IEdmEntityType motorCycleType = model.AssertHasEntityType(typeof(Motorcycle), typeof(Vehicle));
+            Assert.False(motorCycleType.IsAbstract);
+            IEdmStructuralProperty keyProperty = Assert.Single(motorCycleType.DeclaredKey);
+            Assert.Equal("ID", keyProperty.Name);
         }
 
         [Fact]
@@ -322,16 +361,13 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void DerivesFrom_Throws_IfDerivedTypeHasKeys()
+        public void DerivesFrom_DoesnotThrows_IfDerivedTypeHasKeys()
         {
+            // Arrange
             var builder = new ODataModelBuilder();
 
-            Assert.Throws<InvalidOperationException>(
-            () => builder
-                    .EntityType<Motorcycle>()
-                    .HasKey(m => m.Model)
-                    .DerivesFrom<Vehicle>(),
-            "Cannot define keys on type 'System.Web.OData.Builder.TestModels.Motorcycle' deriving from 'System.Web.OData.Builder.TestModels.Vehicle'. Only the root type in the entity inheritance hierarchy can contain keys.");
+            // Act & Assert
+            Assert.DoesNotThrow(() => builder.EntityType<Motorcycle>().HasKey(m => m.Model).DerivesFrom<Vehicle>());
         }
 
         [Fact]
@@ -563,6 +599,68 @@ namespace System.Web.OData.Builder
         {
             public Date Date { get; set; }
             public TimeOfDay TimeOfDay { get; set; }
+        }
+
+        [Fact]
+        public void CanCreateAbstractEntityTypeWithoutKey()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<BaseAbstractShape>().Abstract();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType baseShapeType =
+                model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "BaseAbstractShape");
+            Assert.NotNull(baseShapeType);
+            Assert.True(baseShapeType.IsAbstract);
+            Assert.Null(baseShapeType.DeclaredKey);
+            Assert.Empty(baseShapeType.Properties());
+        }
+
+        public abstract class BaseAbstractShape
+        {
+            public string ShapeName { get; set; }
+        }
+
+        [Fact]
+        public void CanCreateDerivedEntityTypeWithOwnKeys()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<BaseShape>().Abstract();
+            builder.EntityType<DerivedShape>().HasKey(d => d.ShapeId);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType baseShapeType =
+                model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "BaseShape");
+            Assert.NotNull(baseShapeType);
+            Assert.True(baseShapeType.IsAbstract);
+            Assert.Null(baseShapeType.DeclaredKey);
+
+            IEdmEntityType derivedShapeType =
+                model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "DerivedShape");
+            Assert.NotNull(derivedShapeType);
+            Assert.False(derivedShapeType.IsAbstract);
+            Assert.NotNull(derivedShapeType.DeclaredKey);
+
+            IEdmStructuralProperty keyProperty = Assert.Single(derivedShapeType.DeclaredKey);
+            Assert.Equal("ShapeId", keyProperty.Name);
+        }
+
+        public abstract class BaseShape
+        {
+            public string ShapeName { get; set; }
+        }
+
+        public class DerivedShape : BaseShape
+        {
+            public int ShapeId { get; set; }
         }
     }
 }

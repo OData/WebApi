@@ -257,5 +257,18 @@ namespace System.Web.OData.Builder
             "Cannot automatically bind the navigation property 'Manufacturer' on entity type 'System.Web.OData.Builder.TestModels.Motorcycle' for the entity set or singleton 'motorcycles2' because there are two or more matching target entity sets or singletons. " +
             "The matching entity sets or singletons are: NorthWestMotorcycleManufacturers, SouthWestMotorcycleManufacturers.");
         }
+
+        [Fact]
+        public void CreateEdmModelWithEntitySetFromAbstractEntityTypeWithoutKey_Throws()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<Customer>().Abstract().Property(c => c.CustomerId);
+            builder.EntitySet<Customer>("Customers");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
+                "The entity set or singleton 'Customers' is based on type 'System.Web.OData.Builder.TestModels.Customer' that has no keys defined.");
+        }
     }
 }

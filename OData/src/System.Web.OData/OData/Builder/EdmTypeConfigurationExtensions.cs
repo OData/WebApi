@@ -77,7 +77,17 @@ namespace System.Web.OData.Builder
         public static IEnumerable<PropertyConfiguration> Keys(this EntityTypeConfiguration entity)
         {
             Contract.Assert(entity != null);
-            return entity.BaseType == null ? entity.Keys : Keys(entity.BaseType);
+            if (entity.Keys.Any())
+            {
+                return entity.Keys;
+            }
+
+            if (entity.BaseType == null)
+            {
+                return Enumerable.Empty<PropertyConfiguration>();
+            }
+
+            return Keys(entity.BaseType);
         }
 
         // Returns the base types, this type.

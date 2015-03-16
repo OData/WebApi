@@ -504,6 +504,81 @@ namespace System.Web.OData.Builder
             Assert.Contains(expectMetadata.Replace("'", "\""), response.Content.ReadAsStringAsync().Result);
         }
 
+        [Fact]
+        public void DollarMetadata_Works_WithAbstractEntityTypeWithoutKey()
+        {
+            // Arrange
+            const string expectMetadata =
+"      <EntityType Name=\"AbstractEntityType\" Abstract=\"true\">\r\n" +
+"        <Property Name=\"IntProperty\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
+"      </EntityType>";
+
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<AbstractEntityType>().Abstract().Property(a => a.IntProperty);
+            IEdmModel model = builder.GetEdmModel();
+
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(model);
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var response = client.GetAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+
+            string payload = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains(expectMetadata, payload);
+            Assert.DoesNotContain("<key>", payload);
+        }
+
+        [Fact]
+        public void DollarMetadata_Works_WithDerivedEntityTypeWithOwnKeys()
+        {
+            // Arrange
+            const string expectMetadata =
+"    <Schema Namespace=\"System.Web.OData.Formatter\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">\r\n" +
+"      <EntityType Name=\"AbstractEntityType\" Abstract=\"true\">\r\n" +
+"        <Property Name=\"IntProperty\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
+"      </EntityType>\r\n" +
+"      <EntityType Name=\"SubEntityType\" BaseType=\"System.Web.OData.Formatter.AbstractEntityType\">\r\n" +
+"        <Key>\r\n" +
+"          <PropertyRef Name=\"SubKey\" />\r\n" +
+"        </Key>\r\n" +
+"        <Property Name=\"SubKey\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
+"      </EntityType>\r\n" +
+"      <EntityType Name=\"AnotherSubEntityType\" BaseType=\"System.Web.OData.Formatter.AbstractEntityType\">\r\n" +
+"        <Key>\r\n" +
+"          <PropertyRef Name=\"AnotherKey\" />\r\n" +
+"        </Key>\r\n" +
+"        <Property Name=\"AnotherKey\" Type=\"Edm.Double\" Nullable=\"false\" />\r\n" +
+"      </EntityType>\r\n" +
+"    </Schema>";
+
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<AbstractEntityType>().Abstract().Property(a => a.IntProperty);
+            builder.EntityType<SubEntityType>().HasKey(b => b.SubKey).DerivesFrom<AbstractEntityType>();
+            builder.EntityType<AnotherSubEntityType>().HasKey(d => d.AnotherKey).DerivesFrom<AbstractEntityType>();
+            IEdmModel model = builder.GetEdmModel();
+
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(model);
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var response = client.GetAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+
+            string payload = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains(expectMetadata, payload);
+        }
+
         private static void AssertHasEntitySet(HttpClient client, string uri, string entitySetName)
         {
             var response = client.GetAsync(uri).Result;

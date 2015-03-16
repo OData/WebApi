@@ -100,7 +100,7 @@ namespace System.Web.OData.Builder
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
         public virtual EntityTypeConfiguration HasKey(PropertyInfo keyProperty)
         {
-            if (BaseType != null)
+            if (BaseType != null && BaseType.Keys().Any())
             {
                 throw Error.InvalidOperation(SRResources.CannotDefineKeysOnDerivedTypes, FullName, BaseType.FullName);
             }
@@ -152,7 +152,7 @@ namespace System.Web.OData.Builder
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
         public virtual EntityTypeConfiguration DerivesFrom(EntityTypeConfiguration baseType)
         {
-            if (Keys.Any())
+            if (Keys.Any() && baseType.Keys().Any())
             {
                 throw Error.InvalidOperation(SRResources.CannotDefineKeysOnDerivedTypes, FullName, baseType.FullName);
             }

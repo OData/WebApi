@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Validators;
@@ -123,11 +124,33 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Gets the number of entities that satify the given query if the response should include a count query option, or <c>null</c> otherwise.
+        /// Gets the number of entities that satisfy the given query if the response should include a count query option, or <c>null</c> otherwise.
         /// </summary>
         /// <param name="query">The query to compute the count for.</param>
         /// <returns>The number of entities that satisfy the specified query if the response should include a count query option, or <c>null</c> otherwise.</returns>
         public long? GetEntityCount(IQueryable query)
+        {
+            if (Context.ElementClrType == null)
+            {
+                throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "GetEntityCount");
+            }
+
+            if (Value)
+            {
+                return ExpressionHelpers.Count(query, Context.ElementClrType)();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the Func of entities number that satisfy the given query if the response should include a count query option, or <c>null</c> otherwise.
+        /// </summary>
+        /// <param name="query">The query to compute the count for.</param>
+        /// <returns>The the Func of entities number that satisfy the specified query if the response should include a count query option, or <c>null</c> otherwise.</returns>
+        internal Func<long> GetEntityCountFunc(IQueryable query)
         {
             if (Context.ElementClrType == null)
             {

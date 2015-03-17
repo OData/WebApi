@@ -140,7 +140,7 @@ namespace System.Web.OData
             var resultArray = result["value"] as JArray;
             Assert.Equal(6, resultArray.Count);
             Assert.NotNull(resultArray[2]["Token"]);//customer 2 has a token
-            Assert.NotNull(resultArray[4]["Token"]);//customer 3 has a token
+            Assert.NotNull(resultArray[4]["Token"]);//customer 4 has a token
         }
 
         [Fact]
@@ -319,24 +319,7 @@ namespace System.Web.OData
         [EnableQuery]
         public IQueryable<SimpleOpenCustomer> Get(ODataQueryOptions<SimpleOpenCustomer> options)
         {
-            var queryable = CreateCustomers().AsQueryable();
-            //if (options.Filter != null)
-            //    queryable = options.Filter.ApplyTo(queryable, new ODataQuerySettings()) as IQueryable<SimpleOpenCustomer>;
-
-            //if (options.OrderBy != null)
-            //    queryable = options.OrderBy.ApplyTo(queryable);
-
-            //if (options.Skip != null)
-            //    queryable = options.Skip.ApplyTo(queryable, new ODataQuerySettings());
-            //if (options.Top != null)
-            //    queryable = options.Top.ApplyTo(queryable, new ODataQuerySettings());
-
-            //if (options.SelectExpand != null)
-            //{
-            //    Request.ODataProperties().SelectExpandClause = options.SelectExpand.SelectExpandClause;
-            //}
-
-            return queryable;
+            return CreateCustomers().AsQueryable();
         }
 
         public IHttpActionResult Get(int key)

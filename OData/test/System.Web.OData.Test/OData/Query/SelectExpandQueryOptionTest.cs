@@ -246,6 +246,7 @@ namespace System.Web.OData.Query
                 select: null,
                 expand: "Parent($expand=Parent($levels=2))",
                 context: context);
+            selectExpand.LevelsMaxLiteralExpansionDepth = 3;
 
             // Act
             SelectExpandClause clause = selectExpand.ProcessLevels();
@@ -474,6 +475,7 @@ namespace System.Web.OData.Query
                 select: null,
                 expand: "Parent($expand=DerivedAncestors($levels=2);$levels=max)",
                 context: context);
+            selectExpand.LevelsMaxLiteralExpansionDepth = 4;
 
             // Act
             SelectExpandClause clause = selectExpand.ProcessLevels();
@@ -544,6 +546,62 @@ namespace System.Web.OData.Query
             clauseOfDerivedAncestors = derivedAncestors.SelectAndExpand;
             Assert.True(clauseOfDerivedAncestors.AllSelected);
             Assert.Equal(0, clauseOfDerivedAncestors.SelectedItems.Count());
+        }
+
+        [Fact]
+        public void ProcessLevelsCorrectly_WithMaxNestedLevels()
+        {
+            // Arrange
+            var model = ODataLevelsTest.GetEdmModel();
+            var context = new ODataQueryContext(
+                model,
+                model.FindDeclaredType("System.Web.OData.Routing.LevelsEntity"));
+            var selectExpand = new SelectExpandQueryOption(
+                select: null,
+                expand: "Parent($expand=DerivedAncestors($levels=max);$levels=2)",
+                context: context);
+
+            // Act
+            SelectExpandClause clause = selectExpand.ProcessLevels();
+
+            // Assert
+            Assert.True(clause.AllSelected);
+            Assert.Equal(1, clause.SelectedItems.Count());
+
+            // Level 1 of Parent.
+            var parent = Assert.IsType<ExpandedNavigationSelectItem>(clause.SelectedItems.Single());
+            Assert.Equal(
+                "Parent",
+                ((NavigationPropertySegment)parent.PathToNavigationProperty.FirstSegment).NavigationProperty.Name);
+            Assert.Null(parent.LevelsOption);
+
+            var clauseOfParent = parent.SelectAndExpand;
+            Assert.True(clauseOfParent.AllSelected);
+            Assert.Equal(2, clauseOfParent.SelectedItems.Count());
+
+            // Level 1 of DerivedAncestors.
+            var derivedAncestors = Assert.Single(
+                clauseOfParent.SelectedItems.OfType<ExpandedNavigationSelectItem>().Where(
+                    item => item.PathToNavigationProperty.FirstSegment is NavigationPropertySegment &&
+                    ((NavigationPropertySegment)item.PathToNavigationProperty.FirstSegment).NavigationProperty.Name == "DerivedAncestors")
+                );
+            Assert.Null(derivedAncestors.LevelsOption);
+
+            var clauseOfDerivedAncestors = derivedAncestors.SelectAndExpand;
+            Assert.True(clauseOfDerivedAncestors.AllSelected);
+            Assert.Equal(0, clauseOfDerivedAncestors.SelectedItems.Count());
+
+            // Level 2 of Parent.
+            parent = Assert.Single(
+                clauseOfParent.SelectedItems.OfType<ExpandedNavigationSelectItem>().Where(
+                    item => item.PathToNavigationProperty.FirstSegment is NavigationPropertySegment &&
+                    ((NavigationPropertySegment)item.PathToNavigationProperty.FirstSegment).NavigationProperty.Name == "Parent")
+                );
+            Assert.Null(parent.LevelsOption);
+
+            clauseOfParent = parent.SelectAndExpand;
+            Assert.True(clauseOfParent.AllSelected);
+            Assert.Equal(0, clauseOfParent.SelectedItems.Count());
         }
     }
 }

@@ -252,14 +252,14 @@ namespace System.Web.OData.Routing
             // Level 1
             AssertDerivedEntity(derivedEntities[0], 2);
             // Level 2
-            Assert.Empty(derivedEntities[0]["DerivedAncestors"]);
+            AssertDerivedEntity(derivedEntities[0]["DerivedAncestors"][0]["DerivedAncestors"][0], 2);
             // Level 1
             AssertDerivedEntity(derivedEntities[1], 4);
             // Level 2
             Assert.Equal(1, derivedEntities[1]["DerivedAncestors"].Count());
             AssertDerivedEntity(derivedEntities[1]["DerivedAncestors"][0], 2);
             // Level 3
-            Assert.Empty(derivedEntities[1]["DerivedAncestors"][0]["DerivedAncestors"]);
+            AssertDerivedEntity(derivedEntities[1]["DerivedAncestors"][0]["DerivedAncestors"][0], 4);
         }
 
         [Fact]
@@ -356,11 +356,10 @@ namespace System.Web.OData.Routing
             Assert.Equal(2, parent["DerivedAncestors"].Count());
             AssertDerivedEntity(parent["DerivedAncestors"][0], 2);
             // Level 2
-            Assert.Equal(0, parent["DerivedAncestors"][0]["DerivedAncestors"].Count());
+            AssertDerivedEntity(parent["DerivedAncestors"][0]["DerivedAncestors"][0], 4);
             // Level 1
             AssertDerivedEntity(parent["DerivedAncestors"][1], 4);
             // Level 2
-            Assert.Equal(1, parent["DerivedAncestors"][1]["DerivedAncestors"].Count());
             AssertDerivedEntity(parent["DerivedAncestors"][1]["DerivedAncestors"][0], 2);
             // No further expanding.
             Assert.Null(parent["DerivedAncestors"][1]["DerivedAncestors"][0]["DerivedAncestors"]);
@@ -368,7 +367,199 @@ namespace System.Web.OData.Routing
             Assert.Equal(1, parent["Parent"]["DerivedAncestors"].Count());
             AssertDerivedEntity(parent["Parent"]["DerivedAncestors"][0], 2);
             // Level 2
-            Assert.Equal(0, parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"].Count());
+            Assert.Equal(1, parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"].Count());
+        }
+
+        [Fact]
+        public void Levels_Works_WithMaxLevelInNestedExpand()
+        {
+            // Arrange
+            string uri = "LevelsEntities(6)?$expand=Parent($levels=3;$expand=DerivedAncestors($levels=max))";
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JToken parent = result["Parent"];
+            
+            // Level 3
+            AssertEntity(parent["Parent"]["Parent"], 3);
+            // No furthur expanding for "Parent"
+            Assert.Null(parent["Parent"]["Parent"]["Parent"]);
+            // Level 5
+            AssertDerivedEntity(parent["Parent"]["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0], 4);
+            // Level 5
+            AssertDerivedEntity(parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0], 2);
+            // Level 5
+            AssertDerivedEntity(parent["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0], 4);
+            // No further expanding.
+            Assert.Null(parent["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+        }
+
+        [Fact]
+        public void Levels_Works_WithMaxLevelInEveryExpand()
+        {
+            // Arrange
+            string uri = "LevelsEntities(6)?$expand=Parent($levels=max;$expand=DerivedAncestors($levels=max))";
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JToken parent = result["Parent"];
+
+            // Level 5
+            AssertEntity(parent["Parent"]["Parent"]["Parent"]["Parent"], 1);
+            // No further expanding on level5 Parent
+            Assert.Null(parent["Parent"]["Parent"]["Parent"]["Parent"]["Parent"]);
+            Assert.Null(parent["Parent"]["Parent"]["Parent"]["Parent"]["DerivedAncestors"]);
+            // Level 5
+            AssertDerivedEntity(parent["Parent"]["Parent"]["Parent"]["DerivedAncestors"][0], 4);
+            // Level 5
+            AssertDerivedEntity(parent["Parent"]["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0], 4);
+            // Level 5
+            AssertDerivedEntity(parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0], 2);
+            // Level 5
+            AssertDerivedEntity(parent["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0], 4);
+            // No further expanding.
+            Assert.Null(parent["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+        }
+
+        [Fact]
+        public void Levels_Works_SelectWithNestedMaxLevels()
+        {
+            // Arrange
+            string uri = "LevelsEntities(6)?$expand=Parent($select=ID;$levels=3;$expand=DerivedAncestors($levels=max;$select=DerivedName))";
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JToken parent = result["Parent"];
+
+            // Level 3
+            Assert.Equal(parent["Parent"]["Parent"]["ID"], 3);
+            Assert.Null(parent["Parent"]["Parent"]["Name"]);
+            // No furthur expanding for "Parent"
+            Assert.Null(parent["Parent"]["Parent"]["Parent"]);
+            // Level 5
+            Assert.Equal("DerivedName 4", parent["Parent"]["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedName"]);
+            Assert.Null(parent["Parent"]["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["ID"]);
+            // Level 5
+            Assert.Equal("DerivedName 2", parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedName"]);
+            Assert.Null(parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["ID"]);
+            // Level 5
+            Assert.Equal("DerivedName 4", parent["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedName"]);
+            Assert.Null(parent["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["Name"]);
+            // No further expanding.
+            Assert.Null(parent["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+        }
+
+        [Fact]
+        public void Levels_Works_WithMaxOptionInOuterExpand()
+        {
+            // Arrange
+            string uri = "LevelsEntities(6)?$expand=Parent($levels=max;$expand=DerivedAncestors($levels=2))";
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JToken parent = result["Parent"];
+
+            Assert.Null(parent["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+            Assert.Null(parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+            Assert.Null(parent["Parent"]["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+        }
+
+        [Fact]
+        public void Levels_Works_WithMultiParallelExpand() 
+        {
+            // Arrange
+            string uri = "LevelsEntities(6)?$expand=Parent($levels=max;$expand=DerivedAncestors($levels=2),BaseEntities($levels=3))";
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JToken parent = result["Parent"];
+
+            // "Parent" => 2, "BaseEntities" => 3, "DerivedAncestors" => 2
+            Assert.Null(parent["Parent"]["BaseEntities"][1]["BaseEntities"][0]["BaseEntities"][0]["BaseEntities"]);
+            Assert.Null(parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+
+            // "Parent" => 1, "BaseEntities" => 3, "DerivedAncestors" => 2
+            Assert.Null(parent["BaseEntities"][2]["BaseEntities"][1]["BaseEntities"][0]["BaseEntities"]);
+            Assert.Null(parent["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+        }
+
+        [Fact]
+        public void Levels_Works_WithMaxLevelInMultiParallelExpand() 
+        {
+            // Arrange
+            string uri = "LevelsEntities(6)?$expand=Parent($levels=max;$expand=DerivedAncestors($levels=2),BaseEntities($levels=max))";
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JToken parent = result["Parent"];
+
+            // "Parent" => 3, "BaseEntities" => 2, "DerivedAncestors" => 2
+            Assert.Null(parent["Parent"]["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+            Assert.Null(parent["Parent"]["Parent"]["BaseEntities"][0]["BaseEntities"][0]["BaseEntities"]);
+
+            // "Parent" => 2, "BaseEntities" => 3, "DerivedAncestors" => 2
+            Assert.Null(parent["Parent"]["BaseEntities"][1]["BaseEntities"][0]["BaseEntities"][0]["BaseEntities"]);
+            Assert.Null(parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+
+            // "Parent" => 1, "BaseEntities" => 4, "DerivedAncestors" => 2
+            Assert.Null(parent["BaseEntities"][2]["BaseEntities"][1]["BaseEntities"][0]["BaseEntities"][0]["BaseEntities"]);
+            Assert.Null(parent["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+        }
+
+        [Fact]
+        public void Levels_Works_WithMultiLevelsExpand()
+        { 
+            // Arrange
+            string uri = "LevelsEntities(6)?$expand=Parent($levels=max;$expand=DerivedAncestors($levels=2;$expand=BaseEntities($levels=max)))";
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JToken parent = result["Parent"];
+
+            // "Parent" => 3, "DerivedAncestors" => 2, max("BaseEntities") => 1
+            Assert.Null(parent["Parent"]["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+            Assert.Null(parent["Parent"]["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["BaseEntities"]);
+            Assert.NotNull(parent["Parent"]["Parent"]["DerivedAncestors"][0]["BaseEntities"]);
+            Assert.Null(parent["Parent"]["Parent"]["DerivedAncestors"][0]["BaseEntities"][0]["BaseEntities"]);
+
+            // "Parent" => 2, "DerivedAncestors" => 2, max("BaseEntities") => 2
+            Assert.Null(parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
+            Assert.NotNull(parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["BaseEntities"]);
+            Assert.Null(parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"][0]["BaseEntities"][0]["BaseEntities"]);
+            Assert.NotNull(parent["Parent"]["DerivedAncestors"][0]["BaseEntities"]);
+            Assert.NotNull(parent["Parent"]["DerivedAncestors"][0]["BaseEntities"][0]["BaseEntities"]);
+            Assert.Null(parent["Parent"]["DerivedAncestors"][0]["BaseEntities"][0]["BaseEntities"][0]["BaseEntities"]);
+
+            // "Parent" => 1, "DerivedAncestors" => 2, max("BaseEntities") => 3
+            Assert.Null(parent["DerivedAncestors"][1]["BaseEntities"][2]["BaseEntities"][1]["BaseEntities"][0]["BaseEntities"]);
         }
 
         private void AssertEntity(JToken entity, int key)
@@ -449,6 +640,7 @@ namespace System.Web.OData.Routing
                     }
                 }
                 Entities[8].Parent = Entities[9];
+                Entities[1].DerivedAncestors = new LevelsDerivedEntity[] { (LevelsDerivedEntity)Entities[3] }; 
             }
 
             public IHttpActionResult Get(ODataQueryOptions<LevelsEntity> queryOptions)

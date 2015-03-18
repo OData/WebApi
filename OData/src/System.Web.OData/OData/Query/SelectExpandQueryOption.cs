@@ -277,16 +277,19 @@ namespace System.Web.OData.Query
         internal SelectExpandClause ProcessLevels()
         {
             bool levelsEncountered;
-            return ProcessLevels(SelectExpandClause, LevelsMaxLiteralExpansionDepth, out levelsEncountered);
+            bool isMaxLevel;
+            return ProcessLevels(SelectExpandClause, LevelsMaxLiteralExpansionDepth, out levelsEncountered, out isMaxLevel);
         }
 
         // Process $levels in SelectExpandClause.
         private static SelectExpandClause ProcessLevels(
             SelectExpandClause selectExpandClause,
             int levelsMaxLiteralExpansionDepth,
-            out bool levelsEncountered)
+            out bool levelsEncountered,
+            out bool isMaxLevel)
         {
             levelsEncountered = false;
+            isMaxLevel = false;
 
             if (selectExpandClause == null)
             {
@@ -297,9 +300,14 @@ namespace System.Web.OData.Query
             IEnumerable<SelectItem> selectItems = ProcessLevels(
                 selectExpandClause.SelectedItems,
                 levelsMaxLiteralExpansionDepth,
-                out levelsEncountered);
+                out levelsEncountered,
+                out isMaxLevel);
 
-            if (levelsEncountered)
+            if (selectItems == null)
+            {
+                return null;
+            }
+            else if (levelsEncountered)
             {
                 return new SelectExpandClause(selectItems, selectExpandClause.AllSelected);
             }
@@ -314,9 +322,11 @@ namespace System.Web.OData.Query
         private static IEnumerable<SelectItem> ProcessLevels(
             IEnumerable<SelectItem> selectItems,
             int levelsMaxLiteralExpansionDepth,
-            out bool levelsEncountered)
+            out bool levelsEncountered,
+            out bool isMaxLevel)
         {
             levelsEncountered = false;
+            isMaxLevel = false;
             IList<SelectItem> items = new List<SelectItem>();
 
             foreach (SelectItem selectItem in selectItems)
@@ -331,11 +341,25 @@ namespace System.Web.OData.Query
                 else
                 {
                     bool levelsEncouteredInExpand;
+                    bool isMaxLevelInExpand;
                     // Process $levels in ExpandedNavigationSelectItem.
                     ExpandedNavigationSelectItem expandItem = ProcessLevels(
                         item,
                         levelsMaxLiteralExpansionDepth,
-                        out levelsEncouteredInExpand);
+                        out levelsEncouteredInExpand, 
+                        out isMaxLevelInExpand);
+
+                    if (item.LevelsOption != null && item.LevelsOption.Level > 0 && expandItem == null)
+                    {
+                        // Abandon this attempt if any of the items failed to expand 
+                        return null;
+                    }
+                    else if (item.LevelsOption != null)
+                    {
+                        // The expansion would be volatile if any of the expand item is max level
+                        isMaxLevel = isMaxLevel || isMaxLevelInExpand;
+                    }
+
                     levelsEncountered = levelsEncountered || levelsEncouteredInExpand;
 
                     if (expandItem != null)
@@ -352,60 +376,75 @@ namespace System.Web.OData.Query
         private static ExpandedNavigationSelectItem ProcessLevels(
             ExpandedNavigationSelectItem expandItem,
             int levelsMaxLiteralExpansionDepth,
-            out bool levelsEncounteredInExpand)
+            out bool levelsEncounteredInExpand,
+            out bool isMaxLevelInExpand)
         {
-            // Call ProcessLevels on SelectExpandClause recursively.
-            SelectExpandClause selectExpandClause = ProcessLevels(
-                expandItem.SelectAndExpand,
-                levelsMaxLiteralExpansionDepth - 1,
-                out levelsEncounteredInExpand);
+            int level;
+            isMaxLevelInExpand = false;
 
             if (expandItem.LevelsOption == null)
             {
-                if (levelsEncounteredInExpand)
+                levelsEncounteredInExpand = false;
+                level = 1;
+            }
+            else
+            {
+                levelsEncounteredInExpand = true;
+                if (expandItem.LevelsOption.IsMaxLevel)
                 {
-                    return new ExpandedNavigationSelectItem(
-                        expandItem.PathToNavigationProperty,
-                        expandItem.NavigationSource,
-                        selectExpandClause);
+                    isMaxLevelInExpand = true;
+                    level = levelsMaxLiteralExpansionDepth;
                 }
                 else
                 {
-                    // Return the original ExpandedNavigationSelectItem if no $levels is found.
-                    return expandItem;
+                    level = (int)expandItem.LevelsOption.Level;
                 }
             }
 
-            // There is $levels in current ExpandedNavigationSelectItem.
-            levelsEncounteredInExpand = true;
-            int level = expandItem.LevelsOption.IsMaxLevel ?
-                levelsMaxLiteralExpansionDepth :
-                (int)expandItem.LevelsOption.Level;
-
-            if (level <= 0)
+            // Do not expand when:
+            // 1. $levels is equal to or less than 0.
+            // 2. $levels value is greater than current MaxExpansionDepth
+            if (level <= 0 || level > levelsMaxLiteralExpansionDepth)
             {
-                // Do not expand if $levels is equal to 0.
                 return null;
             }
 
-            // Initialize current SelectExpandClause with processed SelectExpandClause.
-            SelectExpandClause currentSelectExpandClause = selectExpandClause;
             ExpandedNavigationSelectItem item = null;
+            SelectExpandClause currentSelectExpandClause = null;
+            SelectExpandClause selectExpandClause = null;
+            bool levelsEncounteredInInnerExpand = false;
+            bool isMaxLevelInInnerExpand = false;
 
-            // Construct new ExpandedNavigationSelectItem with recursive expansion.
+            // Try diffent expansion depth until expandItem.SelectAndExpand is successfully expanded
+            while (selectExpandClause == null && level > 0)
+            {
+                selectExpandClause = ProcessLevels(
+                        expandItem.SelectAndExpand,
+                        levelsMaxLiteralExpansionDepth - level,
+                        out levelsEncounteredInInnerExpand,
+                        out isMaxLevelInInnerExpand);
+                level--;
+            }
+
+            if (selectExpandClause == null)
+            {
+                return null;
+            }
+
+            // Correct level value
+            level++;
+
             while (level > 0)
             {
-                // Construct a new ExpandedNavigationSelectItem with current SelectExpandClause.
-                item = new ExpandedNavigationSelectItem(
-                    expandItem.PathToNavigationProperty,
-                    expandItem.NavigationSource,
-                    currentSelectExpandClause);
-
-                // Update current SelectExpandClause with the new ExpandedNavigationSelectItem.
-                if (selectExpandClause.AllSelected)
+                if (item == null)
                 {
+                    currentSelectExpandClause = selectExpandClause;
+                }
+                else if (selectExpandClause.AllSelected)
+                {
+                    // Concat the processed items
                     currentSelectExpandClause = new SelectExpandClause(
-                        new[] { item }.Concat(selectExpandClause.SelectedItems),
+                        new SelectItem[] { item }.Concat(selectExpandClause.SelectedItems),
                         selectExpandClause.AllSelected);
                 }
                 else
@@ -413,13 +452,35 @@ namespace System.Web.OData.Query
                     // PathSelectItem is needed for the expanded item if AllSelected is false. 
                     PathSelectItem pathSelectItem = new PathSelectItem(
                         new ODataSelectPath(expandItem.PathToNavigationProperty));
+
+                    // Keep default SelectItems before expanded item to keep consistent with normal SelectExpandClause 
+                    SelectItem[] items = new SelectItem[] { item, pathSelectItem };
                     currentSelectExpandClause = new SelectExpandClause(
-                        new SelectItem[] { item, pathSelectItem }.Concat(selectExpandClause.SelectedItems),
+                        new SelectItem[] { }.Concat(selectExpandClause.SelectedItems).Concat(items),
                         selectExpandClause.AllSelected);
                 }
 
+                // Construct a new ExpandedNavigationSelectItem with current SelectExpandClause.
+                item = new ExpandedNavigationSelectItem(
+                    expandItem.PathToNavigationProperty,
+                    expandItem.NavigationSource,
+                    currentSelectExpandClause);
+
                 level--;
+
+                // Need expand and construct selectExpandClause every time if it is max level in inner expand
+                if (isMaxLevelInInnerExpand) 
+                {
+                    selectExpandClause = ProcessLevels(
+                        expandItem.SelectAndExpand,
+                        levelsMaxLiteralExpansionDepth - level,
+                        out levelsEncounteredInInnerExpand,
+                        out isMaxLevelInInnerExpand);
+                }
             }
+
+            levelsEncounteredInExpand = levelsEncounteredInExpand || levelsEncounteredInInnerExpand;
+            isMaxLevelInExpand = isMaxLevelInExpand || isMaxLevelInInnerExpand;
 
             return item;
         }

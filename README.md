@@ -16,3 +16,6 @@ build
 
 ### Contribution
 Please refer to the [CONTRIBUTION.md](https://github.com/OData/WebApi/blob/master/CONTRIBUTION.md).
+
+### Samples
+Please refer to the [ODataSamples WebApi](https://github.com/OData/ODataSamples/tree/master/WebApi).

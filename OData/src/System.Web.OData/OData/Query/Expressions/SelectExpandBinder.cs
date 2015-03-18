@@ -193,6 +193,11 @@ namespace System.Web.OData.Query.Expressions
             {
                 IEdmTypeReference edmElementType = property.Type.AsCollection().ElementType();
                 Type clrElementType = EdmLibHelpers.GetClrType(edmElementType, _model);
+                if (clrElementType == null)
+                {
+                    throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType,
+                        edmElementType.FullName()));
+                }
 
                 Expression filterSource =
                     typeof(IEnumerable).IsAssignableFrom(source.Type.GetProperty(propertyName).PropertyType)
@@ -213,10 +218,18 @@ namespace System.Web.OData.Query.Expressions
                     filterPredicate);
 
                 nullablePropertyType = filterResult.Type;
-                nullablePropertyValue = Expression.Condition(
-                    test: Expression.Equal(nullablePropertyValue, Expression.Constant(value: null)),
-                    ifTrue: Expression.Constant(value: null, type: nullablePropertyType),
-                    ifFalse: filterResult);
+                if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
+                {
+                    // nullablePropertyValue == null ? null : filterResult
+                    nullablePropertyValue = Expression.Condition(
+                        test: Expression.Equal(nullablePropertyValue, Expression.Constant(value: null)),
+                        ifTrue: Expression.Constant(value: null, type: nullablePropertyType),
+                        ifFalse: filterResult);
+                }
+                else
+                {
+                    nullablePropertyValue = filterResult;
+                }
             }
 
             if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)

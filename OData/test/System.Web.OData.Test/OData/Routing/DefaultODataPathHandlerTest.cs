@@ -186,6 +186,7 @@ namespace System.Web.OData.Routing
         [InlineData("RoutingCustomers/$count", "~/entityset/$count", "RoutingCustomers/$count")]
         [InlineData("RoutingCustomers(100)/Products/$count", "~/entityset/key/navigation/$count", "RoutingCustomers(100)/Products/$count")]
         [InlineData("UnboundFunction()/$count", "~/unboundfunction/$count", "UnboundFunction()/$count")]
+        [InlineData("SalesPeople(100)/Foo", "~/entityset/key/dynamicproperty", "SalesPeople(100)/Foo")]
         public void Parse_ReturnsPath_WithCorrectTemplateAndPathString(string odataPath, string template, string pathString)
         {
             ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
@@ -204,6 +205,7 @@ namespace System.Web.OData.Routing
         [InlineData("RoutingCustomers(1)/Name/$value", new string[] { "RoutingCustomers", "1", "Name", "$value" })]
         [InlineData("RoutingCustomers(1)/Products/$ref", new string[] { "RoutingCustomers", "1", "Products", "$ref" })]
         [InlineData("VipCustomer/Default.GetRelatedRoutingCustomers", new string[] { "VipCustomer", "Default.GetRelatedRoutingCustomers" })]
+        [InlineData("SalesPeople(100)/Foo", new string[] { "SalesPeople", "100", "Foo" })]
         public void ParseSegmentsCorrectly(string odataPath, string[] expectedSegments)
         {
             // Arrange & Act
@@ -478,6 +480,22 @@ namespace System.Web.OData.Routing
             Assert.Null(path.NavigationSource);
             PropertyAccessPathSegment propertyAccess = Assert.IsType<PropertyAccessPathSegment>(segment);
             Assert.Same(expectedEdmElement, propertyAccess.Property);
+        }
+
+        [Theory]
+        [InlineData("SalesPeople(100)/Foo")]
+        public void CanParseOpenPropertySegment(string odataPath)
+        {
+            // Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
+            ODataPathSegment segment = path.Segments.Last();
+
+            // Assert
+            Assert.NotNull(segment);
+            Assert.Equal("Foo", segment.ToString());
+            Assert.Null(path.NavigationSource);
+            DynamicPropertyPathSegment dynamicPropertyPathSegment = Assert.IsType<DynamicPropertyPathSegment>(segment);
+            Assert.Equal("Foo", dynamicPropertyPathSegment.PropertyName);
         }
 
         [Theory]

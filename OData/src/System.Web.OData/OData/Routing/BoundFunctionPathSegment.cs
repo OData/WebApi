@@ -156,6 +156,19 @@ namespace System.Web.OData.Routing
                 IEdmOperationParameter edmParam = Function.FindParameter(parameterName);
                 if (edmParam != null)
                 {
+                    IEdmTypeReference edmType = edmParam.Type;
+                    if (edmParam.Type.IsCollection())
+                    {
+                        IEdmCollectionTypeReference collectionTypeReference = edmParam.Type.AsCollection();
+                        edmType = collectionTypeReference.ElementType();
+                    }
+
+                    // for entity or collection of entity, return the string literal from Uri.
+                    if (edmType.Definition.TypeKind == EdmTypeKind.Entity)
+                    {
+                        return paramValue;
+                    }
+
                     return ODataUriUtils.ConvertFromUriLiteral(paramValue, ODataVersion.V4, _edmModel, edmParam.Type);
                 }
             }

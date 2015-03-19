@@ -47,6 +47,34 @@ namespace System.Web.OData.Formatter.Deserialization
                 throw new SerializationException(message);
             }
 
+            items.AddToCollectionCore(collection, elementType, list, addMethod);
+        }
+
+        public static void AddToCollection(this IEnumerable items, IEnumerable collection, Type elementType, string paramName, Type paramType)
+        {
+            Contract.Assert(items != null);
+            Contract.Assert(collection != null);
+            Contract.Assert(elementType != null);
+            Contract.Assert(paramType != null);
+
+            MethodInfo addMethod = null;
+            IList list = collection as IList;
+
+            if (list == null)
+            {
+                addMethod = collection.GetType().GetMethod("Add", new Type[] { elementType });
+                if (addMethod == null)
+                {
+                    string message = Error.Format(SRResources.CollectionParameterShouldHaveAddMethod, paramType, paramName);
+                    throw new SerializationException(message);
+                }
+            }
+
+            items.AddToCollectionCore(collection, elementType, list, addMethod);
+        }
+
+        private static void AddToCollectionCore(this IEnumerable items, IEnumerable collection, Type elementType, IList list, MethodInfo addMethod)
+        {
             bool isNonstandardEdmPrimitiveCollection;
             EdmLibHelpers.IsNonstandardEdmPrimitive(elementType, out isNonstandardEdmPrimitiveCollection);
 

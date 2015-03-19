@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
@@ -34,6 +36,8 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "http://localhost/Customers(42)/NS.SpecialCustomer/NS.IsSpecialUpgraded()", "IsSpecialUpgraded_42")] // function bound to derived entity type
         [InlineData("GET", "http://localhost/Customers(22)/NS.GetSalary()", "GetSalary_22")] // call function on base entity type
         [InlineData("GET", "http://localhost/Customers(12)/NS.SpecialCustomer/NS.GetSalary()", "GetSalaryFromSpecialCustomer_12")] // call function on derived entity type
+        [InlineData("GET", "http://localhost/Customers(12)/NS.GetCustomer(customer=@p)?@p={\"@odata.type\":\"%23NS.Customer\",\"ID\":9,\"City\":\"MyCity\"}",
+            "GetCustomer(ID=9,City=MyCity,)")]
         public async Task AttributeRouting_SelectsExpectedControllerAndAction(string method, string requestUri,
             string expectedResult)
         {
@@ -198,6 +202,24 @@ namespace System.Web.OData.Routing
             public IHttpActionResult GetAmountFromOrder(int id, int orderId)
             {
                 return Ok(id + (orderId * 11));
+            }
+
+            [HttpGet]
+            [ODataRoute("Customers({key})/NS.GetCustomer(customer={customer})")]
+            public IHttpActionResult GetCustomer(int key, [FromODataUri]EdmEntityObject customer)
+            {
+                Assert.NotNull(customer);
+
+                StringBuilder sb = new StringBuilder();
+                IEnumerable<string> propertyNames = customer.GetChangedPropertyNames();
+                foreach (string name in propertyNames)
+                {
+                    object value;
+                    customer.TryGetPropertyValue(name, out value);
+                    sb.Append(name + "=").Append(value).Append(",");
+                }
+
+                return Ok("GetCustomer(" + sb.ToString() + ")");
             }
         }
 

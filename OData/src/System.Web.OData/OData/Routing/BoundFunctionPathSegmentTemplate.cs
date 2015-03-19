@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing
@@ -48,7 +49,20 @@ namespace System.Web.OData.Routing
                 if (FunctionName == functionSegment.FunctionName)
                 {
                     var enumNames = functionSegment.Function.Parameters.Where(p => p.Type.IsEnum()).Select(p => p.Name);
-                    return KeyValuePathSegmentTemplate.TryMatch(ParameterMappings, functionSegment.Values, values, enumNames);
+                    if (KeyValuePathSegmentTemplate.TryMatch(ParameterMappings, functionSegment.Values, values,
+                        enumNames))
+                    {
+                        foreach (KeyValuePair<string, string> nameAndValue in functionSegment.Values)
+                        {
+                            string name = nameAndValue.Key;
+                            object value = functionSegment.GetParameterValue(name);
+
+                            ProcedureRoutingConventionHelpers.AddFunctionParameters(functionSegment.Function, name,
+                                value, values, values, ParameterMappings);
+                        }
+
+                        return true;
+                    }
                 }
             }
 

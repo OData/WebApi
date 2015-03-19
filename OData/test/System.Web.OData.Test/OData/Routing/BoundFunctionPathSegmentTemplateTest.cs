@@ -45,8 +45,11 @@ namespace System.Web.OData.Routing
         public void TryMatch_ReturnTrue_IfSameFunction()
         {
             // Arrange
+            IEdmModel model = new Mock<IEdmModel>().Object;
             IEdmEntityType returnType = new Mock<IEdmEntityType>().Object;
             EdmFunction function = new EdmFunction("NS", "Function", new EdmEntityTypeReference(returnType, isNullable: false));
+            function.AddParameter("Parameter1", EdmCoreModel.Instance.GetInt32(isNullable: false));
+            function.AddParameter("Parameter2", EdmCoreModel.Instance.GetInt32(isNullable: false));
 
             Dictionary<string, string> parameterValues = new Dictionary<string, string>()
             {
@@ -60,9 +63,9 @@ namespace System.Web.OData.Routing
                 { "Parameter2", "{param2}" }
             };
 
-            BoundFunctionPathSegment segment = new BoundFunctionPathSegment(function, model: null, parameterValues: parameterValues);
+            BoundFunctionPathSegment segment = new BoundFunctionPathSegment(function, model, parameterValues: parameterValues);
             BoundFunctionPathSegmentTemplate template = new BoundFunctionPathSegmentTemplate(
-                new BoundFunctionPathSegment(function, model: null, parameterValues: parameterMappings));
+                new BoundFunctionPathSegment(function, model, parameterValues: parameterMappings));
 
             // Act
             Dictionary<string, object> values = new Dictionary<string,object>();
@@ -70,9 +73,12 @@ namespace System.Web.OData.Routing
 
             // Assert
             Assert.True(result);
-            Assert.Equal(2, values.Count);
+            Assert.Equal(4, values.Count);
             Assert.Equal("1", values["param1"]);
             Assert.Equal("2", values["param2"]);
+
+            Assert.Equal(1, (values[ODataParameterValue.ParameterValuePrefix + "param1"] as ODataParameterValue).Value);
+            Assert.Equal(2, (values[ODataParameterValue.ParameterValuePrefix + "param2"] as ODataParameterValue).Value);
         }
     }
 }

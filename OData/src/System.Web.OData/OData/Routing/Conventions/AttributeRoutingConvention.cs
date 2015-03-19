@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -176,6 +177,7 @@ namespace System.Web.OData.Routing.Conventions
             ILookup<string, HttpActionDescriptor> actionMap)
         {
             var routeData = controllerContext.Request.GetRouteData();
+            var routingConventionsStore = controllerContext.Request.ODataProperties().RoutingConventionsStore;
 
             object value;
             if (controllerContext.Request.Properties.TryGetValue("AttributeRouteData", out value))
@@ -185,7 +187,15 @@ namespace System.Web.OData.Routing.Conventions
                 {
                     foreach (var item in attributeRouteData)
                     {
-                        routeData.Values.Add(item);
+                        if (item.Key.StartsWith(ODataParameterValue.ParameterValuePrefix, StringComparison.Ordinal) &&
+                            item.Value is ODataParameterValue)
+                        {
+                            routingConventionsStore.Add(item);
+                        }
+                        else
+                        {
+                            routeData.Values.Add(item);
+                        }
                     }
 
                     return attributeRouteData["action"] as string;

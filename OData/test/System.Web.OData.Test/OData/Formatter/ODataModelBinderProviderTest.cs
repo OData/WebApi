@@ -358,9 +358,36 @@ namespace System.Web.OData.Formatter
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
+        [Theory]
+        [InlineData("GetAddress", "address", "{\"@odata.type\":\"%23NS.Address\",\"City\":\"Shanghai\"}")]
+        [InlineData("GetCustomer", "customer", "{\"@odata.type\":\"%23NS.Customer\",\"Id\":9,\"Name\":\"Robot\"}")]
+        public void ODataModelBinderProvider_Works_OtherParameters(string action, string parameterName, string parameterValue)
+        {
+            // Arrange
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(ModelBinderProvider), new ODataModelBinderProvider());
+            configuration.MapODataServiceRoute("odata", "", GetEdmModel());
+
+            var controllers = new[] { typeof(ODataModelBinderProviderTestODataController) };
+            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
+            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+
+            HttpServer server = new HttpServer(configuration);
+            HttpClient client = new HttpClient(server);
+
+            // Act 
+            string url = String.Format("http://localhost/{0}({1}=@p)?@p={2}", action, parameterName, parameterValue);
+            HttpResponseMessage response = client.GetAsync(url).Result;
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+        }
+
         private IEdmModel GetEdmModel()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Customer>().Namespace = "NS";
+            builder.ComplexType<Address>().Namespace = "NS";
 
             FunctionConfiguration getEnum = builder.Function("GetEnum");
             getEnum.Parameter<SimpleEnum>("simpleEnum");
@@ -373,7 +400,20 @@ namespace System.Web.OData.Formatter
             FunctionConfiguration function = builder.Function("GetNullableFlagsEnum").Returns<bool>();
             function.Parameter<FlagsEnum?>("flagsEnum");
 
+            builder.Function("GetAddress").Returns<bool>().Parameter<Address>("address");
+            builder.Function("GetCustomer").Returns<bool>().Parameter<Customer>("customer");
             return builder.GetEdmModel();
+        }
+
+        public class Address
+        {
+            public string City { get; set; }
+        }
+
+        public class Customer
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
         }
     }
 
@@ -618,6 +658,25 @@ namespace System.Web.OData.Formatter
 
             Assert.True(ModelState.IsValid);
             return false;
+        }
+
+        [HttpGet]
+        [ODataRoute("GetAddress(address={address})")]
+        public bool GetAddress([FromODataUri]ODataModelBinderProviderTest.Address address)
+        {
+            Assert.NotNull(address);
+            Assert.Equal("Shanghai", address.City);
+            return true;
+        }
+
+        [HttpGet]
+        [ODataRoute("GetCustomer(customer={customer})")]
+        public bool GetCustomer([FromODataUri]ODataModelBinderProviderTest.Customer customer)
+        {
+            Assert.NotNull(customer);
+            Assert.Equal(9, customer.Id);
+            Assert.Equal("Robot", customer.Name);
+            return true;
         }
     }
 }

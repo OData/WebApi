@@ -133,6 +133,7 @@
     <Compile Include="OData\ClrPropertyInfoAnnotationTest.cs" />
     <Compile Include="OData\DateTimeTest.cs" />
     <Compile Include="OData\EnableQueryTests.cs" />
+    <Compile Include="OData\Formatter\ODataFunctionTests.cs" />
     <Compile Include="OData\ODataContainmentTest.cs" />
     <Compile Include="OData\ContentIdHelpersTest.cs" />
     <Compile Include="OData\DollarFormatTest.cs" />

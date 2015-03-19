@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -248,11 +250,70 @@ namespace System.Web.OData.Routing
             }
         }
 
+        public static TheoryDataSet<string, string, string> MoreFunctionRouteData
+        {
+            get
+            {
+                return new TheoryDataSet<string, string, string>
+                {
+                    // Collection of primitive
+                    {
+                        "GET",
+                        "RoutingCustomers(10)/Default.CollectionOfPrimitiveTypeFunction(intValues=[1,2,4,7,8])",
+                        "CollectionOfPrimitiveTypeFunction([1,2,4,7,8])"
+                    },
+
+                    {
+                        "GET",
+                        "RoutingCustomers(10)/Default.CollectionOfPrimitiveTypeFunction(intValues=@p)?@p=[1,2,4,7,8]",
+                        "CollectionOfPrimitiveTypeFunction([1,2,4,7,8])"
+                    },
+
+                    // Complex
+                    {
+                        "GET",
+                        "RoutingCustomers(10)/Default.CanMoveToAddress(address=@p)?@p={\"@odata.type\":\"System.Web.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\",\"ZipCode\":\"9001\"}",
+                        "CanMoveToAddress(Street=NE 24th St.,City=Redmond,ZipCode=9001)"
+                    },
+
+                    // Collection of complex
+                    {
+                        "GET", "RoutingCustomers(10)/Default.MoveToAddresses(addresses=@p)?" +
+                               "@p=[{\"@odata.type\":\"System.Web.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\",\"ZipCode\":\"9001\"}," +
+                               "{\"@odata.type\":\"System.Web.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\",\"ZipCode\":\"9001\"}]",
+                        "MoveToAddresses(addresses={2})"
+                    },
+
+                    // Entity
+                    {
+                        "GET",
+                        "RoutingCustomers(10)/Default.EntityTypeFunction(product=@p)?@p={\"@odata.type\":\"System.Web.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}",
+                        "EntityTypeFunction(ID=9,Name=Phone)"
+                    },
+
+                    // Feed (Collection of entity)
+                    {
+                        "GET", "RoutingCustomers(10)/Default.CollectionEntityTypeFunction(products=@p)" +
+                               "?@p={\"value\":[{\"@odata.type\":\"System.Web.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}," +
+                               "{\"@odata.type\":\"System.Web.OData.Routing.SpecialProduct\",\"ID\":9,\"Name\":\"Phone\",\"Value\":9}" +
+                               "]}",
+                        "CollectionEntityTypeFunction(products={2})"
+                    },
+                };
+            }
+        }
+
         [Theory]
         [PropertyData("ControllerRoutes")]
         [InlineData("DELETE",
             "RoutingCustomers(1)/Products/$ref?$id=http://localhost/Products(5)",
             "DeleteRef(1)(5)(Products)")]
+        [PropertyData("MoreFunctionRouteData")]
+        [InlineData("GET", "RoutingCustomers(11)/Default.EntityTypeFunction(product=@p)?@p={\"@odata.id\":\"http://localhost/Products(5)\"}",
+            "EntityTypeFunctionWithEntityReference(ID=5,Name=--)")]
+        [InlineData("GET", "RoutingCustomers(11)/Default.CollectionEntityTypeFunction(products=@p)" +
+            "?@p={\"value\":[{\"@odata.id\":\"http://localhost/Products(5)\"},{\"@odata.id\":\"http://localhost/Products(6)\"}]}",
+            "CollectionEntityTypeFunctionWithEntityReference(products=[{ID=5,Name=--},{ID=6,Name=--}])")]
         public async Task RoutesCorrectly(string httpMethod, string uri, string expectedResponse)
         {
             // Arrange & Act
@@ -262,6 +323,19 @@ namespace System.Web.OData.Routing
             // Assert
             response.EnsureSuccessStatusCode();
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
+        }
+
+        [Theory]
+        [InlineData("CollectionOfPrimitiveTypeFunction(intValues=@p)?@p=[1,2,4,7,8")] // missing "]"
+        [InlineData("CanMoveToAddress(address=@p)?@p={\"@odata.")] // not valid complex payload
+        [InlineData("EntityTypeFunction(product=@p)?@p={\"@odata.type\":\"System.Web.OData.Routing.Product\",\"id\":9,\"Name\":\"Phone\"}")] // should be "ID"
+        public async Task RoutesIncorrectly_ForBadFunctionParameters(string uri)
+        {
+            // Arrange & Act
+            HttpResponseMessage response = await _nullPrefixClient.GetAsync("http://localhost/RoutingCustomers(10)/Default." + uri);
+
+            // Assert
+            Assert.NotEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Theory]
@@ -279,9 +353,15 @@ namespace System.Web.OData.Routing
         [Theory]
         [PropertyData("ServiceAndMetadataRoutes")]
         [PropertyData("ControllerRoutes")]
+        [PropertyData("MoreFunctionRouteData")]
         [InlineData("DELETE",
             "RoutingCustomers(1)/Products/$ref?$id=http://localhost/MyRoot/odata/Products(5)",
             "DeleteRef(1)(5)(Products)")]
+        [InlineData("GET", "RoutingCustomers(11)/Default.EntityTypeFunction(product=@p)?@p={\"@odata.id\":\"http://localhost/MyRoot/odata/Products(5)\"}",
+            "EntityTypeFunctionWithEntityReference(ID=5,Name=--)")]
+        [InlineData("GET", "RoutingCustomers(11)/Default.CollectionEntityTypeFunction(products=@p)" +
+            "?@p={\"value\":[{\"@odata.id\":\"http://localhost/MyRoot/odata/Products(5)\"},{\"@odata.id\":\"http://localhost/MyRoot/odata/Products(6)\"}]}",
+            "CollectionEntityTypeFunctionWithEntityReference(products=[{ID=5,Name=--},{ID=6,Name=--}])")]
         public async Task RoutesCorrectly_WithFixedPrefix(string httpMethod, string uri, string unused)
         {
             // Arrange & Act
@@ -307,9 +387,15 @@ namespace System.Web.OData.Routing
         [Theory]
         [PropertyData("ServiceAndMetadataRoutes")]
         [PropertyData("ControllerRoutes")]
+        [PropertyData("MoreFunctionRouteData")]
         [InlineData("DELETE",
             "RoutingCustomers(1)/Products/$ref?$id=http://localhost/parameter/Products(5)",
             "DeleteRef(1)(5)(Products)")]
+        [InlineData("GET", "RoutingCustomers(11)/Default.EntityTypeFunction(product=@p)?@p={\"@odata.id\":\"http://localhost/parameter/Products(5)\"}",
+            "EntityTypeFunctionWithEntityReference(ID=5,Name=--)")]
+        [InlineData("GET", "RoutingCustomers(11)/Default.CollectionEntityTypeFunction(products=@p)" +
+            "?@p={\"value\":[{\"@odata.id\":\"http://localhost/parameter/Products(5)\"},{\"@odata.id\":\"http://localhost/parameter/Products(6)\"}]}",
+            "CollectionEntityTypeFunctionWithEntityReference(products=[{ID=5,Name=--},{ID=6,Name=--}])")]
         public async Task RoutesCorrectly_WithParameterizedPrefix(string httpMethod, string uri, string unused)
         {
             // Arrange & Act
@@ -552,6 +638,65 @@ namespace System.Web.OData.Routing
         public string UnoundFuncWithEnumParameter(LongEnum p1, FlagsEnum p2)
         {
             return "UnboundFuncWithEnumParameters(" + p1 + "," + p2 + ")";
+        }
+
+        [HttpGet]
+        public string CanMoveToAddress(int key, [FromODataUri] ODataRoutingModel.Address address)
+        {
+            return "CanMoveToAddress(Street=" + address.Street + ",City=" + address.City + ",ZipCode=" + address.ZipCode + ")";
+        }
+
+        [HttpGet]
+        public string MoveToAddresses(int key, [FromODataUri] IEnumerable<ODataRoutingModel.Address> addresses)
+        {
+            return "MoveToAddresses(addresses={" + addresses.Count() + "})";
+        }
+
+        [HttpGet]
+        public string CollectionOfPrimitiveTypeFunction(int key, [FromODataUri] IEnumerable<int> intValues)
+        {
+            return "CollectionOfPrimitiveTypeFunction([" + String.Join(",", intValues.Select(e => e)) + "])";
+        }
+
+        [HttpGet]
+        public string EntityTypeFunction(int key, [FromODataUri] ODataRoutingModel.Product product)
+        {
+            Assert.NotNull(product);
+
+            // entity call
+            if (key == 10)
+            {
+                return "EntityTypeFunction(ID=" + product.ID + ",Name=" + product.Name + ")";
+            }
+            else if (key == 11)
+            {
+                // entity reference call
+                return "EntityTypeFunctionWithEntityReference(ID=" + product.ID + ",Name=" + (product.Name ?? "--") + ")";
+            }
+
+            return "BadRequest";
+        }
+
+        [HttpGet]
+        public string CollectionEntityTypeFunction(int key, [FromODataUri] IEnumerable<ODataRoutingModel.Product> products)
+        {
+            // entity call
+            if (key == 10)
+            {
+                return "CollectionEntityTypeFunction(products={" + products.Count() + "})";
+            }
+            else if (key == 11)
+            {
+                // entity reference call
+                IList<string> msg = new List<string>();
+                foreach (var p in products)
+                {
+                    msg.Add("{ID=" + p.ID + ",Name=" + (p.Name ?? "--") + "}");
+                }
+                return "CollectionEntityTypeFunctionWithEntityReference(products=[" + String.Join(",", msg) + "])";
+            }
+
+            return "BadRequest";
         }
     }
 

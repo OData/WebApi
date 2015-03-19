@@ -221,6 +221,17 @@ namespace System.Web.OData.TestCommon
             isCustomerLocal.AddParameter("entity", new EdmEntityTypeReference(customer, false));
             model.AddElement(isCustomerLocal);
 
+            EdmFunction entityFunction = new EdmFunction(
+                "NS",
+                "GetCustomer",
+                returnType,
+                isBound: true,
+                entitySetPathExpression: null,
+                isComposable: false);
+            entityFunction.AddParameter("entity", new EdmEntityTypeReference(customer, false));
+            entityFunction.AddParameter("customer", new EdmEntityTypeReference(customer, false));
+            model.AddElement(entityFunction);
+
             EdmFunction getOrder = new EdmFunction(
                 "NS",
                 "GetOrder",

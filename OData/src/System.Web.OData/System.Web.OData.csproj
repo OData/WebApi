@@ -210,6 +210,7 @@
     <Compile Include="OData\Routing\Conventions\NavigationSourceRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\SingletonRoutingConvention.cs" />
     <Compile Include="OData\Routing\CountPathSegment.cs" />
+    <Compile Include="OData\Routing\ODataParameterValue.cs" />
     <Compile Include="OData\Routing\SingletonPathSegment.cs" />
     <Compile Include="OData\Routing\ODataPathSegmentTranslator.cs" />
     <Compile Include="OData\Routing\ODataVersionConstraint.cs" />

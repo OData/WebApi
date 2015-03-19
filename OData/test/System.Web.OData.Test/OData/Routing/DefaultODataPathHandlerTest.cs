@@ -1280,15 +1280,13 @@ namespace System.Web.OData.Routing
             return functionSegment.GetParameterValue("Parameter");
         }
 
-        [Fact]
-        public void CanParse_ComplexTypeAsFunctionParameter_ParametersAlias()
+        [Theory]
+        [InlineData("(address=@p)?@p={\"@odata.type\":\"System.Web.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"}")]
+        [InlineData("(address={\"@odata.type\":\"System.Web.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"})")]
+        public void CanParse_ComplexTypeAsFunctionParameter(string parametervalue)
         {
-            // Arrange
-            string complexAlias = "{\"@odata.type\":\"System.Web.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"}";
-
-            // Act
-            ODataPath path = _parser.Parse(_model, _serviceRoot,
-                "RoutingCustomers(1)/Default.CanMoveToAddress(address=@address)?@address=" + complexAlias);
+            // Arrange & Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Default.CanMoveToAddress" + parametervalue);
 
             // Assert
             Assert.Equal("~/entityset/key/function", path.PathTemplate);
@@ -1299,15 +1297,13 @@ namespace System.Web.OData.Routing
             Assert.Equal("System.Web.OData.Routing.Address", address.TypeName);
         }
 
-        [Fact]
-        public void CanParse_CollectionOfComplexTypeAsFunctionParameter_ParametersAlias()
+        [Theory]
+        [InlineData("(addresses=@p)?@p=[{\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"},{\"Street\":\"Pine St.\",\"City\":\"Seattle\"}]")]
+        [InlineData("(addresses=[{\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"},{\"Street\":\"Pine St.\",\"City\":\"Seattle\"}])")]
+        public void CanParse_CollectionOfComplexTypeAsFunctionParameter(string parametervalue)
         {
-            // Arrange
-            string complexAlias = "[{\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"},{\"Street\":\"Pine St.\",\"City\":\"Seattle\"}]";
-
-            // Act
-            ODataPath path = _parser.Parse(_model, _serviceRoot,
-                "RoutingCustomers(1)/Default.MoveToAddresses(addresses=@addresses)?@addresses=" + complexAlias);
+            // Arrange & Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Default.MoveToAddresses" + parametervalue);
 
             // Assert
             Assert.Equal("~/entityset/key/function", path.PathTemplate);
@@ -1316,6 +1312,84 @@ namespace System.Web.OData.Routing
             object parameterValue = functionSegment.GetParameterValue("addresses");
             ODataCollectionValue addresses = Assert.IsType<ODataCollectionValue>(parameterValue);
             Assert.Equal("Collection(System.Web.OData.Routing.Address)", addresses.TypeName);
+        }
+
+        [Theory]
+        [InlineData("(intValues=@p)?@p=[1,2,4,7,8]")]
+        [InlineData("(intValues=[1,2,4,7,8])")]
+        public void CanParse_CollectionOfPrimitiveTypeAsFunctionParameter(string parametervalue)
+        {
+            // Arrange & Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot,
+                "RoutingCustomers(1)/Default.CollectionOfPrimitiveTypeFunction" + parametervalue);
+
+            // Assert
+            Assert.Equal("~/entityset/key/function", path.PathTemplate);
+            BoundFunctionPathSegment functionSegment = (BoundFunctionPathSegment)path.Segments.Last();
+
+            object parameterValue = functionSegment.GetParameterValue("intValues");
+            ODataCollectionValue intValues = Assert.IsType<ODataCollectionValue>(parameterValue);
+            Assert.Equal("Collection(Edm.Int32)", intValues.TypeName);
+        }
+
+        [Theory]
+        [InlineData("{\"@odata.type\":\"System.Web.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}")]
+        [InlineData("{\"@odata.Id\":\"http://localhost/odata/Products(9)\"}")]
+        public void CanParse_EntityTypeAsFunctionParameter_ParametersAlias(string entityAlias)
+        {
+            // Arrange & Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot,
+                "RoutingCustomers(1)/Default.EntityTypeFunction(product=@p)?@p=" + entityAlias);
+
+            // Assert
+            Assert.Equal("~/entityset/key/function", path.PathTemplate);
+            BoundFunctionPathSegment functionSegment = (BoundFunctionPathSegment)path.Segments.Last();
+
+            object parameterValue = functionSegment.GetParameterValue("product");
+            string product = Assert.IsType<string>(parameterValue);
+            Assert.Equal(entityAlias, product);
+        }
+
+        [Fact]
+        public void CanParse_EntityTypeAsFunctionParameter_ThrowsForInlineParameter()
+        {
+            // Arrange
+            const string odataPath =
+                "RoutingCustomers(1)/Default.EntityTypeFunction(product={\"@odata.type\":\"System.Web.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}";
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, odataPath));
+        }
+
+        [Theory]
+        [InlineData("{\"value\":[{\"@odata.type\":\"System.Web.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}," +
+                    "{\"@odata.type\":\"System.Web.OData.Routing.Product\",\"ID\":10,\"Name\":\"TV\"}]}")]
+        [InlineData("[{\"@odata.Id\":\"http://localhost/odata/Products(9)\"},{\"@odata.Id\":\"http://localhost/odata/Products(10)\"}]")]
+        public void CanParse_CollectionEntityTypeAsFunctionParameter_ParametersAlias(string entityAlias)
+        {
+            // Arrange & Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot,
+                "RoutingCustomers(1)/Default.CollectionEntityTypeFunction(products=@p)?@p=" + entityAlias);
+
+            // Assert
+            Assert.Equal("~/entityset/key/function", path.PathTemplate);
+            BoundFunctionPathSegment functionSegment = (BoundFunctionPathSegment)path.Segments.Last();
+
+            object parameterValue = functionSegment.GetParameterValue("products");
+            string product = Assert.IsType<string>(parameterValue);
+            Assert.Equal(entityAlias, product);
+        }
+
+        [Fact]
+        public void CanParse_CollectionEntityTypeAsFunctionParameter_ThrowsForInlineParameter()
+        {
+            // Arrange
+            const string odataPath = "RoutingCustomers(1)/Default.CollectionEntityTypeFunction(products=" +
+                "{\"value\":[{\"@odata.type\":\"System.Web.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}," +
+                "{\"@odata.type\":\"System.Web.OData.Routing.Product\",\"ID\":10,\"Name\":\"TV\"}]}";
+                
+            // & Act
+            Assert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, odataPath));
         }
 
         [Theory]
@@ -1862,7 +1936,8 @@ namespace System.Web.OData.Routing
             // Assert
             Dictionary<string, object> routeData = new Dictionary<string, object>();
             Assert.True(odataPathTemplate.TryMatch(odataPath, routeData));
-            Assert.Equal(keyValues.OrderBy(k => k), routeData.Select(d => d.Key + ":" + d.Value).OrderBy(d => d));
+            Assert.Equal(keyValues.OrderBy(k => k), routeData.Where(d => !d.Key.StartsWith(ODataParameterValue.ParameterValuePrefix))
+                .Select(d => d.Key + ":" + d.Value).OrderBy(d => d));
         }
 
         [Theory]

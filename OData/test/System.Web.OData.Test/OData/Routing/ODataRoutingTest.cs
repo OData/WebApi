@@ -246,6 +246,12 @@ namespace System.Web.OData.Routing
                     { "GET",
                         "DateTimeOffsetKeyCustomers(2001-01-01T12:00:00.000+08:00)",
                         "GetDateTimeOffsetKeyCustomer(01/01/2001 12:00:00 +08:00)" },
+
+                    // test string parameter for [FromODataUri]
+                    { "GET", "Products(1)/Default.CopyProductByCity(city='123')", "CopyProductByCity(1, 123)" },
+                    { "GET", "Products(1)/Default.CopyProductByCity(city='any')", "CopyProductByCity(1, any)" },
+                    { "GET", "Products(1)/Default.CopyProductByCity(city='123any')", "CopyProductByCity(1, 123any)" },
+                    { "GET", "Products(1)/Default.CopyProductByCity(city='any123')",  "CopyProductByCity(1, any123)" },
                 };
             }
         }
@@ -761,6 +767,12 @@ namespace System.Web.OData.Routing
         public string TopProductOfAllByCity(string city)
         {
             return String.Format(CultureInfo.InvariantCulture, "TopProductOfAllByCity({0})", city);
+        }
+
+        [AcceptVerbs("GET")]
+        public string CopyProductByCity(int key, [FromODataUri]string city)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "CopyProductByCity({0}, {1})", key, city);
         }
 
         [AcceptVerbs("GET")]

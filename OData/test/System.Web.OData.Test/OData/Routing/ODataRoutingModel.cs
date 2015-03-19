@@ -92,6 +92,10 @@ namespace System.Web.OData.Routing
             topProductOfAllByCity.Parameter<string>("city");
             topProductOfAllByCity.Returns<string>();
 
+            FunctionConfiguration copyProductByCity = builder.EntityType<Product>().Function("CopyProductByCity");
+            copyProductByCity.Parameter<string>("city");
+            copyProductByCity.Returns<string>();
+
             FunctionConfiguration topProductOfAllByCityAndModel = builder.EntityType<Product>().Collection.Function("TopProductOfAllByCityAndModel");
             topProductOfAllByCityAndModel.Parameter<string>("city");
             topProductOfAllByCityAndModel.Parameter<int>("model");

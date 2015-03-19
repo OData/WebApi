@@ -163,7 +163,7 @@ namespace System.Web.OData.Builder.Conventions
             var model = modelBuilder.GetEdmModel();
 
             // Assert
-            Assert.Equal(model.SchemaElements.OfType<IEdmSchemaType>().Count(), 3);
+            Assert.Equal(3, model.SchemaElements.OfType<IEdmSchemaType>().Count());
 
             var product = model.AssertHasEntitySet(entitySetName: "Products", mappedEntityClrType: typeof(Product));
             Assert.Equal(6, product.StructuralProperties().Count());
@@ -1538,6 +1538,7 @@ namespace System.Web.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_DerivedTypeDeclaringKeyThrows()
         {
+            // Arrange
             MockType baseType =
                   new MockType("BaseType")
                   .Property(typeof(int), "BaseTypeID");
@@ -1555,9 +1556,87 @@ namespace System.Web.OData.Builder.Conventions
 
             builder.AddEntitySet("bases", builder.AddEntityType(baseType));
 
+            // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => builder.GetEdmModel(),
-            "Cannot define keys on type 'DefaultNamespace.DerivedType' deriving from 'DefaultNamespace.BaseType'. Only the root type in the entity inheritance hierarchy can contain keys.");
+            "Cannot define keys on type 'DefaultNamespace.DerivedType' deriving from 'DefaultNamespace.BaseType'. " +
+            "The base type in the entity inheritance hierarchy already contains keys.");
+        }
+
+        [Fact]
+        public void ModelBuilder_CanDeclareAbstractEntityTypeWithoutKey()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.AddEntityType(typeof(AbstractEntityType));
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Act & Assert
+            Assert.NotNull(model);
+            IEdmEntityType abstractType =
+                model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "AbstractEntityType");
+            Assert.NotNull(abstractType);
+            Assert.True(abstractType.IsAbstract);
+            Assert.Null(abstractType.DeclaredKey);
+            Assert.Empty(abstractType.Properties());
+        }
+
+        [Fact]
+        public void ModelBuilder_CanDeclareKeyOnDerivedType_IfBaseEntityTypeWithoutKey()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntityType<BaseAbstractEntityType>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Act & Assert
+            Assert.NotNull(model);
+            IEdmEntityType abstractType =
+                model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "BaseAbstractEntityType");
+            Assert.NotNull(abstractType);
+            Assert.True(abstractType.IsAbstract);
+            Assert.Null(abstractType.DeclaredKey);
+            Assert.Empty(abstractType.Properties());
+
+            IEdmEntityType derivedType =
+                model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "DerivedEntityTypeWithOwnKey");
+            Assert.NotNull(derivedType);
+            Assert.False(derivedType.IsAbstract);
+
+            Assert.NotNull(derivedType.DeclaredKey);
+            IEdmStructuralProperty keyProperty = Assert.Single(derivedType.DeclaredKey);
+            Assert.Equal("DerivedEntityTypeWithOwnKeyId", keyProperty.Name);
+        }
+
+        [Fact]
+        public void ModelBuilder_DeclareKeyOnDerivedTypeAndSubDerivedType_Throws()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntityType<BaseAbstractEntityType2>();
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => builder.GetEdmModel(),
+            "Cannot define keys on type 'System.Web.OData.Builder.Conventions.SubSubEntityTypeWithOwnKey' deriving from 'System.Web.OData.Builder.Conventions.SubEntityTypeWithOwnKey'. " +
+            "The base type in the entity inheritance hierarchy already contains keys.");
+        }
+
+        [Fact]
+        public void ModelBuilder_DeclareNavigationSourceOnAbstractEntityTypeWithKeyThrows()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<AbstractEntityType>("entitySet");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => builder.GetEdmModel(),
+            "The entity set or singleton 'entitySet' is based on type 'System.Web.OData.Builder.Conventions.AbstractEntityType' that has no keys defined.");
         }
 
         [Fact]
@@ -1595,7 +1674,9 @@ namespace System.Web.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_DerivedComplexTypeHavingKeys_Throws()
         {
-            MockType baseComplexType = new MockType("BaseComplexType");
+            // Arrange
+            MockType baseComplexType = new MockType("BaseComplexType")
+                .Property(typeof(int), "BaseComplexTypeId");
 
             MockType derivedComplexType =
                 new MockType("DerivedComplexType")
@@ -1615,9 +1696,11 @@ namespace System.Web.OData.Builder.Conventions
 
             builder.AddEntitySet("entities", builder.AddEntityType(entityType));
 
+            // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => builder.GetEdmModel(),
-                "Cannot define keys on type 'DefaultNamespace.DerivedComplexType' deriving from 'DefaultNamespace.BaseComplexType'. Only the root type in the entity inheritance hierarchy can contain keys.");
+            "Cannot define keys on type 'DefaultNamespace.DerivedComplexType' deriving from 'DefaultNamespace.BaseComplexType'. " +
+            "The base type in the entity inheritance hierarchy already contains keys.");
         }
 
         [Fact]
@@ -2838,5 +2921,32 @@ namespace System.Web.OData.Builder.Conventions
         public int ForeignKeyVipCustomerId { get; set; }
 
         public ForeignKeyVipCustomer VipCustomer { get; set; }
+    }
+
+    public abstract class AbstractEntityType
+    {
+    }
+
+    public abstract class BaseAbstractEntityType
+    {
+    }
+
+    public class DerivedEntityTypeWithOwnKey : BaseAbstractEntityType
+    {
+        public int DerivedEntityTypeWithOwnKeyId { get; set; }
+    }
+
+    public abstract class BaseAbstractEntityType2
+    {
+    }
+
+    public class SubEntityTypeWithOwnKey : BaseAbstractEntityType2
+    {
+        public int SubEntityTypeWithOwnKeyId { get; set; }
+    }
+
+    public class SubSubEntityTypeWithOwnKey : SubEntityTypeWithOwnKey
+    {
+        public int SubSubEntityTypeWithOwnKeyId { get; set; }
     }
 }

@@ -206,15 +206,17 @@ namespace System.Web.OData.Routing.Conventions
                 {
                     IHttpActionSelector actionSelector = controller.Configuration.Services.GetActionSelector();
                     ILookup<string, HttpActionDescriptor> actionMapping = actionSelector.GetActionMapping(controller);
-                    IEnumerable<HttpActionDescriptor> actions = actionMapping.SelectMany(a => a);
-                    string prefix = GetODataRoutePrefix(controller);
-
-                    foreach (HttpActionDescriptor action in actions)
+                    HttpActionDescriptor[] actions = actionMapping.SelectMany(a => a).ToArray();
+ 
+                    foreach (string prefix in GetODataRoutePrefixes(controller))
                     {
-                        IEnumerable<ODataPathTemplate> pathTemplates = GetODataPathTemplates(prefix, action);
-                        foreach (ODataPathTemplate pathTemplate in pathTemplates)
+                        foreach (HttpActionDescriptor action in actions)
                         {
-                            attributeMappings.Add(pathTemplate, action);
+                            IEnumerable<ODataPathTemplate> pathTemplates = GetODataPathTemplates(prefix, action);
+                            foreach (ODataPathTemplate pathTemplate in pathTemplates)
+                            {
+                                attributeMappings.Add(pathTemplate, action);
+                            }
                         }
                     }
                 }
@@ -228,25 +230,34 @@ namespace System.Web.OData.Routing.Conventions
             return typeof(ODataController).IsAssignableFrom(controller.ControllerType);
         }
 
-        private static string GetODataRoutePrefix(HttpControllerDescriptor controllerDescriptor)
+        private static IEnumerable<string> GetODataRoutePrefixes(HttpControllerDescriptor controllerDescriptor)
         {
             Contract.Assert(controllerDescriptor != null);
 
-            string prefix = controllerDescriptor.GetCustomAttributes<ODataRoutePrefixAttribute>(inherit: false)
-                .Select(prefixAttribute => prefixAttribute.Prefix)
-                .SingleOrDefault();
-
-            if (prefix != null && prefix.StartsWith("/", StringComparison.Ordinal))
+            var prefixAttributes = controllerDescriptor.GetCustomAttributes<ODataRoutePrefixAttribute>(inherit: false);
+            if (prefixAttributes.Count == 0)
             {
-                throw Error.InvalidOperation(SRResources.RoutePrefixStartsWithSlash, prefix, controllerDescriptor.ControllerType.FullName);
+                yield return null;
             }
-
-            if (prefix != null && prefix.EndsWith("/", StringComparison.Ordinal))
+            else
             {
-                prefix = prefix.TrimEnd('/');
-            }
+                foreach (ODataRoutePrefixAttribute prefixAttribute in prefixAttributes)
+                {
+                    string prefix = prefixAttribute.Prefix;
 
-            return prefix;
+                    if (prefix != null && prefix.StartsWith("/", StringComparison.Ordinal))
+                    {
+                        throw Error.InvalidOperation(SRResources.RoutePrefixStartsWithSlash, prefix, controllerDescriptor.ControllerType.FullName);
+                    }
+
+                    if (prefix != null && prefix.EndsWith("/", StringComparison.Ordinal))
+                    {
+                        prefix = prefix.TrimEnd('/');
+                    }
+
+                    yield return prefix;
+                }
+            }
         }
 
         private IEnumerable<ODataPathTemplate> GetODataPathTemplates(string prefix, HttpActionDescriptor action)

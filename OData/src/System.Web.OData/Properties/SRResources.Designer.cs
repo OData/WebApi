@@ -214,7 +214,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot define keys on type &apos;{0}&apos; deriving from &apos;{1}&apos;. Only the root type in the entity inheritance hierarchy can contain keys..
+        ///   Looks up a localized string similar to Cannot define keys on type &apos;{0}&apos; deriving from &apos;{1}&apos;. The base type in the entity inheritance hierarchy already contains keys..
         /// </summary>
         internal static string CannotDefineKeysOnDerivedTypes {
             get {
@@ -808,15 +808,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid parameter type &apos;{0}&apos;. A non-binding parameter type must be either Primitive, Complex, Collection of Primitive or a Collection of Complex..
-        /// </summary>
-        internal static string InvalidParameterType {
-            get {
-                return ResourceManager.GetString("InvalidParameterType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The URI segment &apos;{0}&apos; is invalid after the segment &apos;{1}&apos;..
         /// </summary>
         internal static string InvalidPathSegment {
@@ -1164,6 +1155,15 @@ namespace System.Web.OData.Properties {
         internal static string NavigationSourceMissingDuringSerialization {
             get {
                 return ResourceManager.GetString("NavigationSourceMissingDuringSerialization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The entity set or singleton &apos;{0}&apos; is based on type &apos;{1}&apos; that has no keys defined..
+        /// </summary>
+        internal static string NavigationSourceTypeHasNoKeys {
+            get {
+                return ResourceManager.GetString("NavigationSourceTypeHasNoKeys", resourceCulture);
             }
         }
         

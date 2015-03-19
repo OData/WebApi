@@ -606,9 +606,18 @@ namespace System.Web.OData.Builder
 
             foreach (IEdmEntityType entity in model.SchemaElementsAcrossModels().OfType<IEdmEntityType>())
             {
-                if (entity.BaseEntityType() == null && (entity.DeclaredKey == null || entity.DeclaredKey.Count() == 0))
+                if (!entity.IsAbstract && !entity.Key().Any())
                 {
                     throw Error.InvalidOperation(SRResources.EntityTypeDoesntHaveKeyDefined, entity.Name);
+                }
+            }
+
+            foreach (IEdmNavigationSource navigationSource in model.EntityContainer.Elements.OfType<IEdmNavigationSource>())
+            {
+                if (!navigationSource.EntityType().Key().Any())
+                {
+                    throw Error.InvalidOperation(SRResources.NavigationSourceTypeHasNoKeys, navigationSource.Name,
+                        navigationSource.EntityType().FullName());
                 }
             }
         }

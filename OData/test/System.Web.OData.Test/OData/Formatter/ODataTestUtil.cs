@@ -295,4 +295,19 @@ namespace System.Web.OData.Formatter
         public int DerivedPrincipalEntityId { get; set; }
         public DerivedPrincipalEntity DerivedProp { get; set; }
     }
+
+    public abstract class AbstractEntityType
+    {
+        public int IntProperty { get; set; }
+    }
+
+    public class SubEntityType : AbstractEntityType
+    {
+        public int SubKey { get; set; }
+    }
+
+    public class AnotherSubEntityType : AbstractEntityType
+    {
+        public double AnotherKey { get; set; }
+    }
 }

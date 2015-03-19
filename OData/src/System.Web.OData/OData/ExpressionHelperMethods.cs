@@ -37,6 +37,8 @@ namespace System.Web.OData
         private static MethodInfo _queryableTakeMethod = GenericMethodOf(_ => Queryable.Take<int>(default(IQueryable<int>), default(int)));
         private static MethodInfo _enumerableTakeMethod = GenericMethodOf(_ => Enumerable.Take<int>(default(IEnumerable<int>), default(int)));
 
+        private static MethodInfo _queryableAsQueryableMethod = GenericMethodOf(_ => Queryable.AsQueryable<int>(default(IEnumerable<int>)));
+
         public static MethodInfo QueryableOrderByGeneric
         {
             get { return _orderByMethod; }
@@ -130,6 +132,11 @@ namespace System.Web.OData
         public static MethodInfo QueryableOfType
         {
             get { return _queryableOfTypeMethod; }
+        }
+
+        public static MethodInfo QueryableAsQueryable
+        {
+            get { return _queryableAsQueryableMethod; }
         }
 
         private static MethodInfo GenericMethodOf<TReturn>(Expression<Func<object, TReturn>> expression)

@@ -1,10 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Web.Http;
-using System.Web.OData.Properties;
-using Microsoft.OData.Edm;
-
 namespace System.Web.OData.Builder
 {
     /// <summary>
@@ -27,15 +23,6 @@ namespace System.Web.OData.Builder
         public NonbindingParameterConfiguration(string name, IEdmTypeConfiguration parameterType)
             : base(name, parameterType)
         {
-            EdmTypeKind kind = parameterType.Kind;
-            if (kind == EdmTypeKind.Collection)
-            {
-                kind = (parameterType as CollectionTypeConfiguration).ElementType.Kind;
-            }
-            if (kind == EdmTypeKind.Entity)
-            {
-                throw Error.Argument("parameterType", SRResources.InvalidParameterType, parameterType.FullName);
-            }
         }
     }
 }

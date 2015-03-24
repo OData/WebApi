@@ -64,8 +64,9 @@ namespace System.Web.OData.Formatter
                     { DateTimeOffset.MaxValue, "GetDateTimeOffset" },
                     { Date.MaxValue, "GetDate" },
                     { TimeOfDay.MinValue, "GetTimeOfDay" },
+                    { decimal.MaxValue, "GetDecimal" },
                     { float.NaN, "GetFloat" },
-                    // TODO 1560: ODataLib v4 issue on decimal handling, bug filed.
+                    { double.NaN, "GetDouble" }
                 };
             }
         }

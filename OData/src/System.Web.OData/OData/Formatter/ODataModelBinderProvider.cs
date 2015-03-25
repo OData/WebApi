@@ -1,16 +1,26 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ValueProviders;
+using System.Web.OData.Batch;
+using System.Web.OData.Extensions;
+using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Properties;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
@@ -36,23 +46,18 @@ namespace System.Web.OData.Formatter
                 throw Error.ArgumentNull("modelType");
             }
 
-            if (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(modelType) != null)
-            {
-                return new ODataModelBinder();
-            }
-
-            if (TypeHelper.IsEnum(modelType))
-            {
-                return new ODataModelBinder();
-            }
-
-            return null;
+            return new ODataModelBinder();
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
         internal class ODataModelBinder : IModelBinder
         {
-            private static MethodInfo enumTryParseMethod = typeof(Enum).GetMethods()
+            private static readonly MethodInfo EnumTryParseMethod = typeof(Enum).GetMethods()
                         .Single(m => m.Name == "TryParse" && m.GetParameters().Length == 2);
+
+            private static readonly MethodInfo CastMethodInfo = typeof(Enumerable).GetMethod("Cast");
+
+            private static readonly ODataDeserializerProvider DeserializerProvider = new DefaultODataDeserializerProvider();
 
             [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to fail in model binding.")]
             public bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
@@ -67,19 +72,37 @@ namespace System.Web.OData.Formatter
                     throw Error.Argument("bindingContext", SRResources.ModelBinderUtil_ModelMetadataCannotBeNull);
                 }
 
-                ValueProviderResult value = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
+                string modelName = ODataParameterValue.ParameterValuePrefix + bindingContext.ModelName;
+                ValueProviderResult value = bindingContext.ValueProvider.GetValue(modelName);
                 if (value == null)
                 {
-                    return false;
+                    value = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
+                    if (value == null)
+                    {
+                        return false;
+                    }
                 }
+
                 bindingContext.ModelState.SetModelValue(bindingContext.ModelName, value);
 
                 try
                 {
+                    ODataParameterValue paramValue = value.RawValue as ODataParameterValue;
+                    if (paramValue != null)
+                    {
+                        bindingContext.Model = ConvertTo(paramValue, actionContext, bindingContext);
+                        return true;
+                    }
+
+                    // Support key value's [FromODataUri] binding
                     string valueString = value.RawValue as string;
-                    object model = ConvertTo(valueString, bindingContext.ModelType);
-                    bindingContext.Model = model;
-                    return true;
+                    if (valueString != null)
+                    {
+                        bindingContext.Model = ConvertTo(valueString, bindingContext.ModelType);
+                        return true;
+                    }
+
+                    return false;
                 }
                 catch (ODataException ex)
                 {
@@ -101,6 +124,302 @@ namespace System.Web.OData.Formatter
                     bindingContext.ModelState.AddModelError(bindingContext.ModelName, e);
                     return false;
                 }
+            }
+
+            internal static object ConvertTo(ODataParameterValue parameterValue, HttpActionContext actionContext, ModelBindingContext bindingContext)
+            {
+                Contract.Assert(parameterValue != null && parameterValue.EdmType != null);
+
+                object oDataValue = parameterValue.Value;
+                if (oDataValue == null || oDataValue is ODataNullValue)
+                {
+                    return null;
+                }
+
+                IEdmTypeReference edmTypeReference = parameterValue.EdmType;
+                ODataDeserializerContext readContext = BuildDeserializerContext(actionContext, bindingContext, edmTypeReference);
+
+                // complex value
+                ODataComplexValue complexValue = oDataValue as ODataComplexValue;
+                if (complexValue != null)
+                {
+                    IEdmComplexTypeReference edmComplexType = edmTypeReference.AsComplex();
+                    Contract.Assert(edmComplexType != null);
+
+                    ODataComplexTypeDeserializer deserializer =
+                        (ODataComplexTypeDeserializer)DeserializerProvider.GetEdmTypeDeserializer(edmComplexType);
+
+                    return deserializer.ReadInline(complexValue, edmComplexType, readContext);
+                }
+
+                // collection of primitive, enum, complex
+                ODataCollectionValue collectionValue = oDataValue as ODataCollectionValue;
+                if (collectionValue != null)
+                {
+                    return ConvertCollection(collectionValue, edmTypeReference, bindingContext, readContext);
+                }
+
+                // enum value
+                ODataEnumValue enumValue = oDataValue as ODataEnumValue;
+                if (enumValue != null)
+                {
+                    IEdmEnumTypeReference edmEnumType = edmTypeReference.AsEnum();
+                    Contract.Assert(edmEnumType != null);
+
+                    ODataEnumDeserializer deserializer =
+                        (ODataEnumDeserializer)DeserializerProvider.GetEdmTypeDeserializer(edmEnumType);
+
+                    return deserializer.ReadInline(enumValue, edmEnumType, readContext);
+                }
+
+                // primitive value
+                if (edmTypeReference.IsPrimitive())
+                {
+                    return EdmPrimitiveHelpers.ConvertPrimitiveValue(oDataValue, bindingContext.ModelType);
+                }
+
+                // Entity, Feed, Entity Reference or collection of entity reference
+                return ConvertFeedOrEntry(oDataValue, edmTypeReference, readContext);
+            }
+
+            internal static object ConvertCollection(ODataCollectionValue collectionValue, IEdmTypeReference edmTypeReference,
+                ModelBindingContext bindingContext, ODataDeserializerContext readContext)
+            {
+                Contract.Assert(collectionValue != null);
+
+                IEdmCollectionTypeReference collectionType = edmTypeReference as IEdmCollectionTypeReference;
+                Contract.Assert(collectionType != null);
+
+                ODataCollectionDeserializer deserializer =
+                    (ODataCollectionDeserializer)DeserializerProvider.GetEdmTypeDeserializer(collectionType);
+
+                object value = deserializer.ReadInline(collectionValue, collectionType, readContext);
+                if (value == null)
+                {
+                    return null;
+                }
+
+                IEnumerable collection = value as IEnumerable;
+                Contract.Assert(collection != null);
+
+                Type clrType = bindingContext.ModelType;
+                Type elementType;
+                if (!clrType.IsCollection(out elementType))
+                {
+                    // EdmEntityCollectionObject and EdmComplexCollectionObject are collection types.
+                    throw new ODataException(String.Format(CultureInfo.InvariantCulture,
+                        SRResources.ParameterTypeIsNotCollection, bindingContext.ModelName, clrType));
+                }
+
+                IEnumerable newCollection;
+                if (CollectionDeserializationHelpers.TryCreateInstance(clrType, collectionType, elementType, out newCollection))
+                {
+                    collection.AddToCollection(newCollection, elementType, bindingContext.ModelName, bindingContext.ModelType);
+                    if (clrType.IsArray)
+                    {
+                        newCollection = CollectionDeserializationHelpers.ToArray(newCollection, elementType);
+                    }
+
+                    return newCollection;
+                }
+
+                return null;
+            }
+
+            internal static object ConvertFeedOrEntry(object oDataValue, IEdmTypeReference edmTypeReference, ODataDeserializerContext readContext)
+            {
+                string valueString = oDataValue as string;
+                Contract.Assert(valueString != null);
+
+                if (edmTypeReference.IsNullable && String.Equals(valueString, "null", StringComparison.Ordinal))
+                {
+                    return null;
+                }
+
+                HttpRequestMessage request = readContext.Request;
+                ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings();
+
+                using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(valueString)))
+                {
+                    stream.Seek(0, SeekOrigin.Begin);
+
+                    IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(stream, null,
+                        request.GetODataContentIdMapping());
+                    using (
+                        ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage,
+                            oDataReaderSettings, readContext.Model))
+                    {
+                        request.RegisterForDispose(oDataMessageReader);
+
+                        if (edmTypeReference.IsCollection())
+                        {
+                            return ConvertFeed(oDataMessageReader, edmTypeReference, readContext);
+                        }
+                        else
+                        {
+                            return ConvertEntity(oDataMessageReader, edmTypeReference, readContext);
+                        }
+                    }
+                }
+            }
+
+            internal static object ConvertFeed(ODataMessageReader oDataMessageReader, IEdmTypeReference edmTypeReference, ODataDeserializerContext readContext)
+            {
+                IEdmCollectionTypeReference collectionType = edmTypeReference.AsCollection();
+
+                EdmEntitySet tempEntitySet = new EdmEntitySet(readContext.Model.EntityContainer, "temp",
+                    collectionType.ElementType().AsEntity().EntityDefinition());
+
+                ODataReader odataReader = oDataMessageReader.CreateODataFeedReader(tempEntitySet,
+                    collectionType.ElementType().AsEntity().EntityDefinition());
+                ODataFeedWithEntries feed =
+                    ODataEntityDeserializer.ReadEntryOrFeed(odataReader) as ODataFeedWithEntries;
+
+                ODataFeedDeserializer feedDeserializer =
+                    (ODataFeedDeserializer)DeserializerProvider.GetEdmTypeDeserializer(collectionType);
+
+                object result = feedDeserializer.ReadInline(feed, collectionType, readContext);
+                IEnumerable enumerable = result as IEnumerable;
+                if (enumerable != null)
+                {
+                    IEnumerable newEnumerable = CovertFeedIds(enumerable, feed, collectionType, readContext);
+                    if (readContext.IsUntyped)
+                    {
+                        EdmEntityObjectCollection entityCollection =
+                            new EdmEntityObjectCollection(collectionType);
+                        foreach (EdmEntityObject entity in newEnumerable)
+                        {
+                            entityCollection.Add(entity);
+                        }
+
+                        return entityCollection;
+                    }
+                    else
+                    {
+                        IEdmTypeReference elementTypeReference = collectionType.ElementType();
+
+                        Type elementClrType = EdmLibHelpers.GetClrType(elementTypeReference,
+                            readContext.Model);
+                        IEnumerable castedResult =
+                            CastMethodInfo.MakeGenericMethod(elementClrType)
+                                .Invoke(null, new object[] { newEnumerable }) as IEnumerable;
+                        return castedResult;
+                    }
+                }
+
+                return null;
+            }
+
+            internal static object ConvertEntity(ODataMessageReader oDataMessageReader, IEdmTypeReference edmTypeReference,
+                ODataDeserializerContext readContext)
+            {
+                IEdmEntityTypeReference entityType = edmTypeReference.AsEntity();
+
+                EdmEntitySet tempEntitySet = new EdmEntitySet(readContext.Model.EntityContainer, "temp",
+                    entityType.EntityDefinition());
+
+                ODataReader entryReader = oDataMessageReader.CreateODataEntryReader(tempEntitySet,
+                    entityType.EntityDefinition());
+
+                object item = ODataEntityDeserializer.ReadEntryOrFeed(entryReader);
+
+                ODataEntryWithNavigationLinks topLevelEntry = item as ODataEntryWithNavigationLinks;
+                Contract.Assert(topLevelEntry != null);
+
+                ODataEntityDeserializer entityDeserializer =
+                    (ODataEntityDeserializer)DeserializerProvider.GetEdmTypeDeserializer(entityType);
+                object entity = entityDeserializer.ReadInline(topLevelEntry, entityType, readContext);
+                return CovertEntityId(entity, topLevelEntry.Entry, entityType, readContext);
+            }
+
+            internal static IEnumerable CovertFeedIds(IEnumerable sources, ODataFeedWithEntries feed,
+                IEdmCollectionTypeReference collectionType, ODataDeserializerContext readContext)
+            {
+                IEdmEntityTypeReference entityTypeReference = collectionType.ElementType().AsEntity();
+                int i = 0;
+                foreach (object item in sources)
+                {
+                    object newItem = CovertEntityId(item, feed.Entries[i].Entry, entityTypeReference, readContext);
+                    i++;
+                    yield return newItem;
+                }
+            }
+
+            internal static object CovertEntityId(object source, ODataEntry entry, IEdmEntityTypeReference entityTypeReference, ODataDeserializerContext readContext)
+            {
+                Contract.Assert(entry != null);
+                Contract.Assert(source != null);
+
+                if (entry.Id == null || entry.Properties.Any())
+                {
+                    return source;
+                }
+
+                HttpRequestMessage request = readContext.Request;
+                IEdmModel edmModel = readContext.Model;
+
+                DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
+                string serviceRoot = GetServiceRoot(request);
+                IDictionary<string, string> keyValues = GetKeys(pathHandler, edmModel, serviceRoot, entry.Id);
+
+                IList<IEdmStructuralProperty> keys = entityTypeReference.Key().ToList();
+
+                if (keys.Count == 1 && keyValues.Count == 1)
+                {
+                    object propertyValue = ODataUriUtils.ConvertFromUriLiteral(keyValues.First().Value, ODataVersion.V4, edmModel, keys[0].Type);
+                    DeserializationHelpers.SetDeclaredProperty(source, EdmTypeKind.Primitive, keys[0].Name, propertyValue, keys[0], readContext);
+                    return source;
+                }
+
+                foreach (IEdmStructuralProperty key in keys)
+                {
+                    string value;
+                    if (keyValues.TryGetValue(key.Name, out value))
+                    {
+                        object propertyValue = ODataUriUtils.ConvertFromUriLiteral(value, ODataVersion.V4, edmModel, key.Type);
+
+                        DeserializationHelpers.SetDeclaredProperty(source, EdmTypeKind.Primitive, key.Name, propertyValue, key, readContext);
+                    }
+                }
+
+                return source;
+            }
+
+            internal static string GetServiceRoot(HttpRequestMessage request)
+            {
+                return request.GetUrlHelper().CreateODataLink(
+                    request.ODataProperties().RouteName,
+                    request.ODataProperties().PathHandler, new List<ODataPathSegment>());
+            }
+
+            internal static IDictionary<string, string> GetKeys(DefaultODataPathHandler pathHandler, IEdmModel edmModel, string serviceRoot, Uri uri)
+            {
+                ODataPath odataPath = pathHandler.Parse(edmModel, serviceRoot, uri.ToString());
+                KeyValuePathSegment segment = odataPath.Segments.OfType<KeyValuePathSegment>().Last();
+                if (segment == null)
+                {
+                    throw Error.InvalidOperation(SRResources.EntityReferenceMustHasKeySegment, uri);
+                }
+
+                return segment.Values;
+            }
+
+            internal static ODataDeserializerContext BuildDeserializerContext(HttpActionContext actionContext,
+                ModelBindingContext bindingContext, IEdmTypeReference edmTypeReference)
+            {
+                HttpRequestMessage request = actionContext.Request;
+                ODataPath path = request.ODataProperties().Path;
+                IEdmModel edmModel = request.ODataProperties().Model;
+
+                return new ODataDeserializerContext
+                {
+                    Path = path,
+                    Model = edmModel,
+                    Request = request,
+                    ResourceType = bindingContext.ModelType,
+                    ResourceEdmType = edmTypeReference,
+                    RequestContext = request.GetRequestContext()
+                };
             }
 
             internal static object ConvertTo(string valueString, Type type)
@@ -129,7 +448,7 @@ namespace System.Web.OData.Formatter
 
                     Type enumType = TypeHelper.GetUnderlyingTypeOrSelf(type);
                     object[] parameters = new[] { valueString, Enum.ToObject(enumType, 0) };
-                    bool isSuccessful = (bool)enumTryParseMethod.MakeGenericMethod(enumType).Invoke(null, parameters);
+                    bool isSuccessful = (bool)EnumTryParseMethod.MakeGenericMethod(enumType).Invoke(null, parameters);
 
                     if (!isSuccessful)
                     {

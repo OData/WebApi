@@ -31,7 +31,7 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void GetBinding_ThrowsForNonPrimitives()
+        public void GetBinding_DoesnotThrowForNonPrimitives()
         {
             HttpConfiguration config = new HttpConfiguration();
             Type parameterType = typeof(FormatterOrder);
@@ -41,10 +41,7 @@ namespace System.Web.OData
             parameter.Configuration = config;
             parameter.ParameterInfo = parameterInfoMock.Object;
 
-            Assert.ThrowsArgument(
-                () => new FromODataUriAttribute().GetBinding(parameter),
-                "parameter",
-                "Type 'System.Web.OData.Formatter.FormatterOrder' is not a valid EDM primitive. The [FromODataUri] attribute can only be used on parameters with types that correspond to EDM primitives.");
+            Assert.DoesNotThrow(() => new FromODataUriAttribute().GetBinding(parameter));
         }
     }
 }

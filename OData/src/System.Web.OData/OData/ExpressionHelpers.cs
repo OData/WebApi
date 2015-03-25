@@ -13,10 +13,11 @@ namespace System.Web.OData
 {
     internal static class ExpressionHelpers
     {
-        public static long Count(IQueryable query, Type type)
+        public static Func<long> Count(IQueryable query, Type type)
         {
             MethodInfo countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(type);
-            return (long)countMethod.Invoke(null, new object[] { query });
+            Expression<Func<long>> func = Expression.Lambda<Func<long>>(Expression.Call(null, countMethod, query.Expression));
+            return func.Compile();
         }
 
         public static IQueryable Skip(IQueryable query, int count, Type type, bool parameterize)

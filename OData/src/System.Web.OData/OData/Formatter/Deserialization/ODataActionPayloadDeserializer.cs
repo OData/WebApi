@@ -1,10 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Properties;
@@ -19,6 +22,8 @@ namespace System.Web.OData.Formatter.Deserialization
     /// </summary>
     public class ODataActionPayloadDeserializer : ODataDeserializer
     {
+        private static readonly MethodInfo _castMethodInfo = typeof(Enumerable).GetMethod("Cast");
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataActionPayloadDeserializer"/> class.
         /// </summary>
@@ -40,6 +45,8 @@ namespace System.Web.OData.Formatter.Deserialization
         public ODataDeserializerProvider DeserializerProvider { get; private set; }
 
         /// <inheritdoc />
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",
+            Justification = "The majority of types referenced by this method are EdmLib types this method needs to know about to operate correctly")]
         public override object Read(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
         {
             if (messageReader == null)
@@ -98,7 +105,59 @@ namespace System.Web.OData.Formatter.Deserialization
                         payload[parameterName] = collectionDeserializer.ReadInline(value, collectionType, readContext);
                         break;
 
-                    default:
+                    case ODataParameterReaderState.Entry:
+                        parameterName = reader.Name;
+                        parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
+                        Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
+
+                        IEdmEntityTypeReference entityTypeReference = parameter.Type as IEdmEntityTypeReference;
+                        Contract.Assert(entityTypeReference != null);
+
+                        ODataReader entryReader = reader.CreateEntryReader();
+                        object item = ODataEntityDeserializer.ReadEntryOrFeed(entryReader);
+                        ODataEntityDeserializer entityDeserializer = (ODataEntityDeserializer)DeserializerProvider.GetEdmTypeDeserializer(entityTypeReference);
+                        payload[parameterName] = entityDeserializer.ReadInline(item, entityTypeReference, readContext);
+                        break;
+
+                    case ODataParameterReaderState.Feed:
+                        parameterName = reader.Name;
+                        parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
+                        Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
+
+                        IEdmCollectionTypeReference feedType = parameter.Type as IEdmCollectionTypeReference;
+                        Contract.Assert(feedType != null);
+
+                        ODataReader feedReader = reader.CreateFeedReader();
+                        object feed = ODataEntityDeserializer.ReadEntryOrFeed(feedReader);
+                        ODataFeedDeserializer feedDeserializer = (ODataFeedDeserializer)DeserializerProvider.GetEdmTypeDeserializer(feedType);
+
+                        object result = feedDeserializer.ReadInline(feed, feedType, readContext);
+
+                        IEdmTypeReference elementTypeReference = feedType.ElementType();
+                        Contract.Assert(elementTypeReference.IsEntity());
+
+                        IEnumerable enumerable = result as IEnumerable;
+                        if (enumerable != null)
+                        {
+                            if (readContext.IsUntyped)
+                            {
+                                EdmEntityObjectCollection entityCollection = new EdmEntityObjectCollection(feedType);
+                                foreach (EdmEntityObject entityObject in enumerable)
+                                {
+                                    entityCollection.Add(entityObject);
+                                }
+
+                                payload[parameterName] = entityCollection;
+                            }
+                            else
+                            {
+                                Type elementClrType = EdmLibHelpers.GetClrType(elementTypeReference, readContext.Model);
+                                IEnumerable castedResult =
+                                    _castMethodInfo.MakeGenericMethod(elementClrType)
+                                        .Invoke(null, new[] { result }) as IEnumerable;
+                                payload[parameterName] = castedResult;
+                            }
+                        }
                         break;
                 }
             }

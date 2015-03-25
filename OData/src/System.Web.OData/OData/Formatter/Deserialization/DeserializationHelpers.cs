@@ -54,19 +54,15 @@ namespace System.Web.OData.Formatter.Deserialization
         internal static void SetDynamicProperty(object resource, IEdmStructuredTypeReference resourceType,
             EdmTypeKind propertyKind, string propertyName, object propertyValue, IEdmTypeReference propertyType,
             ODataDeserializerContext readContext)
-        {
-            if (propertyKind == EdmTypeKind.Collection)
+        {  
+            if (propertyKind == EdmTypeKind.Collection && propertyValue.GetType() != typeof(EdmComplexObjectCollection)
+                && propertyValue.GetType() != typeof(EdmEnumObjectCollection))
             {
                 SetDynamicCollectionProperty(resource, propertyName, propertyValue, propertyType.AsCollection(),
                     resourceType.StructuredDefinition(), readContext);
             }
             else
             {
-                if (propertyKind == EdmTypeKind.Enum)
-                {
-                    propertyValue = ConvertDynamicEnumValue(propertyValue, readContext);
-                }
-
                 SetDynamicProperty(resource, propertyName, propertyValue, resourceType.StructuredDefinition(),
                     readContext);
             }
@@ -86,11 +82,6 @@ namespace System.Web.OData.Formatter.Deserialization
                     if (propertyKind == EdmTypeKind.Primitive)
                     {
                         propertyValue = EdmPrimitiveHelpers.ConvertPrimitiveValue(propertyValue,
-                            GetPropertyType(resource, propertyName));
-                    }
-                    else if (propertyKind == EdmTypeKind.Enum)
-                    {
-                        propertyValue = EnumDeserializationHelpers.ConvertEnumValue(propertyValue,
                             GetPropertyType(resource, propertyName));
                     }
                 }
@@ -255,22 +246,21 @@ namespace System.Web.OData.Formatter.Deserialization
                 return ConvertComplexValue(complexValue, ref propertyType, deserializerProvider, readContext);
             }
 
+            ODataEnumValue enumValue = oDataValue as ODataEnumValue;
+            if (enumValue != null)
+            {
+                typeKind = EdmTypeKind.Enum;
+                return ConvertEnumValue(enumValue, ref propertyType, deserializerProvider, readContext);
+            }
+
             ODataCollectionValue collection = oDataValue as ODataCollectionValue;
             if (collection != null)
             {
                 typeKind = EdmTypeKind.Collection;
                 return ConvertCollectionValue(collection, ref propertyType, deserializerProvider, readContext);
             }
-
-            if (oDataValue is ODataEnumValue)
-            {
-                typeKind = EdmTypeKind.Enum;
-            }
-            else
-            {
-                typeKind = EdmTypeKind.Primitive;
-            }
-
+            
+            typeKind = EdmTypeKind.Primitive;
             return oDataValue;
         }
 
@@ -379,30 +369,28 @@ namespace System.Web.OData.Formatter.Deserialization
             return deserializer.ReadInline(collection, collectionType, readContext);
         }
 
-        private static object ConvertDynamicEnumValue(object value, ODataDeserializerContext readContext)
+        private static object ConvertEnumValue(ODataEnumValue enumValue, ref IEdmTypeReference propertyType,
+            ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
-            Contract.Assert(value != null);
-            Contract.Assert(readContext != null);
-            Contract.Assert(readContext.Model != null);
-
-            ODataEnumValue enumValue = value as ODataEnumValue;
-            Contract.Assert(enumValue != null);
-
-            IEdmType edmType = readContext.Model.FindType(enumValue.TypeName);
-            Contract.Assert(edmType != null);
-
-            if (!readContext.IsUntyped)
+            IEdmEnumTypeReference edmEnumType;
+            if (propertyType == null)
             {
-                Type enumType = EdmLibHelpers.GetClrType(edmType, readContext.Model);
-                return Enum.Parse(enumType, enumValue.Value);
+                // dynamic enum property
+                Contract.Assert(!String.IsNullOrEmpty(enumValue.TypeName),
+                    "ODataLib should have verified that dynamic enum value has a type name since we provided metadata.");
+                IEdmModel model = readContext.Model;
+                IEdmType edmType = model.FindType(enumValue.TypeName);
+                Contract.Assert(edmType.TypeKind == EdmTypeKind.Enum, "ODataLib should have verified that enum value has a enum resource type.");
+                edmEnumType = new EdmEnumTypeReference(edmType as IEdmEnumType, isNullable: true);
+                propertyType = edmEnumType;
             }
             else
             {
-                // TODO: https://aspnetwebstack.codeplex.com/workitem/1956:
-                // Enum (de)serialization on un-type doesn't work
-                // Currently, just return the "string" value of the ODataEnumValue for untype enum type.
-                return enumValue.Value;
+                edmEnumType = propertyType.AsEnum();
             }
+
+            ODataEdmTypeDeserializer deserializer = deserializerProvider.GetEdmTypeDeserializer(edmEnumType);
+            return deserializer.ReadInline(enumValue, propertyType, readContext);
         }
 
         // The same logic from ODL to get the element type name in a collection.

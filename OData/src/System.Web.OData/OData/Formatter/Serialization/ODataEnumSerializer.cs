@@ -81,6 +81,13 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 value = graph.ToString();
             }
+            else
+            {
+                if (graph.GetType() == typeof(EdmEnumObject))
+                {
+                    value = ((EdmEnumObject)graph).Value;
+                }
+            }
 
             ODataEnumValue enumValue = new ODataEnumValue(value, enumType.FullName());
 

@@ -30,7 +30,7 @@ namespace System.Web.OData.Query
             var openPropertyExpression = orderByClause.Expression as SingleValueOpenPropertyAccessNode;
             if (openPropertyExpression == null)
             {
-                throw new ODataException(String.Format(SRResources.OrderByClauseNotSupported, orderByClause.Expression));
+                throw new ODataException(SRResources.OrderByClauseNotSupported);
             }
             PropertyName = openPropertyExpression.Name;
         }

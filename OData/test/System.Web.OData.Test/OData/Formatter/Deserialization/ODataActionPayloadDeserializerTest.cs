@@ -128,6 +128,29 @@ namespace System.Web.OData.Formatter.Deserialization
                 };
             }
         }
+        public static TheoryDataSet<string, IEdmAction, ODataPath> DeserializeWithEnumParametersTest
+        {
+            get
+            {
+                return new TheoryDataSet<string, IEdmAction, ODataPath>
+                {
+                    {"Enum", GetBoundAction("Enum"), CreateBoundPath("Enum") },
+                    {"UnboundEnum", GetUnboundAction("UnboundEnum"), CreateUnboundPath("UnboundEnum")}
+                };
+            }
+        }
+
+        public static TheoryDataSet<IEdmAction, ODataPath> DeserializeWithEntityParametersTest
+        {
+            get
+            {
+                return new TheoryDataSet<IEdmAction, ODataPath>
+                {
+                    { GetBoundAction("Entity"), CreateBoundPath("Entity") },
+                    { GetUnboundAction("UnboundEntity"), CreateUnboundPath("UnboundEntity")}
+                };
+            }
+        }
 
         public static TheoryDataSet<string, IEdmAction, ODataPath> DeserializeWithPrimitiveCollectionsTest
         {
@@ -152,6 +175,29 @@ namespace System.Web.OData.Formatter.Deserialization
                 };
             }
         }
+        public static TheoryDataSet<string, IEdmAction, ODataPath> DeserializeWithEnumCollectionsTest
+        {
+            get
+            {
+                return new TheoryDataSet<string, IEdmAction, ODataPath>
+                {
+                    {"EnumCollection", GetBoundAction("EnumCollection"), CreateBoundPath("EnumCollection") },
+                    {"UnboundEnumCollection", GetUnboundAction("UnboundEnumCollection"), CreateUnboundPath("UnboundEnumCollection")}
+                };
+            }
+        }
+
+        public static TheoryDataSet<IEdmAction, ODataPath> DeserializeWithEntityCollectionsTest
+        {
+            get
+            {
+                return new TheoryDataSet<IEdmAction, ODataPath>
+                {
+                    { GetBoundAction("EntityCollection"), CreateBoundPath("EntityCollection") },
+                    { GetUnboundAction("UnboundEntityCollection"), CreateUnboundPath("UnboundEntityCollection")}
+                };
+            }
+        }
 
         [Theory]
         [PropertyData("DeserializeWithPrimitiveParametersTest")]
@@ -161,7 +207,7 @@ namespace System.Web.OData.Formatter.Deserialization
             const int Quantity = 1;
             const string ProductCode = "PCode";
             string body = "{" +
-                string.Format(@" ""Quantity"": {0} , ""ProductCode"": ""{1}"" , ""Birthday"": ""2015-02-27"" ", Quantity, ProductCode) +
+                string.Format(@" ""Quantity"": {0} , ""ProductCode"": ""{1}"" , ""Birthday"": ""2015-02-27"", ""BkgColor"": ""Red"", ""InnerColor"": null", Quantity, ProductCode) +
                 "}";
 
             ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(body));
@@ -183,6 +229,13 @@ namespace System.Web.OData.Formatter.Deserialization
 
             Assert.True(payload.ContainsKey("Birthday"));
             Assert.Equal(new Date(2015, 2, 27), payload["Birthday"]);
+
+            Assert.True(payload.ContainsKey("BkgColor"));
+            AColor bkgColor = Assert.IsType<AColor>(payload["BkgColor"]);
+            Assert.Equal(AColor.Red, bkgColor);
+
+            Assert.True(payload.ContainsKey("InnerColor"));
+            Assert.Null(payload["InnerColor"]);
         }
 
         [Theory]
@@ -280,6 +333,31 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         [Theory]
+        [PropertyData("DeserializeWithEnumCollectionsTest")]
+        public void Can_DeserializePayload_WithEnumCollections_InUntypedMode(string actionName, IEdmAction expectedAction, ODataPath path)
+        {
+            // Arrange
+            const string Body = @"{ ""Colors"": [ ""Red"", ""Green""] }";
+            ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(Body));
+            message.SetHeader("Content-Type", "application/json");
+
+            ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), _model);
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = _model, ResourceType = typeof(ODataUntypedActionParameters) };
+
+            // Act
+            ODataUntypedActionParameters payload = _deserializer.Read(reader, typeof(ODataUntypedActionParameters), context) as ODataUntypedActionParameters;
+
+            // Assert
+            Assert.Same(expectedAction, payload.Action);
+            Assert.NotNull(payload);
+            Assert.True(payload.ContainsKey("Colors"));
+            EdmEnumObjectCollection colors = payload["Colors"] as EdmEnumObjectCollection;
+            EdmEnumObject color = colors[0] as EdmEnumObject;
+            Assert.NotNull(color);
+            Assert.Equal("Red", color.Value);
+        }
+
+        [Theory]
         [PropertyData("DeserializeWithComplexParametersTest")]
         public void Can_DeserializePayload_WithComplexParameters_InUntypedMode(string actionName, IEdmAction expectedAction, ODataPath path)
         {
@@ -311,12 +389,38 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         [Theory]
+        [PropertyData("DeserializeWithEnumParametersTest")]
+        public void Can_DeserializePayload_WithEnumParameters_InUntypedMode(string actionName, IEdmAction expectedAction, ODataPath path)
+        {
+            // Arrange
+            const string Body = @"{ ""Color"": ""Red""}";
+            ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(Body));
+            message.SetHeader("Content-Type", "application/json");
+
+            ODataMessageReaderSettings settings = new ODataMessageReaderSettings();
+            ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, settings, _model);
+
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = _model, ResourceType = typeof(ODataUntypedActionParameters) };
+
+            // Act
+            ODataUntypedActionParameters payload = _deserializer.Read(reader, typeof(ODataUntypedActionParameters), context) as ODataUntypedActionParameters;
+
+            // Assert
+            Assert.NotNull(payload);
+            Assert.Same(expectedAction, payload.Action);
+            Assert.True(payload.ContainsKey("Color"));
+            EdmEnumObject color = payload["Color"] as EdmEnumObject;
+            Assert.IsType<EdmEnumObject>(color);
+            Assert.Equal("Red", color.Value);
+        }
+
+        [Theory]
         [PropertyData("DeserializeWithPrimitiveCollectionsTest")]
         public void Can_DeserializePayload_WithPrimitiveCollectionParameters(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
             const string Body =
-                @"{ ""Name"": ""Avatar"", ""Ratings"": [ 5, 5, 3, 4, 5, 5, 4, 5, 5, 4 ], ""Time"": [""01:02:03.0040000"", ""12:13:14.1150000""] }";
+                @"{ ""Name"": ""Avatar"", ""Ratings"": [ 5, 5, 3, 4, 5, 5, 4, 5, 5, 4 ], ""Time"": [""01:02:03.0040000"", ""12:13:14.1150000""], ""Colors"": [ ""Red"", null, ""Green""] }";
             int[] expectedRatings = new int[] { 5, 5, 3, 4, 5, 5, 4, 5, 5, 4 };
 
             ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(Body));
@@ -343,6 +447,10 @@ namespace System.Web.OData.Formatter.Deserialization
             IEnumerable<TimeOfDay> times = payload["Time"] as IEnumerable<TimeOfDay>;
             Assert.Equal(2, times.Count());
             Assert.Equal(new[] {new TimeOfDay(1, 2, 3, 4), new TimeOfDay(12, 13, 14, 115) }, times.ToList());
+
+            Assert.True(payload.ContainsKey("Colors"));
+            IEnumerable<AColor?> colors = payload["Colors"] as IEnumerable<AColor?>;
+            Assert.Equal("Red|null|Green", String.Join("|", colors.Select(e => e == null ? "null" : e.ToString())));
         }
 
         [Theory]
@@ -373,6 +481,150 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Equal("Redmond", address.City);
             Assert.Equal("WA", address.State);
             Assert.Equal(98052, address.ZipCode);
+        }
+
+        private const string EntityPayload = 
+            "{" +
+                "\"Id\": 1, " +
+                "\"Customer\": {\"@odata.type\":\"#System.Web.OData.TestCommon.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" } " +
+                // null can't work here, see: https://github.com/OData/odata.net/issues/99
+                // ",\"NullableCustomer\" : null " +  //
+            "}";
+
+        [Theory]
+        [PropertyData("DeserializeWithEntityParametersTest")]
+        public void Can_DeserializePayload_WithEntityParameters(IEdmAction expectedAction, ODataPath path)
+        {
+            // Arrange
+            ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(EntityPayload));
+            message.SetHeader("Content-Type", "application/json");
+            ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), _model);
+            ODataDeserializerContext context = new ODataDeserializerContext() { Path = path, Model = _model };
+
+            // Act
+            ODataActionParameters payload = _deserializer.Read(reader, typeof(ODataActionParameters), context) as ODataActionParameters;
+            IEdmAction action = ODataActionPayloadDeserializer.GetAction(context);
+
+            // Assert
+            Assert.Same(expectedAction, action);
+            Assert.NotNull(payload);
+            Assert.True(payload.ContainsKey("Id"));
+            Assert.Equal(1, payload["Id"]);
+
+            Assert.True(payload.ContainsKey("Customer"));
+            Customer customer = payload["Customer"] as Customer;
+            Assert.NotNull(customer);
+            Assert.Equal(109, customer.Id);
+            Assert.Equal("Avatar", customer.Name);
+
+            Assert.False(payload.ContainsKey("NullableCustomer"));
+        }
+
+        [Theory]
+        [PropertyData("DeserializeWithEntityParametersTest")]
+        public void Can_DeserializePayload_WithEntityParameters_InUntypedMode(IEdmAction expectedAction, ODataPath path)
+        {
+            // Arrange
+            ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(EntityPayload));
+            message.SetHeader("Content-Type", "application/json");
+            ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), _model);
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = _model, ResourceType = typeof(ODataUntypedActionParameters) };
+
+            // Act
+            ODataUntypedActionParameters payload = _deserializer.Read(reader, typeof(ODataUntypedActionParameters), context) as ODataUntypedActionParameters;
+
+            // Assert
+            Assert.NotNull(payload);
+            Assert.Same(expectedAction, payload.Action);
+
+            Assert.True(payload.ContainsKey("Id"));
+            Assert.Equal(1, payload["Id"]);
+
+            Assert.True(payload.ContainsKey("Customer"));
+            dynamic customer = payload["Customer"] as EdmEntityObject;
+            Assert.IsType<EdmEntityObject>(customer);
+
+            Assert.Equal(109, customer.Id);
+            Assert.Equal("Avatar", customer.Name);
+
+            Assert.False(payload.ContainsKey("NullableCustomer"));
+        }
+
+        private const string EntityCollectionPayload = 
+            "{" +
+                "\"Id\": 1, " +
+                "\"Customers\": [" +
+                    "{\"@odata.type\":\"#System.Web.OData.TestCommon.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" }, " +
+                    // null can't work. see: https://github.com/OData/odata.net/issues/100
+                    // "null," +
+                    "{\"@odata.type\":\"#System.Web.OData.TestCommon.Models.Customer\", \"Id\":901,\"Name\":\"Robot\" } " +
+                 "]" +
+            "}";
+
+        [Theory]
+        [PropertyData("DeserializeWithEntityCollectionsTest")]
+        public void Can_DeserializePayload_WithEntityCollectionParameters(IEdmAction expectedAction, ODataPath path)
+        {
+            // Arrange
+            ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(EntityCollectionPayload));
+            message.SetHeader("Content-Type", "application/json");
+            ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), _model);
+            ODataDeserializerContext context = new ODataDeserializerContext() { Path = path, Model = _model };
+
+            // Act
+            ODataActionParameters payload = _deserializer.Read(reader, typeof(ODataActionParameters), context) as ODataActionParameters;
+            IEdmAction action = ODataActionPayloadDeserializer.GetAction(context);
+
+            // Assert
+            Assert.Same(expectedAction, action);
+            Assert.NotNull(payload);
+            Assert.True(payload.ContainsKey("Id"));
+            Assert.Equal(1, payload["Id"]);
+
+            IList<Customer> customers = (payload["Customers"] as IEnumerable<Customer>).ToList();
+            Assert.NotNull(customers);
+            Assert.Equal(2, customers.Count);
+            Customer customer = customers[0];
+            Assert.NotNull(customer);
+            Assert.Equal(109, customer.Id);
+            Assert.Equal("Avatar", customer.Name);
+
+            customer = customers[1];
+            Assert.NotNull(customer);
+            Assert.Equal(901, customer.Id);
+            Assert.Equal("Robot", customer.Name);
+        }
+
+        [Theory]
+        [PropertyData("DeserializeWithEntityCollectionsTest")]
+        public void Can_DeserializePayload_WithEntityCollectionParameters_InUntypedMode(IEdmAction expectedAction, ODataPath path)
+        {
+            // Arrange
+            ODataMessageWrapper message = new ODataMessageWrapper(GetStringAsStream(EntityCollectionPayload));
+            message.SetHeader("Content-Type", "application/json");
+            ODataMessageReader reader = new ODataMessageReader(message as IODataRequestMessage, new ODataMessageReaderSettings(), _model);
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = _model, ResourceType = typeof(ODataUntypedActionParameters) };
+
+            // Act
+            ODataUntypedActionParameters payload = _deserializer.Read(reader, typeof(ODataUntypedActionParameters), context) as ODataUntypedActionParameters;
+
+            // Assert
+            Assert.Same(expectedAction, payload.Action);
+            Assert.NotNull(payload);
+            Assert.True(payload.ContainsKey("Id"));
+            Assert.Equal(1, payload["Id"]);
+
+            IEnumerable<IEdmObject> customers = payload["Customers"] as EdmEntityObjectCollection;
+            Assert.Equal(2, customers.Count());
+            dynamic customer = customers.First();
+            Assert.NotNull(customer);
+            Assert.Equal(109, customer.Id);
+            Assert.Equal("Avatar", customer.Name);
+
+            customer = customers.Last();
+            Assert.NotNull(customer);
+            Assert.Equal(901, customer.Id);
+            Assert.Equal("Robot", customer.Name);
         }
 
         [Theory]
@@ -437,38 +689,74 @@ namespace System.Web.OData.Formatter.Deserialization
             primitive.Parameter<int>("Quantity");
             primitive.Parameter<string>("ProductCode");
             primitive.Parameter<Date>("Birthday");
+            primitive.Parameter<AColor>("BkgColor");
+            primitive.Parameter<AColor?>("InnerColor");
 
             ActionConfiguration complex = customer.Action("Complex");
             complex.Parameter<int>("Quantity");
             complex.Parameter<MyAddress>("Address");
 
+            ActionConfiguration enumType = customer.Action("Enum");
+            enumType.Parameter<AColor>("Color");
+
             ActionConfiguration primitiveCollection = customer.Action("PrimitiveCollection");
             primitiveCollection.Parameter<string>("Name");
             primitiveCollection.CollectionParameter<int>("Ratings");
             primitiveCollection.CollectionParameter<TimeOfDay>("Time");
+            primitiveCollection.CollectionParameter<AColor?>("Colors");
 
             ActionConfiguration complexCollection = customer.Action("ComplexCollection");
             complexCollection.Parameter<string>("Name");
             complexCollection.CollectionParameter<MyAddress>("Addresses");
+
+            ActionConfiguration enumCollection = customer.Action("EnumCollection");
+            enumCollection.CollectionParameter<AColor>("Colors");
+
+            ActionConfiguration entity = customer.Action("Entity");
+            entity.Parameter<int>("Id");
+            entity.EntityParameter<Customer>("Customer");
+            entity.EntityParameter<Customer>("NullableCustomer");
+
+            ActionConfiguration entityCollection = customer.Action("EntityCollection");
+            entityCollection.Parameter<int>("Id");
+            entityCollection.CollectionEntityParameter<Customer>("Customers");
 
             // unbound actions
             ActionConfiguration unboundPrimitive = builder.Action("UnboundPrimitive");
             unboundPrimitive.Parameter<int>("Quantity");
             unboundPrimitive.Parameter<string>("ProductCode");
             unboundPrimitive.Parameter<Date>("Birthday");
+            unboundPrimitive.Parameter<AColor>("BkgColor");
+            unboundPrimitive.Parameter<AColor?>("InnerColor");
 
             ActionConfiguration unboundComplex = builder.Action("UnboundComplex");
             unboundComplex.Parameter<int>("Quantity");
             unboundComplex.Parameter<MyAddress>("Address");
 
+            ActionConfiguration unboundEnum = builder.Action("UnboundEnum");
+            unboundEnum.Parameter<AColor>("Color");
+
             ActionConfiguration unboundPrimitiveCollection = builder.Action("UnboundPrimitiveCollection");
             unboundPrimitiveCollection.Parameter<string>("Name");
             unboundPrimitiveCollection.CollectionParameter<int>("Ratings");
             unboundPrimitiveCollection.CollectionParameter<TimeOfDay>("Time");
+            unboundPrimitiveCollection.CollectionParameter<AColor?>("Colors");
 
             ActionConfiguration unboundComplexCollection = builder.Action("UnboundComplexCollection");
             unboundComplexCollection.Parameter<string>("Name");
             unboundComplexCollection.CollectionParameter<MyAddress>("Addresses");
+
+            ActionConfiguration unboundEnumCollection = builder.Action("UnboundEnumCollection");
+            unboundEnumCollection.CollectionParameter<AColor>("Colors");
+
+            ActionConfiguration unboundEntity = builder.Action("UnboundEntity");
+            unboundEntity.Parameter<int>("Id");
+            unboundEntity.EntityParameter<Customer>("Customer").OptionalParameter = false;
+            unboundEntity.EntityParameter<Customer>("NullableCustomer");
+
+            ActionConfiguration unboundEntityCollection = builder.Action("UnboundEntityCollection");
+            unboundEntityCollection.Parameter<int>("Id");
+            unboundEntityCollection.CollectionEntityParameter<Customer>("Customers");
 
             return builder.GetEdmModel();
         }
@@ -486,6 +774,13 @@ namespace System.Web.OData.Formatter.Deserialization
         private class DerivedODataActionParameters : ODataActionParameters
         {
         }
+    }
+
+    public enum AColor
+    {
+        Red,
+        Blue,
+        Green
     }
 
     public class MyAddress

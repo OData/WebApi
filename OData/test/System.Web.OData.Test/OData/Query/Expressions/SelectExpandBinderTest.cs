@@ -494,6 +494,97 @@ namespace System.Web.OData.Query.Expressions
         }
 
         [Fact]
+        public void CreatePropertyValueExpressionWithFilter_ThrowsODataException_IfMappingTypeIsNotFoundInModel()
+        {
+            // Arrange
+            _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.Order, value: null);
+            var customer = Expression.Constant(new Customer());
+            var ordersProperty = _model.Customer.NavigationProperties().Single(p => p.Name == "Orders");
+            var parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Order,
+                _model.Orders,
+                new Dictionary<string, string> { { "$filter", "ID eq 1" } });
+            var filterCaluse = parser.ParseFilter();
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => _binder.CreatePropertyValueExpressionWithFilter(_model.Customer, ordersProperty, customer, filterCaluse),
+                "The provided mapping does not contain an entry for the entity type 'NS.Order'.");
+        }
+
+        [Fact]
+        public void CreatePropertyValueExpressionWithFilter_Works_HandleNullPropagationOptionIsTrue()
+        {
+            // Arrange
+            _model.Model.SetAnnotationValue(_model.Order, new ClrTypeAnnotation(typeof(Order)));
+            _settings.HandleNullPropagation = HandleNullPropagationOption.True;
+            var customer =
+                Expression.Constant(new Customer { Orders = new[] { new Order { ID = 1 }, new Order { ID = 2 } } });
+            var ordersProperty = _model.Customer.NavigationProperties().Single(p => p.Name == "Orders");
+            var parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Order,
+                _model.Orders,
+                new Dictionary<string, string> { { "$filter", "ID eq 1" } });
+            var filterCaluse = parser.ParseFilter();
+
+            // Act
+            var filterInExpand = _binder.CreatePropertyValueExpressionWithFilter(
+                _model.Customer,
+                ordersProperty,
+                customer,
+                filterCaluse);
+
+            // Assert
+            Assert.Equal(
+                string.Format(
+                    "IIF((value({0}) == null), null, IIF((value({0}).Orders == null), null, " +
+                    "value({0}).Orders.AsQueryable().Where($it => ($it.ID == value({1}).TypedProperty))))",
+                    customer.Type,
+                    "System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]"),
+                filterInExpand.ToString());
+            var orders = Expression.Lambda(filterInExpand).Compile().DynamicInvoke() as IEnumerable<Order>;
+            Assert.Single(orders);
+            Assert.Equal(1, orders.ToList()[0].ID);
+        }
+
+        [Fact]
+        public void CreatePropertyValueExpressionWithFilter_Works_HandleNullPropagationOptionIsFalse()
+        {
+            // Arrange
+            _model.Model.SetAnnotationValue(_model.Order, new ClrTypeAnnotation(typeof(Order)));
+            _settings.HandleNullPropagation = HandleNullPropagationOption.False;
+            var customer =
+                Expression.Constant(new Customer { Orders = new[] { new Order { ID = 1 }, new Order { ID = 2 } } });
+            var ordersProperty = _model.Customer.NavigationProperties().Single(p => p.Name == "Orders");
+            var parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Order,
+                _model.Orders,
+                new Dictionary<string, string> { { "$filter", "ID eq 1" } });
+            var filterCaluse = parser.ParseFilter();
+
+            // Act
+            var filterInExpand = _binder.CreatePropertyValueExpressionWithFilter(
+                _model.Customer,
+                ordersProperty,
+                customer,
+                filterCaluse);
+
+            // Assert
+            Assert.Equal(
+                string.Format(
+                    "value({0}).Orders.AsQueryable().Where($it => ($it.ID == value(" +
+                    "System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]).TypedProperty))",
+                    customer.Type),
+                filterInExpand.ToString());
+            var orders = Expression.Lambda(filterInExpand).Compile().DynamicInvoke() as IEnumerable<Order>;
+            Assert.Single(orders);
+            Assert.Equal(1, orders.ToList()[0].ID);
+        }
+
+        [Fact]
         public void CreateTypeNameExpression_ReturnsNull_IfTypeHasNoDerivedTypes()
         {
             // Arrange

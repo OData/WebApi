@@ -7,7 +7,6 @@ using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.ValueProviders;
 using System.Web.OData.Formatter;
-using System.Web.OData.Properties;
 
 namespace System.Web.OData
 {
@@ -34,13 +33,8 @@ namespace System.Web.OData
             }
 
             IModelBinder binder = _provider.GetBinder(parameter.Configuration, parameter.ParameterType);
-            if (binder == null)
-            {
-                throw Error.Argument("parameter", SRResources.FromODataUriRequiresPrimitive, parameter.ParameterType.FullName);
-            }
-
             IEnumerable<ValueProviderFactory> valueProviderFactories = GetValueProviderFactories(parameter.Configuration);
-            return new ModelBinderParameterBinding(parameter, binder, valueProviderFactories); 
+            return new ModelBinderParameterBinding(parameter, binder, valueProviderFactories);
         }
     }
 }

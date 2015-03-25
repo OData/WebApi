@@ -106,6 +106,36 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
+        public async Task AttributeRouting_TopFunctionWithComplexParameter()
+        {
+            // Arrange
+            string requestUri = "http://localhost/ComplexFunction(address=@p)?@p={\"@odata.type\":\"%23System.Web.OData.Routing.ConventionAddress\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\",\"ZipCode\":\"911\"}";
+
+            // Act
+            var response = await _client.GetAsync(requestUri);
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Contains("911", responseString);
+        }
+
+        [Fact]
+        public async Task AttributeRouting_TopFunctionWithEntityParameter()
+        {
+            // Arrange
+            string requestUri = "http://localhost/EntityFunction(order=@p)?@p={\"@odata.type\":\"%23System.Web.OData.Routing.ConventionOrder\",\"Price\":9.9}";
+
+            // Act
+            var response = await _client.GetAsync(requestUri);
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Contains("9.9", responseString);
+        }
+
+        [Fact]
         public async Task AttriubteRouting_TopActionWithoutParametersOnPrimitiveType()
         {
             // Arrange
@@ -195,6 +225,16 @@ namespace System.Web.OData.Routing
             getOrder.Parameter<string>("OrderName");
             getOrder.ReturnsFromEntitySet<ConventionOrder>("ConventionOrders");
 
+            // Top level function import with complex parameter
+            FunctionConfiguration complexFunction = builder.Function("ComplexFunction");
+            complexFunction.Parameter<ConventionAddress>("address");
+            complexFunction.Returns<string>();
+
+            // Top level function import with entity parameter
+            FunctionConfiguration entityFunction = builder.Function("EntityFunction");
+            entityFunction.Parameter<ConventionOrder>("order");
+            entityFunction.Returns<string>();
+
             return builder.GetEdmModel();
         }
     }
@@ -249,6 +289,22 @@ namespace System.Web.OData.Routing
         public IEnumerable<string> CreateCollectionMessages()
         {
             return Enumerable.Range(0, 10).Select(i => "This is a test message No. " + i);
+        }
+
+        [HttpGet]
+        [ODataRoute("ComplexFunction(address={ad})")]
+        public string ComplexFunction([FromODataUri] ConventionAddress ad)
+        {
+            Assert.NotNull(ad);
+            return "{\"Street\":\"" + ad.Street + "\",\"City\":\"" + ad.City + "\",\"ZipCode\":\"" + ad.ZipCode + "\"}";
+        }
+
+        [HttpGet]
+        [ODataRoute("EntityFunction(order={order})")]
+        public string EntityFunction([FromODataUri] ConventionOrder order)
+        {
+            Assert.NotNull(order);
+            return "" + order.Price;
         }
     }
 

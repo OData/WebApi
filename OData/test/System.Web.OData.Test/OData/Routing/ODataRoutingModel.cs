@@ -33,6 +33,7 @@ namespace System.Web.OData.Routing
             builder.EntitySet<Destination>("Destinations");
             builder.ComplexType<Dog>();
             builder.ComplexType<Cat>();
+            builder.EntityType<SpecialProduct>();
 
             ActionConfiguration getRoutingCustomerById = builder.Action("GetRoutingCustomerById");
             getRoutingCustomerById.Parameter<int>("RoutingCustomerId");
@@ -90,6 +91,10 @@ namespace System.Web.OData.Routing
             FunctionConfiguration topProductOfAllByCity = builder.EntityType<Product>().Collection.Function("TopProductOfAllByCity");
             topProductOfAllByCity.Parameter<string>("city");
             topProductOfAllByCity.Returns<string>();
+
+            FunctionConfiguration copyProductByCity = builder.EntityType<Product>().Function("CopyProductByCity");
+            copyProductByCity.Parameter<string>("city");
+            copyProductByCity.Returns<string>();
 
             FunctionConfiguration topProductOfAllByCityAndModel = builder.EntityType<Product>().Collection.Function("TopProductOfAllByCityAndModel");
             topProductOfAllByCityAndModel.Parameter<string>("city");
@@ -197,6 +202,18 @@ namespace System.Web.OData.Routing
                 builder.EntityType<RoutingCustomer>().Function("MoveToAddresses").Returns<bool>();
             functionWithCollectionOfComplexTypeParameter.CollectionParameter<Address>("addresses");
 
+            var functionWithCollectionOfPrimitiveTypeParameter =
+                builder.EntityType<RoutingCustomer>().Function("CollectionOfPrimitiveTypeFunction").Returns<bool>();
+            functionWithCollectionOfPrimitiveTypeParameter.CollectionParameter<int>("intValues");
+
+            var functionWithEntityTypeParameter =
+                builder.EntityType<RoutingCustomer>().Function("EntityTypeFunction").Returns<bool>();
+            functionWithEntityTypeParameter.EntityParameter<Product>("product");
+
+            var functionWithCollectionEntityTypeParameter =
+                builder.EntityType<RoutingCustomer>().Function("CollectionEntityTypeFunction").Returns<bool>();
+            functionWithCollectionEntityTypeParameter.CollectionEntityParameter<Product>("products");
+
             return builder.GetEdmModel();
         }
 
@@ -287,10 +304,16 @@ namespace System.Web.OData.Routing
 
         public class SalesPerson
         {
+            public SalesPerson()
+            {
+                this.DynamicProperties = new Dictionary<string, object>();
+            }
+
             public int ID { get; set; }
             public string Name { get; set; }
             public virtual List<VIP> ManagedRoutingCustomers { get; set; }
             public virtual List<ImportantProduct> ManagedProducts { get; set; }
+            public IDictionary<string, object> DynamicProperties { get; set; }
         }
 
         public class VIP : RoutingCustomer

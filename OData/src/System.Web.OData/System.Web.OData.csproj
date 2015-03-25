@@ -75,6 +75,9 @@
     <Compile Include="Extensions\HttpErrorExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
+    <Compile Include="OData\EdmEnumObjectCollection.cs" />
+    <Compile Include="OData\EdmEnumObject.cs" />
+    <Compile Include="OData\IEdmEnumObject.cs" />
     <Compile Include="OData\ODataUriResolverSetttings.cs" />
     <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
@@ -211,6 +214,7 @@
     <Compile Include="OData\Routing\Conventions\NavigationSourceRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\SingletonRoutingConvention.cs" />
     <Compile Include="OData\Routing\CountPathSegment.cs" />
+    <Compile Include="OData\Routing\ODataParameterValue.cs" />    
     <Compile Include="OData\Routing\SingletonPathSegment.cs" />
     <Compile Include="OData\Routing\ODataPathSegmentTranslator.cs" />
     <Compile Include="OData\Routing\ODataVersionConstraint.cs" />
@@ -290,6 +294,7 @@
     <Compile Include="OData\Routing\UnresolvedPathSegment.cs" />
     <Compile Include="OData\Routing\ValuePathSegment.cs" />
     <Compile Include="OData\Routing\PropertyAccessPathSegment.cs" />
+    <Compile Include="OData\Routing\DynamicPropertyPathSegment.cs" />
     <Compile Include="OData\Routing\NavigationPathSegment.cs" />
     <Compile Include="OData\Routing\EntitySetPathSegment.cs" />
     <Compile Include="OData\Routing\MetadataPathSegment.cs" />

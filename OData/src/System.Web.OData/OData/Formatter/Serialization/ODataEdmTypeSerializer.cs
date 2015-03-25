@@ -99,11 +99,18 @@ namespace System.Web.OData.Formatter.Serialization
 
             IEdmStructuredObject structuredObject = source as IEdmStructuredObject;
             object value;
-
-            if (dynamicPropertyInfo == null || structuredObject == null ||
-                !structuredObject.TryGetPropertyValue(dynamicPropertyInfo.Name, out value) || value == null)
+            IDelta delta = source as IDelta;
+            if (delta == null)
+            { 
+                if (dynamicPropertyInfo == null || structuredObject == null ||
+                    !structuredObject.TryGetPropertyValue(dynamicPropertyInfo.Name, out value) || value == null)
+                {
+                    return null;
+                }
+            }
+            else
             {
-                return null;
+                value = ((EdmStructuredObject)structuredObject).TryGetDynamicProperties();
             }
 
             IDictionary<string, object> dynamicPropertyDictionary = (IDictionary<string, object>)value;

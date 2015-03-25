@@ -56,7 +56,7 @@ namespace System.Web.Http.OData.Formatter
                     { DateTimeOffset.MaxValue, "GetDateTimeOffset" },
                     { float.NaN, "GetFloat" },
                     { decimal.MaxValue, "GetDecimal" },
-                    // { double.NaN, "GetDouble" } // doesn't work with uri parser.
+                    { double.NaN, "GetDouble" },
                     { SimpleEnum.First.ToString(), "GetEnum" },
                     { (FlagsEnum.One | FlagsEnum.Two).ToString(), "GetFlagsEnum" }
                 };

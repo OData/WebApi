@@ -9,9 +9,12 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
+using System.Web.OData.Formatter;
+using System.Web.OData.Routing;
 using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm.Library.Values;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -74,6 +77,53 @@ namespace System.Web.OData
         }
 
         [Fact]
+        public void Get_OpenEntityType_Enum_Collection_Property()
+        {
+            // Arrange
+            const string RequestUri = "http://localhost/odata/UntypedSimpleOpenCustomers(1)";
+            var configuration = new[] { typeof(UntypedSimpleOpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetUntypedEdmModel());
+
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.Equal("http://localhost/odata/$metadata#UntypedSimpleOpenCustomers/$entity", result["@odata.context"]);
+            Assert.Equal("#Collection(NS.Color)", result["Colors@odata.type"]);
+            Assert.Equal(new JArray(new[] { "Red", "0" }), result["Colors"]);
+            Assert.Equal("Red", result["Color"]);
+        }
+
+        [Fact]
+        public void CanDispatch_ActionPayload_With_EdmEnumObject()
+        {
+            const string RequestUri = "http://localhost/odata/UntypedSimpleOpenCustomers(1)/NS.AddColor";
+            const string Payload = @"{ 
+                ""Color"": ""0""
+            }";
+
+            var configuration = new[] { typeof(UntypedSimpleOpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetUntypedEdmModel());
+
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
+            request.Content = new StringContent(Payload);
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
         public void Get_OpenEntityTypeWithSelect()
         {
             // Arrange
@@ -118,6 +168,46 @@ namespace System.Web.OData
 
             var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
             configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
+            request.Content = new StringContent(Payload);
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
+        public void Post_UnTyped_OpenEntityType()
+        { 
+            // Arrange
+            const string Payload = "{" + 
+              "\"@odata.context\":\"http://localhost/odata/$metadata#UntypedSimpleOpenCustomer/$entity\"," +
+              "\"CustomerId\":6,\"Name\":\"FirstName 6\"," +
+              "\"Address\":{" +
+                "\"@odata.type\":\"#NS.Address\",\"Street\":\"Street 6\",\"City\":\"City 6\"" +
+              "}," + 
+              "\"Addresses@odata.type\":\"#Collection(NS.Address)\"," +
+              "\"Addresses\":[{" +
+                "\"@odata.type\":\"#NS.Address\",\"Street\":\"Street 7\",\"City\":\"City 7\"" +
+              "}]," +
+              "\"DoubleList@odata.type\":\"#Collection(Double)\"," +
+              "\"DoubleList\":[5.5, 4.4, 3.3]," +
+              "\"FavoriteColor@odata.type\":\"#NS.Color\"," +
+              "\"FavoriteColor\":\"Red\"," +
+              "\"Color\":\"Red\"," +
+              "\"FavoriteColors@odata.type\":\"#Collection(NS.Color)\"," +
+              "\"FavoriteColors\":[\"0\", \"1\"]" +
+            "}";
+
+            const string RequestUri = "http://localhost/odata/UntypedSimpleOpenCustomers";
+
+            var configuration = new[] { typeof(UntypedSimpleOpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetUntypedEdmModel());
 
             HttpClient client = new HttpClient(new HttpServer(configuration));
 
@@ -207,6 +297,42 @@ namespace System.Web.OData
             builder.EntitySet<SimpleOpenCustomer>("SimpleOpenCustomers");
             builder.EntitySet<SimpleOpenOrder>("SimpleOpenOrders");
             return builder.GetEdmModel();
+        }
+
+        private static IEdmModel GetUntypedEdmModel()
+        {
+            var model = new EdmModel();
+            // complex type address
+            EdmComplexType address = new EdmComplexType("NS", "Address", null, false, true);
+            address.AddStructuralProperty("Street", EdmPrimitiveTypeKind.String);
+            model.AddElement(address);
+
+            // enum type color
+            EdmEnumType color = new EdmEnumType("NS", "Color");
+            color.AddMember(new EdmEnumMember(color, "Red", new EdmIntegerConstant(0)));
+            model.AddElement(color);
+
+            // entity type customer
+            EdmEntityType customer = new EdmEntityType("NS", "UntypedSimpleOpenCustomer", null, false, true);
+            customer.AddKeys(customer.AddStructuralProperty("CustomerId", EdmPrimitiveTypeKind.Int32));
+            customer.AddStructuralProperty("Color", new EdmEnumTypeReference(color, isNullable: true));
+            model.AddElement(customer);
+
+            EdmAction action = new EdmAction(
+                "NS", 
+                "AddColor", 
+                null, 
+                isBound: true, 
+                entitySetPathExpression: null);
+            action.AddParameter("bindingParameter", new EdmEntityTypeReference(customer, false));
+            action.AddParameter("Color", new EdmEnumTypeReference(color, true));
+            model.AddElement(action);
+
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            container.AddEntitySet("UntypedSimpleOpenCustomers", customer);
+
+            model.AddElement(container);
+            return model;
         }
     }
 
@@ -345,6 +471,113 @@ namespace System.Web.OData
             Assert.Null(changedCustomer.Website);
             Assert.Equal(1, changedCustomer.CustomerProperties.Count);
             return Updated(changedCustomer); // Updated(customer);
+        }
+    }
+    
+    // Controller
+    public class UntypedSimpleOpenCustomersController : ODataController
+    {
+        public IHttpActionResult Get(int key)
+        {
+            EdmEntityType customerType = new EdmEntityType("NS", "UntypedSimpleOpenCustomer", null, false, true);
+            customerType.AddKeys(customerType.AddStructuralProperty("CustomerId", EdmPrimitiveTypeKind.Int32));
+            EdmEntityObject customer = new EdmEntityObject(customerType);
+            customer.TrySetPropertyValue("CustomerId", 1);
+
+            EdmEnumType colorType = new EdmEnumType("NS", "Color");
+            colorType.AddMember(new EdmEnumMember(colorType, "Red", new EdmIntegerConstant(0)));
+
+            EdmEnumObject color = new EdmEnumObject(colorType, "Red");
+            EdmEnumObject color2 = new EdmEnumObject(colorType, "0");
+            customer.TrySetPropertyValue("Color", color);
+
+            List<IEdmEnumObject> colorList = new List<IEdmEnumObject>();
+            colorList.Add(color);
+            colorList.Add(color2);
+            IEdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(colorType.ToEdmTypeReference(false)));
+            EdmEnumObjectCollection colors = new EdmEnumObjectCollection(collectionType, colorList);
+            customer.TrySetPropertyValue("Colors", colors);
+
+            return Ok(customer);
+        }
+
+        [HttpPost]
+        public IHttpActionResult AddColor(int key, ODataUntypedActionParameters parameters)
+        {
+            Assert.Equal("0", ((EdmEnumObject)parameters["Color"]).Value);
+            return Ok();
+        }
+
+        public IHttpActionResult PostUntypedSimpleOpenCustomer(EdmEntityObject customer)
+        {
+            // Verify there is a string dynamic property in OpenEntityType
+            object nameValue;
+            customer.TryGetPropertyValue("Name", out nameValue);
+            Type nameType;
+            customer.TryGetPropertyType("Name", out nameType);
+
+            Assert.NotNull(nameValue);
+            Assert.Equal(typeof(String), nameType);
+            Assert.Equal("FirstName 6", nameValue);
+
+            // Verify there is a collection of double dynamic property in OpenEntityType
+            object doubleListValue;
+            customer.TryGetPropertyValue("DoubleList", out doubleListValue);
+            Type doubleListType;
+            customer.TryGetPropertyType("DoubleList", out doubleListType);
+
+            Assert.NotNull(doubleListValue);
+            Assert.Equal(typeof(List<Double>), doubleListType);
+
+            // Verify there is a collection of complex type dynamic property in OpenEntityType
+            object addressesValue;
+            customer.TryGetPropertyValue("Addresses", out addressesValue);
+
+            Assert.NotNull(addressesValue);
+
+            // Verify there is a complex type dynamic property in OpenEntityType
+            object addressValue;
+            customer.TryGetPropertyValue("Address", out addressValue);
+
+            Type addressType;
+            customer.TryGetPropertyType("Address", out addressType);
+
+            Assert.NotNull(addressValue);
+            Assert.Equal(typeof(EdmComplexObject), addressType);
+
+            // Verify there is a collection of enum type dynamic property in OpenEntityType
+            object favoriteColorsValue;
+            customer.TryGetPropertyValue("FavoriteColors", out favoriteColorsValue);
+            EdmEnumObjectCollection favoriteColors = favoriteColorsValue as EdmEnumObjectCollection;
+
+            Assert.NotNull(favoriteColorsValue);
+            Assert.NotNull(favoriteColors);
+            Assert.Equal(typeof(EdmEnumObject), favoriteColors[0].GetType());
+
+            // Verify there is an enum type dynamic property in OpenEntityType
+            object favoriteColorValue;
+            customer.TryGetPropertyValue("FavoriteColor", out favoriteColorValue);
+
+            Assert.NotNull(favoriteColorValue);
+            Assert.Equal("Red", ((EdmEnumObject)favoriteColorValue).Value);
+
+            Type favoriteColorType;
+            customer.TryGetPropertyType("FavoriteColor", out favoriteColorType);
+
+            Assert.Equal(typeof(EdmEnumObject), favoriteColorType);
+
+            // Verify there is a string dynamic property in OpenComplexType
+            EdmComplexObject address = addressValue as EdmComplexObject;
+            object cityValue;
+            address.TryGetPropertyValue("City", out cityValue);
+            Type cityType;
+            address.TryGetPropertyType("City", out cityType);
+
+            Assert.NotNull(cityValue);
+            Assert.Equal(typeof(String), cityType);
+            Assert.Equal("City 6", cityValue);
+
+            return Ok(customer);
         }
     }
 }

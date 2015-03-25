@@ -118,7 +118,7 @@ namespace System.Web.OData
         public override bool TrySetPropertyValue(string name, object value)
         {
             IEdmProperty property = _actualEdmType.FindProperty(name);
-            if (property != null)
+            if (property != null || _actualEdmType.IsOpen)
             {
                 _setProperties.Add(name);
                 _container[name] = value;
@@ -132,7 +132,7 @@ namespace System.Web.OData
         public override bool TryGetPropertyValue(string name, out object value)
         {
             IEdmProperty property = _actualEdmType.FindProperty(name);
-            if (property != null)
+            if (property != null || _actualEdmType.IsOpen)
             {
                 if (_container.ContainsKey(name))
                 {
@@ -163,10 +163,30 @@ namespace System.Web.OData
                 type = GetClrTypeForUntypedDelta(property.Type);
                 return true;
             }
+            else if (_actualEdmType.IsOpen && _container.ContainsKey(name))
+            {
+                type = _container[name].GetType();
+                return true;
+            }
             else
             {
                 type = null;
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Get all dynamic properties
+        /// </summary>
+        public Dictionary<string, object> TryGetDynamicProperties()
+        {
+            if (!_actualEdmType.IsOpen)
+            {
+                return new Dictionary<string, object>();
+            }
+            else
+            {
+                return _container.Where(p => _actualEdmType.FindProperty(p.Key) == null).ToDictionary(property => property.Key, property => property.Value);
             }
         }
 
@@ -228,6 +248,9 @@ namespace System.Web.OData
                 case EdmTypeKind.Entity:
                     return typeof(EdmEntityObject);
 
+                case EdmTypeKind.Enum:
+                    return typeof(EdmEnumObject);
+
                 case EdmTypeKind.Collection:
                     IEdmTypeReference elementType = edmType.AsCollection().ElementType();
                     if (elementType.IsPrimitive())
@@ -242,6 +265,10 @@ namespace System.Web.OData
                     else if (elementType.IsEntity())
                     {
                         return typeof(EdmEntityObjectCollection);
+                    }
+                    else if (elementType.IsEnum())
+                    {
+                        return typeof(EdmEnumObjectCollection);
                     }
                     break;
             }

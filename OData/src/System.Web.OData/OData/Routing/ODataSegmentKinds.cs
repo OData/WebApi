@@ -26,6 +26,7 @@ namespace System.Web.OData.Routing
         internal const string _Key = "key";
         internal const string _Navigation = "navigation";
         internal const string _Property = "property";
+        internal const string _DynamicProperty = "dynamicproperty";
         internal const string _Unresolved = "unresolved";
 
         /// <summary>
@@ -112,6 +113,11 @@ namespace System.Web.OData.Routing
         /// Represents a segment indicating a property access.
         /// </summary>
         public static readonly string Property = _Property;
+
+        /// <summary>
+        /// Represents a segment indicating an dynamic property access.
+        /// </summary>
+        public static readonly string DynamicProperty = _DynamicProperty;
 
         /// <summary>
         /// Represents a segment that is not understood.

@@ -187,7 +187,7 @@
     <value>The HttpExecutedActionContext.Request is null.</value>
   </data>
   <data name="OrderByClauseNotSupported" xml:space="preserve">
-    <value>Only ordering by properties is supported for non-primitive collections. Expressions are not supported. Node name '{0}'.</value>
+    <value>Only ordering by properties is supported for non-primitive collections. Expressions are not supported.</value>
   </data>
   <data name="EntitySetNotFoundForName" xml:space="preserve">
     <value>No EntitySet exists in the EdmModel with entitySetName '{0}'.</value>
@@ -464,9 +464,6 @@
   </data>
   <data name="SkipTopLimitExceeded" xml:space="preserve">
     <value>The limit of '{0}' for {1} query has been exceeded. The value from the incoming request is '{2}'.</value>
-  </data>
-  <data name="FromODataUriRequiresPrimitive" xml:space="preserve">
-    <value>Type '{0}' is not a valid EDM primitive. The [FromODataUri] attribute can only be used on parameters with types that correspond to EDM primitives.</value>
   </data>
   <data name="EntitySetMissingDuringSerialization" xml:space="preserve">
     <value>The related entity set could not be found from the OData path. The related entity set is required to serialize the payload.</value>
@@ -780,5 +777,14 @@
   </data>
   <data name="NavigationSourceTypeHasNoKeys" xml:space="preserve">
     <value>The entity set or singleton '{0}' is based on type '{1}' that has no keys defined.</value>
+  </data>
+  <data name="ParameterTypeIsNotCollection" xml:space="preserve">
+    <value>The type '{0}' of the parameter '{1}' must be a collection.</value>
+  </data>
+  <data name="EntityReferenceMustHasKeySegment" xml:space="preserve">
+    <value>The Uri '{0}' in the parameter is invalid.</value>
+  </data>
+  <data name="CollectionParameterShouldHaveAddMethod" xml:space="preserve">
+    <value>The type '{0}' of the parameter '{1}' does not have an Add method. Consider using a collection type that does have an Add method - for example IList&lt;T&gt; or ICollection&lt;T&gt;.</value>
   </data>
 </root>

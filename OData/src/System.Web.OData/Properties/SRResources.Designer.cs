@@ -322,6 +322,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; of the parameter &apos;{1}&apos; does not have an Add method. Consider using a collection type that does have an Add method - for example IList&lt;T&gt; or ICollection&lt;T&gt;..
+        /// </summary>
+        internal static string CollectionParameterShouldHaveAddMethod {
+            get {
+                return ResourceManager.GetString("CollectionParameterShouldHaveAddMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CollectionProperties must implement IEnumerable&lt;&gt;. The property &apos;{0}&apos; declared on &apos;{1}&apos; does not implement IEnumerable&lt;&gt;..
         /// </summary>
         internal static string CollectionPropertiesMustReturnIEnumerable {
@@ -529,6 +538,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The Uri &apos;{0}&apos; in the parameter is invalid..
+        /// </summary>
+        internal static string EntityReferenceMustHasKeySegment {
+            get {
+                return ResourceManager.GetString("EntityReferenceMustHasKeySegment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The entity set &apos;{0}&apos; was already configured with a different EntityType (&apos;{1}&apos;)..
         /// </summary>
         internal static string EntitySetAlreadyConfiguredDifferentEntityType {
@@ -660,15 +678,6 @@ namespace System.Web.OData.Properties {
         internal static string FormatterReadIsNotSupportedForType {
             get {
                 return ResourceManager.GetString("FormatterReadIsNotSupportedForType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Type &apos;{0}&apos; is not a valid EDM primitive. The [FromODataUri] attribute can only be used on parameters with types that correspond to EDM primitives..
-        /// </summary>
-        internal static string FromODataUriRequiresPrimitive {
-            get {
-                return ResourceManager.GetString("FromODataUriRequiresPrimitive", resourceCulture);
             }
         }
         
@@ -1393,7 +1402,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Only ordering by properties is supported for non-primitive collections. Expressions are not supported. Node name &apos;{0}&apos;..
+        ///   Looks up a localized string similar to Only ordering by properties is supported for non-primitive collections. Expressions are not supported..
         /// </summary>
         internal static string OrderByClauseNotSupported {
             get {
@@ -1434,6 +1443,15 @@ namespace System.Web.OData.Properties {
         internal static string ParameterAliasMustBeInCurlyBraces {
             get {
                 return ResourceManager.GetString("ParameterAliasMustBeInCurlyBraces", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; of the parameter &apos;{1}&apos; must be a collection..
+        /// </summary>
+        internal static string ParameterTypeIsNotCollection {
+            get {
+                return ResourceManager.GetString("ParameterTypeIsNotCollection", resourceCulture);
             }
         }
         

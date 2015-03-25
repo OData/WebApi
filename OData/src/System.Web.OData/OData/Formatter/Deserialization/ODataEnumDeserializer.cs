@@ -52,6 +52,11 @@ namespace System.Web.OData.Formatter.Deserialization
                 return null;
             }
 
+            if (readContext.IsUntyped)
+            {
+                Contract.Assert(edmType.TypeKind() == EdmTypeKind.Enum);
+                return new EdmEnumObject((IEdmEnumTypeReference)edmType, ((ODataEnumValue)item).Value);
+            }
             Type clrType = EdmLibHelpers.GetClrType(edmType, readContext.Model);
             return EnumDeserializationHelpers.ConvertEnumValue(item, clrType);
         }

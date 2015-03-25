@@ -32,7 +32,7 @@ namespace System.Web.OData.Query
             SingleValuePropertyAccessNode propertyExpression = orderByClause.Expression as SingleValuePropertyAccessNode;
             if (propertyExpression == null)
             {
-                throw new ODataException(String.Format(SRResources.OrderByClauseNotSupported, orderByClause.Expression));
+                throw new ODataException(SRResources.OrderByClauseNotSupported);
             }
             Property = propertyExpression.Property;
         }

@@ -132,7 +132,10 @@
     <Compile Include="OData\Builder\TestModels\SpecialOrderLine.cs" />
     <Compile Include="OData\ClrPropertyInfoAnnotationTest.cs" />
     <Compile Include="OData\DateTimeTest.cs" />
+    <Compile Include="OData\EdmEnumObjectCollectionTest.cs" />
+    <Compile Include="OData\EdmEnumObjectTest.cs" />
     <Compile Include="OData\EnableQueryTests.cs" />
+    <Compile Include="OData\Formatter\ODataFunctionTests.cs" />
     <Compile Include="OData\ODataContainmentTest.cs" />
     <Compile Include="OData\ContentIdHelpersTest.cs" />
     <Compile Include="OData\DollarFormatTest.cs" />
@@ -199,6 +202,7 @@
     <Compile Include="OData\Routing\ODataCountTest.cs" />
     <Compile Include="OData\Routing\ODataLevelsTest.cs" />
     <Compile Include="OData\Routing\ODataSingletonRoutingTest.cs" />
+    <Compile Include="OData\Routing\DynamicPropertyPathSegmentTest.cs" />
     <Compile Include="OData\Routing\SingletonPathSegmentTest.cs" />
     <Compile Include="OData\Routing\ODataVersionConstraintTests.cs" />
     <Compile Include="OData\Routing\UnboundFunctionPathSegmentTemplateTest.cs" />

@@ -187,7 +187,7 @@
     <value>The HttpExecutedActionContext.Request is null.</value>
   </data>
   <data name="OrderByClauseNotSupported" xml:space="preserve">
-    <value>Only ordering by properties is supported for non-primitive collections. Expressions are not supported.</value>
+    <value>Only ordering by properties is supported for non-primitive collections. Expressions are not supported. Node name '{0}'.</value>
   </data>
   <data name="EntitySetNotFoundForName" xml:space="preserve">
     <value>No EntitySet exists in the EdmModel with entitySetName '{0}'.</value>

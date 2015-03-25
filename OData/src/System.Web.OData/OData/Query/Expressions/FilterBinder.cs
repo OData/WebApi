@@ -32,7 +32,7 @@ namespace System.Web.OData.Query.Expressions
     {
         private const string ODataItParameterName = "$it";
 
-        private static readonly string _dictionaryStringObjectIndexerName = typeof (Dictionary<string, object>).GetDefaultMembers()[0].Name;
+        private static readonly string _dictionaryStringObjectIndexerName = typeof(Dictionary<string, object>).GetDefaultMembers()[0].Name;
 
         private static readonly MethodInfo _stringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
 
@@ -193,7 +193,7 @@ namespace System.Web.OData.Query.Expressions
                         return BindRangeVariable((node as NonentityRangeVariableReferenceNode).RangeVariable);
 
                     case QueryNodeKind.SingleValuePropertyAccess:
-                        return BindPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
+                        return BindDynamicPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
 
                     case QueryNodeKind.SingleValueOpenPropertyAccess:
                         return BindOpenPropertyAccessQueryNode(node as SingleValueOpenPropertyAccessNode);
@@ -239,7 +239,7 @@ namespace System.Web.OData.Query.Expressions
 
         private Expression BindOpenPropertyAccessQueryNode(SingleValueOpenPropertyAccessNode openNode)
         {
-            var prop = GetOpenTypeProperty(openNode);
+            var prop = GetDynamicPropertyContainer(openNode);
             var propertyAccessExpression = BindPropertyAccessExpression(openNode, prop);
 
             var dynamicDictIsNotNull = Expression.NotEqual(propertyAccessExpression, Expression.Constant(null));
@@ -268,23 +268,23 @@ namespace System.Web.OData.Query.Expressions
             return propertyAccessExpression;
         }
 
-        private PropertyInfo GetOpenTypeProperty(SingleValueOpenPropertyAccessNode openNode)
+        private PropertyInfo GetDynamicPropertyContainer(SingleValueOpenPropertyAccessNode openNode)
         {
-            IEdmStructuredType edmEntityType;
+            IEdmStructuredType edmStructuredType;
             var edmTypeReference = openNode.Source.TypeReference;
             if (edmTypeReference.IsEntity())
             {
-                edmEntityType = edmTypeReference.AsEntity().EntityDefinition();
+                edmStructuredType = edmTypeReference.AsEntity().EntityDefinition();
             }
             else if (edmTypeReference.IsComplex())
             {
-                edmEntityType = edmTypeReference.AsComplex().ComplexDefinition();
+                edmStructuredType = edmTypeReference.AsComplex().ComplexDefinition();
             }
             else
             {
-                throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, openNode.Kind, typeof (FilterBinder).Name);
+                throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, openNode.Kind, typeof(FilterBinder).Name);
             }
-            var prop = EdmLibHelpers.GetDynamicPropertyDictionary(edmEntityType, _model);
+            var prop = EdmLibHelpers.GetDynamicPropertyDictionary(edmStructuredType, _model);
             return prop;
         }
 
@@ -561,7 +561,7 @@ namespace System.Web.OData.Query.Expressions
             return CreatePropertyAccessExpression(source, propertyAccessNode.Property);
         }
 
-        private Expression BindPropertyAccessQueryNode(SingleValuePropertyAccessNode propertyAccessNode)
+        private Expression BindDynamicPropertyAccessQueryNode(SingleValuePropertyAccessNode propertyAccessNode)
         {
             Expression source = Bind(propertyAccessNode.Source);
             return CreatePropertyAccessExpression(source, propertyAccessNode.Property);

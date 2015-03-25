@@ -249,10 +249,6 @@ namespace System.Web.OData.Query
                     {
                         querySoFar = AddOrderByQueryForProperty(query, querySettings, openPropertyNode.OrderByClause, querySoFar, openPropertyNode.Direction, alreadyOrdered);
                     }
-                    else
-                    {
-                        throw new NotImplementedException(string.Format("Error ordering the dynamic property {0} on type {1}", openPropertyNode.PropertyName, Context.ElementClrType.FullName));
-                    }
                     alreadyOrdered = true;
                 }
                 else

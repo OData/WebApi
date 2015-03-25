@@ -46,8 +46,7 @@ namespace System.Web.OData.Query
                     continue;
                 }
 
-                var openPropertyExpression = clause.Expression as SingleValueOpenPropertyAccessNode;
-                if (openPropertyExpression != null)
+                if (clause.Expression is SingleValueOpenPropertyAccessNode)
                 {
                     result.Add(new OrderByOpenPropertyNode(clause));
                 }

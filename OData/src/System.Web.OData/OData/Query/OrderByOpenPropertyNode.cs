@@ -14,10 +14,11 @@ namespace System.Web.OData.Query
     public class OrderByOpenPropertyNode : OrderByNode
     {
         /// <summary>
-        /// Default constructor for a dynamic property order by
+        /// Initializes a new instance of the class.
         /// </summary>
-        /// <param name="orderByClause">The order by clause for this open property</param>
+        /// <param name="orderByClause">The order by clause for this open property.</param>
         public OrderByOpenPropertyNode(OrderByClause orderByClause)
+            : base(orderByClause.Direction)
         {
             if (orderByClause == null)
             {
@@ -25,13 +26,11 @@ namespace System.Web.OData.Query
             }
 
             OrderByClause = orderByClause;
-            Direction = orderByClause.Direction;
-
 
             var openPropertyExpression = orderByClause.Expression as SingleValueOpenPropertyAccessNode;
             if (openPropertyExpression == null)
             {
-                throw new ODataException(SRResources.OrderByClauseNotSupported);
+                throw new ODataException(String.Format(SRResources.OrderByClauseNotSupported, orderByClause.Expression));
             }
             PropertyName = openPropertyExpression.Name;
         }
@@ -39,7 +38,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// The order by clause
         /// </summary>
-        public OrderByClause OrderByClause { get; set; }
+        public OrderByClause OrderByClause { get; private set; }
 
         /// <summary>
         /// The name of the dynamic property

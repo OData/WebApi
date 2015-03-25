@@ -47,18 +47,20 @@ namespace System.Web.OData
             Assert.Equal("9999-12-31", result["DateList"][1]);
         }
 
-        [Fact]
-        public void Get_OpenEntityTypeWithOrderbyAscending()
+        [Theory, 
+            InlineData("http://localhost/odata/SimpleOpenCustomers?$orderby=Token&$filter=Token ne null", new [] { 2, 4 }),
+            InlineData("http://localhost/odata/SimpleOpenCustomers?$orderby=Token desc&$filter=Token ne null", new [] { 4, 2 }),
+            InlineData("http://localhost/odata/SimpleOpenCustomers?$filter=Token ne null", new [] { 2, 4 })]
+        public void Get_OpenEntityTypeWithOrderbyAndFilter(string uri, int[] customerIds)
         {
             // Arrange
-            const string RequestUri = "http://localhost/odata/SimpleOpenCustomers?$orderby=Token&$filter=Token ne null";
             var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
             configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
 
             HttpClient client = new HttpClient(new HttpServer(configuration));
 
             // Act
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
             HttpResponseMessage response = client.SendAsync(request).Result;
 
@@ -67,56 +69,8 @@ namespace System.Web.OData
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
             var resultArray = result["value"] as JArray;
             Assert.Equal(2, resultArray.Count);
-            Assert.Equal(2, resultArray[0]["CustomerId"]);
-            Assert.Equal(4, resultArray[1]["CustomerId"]);
-        }
-
-        [Fact]
-        public void Get_OpenEntityTypeWithOrderbyDescending()
-        {
-            // Arrange
-            const string RequestUri = "http://localhost/odata/SimpleOpenCustomers?$orderby=Token desc&$filter=Token ne null";
-            var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
-
-            HttpClient client = new HttpClient(new HttpServer(configuration));
-
-            // Act
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
-            HttpResponseMessage response = client.SendAsync(request).Result;
-
-            // Assert
-            Assert.True(response.IsSuccessStatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            var resultArray = result["value"] as JArray;
-            Assert.Equal(2, resultArray.Count);
-            Assert.Equal(4, resultArray[0]["CustomerId"]);
-            Assert.Equal(2, resultArray[1]["CustomerId"]);
-        }
-
-        [Fact]
-        public void Get_OpenEntityTypeWithFilter()
-        {
-            // Arrange
-            const string RequestUri = "http://localhost/odata/SimpleOpenCustomers?$filter=Token ne null";
-            var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
-
-            HttpClient client = new HttpClient(new HttpServer(configuration));
-
-            // Act
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
-            HttpResponseMessage response = client.SendAsync(request).Result;
-
-            // Assert
-            Assert.True(response.IsSuccessStatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            var resultArray = result["value"] as JArray;
-            Assert.Equal(2, resultArray.Count);
-            Assert.Equal(2, resultArray[0]["CustomerId"]);
-            Assert.Equal(4, resultArray[1]["CustomerId"]);
+            for (var i = 0; i < customerIds.Length; i++)
+                Assert.Equal(customerIds[i], resultArray[i]["CustomerId"]);
         }
 
         [Fact]

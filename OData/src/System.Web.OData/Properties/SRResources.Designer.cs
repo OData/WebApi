@@ -1393,7 +1393,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Only ordering by properties is supported for non-primitive collections. Expressions are not supported..
+        ///   Looks up a localized string similar to Only ordering by properties is supported for non-primitive collections. Expressions are not supported. Node name &apos;{0}&apos;..
         /// </summary>
         internal static string OrderByClauseNotSupported {
             get {

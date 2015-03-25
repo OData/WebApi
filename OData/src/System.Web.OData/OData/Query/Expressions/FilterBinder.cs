@@ -196,7 +196,7 @@ namespace System.Web.OData.Query.Expressions
                         return BindDynamicPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
 
                     case QueryNodeKind.SingleValueOpenPropertyAccess:
-                        return BindOpenPropertyAccessQueryNode(node as SingleValueOpenPropertyAccessNode);
+                        return BindDynamicPropertyAccessQueryNode(node as SingleValueOpenPropertyAccessNode);
                     
                     case QueryNodeKind.UnaryOperator:
                         return BindUnaryOperatorNode(node as UnaryOperatorNode);
@@ -237,7 +237,7 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
-        private Expression BindOpenPropertyAccessQueryNode(SingleValueOpenPropertyAccessNode openNode)
+        private Expression BindDynamicPropertyAccessQueryNode(SingleValueOpenPropertyAccessNode openNode)
         {
             var prop = GetDynamicPropertyContainer(openNode);
             var propertyAccessExpression = BindPropertyAccessExpression(openNode, prop);

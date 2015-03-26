@@ -51,6 +51,7 @@ namespace System.Web.OData.Routing.Conventions
                 new EntityRoutingConvention(),
                 new NavigationRoutingConvention(),
                 new PropertyRoutingConvention(),
+                new DynamicPropertyRoutingConvention(),
                 new RefRoutingConvention(),
                 new ActionRoutingConvention(),
                 new FunctionRoutingConvention(),

@@ -38,21 +38,21 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(null, null, false, "Address,City,ID,Name,SimpleEnum")] // no select and expand -> select all
-        [InlineData(null, null, true, "Address,City,ID,Name,SimpleEnum,SpecialAddress,SpecialCustomerProperty")] // no select and expand on derived type -> select all
+        [InlineData(null, null, false, "Account,Address,City,ID,Name,SimpleEnum")] // no select and expand -> select all
+        [InlineData(null, null, true, "Account,Address,City,ID,Name,SimpleEnum,SpecialAddress,SpecialCustomerProperty")] // no select and expand on derived type -> select all
         [InlineData("ID", null, false, "ID")] // simple select -> select requested
         [InlineData("ID", null, true, "ID")] // simple select on derived type -> select requested
-        [InlineData("*", null, false, "Address,City,ID,Name,SimpleEnum")] // simple select with wild card -> select all, no duplication
-        [InlineData("*", null, true, "Address,City,ID,Name,SimpleEnum,SpecialAddress,SpecialCustomerProperty")] // simple select with wild card on derived type -> select all, no duplication
+        [InlineData("*", null, false, "Account,Address,City,ID,Name,SimpleEnum")] // simple select with wild card -> select all, no duplication
+        [InlineData("*", null, true, "Account,Address,City,ID,Name,SimpleEnum,SpecialAddress,SpecialCustomerProperty")] // simple select with wild card on derived type -> select all, no duplication
         [InlineData("ID,ID", null, false, "ID")] // simple select with duplicates -> select requested no duplicates
-        [InlineData("ID,*", null, false, "Address,City,ID,Name,SimpleEnum")] // simple select with wild card and duplicate -> select all, no duplicates
-        [InlineData("ID,*", null, true, "Address,City,ID,Name,SimpleEnum,SpecialAddress,SpecialCustomerProperty")] // simple select with wild card and duplicate -> select all, no duplicates
+        [InlineData("ID,*", null, false, "Account,Address,City,ID,Name,SimpleEnum")] // simple select with wild card and duplicate -> select all, no duplicates
+        [InlineData("ID,*", null, true, "Account,Address,City,ID,Name,SimpleEnum,SpecialAddress,SpecialCustomerProperty")] // simple select with wild card and duplicate -> select all, no duplicates
         [InlineData("ID,Name", null, false, "ID,Name")] // multiple select -> select requested
         [InlineData("ID,Name", null, true, "ID,Name")] // multiple select on derived type -> select requested
         [InlineData("Orders", "Orders", false, "")] // only expand -> select no structural property
         [InlineData("Orders", "Orders", true, "")] // only expand -> select no structural property
-        [InlineData(null, "Orders", false, "Address,City,ID,Name,SimpleEnum")] // simple expand -> select all
-        [InlineData(null, "Orders", true, "Address,City,ID,Name,SimpleEnum,SpecialAddress,SpecialCustomerProperty")] // simple expand on derived type -> select all
+        [InlineData(null, "Orders", false, "Account,Address,City,ID,Name,SimpleEnum")] // simple expand -> select all
+        [InlineData(null, "Orders", true, "Account,Address,City,ID,Name,SimpleEnum,SpecialAddress,SpecialCustomerProperty")] // simple expand on derived type -> select all
         [InlineData("ID,Name,Orders", "Orders", false, "ID,Name")] // expand and select -> select requested
         [InlineData("ID,Name,Orders", "Orders", true, "ID,Name")] // expand and select on derived type -> select requested
         [InlineData("NS.SpecialCustomer/SpecialCustomerProperty", "", false, "")] // select derived type properties -> select none

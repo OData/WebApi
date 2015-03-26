@@ -347,6 +347,26 @@ namespace System.Web.OData.Routing
             yield return new MetadataPathSegment();
         }
 
+        /// <summary>
+        /// Translate a PathTemplateSegment
+        /// </summary>
+        /// <param name="segment">the segment to Translate</param>
+        /// <returns>Translated WebApi path segment.</returns>
+        public override IEnumerable<ODataPathSegment> Translate(PathTemplateSegment segment)
+        {
+            string value = String.Empty;
+            switch (TranslatePathTemplateSegment(segment.LiteralText, out value))
+            {
+                case ODataSegmentKinds._DynamicProperty:
+                    yield return new DynamicPropertyPathSegment(value);
+                    break;
+                default:
+                    throw new ODataException(Error.Format(
+                        SRResources.InvalidAttributeRoutingTemplateSegment,
+                        segment.LiteralText));
+            }
+        }
+
         // We need to append the key value path segment from $id.
         private static void AppendIdForRef(IList<ODataPathSegment> segments, KeySegment id)
         {
@@ -432,6 +452,33 @@ namespace System.Web.OData.Routing
             }
 
             return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4);
+        }
+
+        // Translate literal test of pathTemplateSegment to segment type and segment name.
+        private static string TranslatePathTemplateSegment(string pathTemplateSegmentLiteralText, out string value)
+        {
+            if (pathTemplateSegmentLiteralText == null)
+            {
+                throw Error.ArgumentNull("pathTemplateSegmentLiteralText");
+            }
+
+            if (pathTemplateSegmentLiteralText.StartsWith("{", StringComparison.Ordinal)
+                && pathTemplateSegmentLiteralText.EndsWith("}", StringComparison.Ordinal))
+            {
+                string[] keyValuePair = pathTemplateSegmentLiteralText.Substring(1,
+                    pathTemplateSegmentLiteralText.Length - 2).Split(':');
+                if (keyValuePair.Length != 2)
+                {
+                    throw new ODataException(Error.Format(
+                        SRResources.InvalidAttributeRoutingTemplateSegment,
+                        pathTemplateSegmentLiteralText));
+                }
+                value = "{" + keyValuePair[0] + "}";
+                return keyValuePair[1];
+            }
+
+            value = String.Empty;
+            return String.Empty;
         }
 
         // Translate the node in ODL path to string literal.

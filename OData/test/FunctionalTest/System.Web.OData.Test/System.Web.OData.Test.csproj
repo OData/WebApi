@@ -200,6 +200,8 @@
     <Compile Include="OData\Results\UpdatedODataResultTest.cs" />
     <Compile Include="OData\Routing\AttributeRoutingOnSingletonTest.cs" />
     <Compile Include="OData\Routing\ComplexCastPathSegmentTest.cs" />
+    <Compile Include="OData\Routing\Conventions\DynamicPropertyPathSegmentTemplateTest.cs" />
+    <Compile Include="OData\Routing\Conventions\DynamicPropertyRoutingConventionTest.cs" />
     <Compile Include="OData\Routing\Conventions\MockNavigationSourceRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\NavigationSourceRoutingConventionTest.cs" />
     <Compile Include="OData\Routing\Conventions\ODataRoutingConventionsTest.cs" />

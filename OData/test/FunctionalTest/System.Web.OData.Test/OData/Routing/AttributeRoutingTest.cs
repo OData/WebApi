@@ -38,6 +38,8 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "http://localhost/Customers(12)/NS.SpecialCustomer/NS.GetSalary()", "GetSalaryFromSpecialCustomer_12")] // call function on derived entity type
         [InlineData("GET", "http://localhost/Customers(12)/NS.GetCustomer(customer=@p)?@p={\"@odata.type\":\"%23NS.Customer\",\"ID\":9,\"City\":\"MyCity\"}",
             "GetCustomer(ID=9,City=MyCity,)")]
+        [InlineData("GET", "http://localhost/Customers(42)/Account/DynamicPropertyName", "GetDynamicPropertyFromAccount_42_DynamicPropertyName")]
+        [InlineData("GET", "http://localhost/Customers(42)/Orders(24)/DynamicPropertyName", "GetDynamicPropertyFromOrder_42_24_DynamicPropertyName")]
         public async Task AttributeRouting_SelectsExpectedControllerAndAction(string method, string requestUri,
             string expectedResult)
         {
@@ -220,6 +222,20 @@ namespace System.Web.OData.Routing
                 }
 
                 return Ok("GetCustomer(" + sb.ToString() + ")");
+            }
+
+            [HttpGet]
+            [ODataRoute("Customers({id})/Account/{pName:dynamicproperty}")]
+            public string GetDynamicPropertyFromAccount([FromODataUri] int id, [FromODataUri]string pName)
+            {
+                return "GetDynamicPropertyFromAccount_" + id + "_" + pName;
+            }
+
+            [HttpGet]
+            [ODataRoute("Customers({cId})/Orders({oId})/{pName:dynamicproperty}")]
+            public string GetDynamicPropertyFromOrder([FromODataUri] int cId, [FromODataUri] int oId, [FromODataUri]string pName)
+            {
+                return "GetDynamicPropertyFromOrder_" + cId + "_" + oId + "_" + pName;
             }
         }
 

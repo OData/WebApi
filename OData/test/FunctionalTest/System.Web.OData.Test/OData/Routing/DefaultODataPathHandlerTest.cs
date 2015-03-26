@@ -1407,7 +1407,7 @@ namespace System.Web.OData.Routing
             const string odataPath = "RoutingCustomers(1)/Default.CollectionEntityTypeFunction(products=" +
                 "{\"value\":[{\"@odata.type\":\"System.Web.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}," +
                 "{\"@odata.type\":\"System.Web.OData.Routing.Product\",\"ID\":10,\"Name\":\"TV\"}]}";
-                
+
             // & Act
             Assert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, odataPath));
         }
@@ -1935,6 +1935,10 @@ namespace System.Web.OData.Routing
         [InlineData("Customers(42)/Orders(24)", "Customers({customerID})/Orders({orderID})", new string[] { "customerID:42", "orderID:24" })]
         [InlineData("Function(foo=42,bar=true)", "Function(foo={newFoo},bar={newBar})", new string[] { "newFoo:42", "newBar:true" })]
         [InlineData("Function(bar=false,foo=24)", "Function(foo={newFoo},bar={newBar})", new string[] { "newFoo:24", "newBar:false" })]
+        [InlineData("Customers(42)/Account/DynamicPropertyName", "Customers({ID})/Account/{propertyname:dynamicproperty}", new string[] { "ID:42", "propertyname:DynamicPropertyName" })]
+        [InlineData("Orders(24)/DynamicPropertyName", "Orders({ID})/{propertyname:dynamicproperty}", new string[] { "ID:24", "propertyname:DynamicPropertyName" })]
+        [InlineData("RootOrder/DynamicPropertyName", "RootOrder/{propertyname:dynamicproperty}", new string[] { "propertyname:DynamicPropertyName" })]
+        [InlineData("Customers(42)/Orders(24)/DynamicPropertyName", "Customers({ID})/Orders({key})/{propertyname:dynamicproperty}", new string[] { "ID:42", "key:24", "propertyname:DynamicPropertyName" })]
         public void ParseTemplate(string path, string template, string[] keyValues)
         {
             // Arrange
@@ -1983,6 +1987,22 @@ namespace System.Web.OData.Routing
             // Act & Assert
             Assert.Throws<ODataException>(() => _parser.ParseTemplate(model.Model, "Customers(ID={key})/Order"),
                 "Found an unresolved path segment 'Order' in the OData path template 'Customers(ID={key})/Order'.");
+        }
+
+        [Theory]
+        [InlineData("Customers({key})/Account/{pName:dynamic:test}", "{pName:dynamic:test}")]
+        [InlineData("Customers({key})/Account/{pName:dynamic}", "{pName:dynamic}")]
+        [InlineData("Customers({key})/Account/{aa}", "{aa}")]
+        [InlineData("Customers({key})/Account/{pName : dynamic}", "{pName : dynamic}")]
+        [InlineData("Orders({key})/{pName : dynamic}", "{pName : dynamic}")]
+        public void ParseTemplate_ThrowODataException_InvalidAttributeRoutingTemplateSegment(string template, string error)
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() => _parser.ParseTemplate(model.Model, template),
+                string.Format("The attribute routing template contains invalid segment '{0}'.", error));
         }
 
         public static TheoryDataSet<string, string, string> PathSegmentIdentifierCaseInsensitiveCases

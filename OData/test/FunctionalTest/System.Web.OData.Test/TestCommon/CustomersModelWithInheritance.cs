@@ -5,7 +5,6 @@ using System.Web.OData.Builder;
 using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.OData.Edm.Library.Values;
 
 namespace System.Web.OData.TestCommon
@@ -32,12 +31,23 @@ namespace System.Web.OData.TestCommon
             address.AddStructuralProperty("Country", EdmPrimitiveTypeKind.String);
             model.AddElement(address);
 
+            // open complex type "Account"
+            EdmComplexType account = new EdmComplexType("NS", "Account", null, false, true);
+            account.AddStructuralProperty("Bank", EdmPrimitiveTypeKind.String);
+            account.AddStructuralProperty("CardNum", EdmPrimitiveTypeKind.Int64);
+            model.AddElement(account);
+
+            EdmComplexType specialAccount = new EdmComplexType("NS", "SpecialAccount", account, false, true);
+            specialAccount.AddStructuralProperty("SpecialCard", EdmPrimitiveTypeKind.String);
+            model.AddElement(specialAccount);
+
             // entity type customer
             EdmEntityType customer = new EdmEntityType("NS", "Customer");
             customer.AddKeys(customer.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
             IEdmProperty customerName = customer.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
             customer.AddStructuralProperty("SimpleEnum", simpleEnum.ToEdmTypeReference(isNullable: false));
             customer.AddStructuralProperty("Address", new EdmComplexTypeReference(address, isNullable: true));
+            customer.AddStructuralProperty("Account", new EdmComplexTypeReference(account, isNullable: true));
             IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance.GetPrimitive(
                 EdmPrimitiveTypeKind.String,
                 isNullable: true);
@@ -54,15 +64,16 @@ namespace System.Web.OData.TestCommon
             specialCustomer.AddStructuralProperty("SpecialAddress", new EdmComplexTypeReference(address, isNullable: true));
             model.AddElement(specialCustomer);
 
-            // entity type order
-            EdmEntityType order = new EdmEntityType("NS", "Order");
+            // entity type order (open entity type)
+            EdmEntityType order = new EdmEntityType("NS", "Order", null, false, true);
+            // EdmEntityType order = new EdmEntityType("NS", "Order");
             order.AddKeys(order.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
             order.AddStructuralProperty("City", EdmPrimitiveTypeKind.String);
             order.AddStructuralProperty("Amount", EdmPrimitiveTypeKind.Int32);
             model.AddElement(order);
 
             // derived entity type special order
-            EdmEntityType specialOrder = new EdmEntityType("NS", "SpecialOrder", order);
+            EdmEntityType specialOrder = new EdmEntityType("NS", "SpecialOrder", order, false, true);
             specialOrder.AddStructuralProperty("SpecialOrderProperty", EdmPrimitiveTypeKind.Guid);
             model.AddElement(specialOrder);
 
@@ -107,6 +118,7 @@ namespace System.Web.OData.TestCommon
             // singletons
             EdmSingleton vipCustomer = container.AddSingleton("VipCustomer", customer);
             EdmSingleton mary = container.AddSingleton("Mary", customer);
+            EdmSingleton rootOrder = container.AddSingleton("RootOrder", order);
 
             // containment
             IEdmContainedEntitySet orderLines = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderLinesNavProp);
@@ -289,12 +301,14 @@ namespace System.Web.OData.TestCommon
             Customer = customer;
             Order = order;
             Address = address;
+            Account = account;
             SpecialCustomer = specialCustomer;
             SpecialOrder = specialOrder;
             Orders = orders;
             Customers = customers;
             VipCustomer = vipCustomer;
             Mary = mary;
+            RootOrder = rootOrder;
             OrderLine = orderLine;
             OrderLines = orderLines;
             UpgradeCustomer = upgrade;
@@ -319,6 +333,8 @@ namespace System.Web.OData.TestCommon
 
         public EdmComplexType Address { get; private set; }
 
+        public EdmComplexType Account { get; private set; } // Open Complex Type
+
         public EdmEntitySet Customers { get; private set; }
 
         public EdmEntitySet Orders { get; private set; }
@@ -326,6 +342,8 @@ namespace System.Web.OData.TestCommon
         public EdmSingleton VipCustomer { get; private set; }
 
         public EdmSingleton Mary { get; private set; }
+
+        public EdmSingleton RootOrder { get; private set; }
 
         public IEdmContainedEntitySet OrderLines { get; private set; }
 

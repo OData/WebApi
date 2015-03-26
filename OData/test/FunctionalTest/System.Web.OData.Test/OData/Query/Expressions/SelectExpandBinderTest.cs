@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.Builder;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization.Models;
 using System.Web.OData.TestCommon;
@@ -66,6 +67,8 @@ namespace System.Web.OData.Query.Expressions
             // Arrange
             SelectExpandQueryOption selectExpand = new SelectExpandQueryOption("Orders", "Orders,Orders($expand=Customer)", _context);
             IPropertyMapper mapper = new IdentityPropertyMapper();
+            _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
+
             // Act
             IQueryable queryable = SelectExpandBinder.Bind(_queryable, _settings, new DefaultAssembliesResolver(), selectExpand);
 
@@ -113,6 +116,7 @@ namespace System.Web.OData.Query.Expressions
                 selectExpandOption: null);
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);
             Expression source = Expression.Constant(null, typeof(Order));
+            _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
 
             // Act
             Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
@@ -134,6 +138,7 @@ namespace System.Web.OData.Query.Expressions
                 _model.Customers,
                 selectExpandOption: null);
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);
+            _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
             Expression source = Expression.Constant(null, typeof(Order));
 
             // Act
@@ -192,6 +197,7 @@ namespace System.Web.OData.Query.Expressions
                 selectExpandOption: null);
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);
             Expression source = Expression.Constant(order);
+            _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
 
             // Act
             Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
@@ -214,6 +220,7 @@ namespace System.Web.OData.Query.Expressions
                 selectExpandOption: null);
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[] { expandItem }, allSelected: true);
             Expression source = Expression.Constant(order);
+            _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
 
             // Act
             Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);

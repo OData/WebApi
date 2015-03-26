@@ -787,4 +787,7 @@
   <data name="CollectionParameterShouldHaveAddMethod" xml:space="preserve">
     <value>The type '{0}' of the parameter '{1}' does not have an Add method. Consider using a collection type that does have an Add method - for example IList&lt;T&gt; or ICollection&lt;T&gt;.</value>
   </data>
+  <data name="InvalidAttributeRoutingTemplateSegment" xml:space="preserve">
+    <value>The attribute routing template contains invalid segment '{0}'.</value>
+  </data>
 </root>

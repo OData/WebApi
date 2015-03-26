@@ -745,6 +745,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The attribute routing template contains invalid segment &apos;{0}&apos;..
+        /// </summary>
+        internal static string InvalidAttributeRoutingTemplateSegment {
+            get {
+                return ResourceManager.GetString("InvalidAttributeRoutingTemplateSegment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The current batch reader state &apos;{0}&apos; is invalid. The expected state is &apos;{1}&apos;..
         /// </summary>
         internal static string InvalidBatchReaderState {

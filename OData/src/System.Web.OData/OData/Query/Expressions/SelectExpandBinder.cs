@@ -392,6 +392,20 @@ namespace System.Web.OData.Query.Expressions
 
                 Expression propertyName = Expression.Constant(dynamicPropertyDictionary.Name);
                 Expression propertyValue = Expression.Property(source, dynamicPropertyDictionary.Name);
+                Expression nullablePropertyValue = ExpressionHelpers.ToNullable(propertyValue);
+                if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
+                {
+                    // source == null ? null : propertyValue
+                    propertyValue = Expression.Condition(
+                        test: Expression.Equal(source, Expression.Constant(value: null)),
+                        ifTrue: Expression.Constant(value: null, type: propertyValue.Type.ToNullable()),
+                        ifFalse: nullablePropertyValue);
+                }
+                else
+                {
+                    propertyValue = nullablePropertyValue;
+                }
+
                 includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue));
             }
 

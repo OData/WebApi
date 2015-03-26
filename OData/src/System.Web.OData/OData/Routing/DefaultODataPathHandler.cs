@@ -242,6 +242,10 @@ namespace System.Web.OData.Routing
                         templateSegments.Add(new UnboundFunctionPathSegmentTemplate((UnboundFunctionPathSegment)pathSegment));
                         break;
 
+                    case ODataSegmentKinds._DynamicProperty:
+                        templateSegments.Add(new DynamicPropertyPathSegmentTemplate((DynamicPropertyPathSegment)pathSegment));
+                        break;
+
                     default:
                         templateSegments.Add(pathSegment);
                         break;

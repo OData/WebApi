@@ -57,5 +57,10 @@ namespace System.Web.OData.Routing
         /// Route template suffix for OData batch.
         /// </summary>
         public static readonly string Batch = "$batch";
+
+        /// <summary>
+        /// Route data key for the dynamic property name when manipulating open type.
+        /// </summary>
+        public static readonly string DynamicProperty = "dynamicProperty";
     }
 }

@@ -10,8 +10,6 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
-using System.Web.OData.Routing;
-using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Values;
@@ -50,10 +48,10 @@ namespace System.Web.OData
             Assert.Equal("9999-12-31", result["DateList"][1]);
         }
 
-        [Theory, 
-            InlineData("http://localhost/odata/SimpleOpenCustomers?$orderby=Token&$filter=Token ne null", new [] { 2, 4 }),
-            InlineData("http://localhost/odata/SimpleOpenCustomers?$orderby=Token desc&$filter=Token ne null", new [] { 4, 2 }),
-            InlineData("http://localhost/odata/SimpleOpenCustomers?$filter=Token ne null", new [] { 2, 4 })]
+        [Theory] 
+        [InlineData("http://localhost/odata/SimpleOpenCustomers?$orderby=Token&$filter=Token ne null", new[] { 2, 4 })]
+        [InlineData("http://localhost/odata/SimpleOpenCustomers?$orderby=Token desc&$filter=Token ne null", new[] { 4, 2 })]
+        [InlineData("http://localhost/odata/SimpleOpenCustomers?$filter=Token ne null", new[] { 2, 4 })]
         public void Get_OpenEntityTypeWithOrderbyAndFilter(string uri, int[] customerIds)
         {
             // Arrange
@@ -397,7 +395,7 @@ namespace System.Web.OData
         }
 
         [EnableQuery]
-        public IQueryable<SimpleOpenCustomer> Get(ODataQueryOptions<SimpleOpenCustomer> options)
+        public IQueryable<SimpleOpenCustomer> Get()
         {
             return CreateCustomers().AsQueryable();
         }

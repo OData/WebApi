@@ -193,7 +193,7 @@ namespace System.Web.OData.Query.Expressions
                         return BindRangeVariable((node as NonentityRangeVariableReferenceNode).RangeVariable);
 
                     case QueryNodeKind.SingleValuePropertyAccess:
-                        return BindDynamicPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
+                        return BindPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
 
                     case QueryNodeKind.SingleValueOpenPropertyAccess:
                         return BindDynamicPropertyAccessQueryNode(node as SingleValueOpenPropertyAccessNode);
@@ -250,8 +250,7 @@ namespace System.Web.OData.Query.Expressions
             return Expression.Condition(
                 dynamicDictExitsAndIsNotNull,
                 readDictionaryIndexerExpression,
-                nullExpression
-                );
+                nullExpression);
         }
 
         private Expression BindPropertyAccessExpression(SingleValueOpenPropertyAccessNode openNode, PropertyInfo prop)
@@ -260,7 +259,9 @@ namespace System.Web.OData.Query.Expressions
             Expression propertyAccessExpression;
             if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True &&
                 IsNullable(source.Type) && source != _lambdaParameters[ODataItParameterName])
+            {
                 propertyAccessExpression = Expression.Property(RemoveInnerNullPropagation(source), prop.Name);
+            }
             else
             {
                 propertyAccessExpression = Expression.Property(source, prop.Name);
@@ -561,7 +562,7 @@ namespace System.Web.OData.Query.Expressions
             return CreatePropertyAccessExpression(source, propertyAccessNode.Property);
         }
 
-        private Expression BindDynamicPropertyAccessQueryNode(SingleValuePropertyAccessNode propertyAccessNode)
+        private Expression BindPropertyAccessQueryNode(SingleValuePropertyAccessNode propertyAccessNode)
         {
             Expression source = Bind(propertyAccessNode.Source);
             return CreatePropertyAccessExpression(source, propertyAccessNode.Property);

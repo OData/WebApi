@@ -14,7 +14,7 @@ namespace System.Web.OData.Query
     public class OrderByOpenPropertyNode : OrderByNode
     {
         /// <summary>
-        /// Initializes a new instance of the class.
+        /// Initializes a new instance of the <see cref="OrderByOpenPropertyNode"/> class.
         /// </summary>
         /// <param name="orderByClause">The order by clause for this open property.</param>
         public OrderByOpenPropertyNode(OrderByClause orderByClause)

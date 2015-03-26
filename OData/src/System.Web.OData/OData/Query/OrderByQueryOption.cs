@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Http;
@@ -244,11 +245,8 @@ namespace System.Web.OData.Query
                         throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, openPropertyNode.PropertyName));
                     }
                     propertiesSoFar.Add(openPropertyNode.PropertyName);
-
-                    if (openPropertyNode.OrderByClause != null)
-                    {
-                        querySoFar = AddOrderByQueryForProperty(query, querySettings, openPropertyNode.OrderByClause, querySoFar, openPropertyNode.Direction, alreadyOrdered);
-                    }
+                    Contract.Assert(openPropertyNode.OrderByClause != null);
+                    querySoFar = AddOrderByQueryForProperty(query, querySettings, openPropertyNode.OrderByClause, querySoFar, openPropertyNode.Direction, alreadyOrdered);
                     alreadyOrdered = true;
                 }
                 else

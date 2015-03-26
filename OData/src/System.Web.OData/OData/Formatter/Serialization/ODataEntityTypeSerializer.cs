@@ -160,8 +160,8 @@ namespace System.Web.OData.Formatter.Serialization
             };
 
             // Try to add the dynamic properties if the entity type is open.
-            if (entityInstanceContext.EntityType.IsOpen && selectExpandNode.SelectAllDynamicProperties ||
-                entityInstanceContext.EntityType.IsOpen && selectExpandNode.SelectedDynamicProperties.Any())
+            if ((entityInstanceContext.EntityType.IsOpen && selectExpandNode.SelectAllDynamicProperties) ||
+                (entityInstanceContext.EntityType.IsOpen && selectExpandNode.SelectedDynamicProperties.Any()))
             {
                 IEdmTypeReference entityTypeReference =
                     entityInstanceContext.EntityType.ToEdmTypeReference(isNullable: false);

@@ -318,13 +318,17 @@ namespace System.Web.OData.Query.Expressions
             return Expression.MemberInit(Expression.New(wrapperType), wrapperTypeMemberAssignments);
         }
 
-        private bool GetSelectsOpenTypeSegments(SelectExpandClause selectExpandClause, IEdmEntityType entityType)
+        private static bool GetSelectsOpenTypeSegments(SelectExpandClause selectExpandClause, IEdmEntityType entityType)
         {
             if (!entityType.IsOpen)
+            {
                 return false;
+            }
 
             if (selectExpandClause.AllSelected)
+            {
                 return true;
+            }
 
             return selectExpandClause.SelectedItems.OfType<PathSelectItem>().Any(x => x.SelectedPath.LastSegment is OpenPropertySegment);
         }

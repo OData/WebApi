@@ -151,6 +151,31 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void CreateEnumKeyInEntityType()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder().Add_Color_EnumType().Add_LongEnum_EnumType();
+            var entityTypeConfiguration = builder.EntityType<EntityTypeWithEnumTypePropertyTestModel>();
+            entityTypeConfiguration.HasKey(e => e.RequiredColor);
+
+            // Act
+            var model = builder.GetEdmModel();
+            var entityType = model.SchemaElements.OfType<IEdmEntityType>().Single();
+
+            // Assert
+            IEdmProperty requiredColorProperty = Assert.Single(entityType.Properties());
+            Assert.NotNull(requiredColorProperty);
+
+            IEdmStructuralProperty requiredColorKey = Assert.Single(entityType.DeclaredKey);
+            Assert.NotNull(requiredColorKey);
+
+            Assert.Same(requiredColorProperty, requiredColorKey);
+
+            Assert.Equal(EdmTypeKind.Enum, requiredColorKey.Type.TypeKind());
+            Assert.Equal("System.Web.OData.Builder.TestModels.Color", requiredColorKey.Type.Definition.FullTypeName());
+        }
+
+        [Fact]
         public void AddAndRemoveEnumMemberFromEnumType()
         {
             // Arrange

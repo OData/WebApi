@@ -19,6 +19,7 @@ namespace System.Web.OData.Builder
     public class EntityTypeConfiguration : StructuralTypeConfiguration
     {
         private List<PrimitivePropertyConfiguration> _keys = new List<PrimitivePropertyConfiguration>();
+        private List<EnumPropertyConfiguration> _enumKeys = new List<EnumPropertyConfiguration>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityTypeConfiguration"/> class.
@@ -69,6 +70,14 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Gets the collection of enum keys for this entity type.
+        /// </summary>
+        public virtual IEnumerable<EnumPropertyConfiguration> EnumKeys
+        {
+            get { return _enumKeys; }
+        }
+
+        /// <summary>
         /// Gets or sets the base type of this entity type.
         /// </summary>
         public virtual EntityTypeConfiguration BaseType
@@ -105,14 +114,31 @@ namespace System.Web.OData.Builder
                 throw Error.InvalidOperation(SRResources.CannotDefineKeysOnDerivedTypes, FullName, BaseType.FullName);
             }
 
-            PrimitivePropertyConfiguration propertyConfig = AddProperty(keyProperty);
-
-            // keys are always required
-            propertyConfig.IsRequired();
-
-            if (!_keys.Contains(propertyConfig))
+            // Add the enum key if the property type is enum
+            if (keyProperty.PropertyType.IsEnum)
             {
-                _keys.Add(propertyConfig);
+                ModelBuilder.AddEnumType(keyProperty.PropertyType);
+                EnumPropertyConfiguration enumConfig = AddEnumProperty(keyProperty);
+
+                // keys are always required
+                enumConfig.IsRequired();
+
+                if (!_enumKeys.Contains(enumConfig))
+                {
+                    _enumKeys.Add(enumConfig);
+                }
+            }
+            else
+            {
+                PrimitivePropertyConfiguration propertyConfig = AddProperty(keyProperty);
+
+                // keys are always required
+                propertyConfig.IsRequired();
+
+                if (!_keys.Contains(propertyConfig))
+                {
+                    _keys.Add(propertyConfig);
+                }
             }
 
             return this;
@@ -135,6 +161,22 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Removes the enum property from the entity enum keys collection.
+        /// </summary>
+        /// <param name="enumKeyProperty">The key to be removed.</param>
+        /// <remarks>This method just disable the property to be not a key anymore. It does not remove the property all together.
+        /// To remove the property completely, use the method <see cref="RemoveProperty"/></remarks>
+        public virtual void RemoveKey(EnumPropertyConfiguration enumKeyProperty)
+        {
+            if (enumKeyProperty == null)
+            {
+                throw Error.ArgumentNull("enumKeyProperty");
+            }
+
+            _enumKeys.Remove(enumKeyProperty);
+        }
+
+        /// <summary>
         /// Sets the base type of this entity type to <c>null</c> meaning that this entity type 
         /// does not derive from anything.
         /// </summary>
@@ -152,7 +194,7 @@ namespace System.Web.OData.Builder
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
         public virtual EntityTypeConfiguration DerivesFrom(EntityTypeConfiguration baseType)
         {
-            if (Keys.Any() && baseType.Keys().Any())
+            if ((Keys.Any() || EnumKeys.Any()) && baseType.Keys().Any())
             {
                 throw Error.InvalidOperation(SRResources.CannotDefineKeysOnDerivedTypes, FullName, baseType.FullName);
             }

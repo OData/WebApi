@@ -337,6 +337,37 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
+        public void EnumKeySimpleSerializerTest()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<EnumCustomer>("EnumKeyCustomers");
+            builder.EntityType<EnumCustomer>().HasKey(c => c.Color);
+            IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(EnumKeyCustomersController) };
+
+            HttpConfiguration configuration = controllers.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
+            HttpServer host = new HttpServer(configuration);
+            HttpClient client = new HttpClient(host);
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                "http://localhost/EnumKeyCustomers(System.Web.OData.Builder.TestModels.Color'Red')");
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            Assert.Equal(9, customer["ID"]);
+            Assert.Equal(Color.Red, Enum.Parse(typeof(Color), customer["Color"].ToString()));
+            var colors = customer["Colors"].Select(c => Enum.Parse(typeof(Color), c.ToString()));
+            Assert.Equal(2, colors.Count());
+            Assert.Contains(Color.Blue, colors);
+            Assert.Contains(Color.Red, colors);
+        }
+
+        [Fact]
         public void EnumTypeRoundTripTest()
         {
             // Arrange
@@ -533,6 +564,21 @@ namespace System.Web.OData.Formatter
             public IHttpActionResult GetColor(int key)
             {
                 return Ok(Color.Green);
+            }
+        }
+
+        public class EnumKeyCustomersController : ODataController
+        {
+            public IHttpActionResult Get([FromODataUri]Color key)
+            {
+                EnumCustomer customer = new EnumCustomer
+                {
+                    ID = 9,
+                    Color = key,
+                    Colors = new List<Color> { Color.Blue, Color.Red }
+                };
+
+                return Ok(customer);
             }
         }
 

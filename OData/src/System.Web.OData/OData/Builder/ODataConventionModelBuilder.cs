@@ -308,6 +308,11 @@ namespace System.Web.OData.Builder
                             {
                                 entity.RemoveKey(keyProperty);
                             }
+
+                            foreach (EnumPropertyConfiguration enumKeyProperty in entity.EnumKeys.ToArray())
+                            {
+                                entity.RemoveKey(enumKeyProperty);
+                            }
                         }
 
                         entity.DerivesFrom(baseEntityType);

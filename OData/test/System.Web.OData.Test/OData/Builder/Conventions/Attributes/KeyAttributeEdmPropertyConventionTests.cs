@@ -79,6 +79,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             Mock<ComplexPropertyConfiguration> complexProperty = 
                 new Mock<ComplexPropertyConfiguration>(property.Object, entityType.Object);
+            complexProperty.Setup(c => c.Kind).Returns(PropertyKind.Complex);
 
             // Act
             new KeyAttributeEdmPropertyConvention().Apply(complexProperty.Object, entityType.Object, builder);
@@ -102,12 +103,41 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             
             Mock<NavigationPropertyConfiguration> navigationProperty = 
                 new Mock<NavigationPropertyConfiguration>(property.Object, EdmMultiplicity.ZeroOrOne, entityType.Object);
+            navigationProperty.Setup(c => c.Kind).Returns(PropertyKind.Navigation);
 
             // Act
             new KeyAttributeEdmPropertyConvention().Apply(navigationProperty.Object, entityType.Object, builder);
 
             // Assert
             entityType.Verify();
+        }
+
+        [Fact]
+        public void Apply_AddsEnumKey_EntityTypeConfiguration()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+
+            Mock<PropertyInfo> property = new Mock<PropertyInfo>();
+            property.Setup(p => p.Name).Returns("Property");
+            property.Setup(p => p.PropertyType).Returns(typeof(MyEnumType));
+            property.Setup(p => p.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { new KeyAttribute() });
+
+            Mock<EntityTypeConfiguration> entityType = new Mock<EntityTypeConfiguration>(MockBehavior.Strict);
+            entityType.Setup(e => e.HasKey(property.Object)).Returns(entityType.Object).Verifiable();
+
+            Mock<EnumPropertyConfiguration> enumProperty =
+                new Mock<EnumPropertyConfiguration>(property.Object, entityType.Object);
+
+            // Act
+            new KeyAttributeEdmPropertyConvention().Apply(enumProperty.Object, entityType.Object, builder);
+
+            // Assert
+            entityType.Verify();
+        }
+
+        enum MyEnumType
+        {
         }
     }
 }

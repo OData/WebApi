@@ -77,9 +77,9 @@ namespace System.Web.OData.Builder
         public static IEnumerable<PropertyConfiguration> Keys(this EntityTypeConfiguration entity)
         {
             Contract.Assert(entity != null);
-            if (entity.Keys.Any())
+            if (entity.Keys.Any() || entity.EnumKeys.Any())
             {
-                return entity.Keys;
+                return entity.Keys.OfType<PropertyConfiguration>().Concat(entity.EnumKeys);
             }
 
             if (entity.BaseType == null)

@@ -93,6 +93,84 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void CanCreateEntityWithEnumKey()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var enumEntityType = builder.EntityType<EnumModel>();
+            enumEntityType.HasKey(c => c.Simple);
+            enumEntityType.Property(c => c.Id);
+
+            // Act
+            IEdmModel model = builder.GetServiceModel();
+
+            // Assert
+            IEdmEntityType entityType = model.SchemaElements.OfType<IEdmEntityType>()
+                .FirstOrDefault(c => c.Name == "EnumModel");
+            Assert.NotNull(entityType);
+            Assert.Equal(2, entityType.Properties().Count());
+
+            Assert.Equal(1, entityType.DeclaredKey.Count());
+            IEdmStructuralProperty key = entityType.DeclaredKey.First();
+            Assert.Equal(EdmTypeKind.Enum, key.Type.TypeKind());
+            Assert.Equal("Microsoft.TestCommon.Types.SimpleEnum", key.Type.Definition.FullTypeName());
+        }
+
+        [Fact]
+        public void CanCreateEntityWithCompoundEnumKeys()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var enumEntityType = builder.EntityType<EnumModel>();
+            enumEntityType.HasKey(c => new { c.Simple, c.Long });
+
+            // Act
+            IEdmModel model = builder.GetServiceModel();
+
+            // Assert
+            IEdmEntityType entityType = model.SchemaElements.OfType<IEdmEntityType>()
+                .FirstOrDefault(c => c.Name == "EnumModel");
+            Assert.NotNull(entityType);
+            Assert.Equal(2, entityType.Properties().Count());
+
+            Assert.Equal(2, entityType.DeclaredKey.Count());
+            IEdmStructuralProperty simpleKey = entityType.DeclaredKey.First(k => k.Name == "Simple");
+            Assert.Equal(EdmTypeKind.Enum, simpleKey.Type.TypeKind());
+            Assert.Equal("Microsoft.TestCommon.Types.SimpleEnum", simpleKey.Type.Definition.FullTypeName());
+
+            IEdmStructuralProperty longKey = entityType.DeclaredKey.First(k => k.Name == "Long");
+            Assert.Equal(EdmTypeKind.Enum, longKey.Type.TypeKind());
+            Assert.Equal("Microsoft.TestCommon.Types.LongEnum", longKey.Type.Definition.FullTypeName());
+        }
+
+        [Fact]
+        public void CanCreateEntityWithPrimitiveAndEnumKey()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var enumEntityType = builder.EntityType<EnumModel>();
+            enumEntityType.HasKey(c => new { c.Simple, c.Id });
+
+            // Act
+            IEdmModel model = builder.GetServiceModel();
+
+            // Assert
+            IEdmEntityType entityType = model.SchemaElements.OfType<IEdmEntityType>()
+                .FirstOrDefault(c => c.Name == "EnumModel");
+            Assert.NotNull(entityType);
+            Assert.Equal(2, entityType.Properties().Count());
+
+            Assert.Equal(2, entityType.DeclaredKey.Count());
+            IEdmStructuralProperty enumKey = entityType.DeclaredKey.First(k => k.Name == "Simple");
+            Assert.Equal(EdmTypeKind.Enum, enumKey.Type.TypeKind());
+            Assert.Equal("Microsoft.TestCommon.Types.SimpleEnum", enumKey.Type.Definition.FullTypeName());
+
+            IEdmStructuralProperty primitiveKey = entityType.DeclaredKey.First(k => k.Name == "Id");
+            Assert.Equal(EdmTypeKind.Primitive, primitiveKey.Type.TypeKind());
+            Assert.Equal("Edm.Int32", primitiveKey.Type.Definition.FullTypeName());
+        }
+
+        [Fact]
         public void CanCreateEntityWithCollectionProperties()
         {
             var builder = new ODataModelBuilder();
@@ -521,6 +599,40 @@ namespace System.Web.OData.Builder
             // Assert
             Assert.Empty(motorcycle.Keys);
         }
+
+        [Fact]
+        public void RemoveEnumKey_ThrowsArgumentNull()
+        {
+            // Arrange
+            var builder = new ODataModelBuilder();
+            var motorcycle = builder.AddEntityType(typeof(Motorcycle));
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(
+                () => motorcycle.RemoveKey(enumKeyProperty: null),
+                "enumKeyProperty");
+        }
+
+        [Fact]
+        public void RemoveEnumKey_Removes_EnumKeyProperty()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var enumEntityType = builder.AddEntityType(typeof(EnumModel));
+            enumEntityType.HasKey(typeof(EnumModel).GetProperty("Simple"));
+
+            EnumPropertyConfiguration enumProperty =
+                enumEntityType.AddEnumProperty(typeof(EnumModel).GetProperty("Simple"));
+
+            Assert.Equal(new[] { enumProperty }, enumEntityType.EnumKeys); // Guard
+
+            // Act
+            enumEntityType.RemoveKey(enumProperty);
+
+            // Assert
+            Assert.Empty(enumEntityType.EnumKeys);
+        }
+
 
         [Fact]
         public void DynamicDictionaryProperty_Works_ToSetEntityTypeAsOpen()

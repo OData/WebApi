@@ -30,6 +30,12 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 {
                     edmTypeConfiguration.RemoveKey(key);
                 }
+
+                EnumPropertyConfiguration[] enumKeys = edmTypeConfiguration.EnumKeys.ToArray();
+                foreach (EnumPropertyConfiguration key in enumKeys)
+                {
+                    edmTypeConfiguration.RemoveKey(key);
+                }
             }
         }
     }

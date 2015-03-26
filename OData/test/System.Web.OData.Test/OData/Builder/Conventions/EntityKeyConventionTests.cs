@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Web.OData.Builder.TestModels;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -36,6 +37,33 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
+        public void Apply_Calls_HasKey_ForEnumProperty_OnEdmType()
+        {
+            // Arrange
+            Mock<EntityTypeConfiguration> mockEntityType = new Mock<EntityTypeConfiguration>();
+            Mock<PropertyConfiguration> property =
+                new Mock<PropertyConfiguration>(typeof(EntityKeyConventionTests_EntityType).GetProperty("ColorId"),
+                    mockEntityType.Object);
+            property.Setup(c => c.Kind).Returns(PropertyKind.Enum);
+
+            mockEntityType.Setup(e => e.Name).Returns("Color");
+            mockEntityType.Setup(
+                entityType => entityType.HasKey(typeof(EntityKeyConventionTests_EntityType).GetProperty("ColorId")))
+                .Returns(mockEntityType.Object)
+                .Verifiable();
+
+            mockEntityType.Object.ExplicitProperties.Add(new MockPropertyInfo(), property.Object);
+
+            var mockModelBuilder = new Mock<ODataConventionModelBuilder>(MockBehavior.Strict);
+
+            // Act
+            new EntityKeyConvention().Apply(mockEntityType.Object, mockModelBuilder.Object);
+
+            // Assert
+            mockEntityType.Verify();
+        }
+
+        [Fact]
         public void EntityKeyConvention_FiguresOutTheKeyProperty()
         {
             MockType baseType =
@@ -49,6 +77,31 @@ namespace System.Web.OData.Builder.Conventions
 
             IEdmEntityType entity = model.AssertHasEntityType(baseType);
             entity.AssertHasKey(model, "ID", EdmPrimitiveTypeKind.Int64);
+        }
+
+        [Fact]
+        public void EntityKeyConvention_FiguresOutTheEnumKeyProperty()
+        {
+            // Arrange
+            MockType baseType =
+                new MockType("BaseType")
+                .Property<Color>("ID");
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.AddEntityType(baseType);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType entity = model.AssertHasEntityType(baseType);
+
+            IEdmStructuralProperty enumProperty = entity.AssertHasProperty<IEdmStructuralProperty>(model, "ID", typeof(Color), false);
+            IEdmProperty enumKey = Assert.Single(entity.DeclaredKey);
+            Assert.Same(enumProperty, enumKey);
+
+            Assert.Equal(EdmTypeKind.Enum, enumKey.Type.TypeKind());
+            Assert.Equal("System.Web.OData.Builder.TestModels.Color", enumKey.Type.Definition.FullTypeName());
         }
 
         [Fact]
@@ -101,6 +154,8 @@ namespace System.Web.OData.Builder.Conventions
             public string iD { get; set; }
 
             public string SampleEntityID { get; set; }
+
+            public Color ColorId { get; set; }
         }
     }
 }

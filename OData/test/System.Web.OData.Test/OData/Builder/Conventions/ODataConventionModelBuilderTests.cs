@@ -244,6 +244,39 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
+        public void ModelBuilder_ProductsWithEnumKeyAttribute()
+        {
+            // Arrange
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntityType<ProductWithEnumKeyAttribute>();
+
+            // Act
+            IEdmModel model = modelBuilder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            Assert.Equal(2, model.SchemaElements.OfType<IEdmSchemaType>().Count());
+
+            IEdmEntityType product = model.AssertHasEntityType(mappedEntityClrType: typeof(ProductWithEnumKeyAttribute));
+            product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
+            Assert.Equal(2, product.StructuralProperties().Count());
+            Assert.Empty(product.NavigationProperties());
+
+            IEdmStructuralProperty enumKey = Assert.Single(product.DeclaredKey);
+            Assert.Equal("ProductColor", enumKey.Name);
+            Assert.Equal(EdmTypeKind.Enum, enumKey.Type.Definition.TypeKind);
+            Assert.Equal("System.Web.OData.Builder.TestModels.Color", enumKey.Type.Definition.FullTypeName());
+            Assert.False(enumKey.Type.IsNullable);
+
+            IEdmEnumType colorType = Assert.Single(model.SchemaElements.OfType<IEdmEnumType>());
+            Assert.Equal("System.Web.OData.Builder.TestModels.Color", enumKey.Type.Definition.FullTypeName());
+            Assert.Equal(3, colorType.Members.Count());
+            Assert.Single(colorType.Members.Where(m => m.Name == "Red"));
+            Assert.Single(colorType.Members.Where(m => m.Name == "Green"));
+            Assert.Single(colorType.Members.Where(m => m.Name == "Blue"));
+        }
+
+        [Fact]
         public void ModelBuilder_ProductsWithFilterSortable()
         {
             var modelBuilder = new ODataConventionModelBuilder();
@@ -1672,6 +1705,42 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
+        public void DerivedTypes_Can_DefineEnumKeys_InQueryCompositionMode()
+        {
+            // Arrange
+            MockType baseType = new MockType("BaseType")
+                .Property(typeof(Color), "ID");
+
+            MockType derivedType = new MockType("DerivedType")
+                .Property(typeof(Color), "DerivedTypeId")
+                .BaseType(baseType);
+
+            MockAssembly assembly = new MockAssembly(baseType, derivedType);
+
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
+            var builder = new ODataConventionModelBuilder(configuration, isQueryCompositionMode: true);
+
+            builder.AddEntitySet("bases", builder.AddEntityType(baseType));
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            model.AssertHasEntitySet("bases", baseType);
+            IEdmEntityType baseEntityType = model.AssertHasEntityType(baseType);
+            IEdmStructuralProperty key = Assert.Single(baseEntityType.DeclaredKey);
+            Assert.Equal(EdmTypeKind.Enum, key.Type.TypeKind());
+            Assert.Equal("System.Web.OData.Builder.TestModels.Color", key.Type.Definition.FullTypeName());
+
+            IEdmEntityType derivedEntityType = model.AssertHasEntityType(derivedType, baseType);
+            Assert.Null(derivedEntityType.DeclaredKey);
+            IEdmProperty derivedId = Assert.Single(derivedEntityType.DeclaredProperties);
+            Assert.Equal(EdmTypeKind.Enum, derivedId.Type.TypeKind());
+            Assert.Equal("System.Web.OData.Builder.TestModels.Color", derivedId.Type.Definition.FullTypeName());
+        }
+
+        [Fact]
         public void ModelBuilder_DerivedComplexTypeHavingKeys_Throws()
         {
             // Arrange
@@ -2652,6 +2721,14 @@ namespace System.Web.OData.Builder.Conventions
         public ProductVersion Version { get; set; }
 
         public CategoryWithKeyAttribute Category { get; set; }
+    }
+
+    public class ProductWithEnumKeyAttribute
+    {
+        [Key]
+        public Color ProductColor { get; set; }
+
+        public string Name { get; set; }
     }
 
     public class ProductWithFilterSortable

@@ -9,11 +9,13 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Tracing;
+using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
+using Microsoft.TestCommon.Types;
 using Moq;
 
 namespace System.Web.OData.Builder
@@ -561,6 +563,40 @@ namespace System.Web.OData.Builder
             builder.EntityType<AbstractEntityType>().Abstract().Property(a => a.IntProperty);
             builder.EntityType<SubEntityType>().HasKey(b => b.SubKey).DerivesFrom<AbstractEntityType>();
             builder.EntityType<AnotherSubEntityType>().HasKey(d => d.AnotherKey).DerivesFrom<AbstractEntityType>();
+            IEdmModel model = builder.GetEdmModel();
+
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(model);
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var response = client.GetAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+
+            string payload = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains(expectMetadata, payload);
+        }
+
+        [Fact]
+        public void DollarMetadata_Works_WithEntityTypeWithEnumKeys()
+        {
+            // Arrange
+            const string expectMetadata =
+                "      <EntityType Name=\"EnumModel\">\r\n" +
+                "        <Key>\r\n" +
+                "          <PropertyRef Name=\"Simple\" />\r\n" +
+                "        </Key>\r\n" +
+                "        <Property Name=\"Simple\" Type=\"NS.SimpleEnum\" Nullable=\"false\" />\r\n" +
+                "      </EntityType>\r\n" +
+                "      <EnumType Name=\"SimpleEnum\" />";
+
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<EnumModel>().HasKey(e => e.Simple).Namespace = "NS";
+            builder.EnumType<SimpleEnum>().Namespace = "NS";
             IEdmModel model = builder.GetEdmModel();
 
             var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();

@@ -290,6 +290,10 @@ namespace System.Web.OData.Builder
             CreateStructuralTypeBody(type, config);
             IEnumerable<IEdmStructuralProperty> keys = config.Keys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.Name));
             type.AddKeys(keys);
+
+            // Add the Enum keys
+            keys = config.EnumKeys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.Name));
+            type.AddKeys(keys);
         }
 
         private void CreateNavigationProperty(EntityTypeConfiguration config)

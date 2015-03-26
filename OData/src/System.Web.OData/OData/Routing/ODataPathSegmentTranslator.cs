@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
@@ -419,6 +418,16 @@ namespace System.Web.OData.Routing
                 if (uriTemplateExpression != null)
                 {
                     return uriTemplateExpression.LiteralText;
+                }
+            }
+
+            ConstantNode constantNode = value as ConstantNode;
+            if (constantNode != null)
+            {
+                ODataEnumValue enumValue = constantNode.Value as ODataEnumValue;
+                if (enumValue != null)
+                {
+                    return ODataUriUtils.ConvertToUriLiteral(enumValue, ODataVersion.V4);
                 }
             }
 

@@ -86,7 +86,8 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         internal List<ODataProperty> AppendDynamicProperties(object source, IEdmStructuredTypeReference structuredType,
-            ODataSerializerContext writeContext, List<ODataProperty> declaredProperties)
+            ODataSerializerContext writeContext, List<ODataProperty> declaredProperties,
+            string[] selectedDynamicProperties)
         {
             Contract.Assert(source != null);
             Contract.Assert(structuredType != null);
@@ -118,7 +119,10 @@ namespace System.Web.OData.Formatter.Serialization
             // It is used to make sure the dynamic property name is different from all declared property names.
             HashSet<string> declaredPropertyNameSet = new HashSet<string>(declaredProperties.Select(p => p.Name));
             List<ODataProperty> dynamicProperties = new List<ODataProperty>();
-            foreach (KeyValuePair<string, object> dynamicProperty in dynamicPropertyDictionary)
+            IEnumerable<KeyValuePair<string, object>> dynamicPropertiesToSelect =
+                dynamicPropertyDictionary.Where(
+                    x => !selectedDynamicProperties.Any() || selectedDynamicProperties.Contains(x.Key));
+            foreach (KeyValuePair<string, object> dynamicProperty in dynamicPropertiesToSelect)
             {
                 if (String.IsNullOrEmpty(dynamicProperty.Key) || dynamicProperty.Value == null)
                 {

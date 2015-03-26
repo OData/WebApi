@@ -677,8 +677,11 @@ namespace System.Web.OData.Query.Validators
                     ValidateAllNode(node as AllNode, settings);
                     break;
 
-                case QueryNodeKind.NamedFunctionParameter:
                 case QueryNodeKind.SingleValueOpenPropertyAccess:
+                    //no validation on open values?
+                    break;
+
+                case QueryNodeKind.NamedFunctionParameter:
                 case QueryNodeKind.ParameterAlias:
                 case QueryNodeKind.EntitySet:
                 case QueryNodeKind.KeyLookup:

@@ -29,6 +29,7 @@ namespace System.Web.OData.Formatter.Serialization
             ExpandedNavigationProperties = new Dictionary<IEdmNavigationProperty, SelectExpandClause>();
             SelectedActions = new HashSet<IEdmAction>();
             SelectedFunctions = new HashSet<IEdmFunction>();
+            SelectedDynamicProperties = new HashSet<string>();
         }
 
         /// <summary>
@@ -100,6 +101,11 @@ namespace System.Web.OData.Formatter.Serialization
         /// Gets the list of EDM navigation properties to be expanded in the response.
         /// </summary>
         public IDictionary<IEdmNavigationProperty, SelectExpandClause> ExpandedNavigationProperties { get; private set; }
+
+        /// <summary>
+        /// Gets the list of dynamic properties to select.
+        /// </summary>
+        public ISet<string> SelectedDynamicProperties { get; private set; }
 
         /// <summary>
         /// Gets the flag to indicate the dynamic property to be included in the response or not.
@@ -183,6 +189,13 @@ namespace System.Web.OData.Formatter.Serialization
                         AddOperations(allActions, allFunctions, operationSegment);
                         continue;
                     }
+
+                    OpenPropertySegment openPropertySegment = segment as OpenPropertySegment;
+                    if (openPropertySegment != null)
+                    {
+                        SelectedDynamicProperties.Add(openPropertySegment.PropertyName);
+                        continue;
+                    }
                     throw new ODataException(Error.Format(SRResources.SelectionTypeNotSupported, segment.GetType().Name));
                 }
 
@@ -245,7 +258,8 @@ namespace System.Web.OData.Formatter.Serialization
             ODataPathSegment lastSegment = path.LastSegment;
             if (!(lastSegment is NavigationPropertySegment
                 || lastSegment is PropertySegment
-                || lastSegment is OperationSegment))
+                || lastSegment is OperationSegment
+                || lastSegment is OpenPropertySegment))
             {
                 throw new ODataException(SRResources.UnsupportedSelectExpandPath);
             }

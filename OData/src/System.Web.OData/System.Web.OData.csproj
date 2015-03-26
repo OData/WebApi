@@ -120,6 +120,7 @@
     <Compile Include="OData\Query\NotCountableAttribute.cs" />
     <Compile Include="OData\Query\NotFilterableAttribute.cs" />
     <Compile Include="OData\Query\NotSortableAttribute.cs" />
+    <Compile Include="OData\Query\OrderByOpenPropertyNode.cs" />
     <Compile Include="OData\Query\ParameterAliasNodeTranslator.cs" />
     <Compile Include="OData\Query\Validators\CountQueryValidator.cs" />
     <Compile Include="OData\RequestPreferenceHelpers.cs" />

@@ -43,6 +43,12 @@ namespace System.Web.OData.Query
                 if (clause.Expression is NonentityRangeVariableReferenceNode || clause.Expression is EntityRangeVariableReferenceNode)
                 {
                     result.Add(new OrderByItNode(clause.Direction));
+                    continue;
+                }
+
+                if (clause.Expression is SingleValueOpenPropertyAccessNode)
+                {
+                    result.Add(new OrderByOpenPropertyNode(clause));
                 }
                 else
                 {

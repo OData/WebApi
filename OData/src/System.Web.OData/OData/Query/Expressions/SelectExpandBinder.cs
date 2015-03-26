@@ -298,6 +298,7 @@ namespace System.Web.OData.Query.Expressions
                 Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand = GetPropertiesToExpandInQuery(selectExpandClause);
                 ISet<IEdmStructuralProperty> autoSelectedProperties;
                 ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, out autoSelectedProperties);
+                bool isSelectingOpenTypeSegments = GetSelectsOpenTypeSegments(selectExpandClause, entityType);
 
                 if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0)
                 {
@@ -305,7 +306,7 @@ namespace System.Web.OData.Query.Expressions
                     Contract.Assert(wrapperProperty != null);
 
                     Expression propertyContainerCreation =
-                        BuildPropertyContainer(entityType, source, propertiesToExpand, propertiesToInclude, autoSelectedProperties);
+                        BuildPropertyContainer(entityType, source, propertiesToExpand, propertiesToInclude, autoSelectedProperties, isSelectingOpenTypeSegments);
 
                     wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, propertyContainerCreation));
                     isContainerPropertySet = true;
@@ -317,9 +318,20 @@ namespace System.Web.OData.Query.Expressions
             return Expression.MemberInit(Expression.New(wrapperType), wrapperTypeMemberAssignments);
         }
 
+        private bool GetSelectsOpenTypeSegments(SelectExpandClause selectExpandClause, IEdmEntityType entityType)
+        {
+            if (!entityType.IsOpen)
+                return false;
+
+            if (selectExpandClause.AllSelected)
+                return true;
+
+            return selectExpandClause.SelectedItems.OfType<PathSelectItem>().Any(x => x.SelectedPath.LastSegment is OpenPropertySegment);
+        }
+
         private Expression BuildPropertyContainer(IEdmEntityType elementType, Expression source,
             Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand,
-            ISet<IEdmStructuralProperty> propertiesToInclude, ISet<IEdmStructuralProperty> autoSelectedProperties)
+            ISet<IEdmStructuralProperty> propertiesToInclude, ISet<IEdmStructuralProperty> autoSelectedProperties, bool isSelectingOpenTypeSegments)
         {
             IList<NamedPropertyExpression> includedProperties = new List<NamedPropertyExpression>();
 
@@ -368,6 +380,15 @@ namespace System.Web.OData.Query.Expressions
                 Expression propertyName = CreatePropertyNameExpression(elementType, propertyToInclude, source);
                 Expression propertyValue = CreatePropertyValueExpression(elementType, propertyToInclude, source);
                 includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue) { AutoSelected = true });
+            }
+
+            if (isSelectingOpenTypeSegments)
+            {
+                var dynamicPropertyDictionary = EdmLibHelpers.GetDynamicPropertyDictionary(elementType, _model);
+
+                Expression propertyName = Expression.Constant(dynamicPropertyDictionary.Name);
+                Expression propertyValue = Expression.Property(source, dynamicPropertyDictionary.Name);
+                includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue));
             }
 
             // create a property container that holds all these property names and values.

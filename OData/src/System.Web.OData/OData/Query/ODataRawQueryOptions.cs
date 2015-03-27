@@ -52,5 +52,10 @@ namespace System.Web.OData.Query
         ///  Gets the raw $skiptoken query value from the incoming request Uri if exists.
         /// </summary>
         public string SkipToken { get; internal set; }
+
+        /// <summary>
+        ///  Gets the raw $deltatoken query value from the incoming request Uri if exists.
+        /// </summary>
+        public string DeltaToken { get; internal set; }
     }
 }

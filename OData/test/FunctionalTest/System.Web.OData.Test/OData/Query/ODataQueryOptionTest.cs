@@ -69,7 +69,8 @@ namespace System.Web.OData.Query
                     "$expand",
                     "$select",
                     "$format",
-                    "$skiptoken"
+                    "$skiptoken",
+                    "$deltatoken"
                 };
             }
         }
@@ -205,7 +206,7 @@ namespace System.Web.OData.Query
 
             var message = new HttpRequestMessage(
                 HttpMethod.Get,
-                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken")
+                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken&$deltatoken=DeltaToken")
             );
 
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
@@ -222,6 +223,7 @@ namespace System.Web.OData.Query
             Assert.NotNull(queryOptions.SelectExpand);
             Assert.Equal("true", queryOptions.RawValues.Count);
             Assert.Equal("SkipToken", queryOptions.RawValues.SkipToken);
+            Assert.Equal("DeltaToken", queryOptions.RawValues.DeltaToken);
         }
 
         [Fact]
@@ -232,7 +234,7 @@ namespace System.Web.OData.Query
 
             var message = new HttpRequestMessage(
                 HttpMethod.Get,
-                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken")
+                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken&$deltatoken=DeltaToken")
             );
 
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
@@ -249,7 +251,7 @@ namespace System.Web.OData.Query
 
             var message = new HttpRequestMessage(
                 HttpMethod.Get,
-                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken")
+                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken&$deltatoken=DeltaToken")
             );
 
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
@@ -266,7 +268,7 @@ namespace System.Web.OData.Query
 
             var message = new HttpRequestMessage(
                 HttpMethod.Get,
-                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken")
+                new Uri("http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken&$deltatoken=DeltaToken")
             );
 
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);

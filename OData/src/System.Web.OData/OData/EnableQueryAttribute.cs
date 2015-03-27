@@ -164,7 +164,7 @@ namespace System.Web.OData
         /// Gets or sets the query parameters that are allowed in queries.
         /// </summary>
         /// <value>The default includes all query options: $filter, $skip, $top, $orderby, $expand, $select, $count,
-        /// $format and $skiptoken.</value>
+        /// $format, $skiptoken and $deltatoken.</value>
         public AllowedQueryOptions AllowedQueryOptions
         {
             get

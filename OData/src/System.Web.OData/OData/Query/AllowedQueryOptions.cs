@@ -60,6 +60,11 @@ namespace System.Web.OData.Query
         SkipToken = 0x100,
 
         /// <summary>
+        /// A value that corresponds to allowing the $deltatoken query option.
+        /// </summary>
+        DeltaToken = 0x200,
+
+        /// <summary>
         /// A value that corresponds to the default query options supported by <see cref="EnableQueryAttribute"/>.
         /// </summary>
         Supported = Filter | OrderBy | Top | Skip | Count | Select | Expand | Format,
@@ -67,6 +72,6 @@ namespace System.Web.OData.Query
         /// <summary>
         /// A value that corresponds to allowing all query options.
         /// </summary>
-        All = Filter | Expand | Select | OrderBy | Top | Skip | Count | Format | SkipToken
+        All = Filter | Expand | Select | OrderBy | Top | Skip | Count | Format | SkipToken | DeltaToken
     }
 }

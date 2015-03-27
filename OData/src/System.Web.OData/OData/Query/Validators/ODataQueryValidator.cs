@@ -89,6 +89,11 @@ namespace System.Web.OData.Query.Validators
             {
                 ValidateQueryOptionAllowed(AllowedQueryOptions.SkipToken, validationSettings.AllowedQueryOptions);
             }
+
+            if (options.RawValues.DeltaToken != null)
+            {
+                ValidateQueryOptionAllowed(AllowedQueryOptions.DeltaToken, validationSettings.AllowedQueryOptions);
+            }
         }
 
         private static void ValidateQueryOptionAllowed(AllowedQueryOptions queryOption, AllowedQueryOptions allowed)

@@ -46,6 +46,7 @@ namespace System.Web.OData.Query.Validators
                 return new TheoryDataSet<AllowedQueryOptions, string, string>
                 {
                     { AllowedQueryOptions.SkipToken, "$skiptoken=__skip__", "SkipToken" },
+                    { AllowedQueryOptions.DeltaToken, "$deltatoken=__delta__", "DeltaToken" },
                 };
             }
         }

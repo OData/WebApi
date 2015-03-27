@@ -202,7 +202,8 @@ namespace System.Web.OData.Query
                  queryOptionName == "$expand" ||
                  queryOptionName == "$select" ||
                  queryOptionName == "$format" ||
-                 queryOptionName == "$skiptoken";
+                 queryOptionName == "$skiptoken" ||
+                 queryOptionName == "$deltatoken";
         }
 
         /// <summary>
@@ -637,6 +638,9 @@ namespace System.Web.OData.Query
                         break;
                     case "$skiptoken":
                         RawValues.SkipToken = kvp.Value;
+                        break;
+                    case "$deltatoken":
+                        RawValues.DeltaToken = kvp.Value;
                         break;
                     default:
                         // we don't throw if we can't recognize the query

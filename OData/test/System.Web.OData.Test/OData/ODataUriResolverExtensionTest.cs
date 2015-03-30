@@ -219,16 +219,61 @@ namespace System.Web.OData
             }
         }
 
+        [Fact]
+        public void DefaultResolver_DoesnotWorks_UnqualifiedNameTemplate()
+        {
+            // Arrange
+            IEdmModel model = GetEdmModel();
+            HttpConfiguration config = new[] { typeof(ParserExtenstionCustomers2Controller) }.GetHttpConfiguration();
+            config.EnableUnqualifiedNameCall(false);
+            config.MapODataServiceRoute("odata", "odata", model);
+            HttpClient client = new HttpClient(new HttpServer(config));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(
+                HttpMethod.Get,
+                "http://localhost/odata/ParserExtenstionCustomers2");
+
+            // Assert
+            Assert.Throws<InvalidOperationException>(() => client.SendAsync(request).Result);
+        }
+
+        [Fact]
+        public void ExtensionResolver_Works_UnqualifiedNameTemplate()
+        {
+            // Arrange
+            IEdmModel model = GetEdmModel();
+            HttpConfiguration config = new[] { typeof(ParserExtenstionCustomers2Controller) }.GetHttpConfiguration();
+            config.EnableUnqualifiedNameCall(true);
+            config.MapODataServiceRoute("odata", "odata", model);
+            HttpClient client = new HttpClient(new HttpServer(config));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(
+                HttpMethod.Get,
+                "http://localhost/odata/ParserExtenstionCustomers2/GetCustomerTitleById(id=32)");
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal("GetCustomerTitleById/32", (response.Content as ObjectContent<string>).Value);
+        }
+
         private static IEdmModel GetEdmModel()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<ParserExtenstionCustomer>("ParserExtenstionCustomers");
+            builder.EntitySet<ParserExtenstionCustomer>("ParserExtenstionCustomers2");
             builder.EntitySet<ParserExtenstionOrder>("ParserExtenstionOrders");
 
             builder.EntityType<ParserExtenstionCustomer>()
                 .Collection.Function("GetCustomerByGender")
                 .Returns<string>()
                 .Parameter<Gender>("gender");
+            builder.EntityType<ParserExtenstionCustomer>()
+                .Collection.Function("GetCustomerTitleById")
+                .Returns<string>()
+                .Parameter<int>("id");
             return builder.GetEdmModel();
         }
     }
@@ -255,6 +300,17 @@ namespace System.Web.OData
         }
     }
 
+    public class ParserExtenstionCustomers2Controller : ODataController
+    {
+        [HttpGet]
+        [ODataRoute("ParserExtenstionCustomers2/GetCustomerTitleById(id={id})")]
+        public IHttpActionResult GetCustomerByTitleVarN([FromODataUri]int id)
+        {
+            var t = ModelState.IsValid;
+            return Ok("GetCustomerTitleById/" + id);
+        }
+    }
+
     class ParserExtensionCustomersContext
     {
         public static IList<ParserExtenstionCustomer> customers = Enumerable.Range(0, 10).Select(i =>
@@ -266,7 +322,7 @@ namespace System.Web.OData
                     new ParserExtenstionOrder
                     {
                         Id = j,
-                        Price = i*j
+                        Price = i * j
                     }).ToList()
             }).ToList();
     }

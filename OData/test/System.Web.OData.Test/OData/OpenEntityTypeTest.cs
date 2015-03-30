@@ -369,8 +369,6 @@ namespace System.Web.OData
     // Controller
     public class SimpleOpenCustomersController : ODataController
     {
-        private static IList<SimpleOpenCustomer> _simpleOpenCustomers;
-
         [EnableQuery]
         public IQueryable<SimpleOpenCustomer> Get()
         {
@@ -450,10 +448,6 @@ namespace System.Web.OData
 
         private static IList<SimpleOpenCustomer> CreateCustomers()
         {
-            if (_simpleOpenCustomers != null)
-            {
-                return _simpleOpenCustomers;
-            }    
             int[] IntValues = { 200, 100, 300, 0, 400 };
             IList<SimpleOpenCustomer> customers = Enumerable.Range(0, 5).Select(i =>
                 new SimpleOpenCustomer
@@ -506,8 +500,7 @@ namespace System.Web.OData
             };
 
             customers.Add(vipCustomer);
-            _simpleOpenCustomers = customers;
-            return _simpleOpenCustomers;
+            return customers;
         }
     }
     

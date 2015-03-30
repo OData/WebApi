@@ -53,8 +53,14 @@ namespace System.Web.OData.Routing.Conventions
                 throw Error.ArgumentNull("configuration");
             }
 
+            DefaultODataPathHandler odataPathHanlder = pathTemplateHandler as DefaultODataPathHandler;
+            if (odataPathHanlder != null)
+            {
+                odataPathHanlder.ResolverSetttings = configuration.GetResolverSettings();
+            }
+
             Action<HttpConfiguration> oldInitializer = configuration.Initializer;
-            bool initialized = false;    
+            bool initialized = false;
             configuration.Initializer = (config) =>
             {
                 if (!initialized)
@@ -217,7 +223,7 @@ namespace System.Web.OData.Routing.Conventions
                     IHttpActionSelector actionSelector = controller.Configuration.Services.GetActionSelector();
                     ILookup<string, HttpActionDescriptor> actionMapping = actionSelector.GetActionMapping(controller);
                     HttpActionDescriptor[] actions = actionMapping.SelectMany(a => a).ToArray();
- 
+
                     foreach (string prefix in GetODataRoutePrefixes(controller))
                     {
                         foreach (HttpActionDescriptor action in actions)

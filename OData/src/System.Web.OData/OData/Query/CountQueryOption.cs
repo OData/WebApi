@@ -137,28 +137,6 @@ namespace System.Web.OData.Query
 
             if (Value)
             {
-                return ExpressionHelpers.Count(query, Context.ElementClrType)();
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Gets the Func of entities number that satisfy the given query if the response should include a count query option, or <c>null</c> otherwise.
-        /// </summary>
-        /// <param name="query">The query to compute the count for.</param>
-        /// <returns>The the Func of entities number that satisfy the specified query if the response should include a count query option, or <c>null</c> otherwise.</returns>
-        internal Func<long> GetEntityCountFunc(IQueryable query)
-        {
-            if (Context.ElementClrType == null)
-            {
-                throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "GetEntityCount");
-            }
-
-            if (Value)
-            {
                 return ExpressionHelpers.Count(query, Context.ElementClrType);
             }
             else

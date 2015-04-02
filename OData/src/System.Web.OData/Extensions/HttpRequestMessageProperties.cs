@@ -33,7 +33,6 @@ namespace System.Web.OData.Extensions
         private const string RoutingConventionsKey = "System.Web.OData.RoutingConventions";
         private const string SelectExpandClauseKey = "System.Web.OData.SelectExpandClause";
         private const string TotalCountKey = "System.Web.OData.TotalCount";
-        private const string TotalCountFuncKey = "System.Web.OData.TotalCountFunc";
 
         internal const string ODataServiceVersionHeader = "OData-Version";
         internal const string ODataMaxServiceVersionHeader = "OData-MaxVersion";
@@ -46,24 +45,6 @@ namespace System.Web.OData.Extensions
         {
             Contract.Assert(request != null);
             _request = request;
-        }
-
-        internal Func<long> TotalCountFunc
-        {
-            get
-            {
-                object totalCountFunc;
-                if (_request.Properties.TryGetValue(TotalCountFuncKey, out totalCountFunc))
-                {
-                    return (Func<long>)totalCountFunc;
-                }
-
-                return null;
-            }
-            set
-            {
-                _request.Properties[TotalCountFuncKey] = value;
-            }
         }
 
         /// <summary>
@@ -163,11 +144,6 @@ namespace System.Web.OData.Extensions
                     // Fairly big problem if following cast fails. Indicates something else is writing properties with
                     // names we've chosen. Do not silently return null because that will hide the problem.
                     return (long)totalCount;
-                }
-
-                if (this.TotalCountFunc != null)
-                {
-                    return this.TotalCountFunc();
                 }
 
                 return null;

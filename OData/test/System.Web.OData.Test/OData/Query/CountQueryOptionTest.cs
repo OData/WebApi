@@ -134,26 +134,6 @@ namespace System.Web.OData.Query
         }
 
         [Fact]
-        public void GetEntityCountFunc_ReturnsFunc_IfValueIsTrue()
-        {
-            // Arrange
-            var countOption = new CountQueryOption("true", _context);
-
-            // Act & Assert
-            Assert.Equal(3, countOption.GetEntityCountFunc(_customers)());
-        }
-
-        [Fact]
-        public void GetEntityCountFunc_ReturnsNull_IfValueIsFalse()
-        {
-            // Arrange
-            var countOption = new CountQueryOption("false", _context);
-
-            // Act & Assert
-            Assert.Null(countOption.GetEntityCountFunc(_customers));
-        }
-
-        [Fact]
         public void Property_Value_WorksWithUnTypedContext()
         {
             // Arrange

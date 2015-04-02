@@ -261,12 +261,12 @@ namespace System.Web.OData.Query
 
             if (Count != null)
             {
-                if (Request.ODataProperties().TotalCountFunc == null)
+                if (Request.ODataProperties().TotalCount == null)
                 {
-                    Func<long> countFunc = Count.GetEntityCountFunc(result);
-                    if (countFunc != null)
+                    long? count = Count.GetEntityCount(result);
+                    if (count.HasValue)
                     {
-                        Request.ODataProperties().TotalCountFunc = countFunc;
+                        Request.ODataProperties().TotalCount = count.Value;
                     }
                 }
 

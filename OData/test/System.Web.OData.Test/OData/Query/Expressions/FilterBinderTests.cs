@@ -1103,8 +1103,7 @@ namespace System.Web.OData.Query.Expressions
         public void DateTimeFunctions(string filter, string expression)
         {
             TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
-            string expect = String.Format(expression,
-                "(IIF((($it.Birthday.Kind == Utc) OrElse ($it.Birthday.Kind == Local)), new DateTimeOffset($it.Birthday.ToUniversalTime()).ToOffset(00:00:00), new DateTimeOffset($it.Birthday, UTC.GetUtcOffset($it.Birthday)).ToUniversalTime().ToOffset(00:00:00))");
+            string expect = String.Format(expression, "($it.Birthday");
             VerifyQueryDeserialization(filter, expect);
         }
 

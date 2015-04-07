@@ -42,9 +42,6 @@ namespace System.Web.OData.Query.Expressions
         private static readonly Expression _zeroConstant = Expression.Constant(0);
         private static readonly Expression _ordinalStringComparisonConstant = Expression.Constant(StringComparison.Ordinal);
 
-        private readonly Expression _utcKind = Expression.Constant(DateTimeKind.Utc, typeof(DateTimeKind));
-        private readonly Expression _localKind = Expression.Constant(DateTimeKind.Local, typeof(DateTimeKind));
-
         private static readonly MethodInfo _enumTryParseMethod = typeof(Enum).GetMethods()
                         .Single(m => m.Name == "TryParse" && m.GetParameters().Length == 2);
 
@@ -992,12 +989,7 @@ namespace System.Web.OData.Query.Expressions
             Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
 
             // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
-            // Because DateTime is transferred to DateTimeOffset by default.
             Expression parameter = arguments[0];
-            if (IsDateTime(arguments[0].Type))
-            {
-                parameter = ConvertDateTimeType(parameter);
-            }
 
             Dictionary<string, PropertyInfo> propertyInfos = ClrCanonicalFunctions.DateTimeOffsetProperties;
 
@@ -1020,12 +1012,7 @@ namespace System.Web.OData.Query.Expressions
             Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
 
             // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
-            // Because DateTime is transferred to DateTimeOffset by default.
             Expression parameter = arguments[0];
-            if (IsDateTime(arguments[0].Type))
-            {
-                parameter = ConvertDateTimeType(parameter);
-            }
 
             Dictionary<string, PropertyInfo> propertyInfos = ClrCanonicalFunctions.DateTimeOffsetProperties;
 
@@ -1050,12 +1037,7 @@ namespace System.Web.OData.Query.Expressions
             Contract.Assert(arguments.Length == 1 && (IsTimeRelated(arguments[0].Type)));
 
             // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
-            // Because DateTime is transferred to DateTimeOffset by default.
             Expression parameter = arguments[0];
-            if (IsDateTime(arguments[0].Type))
-            {
-                parameter = ConvertDateTimeType(parameter);
-            }
 
             PropertyInfo property;
             if (IsTimeOfDay(parameter.Type))
@@ -1081,18 +1063,18 @@ namespace System.Web.OData.Query.Expressions
             Contract.Assert(arguments.Length == 1 && IsDateRelated(arguments[0].Type));
 
             // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
-            // Because DateTime is transferred to DateTimeOffset by default.
             Expression parameter = arguments[0];
-            if (IsDateTime(arguments[0].Type))
-            {
-                parameter = ConvertDateTimeType(parameter);
-            }
 
             PropertyInfo property;
             if (IsDate(parameter.Type))
             {
                 Contract.Assert(ClrCanonicalFunctions.DateProperties.ContainsKey(node.Name));
                 property = ClrCanonicalFunctions.DateProperties[node.Name];
+            }
+            else if (IsDateTime(parameter.Type))
+            {
+                Contract.Assert(ClrCanonicalFunctions.DateTimeProperties.ContainsKey(node.Name));
+                property = ClrCanonicalFunctions.DateTimeProperties[node.Name];
             }
             else
             {
@@ -1109,18 +1091,18 @@ namespace System.Web.OData.Query.Expressions
             Contract.Assert(arguments.Length == 1 && (IsTimeRelated(arguments[0].Type)));
 
             // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
-            // Because DateTime is transferred to DateTimeOffset by default.
             Expression parameter = arguments[0];
-            if (IsDateTime(arguments[0].Type))
-            {
-                parameter = ConvertDateTimeType(parameter);
-            }
 
             PropertyInfo property;
             if (IsTimeOfDay(parameter.Type))
             {
                 Contract.Assert(ClrCanonicalFunctions.TimeOfDayProperties.ContainsKey(node.Name));
                 property = ClrCanonicalFunctions.TimeOfDayProperties[node.Name];
+            }
+            else if (IsDateTime(parameter.Type))
+            {
+                Contract.Assert(ClrCanonicalFunctions.DateTimeProperties.ContainsKey(node.Name));
+                property = ClrCanonicalFunctions.DateTimeProperties[node.Name];
             }
             else
             {
@@ -1454,7 +1436,7 @@ namespace System.Web.OData.Query.Expressions
                             break;
 
                         case TypeCode.DateTime:
-                            convertedExpression = ConvertDateTimeType(source);
+                            convertedExpression = source;
                             break;
 
                         case TypeCode.Object:
@@ -1495,69 +1477,6 @@ namespace System.Web.OData.Query.Expressions
             return source;
         }
 
-        // Convert DateTime expression to DateTimeOffset expression with the TimeZone setting.
-        private Expression ConvertDateTimeType(Expression source)
-        {
-            Expression expression = ExtractValueFromNullableExpression(source);
-
-            Expression baseUtcOffset = Expression.Constant(TimeZoneInfoHelper.TimeZone.BaseUtcOffset, typeof(TimeSpan));
-
-            // $it.DateTime.ToUniversalTime()
-            Expression universalTimeCall = MakeFunctionCall(ClrCanonicalFunctions.ToUniversalTimeDateTime, expression);
-
-            Expression newDateTimeOffset = Expression.New(typeof(DateTimeOffset).GetConstructor(new[] { typeof(DateTime) }),
-                universalTimeCall);
-
-            // Call DateTimeOffset.ToOffset(TimeSpan)
-            Expression newDateTimeOffsetWithTimeZone = MakeFunctionCall(ClrCanonicalFunctions.ToOffsetFunction, newDateTimeOffset,
-                baseUtcOffset);
-
-            // Call TimeZoneInfo.GetUtcOffset(DateTime)
-            Expression timeZoneUtcOffset = MakeFunctionCall(ClrCanonicalFunctions.GetUtcOffset,
-                Expression.Constant(TimeZoneInfoHelper.TimeZone, typeof(TimeZoneInfo)), expression);
-
-            newDateTimeOffset = Expression.New(typeof(DateTimeOffset).GetConstructor(new[] { typeof(DateTime), typeof(TimeSpan) }),
-                expression, timeZoneUtcOffset);
-
-            // Call DateTimeOffset.ToUniversalTime()
-            Expression universalTimeCallOffset = MakeFunctionCall(ClrCanonicalFunctions.ToUniversalTimeDateTimeOffset, newDateTimeOffset);
-            Expression toOffsetOffset = MakeFunctionCall(ClrCanonicalFunctions.ToOffsetFunction, universalTimeCallOffset, baseUtcOffset);
-
-            Expression result = Expression.Condition(
-                test: CreateDateTimeCondition(expression),
-                ifTrue: newDateTimeOffsetWithTimeZone,
-                ifFalse: toOffsetOffset);
-
-            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
-            {
-                Expression nullTest = CheckForNull(source);
-                if (nullTest == null)
-                {
-                    return result;
-                }
-
-                return Expression.Condition(
-                    test: nullTest,
-                    ifTrue: Expression.Constant(null, typeof(DateTimeOffset?)),
-                    ifFalse: ToNullable(result));
-            }
-
-            return result;
-        }
-
-        private Expression CreateDateTimeCondition(Expression source)
-        {
-            Contract.Assert(source.Type == typeof(DateTime));
-
-            Expression dateTimeKind = MakeFunctionCall(ClrCanonicalFunctions.DateTimeKindPropertyInfo, source);
-
-            Expression leftKind = Expression.Equal(dateTimeKind, _utcKind);
-            Expression rightKind = Expression.Equal(dateTimeKind, _localKind);
-
-            // $it.DateTime.Kind == DateTimeKind.Utc || $it.DateTime.Kind == DateTimeKind.Local
-            return Expression.OrElse(leftKind, rightKind);
-        }
-
         private void EnterLambdaScope()
         {
             Contract.Assert(_lambdaParameters != null);
@@ -1592,6 +1511,15 @@ namespace System.Web.OData.Query.Expressions
                 Type enumUnderlyingType = Enum.GetUnderlyingType(enumType);
                 left = ConvertToEnumUnderlyingType(left, enumType, enumUnderlyingType);
                 right = ConvertToEnumUnderlyingType(right, enumType, enumUnderlyingType);
+            }
+
+            if (leftUnderlyingType == typeof(DateTime) && rightUnderlyingType == typeof(DateTimeOffset))
+            {
+                right = DateTimeOffsetToDateTime(right);
+            }
+            else if (rightUnderlyingType == typeof(DateTime) && leftUnderlyingType == typeof(DateTimeOffset))
+            {
+                left = DateTimeOffsetToDateTime(left);
             }
 
             if (left.Type != right.Type)
@@ -1659,6 +1587,25 @@ namespace System.Web.OData.Query.Expressions
                     throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, binaryOperator, typeof(FilterBinder).Name);
                 }
             }
+        }
+
+        private static Expression DateTimeOffsetToDateTime(Expression expression)
+        {
+            var unaryExpression = expression as UnaryExpression;
+            Contract.Assert(unaryExpression != null);
+
+            if (Nullable.GetUnderlyingType(unaryExpression.Type) == unaryExpression.Operand.Type)
+            {
+                // this is a cast from T to Nullable<T> which is redundant.
+                expression = unaryExpression.Operand;
+            } 
+            var parameterizedConstantValue = ExtractParameterizedConstant(expression);
+            var dto = parameterizedConstantValue as DateTimeOffset?;
+            if (dto != null)
+            {
+                expression = Expression.Constant(EdmPrimitiveHelpers.ConvertPrimitiveValue(dto.Value, typeof(DateTime)));
+            }
+            return expression;
         }
 
         private static Expression ConvertToEnumUnderlyingType(Expression expression, Type enumType, Type enumUnderlyingType)

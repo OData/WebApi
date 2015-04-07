@@ -76,6 +76,18 @@ namespace System.Web.OData.Query.Expressions
             new KeyValuePair<string, PropertyInfo>(DayFunctionName, typeof(Date).GetProperty("Day")),
         }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
+        // DateTimeproperties
+        public static readonly Dictionary<string, PropertyInfo> DateTimeProperties = new[]
+        {
+            new KeyValuePair<string, PropertyInfo>(YearFunctionName, typeof(DateTime).GetProperty("Year")),
+            new KeyValuePair<string, PropertyInfo>(MonthFunctionName, typeof(DateTime).GetProperty("Month")),
+            new KeyValuePair<string, PropertyInfo>(DayFunctionName, typeof(DateTime).GetProperty("Day")),
+            new KeyValuePair<string, PropertyInfo>(HourFunctionName, typeof(DateTime).GetProperty("Hour")),
+            new KeyValuePair<string, PropertyInfo>(MinuteFunctionName, typeof(DateTime).GetProperty("Minute")),
+            new KeyValuePair<string, PropertyInfo>(SecondFunctionName, typeof(DateTime).GetProperty("Second")),
+            new KeyValuePair<string, PropertyInfo>(MillisecondFunctionName, typeof(DateTime).GetProperty("Millisecond")),
+        }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        
         // DateTimeOffset properties
         public static readonly Dictionary<string, PropertyInfo> DateTimeOffsetProperties = new[]
         {

@@ -165,7 +165,7 @@ namespace System.Web.OData.Query.Expressions
                     case QueryNodeKind.EntityCollectionFunctionCall:
                     case QueryNodeKind.CollectionOpenPropertyAccess:
                     case QueryNodeKind.CollectionPropertyCast:
-                        // Unused or have unknown uses.
+                    // Unused or have unknown uses.
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
                 }
@@ -194,7 +194,7 @@ namespace System.Web.OData.Query.Expressions
 
                     case QueryNodeKind.SingleValueOpenPropertyAccess:
                         return BindDynamicPropertyAccessQueryNode(node as SingleValueOpenPropertyAccessNode);
-                    
+
                     case QueryNodeKind.UnaryOperator:
                         return BindUnaryOperatorNode(node as UnaryOperatorNode);
 
@@ -223,7 +223,7 @@ namespace System.Web.OData.Query.Expressions
                     case QueryNodeKind.KeyLookup:
                     case QueryNodeKind.SearchTerm:
                     case QueryNodeKind.SingleValueCast:
-                        // Unused or have unknown uses.
+                    // Unused or have unknown uses.
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
                 }
@@ -947,8 +947,8 @@ namespace System.Web.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
-            MethodInfo ceiling = IsType<double>(arguments[0].Type) 
-                ? ClrCanonicalFunctions.CeilingOfDouble 
+            MethodInfo ceiling = IsType<double>(arguments[0].Type)
+                ? ClrCanonicalFunctions.CeilingOfDouble
                 : ClrCanonicalFunctions.CeilingOfDecimal;
             return MakeFunctionCall(ceiling, arguments);
         }
@@ -961,8 +961,8 @@ namespace System.Web.OData.Query.Expressions
 
             Contract.Assert(arguments.Length == 1 && IsDoubleOrDecimal(arguments[0].Type));
 
-            MethodInfo floor = IsType<double>(arguments[0].Type) 
-                ? ClrCanonicalFunctions.FloorOfDouble 
+            MethodInfo floor = IsType<double>(arguments[0].Type)
+                ? ClrCanonicalFunctions.FloorOfDouble
                 : ClrCanonicalFunctions.FloorOfDecimal;
             return MakeFunctionCall(floor, arguments);
         }
@@ -991,7 +991,7 @@ namespace System.Web.OData.Query.Expressions
             // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
             Expression parameter = arguments[0];
 
-            Dictionary<string, PropertyInfo> propertyInfos = ClrCanonicalFunctions.DateTimeOffsetProperties;
+            Dictionary<string, PropertyInfo> propertyInfos = IsDateTime(arguments[0].Type) ? ClrCanonicalFunctions.DateTimeProperties : ClrCanonicalFunctions.DateTimeOffsetProperties;
 
             // Year, Month, Day
             Expression year = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.YearFunctionName], parameter);
@@ -1014,7 +1014,7 @@ namespace System.Web.OData.Query.Expressions
             // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
             Expression parameter = arguments[0];
 
-            Dictionary<string, PropertyInfo> propertyInfos = ClrCanonicalFunctions.DateTimeOffsetProperties;
+            Dictionary<string, PropertyInfo> propertyInfos = IsDateTime(arguments[0].Type) ? ClrCanonicalFunctions.DateTimeProperties : ClrCanonicalFunctions.DateTimeOffsetProperties;
 
             // Hour, Minute, Second, Millisecond
             Expression hour = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.HourFunctionName], parameter);
@@ -1043,6 +1043,11 @@ namespace System.Web.OData.Query.Expressions
             if (IsTimeOfDay(parameter.Type))
             {
                 property = ClrCanonicalFunctions.TimeOfDayProperties[ClrCanonicalFunctions.MillisecondFunctionName];
+            }
+            else
+            if (IsDateTime(parameter.Type))
+            {
+                property = ClrCanonicalFunctions.DateTimeProperties[ClrCanonicalFunctions.MillisecondFunctionName];
             }
             else
             {
@@ -1592,13 +1597,14 @@ namespace System.Web.OData.Query.Expressions
         private static Expression DateTimeOffsetToDateTime(Expression expression)
         {
             var unaryExpression = expression as UnaryExpression;
-            Contract.Assert(unaryExpression != null);
-
-            if (Nullable.GetUnderlyingType(unaryExpression.Type) == unaryExpression.Operand.Type)
+            if (unaryExpression != null)
             {
-                // this is a cast from T to Nullable<T> which is redundant.
-                expression = unaryExpression.Operand;
-            } 
+                if (Nullable.GetUnderlyingType(unaryExpression.Type) == unaryExpression.Operand.Type)
+                {
+                    // this is a cast from T to Nullable<T> which is redundant.
+                    expression = unaryExpression.Operand;
+                }
+            }
             var parameterizedConstantValue = ExtractParameterizedConstant(expression);
             var dto = parameterizedConstantValue as DateTimeOffset?;
             if (dto != null)

@@ -21,6 +21,7 @@ namespace System.Web.OData
         private readonly TimeZoneInfo _utcTimeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("UTC");
         private readonly TimeZoneInfo _pacificStandard = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
         private readonly TimeZoneInfo _chinaStandard = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
+        private readonly string _bastUri = "http://localhost/odata/DateTimeModels";
 
         [Fact]
         public void MetadataDocument_IncludesDateTimeProperties()
@@ -118,7 +119,7 @@ namespace System.Web.OData
         public void CanSelect_OnDateTimeProperty()
         {
             // Arrange
-            const string Expected ="{\r\n" +
+            const string Expected = "{\r\n" +
                 "  \"@odata.context\":\"http://localhost/odata/$metadata#DateTimeModels(BirthdayB,BirthdayC)/$entity\"," +
                 "\"BirthdayB\":\"2015-04-01T04:12:30+08:00\",\"BirthdayC\":[\r\n" +
                 "    \"2018-01-01T04:12:30+08:00\",\"2015-04-01T04:12:30+08:00\",\"2015-01-04T04:12:30+08:00\"\r\n" +
@@ -165,6 +166,25 @@ namespace System.Web.OData
             Assert.Equal(2, result["value"].Count());
             Assert.Equal(DateTimeOffset.Parse("2016-01-01T04:12:30+08:00"), result["value"][0]["BirthdayA"]);
             Assert.Equal(DateTimeOffset.Parse("2017-01-01T04:12:30+08:00"), result["value"][1]["BirthdayA"]);
+        }
+
+        [Theory]
+        [InlineData("?$filter=BirthdayA lt cast(2015-04-01T04:11:31%2B08:00,Edm.DateTimeOffset)")]
+        [InlineData("?$filter=cast(2015-04-01T04:11:31%2B08:00,Edm.DateTimeOffset) ge BirthdayA")]
+        [InlineData("?$filter=2015-04-01T04:11:31Z ge BirthdayA")]
+        [InlineData("?$filter=BirthdayA lt 2015-04-01T04:11:31Z")]
+        [InlineData("?$filter=BirthdayB lt 2015-04-01T04:11:31Z")]
+        [InlineData("?$filter=2015-04-01T04:11:31Z ge BirthdayB")]
+        public void CanFilter_OnDateTimeProperty_WithDateTimeAndDateTimeOffset(string uri)
+        {
+            // Arrange
+            var client = GetClient(timeZoneInfo: null);
+
+            // Act
+            var response = client.GetAsync(_bastUri + uri).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
         }
 
         [Theory]

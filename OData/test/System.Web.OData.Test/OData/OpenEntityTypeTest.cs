@@ -20,6 +20,8 @@ namespace System.Web.OData
 {
     public class OpenEntityTypeTest
     {
+        private const string _untypedCustomerRequestRooturl = "http://localhost/odata/UntypedSimpleOpenCustomers";
+
         [Fact]
         public void Get_OpenEntityType()
         {
@@ -94,8 +96,29 @@ namespace System.Web.OData
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
             Assert.Equal("http://localhost/odata/$metadata#UntypedSimpleOpenCustomers/$entity", result["@odata.context"]);
             Assert.Equal("#Collection(NS.Color)", result["Colors@odata.type"]);
-            Assert.Equal(new JArray(new[] { "Red", "0" }), result["Colors"]);
+            Assert.Equal(new JArray(new[] { "Red", "0" , "Red"}), result["Colors"]);
             Assert.Equal("Red", result["Color"]);
+        }
+
+        [Theory]
+        [InlineData("/$count", "1")]
+        [InlineData("(1)/DeclaredNumbers/$count", "2")]
+        [InlineData("(1)/DeclaredColors/$count", "3")] 
+        [InlineData("(1)/DeclaredAddresses/$count", "2")] 
+        public void Get_UnTyped_DollarCount(string requestUri, string expectedResult)
+        {
+            // Arrange
+            var configuration = new[] { typeof(UntypedSimpleOpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetUntypedEdmModel());
+
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpResponseMessage response = client.GetAsync(_untypedCustomerRequestRooturl + requestUri).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(expectedResult, response.Content.ReadAsStringAsync().Result);
         }
 
         [Fact]
@@ -202,7 +225,6 @@ namespace System.Web.OData
               "\"FavoriteColors\":[\"0\", \"1\"]" +
             "}";
 
-            const string RequestUri = "http://localhost/odata/UntypedSimpleOpenCustomers";
 
             var configuration = new[] { typeof(UntypedSimpleOpenCustomersController) }.GetHttpConfiguration();
             configuration.MapODataServiceRoute("odata", "odata", GetUntypedEdmModel());
@@ -210,7 +232,7 @@ namespace System.Web.OData
             HttpClient client = new HttpClient(new HttpServer(configuration));
 
             // Act
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, _untypedCustomerRequestRooturl);
             request.Content = new StringContent(Payload);
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
             HttpResponseMessage response = client.SendAsync(request).Result;
@@ -304,16 +326,26 @@ namespace System.Web.OData
             EdmComplexType address = new EdmComplexType("NS", "Address", null, false, true);
             address.AddStructuralProperty("Street", EdmPrimitiveTypeKind.String);
             model.AddElement(address);
+            IEdmCollectionTypeReference complexCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(address.ToEdmTypeReference(false)));   
 
             // enum type color
             EdmEnumType color = new EdmEnumType("NS", "Color");
             color.AddMember(new EdmEnumMember(color, "Red", new EdmIntegerConstant(0)));
             model.AddElement(color);
+            IEdmCollectionTypeReference enumCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(color.ToEdmTypeReference(false)));
+
+            // primitive collection type
+            IEdmTypeReference intType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: true);
+            EdmCollectionTypeReference primitiveCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(intType));
 
             // entity type customer
             EdmEntityType customer = new EdmEntityType("NS", "UntypedSimpleOpenCustomer", null, false, true);
             customer.AddKeys(customer.AddStructuralProperty("CustomerId", EdmPrimitiveTypeKind.Int32));
             customer.AddStructuralProperty("Color", new EdmEnumTypeReference(color, isNullable: true));
+            customer.AddStructuralProperty("DeclaredAddresses", complexCollectionType);
+            customer.AddStructuralProperty("DeclaredColors", enumCollectionType);
+            customer.AddStructuralProperty("DeclaredNumbers", primitiveCollectionType);
+
             model.AddElement(customer);
 
             EdmAction action = new EdmAction(
@@ -337,62 +369,7 @@ namespace System.Web.OData
     // Controller
     public class SimpleOpenCustomersController : ODataController
     {
-        private static IList<SimpleOpenCustomer> CreateCustomers()
-        {
-            int[] IntValues = { 200, 100, 300, 0, 400 };
-            IList<SimpleOpenCustomer> customers = Enumerable.Range(0, 5).Select(i =>
-                new SimpleOpenCustomer
-                {
-                    CustomerId = i,
-                    Name = "FirstName " + i,
-                    Address = new SimpleOpenAddress
-                    {
-                        Street = "Street " + i,
-                        City = "City " + i,
-                        Properties = new Dictionary<string, object> { { "IntProp", IntValues[i] } }
-                    },
-                    Website = "WebSite #" + i
-                }).ToList();
-
-            customers[2].CustomerProperties = new Dictionary<string, object>
-            {
-                {"Token", new Guid("2C1F450A-A2A7-4FE1-A25D-4D9332FC0694")},
-                {"IntList", new List<int> { 1, 2, 3, 4, 5, 6, 7 }},
-            };
-
-            customers[4].CustomerProperties = new Dictionary<string, object>
-            {
-                {"Token", new Guid("A6A594ED-375B-424E-AC0A-945D89CF7B9B")},
-                {"IntList", new List<int> { 1, 2, 3, 4, 5, 6, 7 }},
-            };
-
-            SimpleOpenAddress address = new SimpleOpenAddress
-            {
-                Street = "SubStreet",
-                City = "City"
-            };
-            customers[3].CustomerProperties = new Dictionary<string, object> {{"ComplexList", new[] {address, address}}};
-
-            SimpleVipCustomer vipCustomer = new SimpleVipCustomer
-            {
-                CustomerId = 9,
-                Name = "VipCustomer",
-                Address = new SimpleOpenAddress
-                {
-                    Street = "Vip Street ",
-                    City = "Vip City ",
-                },
-                VipNum = "99-001",
-                CustomerProperties = new Dictionary<string, object>
-                {
-                    { "ListProp", IntValues },
-                    { "DateList", new[] { Date.MinValue, Date.MaxValue } }
-                }
-            };
-
-            customers.Add(vipCustomer);
-            return customers;
-        }
+        private static IList<SimpleOpenCustomer> _simpleOpenCustomers;
 
         [EnableQuery]
         public IQueryable<SimpleOpenCustomer> Get()
@@ -470,33 +447,108 @@ namespace System.Web.OData
             Assert.Equal(1, changedCustomer.CustomerProperties.Count);
             return Updated(changedCustomer); // Updated(customer);
         }
+
+        private static IList<SimpleOpenCustomer> CreateCustomers()
+        {
+            if (_simpleOpenCustomers != null)
+            {
+                return _simpleOpenCustomers;
+            }    
+            int[] IntValues = { 200, 100, 300, 0, 400 };
+            IList<SimpleOpenCustomer> customers = Enumerable.Range(0, 5).Select(i =>
+                new SimpleOpenCustomer
+                {
+                    CustomerId = i,
+                    Name = "FirstName " + i,
+                    Address = new SimpleOpenAddress
+                    {
+                        Street = "Street " + i,
+                        City = "City " + i,
+                        Properties = new Dictionary<string, object> { { "IntProp", IntValues[i] } }
+                    },
+                    Website = "WebSite #" + i
+                }).ToList();
+
+            customers[2].CustomerProperties = new Dictionary<string, object>
+            {
+                {"Token", new Guid("2C1F450A-A2A7-4FE1-A25D-4D9332FC0694")},
+                {"IntList", new List<int> { 1, 2, 3, 4, 5, 6, 7 }},
+            };
+
+            customers[4].CustomerProperties = new Dictionary<string, object>
+            {
+                {"Token", new Guid("A6A594ED-375B-424E-AC0A-945D89CF7B9B")},
+                {"IntList", new List<int> { 1, 2, 3, 4, 5, 6, 7 }},
+            };
+
+            SimpleOpenAddress address = new SimpleOpenAddress
+            {
+                Street = "SubStreet",
+                City = "City"
+            };
+            customers[3].CustomerProperties = new Dictionary<string, object> { { "ComplexList", new[] { address, address } } };
+
+            SimpleVipCustomer vipCustomer = new SimpleVipCustomer
+            {
+                CustomerId = 9,
+                Name = "VipCustomer",
+                Address = new SimpleOpenAddress
+                {
+                    Street = "Vip Street ",
+                    City = "Vip City ",
+                },
+                VipNum = "99-001",
+                CustomerProperties = new Dictionary<string, object>
+                {
+                    { "ListProp", IntValues },
+                    { "DateList", new[] { Date.MinValue, Date.MaxValue } }
+                }
+            };
+
+            customers.Add(vipCustomer);
+            _simpleOpenCustomers = customers;
+            return _simpleOpenCustomers;
+        }
     }
     
     // Controller
     public class UntypedSimpleOpenCustomersController : ODataController
     {
+        private static EdmEntityObjectCollection _untypedSimpleOpenCustormers;
+
+        [EnableQuery]
+        public IHttpActionResult Get()
+        {
+            return Ok(GetCustomers());
+        }
+
         public IHttpActionResult Get(int key)
         {
-            EdmEntityType customerType = new EdmEntityType("NS", "UntypedSimpleOpenCustomer", null, false, true);
-            customerType.AddKeys(customerType.AddStructuralProperty("CustomerId", EdmPrimitiveTypeKind.Int32));
-            EdmEntityObject customer = new EdmEntityObject(customerType);
-            customer.TrySetPropertyValue("CustomerId", 1);
+            return Ok(GetCustomers()[0]);
+        }
 
-            EdmEnumType colorType = new EdmEnumType("NS", "Color");
-            colorType.AddMember(new EdmEnumMember(colorType, "Red", new EdmIntegerConstant(0)));
+        [EnableQuery]
+        public IHttpActionResult GetDeclaredAddresses(int key)
+        {
+            object addresses;
+            GetCustomers()[0].TryGetPropertyValue("DeclaredAddresses", out addresses);
+            return Ok((EdmComplexObjectCollection)addresses);
+        }
 
-            EdmEnumObject color = new EdmEnumObject(colorType, "Red");
-            EdmEnumObject color2 = new EdmEnumObject(colorType, "0");
-            customer.TrySetPropertyValue("Color", color);
+        [EnableQuery]
+        public IHttpActionResult GetDeclaredColors(int key)
+        {
+            object colors;
+            GetCustomers()[0].TryGetPropertyValue("DeclaredColors", out colors);
+            return Ok((EdmEnumObjectCollection)colors);
+        }
 
-            List<IEdmEnumObject> colorList = new List<IEdmEnumObject>();
-            colorList.Add(color);
-            colorList.Add(color2);
-            IEdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(colorType.ToEdmTypeReference(false)));
-            EdmEnumObjectCollection colors = new EdmEnumObjectCollection(collectionType, colorList);
-            customer.TrySetPropertyValue("Colors", colors);
-
-            return Ok(customer);
+        [EnableQuery]
+        public IHttpActionResult GetDeclaredNumbers(int key)
+        {
+            object numbers;
+            GetCustomers()[0].TryGetPropertyValue("DeclaredNumbers", out numbers);
+            return Ok(numbers as int[]);
         }
 
         [HttpPost]
@@ -576,6 +628,59 @@ namespace System.Web.OData
             Assert.Equal("City 6", cityValue);
 
             return Ok(customer);
+        }
+        private static EdmEntityObjectCollection GetCustomers()
+        {
+            if (_untypedSimpleOpenCustormers != null)
+            {
+                return _untypedSimpleOpenCustormers;
+            }
+            EdmEntityType customerType = new EdmEntityType("NS", "UntypedSimpleOpenCustomer", null, false, true);
+            customerType.AddKeys(customerType.AddStructuralProperty("CustomerId", EdmPrimitiveTypeKind.Int32));
+            EdmEntityObject customer = new EdmEntityObject(customerType);
+            customer.TrySetPropertyValue("CustomerId", 1);
+
+            //Add Numbers primitive collection property
+            customer.TrySetPropertyValue("DeclaredNumbers", new[] { 1, 2 });
+
+            //Add Color, Colors enum(collection) property
+            EdmEnumType colorType = new EdmEnumType("NS", "Color");
+            colorType.AddMember(new EdmEnumMember(colorType, "Red", new EdmIntegerConstant(0)));
+
+            EdmEnumObject color = new EdmEnumObject(colorType, "Red");
+            EdmEnumObject color2 = new EdmEnumObject(colorType, "0");
+            EdmEnumObject color3 = new EdmEnumObject(colorType, "Red");
+            customer.TrySetPropertyValue("Color", color);
+
+            List<IEdmEnumObject> colorList = new List<IEdmEnumObject>();
+            colorList.Add(color);
+            colorList.Add(color2);
+            colorList.Add(color3);
+            IEdmCollectionTypeReference enumCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(colorType.ToEdmTypeReference(false)));
+            EdmEnumObjectCollection colors = new EdmEnumObjectCollection(enumCollectionType, colorList);
+            customer.TrySetPropertyValue("Colors", colors);
+            customer.TrySetPropertyValue("DeclaredColors", colors);
+
+            //Add Addresses complex(collection) property 
+            EdmComplexType addressType = new EdmComplexType("NS", "Address", null, false, true);
+            addressType.AddStructuralProperty("Street", EdmPrimitiveTypeKind.String);
+
+            EdmComplexObject address = new EdmComplexObject(addressType);
+            address.TrySetPropertyValue("Street", "No1");
+            EdmComplexObject address2 = new EdmComplexObject(addressType);
+            address2.TrySetPropertyValue("Street", "No2");
+
+            List<IEdmComplexObject> addressList = new List<IEdmComplexObject>();
+            addressList.Add(address);
+            addressList.Add(address2);
+            IEdmCollectionTypeReference complexCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(addressType.ToEdmTypeReference(false)));
+            EdmComplexObjectCollection addresses = new EdmComplexObjectCollection(complexCollectionType, addressList);
+            customer.TrySetPropertyValue("DeclaredAddresses", addresses);
+
+            EdmEntityObjectCollection customers = new EdmEntityObjectCollection(new EdmCollectionTypeReference(new EdmCollectionType(customerType.ToEdmTypeReference(false))));
+            customers.Add(customer);
+            _untypedSimpleOpenCustormers = customers;
+            return _untypedSimpleOpenCustormers;
         }
     }
 }

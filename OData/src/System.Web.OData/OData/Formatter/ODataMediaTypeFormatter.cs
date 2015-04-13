@@ -549,8 +549,16 @@ namespace System.Web.OData.Formatter
             return null;
         }
 
-        private static ODataPayloadKind? GetEdmObjectPayloadKind(Type type)
+        /// <summary>
+        /// This method is to get payload kind for untyped scenario.
+        /// </summary>
+        private ODataPayloadKind? GetEdmObjectPayloadKind(Type type)
         {
+            if (ODataCountMediaTypeMapping.IsCountRequest(Request))
+            {
+                return ODataPayloadKind.Value;
+            }
+
             Type elementType;
             if (type.IsCollection(out elementType))
             {

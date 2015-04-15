@@ -124,9 +124,9 @@ namespace System.Web.OData.Formatter.Serialization
                     x => !selectedDynamicProperties.Any() || selectedDynamicProperties.Contains(x.Key));
             foreach (KeyValuePair<string, object> dynamicProperty in dynamicPropertiesToSelect)
             {
-                if (String.IsNullOrEmpty(dynamicProperty.Key) || dynamicProperty.Value == null)
+                if (String.IsNullOrEmpty(dynamicProperty.Key))
                 {
-                    continue; // skip the null object
+                    continue;
                 }
 
                 if (declaredPropertyNameSet.Contains(dynamicProperty.Key))
@@ -135,23 +135,30 @@ namespace System.Web.OData.Formatter.Serialization
                         dynamicProperty.Key, structuredType.FullName());
                 }
 
-                IEdmTypeReference edmTypeReference = writeContext.GetEdmType(dynamicProperty.Value,
-                    dynamicProperty.Value.GetType());
-                if (edmTypeReference == null)
-                {
-                    throw Error.NotSupported(SRResources.TypeOfDynamicPropertyNotSupported,
-                        dynamicProperty.Value.GetType().FullName, dynamicProperty.Key);
+                if (dynamicProperty.Value == null)
+                {                    
+                    dynamicProperties.Add(new ODataProperty { Name = dynamicProperty.Key, Value = new ODataNullValue() });
                 }
-
-                ODataEdmTypeSerializer propertySerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
-                if (propertySerializer == null)
+                else
                 {
-                    throw Error.NotSupported(SRResources.DynamicPropertyCannotBeSerialized, dynamicProperty.Key,
-                        edmTypeReference.FullName());
-                }
+                    IEdmTypeReference edmTypeReference = writeContext.GetEdmType(dynamicProperty.Value,
+                        dynamicProperty.Value.GetType());
+                    if (edmTypeReference == null)
+                    {
+                        throw Error.NotSupported(SRResources.TypeOfDynamicPropertyNotSupported,
+                            dynamicProperty.Value.GetType().FullName, dynamicProperty.Key);
+                    }
 
-                dynamicProperties.Add(propertySerializer.CreateProperty(
-                    dynamicProperty.Value, edmTypeReference, dynamicProperty.Key, writeContext));
+                    ODataEdmTypeSerializer propertySerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
+                    if (propertySerializer == null)
+                    {
+                        throw Error.NotSupported(SRResources.DynamicPropertyCannotBeSerialized, dynamicProperty.Key,
+                            edmTypeReference.FullName());
+                    }
+
+                    dynamicProperties.Add(propertySerializer.CreateProperty(
+                        dynamicProperty.Value, edmTypeReference, dynamicProperty.Key, writeContext));
+                }
             }
 
             return dynamicProperties;

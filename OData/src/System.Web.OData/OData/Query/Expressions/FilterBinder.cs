@@ -486,6 +486,16 @@ namespace System.Web.OData.Query.Expressions
                 // we handle null propagation ourselves. So, if converting from bool to Nullable<bool> ignore.
                 return source;
             }
+            else if (conversionType == typeof(Date?) && 
+                (source.Type == typeof(DateTimeOffset?) || source.Type == typeof(DateTime?)))
+            {
+                return source;
+            }
+            else if (conversionType == typeof(TimeOfDay?) &&
+                (source.Type == typeof(DateTimeOffset?) || source.Type == typeof(DateTime?)))
+            {
+                return source;
+            }
             else if (source == _nullConstant)
             {
                 return source;
@@ -986,22 +996,13 @@ namespace System.Web.OData.Query.Expressions
             Contract.Assert("date" == node.Name);
 
             Expression[] arguments = BindArguments(node.Parameters);
-            Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
 
             // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
-            Expression parameter = arguments[0];
+            Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
 
-            Dictionary<string, PropertyInfo> propertyInfos = IsDateTime(arguments[0].Type) ? ClrCanonicalFunctions.DateTimeProperties : ClrCanonicalFunctions.DateTimeOffsetProperties;
-
-            // Year, Month, Day
-            Expression year = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.YearFunctionName], parameter);
-            Expression month = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.MonthFunctionName], parameter);
-            Expression day = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.DayFunctionName], parameter);
-
-            Type intType = typeof(int);
-            Expression constructor = Expression.New(typeof(Date).GetConstructor(new[] { intType, intType, intType }), year, month, day);
-
-            return CreateFunctionCallWithNullPropagation(constructor, arguments);
+            // EF doesn't support new Date(int, int, int), also doesn't support other property access, for example DateTime.Date.
+            // Therefore, we just return the source (DateTime or DateTimeOffset).
+            return arguments[0];
         }
 
         private Expression BindTime(SingleValueFunctionCallNode node)
@@ -1009,24 +1010,13 @@ namespace System.Web.OData.Query.Expressions
             Contract.Assert("time" == node.Name);
 
             Expression[] arguments = BindArguments(node.Parameters);
-            Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
 
             // We should support DateTime & DateTimeOffset even though DateTime is not part of OData v4 Spec.
-            Expression parameter = arguments[0];
+            Contract.Assert(arguments.Length == 1 && IsDateOrOffset(arguments[0].Type));
 
-            Dictionary<string, PropertyInfo> propertyInfos = IsDateTime(arguments[0].Type) ? ClrCanonicalFunctions.DateTimeProperties : ClrCanonicalFunctions.DateTimeOffsetProperties;
-
-            // Hour, Minute, Second, Millisecond
-            Expression hour = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.HourFunctionName], parameter);
-            Expression minute = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.MinuteFunctionName], parameter);
-            Expression second = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.SecondFunctionName], parameter);
-            Expression millisecond = MakePropertyAccess(propertyInfos[ClrCanonicalFunctions.MillisecondFunctionName], parameter);
-
-            Type intType = typeof(int);
-            Expression constructor = Expression.New(typeof(TimeOfDay).GetConstructor(new[] { intType, intType, intType, intType }),
-                hour, minute, second, millisecond);
-
-            return CreateFunctionCallWithNullPropagation(constructor, arguments);
+            // EF doesn't support new TimeOfDay(int, int, int, int), also doesn't support other property access, for example DateTimeOffset.DateTime.
+            // Therefore, we just return the source (DateTime or DateTimeOffset).
+            return arguments[0];
         }
 
         private Expression BindFractionalSeconds(SingleValueFunctionCallNode node)
@@ -1500,6 +1490,7 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "These are simple conversion function and cannot be split up.")]
         private Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull)
         {
             ExpressionType binaryExpressionType;
@@ -1525,6 +1516,20 @@ namespace System.Web.OData.Query.Expressions
             else if (rightUnderlyingType == typeof(DateTime) && leftUnderlyingType == typeof(DateTimeOffset))
             {
                 left = DateTimeOffsetToDateTime(left);
+            }
+
+            if ((IsDateOrOffset(leftUnderlyingType) && IsDate(rightUnderlyingType)) ||
+                (IsDate(leftUnderlyingType) && IsDateOrOffset(rightUnderlyingType)))
+            {
+                left = CreateDateBinaryExpression(left);
+                right = CreateDateBinaryExpression(right);
+            }
+
+            if ((IsDateOrOffset(leftUnderlyingType) && IsTimeOfDay(rightUnderlyingType)) ||
+                (IsTimeOfDay(leftUnderlyingType) && IsDateOrOffset(rightUnderlyingType)))
+            {
+                left = CreateTimeBinaryExpression(left);
+                right = CreateTimeBinaryExpression(right);
             }
 
             if (left.Type != right.Type)
@@ -1612,6 +1617,65 @@ namespace System.Web.OData.Query.Expressions
                 expression = Expression.Constant(EdmPrimitiveHelpers.ConvertPrimitiveValue(dto.Value, typeof(DateTime)));
             }
             return expression;
+        }
+
+        private Expression GetProperty(Expression source, string propertyName)
+        {
+            if (IsDateOrOffset(source.Type))
+            {
+                if (IsDateTime(source.Type))
+                {
+                    return MakePropertyAccess(ClrCanonicalFunctions.DateTimeProperties[propertyName], source);
+                }
+                else
+                {
+                    return MakePropertyAccess(ClrCanonicalFunctions.DateTimeOffsetProperties[propertyName], source);
+                }
+            }
+            else if (IsDate(source.Type))
+            {
+                return MakePropertyAccess(ClrCanonicalFunctions.DateProperties[propertyName], source);
+            }
+            else if (IsTimeOfDay(source.Type))
+            {
+                return MakePropertyAccess(ClrCanonicalFunctions.TimeOfDayProperties[propertyName], source);
+            }
+
+            return source;
+        }
+
+        private Expression CreateDateBinaryExpression(Expression source)
+        {
+            // Year, Month, Day
+            Expression year = GetProperty(source, ClrCanonicalFunctions.YearFunctionName);
+            Expression month = GetProperty(source, ClrCanonicalFunctions.MonthFunctionName);
+            Expression day = GetProperty(source, ClrCanonicalFunctions.DayFunctionName);
+
+            // return (year * 10000 + month * 100 + day)
+            Expression result =
+                Expression.Add(
+                    Expression.Add(Expression.Multiply(year, Expression.Constant(10000)),
+                        Expression.Multiply(month, Expression.Constant(100))), day);
+
+            return CreateFunctionCallWithNullPropagation(result, new[] { source });
+        }
+
+        private Expression CreateTimeBinaryExpression(Expression source)
+        {
+            // Hour, Minute, Second, Millisecond
+            Expression hour = GetProperty(source, ClrCanonicalFunctions.HourFunctionName);
+            Expression minute = GetProperty(source, ClrCanonicalFunctions.MinuteFunctionName);
+            Expression second = GetProperty(source, ClrCanonicalFunctions.SecondFunctionName);
+            Expression milliSecond = GetProperty(source, ClrCanonicalFunctions.MillisecondFunctionName);
+
+            Expression hourTicks = Expression.Multiply(Expression.Convert(hour, typeof(long)), Expression.Constant(TimeOfDay.TicksPerHour));
+            Expression minuteTicks = Expression.Multiply(Expression.Convert(minute, typeof(long)), Expression.Constant(TimeOfDay.TicksPerMinute));
+            Expression secondTicks = Expression.Multiply(Expression.Convert(second, typeof(long)), Expression.Constant(TimeOfDay.TicksPerSecond));
+
+            // return (hour * TicksPerHour + minute * TicksPerMinute + second * TicksPerSecond + millisecond)
+            Expression result = Expression.Add(hourTicks, Expression.Add(minuteTicks, Expression.Add(secondTicks, Expression.Convert(milliSecond, typeof(long)))));
+
+            return CreateFunctionCallWithNullPropagation(result, new[] { source });
         }
 
         private static Expression ConvertToEnumUnderlyingType(Expression expression, Type enumType, Type enumUnderlyingType)

@@ -1161,7 +1161,13 @@ namespace System.Web.OData.Query.Expressions
 
         [Theory]
         [InlineData("date(DiscontinuedDate) eq 2015-02-26",
-            "$it => (new Date($it.DiscontinuedDate.Value.Year, $it.DiscontinuedDate.Value.Month, $it.DiscontinuedDate.Value.Day) == 2015-02-26)")]
+            "$it => (((($it.DiscontinuedDate.Value.Year * 10000) + ($it.DiscontinuedDate.Value.Month * 100)) + $it.DiscontinuedDate.Value.Day) == (((2015-02-26.Year * 10000) + (2015-02-26.Month * 100)) + 2015-02-26.Day))")]
+        [InlineData("date(DiscontinuedDate) lt 2016-02-26",
+            "$it => (((($it.DiscontinuedDate.Value.Year * 10000) + ($it.DiscontinuedDate.Value.Month * 100)) + $it.DiscontinuedDate.Value.Day) < (((2016-02-26.Year * 10000) + (2016-02-26.Month * 100)) + 2016-02-26.Day))")]
+        [InlineData("2015-02-26 ge date(DiscontinuedDate)",
+            "$it => ((((2015-02-26.Year * 10000) + (2015-02-26.Month * 100)) + 2015-02-26.Day) >= ((($it.DiscontinuedDate.Value.Year * 10000) + ($it.DiscontinuedDate.Value.Month * 100)) + $it.DiscontinuedDate.Value.Day))")]
+        [InlineData("null ne date(DiscontinuedDate)", "$it => (null != $it.DiscontinuedDate)")]
+        [InlineData("date(DiscontinuedDate) eq null", "$it => ($it.DiscontinuedDate == null)")]
         public void DateFunction_Nullable(string filter, string expression)
         {
             VerifyQueryDeserialization(filter, expression, NotTesting);
@@ -1169,7 +1175,11 @@ namespace System.Web.OData.Query.Expressions
 
         [Theory]
         [InlineData("date(NonNullableDiscontinuedDate) eq 2015-02-26",
-            "$it => (new Date($it.NonNullableDiscontinuedDate.Year, $it.NonNullableDiscontinuedDate.Month, $it.NonNullableDiscontinuedDate.Day) == 2015-02-26)")]
+            "$it => (((($it.NonNullableDiscontinuedDate.Year * 10000) + ($it.NonNullableDiscontinuedDate.Month * 100)) + $it.NonNullableDiscontinuedDate.Day) == (((2015-02-26.Year * 10000) + (2015-02-26.Month * 100)) + 2015-02-26.Day))")]
+        [InlineData("date(NonNullableDiscontinuedDate) lt 2016-02-26",
+            "$it => (((($it.NonNullableDiscontinuedDate.Year * 10000) + ($it.NonNullableDiscontinuedDate.Month * 100)) + $it.NonNullableDiscontinuedDate.Day) < (((2016-02-26.Year * 10000) + (2016-02-26.Month * 100)) + 2016-02-26.Day))")]
+        [InlineData("2015-02-26 ge date(NonNullableDiscontinuedDate)",
+            "$it => ((((2015-02-26.Year * 10000) + (2015-02-26.Month * 100)) + 2015-02-26.Day) >= ((($it.NonNullableDiscontinuedDate.Year * 10000) + ($it.NonNullableDiscontinuedDate.Month * 100)) + $it.NonNullableDiscontinuedDate.Day))")]
         public void DateFunction_NonNullable(string filter, string expression)
         {
             VerifyQueryDeserialization(filter, expression);
@@ -1177,7 +1187,13 @@ namespace System.Web.OData.Query.Expressions
 
         [Theory]
         [InlineData("time(DiscontinuedDate) eq 01:02:03.0040000",
-            "$it => (new TimeOfDay($it.DiscontinuedDate.Value.Hour, $it.DiscontinuedDate.Value.Minute, $it.DiscontinuedDate.Value.Second, $it.DiscontinuedDate.Value.Millisecond) == 01:02:03.0040000)")]
+            "$it => (((Convert($it.DiscontinuedDate.Value.Hour) * 36000000000) + ((Convert($it.DiscontinuedDate.Value.Minute) * 600000000) + ((Convert($it.DiscontinuedDate.Value.Second) * 10000000) + Convert($it.DiscontinuedDate.Value.Millisecond)))) == ((Convert(01:02:03.0040000.Hours) * 36000000000) + ((Convert(01:02:03.0040000.Minutes) * 600000000) + ((Convert(01:02:03.0040000.Seconds) * 10000000) + Convert(01:02:03.0040000.Milliseconds)))))")]
+        [InlineData("time(DiscontinuedDate) ge 01:02:03.0040000",
+            "$it => (((Convert($it.DiscontinuedDate.Value.Hour) * 36000000000) + ((Convert($it.DiscontinuedDate.Value.Minute) * 600000000) + ((Convert($it.DiscontinuedDate.Value.Second) * 10000000) + Convert($it.DiscontinuedDate.Value.Millisecond)))) >= ((Convert(01:02:03.0040000.Hours) * 36000000000) + ((Convert(01:02:03.0040000.Minutes) * 600000000) + ((Convert(01:02:03.0040000.Seconds) * 10000000) + Convert(01:02:03.0040000.Milliseconds)))))")]
+        [InlineData("01:02:03.0040000 le time(DiscontinuedDate)",
+            "$it => (((Convert(01:02:03.0040000.Hours) * 36000000000) + ((Convert(01:02:03.0040000.Minutes) * 600000000) + ((Convert(01:02:03.0040000.Seconds) * 10000000) + Convert(01:02:03.0040000.Milliseconds)))) <= ((Convert($it.DiscontinuedDate.Value.Hour) * 36000000000) + ((Convert($it.DiscontinuedDate.Value.Minute) * 600000000) + ((Convert($it.DiscontinuedDate.Value.Second) * 10000000) + Convert($it.DiscontinuedDate.Value.Millisecond)))))")]
+        [InlineData("null ne time(DiscontinuedDate)", "$it => (null != $it.DiscontinuedDate)")]
+        [InlineData("time(DiscontinuedDate) eq null", "$it => ($it.DiscontinuedDate == null)")]
         public void TimeFunction_Nullable(string filter, string expression)
         {
             VerifyQueryDeserialization(filter, expression, NotTesting);
@@ -1185,7 +1201,11 @@ namespace System.Web.OData.Query.Expressions
 
         [Theory]
         [InlineData("time(NonNullableDiscontinuedDate) eq 01:02:03.0040000",
-            "$it => (new TimeOfDay($it.NonNullableDiscontinuedDate.Hour, $it.NonNullableDiscontinuedDate.Minute, $it.NonNullableDiscontinuedDate.Second, $it.NonNullableDiscontinuedDate.Millisecond) == 01:02:03.0040000)")]
+            "$it => (((Convert($it.NonNullableDiscontinuedDate.Hour) * 36000000000) + ((Convert($it.NonNullableDiscontinuedDate.Minute) * 600000000) + ((Convert($it.NonNullableDiscontinuedDate.Second) * 10000000) + Convert($it.NonNullableDiscontinuedDate.Millisecond)))) == ((Convert(01:02:03.0040000.Hours) * 36000000000) + ((Convert(01:02:03.0040000.Minutes) * 600000000) + ((Convert(01:02:03.0040000.Seconds) * 10000000) + Convert(01:02:03.0040000.Milliseconds)))))")]
+        [InlineData("time(NonNullableDiscontinuedDate) ge 01:02:03.0040000",
+            "$it => (((Convert($it.NonNullableDiscontinuedDate.Hour) * 36000000000) + ((Convert($it.NonNullableDiscontinuedDate.Minute) * 600000000) + ((Convert($it.NonNullableDiscontinuedDate.Second) * 10000000) + Convert($it.NonNullableDiscontinuedDate.Millisecond)))) >= ((Convert(01:02:03.0040000.Hours) * 36000000000) + ((Convert(01:02:03.0040000.Minutes) * 600000000) + ((Convert(01:02:03.0040000.Seconds) * 10000000) + Convert(01:02:03.0040000.Milliseconds)))))")]
+        [InlineData("01:02:03.0040000 le time(NonNullableDiscontinuedDate)",
+            "$it => (((Convert(01:02:03.0040000.Hours) * 36000000000) + ((Convert(01:02:03.0040000.Minutes) * 600000000) + ((Convert(01:02:03.0040000.Seconds) * 10000000) + Convert(01:02:03.0040000.Milliseconds)))) <= ((Convert($it.NonNullableDiscontinuedDate.Hour) * 36000000000) + ((Convert($it.NonNullableDiscontinuedDate.Minute) * 600000000) + ((Convert($it.NonNullableDiscontinuedDate.Second) * 10000000) + Convert($it.NonNullableDiscontinuedDate.Millisecond)))))")]
         public void TimeFunction_NonNullable(string filter, string expression)
         {
             VerifyQueryDeserialization(filter, expression);

@@ -457,6 +457,10 @@
     <EmbeddedResource Include="Resources\PresidentInJsonLightFullMetadata.json" />
     <EmbeddedResource Include="Resources\DateFullMetadata.json" />
     <EmbeddedResource Include="Resources\TimeOfDayFullMetadata.json" />
+    <EmbeddedResource Include="Resources\PeopleWithAllAnnotations.json" />
+    <EmbeddedResource Include="Resources\PeopleWithMultipleAnnotations.json" />
+    <EmbeddedResource Include="Resources\PeopleWithoutAnnotations.json" />
+    <EmbeddedResource Include="Resources\PeopleWithSpecialAnnotations.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\System.Web.OData\System.Web.OData.csproj">

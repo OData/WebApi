@@ -9,9 +9,9 @@ namespace System.Web.OData
 {
     internal static class RequestPreferenceHelpers
     {
-        private const string PreferHeaderName = "Prefer";
-        private const string ReturnContentHeaderValue = "return=representation";
-        private const string ReturnNoContentHeaderValue = "return=minimal";
+        public const string PreferHeaderName = "Prefer";
+        public const string ReturnContentHeaderValue = "return=representation";
+        public const string ReturnNoContentHeaderValue = "return=minimal";
 
         internal static bool RequestPrefersReturnContent(HttpRequestMessage request)
         {
@@ -31,6 +31,18 @@ namespace System.Web.OData
                 return preferences.Contains(ReturnNoContentHeaderValue);
             }
             return false;
+        }
+
+        internal static string GetRequestPreferHeader(HttpRequestMessage request)
+        {
+            IEnumerable<string> values;
+            if (request.Headers.TryGetValues(PreferHeaderName, out values))
+            {
+                // If there are many "Prefer" headers, pick up the first one.
+                return values.FirstOrDefault();
+            }
+
+            return null;
         }
     }
 }

@@ -484,7 +484,20 @@ namespace System.Web.OData.Formatter
                 throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
             }
 
+            string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(Request);
+            string annotationFilter = null;
+            if (!String.IsNullOrEmpty(preferHeader))
+            {
+                ODataMessageWrapper messageWrapper = new ODataMessageWrapper(writeStream, content.Headers);
+                messageWrapper.SetHeader(RequestPreferenceHelpers.PreferHeaderName, preferHeader);
+                annotationFilter = messageWrapper.PreferHeader().AnnotationFilter;
+            }
+
             IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream, content.Headers);
+            if (annotationFilter != null)
+            {
+                responseMessage.PreferenceAppliedHeader().AnnotationFilter = annotationFilter;
+            }
 
             Uri baseAddress = GetBaseAddress(Request);
             ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings(MessageWriterSettings)

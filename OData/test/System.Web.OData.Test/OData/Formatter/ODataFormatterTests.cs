@@ -320,7 +320,7 @@ namespace System.Web.OData.Formatter
                     ODataMediaTypeFormatters.Create(new CustomSerializerProvider(), new DefaultODataDeserializerProvider()));
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
-                using (HttpRequestMessage request = CreateRequest("People", MediaTypeWithQualityHeaderValue.Parse("application/json")))
+                using (HttpRequestMessage request = CreateRequestWithAnnotationFilter("People", "odata.include-annotations=\"*\""))
                 // Act
                 using (HttpResponseMessage response = client.SendAsync(request).Result)
                 {
@@ -329,11 +329,37 @@ namespace System.Web.OData.Formatter
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     string payload = response.Content.ReadAsStringAsync().Result;
 
-                    // Change DoesNotContain() as Contain() after fix https://aspnetwebstack.codeplex.com/workitem/1880
-                    Assert.DoesNotContain("\"@Custom.Int32Annotation\":321", payload);
-                    Assert.DoesNotContain("\"@Custom.StringAnnotation\":\"My amazing feed\"", payload);
+                    Assert.Contains("\"@Custom.Int32Annotation\":321", payload);
+                    Assert.Contains("\"@Custom.StringAnnotation\":\"My amazing feed\"", payload);
                 }
             }
+        }
+
+        [Theory]
+        [InlineData("*", "PeopleWithAllAnnotations.json")]
+        [InlineData("-*", "PeopleWithoutAnnotations.json")]
+        [InlineData("Entry.*", "PeopleWithSpecialAnnotations.json")]
+        [InlineData("Property.*,Hello.*", "PeopleWithMultipleAnnotations.json")]
+        public void CustomSerializerWorks_ForInstanceAnnotationsFilter(string filter, string expect)
+        {
+            // Arrange
+            HttpConfiguration configuration = CreateConfiguration();
+            configuration.Formatters.InsertRange(0,
+                    ODataMediaTypeFormatters.Create(new CustomSerializerProvider(),
+                    new DefaultODataDeserializerProvider()));
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            HttpRequestMessage request = CreateRequestWithAnnotationFilter("People(2)",
+                String.Format("odata.include-annotations=\"{0}\"", filter));
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Console.WriteLine(response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(Resources.GetString(expect), response.Content.ReadAsStringAsync().Result);
         }
 
         [Fact]
@@ -714,6 +740,13 @@ namespace System.Web.OData.Formatter
             return request;
         }
 
+        private static HttpRequestMessage CreateRequestWithAnnotationFilter(string pathAndQuery, string annotationHeader)
+        {
+            HttpRequestMessage request = CreateRequest(pathAndQuery, MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            request.Headers.Add("Prefer", annotationHeader);
+            return request;
+        }
+
         private class CustomFeedSerializer : ODataFeedSerializer
         {
             public CustomFeedSerializer(ODataSerializerProvider serializerProvider)
@@ -745,8 +778,48 @@ namespace System.Web.OData.Formatter
                 {
                     return new CustomFeedSerializer(this);
                 }
+                else if (edmType.IsEntity())
+                {
+                    return new CustomEntrySerializer(this);
+                }
 
                 return base.GetEdmTypeSerializer(edmType);
+            }
+        }
+
+        private class CustomEntrySerializer : ODataEntityTypeSerializer
+        {
+            public CustomEntrySerializer(ODataSerializerProvider serializerProvider)
+                : base(serializerProvider)
+            {
+            }
+
+            public override ODataEntry CreateEntry(SelectExpandNode selectExpandNode, EntityInstanceContext entityInstanceContext)
+            {
+                ODataEntry entry = base.CreateEntry(selectExpandNode, entityInstanceContext);
+
+                // instance annotation on entry
+                ODataPrimitiveValue guidValue = new ODataPrimitiveValue(new Guid("A6E07EAC-AD49-4BF7-A06E-203FF4D4B0D8"));
+                entry.InstanceAnnotations.Add(new ODataInstanceAnnotation("Entry.GuidAnnotation", guidValue));
+
+                ODataPrimitiveValue strValue = new ODataPrimitiveValue("Hello World.");
+                entry.InstanceAnnotations.Add(new ODataInstanceAnnotation("Hello.World", strValue));
+                return entry;
+            }
+
+            public override ODataProperty CreateStructuralProperty(IEdmStructuralProperty structuralProperty, EntityInstanceContext entityInstanceContext)
+            {
+                ODataProperty property = base.CreateStructuralProperty(structuralProperty, entityInstanceContext);
+
+                // instance annotation on property
+                if (property.Name == "Age")
+                {
+                    ODataPrimitiveValue dateValue = new ODataPrimitiveValue(new DateTimeOffset(new DateTime(2010, 1, 2)));
+                    property.InstanceAnnotations.Add(new ODataInstanceAnnotation("Property.BirthdayAnnotation",
+                        dateValue));
+                }
+
+                return property;
             }
         }
     }

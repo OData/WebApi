@@ -18,6 +18,7 @@ using System.Web.OData.Query;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 using Newtonsoft.Json.Linq;
@@ -814,7 +815,7 @@ namespace System.Web.OData.Formatter
                 // instance annotation on property
                 if (property.Name == "Age")
                 {
-                    ODataPrimitiveValue dateValue = new ODataPrimitiveValue(new DateTimeOffset(new DateTime(2010, 1, 2)));
+                    ODataPrimitiveValue dateValue = new ODataPrimitiveValue(new Date(2010, 1, 2));
                     property.InstanceAnnotations.Add(new ODataInstanceAnnotation("Property.BirthdayAnnotation",
                         dateValue));
                 }

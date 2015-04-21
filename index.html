@@ -1,0 +1,116 @@
+---
+layout: default
+---
+<style type="text/css">
+.affix-top{
+  position:fixed;
+  top:80px;
+  left: 75%;
+}
+.affix{
+  position:fixed;
+  top:-100px;
+  left: 75%;
+}
+.post-title{
+  margin-bottom: 30px;
+  border-bottom: 1px;
+  border-bottom-color: #e8e8e8;
+  border-bottom-style: solid;
+}
+.post-content{
+  margin-bottom: 60px;
+}
+.nav>li>a {
+  position: relative;
+  display: block;
+  padding: 0px 5px;
+}
+ul.nav{
+  margin-left: 5px;
+}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function(){
+  // Nav bar
+  $("#nav-sidebar>ul>li>div").hide();
+  $(window).scroll(function(){
+      $("#nav-sidebar>ul>li>div").hide();
+      $("#nav-sidebar>ul>li.active>div").show();
+    });
+  $("#nav-sidebar>ul>li").click(function(){
+      $("#nav-sidebar>ul>li").removeClass('active');
+      $(this).addClass('active');
+      $("#nav-sidebar>ul>li>div").hide();
+      $(this).children('div').show();
+  });
+
+  // Window width change
+  $( window ).resize(function() {
+      if ($(window).width() < 975) {
+        $('#nav-sidebar').hide();
+      }
+      else{
+        $('#nav-sidebar').show(); 
+      }
+  });
+});
+</script>
+
+<div class="home">
+
+  <div class="row">
+    <div id="nav-sidebar" class="col-md-3" data-spy="affix" data-offset-top="20000">
+      <ul class="nav nav-pills nav-stacked">
+        {% assign sortedCategories = site.categories | sort %}
+        {% for category in sortedCategories %}
+        <li class="panel panel-default">
+          <a class="panel-heading">
+            <small>{{ category[0] | upcase }}</small>
+          </a>
+          <div class="panel-body">
+            <ul class="nav nav-pills nav-stacked">
+              {% for posts in category %}
+              {% for post in posts reversed %}
+              {% if post.title != null%}
+              <li class="nav-item">
+                <a href="#{{ post.id | remove_first:'/'}}"><small>{{ post.title }}</small></a>
+              </li>
+              {% endif %}
+              {% endfor %}
+              {% endfor %}
+            </ul>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="col-md-9">
+      {% assign sortedCategories = site.categories | sort %}
+      {% for category in sortedCategories %}
+      <h1 class="post-title" id="{{ category[0] | replace:' ','-' | replace:'.','' }}">{{ category[0] | join: "/" | upcase }}</h1>
+      <ul class="post-list">
+        {% for posts in category %}
+        {% for post in posts reversed %}
+        {% if post.title != null%}
+        <li>
+          <h2 class="post-title" id="{{ post.id | remove_first:'/'}}">{{ post.title }}</h2>
+          <article class="post-content">
+            {{ post.content }}
+          </article>
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
+      </ul>
+      {% endfor %}
+    </div>
+
+    <div class="col-md-3">
+    </div>
+
+  </div>
+
+</div>

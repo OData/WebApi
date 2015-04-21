@@ -88,6 +88,9 @@ $(document).ready(function(){
     </div>
 
     <div class="col-md-9">
+      <div class="alert alert-success" role="alert">
+        For a unified experience, please go to the <a href="https://github.com/odata/WebApi/issues" target="_blank">GitHub Issues</a> to ask question, report bugs, and ask for features.
+      </div>
       {% assign sortedCategories = site.categories | sort %}
       {% for category in sortedCategories %}
       <h1 class="post-title" id="{{ category[0] | replace:' ','-' | replace:'.','' }}">{{ category[0] | join: "/" | upcase }}</h1>

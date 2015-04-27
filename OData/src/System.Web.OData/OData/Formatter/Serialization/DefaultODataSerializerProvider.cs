@@ -26,6 +26,7 @@ namespace System.Web.OData.Formatter.Serialization
         private static readonly DefaultODataSerializerProvider _instance = new DefaultODataSerializerProvider();
 
         private readonly ODataFeedSerializer _feedSerializer;
+        private readonly ODataDeltaFeedSerializer _deltaFeedSerializer;
         private readonly ODataCollectionSerializer _collectionSerializer;
         private readonly ODataComplexTypeSerializer _complexTypeSerializer;
         private readonly ODataEntityTypeSerializer _entityTypeSerializer;
@@ -36,6 +37,7 @@ namespace System.Web.OData.Formatter.Serialization
         public DefaultODataSerializerProvider()
         {
             _feedSerializer = new ODataFeedSerializer(this);
+            _deltaFeedSerializer = new ODataDeltaFeedSerializer(this);
             _collectionSerializer = new ODataCollectionSerializer(this);
             _complexTypeSerializer = new ODataComplexTypeSerializer(this);
             _entityTypeSerializer = new ODataEntityTypeSerializer(this);
@@ -70,7 +72,11 @@ namespace System.Web.OData.Formatter.Serialization
 
                 case EdmTypeKind.Collection:
                     IEdmCollectionTypeReference collectionType = edmType.AsCollection();
-                    if (collectionType.ElementType().IsEntity())
+                    if (collectionType.Definition.IsDeltaFeed())
+                    {
+                        return _deltaFeedSerializer;
+                    }
+                    else if (collectionType.ElementType().IsEntity())
                     {
                         return _feedSerializer;
                     }

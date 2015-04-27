@@ -583,6 +583,10 @@ namespace System.Web.OData.Formatter
                 {
                     return ODataPayloadKind.Feed;
                 }
+                else if (typeof(IEdmChangedObject).IsAssignableFrom(elementType))
+                {
+                    return ODataPayloadKind.Delta;
+                }
             }
             else
             {

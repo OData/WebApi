@@ -82,7 +82,8 @@ namespace System.Web.OData.Formatter
                 ODataPayloadKind.Collection,
                 ODataPayloadKind.ServiceDocument,
                 ODataPayloadKind.Error,
-                ODataPayloadKind.Parameter);
+                ODataPayloadKind.Parameter,
+                ODataPayloadKind.Delta);
 
             // Add minimal metadata as the first media type so it gets used when the request doesn't
             // ask for a specific content type

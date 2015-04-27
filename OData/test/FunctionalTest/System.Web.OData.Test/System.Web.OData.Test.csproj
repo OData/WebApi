@@ -79,6 +79,9 @@
     <Compile Include="..\System.Web.Http.Test\Util\ContextUtil.cs">
       <Link>TestCommon\ContextUtil.cs</Link>
     </Compile>
+    <Compile Include="EdmDeltaCollectionTypeTest.cs" />
+    <Compile Include="EdmDeltaTypeTest.cs" />
+    <Compile Include="EdmTypeExtensionsTest.cs" />
     <Compile Include="HttpRouteCollectionExtensionsTest.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="HttpRequestMessageExtensionsTest.cs" />
@@ -139,6 +142,9 @@
     <Compile Include="OData\EdmEnumObjectTest.cs" />
     <Compile Include="OData\EnableQueryTests.cs" />
     <Compile Include="OData\Formatter\ODataFunctionTests.cs" />
+    <Compile Include="OData\EdmChangedObjectCollectionTest.cs" />
+    <Compile Include="OData\EnableQueryTests.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataDeltaFeedSerializerTests.cs" />
     <Compile Include="OData\ODataContainmentTest.cs" />
     <Compile Include="OData\ContentIdHelpersTest.cs" />
     <Compile Include="OData\DollarFormatTest.cs" />

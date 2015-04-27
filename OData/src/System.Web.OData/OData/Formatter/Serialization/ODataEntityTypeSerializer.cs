@@ -86,6 +86,57 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
+        /// <summary>
+        /// Writes the given object specified by the parameter graph as a part of an existing OData message using the given
+        /// deltaWriter and the writeContext.
+        /// </summary>
+        /// <param name="graph">The object to be written.</param>
+        /// <param name="expectedType">The expected EDM type of the object represented by <paramref name="graph"/>.</param>
+        /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
+        /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
+        public virtual void WriteDeltaObjectInline(object graph, IEdmTypeReference expectedType, ODataDeltaWriter writer,
+           ODataSerializerContext writeContext)
+        {
+            if (writer == null)
+            {
+                throw Error.ArgumentNull("writer");
+            }
+
+            if (writeContext == null)
+            {
+                throw Error.ArgumentNull("writeContext");
+            }
+
+            if (graph == null)
+            {
+                throw new SerializationException(Error.Format(Properties.SRResources.CannotSerializerNull, Entry));
+            }
+            else
+            {
+                WriteDeltaEntry(graph, writer, writeContext);
+            }
+        }
+
+        private void WriteDeltaEntry(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
+        {
+            Contract.Assert(writeContext != null);
+
+            IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext, entityType, graph);
+            SelectExpandNode selectExpandNode = CreateSelectExpandNode(entityInstanceContext);
+            if (selectExpandNode != null)
+            {
+                ODataEntry entry = CreateEntry(selectExpandNode, entityInstanceContext);
+                if (entry != null)
+                {
+                    writer.WriteStart(entry);
+                    //TODO: Need to add support to write Navigation Links using Delta Writer
+                    //https://github.com/OData/odata.net/issues/155
+                    writer.WriteEnd();
+                }
+            }
+        }
+
         private void WriteEntry(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
             Contract.Assert(writeContext != null);

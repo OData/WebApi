@@ -29,8 +29,7 @@ As the name implies, the first one creates a mutable list of the default OData r
 
 In fact, when you call the basic `MapODataServiceRoute`, it enables the attribute routing by default as:
 {% highlight csharp %}
-public static ODataRoute MapODataServiceRoute(this HttpConfiguration configuration, string routeName,
-    string routePrefix, IEdmModel model, ODataBatchHandler batchHandler)
+public static ODataRoute MapODataServiceRoute(this HttpConfiguration configuration, string routeName, string routePrefix, IEdmModel model, ODataBatchHandler batchHandler)
 {
     return MapODataServiceRoute(configuration, routeName, routePrefix, model, new DefaultODataPathHandler(),
         ODataRoutingConventions.CreateDefaultWithAttributeRouting(configuration, model), batchHandler);
@@ -39,9 +38,7 @@ public static ODataRoute MapODataServiceRoute(this HttpConfiguration configurati
 
 However, you can call other version of `MapODataServiceRoute` to custom your own routing conventions. For example:
 {% highlight csharp %}
-public static ODataRoute MapODataServiceRoute(this HttpConfiguration configuration, string routeName,
-            string routePrefix, IEdmModel model, IODataPathHandler pathHandler,
-            IEnumerable<IODataRoutingConvention> routingConventions)
+public static ODataRoute MapODataServiceRoute(this HttpConfiguration configuration, string routeName, string routePrefix, IEdmModel model, IODataPathHandler pathHandler, IEnumerable<IODataRoutingConvention> routingConventions)
 {% endhighlight %}
 
 ### ODataRouteAttribute
@@ -53,7 +50,7 @@ Here is an example of an action defined using an `ODataRouteAttribute`:
 {% highlight csharp %}
 public class MyController : ODataController
 {
-	[HttpGet]
+    [HttpGet]
     [ODataRoute("Customers({id})/Address/City")]
     public string GetCityOfACustomer([FromODataUri]int id)
     {
@@ -62,7 +59,7 @@ public class MyController : ODataController
 }
 {% endhighlight %}
 
-With this attribute, Web API OData tries to match all request Uri with `Customers({id})/Address/City` routing template to  `GetCityOfACustomer()` function in `MyController`. For example, the following request Uri will invoke `GetCityOfACustomer`:
+With this attribute, Web API OData tries to match the request Uri with `Customers({id})/Address/City` routing template to  `GetCityOfACustomer()` function in `MyController`. For example, the following request Uri will invoke `GetCityOfACustomer`:
 
 {% highlight csharp %}
 ~/odata/Customers(1)/Address/City
@@ -72,7 +69,7 @@ With this attribute, Web API OData tries to match all request Uri with `Customer
 
 For the above request Uri, `id` in the function will have `1`, `2` and `301` value.
 
-However, for the following request Uri can't match to `GetCityOfACustomer()':
+However, for the following request Uri, it can't match to `GetCityOfACustomer()':
 {% highlight csharp %}
 ~/odata/Customers
 ~/odata/Customers(1)/Address
@@ -83,9 +80,9 @@ Web API OData supports to put multiple `ODataRouteAttribute` on the same OData a
 {% highlight csharp %}
 public class MyController : ODataController
 {
-	[HttpGet]
+    [HttpGet]
     [ODataRoute("Customers({id})/Address/City")]
-	[ODataRoute("Products({id})/Address/City")]
+    [ODataRoute("Products({id})/Address/City")]
     public string GetCityOfACustomer([FromODataUri]int id)
     {
         ......
@@ -104,21 +101,21 @@ public class MyController : ODataController
 {
     [ODataRoute("Customers({id})/Address")]
     public IHttpActionResult GetAddress(int id)
-	{
+    {
         ......
-	}
+    }
 
     [ODataRoute("Customers({id})/Address/City")]
     public IHttpActionResult GetCity(int id)
-	{
+    {
         ......
-	}
+    }
 
     [ODataRoute("Customers({id})/Order")]
     public IHttpActionResult GetOrder(int id)
-	{
+    {
         ......
-	}
+    }
 }
 {% endhighlight %}
 
@@ -130,21 +127,21 @@ public class MyController : ODataController
 {
     [ODataRoute("Address")]
     public IHttpActionResult GetAddress(int id)
-	{
+    {
         ......
-	}
+    }
 
     [ODataRoute("Address/City")]
     public IHttpActionResult GetCity(int id)
-	{
+    {
         ......
-	}
+    }
 
     [ODataRoute("/Order")]
     public IHttpActionResult GetOrder(int id)
-	{
+    {
         ......
-	}
+    }
 }
 {% endhighlight %}
 
@@ -169,26 +166,22 @@ public class MyController : ODataController
 {
     [ODataRoute("({id})/Address")]
     public IHttpActionResult GetAddress(int id)
-	{
+    {
         ......
-	}
+    }
 }
 {% endhighlight %}
 
-The `GetAddress` matches to `Customers({id})/Address` route template because there's a template `{id}`. So far in Web API OData, it supports two kind of templates:
+The `GetAddress` matches to `Customers({id})/Address` route template. It's called key template because there's a template `{id}`. So far in Web API OData, it supports two kind of templates:
 
-1. key template
-   
-For example: 
+1. key template, for example: 
 
 {% highlight csharp %}
 [ODataRoute("({id})/Address")]
 [ODataRoute("Clients({clientId})/MyOrders({orderId})/OrderLines")]
 {% endhighlight %}    
    
-2. function parameter template.
-
-For example: 
+2. function parameter template, for example: 
 
 {% highlight csharp %}
 [ODataRoute("Customers({id})/NS.MyFunction(city={city})")]

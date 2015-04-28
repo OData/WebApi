@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:Runtime>
+    <edmx:ConceptualModels>
+      <Schema Namespace="WebStack.QA.Test.OData.ComplexTypeInheritance" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <EntityType Name="Window">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+          <Property Name="Name" Type="Edm.String" />
+          <Property Name="CurrentShape" Type="WebStack.QA.Test.OData.ComplexTypeInheritance.Shape" />
+          <Property Name="OptionalShapes" Type="Collection(WebStack.QA.Test.OData.ComplexTypeInheritance.Shape)" />
+          <NavigationProperty Name="Parent" Type="WebStack.QA.Test.OData.ComplexTypeInheritance.Window" />
+        </EntityType>
+        <ComplexType Name="Shape" Abstract="true">
+          <Property Name="HasBorder" Type="Edm.Boolean" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="Polygon" BaseType="WebStack.QA.Test.OData.ComplexTypeInheritance.Shape">
+          <Property Name="Vertexes" Type="Collection(WebStack.QA.Test.OData.ComplexTypeInheritance.Point)" />
+        </ComplexType>
+        <ComplexType Name="Rectangle" BaseType="WebStack.QA.Test.OData.ComplexTypeInheritance.Polygon">
+          <Property Name="TopLeft" Type="WebStack.QA.Test.OData.ComplexTypeInheritance.Point" />
+          <Property Name="Width" Type="Edm.Int32" Nullable="false" />
+          <Property Name="Height" Type="Edm.Int32" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="Point">
+          <Property Name="X" Type="Edm.Int32" Nullable="false" />
+          <Property Name="Y" Type="Edm.Int32" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="Circle" BaseType="WebStack.QA.Test.OData.ComplexTypeInheritance.Shape">
+          <Property Name="Center" Type="WebStack.QA.Test.OData.ComplexTypeInheritance.Point" />
+          <Property Name="Radius" Type="Edm.Int32" Nullable="false" />
+        </ComplexType>
+        <EntityContainer Name="Container">
+          <EntitySet Name="Windows" EntityType="WebStack.QA.Test.OData.ComplexTypeInheritance.Window">
+            <NavigationPropertyBinding Path="Parent" Target="Windows" />
+          </EntitySet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+  </edmx:Runtime>
+</edmx:Edmx>

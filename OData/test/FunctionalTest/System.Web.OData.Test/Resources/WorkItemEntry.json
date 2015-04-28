@@ -1,0 +1,3 @@
+﻿{
+  "@odata.context":"http://localhost/$metadata#WorkItems/$entity","ID":25,"EmployeeID":0,"IsCompleted":false,"NumberOfHours":100
+}

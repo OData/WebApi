@@ -1,0 +1,77 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Web" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Web.Routing" #>
+<#@ import namespace="System.Web.Http" #>
+<#@ import namespace="System.Web.Http.Tracing" #>
+<%@ Application Language="C#" %>
+
+<# // Import name spaces
+	foreach (var each in this.Namespaces)
+	{
+#>
+<%@ Import namespace="<#=each#>" %>
+<#
+	}
+#>
+
+<script RunAt="server">
+	private void RegisterRoutes(RouteCollection routes)
+	{
+<# // Add routes 
+		foreach (var route in this._routes)
+		{
+#>
+		<#=route.RouteMapFunctionCall#>(
+			routes,
+			"<#=route.Name#>",
+			"<#=route.Path#>",
+			<#=(route.Defaults ?? "null")#>);
+<#
+		}
+#>
+    }
+
+    protected void Application_Start(object sender, System.EventArgs e)
+    {
+        RegisterRoutes(System.Web.Routing.RouteTable.Routes);
+<# // replace trace if the given trace writer type is not null 
+        if (this._traceWriterType != null)
+        { 
+#>
+
+        GlobalConfiguration.Configuration.Services.Replace(
+            typeof(ITraceWriter),
+            new <#=this._traceWriterType.Name#>());
+<# 
+        } // END if (this.Options.TraceWriterType != null)
+#>
+<#
+		// call the configuration method if it is given
+        if (this._configureMethod != null)
+        {
+            var configMtdDeclaringType = this._configureMethod.DeclaringType;
+            
+            string declareTypeName;
+            if (configMtdDeclaringType.IsGenericType)
+            {
+                declareTypeName = WebAppSetupOptions.GenericTypeFullNameToString(configMtdDeclaringType); 
+            }
+            else
+            {
+                declareTypeName = this._configureMethod.DeclaringType.FullName;
+            }
+
+			string methodName = this._configureMethod.Name;
+#>
+		GlobalConfiguration.Configuration.SetHttpServer(GlobalConfiguration.DefaultServer);
+
+		<#=declareTypeName#>.<#=methodName#>(GlobalConfiguration.Configuration);
+<#
+        } // END if (this.Options.ConfigureMethod != null)
+#>
+    }
+</script>

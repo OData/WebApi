@@ -1,0 +1,3 @@
+﻿{
+  "@odata.context":"http://localhost/$metadata#Edm.TimeOfDay","@odata.type":"#TimeOfDay","value":"12:13:14.0150000"
+}

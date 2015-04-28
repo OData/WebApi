@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:Runtime>
+    <edmx:ConceptualModels>
+      <Schema Namespace="WebStack.QA.Test.OData.OpenType" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <EntityType Name="Employee">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+          <Property Name="Name" Type="Edm.String" />
+          <NavigationProperty Name="Account" Type="WebStack.QA.Test.OData.OpenType.Account" />
+        </EntityType>
+        <EntityType Name="Account" OpenType="true">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+          <Property Name="Name" Type="Edm.String" />
+          <Property Name="AccountInfo" Type="WebStack.QA.Test.OData.OpenType.AccountInfo" />
+          <Property Name="Address" Type="WebStack.QA.Test.OData.OpenType.Address" />
+          <Property Name="Tags" Type="WebStack.QA.Test.OData.OpenType.Tags" />
+        </EntityType>
+        <ComplexType Name="Address" OpenType="true">
+          <Property Name="City" Type="Edm.String" />
+          <Property Name="Street" Type="Edm.String" />
+        </ComplexType>
+        <ComplexType Name="AccountInfo" OpenType="true">
+          <Property Name="NickName" Type="Edm.String" />
+        </ComplexType>
+        <ComplexType Name="Tags" OpenType="true" />
+        <EntityType Name="PremiumAccount" BaseType="WebStack.QA.Test.OData.OpenType.Account" OpenType="true">
+          <Property Name="Since" Type="Edm.DateTimeOffset" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Manager" BaseType="WebStack.QA.Test.OData.OpenType.Employee" OpenType="true">
+          <Property Name="Heads" Type="Edm.Int32" Nullable="false" />
+        </EntityType>
+        <EnumType Name="Gender">
+          <Member Name="Male" Value="1" />
+          <Member Name="Female" Value="2" />
+        </EnumType>
+        <Function Name="GetAddressFunction" IsBound="true">
+          <Parameter Name="bindingParameter" Type="WebStack.QA.Test.OData.OpenType.Account" />
+          <ReturnType Type="WebStack.QA.Test.OData.OpenType.Address" />
+        </Function>
+        <Function Name="GetShipAddresses" IsBound="true">
+          <Parameter Name="bindingParameter" Type="WebStack.QA.Test.OData.OpenType.Account" />
+          <ReturnType Type="Collection(WebStack.QA.Test.OData.OpenType.Address)" />
+        </Function>
+        <Action Name="IncreaseAgeAction" IsBound="true">
+          <Parameter Name="bindingParameter" Type="WebStack.QA.Test.OData.OpenType.Account" />
+          <ReturnType Type="WebStack.QA.Test.OData.OpenType.AccountInfo" />
+        </Action>
+        <Action Name="AddShipAddress" IsBound="true">
+          <Parameter Name="bindingParameter" Type="WebStack.QA.Test.OData.OpenType.Account" />
+          <Parameter Name="address" Type="WebStack.QA.Test.OData.OpenType.Address" />
+          <ReturnType Type="Edm.Int32" Nullable="false" />
+        </Action>
+        <Action Name="ResetDataSource" />
+        <Action Name="UpdateAddressAction">
+          <Parameter Name="Address" Type="WebStack.QA.Test.OData.OpenType.Address" />
+          <Parameter Name="ID" Type="Edm.Int32" Nullable="false" />
+          <ReturnType Type="WebStack.QA.Test.OData.OpenType.Address" />
+        </Action>
+        <EntityContainer Name="Container">
+          <EntitySet Name="Employees" EntityType="WebStack.QA.Test.OData.OpenType.Employee">
+            <NavigationPropertyBinding Path="Account" Target="Accounts" />
+          </EntitySet>
+          <EntitySet Name="Accounts" EntityType="WebStack.QA.Test.OData.OpenType.Account" />
+          <ActionImport Name="ResetDataSource" Action="WebStack.QA.Test.OData.OpenType.ResetDataSource" />
+          <ActionImport Name="UpdateAddressAction" Action="WebStack.QA.Test.OData.OpenType.UpdateAddressAction" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+  </edmx:Runtime>
+</edmx:Edmx>

@@ -5,13 +5,13 @@ description: "Routing Conventions"
 category: "3. Routing"
 ---
 
-It's easy to custom your own routing convention to override the default Web API OData routing. Let's see how to target it.
+It's easy to custom your own routing convention to override the default Web API OData routing convention. Let's see how to target it.
 
 ### Property access routing convention
 
-From built-in routing convention section, we know that developer should add many actions for every property access. 
+From built-in routing convention section, we know that users should add many actions for every property access. 
 
-For example, if the client issues he following property access,
+For example, if the client issues the following property access request Uris:
 
 {% highlight csharp %}
 ~/odata/Customers(1)/Orders
@@ -30,84 +30,83 @@ public class CustomersController : ODataController
         ......
     }
 	
-	public string GetAddress([FromODataUri]int key)
+    public string GetAddress([FromODataUri]int key)
     {
         ......
     }
 	
-	public string GetName([FromODataUri]int key)
+    public string GetName([FromODataUri]int key)
     {
         ......
     }
 }
 {% endhighlight %}
 
-If we have hundreds of similar property for `Customer`, we should add hundres of similar function in `CustomersController`. It's boring and we can create our own routing convention to override it.
+If `Customer` has hundreds of properties, users should add hundres of similar functions in `CustomersController`. It's boring and we can create our own routing convention to override it.
 
 ### Custom routing convention
 
-We can create our own routing convention class by implementing the `IODataRoutingConvention`. However, if you don't want to change behaviour to find the controller, the new routing convention class can derive from `NavigationSourceRoutingConvention'.
+We can create our own routing convention class by implementing the `IODataRoutingConvention`. However, if you don't want to change the behaviour to find the *controller*, the new added routing convention class can derive from `NavigationSourceRoutingConvention'.
 
 Let's build a sample property access routing convention class derived from `NavigationSourceRoutingConvention`.
 
 {% highlight csharp %}
 public class CustomPropertyRoutingConvention : NavigationSourceRoutingConvention
 {
-	private const string ActionName = "GetProperty";
+  private const string ActionName = "GetProperty";
 
-	public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext,
-		ILookup<string, HttpActionDescriptor> actionMap)
-	{
-		if (odataPath == null || controllerContext == null || actionMap == null)
-		{
-			return null;
-		}
+  public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
+  {
+    if (odataPath == null || controllerContext == null || actionMap == null)
+    {
+       return null;
+    }
 
-		if (odataPath.PathTemplate == "~/entityset/key/property" ||
-			odataPath.PathTemplate == "~/entityset/key/cast/property" ||
-			odataPath.PathTemplate == "~/singleton/property" ||
-			odataPath.PathTemplate == "~/singleton/cast/property")
-		{
-			var segment = odataPath.Segments[odataPath.Segments.Count - 1] as PropertyAccessPathSegment;
+    if (odataPath.PathTemplate == "~/entityset/key/property" ||
+        odataPath.PathTemplate == "~/entityset/key/cast/property" ||
+	odataPath.PathTemplate == "~/singleton/property" ||
+	odataPath.PathTemplate == "~/singleton/cast/property")
+    {
+      var segment = odataPath.Segments[odataPath.Segments.Count - 1] as PropertyAccessPathSegment;
 
-			if (segment != null)
-			{
-				string actionName = FindMatchingAction(actionMap, ActionName);
+      if (segment != null)
+      {
+ 	  string actionName = FindMatchingAction(actionMap, ActionName);
 
-				if (actionName != null)
-				{
-					if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
-					{
-						KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-						controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
-					}
+	  if (actionName != null)
+	  {
+	    if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
+	    {
+	      KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
+	      controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+	    }
 
-					controllerContext.RouteData.Values["propertyName"] = segment.PropertyName;
+	    controllerContext.RouteData.Values["propertyName"] = segment.PropertyName;
 
-					return actionName;
-				}
-			}
-		}
-
-		return null;
+	    return actionName;
+	  }
 	}
+     }
 
-	public static string FindMatchingAction(ILookup<string, HttpActionDescriptor> actionMap, params string[] targetActionNames)
-	{
-		foreach (string targetActionName in targetActionNames)
-		{
-			if (actionMap.Contains(targetActionName))
-			{
-				return targetActionName;
-			}
-		}
+     return null;
+   }
 
-		return null;
-	}
+   public static string FindMatchingAction(ILookup<string, HttpActionDescriptor> actionMap, params string[] targetActionNames)
+   {
+     foreach (string targetActionName in targetActionNames)
+     {
+       if (actionMap.Contains(targetActionName))
+       {
+   	  return targetActionName;
+       }
+     }
+
+     return null;
+   }
 }
 {% endhighlight %}
 
-Where, we routes the following path template to a certain action named `GetProperty`.
+Where, we routes the following path templates to a certain action named `GetProperty`.
 
 {% highlight csharp %}
 ~/entityset/key/property
@@ -118,7 +117,7 @@ Where, we routes the following path template to a certain action named `GetPrope
 
 ### Enable customized routing convention
 
-The following sample codes are used to enable the customized routing convention.
+The following sample codes are used to enable the customized routing convention:
 
 {% highlight csharp %}
 HttpConfiguration configuration = ......
@@ -163,10 +162,11 @@ public class CustomersController : ODataController
 
 ### Samples
 
-Let's have some request Uri sample to test:
+Let's have some request Uri samples to test:
 
+a)
 {% highlight csharp %}
-http://localhost/odata/Customers(2)/Name
+**GET** http://localhost/odata/Customers(2)/Name
 {% endhighlight %}
 
 The result is:
@@ -177,9 +177,9 @@ The result is:
 }
 {% endhighlight %}
 
-2. 
+b) 
 {% highlight csharp %}
-http://localhost/odata/Customers(2)/Location
+**GET** http://localhost/odata/Customers(2)/Location
 {% endhighlight %}
 
 The result is:
@@ -189,9 +189,9 @@ The result is:
 }
 {% endhighlight %}
 
-3. 
+c)
 {% highlight csharp %}
-http://localhost/odata/Customers(2)/Location
+**GET** http://localhost/odata/Customers(2)/Location
 {% endhighlight %}
 
 The result is:

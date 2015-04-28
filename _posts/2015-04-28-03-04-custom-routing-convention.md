@@ -166,7 +166,7 @@ Let's have some request Uri samples to test:
 
 a)
 {% highlight csharp %}
-**GET** http://localhost/odata/Customers(2)/Name
+GET http://localhost/odata/Customers(2)/Name
 {% endhighlight %}
 
 The result is:
@@ -179,7 +179,7 @@ The result is:
 
 b) 
 {% highlight csharp %}
-**GET** http://localhost/odata/Customers(2)/Location
+GET http://localhost/odata/Customers(2)/Location
 {% endhighlight %}
 
 The result is:
@@ -191,12 +191,12 @@ The result is:
 
 c)
 {% highlight csharp %}
-**GET** http://localhost/odata/Customers(2)/Location
+GET http://localhost/odata/Customers(2)/Location
 {% endhighlight %}
 
 The result is:
 {% highlight csharp %}
 {
-  "@odata.context":"http://localhost/odata/$metadata#Customers(2)/Location","Country":"United States","City":"Redmond"
+  "@odata.context":"http://localhost/odata/$metadata#Customers(2)/Location","Country":"The United States","City":"Redmond"
 }
 {% endhighlight %}

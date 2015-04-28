@@ -58,8 +58,10 @@ Once the Uri Parse is finished, Web API OData will try to find the corresponding
 Basically, there are two parts of **Routing Convention**:
 
 1. Convention Routing
+
    It is also called built-in routing conventions. It uses a set of pre-defined rules to find **controller** and **action**.
    
 2. Attribute Routing
+
    It uses two Attributes to find **controller** and **action**. One is `ODataPrefixAttribute`, the other is `ODataRouteAttribute`.
 

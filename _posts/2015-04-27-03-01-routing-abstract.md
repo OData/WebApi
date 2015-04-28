@@ -5,7 +5,7 @@ description: "Routing Conventions"
 category: "3. Routing"
 ---
 
-The **Routing** of Web API OData is derived from Web API **Routing** and do more extensions.
+In Web API, **Routing** is how it matches a request URI to an action in a controller. The **Routing** of Web API OData is derived from Web API **Routing** and do more extensions.
 In Web API OData, an *OData controller* (not *API controller*) is severed as the request handler to handle HTTP requests, while the public methods (called action methods) in the controller are invoked to execute the business logic.
 So, when the client issues a request to OData service, the Web API OData framework will map the request to an action in the *OData controller*. Such mapping is based on pre-registered **Routes** in global configuration.
 
@@ -63,5 +63,5 @@ Basically, there are two parts of **Routing Convention**:
    
 2. Attribute Routing
 
-   It uses two Attributes to find **controller** and **action**. One is `ODataPrefixAttribute`, the other is `ODataRouteAttribute`.
+   It uses two Attributes to find **controller** and **action**. One is `ODataRoutePrefixAttribute`, the other is `ODataRouteAttribute`.
 

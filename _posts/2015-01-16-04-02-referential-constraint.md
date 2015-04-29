@@ -143,4 +143,52 @@ builder.EntityType<Order>()
     
 {% endhighlight %}
 
+#### Define Nullable Referential Constraint Using Convention
+
+Currently, it doesn't suppport to define nullable referential constraint from attribute and convention method. However, you can do it by Programmatically by calling `HasOptional()` method:
+
+For example:
+{% highlight csharp %}
+
+public class Product
+{
+    [Key]
+    public int ProductId { get; set; }
+
+    public int SupplierId { get; set; }
+
+    public Supplier Supplier { get; set; }
+}
+
+public class Category
+{
+    [Key]
+    public int CategoryId { get; set; }
+}
+
+ODataModelBuilder builder = new ODataModelBuilder();
+builder.EntitySet<Product>("Product");
+var product = builder.EntityType<Product>().HasOptional(p => p.Supplier, (p, s) => p.SupplierId == s.SupplierId);
+    
+{% endhighlight %}
+
+Then you can get the following result:
+
+{% highlight xml %}
+<EntityType Name="Product">
+    <Key>
+      <PropertyRef Name="ProductId" />
+    </Key>
+    <Property Name="SupplierId" Type="Edm.Int32" />
+    <Property Name="ProductId" Type="Edm.Int32" Nullable="false" />
+    <Property Name="CategoryId" Type="Edm.Int32" />
+    <NavigationProperty Name="Supplier" Type="WebApiService.Supplier">
+      <ReferentialConstraint Property="SupplierId" ReferencedProperty="SupplierId" />
+    </NavigationProperty>
+    <NavigationProperty Name="Category" Type="WebApiService.Category" />
+</EntityType>
+{% endhighlight %}
+
+Where, `CategoryId` is nullable while navigation property `Supplier` is nullable too.
+
 Thanks.

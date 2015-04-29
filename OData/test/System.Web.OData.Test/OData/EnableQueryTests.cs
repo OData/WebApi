@@ -268,7 +268,7 @@ namespace System.Web.OData.Test
                     {"?$filter=time(AbsoluteBirthDate) eq 01:02:03.0040000", "time"},
                     {"?$filter=fractionalseconds(AbsoluteBirthDate) eq 0.4", "fractionalseconds"},
 
-                     {"?$filter=date(NullableBirthDate) eq null", "date"},
+                    {"?$filter=date(NullableBirthDate) eq null", "date"},
                     {"?$filter=time(NullableBirthDate) eq null", "time"},
                     {"?$filter=fractionalseconds(NullableBirthDate) eq null", "fractionalseconds"},
                 };

@@ -32,4 +32,17 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
         public IList<Date?> NullableDates { get; set; }
         public IList<TimeOfDay?> NullableTimeOfDays { get; set; }
     }
+
+    public class EfCustomer
+    {
+        public int Id { get; set; }
+
+        // non-nullable
+        public DateTime DateTime { get; set; }
+        public DateTimeOffset Offset { get; set; }
+
+        // nullable
+        public DateTime? NullableDateTime { get; set; }
+        public DateTimeOffset? NullableOffset { get; set; }
+    }
 }

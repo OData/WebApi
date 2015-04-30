@@ -129,4 +129,55 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
             return sb.ToString();
         }
     }
+
+    public class EfCustomersController : ODataController
+    {
+        private readonly DateAndTimeOfDayContext _db = new DateAndTimeOfDayContext();
+
+        [EnableQuery]
+        public IHttpActionResult Get()
+        {
+            return Ok(_db.Customers);
+        }
+
+        public IHttpActionResult Get(int key)
+        {
+            EfCustomer customer = _db.Customers.FirstOrDefault(e => e.Id == key);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(customer);
+        }
+
+        [HttpPost]
+        [ODataRoute("ResetDataSource")]
+        public IHttpActionResult ResetDataSource()
+        {
+            DateAndTimeOfDayContext db = new DateAndTimeOfDayContext();
+            if (!db.Customers.Any())
+            {
+                DateTimeOffset dateTime = new DateTimeOffset(2014, 12, 24, 1, 2, 3, 4, new TimeSpan(-8, 0, 0));
+                IEnumerable<EfCustomer> customers = Enumerable.Range(1, 5).Select(e =>
+                    new EfCustomer
+                    {
+                        Id = e,
+                        DateTime = dateTime.AddYears(e).AddHours(e).AddMilliseconds(e).DateTime,
+                        NullableDateTime = e % 2 == 0 ? (DateTime?)null : dateTime.AddHours(e * 5).AddMilliseconds(e * 5).DateTime,
+                        Offset = dateTime.AddMonths(e).AddHours(e).AddMilliseconds(e),
+                        NullableOffset = e % 3 == 0 ? (DateTimeOffset?)null : dateTime.AddDays(e).AddHours(e * 5)
+                    }).ToList();
+
+                foreach (EfCustomer customer in customers)
+                {
+                    db.Customers.Add(customer);
+                }
+
+                db.SaveChanges();
+            }
+
+            return Ok();
+        }
+    }
 }

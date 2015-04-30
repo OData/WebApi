@@ -37,7 +37,7 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
         [NuwaConfiguration]
         public static void UpdateConfiguration(HttpConfiguration configuration)
         {
-            var controllers = new[] { typeof(DCustomersController), typeof(MetadataController) };
+            var controllers = new[] { typeof(DCustomersController), typeof(MetadataController), typeof(EfCustomersController) };
             TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
@@ -138,7 +138,6 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             JObject content = await response.Content.ReadAsAsync<JObject>();
-
             Assert.Equal(2, content["Id"]);
             Assert.Equal(DateTimeOffset.Parse("2017-01-01T17:02:03.004+08:00"), content["DateTime"]);
             Assert.Equal(DateTimeOffset.Parse("2015-03-01T01:02:03.004Z"), content["Offset"]);
@@ -410,6 +409,203 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
             Assert.Equal(expectKind, property.Type.TypeKind());
             Assert.Equal(expectTypeName, property.Type.Definition.FullTypeName());
             Assert.Equal(isNullable, property.Type.IsNullable);
+        }
+
+        [Theory]
+        [InlineData("json")]
+        [InlineData("application/json")]
+        [InlineData("application/json;odata.metadata=none")]
+        [InlineData("application/json;odata.metadata=minimal")]
+        [InlineData("application/json;odata.metadata=full")]
+        public async Task QueryEfCustomerEntityTest(string mime)
+        {
+            await ResetDatasource("convention");
+
+            string requestUri = string.Format("{0}/convention/EfCustomers(2)?$format={1}", BaseAddress, mime);
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+            var response = await Client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject content = await response.Content.ReadAsAsync<JObject>();
+
+            Assert.Equal(2, content["Id"]);
+            Assert.Equal(DateTimeOffset.Parse("2016-12-24T03:02:03.007-08:00"), content["DateTime"]);
+            Assert.Equal(DateTimeOffset.Parse("2015-02-24T03:02:03.006-08:00"), content["Offset"]);
+            Assert.Equal(DateTimeOffset.Parse("2014-12-26T11:02:03.004-08:00"), content["NullableOffset"]);
+
+            Assert.Null((DateTimeOffset?)(content["NullableDateTime"]));
+        }
+
+        public static TheoryDataSet<string, IList<int>> FilterDataForEf
+        {
+            get
+            {
+                object[][] orders = {
+                    // DateTime
+                    new object[] {"$filter=DateTime eq cast(2017-12-24T12:02:03.007Z,Edm.DateTimeOffset)", new[] {3} },
+                    new object[] {"$filter=DateTime ge cast(2017-12-24T12:02:03.007Z,Edm.DateTimeOffset)", new[] {3,4,5} },
+                    new object[] {"$filter=DateTime lt cast(2017-12-24T12:02:03.007Z,Edm.DateTimeOffset)", new[] {1,2} },
+
+                    // DateTimeOffset
+                    new object[] {"$filter=Offset eq cast(2015-04-24T13:02:03.008Z,Edm.DateTimeOffset)", new[] {4} },
+                    new object[] {"$filter=Offset ge cast(2015-04-24T13:02:03.008Z,Edm.DateTimeOffset)", new[] {4,5} },
+                    new object[] {"$filter=Offset lt cast(2015-04-24T13:02:03.008Z,Edm.DateTimeOffset)", new int[] {1,2,3} },
+
+                    // DateTime?
+                    new object[] {"$filter=NullableDateTime eq null", new[] {2,4} },
+                    new object[] {"$filter=NullableDateTime ne null", new[] {1,3,5} },
+                    new object[] {"$filter=NullableDateTime lt cast(2016-01-01T17:02:03.004%2B08:00,Edm.DateTimeOffset)", new[] {1,3,5} },
+
+                    // DateTimeOffset?
+                    new object[] {"$filter=NullableOffset eq null", new[] {3} },
+                    new object[] {"$filter=NullableOffset ne null", new[] {1,2,4,5} },
+                    new object[] {"$filter=NullableOffset lt cast(2014-12-29T01:02:03.004Z,Edm.DateTimeOffset)", new [] {1,2} },
+
+                    // fractionalseconds()
+                    new object[] {"$filter=fractionalseconds(DateTime) eq 0.007", new[] {1,2,3,4} },
+                    new object[] {"$filter=fractionalseconds(Offset) gt 0.004", new[] {1,2,3,4,5} },
+
+                    new object[] {"$filter=fractionalseconds(NullableDateTime) eq null", new[] {2,4} },
+                    new object[] {"$filter=fractionalseconds(NullableOffset) lt 0.004", new int[] {} },
+
+                    // date(DateTime)
+                    new object[] {"$filter=date(DateTime) eq 2017-12-24", new[] {3} },
+                    new object[] {"$filter=2017-12-24 eq date(DateTime)", new[] {3} },
+                    new object[] {"$filter=date(DateTime) lt 2017-12-24", new[] {1,2} },
+                    new object[] {"$filter=2017-12-24 le date(DateTime)", new[] {3,4,5 } },
+
+                    // date(DateTimeOffset)
+                    new object[] {"$filter=date(Offset) ne 2015-03-24", new[] {1,2,4,5} },
+                    new object[] {"$filter=2015-03-24 eq date(Offset)", new[] {3} },
+                    new object[] {"$filter=date(Offset) lt 2015-02-24", new[] {1} },
+                    new object[] {"$filter=2015-02-24 le date(Offset)", new[] {2,3,4,5} },
+
+                    // date(DateTime?)
+                    new object[] {"$filter=date(NullableDateTime) eq null", new[] {2,4} },
+                    new object[] {"$filter=null ne date(NullableDateTime)", new[] {1,3,5} },
+                    new object[] {"$filter=date(NullableDateTime) eq 2014-12-24", new[] {1,3} }, // vary with the time zone setting.
+                    new object[] {"$filter=date(NullableDateTime) gt 2014-12-24", new[] {5} }, // vary with the time zone setting.
+                    new object[] {"$filter=date(NullableDateTime) lt 2014-12-24", new int[] {} },
+
+                    // date(DateTimeOffset?)
+                    new object[] {"$filter=date(NullableOffset) eq null", new[] {3} },
+                    new object[] {"$filter=null ne date(NullableOffset)", new[] {1,2,4,5} },
+                    new object[] {"$filter=date(NullableOffset) eq 2014-12-26", new[] {2} },
+                    new object[] {"$filter=2014-12-28 ne date(NullableOffset)", new[] {1,2,3,5} },
+
+                    // time(DateTime)
+                    new object[] {"$filter=time(DateTime) eq 02:02:03.007", new[] {1} },
+                    new object[] {"$filter=05:02:03.007 eq time(DateTime)", new[] {4} },
+                    new object[] {"$filter=time(DateTime) lt 05:02:03.007", new[] {1,2,3} },
+
+                    // time(DateTimeOffset)
+                    new object[] {"$filter=time(Offset) eq 02:02:03.005", new[] {1} },
+                    new object[] {"$filter=05:02:03.008 eq time(Offset)", new[] {4} },
+                    new object[] {"$filter=time(Offset) lt 03:02:03.007", new[] {1,2} },
+
+                    // time(DateTime?)
+                    new object[] {"$filter=time(NullableDateTime) eq null", new[] {2,4} },
+                    new object[] {"$filter=null ne time(NullableDateTime)", new[] {1,3,5} },
+                    new object[] {"$filter=time(NullableDateTime) lt 06:02:04.005", new[] {1,5} },
+
+                    // time(DateTimeOffset?)
+                    new object[] {"$filter=time(NullableOffset) eq null", new[] {3} },
+                    new object[] {"$filter=null ne time(NullableOffset)", new[] {1,2,4,5} },
+                    new object[] {"$filter=time(NullableOffset) eq 21:02:03.004", new[] {4} },
+                    new object[] {"$filter=21:02:03.004 ne time(NullableOffset)", new[] {1,2,3,5} },
+                };
+                TheoryDataSet<string, IList<int>> data = new TheoryDataSet<string, IList<int>>();
+                foreach (object[] order in orders)
+                {
+                    data.Add(order[0] as string, order[1] as IList<int>);
+                }
+
+                return data;
+            }
+        }
+
+        [Theory]
+        [PropertyData("FilterDataForEf")]
+        public async Task CanFilterDateAndTimeOfDayPropertyOnEf(string filter, IList<int> expect)
+        {
+            await ResetDatasource("convention");
+
+            string requestUri = string.Format("{0}/convention/EfCustomers?{1}", BaseAddress, filter);
+
+            HttpResponseMessage response = await Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            JObject content = await response.Content.ReadAsAsync<JObject>();
+            Assert.Equal(expect.Count, content["value"].Count());
+
+            IList<int> actual = new List<int>();
+            for (int i = 0; i < expect.Count; i++)
+            {
+                actual.Add((int)content["value"][i]["Id"]);
+            }
+
+            Assert.Equal(expect, actual.ToArray());
+        }
+
+        public static TheoryDataSet<string, string> OrderByDataEf
+        {
+            get
+            {
+                string[][] orders = {
+                    new[] {"$orderby=DateTime", "1 > 2 > 3 > 4 > 5"},
+                    new[] {"$orderby=DateTime desc", "5 > 4 > 3 > 2 > 1"},
+
+                    new[] {"$orderby=Offset", "1 > 2 > 3 > 4 > 5"},
+                    new[] {"$orderby=Offset desc", "5 > 4 > 3 > 2 > 1"},
+
+                    new[] {"$orderby=NullableDateTime", "2 > 4 > 1 > 3 > 5"}, // Make sure 2 > 4, not 4 > 2
+                    new[] {"$orderby=NullableDateTime desc", "5 > 3 > 1 > 2 > 4"},
+
+                    new[] {"$orderby=NullableOffset", "3 > 1 > 2 > 4 > 5"},
+                    new[] {"$orderby=NullableOffset desc", "5 > 4 > 2 > 1 > 3"},
+                };
+                TheoryDataSet<string, string> data = new TheoryDataSet<string, string>();
+                foreach (string[] order in orders)
+                {
+                    data.Add(order[0], order[1]);
+                }
+                return data;
+            }
+        }
+
+        [Theory]
+        [PropertyData("OrderByDataEf")]
+        public async Task CanOrderByDateAndTimeOfDayPropertyOnEf(string orderby, string expect)
+        {
+            await ResetDatasource("convention");
+
+            string requestUri = string.Format("{0}/convention/EfCustomers?{1}", BaseAddress, orderby);
+
+            HttpResponseMessage response = await Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            JObject content = await response.Content.ReadAsAsync<JObject>();
+
+            Assert.Equal(5, content["value"].Count());
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 5; i++)
+            {
+                sb.Append(content["value"][i]["Id"]).Append(" > ");
+            }
+            sb.Remove(sb.Length - 3, 3); // remove the last " > "
+
+            Assert.Equal(expect, sb.ToString());
+        }
+
+        private async Task<HttpResponseMessage> ResetDatasource(string mode)
+        {
+            var requestUriForPost = this.BaseAddress + "/" + mode + "/ResetDataSource";
+            var responseForPost = await this.Client.PostAsync(requestUriForPost, new StringContent(""));
+            Assert.True(responseForPost.IsSuccessStatusCode);
+            return responseForPost;
         }
     }
 }

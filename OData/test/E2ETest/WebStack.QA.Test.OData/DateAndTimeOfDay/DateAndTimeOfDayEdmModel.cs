@@ -52,6 +52,8 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
             BuildFunctions(builder);
             BuildActions(builder);
 
+            builder.EntitySet<EfCustomer>("EfCustomers");
+
             return builder.GetEdmModel();
         }
 
@@ -86,6 +88,9 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
             action.Parameter<Date?>("nullableModifiedDate");
             action.Parameter<TimeOfDay?>("nullableModifiedTime");
             action.CollectionParameter<Date>("dates");
+
+            // just for reset the data source
+            builder.Action("ResetDataSource");
         }
 
         private static Func<EntityInstanceContext, Uri> link = entityContext =>

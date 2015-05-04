@@ -155,10 +155,10 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Gets or sets a value that is <see langword="true"/> if the type's name or namespace was set by the user; 
-        /// <see langword="false"/> if it was inferred through conventions.
+        /// Gets or sets a value that is <c>true</c> if the type's name or namespace was set by the user; 
+        /// <c>false</c> if it was inferred through conventions.
         /// </summary>
-        /// <remarks>The default value is <see langword="false"/>.</remarks>
+        /// <remarks>The default value is <c>false</c>.</remarks>
         public bool AddedExplicitly { get; set; }
 
         /// <summary>

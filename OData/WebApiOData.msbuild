@@ -17,12 +17,6 @@
     <SkipStrongNamesXml>$(MSBuildThisFileDirectory)tools\SkipStrongNames.xml</SkipStrongNamesXml>
     <NuGetExeFile>$(MSBuildThisFileDirectory).nuget\NuGet.exe</NuGetExeFile>
   </PropertyGroup>
-
-  <UsingTask AssemblyFile=".\packages\xunit.1.9.1\lib\net20\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit"/>
-  
-  <ItemGroup>
-    <TestDLLsXunit Include="bin\$(Configuration)\FunctionalTest\*.Test.dll;bin\$(Configuration)\FunctionalTest\*.Test.*.dll;bin\$(Configuration)\FunctionalTest\NetCore\*.Test.dll" />
-  </ItemGroup>
 	
   <ItemGroup>
     <SolutionsToBuild Include="WebApiOData.sln">
@@ -99,11 +93,17 @@
   </Target>
 
   <Target Name="RunTests" DependsOnTargets="CheckSkipStrongNames">
+    <ItemGroup>
+      <TestAssembiles Include="bin\$(Configuration)\FunctionalTest\*.Test.dll;bin\$(Configuration)\FunctionalTest\*.Test.*.dll;bin\$(Configuration)\FunctionalTest\NetCore\*.Test.dll" />
+	  <XunitProject Include="tools\WebStack.xunit.targets">
+		<Properties>TestAssembly=%(TestAssembiles.FullPath);XmlPath=$(TestResultsDirectory)%(TestAssembiles.FileName)-XunitResults.xml</Properties>
+      </XunitProject>
+    </ItemGroup>
+	
     <!-- Re-create the test results directory so that print summary doesn't run on old test results -->
     <RemoveDir Directories="$(TestResultsDirectory)" />
     <MakeDir Directories="$(TestResultsDirectory)" />
-
-    <xunit Assemblies="@(TestDLLsXunit)" Xml="$(TestResultsDirectory)\test.result.xml"/>
+    <MSBuild Projects="@(XunitProject)" BuildInParallel="$(BuildInParallel)" Targets="Xunit" />
   </Target>
 
   <Target Name="CheckSkipStrongNames" DependsOnTargets="RestoreSkipStrongNames">

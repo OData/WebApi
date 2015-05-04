@@ -80,7 +80,7 @@ namespace System.Web.Http.OData.Builder
         /// </summary>
         /// <param name="configuration">The <see cref="HttpConfiguration"/> to use.</param>
         /// <param name="isQueryCompositionMode">If the model is being built for only querying.</param>
-        /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <see langword="true"/> has more relaxed
+        /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <c>true</c> has more relaxed
         /// inference rules and also treats all types as entity types. This constructor is intended for use by unit testing only.</remarks>
         public ODataConventionModelBuilder(HttpConfiguration configuration, bool isQueryCompositionMode)
         {

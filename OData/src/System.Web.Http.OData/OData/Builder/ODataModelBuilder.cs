@@ -272,7 +272,7 @@ namespace System.Web.Http.OData.Builder
         /// Removes the type from the model.
         /// </summary>
         /// <param name="type">The type to be removed</param>
-        /// <returns><see>true</see> if the type is present in the model and <see>false</see> otherwise.</returns>
+        /// <returns><c>true</c> if the type is present in the model and <c>false</c> otherwise.</returns>
         public virtual bool RemoveStructuralType(Type type)
         {
             if (type == null)
@@ -287,7 +287,7 @@ namespace System.Web.Http.OData.Builder
         /// Removes the entity set from the model.
         /// </summary>
         /// <param name="name">The name of the entity set to be removed</param>
-        /// <returns><see>true</see> if the entity set is present in the model and <see>false</see> otherwise.</returns>
+        /// <returns><c>true</c> if the entity set is present in the model and <c>false</c> otherwise.</returns>
         public virtual bool RemoveEntitySet(string name)
         {
             if (name == null)
@@ -306,7 +306,7 @@ namespace System.Web.Http.OData.Builder
         /// </remarks>
         /// </summary>
         /// <param name="name">The name of the procedure to be removed</param>
-        /// <returns><see>true</see> if the procedure is present in the model and <see>false</see> otherwise.</returns>
+        /// <returns><c>true</c> if the procedure is present in the model and <c>false</c> otherwise.</returns>
         public virtual bool RemoveProcedure(string name)
         {
             if (name == null)
@@ -336,7 +336,7 @@ namespace System.Web.Http.OData.Builder
         /// Remove the procedure from the model
         /// </summary>
         /// <param name="procedure">The procedure to be removed</param>
-        /// <returns><see>true</see> if the procedure is present in the model and <see>false</see> otherwise.</returns>
+        /// <returns><c>true</c> if the procedure is present in the model and <c>false</c> otherwise.</returns>
         public virtual bool RemoveProcedure(ProcedureConfiguration procedure)
         {
             if (procedure == null)

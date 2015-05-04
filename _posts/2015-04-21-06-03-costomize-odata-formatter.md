@@ -126,6 +126,16 @@ public IEnumerable<Document> GetDocuments(string search)
 }
 {% endhighlight %}
 
+#### Request Samples
+
+Add prefer header and send request.
+
+{% highlight csharp %}
+HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, baseAddress + "odata/Documents?search=test");
+request.Headers.TryAddWithoutValidation("Prefer", "odata.include-annotations=\"*\"");
+var response = client.SendAsync(request).Result;
+{% endhighlight %}
+
 #### Response Samples
 
 Annotation is supported in newest night build, 5.6.0-beta1.

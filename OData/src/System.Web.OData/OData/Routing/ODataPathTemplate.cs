@@ -53,7 +53,7 @@ namespace System.Web.OData.Routing
         /// </summary>
         /// <param name="path">The OData path to be matched against.</param>
         /// <param name="values">The dictionary of matches to be updated in case of a match.</param>
-        /// <returns><see langword="true"/> in case of a match; otherwise, <see langword="false"/>.</returns>
+        /// <returns><c>true</c> in case of a match; otherwise, <c>false</c>.</returns>
         public bool TryMatch(ODataPath path, IDictionary<string, object> values)
         {
             if (path.Segments.Count != Segments.Count)

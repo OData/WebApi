@@ -150,7 +150,7 @@ namespace System.Web.OData.Routing.Conventions
         /// enough so as not to depend on the "this" pointer referencing a fully constructed object.
         /// </summary>
         /// <param name="controller">The controller.</param>
-        /// <returns><see langword="true"/> if this controller should be included in the map; <see langword="false"/> otherwise.</returns>
+        /// <returns><c>true</c> if this controller should be included in the map; <c>false</c> otherwise.</returns>
         public virtual bool ShouldMapController(HttpControllerDescriptor controller)
         {
             return true;

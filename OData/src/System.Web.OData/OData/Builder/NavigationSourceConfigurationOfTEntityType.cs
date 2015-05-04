@@ -559,8 +559,8 @@ namespace System.Web.OData.Builder
         /// Configures the edit link for the entities from this navigation source.
         /// </summary>
         /// <param name="editLinkFactory">The factory used to generate the edit link.</param>
-        /// <param name="followsConventions"><see langword="true"/> if the factory follows OData edit link conventions;
-        /// otherwise, <see langword="false"/>.</param>
+        /// <param name="followsConventions"><c>true</c> if the factory follows OData edit link conventions;
+        /// otherwise, <c>false</c>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
         public void HasEditLink(Func<EntityInstanceContext<TEntityType>, Uri> editLinkFactory, bool followsConventions)
@@ -577,8 +577,8 @@ namespace System.Web.OData.Builder
         /// Configures the read link for the entities from this navigation source.
         /// </summary>
         /// <param name="readLinkFactory">The factory used to generate the read link.</param>
-        /// <param name="followsConventions"><see langword="true"/> if the factory follows OData read link conventions;
-        /// otherwise, <see langword="false"/>.</param>
+        /// <param name="followsConventions"><c>true</c> if the factory follows OData read link conventions;
+        /// otherwise, <c>false</c>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
         public void HasReadLink(Func<EntityInstanceContext<TEntityType>, Uri> readLinkFactory, bool followsConventions)
@@ -596,8 +596,8 @@ namespace System.Web.OData.Builder
         /// Configures the ID link for the entities from this navigation source.
         /// </summary>
         /// <param name="idLinkFactory">The factory used to generate the ID link.</param>
-        /// <param name="followsConventions"><see langword="true"/> if the factory follows OData ID link conventions;
-        /// otherwise, <see langword="false"/>.</param>
+        /// <param name="followsConventions"><c>true</c> if the factory follows OData ID link conventions;
+        /// otherwise, <c>false</c>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
         public void HasIdLink(Func<EntityInstanceContext<TEntityType>, Uri> idLinkFactory, bool followsConventions)
@@ -616,8 +616,8 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="navigationProperty">The navigation property for which the navigation link is being generated.</param>
         /// <param name="navigationLinkFactory">The factory used to generate the navigation link.</param>
-        /// <param name="followsConventions"><see langword="true"/> if the factory follows OData navigation link conventions;
-        /// otherwise, <see langword="false"/>.</param>
+        /// <param name="followsConventions"><c>true</c> if the factory follows OData navigation link conventions;
+        /// otherwise, <c>false</c>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
         public void HasNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty,
@@ -642,8 +642,8 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="navigationProperties">The navigation properties for which the navigation link is being generated.</param>
         /// <param name="navigationLinkFactory">The factory used to generate the navigation link.</param>
-        /// <param name="followsConventions"><see langword="true"/> if the factory follows OData navigation link conventions;
-        /// otherwise, <see langword="false"/>.</param>
+        /// <param name="followsConventions"><c>true</c> if the factory follows OData navigation link conventions;
+        /// otherwise, <c>false</c>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
         public void HasNavigationPropertiesLink(IEnumerable<NavigationPropertyConfiguration> navigationProperties,

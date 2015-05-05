@@ -977,7 +977,7 @@ namespace WebStack.QA.Test.OData.Containment
             Assert.Equal(originCount - deletedCount, currentCount);
         }
 
-        [Theory(Skip = "Bug 2021-Should support Action/Function returns contained entities.")]
+        [Theory(Skip = "Should support Action/Function returns contained entities.")]
         [InlineData("convention")]
         [InlineData("explicit")]
         // Action bound to a collection of contained entity.

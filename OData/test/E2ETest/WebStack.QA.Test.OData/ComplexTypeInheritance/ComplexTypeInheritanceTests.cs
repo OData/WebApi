@@ -135,7 +135,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
             Assert.True(4 == vertexes.Count, "The returned OptionalShapes is not as expected");
         }
 
-        [Theory(Skip = "bug 2846350: [Client] Client cant deserialize a property which is declared as abstract, but the payload is concrete.")]
+        [Theory(Skip = "[Client] Client cant deserialize a property which is declared as abstract, but the payload is concrete.")]
         [PropertyData("MediaTypes")]
         // GET ~/Windows(1)
         public async Task QuerySingleContainingEntity(string mode, string mime)
@@ -338,7 +338,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
                 String.Format("\nExpected that Radius: 2, but actually: {0},\n request uri: {1},\n response payload: {2}", radius, requestUri, contentOfString));
         }
 
-        [Theory(Skip = "Bug 2876570:[UriParser] Cast segment following a collection complex type property reports exception.")]
+        [Theory(Skip = "[UriParser] Cast segment following a collection complex type property reports exception.")]
         [InlineData("convention")]
         [InlineData("explicit")]
         // GET ~/Windows(1)/CurrentShape/WebStack.QA.Test.OData.ComplexTypeInheritance.Circle
@@ -426,7 +426,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
                 String.Format("\nExpected that Radius: 2, but actually: {0},\n request uri: {1},\n response payload: {2}", radius, requestUri, contentOfString));
         }
 
-        [Theory(Skip = "bug 2064-Support collection of complex type value as function parameter")]
+        [Theory(Skip = "Support collection of complex type value as function parameter")]
         [InlineData("convention")]
         [InlineData("explicit")]
         // PUT ~/Windows(3)/OptionalShapes
@@ -473,7 +473,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
                 contentOfString));
         }
 
-        [Theory(Skip = "bug 2065-Support deserialize complex type value")]
+        [Theory(Skip = "Support deserialize complex type value")]
         [InlineData("convention")]
         [InlineData("explicit")]
         // PUT ~/Widnows(1)/CurrentShape

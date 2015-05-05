@@ -36,4 +36,23 @@ Your pull request should:
  - Include a description of what your change intends to do
  - Have clear commit messages
  - Include a link to the issue created at the issue tracker or its issue number
- - Include adequate tests
+ - Include adequate function tests, corresponding E2E tests
+ - Pass all tests without error
+###Run test
+Function test
+```
+cd OData
+build
+```
+
+Corresponding E2E test
+```
+cd OData
+build E2EV3 (or E2EV4)
+```
+
+Or you can just run all test
+```
+cd OData
+build FULL
+```

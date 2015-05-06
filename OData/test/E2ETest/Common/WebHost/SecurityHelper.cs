@@ -100,9 +100,9 @@ namespace WebStack.QA.Common.WebHost
             }
         }
 
-        public static void AddIpListen(string port)
+        public static void AddIpListen()
         {
-            Run(string.Format(@"netsh http add iplisten ipaddress=0.0.0.0:{0}", port));
+            Run(string.Format(@"netsh http add iplisten ipaddress=::"));
         }
 
         public static bool AddHttpsBinding(X509Certificate2 cert, string port)

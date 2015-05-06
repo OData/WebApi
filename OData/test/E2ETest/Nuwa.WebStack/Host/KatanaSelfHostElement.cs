@@ -52,7 +52,7 @@ namespace Nuwa.WebStack.Host
 
             // setup security strategy and base address
             port = _portArranger.Reserve();
-            SecurityHelper.AddIpListen(port);
+            SecurityHelper.AddIpListen();
             SecurityOptionElement securityElem = frame.GetFirstElement<SecurityOptionElement>();
             if (securityElem != null)
             {

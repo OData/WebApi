@@ -13,10 +13,10 @@ REM %MSBuild% value when setting the variable and never quote %MSBuild% referenc
 set MSBuild="%ProgramFiles(x86)%\MSBuild\12.0\Bin\MSBuild.exe"
 if not exist %MSBuild% @set MSBuild="%ProgramFiles%\MSBuild\12.0\Bin\MSBuild.exe"
 
-if "%1" == "" goto BuildDefaults
-if "%1" == "E2EV4" goto BuildE2EV4
-if "%1" == "E2EV3" goto BuildE2EV3
-if "%1" == "FULL" goto BuildDefaults
+if /I "%1" == "" goto BuildDefaults
+if /I "%1" == "E2EV4" goto BuildE2EV4
+if /I "%1" == "E2EV3" goto BuildE2EV3
+if /I "%1" == "FULL" goto BuildDefaults
 
 %MSBuild% WebApiOData.msbuild /m /nr:false /t:%* /p:Platform="Any CPU" /p:Desktop=true /v:M /fl /flp:LogFile=bin\msbuild.log;Verbosity=Normal
 if %ERRORLEVEL% neq 0 goto BuildFail
@@ -25,7 +25,7 @@ goto BuildSuccess
 :BuildDefaults
 %MSBuild% WebApiOData.msbuild /m /nr:false /p:Platform="Any CPU" /p:Desktop=true /v:M /fl /flp:LogFile=bin\msbuild.log;Verbosity=Normal
 if %ERRORLEVEL% neq 0 goto BuildFail
-if "%1" == "FULL" goto BuildE2EV4
+if /I "%1" == "FULL" goto BuildE2EV4
 goto BuildSuccess
 
 :BuildE2EV4
@@ -41,7 +41,7 @@ REM PowerShell.exe -executionpolicy remotesigned -File tools\scripts\ReplaceAppC
 REM %MSBuild% WebApiOData.E2E.msbuild /m /nr:false /p:ResultFileName="IIS.test.result.xml" /p:Platform="Any CPU" /p:Desktop=true /v:M /fl /flp:LogFile=bin\msbuild.log;Verbosity=Normal
 REM if %ERRORLEVEL% neq 0 goto BuildFail
 
-if "%1" == "FULL" goto BuildE2EV3
+if /I "%1" == "FULL" goto BuildE2EV3
 goto BuildSuccess
 
 :BuildE2EV3

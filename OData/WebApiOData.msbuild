@@ -11,8 +11,8 @@
     <BuildPortable Condition=" '$(BuildPortable)' == '' ">true</BuildPortable>
     <BuildInParallel Condition=" '$(BuildInParallel)' == '' And $(MSBuildNodeCount) &gt; 1 ">true</BuildInParallel>
     <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
-    <OutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\FunctionalTest\</OutputPath>
-    <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\FunctionalTest\TestResults\</TestResultsDirectory>
+    <OutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\UnitTest\</OutputPath>
+    <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\UnitTest\TestResults\</TestResultsDirectory>
     <SkipStrongNamesExe>$(MSBuildThisFileDirectory)packages\Microsoft.Web.SkipStrongNames.1.0.0\tools\SkipStrongNames.exe</SkipStrongNamesExe>
     <SkipStrongNamesXml>$(MSBuildThisFileDirectory)tools\SkipStrongNames.xml</SkipStrongNamesXml>
     <NuGetExeFile>$(MSBuildThisFileDirectory).nuget\NuGet.exe</NuGetExeFile>
@@ -94,7 +94,7 @@
 
   <Target Name="RunTests" DependsOnTargets="CheckSkipStrongNames">
     <ItemGroup>
-      <TestAssembiles Include="bin\$(Configuration)\FunctionalTest\*.Test.dll;bin\$(Configuration)\FunctionalTest\*.Test.*.dll;bin\$(Configuration)\FunctionalTest\NetCore\*.Test.dll" />
+      <TestAssembiles Include="bin\$(Configuration)\UnitTest\*.Test.dll;bin\$(Configuration)\UnitTest\*.Test.*.dll;bin\$(Configuration)\UnitTest\NetCore\*.Test.dll" />
 	  <XunitProject Include="tools\WebStack.xunit.targets">
 		<Properties>TestAssembly=%(TestAssembiles.FullPath);XmlPath=$(TestResultsDirectory)%(TestAssembiles.FileName)-XunitResults.xml</Properties>
       </XunitProject>

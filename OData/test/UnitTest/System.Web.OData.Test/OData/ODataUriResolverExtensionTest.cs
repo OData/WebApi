@@ -12,6 +12,7 @@ using System.Web.OData.Routing;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using Newtonsoft.Json.Linq;
 
 namespace System.Web.OData
 {
@@ -219,6 +220,42 @@ namespace System.Web.OData
             }
         }
 
+        [Theory]
+        [InlineData("$filter=Gender eq 'Male'", true, HttpStatusCode.OK, "0,2,4,6,8")]
+        [InlineData("$filter=Gender eq 'Male'", false, HttpStatusCode.BadRequest, null)]
+        [InlineData("$filter=Gender eq 'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
+        [InlineData("$filter=Gender eq 'Female'", false, HttpStatusCode.BadRequest, null)]
+        [InlineData("$filter=Gender eq System.Web.OData.TestCommon.Models.Gender'Male'", true, HttpStatusCode.OK, "0,2,4,6,8")]
+        [InlineData("$filter=Gender eq System.Web.OData.TestCommon.Models.Gender'Male'", false, HttpStatusCode.OK, "0,2,4,6,8")]
+        [InlineData("$filter=Gender eq System.Web.OData.TestCommon.Models.Gender'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
+        [InlineData("$filter=Gender eq System.Web.OData.TestCommon.Models.Gender'Female'", false, HttpStatusCode.OK, "1,3,5,7,9")]
+        [InlineData("$filter=Gender eq 'SomeUnknowValue'", true, HttpStatusCode.BadRequest, null)]
+        [InlineData("$filter=Gender eq System.Web.OData.TestCommon.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.BadRequest, null)]
+        public void ExtensionResolver_Works_EnumPrefixFree_QueryOption(string query, bool enableEnumPrefix, HttpStatusCode statusCode, string output)
+        {
+            // Arrange
+            IEdmModel model = GetEdmModel();
+            HttpConfiguration config = new[] { typeof(ParserExtenstionCustomersController) }.GetHttpConfiguration();
+            config.EnableEnumPrefixFree(enableEnumPrefix);
+            config.MapODataServiceRoute("odata", "odata", model);
+            HttpClient client = new HttpClient(new HttpServer(config));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                String.Format("http://localhost/odata/ParserExtenstionCustomers?{0}", query));
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(statusCode, response.StatusCode);
+
+            if (statusCode == HttpStatusCode.OK)
+            {
+                JObject content = response.Content.ReadAsAsync<JObject>().Result;
+                Assert.Equal(5, content["value"].Count());
+                Assert.Equal(output, String.Join(",", content["value"].Select(e => e["Id"])));
+            }
+        }
+
         [Fact]
         public void DefaultResolver_DoesnotWorks_UnqualifiedNameTemplate()
         {
@@ -323,7 +360,8 @@ namespace System.Web.OData
                     {
                         Id = j,
                         Price = i * j
-                    }).ToList()
+                    }).ToList(),
+                Gender = i % 2 == 0 ? Gender.Male : Gender.Female
             }).ToList();
     }
 
@@ -331,6 +369,7 @@ namespace System.Web.OData
     {
         public int Id { get; set; }
         public string Title { get; set; }
+        public Gender Gender { get; set; }
         public IList<ParserExtenstionOrder> Orders { get; set; }
     }
 

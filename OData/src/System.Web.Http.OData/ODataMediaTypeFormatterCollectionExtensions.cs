@@ -19,8 +19,8 @@ namespace System.Web.Http
         /// <param name="collection">The collection to which to add the items.</param>
         /// <param name="items">
         /// The items that should be added to the end of the <see cref="MediaTypeFormatterCollection"/>.
-        /// The items collection itself cannot be <see langword="null"/>, but it can contain elements that are
-        /// <see langword="null"/>.
+        /// The items collection itself cannot be null, but it can contain elements that are
+        /// null.
         /// </param>
         [Obsolete("This method is obsolete; use the AddRange method in the MediaTypeFormatterCollection class.")]
         public static void AddRange(this MediaTypeFormatterCollection collection,
@@ -42,7 +42,7 @@ namespace System.Web.Http
         /// <param name="index">The zero-based index at which the new elements should be inserted.</param>
         /// <param name="items">
         /// The items that should be inserted into the <see cref="MediaTypeFormatterCollection"/>. The items collection
-        /// itself cannot be <see langword="null"/>, but it can contain elements that are <see langword="null"/>.
+        /// itself cannot be null, but it can contain elements that are null.
         /// </param>
         [Obsolete("This method is obsolete; use the InsertRange method in the MediaTypeFormatterCollection class.")]
         public static void InsertRange(this MediaTypeFormatterCollection collection,

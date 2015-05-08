@@ -667,7 +667,7 @@ namespace System.Web.OData.Builder
         /// Finds the <see cref="NavigationPropertyBindingConfiguration"/> for the navigation property with the given name.
         /// </summary>
         /// <param name="propertyName">The name of the navigation property.</param>
-        /// <returns>The binding, if found; otherwise, <see langword="null"/>.</returns>
+        /// <returns>The binding, if found; otherwise, null.</returns>
         public NavigationPropertyBindingConfiguration FindBinding(string propertyName)
         {
             return _configuration.FindBinding(propertyName);

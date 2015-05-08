@@ -71,7 +71,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Gets or sets a value that is <c>true</c> if the member was added by the user; <c>false</c> if it was inferred through conventions.
         /// </summary>
-        /// <remarks>The default value is <see langword="true"/></remarks>
+        /// <remarks>The default value is <c>true</c></remarks>
         public bool AddedExplicitly { get; set; }
     }
 }

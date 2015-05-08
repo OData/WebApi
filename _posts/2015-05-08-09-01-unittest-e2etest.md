@@ -19,6 +19,7 @@ You can find that the structural under `System.Web.OData` folder and `System.Web
 * Make sure you add/change the right class(V4 or V3 or both).
 * Can add functinal test for complicate scenario, but E2E test cases are better.
 
+
 ### E2E Test
 E2E test are complete test for user scenarios, always begin with client request and end with server response. If your unit test in pull request can't cover all scenario well or you have a big pull request, please add E2E test for it.
 
@@ -28,6 +29,7 @@ E2E test are complete test for user scenarios, always begin with client request 
 * If the test has any kind of state that is preserved between request, it should be the only test defined in the test class to avoid conflicts when executed along other tests.
 * Try to test with both in memory data and DB data.
 * Keep test folder, class style with exist test folder, class.
+
 
 #### Test Sample
 {% highlight csharp %}

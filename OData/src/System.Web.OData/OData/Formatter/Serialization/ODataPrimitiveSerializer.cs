@@ -147,11 +147,10 @@ namespace System.Web.OData.Formatter.Serialization
                         TimeZoneInfo timeZone = TimeZoneInfoHelper.TimeZone;
                         if (dateTime.Kind == DateTimeKind.Utc || dateTime.Kind == DateTimeKind.Local)
                         {
-                            return new DateTimeOffset(dateTime.ToUniversalTime()).ToOffset(timeZone.BaseUtcOffset);
+                            return TimeZoneInfo.ConvertTime(new DateTimeOffset(dateTime), timeZone);
                         }
 
-                        DateTimeOffset dateTimeOffset = new DateTimeOffset(dateTime, timeZone.GetUtcOffset(dateTime));
-                        return dateTimeOffset.ToUniversalTime().ToOffset(timeZone.BaseUtcOffset);
+                        return new DateTimeOffset(dateTime, timeZone.GetUtcOffset(dateTime));
 
                     default:
                         if (type == typeof(char[]))

@@ -162,7 +162,7 @@ namespace System.Web.OData
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
-            TimeZoneInfo tiemZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("UTC");
+            TimeZoneInfo tiemZoneInfo = TimeZoneInfo.Utc;
 
             // Act
             config.SetTimeZoneInfo(tiemZoneInfo);

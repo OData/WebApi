@@ -75,8 +75,7 @@ namespace System.Web.OData.Formatter
             Assert.Equal(1, values.Count);
             DateTimeOffset result = Assert.IsType<DateTimeOffset>(values[0]);
 
-            Assert.Equal(new DateTimeOffset(value.ToUniversalTime()).ToOffset(TimeZoneInfoHelper.TimeZone.BaseUtcOffset),
-                result);
+            Assert.Equal(TimeZoneInfo.ConvertTime(new DateTimeOffset(value), TimeZoneInfoHelper.TimeZone), result);
         }
 
         [Theory]

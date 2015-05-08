@@ -58,8 +58,7 @@ namespace System.Web.OData.Formatter.Deserialization
             DateTime dt2 = new DateTime(2014, 10, 27, 0, 0, 0, DateTimeKind.Utc);
             IList<DateTimeOffset> source = new List<DateTimeOffset> { new DateTimeOffset(dt1), new DateTimeOffset(dt2) };
 
-            IEnumerable<DateTime> expect =
-                source.Select(e => e.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime);
+            IEnumerable<DateTime> expect = source.Select(e => e.LocalDateTime);
             TimeZoneInfoHelper.TimeZone = null;
             IEnumerable newCollection = new CustomCollectionWithAdd<DateTime>();
 
@@ -79,14 +78,14 @@ namespace System.Web.OData.Formatter.Deserialization
             DateTime dt2 = new DateTime(2014, 10, 27, 10, 20, 30, DateTimeKind.Utc);
             IList source = new List<DateTimeOffset> { new DateTimeOffset(dt1), new DateTimeOffset(dt2) };
             IEnumerable newCollection = new CustomCollectionWithAdd<DateTime>();
-            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"); // -8:00
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"); // -8:00 / -7:00
 
             // Act
             source.AddToCollection(newCollection, typeof(DateTime), typeof(CollectionDeserializationHelpersTest),
                 "PropertyName", newCollection.GetType());
 
             // Assert
-            Assert.Equal(new[] { dt1.AddHours(-8), dt2.AddHours(-8) }, newCollection as IEnumerable<DateTime>);
+            Assert.Equal(new[] { dt1.AddHours(-8), dt2.AddHours(-7) }, newCollection as IEnumerable<DateTime>);
         }
 
         [Fact]
@@ -98,8 +97,8 @@ namespace System.Web.OData.Formatter.Deserialization
             IList source = new List<DateTimeOffset> { dto1, dto2 };
             IEnumerable<DateTime> expect = new List<DateTime>
             {
-                dto1.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime,
-                dto2.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime
+                dto1.LocalDateTime,
+                dto2.LocalDateTime
             };
             TimeZoneInfoHelper.TimeZone = null;
             IEnumerable newCollection = new CustomCollectionWithAdd<DateTime>();
@@ -121,7 +120,7 @@ namespace System.Web.OData.Formatter.Deserialization
             IList source = new List<DateTimeOffset> { dto1, dto2 };
             IEnumerable newCollection = new CustomCollectionWithAdd<DateTime>();
             IEdmModel model = new EdmModel();
-            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"); // -8:00
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"); // -8:00 / -7:00
 
             // Act
             source.AddToCollection(newCollection, typeof(DateTime), typeof(CollectionDeserializationHelpersTest),

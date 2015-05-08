@@ -84,7 +84,7 @@ namespace System.Web.OData.Formatter
                     {
                         DateTimeOffset dateTimeOffsetValue = (DateTimeOffset)value;
                         TimeZoneInfo timeZone = TimeZoneInfoHelper.TimeZone;
-                        dateTimeOffsetValue = dateTimeOffsetValue.ToUniversalTime().ToOffset(timeZone.BaseUtcOffset);
+                        dateTimeOffsetValue = TimeZoneInfo.ConvertTime(dateTimeOffsetValue, timeZone);
                         return dateTimeOffsetValue.DateTime;
                     }
 

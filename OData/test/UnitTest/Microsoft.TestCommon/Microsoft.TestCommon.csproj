@@ -7,12 +7,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.TestCommon</RootNamespace>
     <AssemblyName>Microsoft.TestCommon</AssemblyName>
-    <OutputPath>..\..\..\bin\$(Configuration)\FunctionalTest\</OutputPath>
+    <OutputPath>..\..\..\bin\$(Configuration)\UnitTest\</OutputPath>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <OutputPath>..\..\..\bin\Debug\FunctionalTest\</OutputPath>
+    <OutputPath>..\..\..\bin\Debug\UnitTest\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.OData.Core">

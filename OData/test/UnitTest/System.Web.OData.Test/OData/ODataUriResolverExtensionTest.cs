@@ -231,6 +231,11 @@ namespace System.Web.OData
         [InlineData("$filter=Gender eq System.Web.OData.TestCommon.Models.Gender'Female'", false, HttpStatusCode.OK, "1,3,5,7,9")]
         [InlineData("$filter=Gender eq 'SomeUnknowValue'", true, HttpStatusCode.BadRequest, null)]
         [InlineData("$filter=Gender eq System.Web.OData.TestCommon.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.BadRequest, null)]
+        [InlineData("$filter=NullableGender eq 'Male'", true, HttpStatusCode.OK, "")]
+        [InlineData("$filter=NullableGender eq System.Web.OData.TestCommon.Models.Gender'Male'", true, HttpStatusCode.OK, "")]
+        [InlineData("$filter=NullableGender eq 'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
+        [InlineData("$filter=NullableGender eq System.Web.OData.TestCommon.Models.Gender'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
+        [InlineData("$filter=NullableGender eq null", true, HttpStatusCode.OK, "0,2,4,6,8")]
         public void ExtensionResolver_Works_EnumPrefixFree_QueryOption(string query, bool enableEnumPrefix, HttpStatusCode statusCode, string output)
         {
             // Arrange
@@ -251,7 +256,6 @@ namespace System.Web.OData
             if (statusCode == HttpStatusCode.OK)
             {
                 JObject content = response.Content.ReadAsAsync<JObject>().Result;
-                Assert.Equal(5, content["value"].Count());
                 Assert.Equal(output, String.Join(",", content["value"].Select(e => e["Id"])));
             }
         }
@@ -361,7 +365,8 @@ namespace System.Web.OData
                         Id = j,
                         Price = i * j
                     }).ToList(),
-                Gender = i % 2 == 0 ? Gender.Male : Gender.Female
+                Gender = i % 2 == 0 ? Gender.Male : Gender.Female,
+                NullableGender = i % 2 == 0 ? (Gender?)null : Gender.Female
             }).ToList();
     }
 
@@ -370,6 +375,7 @@ namespace System.Web.OData
         public int Id { get; set; }
         public string Title { get; set; }
         public Gender Gender { get; set; }
+        public Gender? NullableGender { get; set; }
         public IList<ParserExtenstionOrder> Orders { get; set; }
     }
 

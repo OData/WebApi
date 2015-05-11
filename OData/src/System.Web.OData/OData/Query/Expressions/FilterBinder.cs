@@ -459,6 +459,8 @@ namespace System.Web.OData.Query.Expressions
                 ODataEnumValue odataEnumValue = (ODataEnumValue)value;
                 string strValue = odataEnumValue.Value;
                 Contract.Assert(strValue != null);
+
+                constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
                 value = Enum.Parse(constantType, strValue);
             }
 

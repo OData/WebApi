@@ -859,6 +859,7 @@
     <Compile Include="Routing\RefRoutingConventionTests.cs" />
     <Compile Include="Routing\ODataRouteTests.cs" />
     <Compile Include="Routing\ODataValueProviderTests.cs" />
+    <Compile Include="Routing\UnqualifiedNameCallRoutingTests.cs" />
     <Compile Include="BoundOperation\BoundOperationController.cs" />
     <Compile Include="BoundOperation\BoundOperationDataModel.cs" />
     <Compile Include="BoundOperation\BoundOperationEdmModel.cs" />

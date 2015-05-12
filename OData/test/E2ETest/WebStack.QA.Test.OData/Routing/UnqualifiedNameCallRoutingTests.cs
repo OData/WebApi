@@ -34,7 +34,6 @@ namespace WebStack.QA.Test.OData.Routing
             config.Routes.Clear();
             config.EnableUnqualifiedNameCall(true);
             config.MapODataServiceRoute("odata", "odata", GetModel());
-             config.EnsureInitialized();
         }
 
         private static IEdmModel GetModel()
@@ -43,15 +42,34 @@ namespace WebStack.QA.Test.OData.Routing
             EntitySetConfiguration<UnqualifiedCar> cars = builder.EntitySet<UnqualifiedCar>("UnqualifiedCars");
             cars.EntityType.Action("Wash").Returns<string>();
             cars.EntityType.Collection.Action("Wash").Returns<string>();
+            cars.EntityType.Function("Check").Returns<string>();
+            cars.EntityType.Collection.Function("Check").Returns<string>();
             return builder.GetEdmModel();
         }
 
         [Theory]
         [InlineData("/odata/UnqualifiedCars(5)/Wash", "WashSingle5")]
+        [InlineData("/odata/UnqualifiedCars(5)/Default.Wash", "WashSingle5")]
         [InlineData("/odata/UnqualifiedCars/Wash", "WashCollection")]
-        public void CanCallActionWithUnqualifiedRouteName(string url, string expectedResult)
+        [InlineData("/odata/UnqualifiedCars/Default.Wash", "WashCollection")]
+        public void CanCallBoundActionWithUnqualifiedRouteName(string url, string expectedResult)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, BaseAddress + url);
+            HttpResponseMessage response = Client.SendAsync(request).Result;
+            Assert.NotNull(response);
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.NotNull(response.Content);
+            Assert.Equal(expectedResult, (string)response.Content.ReadAsAsync<JObject>().Result["value"]);
+        }
+
+        [Theory]
+        [InlineData("/odata/UnqualifiedCars(5)/Check", "CheckSingle5")]
+        [InlineData("/odata/UnqualifiedCars(5)/Default.Check", "CheckSingle5")]
+        [InlineData("/odata/UnqualifiedCars/Check", "CheckCollection")]
+        [InlineData("/odata/UnqualifiedCars/Default.Check", "CheckCollection")]
+        public void CanCallBoundFunctionWithUnqualifiedRouteName(string url, string expectedResult)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + url);
             HttpResponseMessage response = Client.SendAsync(request).Result;
             Assert.NotNull(response);
             Assert.True(response.IsSuccessStatusCode);
@@ -72,6 +90,20 @@ namespace WebStack.QA.Test.OData.Routing
         public IHttpActionResult WashOnCollection()
         {
             return Ok("WashCollection");
+        }
+
+        [HttpGet]
+        [ODataRoute("UnqualifiedCars({key})/Check")]
+        public IHttpActionResult CheckSingle([FromODataUri]int key)
+        {
+            return Ok("CheckSingle" + key);
+        }
+
+        [HttpGet]
+        [ODataRoute("UnqualifiedCars/Check")]
+        public IHttpActionResult CheckOnCollection()
+        {
+            return Ok("CheckCollection");
         }
     }
 

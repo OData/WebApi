@@ -264,8 +264,11 @@ namespace System.Web.OData.Builder
                     constraint.Value.Name, "dependent", foundDependent.Name);
             }
 
+            Type dependentType = Nullable.GetUnderlyingType(constraint.Key.PropertyType) ?? constraint.Key.PropertyType;
+            Type principalType = Nullable.GetUnderlyingType(constraint.Value.PropertyType) ?? constraint.Value.PropertyType;
+
             // The principal property and the dependent property must have the same data type.
-            if (constraint.Key.PropertyType != constraint.Value.PropertyType)
+            if (dependentType != principalType)
             {
                 throw Error.InvalidOperation(SRResources.DependentAndPrincipalTypeNotMatch,
                     constraint.Key.PropertyType.FullName, constraint.Value.PropertyType.FullName);

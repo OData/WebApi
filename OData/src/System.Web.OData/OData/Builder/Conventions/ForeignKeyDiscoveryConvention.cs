@@ -95,7 +95,9 @@ namespace System.Web.OData.Builder.Conventions
                 foreach (PrimitivePropertyConfiguration dependentProperty in
                     dependentEntityType.Properties.OfType<PrimitivePropertyConfiguration>())
                 {
-                    if (dependentProperty.PropertyInfo.PropertyType == principalKey.PropertyInfo.PropertyType)
+                    Type dependentType = Nullable.GetUnderlyingType(dependentProperty.PropertyInfo.PropertyType) ??
+                                         dependentProperty.PropertyInfo.PropertyType;
+                    if (dependentType == principalKey.PropertyInfo.PropertyType)
                     {
                         if (String.Equals(dependentProperty.Name, principalEntityType.Name + principalKey.Name,
                             StringComparison.Ordinal))

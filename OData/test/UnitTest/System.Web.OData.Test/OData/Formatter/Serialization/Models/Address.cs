@@ -25,4 +25,11 @@ namespace System.Web.OData.Formatter.Serialization.Models
     {
         public Guid CnProp { get; set; }
     }
+
+    public class Location
+    {
+        public string Name { get; set; }
+
+        public Address Address { get; set; }
+    }
 }

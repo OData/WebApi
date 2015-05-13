@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Web.Configuration;
 using System.Web.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -57,6 +58,12 @@ namespace System.Web.OData.Formatter.Serialization
             var cnAddressType = new EdmComplexType("Default", "CnAddress", addressType);
             cnAddressType.AddStructuralProperty("CnProp", EdmPrimitiveTypeKind.Guid);
             model.AddElement(cnAddressType);
+
+            // add a complex type "Location" with complex type property
+            var location = new EdmComplexType("Default", "Location");
+            location.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            location.AddStructuralProperty("Address", new EdmComplexTypeReference(addressType, isNullable: true));
+            model.AddElement(location);
 
             // Add navigations
             customerType.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo() { Name = "Orders", Target = orderType, TargetMultiplicity = EdmMultiplicity.Many });

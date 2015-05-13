@@ -20,8 +20,8 @@ namespace System.Web.OData.Formatter.Serialization
         private IEdmModel _model;
         private Address _address;
         private ODataComplexTypeSerializer _serializer;
-        private IEdmComplexType _addressType;
-        private IEdmComplexTypeReference _addressTypeRef;
+        private IEdmComplexType _addressType, _locationType;
+        private IEdmComplexTypeReference _addressTypeRef, _locationTypeRef;
 
         public ODataComplexTypeSerializerTests()
         {
@@ -38,6 +38,16 @@ namespace System.Web.OData.Formatter.Serialization
             _addressType = _model.FindDeclaredType("Default.Address") as IEdmComplexType;
             _model.SetAnnotationValue(_addressType, new ClrTypeAnnotation(typeof(Address)));
             _addressTypeRef = _addressType.ToEdmTypeReference(isNullable: false).AsComplex();
+
+            var cnAddressType = _model.FindDeclaredType("Default.CnAddress") as IEdmComplexType;
+            _model.SetAnnotationValue(cnAddressType, new ClrTypeAnnotation(typeof(CnAddress)));
+
+            var usAddressType = _model.FindDeclaredType("Default.UsAddress") as IEdmComplexType;
+            _model.SetAnnotationValue(usAddressType, new ClrTypeAnnotation(typeof(UsAddress)));
+
+            _locationType = _model.FindDeclaredType("Default.Location") as IEdmComplexType;
+            _model.SetAnnotationValue(_locationType, new ClrTypeAnnotation(typeof(Location)));
+            _locationTypeRef = _locationType.ToEdmTypeReference(isNullable: false).AsComplex();
 
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             _serializer = new ODataComplexTypeSerializer(serializerProvider);
@@ -152,7 +162,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void CreateODataComplexValue_WritesAllDeclaredProperties()
         {
-            var odataValue = _serializer.CreateODataComplexValue(_address, _addressTypeRef, new ODataSerializerContext());
+            var odataValue = _serializer.CreateODataComplexValue(_address, _addressTypeRef, new ODataSerializerContext { Model = _model });
 
             ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
 
@@ -160,11 +170,92 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.Equal(
                 complexValue.Properties.Select(p => Tuple.Create(p.Name, p.Value as string)),
                 new[] { 
-                    Tuple.Create("Street","One Microsoft Way"), 
+                    Tuple.Create("Street","One Microsoft Way"),
                     Tuple.Create("City","Redmond"),
                     Tuple.Create("State","Washington"),
                     Tuple.Create("Country", "United States"),
                     Tuple.Create("ZipCode","98052") });
+        }
+
+        [Fact]
+        public void CreateODataComplexValue_WritesBaseComplexTypeProperty()
+        {
+            // Arrange
+            Location location = new Location
+            {
+                Name = "Location #1",
+                Address = _address
+            };
+
+            // Act
+            var odataValue = _serializer.CreateODataComplexValue(location, _locationTypeRef, new ODataSerializerContext { Model = _model });
+            ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
+
+            // Assert
+            Assert.Equal(complexValue.TypeName, "Default.Location");
+            Assert.Equal(2, complexValue.Properties.Count());
+
+            ODataProperty name = Assert.Single(complexValue.Properties.Where(p => p.Name == "Name"));
+            Assert.Equal("Location #1", name.Value);
+
+            ODataProperty address = Assert.Single(complexValue.Properties.Where(p => p.Name == "Address"));
+            ODataComplexValue addressComplexValue = Assert.IsType<ODataComplexValue>(address.Value);
+
+            Assert.Equal(addressComplexValue.TypeName, "Default.Address");
+
+            Assert.Equal(
+                addressComplexValue.Properties.Select(p => Tuple.Create(p.Name, p.Value as string)),
+                new[] { 
+                    Tuple.Create("Street","One Microsoft Way"),
+                    Tuple.Create("City","Redmond"),
+                    Tuple.Create("State","Washington"),
+                    Tuple.Create("Country", "United States"),
+                    Tuple.Create("ZipCode","98052") });
+        }
+
+        [Fact]
+        public void CreateODataComplexValue_WritesDerivedComplexTypeProperty()
+        {
+            // Arrange
+            Location location = new Location
+            {
+                Name = "Location #2",
+                Address = new CnAddress
+                {
+                    City = "Shanghai",
+                    CnProp = new Guid("87f049bd-9976-4843-9434-a5735b0daf10"),
+                    Country = "CN",
+                    State = "Shanghai",
+                    Street = "ZiXing Rd",
+                    ZipCode = "200241"
+                }
+            };
+
+            // Act
+            var odataValue = _serializer.CreateODataComplexValue(location, _locationTypeRef, new ODataSerializerContext { Model = _model });
+            ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
+
+            // Assert
+            Assert.Equal(complexValue.TypeName, "Default.Location");
+            Assert.Equal(2, complexValue.Properties.Count());
+
+            ODataProperty name = Assert.Single(complexValue.Properties.Where(p => p.Name == "Name"));
+            Assert.Equal("Location #2", name.Value);
+
+            ODataProperty address = Assert.Single(complexValue.Properties.Where(p => p.Name == "Address"));
+            ODataComplexValue addressComplexValue = Assert.IsType<ODataComplexValue>(address.Value);
+
+            Assert.Equal(addressComplexValue.TypeName, "Default.CnAddress");
+
+            Assert.Equal(
+                addressComplexValue.Properties.Select(p => Tuple.Create(p.Name, p.Value.ToString())),
+                new[] { 
+                    Tuple.Create("Street","ZiXing Rd"), 
+                    Tuple.Create("City","Shanghai"),
+                    Tuple.Create("State","Shanghai"),
+                    Tuple.Create("Country", "CN"),
+                    Tuple.Create("ZipCode","200241"),
+                    Tuple.Create("CnProp","87f049bd-9976-4843-9434-a5735b0daf10")});
         }
 
         [Fact]

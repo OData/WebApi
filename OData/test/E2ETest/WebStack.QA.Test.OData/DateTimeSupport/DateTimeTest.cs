@@ -135,7 +135,7 @@ namespace WebStack.QA.Test.OData.DateTimeSupport
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             JObject content = await response.Content.ReadAsAsync<JObject>();
-            Console.WriteLine(content);
+
             Assert.Equal(5, content["value"].Count());
             for (int i = 1; i <= 5; i++)
             {
@@ -325,7 +325,6 @@ namespace WebStack.QA.Test.OData.DateTimeSupport
 
             HttpResponseMessage response = await Client.GetAsync(requestUri);
 
-            Console.WriteLine(response.Content.ReadAsStringAsync().Result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             JObject content = await response.Content.ReadAsAsync<JObject>();

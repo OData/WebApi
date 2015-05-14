@@ -10,6 +10,7 @@ namespace System.Web.OData
     /// <summary>
     /// Represents an <see cref="IEdmEnumObject"/> with no backing CLR <see cref="Type"/>.
     /// </summary>
+    [NonValidatingParameterBinding]
     public class EdmEnumObject : IEdmEnumObject
     {
         private readonly IEdmType _edmType;

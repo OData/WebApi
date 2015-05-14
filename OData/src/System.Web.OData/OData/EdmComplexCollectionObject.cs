@@ -12,6 +12,7 @@ namespace System.Web.OData
     /// <summary>
     /// Represents an <see cref="IEdmObject"/> that is a collection of <see cref="IEdmComplexObject"/>s.
     /// </summary>
+    [NonValidatingParameterBinding]
     public class EdmComplexObjectCollection : Collection<IEdmComplexObject>, IEdmObject
     {
         private IEdmCollectionTypeReference _edmType;

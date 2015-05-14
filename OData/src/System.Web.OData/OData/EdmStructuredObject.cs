@@ -15,6 +15,7 @@ namespace System.Web.OData
     /// <summary>
     /// Represents an <see cref="IEdmStructuredObject"/> with no backing CLR <see cref="Type"/>.
     /// </summary>
+    [NonValidatingParameterBinding]
     public abstract class EdmStructuredObject : Delta, IEdmStructuredObject
     {
         private Dictionary<string, object> _container = new Dictionary<string, object>();

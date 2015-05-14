@@ -10,6 +10,7 @@ namespace System.Web.OData
     /// Represents an <see cref="IEdmChangedObject"/> with no backing CLR <see cref="Type"/>.
     /// Used to hold the Entry object in the Delta Feed Payload.
     /// </summary>
+    [NonValidatingParameterBinding]
     public class EdmDeltaEntityObject : EdmEntityObject, IEdmChangedObject
     {
         private EdmDeltaType _edmType;

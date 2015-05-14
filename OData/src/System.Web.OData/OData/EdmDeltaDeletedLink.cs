@@ -10,6 +10,7 @@ namespace System.Web.OData
     /// Represents an <see cref="IEdmDeltaDeletedLink"/> with no backing CLR <see cref="Type"/>.
     /// Used to hold the Deleted Link object in the Delta Feed Payload.
     /// </summary>
+    [NonValidatingParameterBinding]
     public class EdmDeltaDeletedLink : EdmEntityObject, IEdmDeltaDeletedLink
     {
         private Uri _source;

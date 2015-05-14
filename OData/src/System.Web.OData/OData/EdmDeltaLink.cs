@@ -10,6 +10,7 @@ namespace System.Web.OData
     /// Represents an <see cref="IEdmDeltaLink"/> with no backing CLR <see cref="Type"/>.
     /// Used to hold the Added/Modified Link object in the Delta Feed Payload.
     /// </summary>
+    [NonValidatingParameterBinding]
     public class EdmDeltaLink : EdmEntityObject, IEdmDeltaLink
     {
         private Uri _source;

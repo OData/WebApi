@@ -8,6 +8,7 @@ namespace System.Web.OData
     /// <summary>
     /// Represents an <see cref="IEdmEntityObject"/> with no backing CLR <see cref="Type"/>.
     /// </summary>
+    [NonValidatingParameterBinding]
     public class EdmEntityObject : EdmStructuredObject, IEdmEntityObject
     {
         /// <summary>

@@ -13,6 +13,7 @@ namespace System.Web.OData
     /// <summary>
     /// Represents an <see cref="IEdmObject"/> that is a collection of <see cref="IEdmEnumObject"/>s.
     /// </summary>
+    [NonValidatingParameterBinding]
     public class EdmEnumObjectCollection : Collection<IEdmEnumObject>, IEdmObject
     {
         private IEdmCollectionTypeReference _edmType;

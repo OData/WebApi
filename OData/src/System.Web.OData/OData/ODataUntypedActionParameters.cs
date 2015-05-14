@@ -14,6 +14,7 @@ namespace System.Web.OData
     /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "ODataUntypedActionParameters is more appropriate here.")]
     [SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable", Justification = "ODataUntypedActionParameters is not serializable.")]
+    [NonValidatingParameterBinding]
     public class ODataUntypedActionParameters : Dictionary<string, object>
     {
         /// <summary>

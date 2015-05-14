@@ -12,12 +12,13 @@ namespace System.Web.OData
     /// <summary>
     /// Represents an <see cref="IEdmObject"/> that is a collection of <see cref="IEdmEntityObject"/>s.
     /// </summary>
+    [NonValidatingParameterBinding]
     public class EdmEntityObjectCollection : Collection<IEdmEntityObject>, IEdmObject
     {
         private IEdmCollectionTypeReference _edmType;
 
         /// <summary>
-        /// Initialzes a new instance of the <see cref="EdmEntityObjectCollection"/> class.
+        /// Initializes a new instance of the <see cref="EdmEntityObjectCollection"/> class.
         /// </summary>
         /// <param name="edmType">The edm type of the collection.</param>
         public EdmEntityObjectCollection(IEdmCollectionTypeReference edmType)
@@ -26,7 +27,7 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Initialzes a new instance of the <see cref="EdmEntityObjectCollection"/> class.
+        /// Initializes a new instance of the <see cref="EdmEntityObjectCollection"/> class.
         /// </summary>
         /// <param name="edmType">The edm type of the collection.</param>
         /// <param name="list">The list that is wrapped by the new collection.</param>

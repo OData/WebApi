@@ -13,6 +13,7 @@ namespace System.Web.OData
     /// <summary>
     /// Represents an <see cref="IEdmObject"/> that is a collection of <see cref="IEdmChangedObject"/>s.
     /// </summary>
+    [NonValidatingParameterBinding]
     public class EdmChangedObjectCollection : Collection<IEdmChangedObject>, IEdmObject
     {
         private IEdmEntityType _entityType;

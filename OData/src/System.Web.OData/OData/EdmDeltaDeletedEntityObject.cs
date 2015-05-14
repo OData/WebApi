@@ -11,6 +11,7 @@ namespace System.Web.OData
     /// Represents an <see cref="IEdmDeltaDeletedEntityObject"/> with no backing CLR <see cref="Type"/>.
     /// Used to hold the Deleted Entry object in the Delta Feed Payload.
     /// </summary>
+    [NonValidatingParameterBinding]
     public class EdmDeltaDeletedEntityObject : EdmEntityObject, IEdmDeltaDeletedEntityObject
     {
         private string _id;

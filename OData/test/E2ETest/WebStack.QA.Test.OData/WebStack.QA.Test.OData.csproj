@@ -142,6 +142,7 @@
     <Compile Include="Batch\Client\UnbufferedBatchGeneratedClient.cs" />
     <Compile Include="Batch\Tests\DataServicesClient\DefaultODataBatchHandlerTests.cs" />
     <Compile Include="Batch\Tests\DataServicesClient\UnbufferedODataBatchHandlerTests.cs" />
+    <Compile Include="ComplexTypeInheritance\ComplexTypeInheritanceSerializeTest.cs" />
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayContext.cs" />
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayController.cs" />
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayEdmModel.cs" />

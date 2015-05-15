@@ -106,7 +106,6 @@ namespace WebStack.QA.Test.OData.ModelBuilder
             var content = response.Content.ReadAsStringAsync().Result;
             Assert.DoesNotContain("<link rel=\"edit\"", content);
             Assert.Contains("<link rel=\"self\"", content);
-            Console.WriteLine(content);
         }
     }
 }

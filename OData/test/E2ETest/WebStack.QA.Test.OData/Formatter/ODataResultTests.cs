@@ -101,8 +101,6 @@ namespace WebStack.QA.Test.OData.Formatter
             var responseContentString = await response.Content.ReadAsStringAsync();
 
             // Assert
-            Console.WriteLine(response);
-            Console.WriteLine(responseContentString);
             response.EnsureSuccessStatusCode();
             Assert.Contains("\"@odata.nextLink\":\"ODataResult_Model2\"", responseContentString);
         }

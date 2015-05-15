@@ -1,0 +1,32 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "",
+  "authors": [ "" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "dependencies": {
+    "System.Xml.XDocument": "4.0.10-beta-22816"
+  },
+
+  "commands": {
+    "ResxGenerator": "ResxGenerator"
+  },
+
+  "frameworks": {
+    "dnx451": { },
+    "dnxcore50": {
+      "dependencies": {
+        "System.Console": "4.0.0-beta-22816",
+        "System.Collections": "4.0.10-beta-22816",
+        "System.IO.FileSystem": "4.0.0-beta-22816",
+        "System.Linq": "4.0.0-beta-22816",
+        "System.Runtime": "4.0.20-beta-22816",
+        "System.Runtime.Extensions": "4.0.10-beta-22816",
+        "System.Text.RegularExpressions": "4.0.10-beta-22816",
+        "Microsoft.CSharp": "4.0.0-beta-22816"
+      }
+    }
+  }
+}

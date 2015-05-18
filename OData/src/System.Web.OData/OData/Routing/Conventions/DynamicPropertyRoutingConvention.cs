@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using System.Web.OData.Formatter;
 using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Routing.Conventions
@@ -99,6 +100,9 @@ namespace System.Web.OData.Routing.Conventions
 
                 controllerContext.RouteData.Values[ODataRouteConstants.DynamicProperty] =
                     dynamicPropertSegment.PropertyName;
+                controllerContext.RouteData.Values[ODataParameterValue.ParameterValuePrefix + ODataRouteConstants.DynamicProperty] =
+                        new ODataParameterValue(dynamicPropertSegment.PropertyName,
+                            EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
                 return actionName;
             }
             return null;

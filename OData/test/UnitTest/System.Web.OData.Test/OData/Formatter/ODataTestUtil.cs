@@ -310,4 +310,64 @@ namespace System.Web.OData.Formatter
     {
         public double AnotherKey { get; set; }
     }
+
+    public class FkSupplier
+    {
+        public int Id { get; set; }
+    }
+
+    public class FkProduct
+    {
+        public int Id { get; set; }
+
+        [ForeignKey("Supplier")]
+        public int? SupplierId { get; set; }
+        public FkSupplier Supplier { get; set; }
+
+        public int? SupplierKey { get; set; }
+        [ForeignKey("SupplierKey")]
+        public FkSupplier SupplierNav { get; set; }
+    }
+
+    public class FkSupplier2
+    {
+        public string Id { get; set; }
+    }
+
+    public class FkProduct2
+    {
+        public int Id { get; set; }
+
+        public string SupplierId { get; set; }
+
+        [Required] // with [Required]
+        [ForeignKey("SupplierId")]
+        public FkSupplier2 Supplier { get; set; }
+
+        [ForeignKey("SupplierNav")]
+        public string SupplierKey { get; set; }
+        public FkSupplier2 SupplierNav { get; set; }
+    }
+
+    public class FkSupplier3
+    {
+        public int Id { get; set; }
+    }
+
+    public class FkProduct3
+    {
+        [Key]
+        public int ProductKey { get; set; }
+
+        public int? FkSupplierId { get; set; }
+        [Required] // with [Required]
+        public FkSupplier Supplier { get; set; }
+
+        public string FkSupplier2Id { get; set; }
+        [Required] // with [Required]
+        public FkSupplier2 Supplier2 { get; set; }
+
+        public int? FkSupplier3Id { get; set; }
+        public FkSupplier3 Supplier3 { get; set; }
+    }
 }

@@ -63,6 +63,46 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             public PrincipalEntity Principal { get; set; }
         }
 
+
+        [Fact]
+        public void Apply_SingleNullableForeignKeyOnNavigationProperty_Works()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+
+            builder.EntityType<PrincipalEntity>().HasKey(p => p.PrincipalIntId);
+            EntityTypeConfiguration dependentEntity = builder.AddEntityType(typeof(SingleNullableDependentEntity));
+
+            PropertyInfo expectPrincipal = typeof(PrincipalEntity).GetProperty("PrincipalIntId");
+            PropertyInfo expectDependent = typeof(SingleNullableDependentEntity).GetProperty("PrincipalId");
+            PrimitivePropertyConfiguration primitiveProperty = dependentEntity.AddProperty(expectDependent);
+
+            PropertyInfo propertyInfo = typeof(SingleNullableDependentEntity).GetProperty("Principal");
+            NavigationPropertyConfiguration navigation = dependentEntity.AddNavigationProperty(propertyInfo,
+                EdmMultiplicity.ZeroOrOne);
+            navigation.AddedExplicitly = false;
+
+            // Act
+            new ForeignKeyAttributeConvention().Apply(navigation, dependentEntity, builder);
+
+            // Assert
+            PropertyInfo actualPropertyInfo = Assert.Single(navigation.DependentProperties);
+            Assert.Same(expectDependent, actualPropertyInfo);
+
+            actualPropertyInfo = Assert.Single(navigation.PrincipalProperties);
+            Assert.Same(expectPrincipal, actualPropertyInfo);
+
+            Assert.True(primitiveProperty.OptionalProperty);
+        }
+
+        private class SingleNullableDependentEntity
+        {
+            public int? PrincipalId { get; set; }
+
+            [ForeignKey("PrincipalId")]
+            public PrincipalEntity Principal { get; set; }
+        }
+
         [Fact]
         public void Apply_SingleForeignKeyOnForeignKeyProperty_Works()
         {

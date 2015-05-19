@@ -16,10 +16,13 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         }
 
         [Theory]
-        [InlineData("Key1")]
-        [InlineData("Key2")]
-        [InlineData("Key3")]
-        public void Apply_TypeNameConventions_Works(string propertyName)
+        [InlineData("Key1", EdmMultiplicity.One, false)]
+        [InlineData("Key2", EdmMultiplicity.One, false)]
+        [InlineData("Key3", EdmMultiplicity.One, false)]
+        [InlineData("Key1", EdmMultiplicity.ZeroOrOne, true)]
+        [InlineData("Key2", EdmMultiplicity.ZeroOrOne, true)]
+        [InlineData("Key3", EdmMultiplicity.ZeroOrOne, true)]
+        public void Apply_TypeNameConventions_Works(string propertyName, EdmMultiplicity multiplicity, bool optional)
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -30,11 +33,10 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             EntityTypeConfiguration dependentEntity = builder.AddEntityType(typeof(DiscoveryDependentEntity));
             PropertyInfo expectPropertyInfo = typeof(DiscoveryDependentEntity).GetProperty("DiscoveryPrincipalEntity" + propertyName);
-            dependentEntity.AddProperty(expectPropertyInfo);
+            var property = dependentEntity.AddProperty(expectPropertyInfo);
 
             PropertyInfo navigationPropertyInfo = typeof(DiscoveryDependentEntity).GetProperty("Principal");
-            NavigationPropertyConfiguration navigation = dependentEntity.AddNavigationProperty(navigationPropertyInfo,
-                EdmMultiplicity.One);
+            NavigationPropertyConfiguration navigation = dependentEntity.AddNavigationProperty(navigationPropertyInfo, multiplicity);
 
             // Act
             new ForeignKeyDiscoveryConvention().Apply(navigation, dependentEntity, builder);
@@ -45,6 +47,8 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             PropertyInfo principalProperty = Assert.Single(navigation.PrincipalProperties);
             Assert.Equal(propertyName, principalProperty.Name);
+
+            Assert.Equal(optional, property.OptionalProperty);
         }
 
         [Fact]

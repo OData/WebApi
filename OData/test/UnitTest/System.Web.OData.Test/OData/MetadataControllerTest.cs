@@ -124,6 +124,148 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void DollarMetadata_Works_ForNullableReferencialConstraint_WithfForeignKeyAttribute()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<FkProduct>("Products");
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpConfiguration config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            HttpServer server = new HttpServer(config);
+            config.MapODataServiceRoute("odata", "odata", model);
+
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+
+            string payload = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains("<Property Name=\"SupplierId\" Type=\"Edm.Int32\" />", payload);
+            Assert.Contains("<ReferentialConstraint Property=\"SupplierId\" ReferencedProperty=\"Id\" />", payload);
+
+            Assert.Contains("<Property Name=\"SupplierKey\" Type=\"Edm.Int32\" />", payload);
+            Assert.Contains("<ReferentialConstraint Property=\"SupplierKey\" ReferencedProperty=\"Id\" />", payload);
+        }
+
+        [Fact]
+        public void DollarMetadata_Works_ForNullableReferencialConstraint_WithCustomReferentialConstraints()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<FkSupplier>().HasKey(c => c.Id);
+
+            var product = builder.EntityType<FkProduct>().HasKey(o => o.Id);
+            product.HasOptional(o => o.Supplier, (o, c) => o.SupplierId == c.Id);
+            product.HasRequired(o => o.SupplierNav, (o, c) => o.SupplierKey == c.Id);
+
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpConfiguration config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            HttpServer server = new HttpServer(config);
+            config.MapODataServiceRoute("odata", "odata", model);
+
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            string payload = response.Content.ReadAsStringAsync().Result;
+
+            // non-nullable
+            Assert.Contains("<Property Name=\"SupplierId\" Type=\"Edm.Int32\" />", payload);
+            Assert.Contains("<NavigationProperty Name=\"Supplier\" Type=\"System.Web.OData.Formatter.FkSupplier\">", payload);
+            Assert.Contains("<ReferentialConstraint Property=\"SupplierId\" ReferencedProperty=\"Id\" />", payload);
+
+            // nullable
+            Assert.Contains("<Property Name=\"SupplierKey\" Type=\"Edm.Int32\" Nullable=\"false\" />", payload);
+            Assert.Contains("<NavigationProperty Name=\"SupplierNav\" Type=\"System.Web.OData.Formatter.FkSupplier\" Nullable=\"false\">", payload);
+            Assert.Contains("<ReferentialConstraint Property=\"SupplierKey\" ReferencedProperty=\"Id\" />", payload);
+        }
+
+        [Fact]
+        public void DollarMetadata_Works_ForNullableReferencialConstraint_WithForeignKeyAttributeAndRequiredAttribute()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<FkProduct2>("Products");
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpConfiguration config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            HttpServer server = new HttpServer(config);
+            config.MapODataServiceRoute("odata", "odata", model);
+
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+
+            string payload = response.Content.ReadAsStringAsync().Result;
+
+            // non-nullable
+            Assert.Contains("<Property Name=\"SupplierId\" Type=\"Edm.String\" Nullable=\"false\" />", payload);
+            Assert.Contains("<NavigationProperty Name=\"Supplier\" Type=\"System.Web.OData.Formatter.FkSupplier2\" Nullable=\"false\">", payload);
+            Assert.Contains("<ReferentialConstraint Property=\"SupplierId\" ReferencedProperty=\"Id\" />", payload);
+
+            // nullable
+            Assert.Contains("<Property Name=\"SupplierKey\" Type=\"Edm.String\" />", payload);
+            Assert.Contains("<NavigationProperty Name=\"SupplierNav\" Type=\"System.Web.OData.Formatter.FkSupplier2\">", payload);
+            Assert.Contains("<ReferentialConstraint Property=\"SupplierKey\" ReferencedProperty=\"Id\" />", payload);
+        }
+
+        [Fact]
+        public void DollarMetadata_Works_ForNullableReferencialConstraint_WithForeignKeyDiscovery()
+        {
+            // Arrange
+            const string expect =
+                "        <Property Name=\"FkSupplierId\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"FkSupplier2Id\" Type=\"Edm.String\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"FkSupplier3Id\" Type=\"Edm.Int32\" />\r\n" +
+                "        <NavigationProperty Name=\"Supplier\" Type=\"System.Web.OData.Formatter.FkSupplier\" Nullable=\"false\">\r\n" +
+                "          <ReferentialConstraint Property=\"FkSupplierId\" ReferencedProperty=\"Id\" />\r\n" +
+                "        </NavigationProperty>\r\n" +
+                "        <NavigationProperty Name=\"Supplier2\" Type=\"System.Web.OData.Formatter.FkSupplier2\" Nullable=\"false\">\r\n" +
+                "          <ReferentialConstraint Property=\"FkSupplier2Id\" ReferencedProperty=\"Id\" />\r\n" +
+                "        </NavigationProperty>\r\n" +
+                "        <NavigationProperty Name=\"Supplier3\" Type=\"System.Web.OData.Formatter.FkSupplier3\">\r\n" +
+                "          <ReferentialConstraint Property=\"FkSupplier3Id\" ReferencedProperty=\"Id\" />\r\n" +
+                "        </NavigationProperty>";
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<FkProduct3>("Products");
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpConfiguration config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            HttpServer server = new HttpServer(config);
+            config.MapODataServiceRoute("odata", "odata", model);
+
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Contains(expect, response.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
         public void DollarMetadata_Works_WithReferencialConstraint_IfForeignKeyAttributeOnForeignKeyProperty()
         {
             // Arrange

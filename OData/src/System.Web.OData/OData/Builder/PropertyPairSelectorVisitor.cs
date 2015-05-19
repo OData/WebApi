@@ -86,7 +86,9 @@ namespace System.Web.OData.Builder
 
             if (left != null && right != null)
             {
-                if (left.PropertyType != right.PropertyType)
+                Type leftType = Nullable.GetUnderlyingType(left.PropertyType) ?? left.PropertyType;
+                Type rightType = Nullable.GetUnderlyingType(right.PropertyType) ?? right.PropertyType;
+                if (leftType != rightType)
                 {
                     throw Error.InvalidOperation(SRResources.EqualExpressionsMustHaveSameTypes,
                         left.ReflectedType.FullName, left.Name, left.PropertyType.FullName,

@@ -776,6 +776,7 @@
     <Compile Include="Formatter\ODataFormatterTestBase.cs" />
     <Compile Include="Formatter\ServerDrivenPagingTests.cs" />
     <Compile Include="Formatter\Untyped\UntypedSerializationTests.cs" />
+    <Compile Include="Formatter\Untyped\UntypedDeltaSerializationTests.cs" />
     <Compile Include="ModelAliasing\FormattersTests.cs" />
     <Compile Include="ModelAliasing\GeneratedConventionModelClient.cs" />
     <Compile Include="ModelAliasing\MetadataTests.cs" />

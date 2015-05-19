@@ -85,7 +85,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
         [Fact]
         public async Task TestOtherQueries()
         {
-            var response = await Client.GetAsync(BaseAddress + "/api/TopSkipOrderByTests/GetODataQueryOptions?$skiptoken=abc&$expand=abc&$select=abc&$count=abc");
+            var response = await Client.GetAsync(BaseAddress + "/api/TopSkipOrderByTests/GetODataQueryOptions?$skiptoken=abc&$expand=abc&$select=abc&$count=abc&$deltatoken=abc");
             var results = await response.Content.ReadAsAsync<Dictionary<string, string>[]>();
             var result = results[0];
 
@@ -93,6 +93,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             Assert.Equal("abc", result["Expand"]);
             Assert.Equal("abc", result["Select"]);
             Assert.Equal("abc", result["Count"]);
+            Assert.Equal("abc", result["DeltaToken"]);
         }
     }
 }

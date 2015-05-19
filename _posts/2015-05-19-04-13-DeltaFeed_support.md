@@ -33,7 +33,7 @@ private static IEdmModel GetEdmModel()
   ODataModelBuilder builder = new ODataConventionModelBuilder();
   var customers = builder.EntitySet<Customer>("Customers");
   var orders = builder.EntitySet<Order>("Orders");
-        return builder.GetEdmModel();
+  return builder.GetEdmModel();
 }
 {% endhighlight %}
 
@@ -46,7 +46,7 @@ Changed or Modified objects are added as `EdmDeltaEntityObject`s:
 {% highlight csharp %}
 EdmDeltaEntityObject Customer = new EdmDeltaEntityObject(CustomerType); 
 Customer.Id = 123;
-Customer.Name = “Added Customer”;
+Customer.Name = "Added Customer";
 changedCollection.Add(Customer);
 {% endhighlight %}
 
@@ -61,18 +61,18 @@ changedCollection.Add(Customer);
 Delta Link is added corresponding to a $expand in the initial request, these are added as `EdmDeltaLink`s:
 {% highlight csharp %}
 EdmDeltaLink CustomerOrderLink = new EdmDeltaLink(CustomerType);
-CustomerOrderLink.Relationship = “Orders”;
-CustomerOrderLink.Source = new Uri(ServiceBaseUri, “Customers(123)”);	
-CustomerOrderLink.Target = new Uri(ServiceBaseUri, “Orders(10)”);
+CustomerOrderLink.Relationship = "Orders";
+CustomerOrderLink.Source = new Uri(ServiceBaseUri, "Customers(123)");	
+CustomerOrderLink.Target = new Uri(ServiceBaseUri, "Orders(10)");
 changedCollection.Add(CustomerOrderLink);
 {% endhighlight %}
 
 Deleted Links is added for each deleted link that corresponds to a $expand path in the initial request, these are added as `EdmDeltaDeletedLink`s:
 {% highlight csharp %}
 EdmDeltaDeletedLink CustomerOrderDeletedLink = new EdmDeltaDeletedLink(CustomerType);
-CustomerOrderDeletedLink.Relationship = “Orders”;
-CustomerOrderDeletedLink.Source = new Uri(ServiceBaseUri, “Customers(123)”);
-CustomerOrderDeletedLink.Target = new Uri(ServiceBaseUri, “Orders(10)”);
+CustomerOrderDeletedLink.Relationship = "Orders";
+CustomerOrderDeletedLink.Source = new Uri(ServiceBaseUri, "Customers(123)");
+CustomerOrderDeletedLink.Target = new Uri(ServiceBaseUri, "Orders(10)");
 changedCollection.Add(CustomerOrderDeletedLink);
 {% endhighlight %}
 
@@ -86,7 +86,7 @@ public class CustomersController : ODataController
     EdmChangedObjectCollection changedCollection = new EdmChangedObjectCollection(CustomerType);
     EdmDeltaEntityObject Customer = new EdmDeltaEntityObject(CustomerType); 
     Customer.Id = 123;
-    Customer.Name = “Added Customer”;
+    Customer.Name = "Added Customer";
     changedCollection.Add(Customer);
     
     EdmDeltaDeletedEntityObject Customer = new EdmDeltaDeletedEntityObject(CustomerType);
@@ -95,15 +95,15 @@ public class CustomersController : ODataController
     changedCollection.Add(Customer);
 
     EdmDeltaLink CustomerOrderLink = new EdmDeltaLink(CustomerType);
-    CustomerOrderLink.Relationship = “Orders”;
-    CustomerOrderLink.Source = new Uri(ServiceBaseUri, “Customers(123)”);	
-    CustomerOrderLink.Target = new Uri(ServiceBaseUri, “Orders(10)”);
+    CustomerOrderLink.Relationship = "Orders";
+    CustomerOrderLink.Source = new Uri(ServiceBaseUri, "Customers(123)");
+    CustomerOrderLink.Target = new Uri(ServiceBaseUri, "Orders(10)");
     changedCollection.Add(CustomerOrderLink);
     
     EdmDeltaDeletedLink CustomerOrderDeletedLink = new EdmDeltaDeletedLink(CustomerType);
-    CustomerOrderDeletedLink.Relationship = “Orders”;
-    CustomerOrderDeletedLink.Source = new Uri(ServiceBaseUri, “Customers(123)”);
-    CustomerOrderDeletedLink.Target = new Uri(ServiceBaseUri, “Orders(11)”);
+    CustomerOrderDeletedLink.Relationship = "Orders";
+    CustomerOrderDeletedLink.Source = new Uri(ServiceBaseUri, "Customers(123)");
+    CustomerOrderDeletedLink.Target = new Uri(ServiceBaseUri, "Orders(11)");
     changedCollection.Add(CustomerOrderDeletedLink);
     return Ok(changedCollection);
   }
@@ -121,14 +121,14 @@ The corresponding payload will has the following contents:
 {
   "@odata.context":"http://localhost/odata/$metadata#Customers",
   "value": [
-	  {
-		  "Id":123,
-		  "Name":"Added Customer"
-	  },
+    {
+      "Id":123,
+      "Name":"Added Customer"
+    },
 	  {
    	  "@odata.context":"http://localhost/odata/$metadata#Customers/$deletedEntity",
-     	"Id": 124
-		  "Reason":"Deleted"
+      "Id": 124
+      "Reason":"Deleted"
     },
     {
       "@odata.context":"http://localhost/odata/$metadata#Customers/$link",
@@ -137,7 +137,7 @@ The corresponding payload will has the following contents:
       "target":"Orders(10)"
     },
     {
-     	"@odata.context":"http://localhost:port_number/orest/$metadata#Customers/$deletedLink",
+     	"@odata.context":"http://localhost/odata/$metadata#Customers/$deletedLink",
      	"source":"Customers(123)",
      	"relationship":"Orders",
      	"target":"Orders(11)"

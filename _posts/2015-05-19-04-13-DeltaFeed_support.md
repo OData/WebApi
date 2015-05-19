@@ -125,8 +125,8 @@ The corresponding payload will has the following contents:
       "Id":123,
       "Name":"Added Customer"
     },
-	  {
-   	  "@odata.context":"http://localhost/odata/$metadata#Customers/$deletedEntity",
+    {
+      "@odata.context":"http://localhost/odata/$metadata#Customers/$deletedEntity",
       "Id": 124
       "Reason":"Deleted"
     },

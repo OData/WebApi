@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using Microsoft.OData.Edm.Library;
 
@@ -84,7 +85,7 @@ namespace System.Web.OData.Routing.Conventions
                     if (controllerContext.Request.Method == HttpMethod.Get)
                     {
                         string actionNamePrefix = String.Format(CultureInfo.InvariantCulture, "Get{0}", _actionName);
-                        actionName = actionMap.FindMatchingAction(actionNamePrefix + "From" + complexType.Name);
+                        actionName = actionMap.FindMatchingAction(actionNamePrefix + "From" + propertyAccessSegment.Property.Name);
                     }
                     break;
                 default: break;
@@ -98,11 +99,11 @@ namespace System.Web.OData.Routing.Conventions
                     controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
                 }
 
-                controllerContext.RouteData.Values[ODataRouteConstants.DynamicProperty] =
-                    dynamicPropertSegment.PropertyName;
-                controllerContext.RouteData.Values[ODataParameterValue.ParameterValuePrefix + ODataRouteConstants.DynamicProperty] =
-                        new ODataParameterValue(dynamicPropertSegment.PropertyName,
-                            EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
+                controllerContext.RouteData.Values[ODataRouteConstants.DynamicProperty] = dynamicPropertSegment.PropertyName;
+                var key = ODataParameterValue.ParameterValuePrefix + ODataRouteConstants.DynamicProperty;
+                var value = new ODataParameterValue(dynamicPropertSegment.PropertyName, EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
+                controllerContext.RouteData.Values[key] = value;
+                controllerContext.Request.ODataProperties().RoutingConventionsStore[key] = value;
                 return actionName;
             }
             return null;

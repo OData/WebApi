@@ -8,7 +8,7 @@ using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
 {
-    [Route("api/Products")]
+    [Route("odata/Products")]
     public class ProductsController : Controller
     {
         private readonly SampleContext _sampleContext;

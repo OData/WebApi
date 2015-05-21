@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNet.Mvc;
+﻿using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Mvc;
 using Microsoft.Framework.Internal;
-using Microsoft.Framework.OptionsModel;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
@@ -11,14 +11,16 @@ namespace Microsoft.AspNet.OData
     {
         private readonly IEdmModel _model;
 
-        public MetadataController([NotNull]IOptions<ODataOptions> options)
+        public MetadataController([NotNull]ODataProperties odataProperties)
         {
-            _model = options.Options?.ModelProvider();
+           this._model = odataProperties.Model;
         }
 
+        // not work: public IEdmModel Get => this._model;
         public IEdmModel Get()
         {
-            return _model;
+            return this._model;
         }
-    }
+
+}
 }

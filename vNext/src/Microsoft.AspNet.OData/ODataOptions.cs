@@ -8,8 +8,5 @@ namespace Microsoft.AspNet.OData
 {
     public class ODataOptions
     {
-        public delegate IEdmModel IODataModelProvider();
-
-        public IODataModelProvider ModelProvider { get; set; }
     }
 }

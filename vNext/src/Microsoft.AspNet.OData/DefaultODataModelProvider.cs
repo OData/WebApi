@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Microsoft.AspNet.OData
 {
-    public class DefaultODataModelProvider
+    internal class DefaultODataModelProvider
     {
         public static IEdmModel BuildEdmModel(Type ApiContextType)
         {

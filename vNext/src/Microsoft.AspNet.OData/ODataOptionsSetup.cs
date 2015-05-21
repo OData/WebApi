@@ -10,7 +10,6 @@ namespace Microsoft.AspNet.OData
 
         public static void ConfigureOData(ODataOptions options)
         {
-            options.ModelProvider = null;
         }
     }
 }

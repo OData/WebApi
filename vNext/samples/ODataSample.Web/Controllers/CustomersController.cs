@@ -1,14 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNet.Mvc;
+using ODataSample.Web.Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
-using Microsoft.Framework.DependencyInjection;
-using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
 {
-    [Route("api/Customers")]
+    [Route("odata/Customers")]
     public class CustomersController : Controller
     {
         private readonly SampleContext _sampleContext;

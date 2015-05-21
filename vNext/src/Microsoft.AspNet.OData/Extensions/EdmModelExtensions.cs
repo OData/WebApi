@@ -1,9 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData;
-using Microsoft.OData.Edm.Library;
+using System;
 
 namespace Microsoft.AspNet.OData.Extensions
 {

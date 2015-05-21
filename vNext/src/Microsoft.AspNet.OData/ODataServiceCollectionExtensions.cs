@@ -9,9 +9,10 @@ namespace Microsoft.AspNet.OData
 {
     public static class ODataServiceCollectionExtensions
     {
-        public static IServiceCollection AddOData(
+        public static ODataServiceBuilder AddOData(
             [NotNull] this IServiceCollection services)
         {
+            services.AddScoped<ODataProperties>();
             services.AddTransient<IConfigureOptions<ODataOptions>, ODataOptionsSetup>();
             services.ConfigureMvc(options =>
             {
@@ -19,7 +20,15 @@ namespace Microsoft.AspNet.OData
                 options.OutputFormatters.Insert(0, new ODataOutputFormatter());
             });
 
-            return services;
+            return new ODataServiceBuilder(services);
+        }
+
+        public static void AddApiContext<T>(
+           [NotNull] this ODataServiceBuilder builder,
+           [NotNull] string prefix)
+            where T : class
+        {
+            builder.Register<T>(prefix);
         }
 
         public static void ConfigureOData(

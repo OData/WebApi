@@ -2,11 +2,9 @@
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Routing;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.OptionsModel;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.OData.Routing
@@ -14,10 +12,15 @@ namespace Microsoft.AspNet.OData.Routing
     public class ODataRoute : IRouter
     {
         private readonly IODataRoutingConvention _routingConvention;
+        private readonly string _routePrefix;
+        private readonly IEdmModel _model;
+        private readonly IRouter m = new MvcRouteHandler();
 
-        public ODataRoute()
+        public ODataRoute(string routePrefix, IEdmModel model)
         {
             _routingConvention = new DefaultODataRoutingConvention();
+            _routePrefix = routePrefix;
+            _model = model;
         }
 
         public async Task RouteAsync(RouteContext context)
@@ -25,65 +28,27 @@ namespace Microsoft.AspNet.OData.Routing
             var request = context.HttpContext.Request;
             var _provider = context.HttpContext.RequestServices;
 
-            var cp = _provider.GetService<ODataContextProvider>();
-
-            IEdmModel model;
             Uri uri;
-            if(!TryGetPathUri(request, cp, out model, out uri))
+            PathString remaining;
+            if (!request.Path.StartsWithSegments(PathString.FromUriComponent("/" + _routePrefix), out remaining))
             {
                 //return;
                 throw new Exception("route error");
             }
 
-            _provider.GetService<ODataProperties>().Model = model;
+            uri = new Uri(remaining.ToString(), UriKind.Relative);
 
-            var parser = new ODataUriParser(model, uri);
+            _provider.GetService<ODataProperties>().Model = _model;
+            var parser = new ODataUriParser(_model, uri);
             var path = parser.ParsePath();
 
-            var actionDescriptor = _routingConvention.SelectControllerAction(path, context);
-            await InvokeActionAsync(context, actionDescriptor);
-            context.IsHandled = true;
+            var ctx = new ODataRouteContext(context) { Path = path };
+            await m.RouteAsync(ctx);
         }
 
         public VirtualPathData GetVirtualPath(VirtualPathContext context)
         {
-            throw new NotImplementedException();
-        }
-
-        private bool TryGetPathUri(HttpRequest request, ODataContextProvider routePrefix, out IEdmModel model, out Uri uri)
-        {
-            foreach(var prefix in routePrefix.ContextMap.Keys)
-            {
-                PathString remaining;
-                if (request.Path.StartsWithSegments(PathString.FromUriComponent("/" + prefix), out remaining))
-                {
-                    uri = new Uri(remaining.ToString(), UriKind.Relative);
-                    model = routePrefix.ContextMap[prefix].Model;
-                    return true;
-                }
-            }
-
-            model = null;
-            uri = null;
-            return false;
-        }
-
-        private async Task InvokeActionAsync(RouteContext context, ActionDescriptor actionDescriptor)
-        {
-            var services = context.HttpContext.RequestServices;
-            Debug.Assert(services != null);
-
-            var actionContext = new ActionContext(context.HttpContext, context.RouteData, actionDescriptor);
-
-            var optionsAccessor = services.GetRequiredService<IOptions<MvcOptions>>();
-            actionContext.ModelState.MaxAllowedErrors = optionsAccessor.Options.MaxModelValidationErrors;
-
-            var contextAccessor = services.GetRequiredService<IScopedInstance<ActionContext>>();
-            contextAccessor.Value = actionContext;
-            var invokerFactory = services.GetRequiredService<IActionInvokerFactory>();
-            var invoker = invokerFactory.CreateInvoker(actionContext);
-
-            await invoker.InvokeAsync();
+            return null;
         }
     }
 }

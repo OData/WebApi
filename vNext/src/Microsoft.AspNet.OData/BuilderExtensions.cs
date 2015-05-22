@@ -1,17 +1,15 @@
-﻿using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.OData.Routing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.Routing;
+
 
 namespace Microsoft.AspNet.OData
 {
     public static class BuilderExtensions
     {
-        public static IApplicationBuilder UseOData(this IApplicationBuilder app)
+        public static IRouteBuilder MapODataRoute<T>(this IRouteBuilder builder, string prefix) where T : class
         {
-            return app.UseRouter(new ODataRoute());
+            builder.Routes.Add(new ODataRoute(prefix, DefaultODataModelProvider.BuildEdmModel(typeof(T))));
+            return builder;
         }
     }
 }

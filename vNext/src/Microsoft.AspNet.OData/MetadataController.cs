@@ -6,7 +6,7 @@ using Microsoft.OData.Edm;
 namespace Microsoft.AspNet.OData
 {
     [ApiExplorerSettings(IgnoreApi = true)]
-    [Route("odata/$metadata")]
+    // [Route("odata/$metadata")]
     public class MetadataController : Controller
     {
         private readonly IEdmModel _model;

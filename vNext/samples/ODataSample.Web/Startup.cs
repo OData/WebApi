@@ -15,15 +15,16 @@ namespace ODataSample.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddOData().AddApiContext<ISampleService>("odata");
+            services.AddOData();
 
             services.AddSingleton<SampleContext>();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
-            app.UseOData();
-            app.UseMvc();
+            app.UseMvc(builder => {
+                builder.MapODataRoute<ISampleService>("odata");
+            });
         }
     }
 }

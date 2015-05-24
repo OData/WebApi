@@ -6,7 +6,7 @@ using System;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData.Routing;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNet.OData.Extensions
 {
     public static class ODataServiceCollectionExtensions
     {

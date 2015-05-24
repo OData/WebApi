@@ -2,7 +2,7 @@
 using Microsoft.AspNet.Routing;
 
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNet.OData.Extensions
 {
     public static class BuilderExtensions
     {

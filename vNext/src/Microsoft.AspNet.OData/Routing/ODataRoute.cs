@@ -38,9 +38,13 @@ namespace Microsoft.AspNet.OData.Routing
 
             uri = new Uri(remaining.ToString(), UriKind.Relative);
 
-            _provider.GetService<ODataProperties>().Model = _model;
+            _provider.GetRequiredService<ODataProperties>().Model = _model;
             var parser = new ODataUriParser(_model, uri);
             var path = parser.ParsePath();
+
+            // Fix IsHandled assignment in ODataRouteContext or consider remove ODataRouteContext.
+            // Put Path in ODataProperties?
+            context.IsHandled = true;
 
             var ctx = new ODataRouteContext(context) { Path = path };
             await m.RouteAsync(ctx);

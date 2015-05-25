@@ -34,9 +34,15 @@ namespace ODataSample.Web.Models
         #endregion
 
         #region Products business logic
+
+        public Product FindProduct(int id)
+        {
+            return _products.SingleOrDefault(p => p.ProductId == id);
+        }
+
         public Product AddProduct(Product product)
         {
-            var existingProduct = _products.SingleOrDefault(p => p.ProductId == product.ProductId);
+            var existingProduct = FindProduct(product.ProductId);
             if (existingProduct != null)
             {
                 return existingProduct;
@@ -71,9 +77,15 @@ namespace ODataSample.Web.Models
         #endregion
 
         #region Customers business logic
+
+        public Customer FindCustomer(int id)
+        {
+            return _customers.SingleOrDefault(p => p.CustomerId == id);
+        }
+
         public Customer AddCustomer(Customer customer)
         {
-            var existingCustomer = _customers.SingleOrDefault(p => p.CustomerId == customer.CustomerId);
+            var existingCustomer = FindCustomer(customer.CustomerId);
             if (existingCustomer != null)
             {
                 return existingCustomer;

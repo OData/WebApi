@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
@@ -12,11 +13,12 @@ namespace Microsoft.AspNet.OData.Routing
 {
     public class DefaultODataRoutingConvention : IODataRoutingConvention
     {
-        public ControllerActionDescriptor SelectControllerAction(ODataPath odataPath, RouteContext context)
+        public ActionDescriptor SelectAction(ODataRouteContext routeContext)
         {
+            var odataPath = routeContext.Path;
             var controllerName = string.Empty;
             var actionName = "Get";
-            var keyCount = 0;
+            var keys = new List<KeyValuePair<string, object>>();
 
             if (odataPath.FirstSegment is MetadataSegment)
             {
@@ -24,7 +26,7 @@ namespace Microsoft.AspNet.OData.Routing
             }
             else
             {
-                // In the future, we should use attribute routing to determine controller and action.
+                // TODO: we should use attribute routing to determine controller and action.
                 var entitySetSegment = odataPath.FirstSegment as EntitySetSegment;
                 if (entitySetSegment != null)
                 {
@@ -34,12 +36,7 @@ namespace Microsoft.AspNet.OData.Routing
                 var keySegment = odataPath.FirstOrDefault(s => s is KeySegment) as KeySegment;
                 if (keySegment != null)
                 {
-                    keyCount = keySegment.Keys.Count();
-
-                    foreach (var kvp in keySegment.Keys)
-                    {
-                        context.RouteData.Values[kvp.Key] = kvp.Value;
-                    }
+                    keys.AddRange(keySegment.Keys);
                 }
 
                 var navigationPropertySegment =
@@ -50,18 +47,32 @@ namespace Microsoft.AspNet.OData.Routing
                 }
             }
             
-            var services = context.HttpContext.ApplicationServices;
+            var services = routeContext.HttpContext.ApplicationServices;
             var provider = services.GetRequiredService<IActionDescriptorsCollectionProvider>();
-            var actionDescriptor = (ControllerActionDescriptor)provider.ActionDescriptors.Items.SingleOrDefault(d =>
+            var actionDescriptor = provider.ActionDescriptors.Items.SingleOrDefault(d =>
             {
                 var c = d as ControllerActionDescriptor;
                 return c != null
                 && c.ControllerName == controllerName
                 && c.Name == actionName
-                && c.Parameters.Count == keyCount;
+                && c.Parameters.Count == keys.Count;
             });
 
+            if (actionDescriptor != null)
+            {
+                WriteRouteData(routeContext, actionDescriptor.Parameters, keys);
+            }
+
             return actionDescriptor;
+        }
+
+        private void WriteRouteData(RouteContext context, IList<ParameterDescriptor> parameters, IList<KeyValuePair<string, object>> keys)
+        {
+            for (int i = 0; i < parameters.Count; ++i)
+            {
+                // TODO: check if parameters match keys.
+                context.RouteData.Values[parameters[i].Name] = keys[i].Value;
+            }
         }
     }
 }

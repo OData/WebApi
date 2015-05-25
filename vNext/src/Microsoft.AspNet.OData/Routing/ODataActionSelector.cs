@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.OData.Routing
     public class ODataActionSelector : IActionSelector
     {
         private readonly IActionSelector _selector;
-        private IODataRoutingConvention _convention;
+        private readonly IODataRoutingConvention _convention;
 
         public ODataActionSelector(IODataRoutingConvention convention,
             IActionDescriptorsCollectionProvider actionDescriptorsCollectionProvider,
@@ -32,12 +32,10 @@ namespace Microsoft.AspNet.OData.Routing
 
         public async Task<ActionDescriptor> SelectAsync(RouteContext context)
         {
-            var odataRouteContext = context as ODataRouteContext;
-
-            if (odataRouteContext != null)
+            var odataContext = context as ODataRouteContext;
+            if (odataContext != null)
             {
-                var a=_convention.SelectControllerAction(odataRouteContext.Path, context);
-                return await Task.FromResult((ActionDescriptor)a);
+                return await Task.FromResult(_convention.SelectAction(odataContext));
             }
 
             return await _selector.SelectAsync(context);

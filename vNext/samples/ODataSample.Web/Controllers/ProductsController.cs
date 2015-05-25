@@ -29,7 +29,13 @@ namespace ODataSample.Web.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            return Json(_sampleContext.Products.Single(p => p.ProductId == id));
+            var product = _sampleContext.FindProduct(id);
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+
+            return Json(product);
         }
 
         // POST api/Products

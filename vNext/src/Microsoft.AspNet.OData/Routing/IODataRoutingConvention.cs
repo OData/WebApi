@@ -9,6 +9,6 @@ namespace Microsoft.AspNet.OData.Routing
 {
     public interface IODataRoutingConvention
     {
-        ControllerActionDescriptor SelectControllerAction(ODataPath odataPath, RouteContext context);
+        ActionDescriptor SelectAction(ODataRouteContext routeContext);
     }
 }

@@ -32,8 +32,8 @@ namespace Microsoft.AspNet.OData.Routing
             PathString remaining;
             if (!request.Path.StartsWithSegments(PathString.FromUriComponent("/" + _routePrefix), out remaining))
             {
-                //return;
-                throw new Exception("route error");
+                // Fallback to MVC routing.
+                return;
             }
 
             uri = new Uri(remaining.ToString(), UriKind.Relative);

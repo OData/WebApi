@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.OData.Routing
             PathString remaining;
             if (!request.Path.StartsWithSegments(PathString.FromUriComponent("/" + _routePrefix), out remaining))
             {
-                // Fallback to MVC routing.
+                // Fallback to other routes.
                 return;
             }
 

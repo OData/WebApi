@@ -11,6 +11,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.Framework.Internal;
 
 namespace Microsoft.AspNet.OData.Formatters
 {
@@ -27,6 +28,12 @@ namespace Microsoft.AspNet.OData.Formatters
             SupportedEncodings.Add(UTF8EncodingWithoutBOM);
             SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/json"));
             SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/json"));
+            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/xml"));
+
+            foreach (var mediaType in SupportedMediaTypes)
+            {
+                mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "minimal"));
+            }
         }
 
         public override Task WriteResponseBodyAsync(OutputFormatterContext context)
@@ -45,7 +52,11 @@ namespace Microsoft.AspNet.OData.Formatters
 
         public override void WriteResponseHeaders(OutputFormatterContext context)
         {
-            context.SelectedContentType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "minimal"));
+            if (context.Object is IEdmModel)
+            {
+                context.SelectedContentType = SupportedMediaTypes[2];
+            }
+
             context.ActionContext.HttpContext.Response.Headers.Add("OData-Version", new[] { "4.0" });
             base.WriteResponseHeaders(context);
         }

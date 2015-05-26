@@ -18,7 +18,7 @@ namespace Microsoft.AspNet.OData.Extensions
             services.ConfigureMvc(options =>
             {
                 // use descriptor?
-                options.OutputFormatters.Insert(0, new ODataOutputFormatter());
+                options.OutputFormatters.Insert(0, new ModernOutputFormatter());
             });
 
             services.AddSingleton<IActionSelector, ODataActionSelector>();

@@ -15,7 +15,7 @@ using Microsoft.Framework.Internal;
 
 namespace Microsoft.AspNet.OData.Formatters
 {
-    public class ODataOutputFormatter : OutputFormatter
+    public class ModernOutputFormatter : OutputFormatter
     {
         /// <summary>
         /// Returns UTF8 Encoding without BOM and throws on invalid bytes.
@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.OData.Formatters
         public static readonly Encoding UTF8EncodingWithoutBOM
             = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
-        public ODataOutputFormatter()
+        public ModernOutputFormatter()
         {
             SupportedEncodings.Add(UTF8EncodingWithoutBOM);
             SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/json"));

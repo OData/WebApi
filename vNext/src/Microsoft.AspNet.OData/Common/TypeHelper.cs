@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.Mvc;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNet.OData.Common
 {
     internal static class TypeHelper
     {

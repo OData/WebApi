@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Web.OData.Formatter;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Common;
 
 namespace System.Web.OData.Builder
 {

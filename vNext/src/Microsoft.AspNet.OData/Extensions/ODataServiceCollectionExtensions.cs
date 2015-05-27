@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNet.OData.Formatters;
+﻿using Microsoft.AspNet.OData.Formatter;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 using System;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
 
 namespace Microsoft.AspNet.OData.Extensions
 {

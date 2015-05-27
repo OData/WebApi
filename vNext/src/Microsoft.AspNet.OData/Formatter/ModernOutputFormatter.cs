@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Framework.Internal;
 
-namespace Microsoft.AspNet.OData.Formatters
+namespace Microsoft.AspNet.OData.Formatter
 {
     public class ModernOutputFormatter : OutputFormatter
     {

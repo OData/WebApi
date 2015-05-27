@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-namespace System.Web.OData.Builder.Conventions
+using System.Reflection;
+
+namespace Microsoft.AspNet.OData.Builder.Conventions
 {
     /// <summary>
     /// <see cref="AbstractTypeDiscoveryConvention"/> to figure out if a structural type is abstract or not.
@@ -14,7 +16,7 @@ namespace System.Web.OData.Builder.Conventions
             StructuralTypeConfiguration structuralType = edmTypeConfiguration as StructuralTypeConfiguration;
             if (structuralType != null && structuralType.IsAbstract == null)
             {
-                structuralType.IsAbstract = structuralType.ClrType.IsAbstract;
+                structuralType.IsAbstract = structuralType.ClrType.GetTypeInfo().IsAbstract;
             }
         }
     }

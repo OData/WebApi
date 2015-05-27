@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// EntityCollectionConfiguration represents a Collection of Entities.

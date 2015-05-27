@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
-using System.Web.OData.Builder;
+using Microsoft.AspNet.OData.Builder;
 using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 

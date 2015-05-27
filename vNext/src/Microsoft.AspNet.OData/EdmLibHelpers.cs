@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.AspNet.OData.Builder;
 using System.Xml.Linq;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData.Common;
@@ -108,6 +110,17 @@ namespace Microsoft.AspNet.OData
             }
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
+        public static IEdmCollectionType GetCollection(this IEdmEntityType entityType)
+        {
+            return new EdmCollectionType(new EdmEntityTypeReference(entityType, isNullable: false));
+        }
+
+        public static Type GetClrType(IEdmType edmType, IEdmModel edmModel)
+        {
+            //return GetClrType(edmType, edmModel, null);
+            throw new NotImplementedException("EdmLibHelpers.GetClrType");
+        }
+
         public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, IAssemblyProvider assemblyProvider)
         {
             IEdmSchemaType edmSchemaType = edmType as IEdmSchemaType;
@@ -118,6 +131,12 @@ namespace Microsoft.AspNet.OData
             IEnumerable<Type> matchingTypes = GetMatchingTypes(typeName, assemblyProvider);
 
             return matchingTypes.FirstOrDefault();
+        }
+
+        public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel)
+        {
+            // return GetClrType(edmTypeReference, edmModel, null);
+            throw new NotImplementedException("EdmLibHelpers.GetClrType");
         }
 
         public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel,
@@ -149,6 +168,18 @@ namespace Microsoft.AspNet.OData
         public static bool IsNullable(Type type)
         {
             return !type.GetTypeInfo().IsValueType || Nullable.GetUnderlyingType(type) != null;
+        }
+
+        public static IEdmTypeReference GetEdmTypeReference(this IEdmModel edmModel, Type clrType)
+        {
+            IEdmType edmType = edmModel.GetEdmType(clrType);
+            if (edmType != null)
+            {
+                bool isNullable = IsNullable(clrType);
+                return ToEdmTypeReference(edmType, isNullable);
+            }
+
+            return null;
         }
 
         public static IEdmTypeReference ToEdmTypeReference(this IEdmType edmType, bool isNullable)
@@ -189,6 +220,28 @@ namespace Microsoft.AspNet.OData
             return edmProperty.Name;
         }
 
+        public static PropertyInfo GetDynamicPropertyDictionary(IEdmStructuredType edmType, IEdmModel edmModel)
+        {
+            if (edmType == null)
+            {
+                throw Error.ArgumentNull("edmType");
+            }
+
+            if (edmModel == null)
+            {
+                throw Error.ArgumentNull("edmModel");
+            }
+
+            DynamicPropertyDictionaryAnnotation annotation =
+                edmModel.GetAnnotationValue<DynamicPropertyDictionaryAnnotation>(edmType);
+            if (annotation != null)
+            {
+                return annotation.PropertyInfo;
+            }
+
+            return null;
+        }
+
         public static IEdmPrimitiveType GetEdmPrimitiveTypeOrNull(Type clrType)
         {
             IEdmPrimitiveType primitiveType;
@@ -201,6 +254,12 @@ namespace Microsoft.AspNet.OData
             return primitiveType != null
                 ? _coreModel.GetPrimitive(primitiveType.PrimitiveKind, IsNullable(clrType))
                 : null;
+        }
+        
+        public static Type IsNonstandardEdmPrimitive(Type type, out bool isNonstandardEdmPrimitive)
+        {
+            // return IsNonstandardEdmPrimitive(type, out isNonstandardEdmPrimitive, null);
+            throw new NotImplementedException("EdmLibHelpers.IsNonstandardEdmPrimitive");
         }
 
         // figures out if the given clr type is nonstandard edm primitive like uint, ushort, char[] etc.
@@ -221,6 +280,14 @@ namespace Microsoft.AspNet.OData
             return reverseLookupClrType;
         }
 
+        // Mangle the invalid EDM literal Type.FullName (System.Collections.Generic.IEnumerable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]) 
+        // to a valid EDM literal (the C# type name IEnumerable<int>).
+        public static string EdmName(this Type clrType)
+        {
+            // We cannot use just Type.Name here as it doesn't work for generic types.
+            return MangleClrTypeName(clrType);
+        }
+
         private static IEnumerable<Type> GetMatchingTypes(string edmFullName, IAssemblyProvider assemblyProvider)
         {
             return
@@ -231,6 +298,24 @@ namespace Microsoft.AspNet.OData
         private static IEdmPrimitiveType GetPrimitiveType(EdmPrimitiveTypeKind primitiveKind)
         {
             return _coreModel.GetPrimitiveType(primitiveKind);
+        }
+
+        private static string MangleClrTypeName(Type type)
+        {
+            Contract.Assert(type != null);
+
+            if (!type.GetTypeInfo().IsGenericType)
+            {
+                return type.Name;
+            }
+            else
+            {
+                return String.Format(
+                    CultureInfo.InvariantCulture,
+                    "{0}Of{1}",
+                    type.Name.Replace('`', '_'),
+                    String.Join("_", type.GetGenericArguments().Select(t => MangleClrTypeName(t))));
+            }
         }
     }
 }

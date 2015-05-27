@@ -7,7 +7,7 @@ using System.Linq;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     internal class ContainmentPathBuilder
     {

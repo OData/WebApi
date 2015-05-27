@@ -7,6 +7,7 @@ using Microsoft.Framework.Logging;
 using Microsoft.AspNet.Mvc.Routing;
 using Microsoft.AspNet.Mvc.ActionConstraints;
 using System.Collections.Generic;
+using Microsoft.AspNet.OData.Routing.Conventions;
 
 namespace Microsoft.AspNet.OData.Routing
 {

@@ -5,7 +5,7 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 
-namespace Microsoft.AspNet.OData.Formatters
+namespace Microsoft.AspNet.OData.Formatter
 {
     public class ODataJsonConverter : JsonConverter
     {

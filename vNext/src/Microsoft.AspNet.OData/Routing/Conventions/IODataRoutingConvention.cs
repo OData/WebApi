@@ -5,7 +5,7 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.AspNet.Routing;
 
-namespace Microsoft.AspNet.OData.Routing
+namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     public interface IODataRoutingConvention
     {

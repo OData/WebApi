@@ -9,7 +9,7 @@ using Microsoft.OData.Edm.Library;
 using Microsoft.AspNet.Routing;
 using Microsoft.Framework.DependencyInjection;
 
-namespace Microsoft.AspNet.OData.Routing
+namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     public class DefaultODataRoutingConvention : IODataRoutingConvention
     {

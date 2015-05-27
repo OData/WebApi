@@ -1,21 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http;
-using System.Web.OData.Formatter;
-using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.OData.Edm.Validation;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     internal static class EdmModelHelperMethods
     {
@@ -518,7 +518,7 @@ namespace System.Web.OData.Builder
             {
                 Type configurationClrType = TypeHelper.GetUnderlyingTypeOrSelf(configuration.ClrType);
 
-                if (!configurationClrType.IsEnum)
+                if (!configurationClrType.GetTypeInfo().IsEnum)
                 {
                     configurationClrType = configuration.ClrType;
                 }

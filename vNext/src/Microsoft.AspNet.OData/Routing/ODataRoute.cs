@@ -6,6 +6,7 @@ using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Routing.Conventions;
 
 namespace Microsoft.AspNet.OData.Routing
 {

@@ -4,7 +4,7 @@
 using System.Linq;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Builder.Conventions
+namespace Microsoft.AspNet.OData.Builder.Conventions
 {
     /// <summary>
     /// The FunctionLinkGenerationConvention calls function.HasFunctionLink(..) if the function binds to a single entity and has not previously been configured.

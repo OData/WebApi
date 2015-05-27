@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Web.Http;
-using System.Web.OData.Formatter;
-using System.Web.OData.Properties;
+using System.Reflection;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// <see cref="ODataModelBuilder"/> is used to map CLR classes to an EDM model.
@@ -295,7 +295,7 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("type");
             }
 
-            if (!type.IsEnum)
+            if (!type.GetTypeInfo().IsEnum)
             {
                 throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
             }

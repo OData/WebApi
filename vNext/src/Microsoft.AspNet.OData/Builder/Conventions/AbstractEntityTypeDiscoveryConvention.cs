@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
-using System.Reflection;
+
 namespace System.Web.OData.Builder.Conventions
 {
     /// <summary>
@@ -13,7 +13,7 @@ namespace System.Web.OData.Builder.Conventions
         {
             if (entity.IsAbstract == null)
             {
-                entity.IsAbstract = entity.ClrType.GetTypeInfo().IsAbstract;
+                entity.IsAbstract = entity.ClrType.IsAbstract;
             }
         }
     }

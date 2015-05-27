@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
-
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -27,12 +27,12 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            //if (!typeof(IDictionary<string, object>).IsAssignableFrom(propertyInfo.PropertyType))
-            //{
-            //    throw Error.Argument("propertyInfo", SRResources.InvalidPropertyInfoForDynamicPropertyAnnotation,
-            //        propertyInfo.PropertyType.Name,
-            //        "IDictionary<string, object>");
-            //}
+            if (!typeof(IDictionary<string, object>).IsAssignableFrom(propertyInfo.PropertyType))
+            {
+                throw Error.Argument("propertyInfo", SRResources.InvalidPropertyInfoForDynamicPropertyAnnotation,
+                    propertyInfo.PropertyType.Name,
+                    "IDictionary<string, object>");
+            }
 
             PropertyInfo = propertyInfo;
         }

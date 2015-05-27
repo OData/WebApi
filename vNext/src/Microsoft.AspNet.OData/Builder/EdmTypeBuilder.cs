@@ -6,9 +6,9 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using System.Web.OData.Formatter;
-using Microsoft.AspNet.OData;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Values;
@@ -212,14 +212,14 @@ namespace System.Web.OData.Builder
             IEdmTypeReference elementTypeReference = null;
             Type clrType = TypeHelper.GetUnderlyingTypeOrSelf(collectionProperty.ElementType);
 
-            if (clrType.GetTypeInfo().IsEnum)
+            if (clrType.IsEnum)
             {
                 IEdmType edmType = GetEdmType(clrType);
 
-                //if (edmType == null)
-                //{
-                //    throw Error.InvalidOperation(SRResources.EnumTypeDoesNotExist, clrType.Name);
-                //}
+                if (edmType == null)
+                {
+                    throw Error.InvalidOperation(SRResources.EnumTypeDoesNotExist, clrType.Name);
+                }
 
                 IEdmEnumType enumElementType = (IEdmEnumType)edmType;
                 bool isNullable = collectionProperty.ElementType != clrType;
@@ -252,10 +252,10 @@ namespace System.Web.OData.Builder
             Type enumPropertyType = TypeHelper.GetUnderlyingTypeOrSelf(enumProperty.RelatedClrType);
             IEdmType edmType = GetEdmType(enumPropertyType);
 
-            //if (edmType == null)
-            //{
-            //    throw Error.InvalidOperation(SRResources.EnumTypeDoesNotExist, enumPropertyType.Name);
-            //}
+            if (edmType == null)
+            {
+                throw Error.InvalidOperation(SRResources.EnumTypeDoesNotExist, enumPropertyType.Name);
+            }
 
             IEdmEnumType enumType = (IEdmEnumType)edmType;
             IEdmTypeReference enumTypeReference = new EdmEnumTypeReference(enumType, enumProperty.OptionalProperty);
@@ -289,6 +289,10 @@ namespace System.Web.OData.Builder
 
             CreateStructuralTypeBody(type, config);
             IEnumerable<IEdmStructuralProperty> keys = config.Keys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.Name));
+            type.AddKeys(keys);
+
+            // Add the Enum keys
+            keys = config.EnumKeys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.Name));
             type.AddKeys(keys);
         }
 
@@ -346,8 +350,8 @@ namespace System.Web.OData.Builder
                 }
                 else
                 {
-                    //Contract.Assert(propInfo.ReflectedType != null);
-                    Type baseType = propInfo.PropertyType.GetTypeInfo().BaseType;
+                    Contract.Assert(propInfo.ReflectedType != null);
+                    Type baseType = propInfo.ReflectedType.BaseType;
                     while (baseType != null)
                     {
                         PropertyInfo basePropInfo = baseType.GetProperty(propInfo.Name);
@@ -357,7 +361,7 @@ namespace System.Web.OData.Builder
                             break;
                         }
 
-                        baseType = baseType.GetTypeInfo().BaseType;
+                        baseType = baseType.BaseType;
                     }
 
                     Contract.Assert(baseType != null);
@@ -376,14 +380,14 @@ namespace System.Web.OData.Builder
             {
                 // EdmIntegerConstant can only support a value of long type.
                 long value;
-                //try
-                //{
+                try
+                {
                     value = Convert.ToInt64(member.MemberInfo, CultureInfo.InvariantCulture);
-                //}
-                //catch
-                //{
-                //    throw Error.Argument("value", SRResources.EnumValueCannotBeLong, Enum.GetName(member.MemberInfo.GetType(), member.MemberInfo));
-                //}
+                }
+                catch
+                {
+                    throw Error.Argument("value", SRResources.EnumValueCannotBeLong, Enum.GetName(member.MemberInfo.GetType(), member.MemberInfo));
+                }
 
                 EdmEnumMember edmMember = new EdmEnumMember(type, member.Name,
                     new EdmIntegerConstant(value));
@@ -431,10 +435,10 @@ namespace System.Web.OData.Builder
         public static EdmPrimitiveTypeKind GetTypeKind(Type clrType)
         {
             IEdmPrimitiveType primitiveType = EdmLibHelpers.GetEdmPrimitiveTypeOrNull(clrType);
-            //if (primitiveType == null)
-            //{
-            //    throw Error.Argument("clrType", SRResources.MustBePrimitiveType, clrType.FullName);
-            //}
+            if (primitiveType == null)
+            {
+                throw Error.Argument("clrType", SRResources.MustBePrimitiveType, clrType.FullName);
+            }
 
             return primitiveType.PrimitiveKind;
         }

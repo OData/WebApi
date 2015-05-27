@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
-
+using System.Web.Http;
+using System.Web.OData.Properties;
 
 namespace System.Web.OData.Builder
 {
@@ -48,11 +48,9 @@ namespace System.Web.OData.Builder
                 case ExpressionType.Equal: // ==
                     return VisitEqual(exp);
 
-                //default:
-                //    throw Error.NotSupported(SRResources.UnsupportedExpressionNodeTypeWithName, exp.NodeType);
+                default:
+                    throw Error.NotSupported(SRResources.UnsupportedExpressionNodeTypeWithName, exp.NodeType);
             }
-
-            return null;
         }
 
         protected override Expression VisitLambda<T>(Expression<T> lambda)
@@ -62,10 +60,10 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("lambda");
             }
 
-            //if (lambda.Parameters.Count != 2)
-            //{
-            //    throw Error.InvalidOperation(SRResources.LambdaExpressionMustHaveExactlyTwoParameters);
-            //}
+            if (lambda.Parameters.Count != 2)
+            {
+                throw Error.InvalidOperation(SRResources.LambdaExpressionMustHaveExactlyTwoParameters);
+            }
 
             Expression body = Visit(lambda.Body);
 
@@ -88,11 +86,13 @@ namespace System.Web.OData.Builder
 
             if (left != null && right != null)
             {
-                if (left.PropertyType != right.PropertyType)
+                Type leftType = Nullable.GetUnderlyingType(left.PropertyType) ?? left.PropertyType;
+                Type rightType = Nullable.GetUnderlyingType(right.PropertyType) ?? right.PropertyType;
+                if (leftType != rightType)
                 {
-                    //throw Error.InvalidOperation(SRResources.EqualExpressionsMustHaveSameTypes,
-                    //    left.ReflectedType.FullName, left.Name, left.PropertyType.FullName,
-                    //    right.ReflectedType.FullName, right.Name, right.PropertyType.FullName);
+                    throw Error.InvalidOperation(SRResources.EqualExpressionsMustHaveSameTypes,
+                        left.ReflectedType.FullName, left.Name, left.PropertyType.FullName,
+                        right.ReflectedType.FullName, right.Name, right.PropertyType.FullName);
                 }
 
                 _properties.Add(left, right);
@@ -122,16 +122,16 @@ namespace System.Web.OData.Builder
             Contract.Assert(memberNode != null);
 
             PropertyInfo propertyInfo = memberNode.Member as PropertyInfo;
-            //if (propertyInfo == null)
-            //{
-            //    throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties,
-            //        memberNode.Member.ReflectedType.FullName, memberNode.Member.Name);
-            //}
+            if (propertyInfo == null)
+            {
+                throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties,
+                    memberNode.Member.ReflectedType.FullName, memberNode.Member.Name);
+            }
 
-            //if (memberNode.Expression.NodeType != ExpressionType.Parameter)
-            //{
-            //    throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeBoundToLambdaParameter);
-            //}
+            if (memberNode.Expression.NodeType != ExpressionType.Parameter)
+            {
+                throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeBoundToLambdaParameter);
+            }
 
             return propertyInfo;
         }

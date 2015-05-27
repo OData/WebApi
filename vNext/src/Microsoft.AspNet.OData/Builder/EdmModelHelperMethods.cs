@@ -6,10 +6,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using System.Web.OData.Formatter;
-
-using Microsoft.AspNet.OData;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
 using Microsoft.OData.Edm.Library;
@@ -201,7 +200,7 @@ namespace System.Web.OData.Builder
             IEnumerable<EdmError> edmErrors;
             if (procedure.EntitySetPath != null && !operationImport.TryGetRelativeEntitySetPath(model, out procedureParameter, out navPath, out edmErrors))
             {
-                //throw Error.InvalidOperation(SRResources.ProcedureHasInvalidEntitySetPath, String.Join("/", procedure.EntitySetPath), procedure.FullyQualifiedName);
+                throw Error.InvalidOperation(SRResources.ProcedureHasInvalidEntitySetPath, String.Join("/", procedure.EntitySetPath), procedure.FullyQualifiedName);
             }
         }
 
@@ -325,7 +324,7 @@ namespace System.Web.OData.Builder
                     }
                     else
                     {
-                        //throw Error.InvalidOperation(SRResources.MoreThanOneUnboundActionFound, action.Name);
+                        throw Error.InvalidOperation(SRResources.MoreThanOneUnboundActionFound, action.Name);
                     }
                 }
             }
@@ -343,11 +342,11 @@ namespace System.Web.OData.Builder
                         IList<IEdmTypeConfiguration> bindingTypes = actionNamesToBindingTypes[action.Name];
                         foreach (IEdmTypeConfiguration type in bindingTypes)
                         {
-                            //if (type == newBindingType)
-                            //{
-                            //    throw Error.InvalidOperation(SRResources.MoreThanOneOverloadActionBoundToSameTypeFound,
-                            //        action.Name, type.FullName);
-                            //}
+                            if (type == newBindingType)
+                            {
+                                throw Error.InvalidOperation(SRResources.MoreThanOneOverloadActionBoundToSameTypeFound,
+                                    action.Name, type.FullName);
+                            }
                         }
 
                         bindingTypes.Add(newBindingType);
@@ -487,8 +486,7 @@ namespace System.Web.OData.Builder
                 }
                 else
                 {
-                    //throw Error.InvalidOperation(SRResources.EntitySetNotFoundForName, procedure.NavigationSource.Name);
-                    return null;
+                    throw Error.InvalidOperation(SRResources.EntitySetNotFoundForName, procedure.NavigationSource.Name);
                 }
             }
             else if (procedure.EntitySetPath != null)
@@ -520,7 +518,7 @@ namespace System.Web.OData.Builder
             {
                 Type configurationClrType = TypeHelper.GetUnderlyingTypeOrSelf(configuration.ClrType);
 
-                if (!configurationClrType.GetTypeInfo().IsEnum)
+                if (!configurationClrType.IsEnum)
                 {
                     configurationClrType = configuration.ClrType;
                 }
@@ -543,8 +541,7 @@ namespace System.Web.OData.Builder
                     }
                     else
                     {
-                        //throw Error.InvalidOperation(SRResources.UnsupportedEdmTypeKind, kind.ToString());
-                        return null;
+                        throw Error.InvalidOperation(SRResources.UnsupportedEdmTypeKind, kind.ToString());
                     }
                 }
                 else if (configuration.Kind == EdmTypeKind.Primitive)
@@ -554,8 +551,7 @@ namespace System.Web.OData.Builder
                 }
                 else
                 {
-                    //throw Error.InvalidOperation(SRResources.NoMatchingIEdmTypeFound, configuration.FullName);
-                    return null;
+                    throw Error.InvalidOperation(SRResources.NoMatchingIEdmTypeFound, configuration.FullName);
                 }
             }
         }

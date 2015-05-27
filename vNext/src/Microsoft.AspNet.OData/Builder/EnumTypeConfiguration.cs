@@ -5,10 +5,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using System.Web.OData.Formatter;
-
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -37,16 +36,16 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("clrType");
             }
 
-            //if (!clrType.IsEnum)
-            //{
-            //    throw Error.Argument("clrType", SRResources.TypeCannotBeEnum, clrType.FullName);
-            //}
+            if (!clrType.IsEnum)
+            {
+                throw Error.Argument("clrType", SRResources.TypeCannotBeEnum, clrType.FullName);
+            }
 
             ClrType = clrType;
-            IsFlags = false;// clrType.GetCustomAttributes(typeof(FlagsAttribute), false).Any();
+            IsFlags = clrType.GetCustomAttributes(typeof(FlagsAttribute), false).Any();
             UnderlyingType = Enum.GetUnderlyingType(clrType);
             ModelBuilder = builder;
-            _name = clrType.Name;
+            _name = clrType.EdmName();
             _namespace = clrType.Namespace ?? DefaultNamespace;
             ExplicitMembers = new Dictionary<Enum, EnumMemberConfiguration>();
             RemovedMembers = new List<Enum>();
@@ -102,10 +101,10 @@ namespace System.Web.OData.Builder
             }
             set
             {
-                //if (value == null)
-                //{
-                //    throw Error.PropertyNull();
-                //}
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
 
                 _namespace = value;
                 AddedExplicitly = true;
@@ -123,10 +122,10 @@ namespace System.Web.OData.Builder
             }
             set
             {
-                //if (value == null)
-                //{
-                //    throw Error.PropertyNull();
-                //}
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
 
                 _name = value;
                 AddedExplicitly = true;
@@ -156,10 +155,10 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Gets or sets a value that is <see langword="true"/> if the type's name or namespace was set by the user; 
-        /// <see langword="false"/> if it was inferred through conventions.
+        /// Gets or sets a value that is <c>true</c> if the type's name or namespace was set by the user; 
+        /// <c>false</c> if it was inferred through conventions.
         /// </summary>
-        /// <remarks>The default value is <see langword="false"/>.</remarks>
+        /// <remarks>The default value is <c>false</c>.</remarks>
         public bool AddedExplicitly { get; set; }
 
         /// <summary>
@@ -189,10 +188,10 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("member");
             }
 
-            //if (member.GetType() != ClrType)
-            //{
-            //    throw Error.Argument("member", SRResources.PropertyDoesNotBelongToType, member.ToString(), ClrType.FullName);
-            //}
+            if (member.GetType() != ClrType)
+            {
+                throw Error.Argument("member", SRResources.PropertyDoesNotBelongToType, member.ToString(), ClrType.FullName);
+            }
 
             // Remove from the ignored members
             if (RemovedMembers.Contains(member))
@@ -225,10 +224,10 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("member");
             }
 
-            //if (member.GetType() != ClrType)
-            //{
-            //    throw Error.Argument("member", SRResources.PropertyDoesNotBelongToType, member.ToString(), ClrType.FullName);
-            //}
+            if (member.GetType() != ClrType)
+            {
+                throw Error.Argument("member", SRResources.PropertyDoesNotBelongToType, member.ToString(), ClrType.FullName);
+            }
 
             if (ExplicitMembers.ContainsKey(member))
             {

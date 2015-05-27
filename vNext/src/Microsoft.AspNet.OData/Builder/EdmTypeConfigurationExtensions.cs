@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -77,7 +77,17 @@ namespace System.Web.OData.Builder
         public static IEnumerable<PropertyConfiguration> Keys(this EntityTypeConfiguration entity)
         {
             Contract.Assert(entity != null);
-            return entity.BaseType == null ? entity.Keys : Keys(entity.BaseType);
+            if (entity.Keys.Any() || entity.EnumKeys.Any())
+            {
+                return entity.Keys.OfType<PropertyConfiguration>().Concat(entity.EnumKeys);
+            }
+
+            if (entity.BaseType == null)
+            {
+                return Enumerable.Empty<PropertyConfiguration>();
+            }
+
+            return Keys(entity.BaseType);
         }
 
         // Returns the base types, this type.

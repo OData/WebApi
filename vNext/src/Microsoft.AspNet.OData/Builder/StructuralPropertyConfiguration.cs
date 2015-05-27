@@ -3,7 +3,6 @@
 
 using System.Reflection;
 using System.Web.OData.Formatter;
-using Microsoft.AspNet.OData;
 
 namespace System.Web.OData.Builder
 {

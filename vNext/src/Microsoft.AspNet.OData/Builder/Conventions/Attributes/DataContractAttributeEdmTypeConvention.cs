@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
@@ -57,17 +57,17 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 edmTypeConfiguration.AddedExplicitly = false;
             }
 
-            //IEnumerable<PropertyConfiguration> allProperties = edmTypeConfiguration.Properties.ToArray();
-            //foreach (PropertyConfiguration property in allProperties)
-            //{
-            //    if (!property.PropertyInfo.GetCustomAttributes(typeof(DataMemberAttribute), inherit: true).Any())
-            //    {
-            //        if (!property.AddedExplicitly)
-            //        {
-            //            edmTypeConfiguration.RemoveProperty(property.PropertyInfo);
-            //        }
-            //    }
-            //}
+            IEnumerable<PropertyConfiguration> allProperties = edmTypeConfiguration.Properties.ToArray();
+            foreach (PropertyConfiguration property in allProperties)
+            {
+                if (!property.PropertyInfo.GetCustomAttributes(typeof(DataMemberAttribute), inherit: true).Any())
+                {
+                    if (!property.AddedExplicitly)
+                    {
+                        edmTypeConfiguration.RemoveProperty(property.PropertyInfo);
+                    }
+                }
+            }
         }
     }
 }

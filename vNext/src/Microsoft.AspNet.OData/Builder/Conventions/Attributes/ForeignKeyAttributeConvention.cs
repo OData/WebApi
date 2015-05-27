@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
@@ -94,9 +94,9 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
                 if (dependent != null)
                 {
+                    Type dependentType = Nullable.GetUnderlyingType(dependent.PropertyInfo.PropertyType) ?? dependent.PropertyInfo.PropertyType;
                     PrimitivePropertyConfiguration principal = principalEntity.Keys.FirstOrDefault(
-                        k => k.PropertyInfo.PropertyType == dependent.PropertyInfo.PropertyType &&
-                            navProperty.PrincipalProperties.All(p => p != k.PropertyInfo));
+                            k => k.PropertyInfo.PropertyType == dependentType && navProperty.PrincipalProperties.All(p => p != k.PropertyInfo));
 
                     if (principal != null)
                     {
@@ -133,10 +133,9 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 return;
             }
 
+            Type dependentType = Nullable.GetUnderlyingType(dependent.PropertyInfo.PropertyType) ?? dependent.PropertyInfo.PropertyType;
             PrimitivePropertyConfiguration principal = principalEntity.Keys.FirstOrDefault(
-                k => k.PropertyInfo.PropertyType == dependent.PropertyInfo.PropertyType &&
-                    navProperty.PrincipalProperties.All(p => p != k.PropertyInfo));
-
+                k => k.PropertyInfo.PropertyType == dependentType && navProperty.PrincipalProperties.All(p => p != k.PropertyInfo));
             if (principal != null)
             {
                 navProperty.HasConstraint(dependent.PropertyInfo, principal.PropertyInfo);

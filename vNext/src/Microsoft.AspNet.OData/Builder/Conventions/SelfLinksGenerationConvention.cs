@@ -2,7 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
+using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 
 namespace System.Web.OData.Builder.Conventions
@@ -22,13 +23,13 @@ namespace System.Web.OData.Builder.Conventions
             {
                 entitySet.HasFeedSelfLink(feedContext =>
                 {
-                    //string selfLink = feedContext.Url.CreateODataLink(new EntitySetPathSegment(feedContext.EntitySetBase));
+                    string selfLink = feedContext.Url.CreateODataLink(new EntitySetPathSegment(feedContext.EntitySetBase));
 
-                    //if (selfLink == null)
-                    //{
+                    if (selfLink == null)
+                    {
                         return null;
-                    //}
-                    //return new Uri(selfLink);
+                    }
+                    return new Uri(selfLink);
                 });
             }
 

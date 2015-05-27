@@ -117,8 +117,7 @@ namespace Microsoft.AspNet.OData
 
         public static Type GetClrType(IEdmType edmType, IEdmModel edmModel)
         {
-            //return GetClrType(edmType, edmModel, null);
-            throw new NotImplementedException("EdmLibHelpers.GetClrType");
+            return GetClrType(edmType, edmModel, AssemblyProviderManager.Instance());
         }
 
         public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, IAssemblyProvider assemblyProvider)
@@ -135,8 +134,7 @@ namespace Microsoft.AspNet.OData
 
         public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel)
         {
-            // return GetClrType(edmTypeReference, edmModel, null);
-            throw new NotImplementedException("EdmLibHelpers.GetClrType");
+            return GetClrType(edmTypeReference, edmModel, AssemblyProviderManager.Instance());
         }
 
         public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel,
@@ -258,8 +256,7 @@ namespace Microsoft.AspNet.OData
         
         public static Type IsNonstandardEdmPrimitive(Type type, out bool isNonstandardEdmPrimitive)
         {
-            // return IsNonstandardEdmPrimitive(type, out isNonstandardEdmPrimitive, null);
-            throw new NotImplementedException("EdmLibHelpers.IsNonstandardEdmPrimitive");
+            return IsNonstandardEdmPrimitive(type, out isNonstandardEdmPrimitive, AssemblyProviderManager.Instance());
         }
 
         // figures out if the given clr type is nonstandard edm primitive like uint, ushort, char[] etc.

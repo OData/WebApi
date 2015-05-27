@@ -74,33 +74,33 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         public ODataConventionModelBuilder()
         {
-            Initialize(new DefaultAssembliesResolver(), isQueryCompositionMode: false);
+            Initialize(AssemblyProviderManager.Instance(), isQueryCompositionMode: false);
         }
 
         /// <summary>
         /// Initializes a new <see cref="ODataConventionModelBuilder"/>.
         /// </summary>
-        /// <param name="configuration">The <see cref="HttpConfiguration"/> to use.</param>
-        public ODataConventionModelBuilder(HttpConfiguration configuration)
-            : this(configuration, isQueryCompositionMode: false)
+        /// <param name="assemblyProvider">The <see cref="IAssemblyProvider"/> to use.</param>
+        public ODataConventionModelBuilder(IAssemblyProvider assemblyProvider)
+            : this(assemblyProvider, isQueryCompositionMode: false)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
         /// </summary>
-        /// <param name="configuration">The <see cref="HttpConfiguration"/> to use.</param>
+        /// <param name="assemblyProvider">The <see cref="IAssemblyProvider"/> to use.</param>
         /// <param name="isQueryCompositionMode">If the model is being built for only querying.</param>
         /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <c>true</c> has more relaxed
         /// inference rules and also treats all types as entity types. This constructor is intended for use by unit testing only.</remarks>
-        public ODataConventionModelBuilder(HttpConfiguration configuration, bool isQueryCompositionMode)
+        public ODataConventionModelBuilder(IAssemblyProvider assemblyProvider, bool isQueryCompositionMode)
         {
-            if (configuration == null)
+            if (assemblyProvider == null)
             {
-                throw Error.ArgumentNull("configuration");
+                throw Error.ArgumentNull("assemblyProvider");
             }
 
-            Initialize(configuration.Services.GetAssembliesResolver(), isQueryCompositionMode);
+            Initialize(assemblyProvider, isQueryCompositionMode);
         }
 
         /// <summary>

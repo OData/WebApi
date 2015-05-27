@@ -91,8 +91,8 @@ namespace Microsoft.AspNet.OData.Builder
                 if (leftType != rightType)
                 {
                     throw Error.InvalidOperation(SRResources.EqualExpressionsMustHaveSameTypes,
-                        left.PropertyType.FullName, left.Name, left.PropertyType.FullName,
-                        right.PropertyType.FullName, right.Name, right.PropertyType.FullName);
+                        left.DeclaringType.FullName, left.Name, left.PropertyType.FullName,
+                        right.DeclaringType.FullName, right.Name, right.PropertyType.FullName);
                 }
 
                 _properties.Add(left, right);

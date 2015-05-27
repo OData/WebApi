@@ -34,8 +34,8 @@ namespace System.Web.Http.OData
         /// <param name="edmType">The <see cref="IEdmEntityType"/> of this object.</param>
         /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
         public EdmEntityObject(IEdmEntityType edmType, bool isNullable)
-            : base(edmType, isNullable)
         {
+			base(edmType, isNullable);
         }
     }
 }

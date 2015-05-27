@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.Mvc.Internal;
+using Microsoft.AspNet.Mvc.Routing;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.Routing;
 using Microsoft.Framework.DependencyInjection;
@@ -16,11 +18,14 @@ namespace Microsoft.AspNet.OData.Extensions
             return builder;
         }
 
-        public static IApplicationBuilder UseOData([NotNull] this IApplicationBuilder app)
+        public static IApplicationBuilder UseOData<T>([NotNull] this IApplicationBuilder app, string prefix) where T : class
         {
             var defaultAssemblyProvider = app.ApplicationServices.GetRequiredService<IAssemblyProvider>();
             AssemblyProviderManager.Register(defaultAssemblyProvider);
-            return app;
+
+            return app.UseMvc(builder => {
+                builder.MapODataRoute<T>(prefix);
+            });
         }
     }
 }

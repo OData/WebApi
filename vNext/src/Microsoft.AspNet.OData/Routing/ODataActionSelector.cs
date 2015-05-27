@@ -7,6 +7,7 @@ using Microsoft.Framework.Logging;
 using Microsoft.AspNet.Mvc.Routing;
 using Microsoft.AspNet.Mvc.ActionConstraints;
 using System.Collections.Generic;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
 
 namespace Microsoft.AspNet.OData.Routing
@@ -33,10 +34,9 @@ namespace Microsoft.AspNet.OData.Routing
 
         public async Task<ActionDescriptor> SelectAsync(RouteContext context)
         {
-            var odataContext = context as ODataRouteContext;
-            if (odataContext != null)
+            if (context.ODataProperties().IsValidODataRequest)
             {
-                return await Task.FromResult(_convention.SelectAction(odataContext));
+                return await Task.FromResult(_convention.SelectAction(context));
             }
 
             return await _selector.SelectAsync(context);

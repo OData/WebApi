@@ -5,7 +5,9 @@ using Microsoft.Framework.DependencyInjection;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
 
 namespace Microsoft.AspNet.OData.Routing
@@ -27,7 +29,6 @@ namespace Microsoft.AspNet.OData.Routing
         public async Task RouteAsync(RouteContext context)
         {
             var request = context.HttpContext.Request;
-            var _provider = context.HttpContext.RequestServices;
 
             Uri uri;
             PathString remaining;
@@ -38,17 +39,14 @@ namespace Microsoft.AspNet.OData.Routing
             }
 
             uri = new Uri(remaining.ToString(), UriKind.Relative);
-
-            _provider.GetRequiredService<ODataProperties>().Model = _model;
+            
+            context.ODataProperties().Model = _model;
             var parser = new ODataUriParser(_model, uri);
-            var path = parser.ParsePath();
+            context.ODataProperties().NewPath = parser.ParsePath();
+            context.ODataProperties().IsValidODataRequest = true;
 
-            // Fix IsHandled assignment in ODataRouteContext or consider remove ODataRouteContext.
-            // Put Path in ODataProperties?
+            await m.RouteAsync(context);
             context.IsHandled = true;
-
-            var ctx = new ODataRouteContext(context) { Path = path };
-            await m.RouteAsync(ctx);
         }
 
         public VirtualPathData GetVirtualPath(VirtualPathContext context)

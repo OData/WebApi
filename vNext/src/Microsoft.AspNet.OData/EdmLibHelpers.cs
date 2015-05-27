@@ -163,6 +163,12 @@ namespace Microsoft.AspNet.OData
             }
         }
 
+        public static IEnumerable<IEdmStructuralProperty> GetConcurrencyProperties(this IEdmEntityType type)
+        {
+            return type.StructuralProperties()
+                .Where(s => s.ConcurrencyMode == EdmConcurrencyMode.Fixed && s.Type.IsPrimitive());
+        }
+
         public static bool IsNullable(Type type)
         {
             return !type.GetTypeInfo().IsValueType || Nullable.GetUnderlyingType(type) != null;

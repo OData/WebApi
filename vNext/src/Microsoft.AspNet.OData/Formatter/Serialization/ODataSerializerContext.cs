@@ -79,7 +79,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <summary>
         /// Gets or sets the <see cref="UrlHelper"/> to use for generating OData links.
         /// </summary>
-        public UrlHelper Url { get; set; }
+        public IUrlHelper Url { get; set; }
 
         /// <summary>
         /// Gets or sets the navigation source.

@@ -140,7 +140,7 @@ namespace Microsoft.AspNet.OData
         /// Gets or sets a <see cref="UrlHelper"/> that may be used to generate links while serializing this entity
         /// instance.
         /// </summary>
-        public UrlHelper Url
+        public IUrlHelper Url
         {
             get
             {

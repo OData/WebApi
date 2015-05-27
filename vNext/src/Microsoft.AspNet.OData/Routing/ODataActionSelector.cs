@@ -34,7 +34,7 @@ namespace Microsoft.AspNet.OData.Routing
 
         public async Task<ActionDescriptor> SelectAsync(RouteContext context)
         {
-            if (context.ODataProperties().IsValidODataRequest)
+            if (context.HttpContext.ODataProperties().IsValidODataRequest)
             {
                 return await Task.FromResult(_convention.SelectAction(context));
             }

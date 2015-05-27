@@ -19,7 +19,7 @@ namespace ODataSample.Web.Controllers
         }
 
         // GET: api/Products
-        [HttpGet]
+        //[HttpGet]
         public IEnumerable<Product> Get()
         {
             return _sampleContext.Products;
@@ -35,7 +35,43 @@ namespace ODataSample.Web.Controllers
                 return HttpNotFound();
             }
 
-            return Json(product);
+            return new ObjectResult(product);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetName(int id)
+        {
+            var product = _sampleContext.FindProduct(id);
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(product.Name);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetPrice(int id)
+        {
+            var product = _sampleContext.FindProduct(id);
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(product.Price);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetProductId(int id)
+        {
+            var product = _sampleContext.FindProduct(id);
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(product.ProductId);
         }
 
         // POST api/Products

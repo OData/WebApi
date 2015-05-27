@@ -174,9 +174,28 @@ namespace Microsoft.AspNet.OData
             return !type.GetTypeInfo().IsValueType || Nullable.GetUnderlyingType(type) != null;
         }
 
+        public static bool IsNotNavigable(IEdmProperty edmProperty, IEdmModel edmModel)
+        {
+            QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(edmProperty, edmModel);
+            return annotation == null ? false : annotation.Restrictions.NotNavigable;
+        }
+
         public static IEdmTypeReference GetEdmTypeReference(this IEdmModel edmModel, Type clrType)
         {
-            IEdmType edmType = edmModel.GetEdmType(clrType);
+            IEdmType edmType = GetEdmPrimitiveTypeOrNull(clrType);
+            if (edmType == null)
+            {
+                Type elementType;
+                if (clrType.IsCollection(out elementType))
+                {
+                    edmType = new EdmCollectionType(edmModel.GetEdmType(elementType).ToEdmTypeReference(IsNullable(elementType)));
+                }
+                else
+                {
+                    edmType = edmModel.GetEdmType(clrType);
+                }
+            }
+
             if (edmType != null)
             {
                 bool isNullable = IsNullable(clrType);
@@ -289,6 +308,14 @@ namespace Microsoft.AspNet.OData
         {
             // We cannot use just Type.Name here as it doesn't work for generic types.
             return MangleClrTypeName(clrType);
+        }
+
+        private static QueryableRestrictionsAnnotation GetPropertyRestrictions(IEdmProperty edmProperty, IEdmModel edmModel)
+        {
+            Contract.Assert(edmProperty != null);
+            Contract.Assert(edmModel != null);
+
+            return edmModel.GetAnnotationValue<QueryableRestrictionsAnnotation>(edmProperty);
         }
 
         private static IEnumerable<Type> GetMatchingTypes(string edmFullName, IAssemblyProvider assemblyProvider)

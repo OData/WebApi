@@ -25,14 +25,14 @@ namespace Microsoft.AspNet.OData.Extensions
             return request.HttpContext.RequestServices.GetRequiredService<ODataProperties>();
         }
 
-        public static IETagHandler GetETagHandler(this HttpRequest request)
+        public static IETagHandler ETagHandler(this HttpRequest request)
         {
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
             }
 
-            return request.HttpContext.ApplicationServices.GetRequiredService<IETagHandler>();
+            return request.HttpContext.ETagHandler();
         }
     }
 }

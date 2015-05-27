@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
@@ -126,10 +127,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             if (value != null)
             {
                 Type type = value.GetType();
-                TypeCode typeCode = ((IConvertible)type).GetTypeCode();
 
                 // Note that type cannot be a nullable type as value is not null and it is boxed.
-                switch (typeCode)
+                switch (type.GetTypeCode())
                 {
                     case TypeCode.Char:
                         return new String((char)value, 1);
@@ -179,7 +179,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         {
             Contract.Assert(value != null);
 
-            TypeCode typeCode = ((IConvertible)value.GetType()).GetTypeCode();
+            TypeCode typeCode = value.GetType().GetTypeCode();
 
             switch (typeCode)
             {

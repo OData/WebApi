@@ -32,7 +32,55 @@ namespace ODataSample.Web.Controllers
                 return HttpNotFound();
             }
 
-            return Json(customer);
+            return new ObjectResult(customer);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetFirstName(int id)
+        {
+            var customer = _sampleContext.FindCustomer(id);
+            if (customer == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(customer.FirstName);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetLastName(int id)
+        {
+            var customer = _sampleContext.FindCustomer(id);
+            if (customer == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(customer.LastName);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetCustomerId(int id)
+        {
+            var customer = _sampleContext.FindCustomer(id);
+            if (customer == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(customer.CustomerId);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetProducts(int id)
+        {
+            var customer = _sampleContext.FindCustomer(id);
+            if (customer == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(customer.Products);
         }
 
         // POST api/Customers

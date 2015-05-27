@@ -40,10 +40,10 @@ namespace Microsoft.AspNet.OData.Routing
 
             uri = new Uri(remaining.ToString(), UriKind.Relative);
             
-            context.ODataProperties().Model = _model;
+            context.HttpContext.ODataProperties().Model = _model;
             var parser = new ODataUriParser(_model, uri);
-            context.ODataProperties().NewPath = parser.ParsePath();
-            context.ODataProperties().IsValidODataRequest = true;
+            context.HttpContext.ODataProperties().NewPath = parser.ParsePath();
+            context.HttpContext.ODataProperties().IsValidODataRequest = true;
 
             await m.RouteAsync(context);
             context.IsHandled = true;

@@ -8,98 +8,90 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http.Formatting;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.AspNet.Http;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Internal;
+using Microsoft.OData.Core;
 
 namespace Microsoft.AspNet.OData.Formatter
 {
     public class ODataOutputFormatter : OutputFormatter
     {
-        /// <summary>
-        /// Returns UTF8 Encoding without BOM and throws on invalid bytes.
-        /// </summary>
-        public static readonly Encoding UTF8EncodingWithoutBOM
-            = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
-
         public ODataOutputFormatter()
         {
-            SupportedEncodings.Add(UTF8EncodingWithoutBOM);
-            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/json"));
-            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/json"));
-            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/xml"));
-
-            foreach (var mediaType in SupportedMediaTypes)
-            {
-                mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "minimal"));
-            }
         }
 
         public override Task WriteResponseBodyAsync(OutputFormatterContext context)
         {
-            var response = context.ActionContext.HttpContext.Response;
-            var selectedEncoding = context.SelectedEncoding;
+            HttpRequest request = context.ActionContext.HttpContext.Request;
 
-            using (var delegatingStream = new NonDisposableStream(response.Body))
-            using (var writer = new StreamWriter(delegatingStream, selectedEncoding, 1024, leaveOpen: true))
+            IEdmModel model = request.ODataProperties().Model;
+            if (model == null)
             {
-                WriteObject(writer, context.Object);
+                throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
             }
 
-            return Task.FromResult(true);
+            object value = context.Object;
+            Type type = value.GetType();
+            ODataSerializer serializer = GetSerializer(type, value, model, new DefaultODataSerializerProvider(), request);
+
+            IUrlHelper urlHelper = context.ActionContext.HttpContext.UrlHelper();
+
+            ODataPath path = request.ODataProperties().Path;
+            IEdmNavigationSource targetNavigationSource = path == null ? null : path.NavigationSource;
+
+            throw new NotImplementedException("WriteResponseBodyAsync");
         }
 
         public override void WriteResponseHeaders(OutputFormatterContext context)
         {
-            if (context.Object is IEdmModel)
+            
+        }
+
+        private ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider, HttpRequest request)
+        {
+            ODataSerializer serializer;
+
+            IEdmObject edmObject = value as IEdmObject;
+            if (edmObject != null)
             {
-                context.SelectedContentType = SupportedMediaTypes[2];
+                IEdmTypeReference edmType = edmObject.GetEdmType();
+                if (edmType == null)
+                {
+                    throw new SerializationException(Error.Format(SRResources.EdmTypeCannotBeNull,
+                        edmObject.GetType().FullName, typeof(IEdmObject).Name));
+                }
+
+                serializer = serializerProvider.GetEdmTypeSerializer(edmType);
+                if (serializer == null)
+                {
+                    string message = Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString(), typeof(ODataOutputFormatter).Name);
+                    throw new SerializationException(message);
+                }
+            }
+            else
+            {
+                // get the most appropriate serializer given that we support inheritance.
+                type = value == null ? type : value.GetType();
+                serializer = serializerProvider.GetODataPayloadSerializer(model, type, request);
+                if (serializer == null)
+                {
+                    string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataOutputFormatter).Name);
+                    throw new SerializationException(message);
+                }
             }
 
-            context.ActionContext.HttpContext.Response.Headers.Add("OData-Version", new[] { "4.0" });
-            base.WriteResponseHeaders(context);
+            return serializer;
         }
 
-        // In the future, should convert to ODataEntry and use ODL to write out.
-        // Or use ODL to build a JObject and use Json.NET to write out.
-        public void WriteObject(TextWriter writer, object value)
-        {
-            if (value is IEdmModel)
-            {
-                WriteMetadata(writer, (IEdmModel)value);
-                return;
-            }
-
-            using (var jsonWriter = CreateJsonWriter(writer))
-            {
-                var jsonSerializer = CreateJsonSerializer();
-                jsonSerializer.Serialize(jsonWriter, value);
-            }
-        }
-        private JsonSerializer CreateJsonSerializer()
-        {
-            var serializerSettings = new JsonSerializerSettings();
-            serializerSettings.Converters.Add(new ODataJsonConverter(new Uri("http://localhost:58888/")));
-            var jsonSerializer = JsonSerializer.Create(serializerSettings);
-            return jsonSerializer;
-        }
-
-        private JsonWriter CreateJsonWriter(TextWriter writer)
-        {
-            var jsonWriter = new JsonTextWriter(writer);
-            jsonWriter.CloseOutput = false;
-
-            return jsonWriter;
-        }
-
-        private void WriteMetadata(TextWriter writer, IEdmModel model)
-        {
-            using (var xmlWriter = XmlWriter.Create(writer))
-            {
-                IEnumerable<EdmError> errors;
-                EdmxWriter.TryWriteEdmx(model, xmlWriter, EdmxTarget.OData, out errors);
-            }
-        }
     }
 }

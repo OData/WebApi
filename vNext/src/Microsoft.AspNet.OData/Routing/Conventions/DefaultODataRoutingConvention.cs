@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -13,9 +14,9 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     public class DefaultODataRoutingConvention : IODataRoutingConvention
     {
-        public ActionDescriptor SelectAction(ODataRouteContext routeContext)
+        public ActionDescriptor SelectAction(RouteContext routeContext)
         {
-            var odataPath = routeContext.Path;
+            var odataPath = routeContext.HttpContext.Request.ODataProperties().NewPath;
             var controllerName = string.Empty;
             var actionName = "Get";
             var keys = new List<KeyValuePair<string, object>>();

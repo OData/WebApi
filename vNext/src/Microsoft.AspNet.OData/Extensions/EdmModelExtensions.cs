@@ -21,6 +21,37 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
+        /// Gets the <see cref="ActionLinkBuilder"/> to be used while generating action links for the given action.
+        /// </summary>
+        /// <param name="model">The <see cref="IEdmModel"/> containing the action.</param>
+        /// <param name="action">The action for which the link builder is needed.</param>
+        /// <returns>The <see cref="ActionLinkBuilder"/> for the given action if one is set; otherwise, a new
+        /// <see cref="ActionLinkBuilder"/> that generates action links following OData URL conventions.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "IEdmActionImport is more relevant here.")]
+        public static ActionLinkBuilder GetActionLinkBuilder(this IEdmModel model, IEdmAction action)
+        {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+            if (action == null)
+            {
+                throw Error.ArgumentNull("action");
+            }
+
+            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(action);
+            if (actionLinkBuilder == null)
+            {
+                actionLinkBuilder = new ActionLinkBuilder(
+                    entityInstanceContext => entityInstanceContext.GenerateActionLink(action), followsConventions: true);
+                model.SetActionLinkBuilder(action, actionLinkBuilder);
+            }
+
+            return actionLinkBuilder;
+        }
+
+        /// <summary>
         /// Sets the <see cref="ActionLinkBuilder"/> to be used for generating the OData action link for the given action.
         /// </summary>
         /// <param name="model">The <see cref="IEdmModel"/> containing the entity set.</param>
@@ -58,6 +89,37 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
+        /// Gets the <see cref="NavigationSourceLinkBuilderAnnotation"/> to be used while generating self and navigation
+        /// links for the given navigation source.
+        /// </summary>
+        /// <param name="model">The <see cref="IEdmModel"/> containing the navigation source.</param>
+        /// <param name="navigationSource">The navigation source.</param>
+        /// <returns>The <see cref="NavigationSourceLinkBuilderAnnotation"/> if set for the given the singleton; otherwise,
+        /// a new <see cref="NavigationSourceLinkBuilderAnnotation"/> that generates URLs that follow OData URL conventions.
+        /// </returns>
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "IEdmNavigationSource is more relevant here.")]
+        public static NavigationSourceLinkBuilderAnnotation GetNavigationSourceLinkBuilder(this IEdmModel model,
+            IEdmNavigationSource navigationSource)
+        {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            NavigationSourceLinkBuilderAnnotation annotation = model
+                .GetAnnotationValue<NavigationSourceLinkBuilderAnnotation>(navigationSource);
+            if (annotation == null)
+            {
+                // construct and set a navigation source link builder that follows OData URL conventions.
+                annotation = new NavigationSourceLinkBuilderAnnotation(navigationSource, model);
+                model.SetNavigationSourceLinkBuilder(navigationSource, annotation);
+            }
+
+            return annotation;
+        }
+
+        /// <summary>
         /// Sets the <see cref="NavigationSourceLinkBuilderAnnotation"/> to be used while generating self and navigation
         /// links for the given navigation source.
         /// </summary>
@@ -89,6 +151,12 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             return typeMappingCache;
+        }
+
+        internal static OperationTitleAnnotation GetOperationTitleAnnotation(this IEdmModel model, IEdmOperation action)
+        {
+            Contract.Assert(model != null);
+            return model.GetAnnotationValue<OperationTitleAnnotation>(action);
         }
 
         internal static void SetOperationTitleAnnotation(this IEdmModel model, IEdmOperation action, OperationTitleAnnotation title)

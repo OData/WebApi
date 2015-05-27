@@ -24,6 +24,7 @@ namespace Microsoft.AspNet.OData.Extensions
 
             services.AddSingleton<IActionSelector, ODataActionSelector>();
             services.AddSingleton<IODataRoutingConvention, DefaultODataRoutingConvention>();
+            services.AddSingleton<IETagHandler, DefaultODataETagHandler>();
             return new ODataServiceBuilder(services);
         }
 

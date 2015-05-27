@@ -6,9 +6,10 @@ using System.Collections.Generic;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.OData.Core.UriParser.Semantic;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
@@ -91,7 +92,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public IEdmModel Model { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="ODataPath"/> of the request.
+        /// Gets or sets the <see cref="Routing.ODataPath"/> of the request.
         /// </summary>
         public ODataPath Path { get; set; }
 

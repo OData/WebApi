@@ -24,10 +24,10 @@ namespace ODataSample.Web
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseOData();
-            app.UseMvc(builder => {
-                builder.MapODataRoute<ISampleService>("odata");
-            });
+            app.UseOData<ISampleService>("odata");
+            //app.UseMvc(builder => {
+            //    builder.MapODataRoute<ISampleService>("odata");
+            //});
         }
     }
 }

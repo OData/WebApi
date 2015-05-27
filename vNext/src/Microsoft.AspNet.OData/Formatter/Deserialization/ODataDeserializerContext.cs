@@ -15,8 +15,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// </summary>
     public class ODataDeserializerContext
     {
-        private bool? _isDeltaOfT;
-        private bool? _isUntyped;
+        // private bool? _isDeltaOfT;
+        // private bool? _isUntyped;
 
         /// <summary>
         /// Gets or sets the type of the top-level object the request needs to be deserialized into.

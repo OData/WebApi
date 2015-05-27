@@ -1,20 +1,20 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http;
-using System.Web.OData.Formatter;
-using System.Web.OData.Formatter.Serialization;
-using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 
-namespace System.Web.OData.Builder.Conventions
+namespace Microsoft.AspNet.OData.Builder.Conventions
 {
     internal static class ConventionsHelpers
     {
@@ -123,7 +123,7 @@ namespace System.Web.OData.Builder.Conventions
 
             Type elementType;
 
-            return !(type.IsGenericTypeDefinition
+            return !(type.GetTypeInfo().IsGenericTypeDefinition
                      || type.IsPointer
                      || type == typeof(object)
                      || (type.IsCollection(out elementType) && elementType == typeof(object)));
@@ -135,7 +135,7 @@ namespace System.Web.OData.Builder.Conventions
             Contract.Assert(value != null);
 
             Type type = value.GetType();
-            if (type.IsEnum)
+            if (type.GetTypeInfo().IsEnum)
             {
                 value = new ODataEnumValue(value.ToString(), type.EdmFullName());
             }

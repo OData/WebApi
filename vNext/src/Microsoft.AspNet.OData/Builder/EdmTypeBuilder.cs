@@ -1,19 +1,18 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http;
-using System.Web.OData.Formatter;
-using System.Web.OData.Properties;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Values;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// <see cref="EdmTypeBuilder"/> builds <see cref="IEdmType"/>'s from <see cref="StructuralTypeConfiguration"/>'s.
@@ -212,7 +211,7 @@ namespace System.Web.OData.Builder
             IEdmTypeReference elementTypeReference = null;
             Type clrType = TypeHelper.GetUnderlyingTypeOrSelf(collectionProperty.ElementType);
 
-            if (clrType.IsEnum)
+            if (clrType.GetTypeInfo().IsEnum)
             {
                 IEdmType edmType = GetEdmType(clrType);
 
@@ -350,8 +349,8 @@ namespace System.Web.OData.Builder
                 }
                 else
                 {
-                    Contract.Assert(propInfo.ReflectedType != null);
-                    Type baseType = propInfo.ReflectedType.BaseType;
+                    Contract.Assert(propInfo.PropertyType != null);
+                    Type baseType = propInfo.PropertyType.GetTypeInfo().BaseType;
                     while (baseType != null)
                     {
                         PropertyInfo basePropInfo = baseType.GetProperty(propInfo.Name);
@@ -361,7 +360,7 @@ namespace System.Web.OData.Builder
                             break;
                         }
 
-                        baseType = baseType.BaseType;
+                        baseType = baseType.GetTypeInfo().BaseType;
                     }
 
                     Contract.Assert(baseType != null);

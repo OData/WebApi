@@ -40,6 +40,12 @@ namespace Microsoft.AspNet.OData.Extensions
             }
         }
 
+        public static bool IsCollection(this Type type)
+        {
+            Type elementType;
+            return type.IsCollection(out elementType);
+        }
+
         public static bool IsCollection(this Type type, out Type elementType)
         {
             if (type == null)

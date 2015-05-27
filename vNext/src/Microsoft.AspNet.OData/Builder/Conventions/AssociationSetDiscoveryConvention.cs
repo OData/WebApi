@@ -3,10 +3,10 @@
 
 using System.Linq;
 using System.Reflection;
-using System.Web.Http;
-using System.Web.OData.Properties;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Builder.Conventions
+namespace Microsoft.AspNet.OData.Builder.Conventions
 {
     /// <summary>
     /// <see cref="INavigationSourceConvention"/> to configure the EDM association sets for the given entity set.
@@ -46,7 +46,7 @@ namespace System.Web.OData.Builder.Conventions
             if (targetEntityType == null)
             {
                 throw Error.InvalidOperation(SRResources.TargetEntityTypeMissing, navigationProperty.Name,
-                    navigationProperty.PropertyInfo.ReflectedType.FullName);
+                    navigationProperty.PropertyInfo.PropertyType.FullName);
             }
 
             bool hasSingletonAttribute = navigationProperty.PropertyInfo.GetCustomAttributes<SingletonAttribute>().Any();

@@ -1,20 +1,20 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
-using System.Web.OData.Builder.Conventions;
-using System.Web.OData.Builder.Conventions.Attributes;
-using System.Web.OData.Formatter;
-using System.Web.OData.Properties;
+using Microsoft.AspNet.OData.Builder.Conventions;
+using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
+using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// <see cref="ODataConventionModelBuilder"/> is used to automatically map CLR classes to an EDM model based on a set of <see cref="IConvention"/>.
@@ -115,7 +115,7 @@ namespace System.Web.OData.Builder
         /// <remarks>Use this action to modify the <see cref="ODataModelBuilder"/> configuration that has been inferred by convention.</remarks>
         public Action<ODataConventionModelBuilder> OnModelCreating { get; set; }
 
-        internal void Initialize(IAssembliesResolver assembliesResolver, bool isQueryCompositionMode)
+        internal void Initialize(IAssemblyProvider assemblyProvider, bool isQueryCompositionMode)
         {
             _isQueryCompositionMode = isQueryCompositionMode;
             _configuredNavigationSources = new HashSet<INavigationSourceConfiguration>();
@@ -123,7 +123,7 @@ namespace System.Web.OData.Builder
             _ignoredTypes = new HashSet<Type>();
             ModelAliasingEnabled = true;
             _allTypesWithDerivedTypeMapping = new Lazy<IDictionary<Type, List<Type>>>(
-                () => BuildDerivedTypesMapping(assembliesResolver),
+                () => BuildDerivedTypesMapping(assemblyProvider),
                 isThreadSafe: false);
         }
 
@@ -210,7 +210,7 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("type");
             }
 
-            if (!type.IsEnum)
+            if (!type.GetTypeInfo().IsEnum)
             {
                 throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
             }
@@ -291,7 +291,7 @@ namespace System.Web.OData.Builder
 
             foreach (EntityTypeConfiguration entity in StructuralTypes.OfType<EntityTypeConfiguration>().Where(e => !e.BaseTypeConfigured))
             {
-                Type baseClrType = entity.ClrType.BaseType;
+                Type baseClrType = entity.ClrType.GetTypeInfo().BaseType;
                 while (baseClrType != null)
                 {
                     // see if we there is an entity that we know mapping to this clr types base type.
@@ -319,7 +319,7 @@ namespace System.Web.OData.Builder
                         break;
                     }
 
-                    baseClrType = baseClrType.BaseType;
+                    baseClrType = baseClrType.GetTypeInfo().BaseType;
                 }
             }
 
@@ -328,7 +328,7 @@ namespace System.Web.OData.Builder
             foreach (ComplexTypeConfiguration complex in
                 StructuralTypes.OfType<ComplexTypeConfiguration>().Where(e => !e.BaseTypeConfigured))
             {
-                Type baseClrType = complex.ClrType.BaseType;
+                Type baseClrType = complex.ClrType.GetTypeInfo().BaseType;
                 while (baseClrType != null)
                 {
                     ComplexTypeConfiguration baseComplexType;
@@ -339,7 +339,7 @@ namespace System.Web.OData.Builder
                         break;
                     }
 
-                    baseClrType = baseClrType.BaseType;
+                    baseClrType = baseClrType.GetTypeInfo().BaseType;
                 }
             }
         }
@@ -709,12 +709,12 @@ namespace System.Web.OData.Builder
                     Contract.Assert(propertyKind != PropertyKind.Complex, "we don't create complex types in query composition mode.");
                 }
 
-                if (property.PropertyType.IsGenericType)
+                if (property.PropertyType.GetTypeInfo().IsGenericType)
                 {
                     Type elementType = property.PropertyType.GetGenericArguments().First();
                     Type elementUnderlyingTypeOrSelf = TypeHelper.GetUnderlyingTypeOrSelf(elementType);
 
-                    if (elementUnderlyingTypeOrSelf.IsEnum)
+                    if (elementUnderlyingTypeOrSelf.GetTypeInfo().IsEnum)
                     {
                         AddEnumType(elementUnderlyingTypeOrSelf);
                     }
@@ -801,7 +801,7 @@ namespace System.Web.OData.Builder
 
             // If one of the base types is configured as complex type, the type of this property
             // should be configured as complex type too.
-            Type baseType = propertyType.BaseType;
+            Type baseType = propertyType.GetTypeInfo().BaseType;
             while (baseType != null && baseType != typeof(object))
             {
                 IEdmTypeConfiguration baseMappedType = GetStructuralTypeOrNull(baseType);
@@ -814,7 +814,7 @@ namespace System.Web.OData.Builder
                     }
                 }
 
-                baseType = baseType.BaseType;
+                baseType = baseType.GetTypeInfo().BaseType;
             }
 
             // refer the Edm type from the derived types
@@ -1102,15 +1102,15 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private static Dictionary<Type, List<Type>> BuildDerivedTypesMapping(IAssembliesResolver assemblyResolver)
+        private static Dictionary<Type, List<Type>> BuildDerivedTypesMapping(IAssemblyProvider assemblyProvider)
         {
-            IEnumerable<Type> allTypes = TypeHelper.GetLoadedTypes(assemblyResolver).Where(t => t.IsVisible && t.IsClass && t != typeof(object));
+            IEnumerable<Type> allTypes = TypeHelper.GetLoadedTypes(assemblyProvider).Where(t => t.GetTypeInfo().IsVisible && t.GetTypeInfo().IsClass && t != typeof(object));
             Dictionary<Type, List<Type>> allTypeMapping = allTypes.ToDictionary(k => k, k => new List<Type>());
 
             foreach (Type type in allTypes)
             {
                 List<Type> derivedTypes;
-                if (type.BaseType != null && allTypeMapping.TryGetValue(type.BaseType, out derivedTypes))
+                if (type.GetTypeInfo().BaseType != null && allTypeMapping.TryGetValue(type.GetTypeInfo().BaseType, out derivedTypes))
                 {
                     derivedTypes.Add(type);
                 }

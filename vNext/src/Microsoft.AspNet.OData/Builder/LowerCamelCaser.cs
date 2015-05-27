@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// Default lower camel caser to resolve property names for <see cref="ODataConventionModelBuilder"/>.
@@ -85,7 +85,7 @@ namespace System.Web.OData.Builder
                 }
                 else
                 {
-                    stringBuilder.Append(Char.ToLower(name[index], CultureInfo.InvariantCulture));
+                    stringBuilder.Append(Char.ToLowerInvariant(name[index]));
                 }
             }
 

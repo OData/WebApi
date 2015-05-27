@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Builder.Conventions.Attributes
+namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Removes properties that have <see cref="IgnoreDataMemberAttribute"/> from their edm type.
@@ -41,7 +43,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             if (!edmProperty.AddedExplicitly)
             {
-                bool isTypeDataContract = structuralTypeConfiguration.ClrType.GetCustomAttributes(typeof(DataContractAttribute), inherit: true).Any();
+                bool isTypeDataContract = structuralTypeConfiguration.ClrType.GetTypeInfo().GetCustomAttributes(typeof(DataContractAttribute), inherit: true).Any();
                 bool isPropertyDataMember = edmProperty.PropertyInfo.GetCustomAttributes(typeof(DataMemberAttribute), inherit: true).Any();
 
                 if (isTypeDataContract && isPropertyDataMember)

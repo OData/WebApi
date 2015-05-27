@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-namespace System.Web.OData.Builder.Conventions
+using System.Reflection;
+
+namespace Microsoft.AspNet.OData.Builder.Conventions
 {
     /// <summary>
     /// <see cref="EntityTypeConvention"/> to figure out if an entity is abstract or not.
@@ -13,7 +15,7 @@ namespace System.Web.OData.Builder.Conventions
         {
             if (entity.IsAbstract == null)
             {
-                entity.IsAbstract = entity.ClrType.IsAbstract;
+                entity.IsAbstract = entity.ClrType.GetTypeInfo().IsAbstract;
             }
         }
     }

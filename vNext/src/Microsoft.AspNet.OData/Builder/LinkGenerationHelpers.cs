@@ -1,18 +1,18 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Web.Http;
-using System.Web.OData.Builder.Conventions;
-using System.Web.OData.Extensions;
-using System.Web.OData.Properties;
-using System.Web.OData.Routing;
+using Microsoft.AspNet.OData.Builder.Conventions;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// Contains helper methods for generating OData links that follow OData URL conventions.

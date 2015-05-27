@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Web.Http;
-using System.Web.OData.Formatter;
-using System.Web.OData.Properties;
+using System.Reflection;
 using Microsoft.OData.Edm;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// Represents an <see cref="IEdmEnumType"/> that can be built using <see cref="ODataModelBuilder"/>.
@@ -36,13 +36,13 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("clrType");
             }
 
-            if (!clrType.IsEnum)
+            if (!clrType.GetTypeInfo().IsEnum)
             {
                 throw Error.Argument("clrType", SRResources.TypeCannotBeEnum, clrType.FullName);
             }
 
             ClrType = clrType;
-            IsFlags = clrType.GetCustomAttributes(typeof(FlagsAttribute), false).Any();
+            IsFlags = clrType.GetTypeInfo().GetCustomAttributes(typeof(FlagsAttribute), false).Any();
             UnderlyingType = Enum.GetUnderlyingType(clrType);
             ModelBuilder = builder;
             _name = clrType.EdmName();

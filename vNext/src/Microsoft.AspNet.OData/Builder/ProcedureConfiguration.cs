@@ -1,12 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Web.OData.Formatter;
+using System.Reflection;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// Represents a Procedure that is exposed in the model
@@ -304,7 +306,7 @@ namespace System.Web.OData.Builder
             Type type = TypeHelper.GetUnderlyingTypeOrSelf(clrType);
             IEdmTypeConfiguration edmTypeConfiguration;
 
-            if (type.IsEnum)
+            if (type.GetTypeInfo().IsEnum)
             {
                 edmTypeConfiguration = ModelBuilder.GetTypeConfigurationOrNull(type);
 
@@ -320,7 +322,7 @@ namespace System.Web.OData.Builder
 
             if (edmTypeConfiguration == null)
             {
-                if (type.IsEnum)
+                if (type.GetTypeInfo().IsEnum)
                 {
                     EnumTypeConfiguration enumTypeConfiguration = ModelBuilder.AddEnumType(type);
 

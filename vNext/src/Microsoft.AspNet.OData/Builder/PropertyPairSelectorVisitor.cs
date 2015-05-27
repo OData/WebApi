@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Web.Http;
-using System.Web.OData.Properties;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     internal class PropertyPairSelectorVisitor : ExpressionVisitor
     {
@@ -91,8 +91,8 @@ namespace System.Web.OData.Builder
                 if (leftType != rightType)
                 {
                     throw Error.InvalidOperation(SRResources.EqualExpressionsMustHaveSameTypes,
-                        left.ReflectedType.FullName, left.Name, left.PropertyType.FullName,
-                        right.ReflectedType.FullName, right.Name, right.PropertyType.FullName);
+                        left.PropertyType.FullName, left.Name, left.PropertyType.FullName,
+                        right.PropertyType.FullName, right.Name, right.PropertyType.FullName);
                 }
 
                 _properties.Add(left, right);
@@ -125,7 +125,7 @@ namespace System.Web.OData.Builder
             if (propertyInfo == null)
             {
                 throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties,
-                    memberNode.Member.ReflectedType.FullName, memberNode.Member.Name);
+                    memberNode.Member.DeclaringType.FullName, memberNode.Member.Name);
             }
 
             if (memberNode.Expression.NodeType != ExpressionType.Parameter)

@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http;
-using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     // TODO: add support for FK properties
     // CUT: support for bi-directional properties
@@ -115,7 +116,7 @@ namespace System.Web.OData.Builder
             }
 
             // Add the enum key if the property type is enum
-            if (keyProperty.PropertyType.IsEnum)
+            if (keyProperty.PropertyType.GetTypeInfo().IsEnum)
             {
                 ModelBuilder.AddEnumType(keyProperty.PropertyType);
                 EnumPropertyConfiguration enumConfig = AddEnumProperty(keyProperty);
@@ -232,7 +233,7 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("navigationProperty");
             }
 
-            if (!navigationProperty.ReflectedType.IsAssignableFrom(ClrType))
+            if (!navigationProperty.PropertyType.IsAssignableFrom(ClrType))
             {
                 throw Error.Argument("navigationProperty", SRResources.PropertyDoesNotBelongToType, navigationProperty.Name, ClrType.FullName);
             }

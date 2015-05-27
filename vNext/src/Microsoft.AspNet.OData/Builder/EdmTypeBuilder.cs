@@ -349,8 +349,8 @@ namespace Microsoft.AspNet.OData.Builder
                 }
                 else
                 {
-                    Contract.Assert(propInfo.PropertyType != null);
-                    Type baseType = propInfo.PropertyType.GetTypeInfo().BaseType;
+                    Contract.Assert(propInfo.DeclaringType != null);
+                    Type baseType = propInfo.DeclaringType.GetTypeInfo().BaseType;
                     while (baseType != null)
                     {
                         PropertyInfo basePropInfo = baseType.GetProperty(propInfo.Name);

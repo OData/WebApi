@@ -258,7 +258,7 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            if (!propertyInfo.PropertyType.GetTypeInfo().IsAssignableFrom(ClrType.GetTypeInfo()))
+            if (!propertyInfo.DeclaringType.GetTypeInfo().IsAssignableFrom(ClrType.GetTypeInfo()))
             {
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
@@ -302,7 +302,7 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            if (!propertyInfo.PropertyType.IsAssignableFrom(ClrType))
+            if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
             {
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
@@ -352,7 +352,7 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            if (!propertyInfo.PropertyType.IsAssignableFrom(ClrType))
+            if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
             {
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
@@ -503,7 +503,7 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            if (!propertyInfo.PropertyType.IsAssignableFrom(ClrType))
+            if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
             {
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
@@ -531,7 +531,7 @@ namespace Microsoft.AspNet.OData.Builder
             if (baseProperty != null)
             {
                 throw Error.Argument("propertyInfo", SRResources.CannotRedefineBaseTypeProperty,
-                    propertyInfo.Name, baseProperty.PropertyInfo.PropertyType.FullName);
+                    propertyInfo.Name, baseProperty.PropertyInfo.DeclaringType.FullName);
             }
         }
 

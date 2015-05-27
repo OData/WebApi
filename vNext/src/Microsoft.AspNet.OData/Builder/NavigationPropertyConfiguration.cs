@@ -44,7 +44,7 @@ namespace Microsoft.AspNet.OData.Builder
                 Type elementType;
                 if (!_relatedType.IsCollection(out elementType))
                 {
-                    throw Error.Argument("property", SRResources.ManyToManyNavigationPropertyMustReturnCollection, property.Name, property.PropertyType.Name);
+                    throw Error.Argument("property", SRResources.ManyToManyNavigationPropertyMustReturnCollection, property.Name, property.DeclaringType.Name);
                 }
 
                 _relatedType = elementType;

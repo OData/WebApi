@@ -45,12 +45,12 @@ namespace Microsoft.AspNet.OData.Common
             Contract.Assert(setMethod != null);
             Contract.Assert(!setMethod.IsStatic);
             Contract.Assert(setMethod.GetParameters().Length == 1);
-            Contract.Assert(!propertyInfo.PropertyType.GetTypeInfo().IsValueType);
+            Contract.Assert(!propertyInfo.DeclaringType.GetTypeInfo().IsValueType);
 
             // Instance methods in the CLR can be turned into static methods where the first parameter
             // is open over "this". This parameter is always passed by reference, so we have a code
             // path for value types and a code path for reference types.
-            Type typeInput = propertyInfo.PropertyType;
+            Type typeInput = propertyInfo.DeclaringType;
             Type typeValue = setMethod.GetParameters()[0].ParameterType;
 
             Delegate callPropertySetterDelegate;

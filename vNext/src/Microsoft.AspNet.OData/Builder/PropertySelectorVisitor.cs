@@ -6,8 +6,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
-
+using System.Web.Http;
+using System.Web.OData.Properties;
 
 namespace System.Web.OData.Builder
 {
@@ -46,15 +46,15 @@ namespace System.Web.OData.Builder
 
             PropertyInfo pinfo = node.Member as PropertyInfo;
 
-            //if (pinfo == null)
-            //{
-            //    throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties, node.Member.ReflectedType.FullName, node.Member.Name);
-            //}
+            if (pinfo == null)
+            {
+                throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties, node.Member.ReflectedType.FullName, node.Member.Name);
+            }
 
-            //if (node.Expression.NodeType != ExpressionType.Parameter)
-            //{
-            //    throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeBoundToLambdaParameter);
-            //}
+            if (node.Expression.NodeType != ExpressionType.Parameter)
+            {
+                throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeBoundToLambdaParameter);
+            }
 
             _properties.Add(pinfo);
             return node;
@@ -83,11 +83,9 @@ namespace System.Web.OData.Builder
                 case ExpressionType.MemberAccess:
                 case ExpressionType.Lambda:
                     return base.Visit(exp);
-                //default:
-                //    throw Error.NotSupported(SRResources.UnsupportedExpressionNodeType);
+                default:
+                    throw Error.NotSupported(SRResources.UnsupportedExpressionNodeType);
             }
-
-            return null;
         }
 
         protected override Expression VisitLambda<T>(Expression<T> lambda)
@@ -97,10 +95,10 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("lambda");
             }
 
-            //if (lambda.Parameters.Count != 1)
-            //{
-            //    throw Error.InvalidOperation(SRResources.LambdaExpressionMustHaveExactlyOneParameter);
-            //}
+            if (lambda.Parameters.Count != 1)
+            {
+                throw Error.InvalidOperation(SRResources.LambdaExpressionMustHaveExactlyOneParameter);
+            }
 
             Expression body = Visit(lambda.Body);
 

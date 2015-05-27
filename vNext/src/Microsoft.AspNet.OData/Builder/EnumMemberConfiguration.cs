@@ -2,7 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 
 namespace System.Web.OData.Builder
 {
@@ -49,10 +49,10 @@ namespace System.Web.OData.Builder
             }
             set
             {
-                //if (value == null)
-                //{
-                //    throw Error.PropertyNull();
-                //}
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
 
                 _name = value;
             }
@@ -69,9 +69,9 @@ namespace System.Web.OData.Builder
         public Enum MemberInfo { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value that is <see langword="true"/> if the member was added by the user; <see langword="false"/> if it was inferred through conventions.
+        /// Gets or sets a value that is <c>true</c> if the member was added by the user; <c>false</c> if it was inferred through conventions.
         /// </summary>
-        /// <remarks>The default value is <see langword="true"/></remarks>
+        /// <remarks>The default value is <c>true</c></remarks>
         public bool AddedExplicitly { get; set; }
     }
 }

@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
-
+using System.Web.Http;
+using System.Web.OData.Properties;
 
 namespace System.Web.OData.Builder
 {
@@ -191,8 +191,8 @@ namespace System.Web.OData.Builder
             EntityTypeConfiguration declaringEntityType = navigationProperty.DeclaringEntityType;
             if (!(declaringEntityType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringEntityType)))
             {
-                //throw Error.Argument("navigationProperty", SRResources.NavigationPropertyNotInHierarchy,
-                //    declaringEntityType.FullName, EntityType.FullName, Name);
+                throw Error.Argument("navigationProperty", SRResources.NavigationPropertyNotInHierarchy,
+                    declaringEntityType.FullName, EntityType.FullName, Name);
             }
 
             _navigationPropertyLinkBuilders[navigationProperty] = navigationLinkBuilder;
@@ -248,17 +248,17 @@ namespace System.Web.OData.Builder
             EntityTypeConfiguration declaringEntityType = navigationConfiguration.DeclaringEntityType;
             if (!(declaringEntityType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringEntityType)))
             {
-                //throw Error.Argument("navigationConfiguration", SRResources.NavigationPropertyNotInHierarchy,
-                //    declaringEntityType.FullName, EntityType.FullName, Name);
+                throw Error.Argument("navigationConfiguration", SRResources.NavigationPropertyNotInHierarchy,
+                    declaringEntityType.FullName, EntityType.FullName, Name);
             }
 
             NavigationPropertyBindingConfiguration navigationPropertyBinding;
             if (_navigationPropertyBindings.TryGetValue(navigationConfiguration, out navigationPropertyBinding))
             {
-                //if (navigationPropertyBinding.TargetNavigationSource != targetNavigationSource)
-                //{
-                //    throw Error.NotSupported(SRResources.RebindingNotSupported);
-                //}
+                if (navigationPropertyBinding.TargetNavigationSource != targetNavigationSource)
+                {
+                    throw Error.NotSupported(SRResources.RebindingNotSupported);
+                }
             }
             else
             {
@@ -341,13 +341,12 @@ namespace System.Web.OData.Builder
             }
             else
             {
-                //throw Error.NotSupported(
-                //    SRResources.CannotAutoCreateMultipleCandidates,
-                //    navigationConfiguration.Name,
-                //    navigationConfiguration.DeclaringEntityType.FullName,
-                //    Name,
-                //    String.Join(", ", matchedNavigationSources.Select(s => s.Name)));
-                return null;
+                throw Error.NotSupported(
+                    SRResources.CannotAutoCreateMultipleCandidates,
+                    navigationConfiguration.Name,
+                    navigationConfiguration.DeclaringEntityType.FullName,
+                    Name,
+                    String.Join(", ", matchedNavigationSources.Select(s => s.Name)));
             }
         }
 

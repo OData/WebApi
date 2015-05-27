@@ -4,9 +4,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using System.Web.OData.Formatter;
-using Microsoft.AspNet.OData;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 
@@ -63,10 +63,10 @@ namespace System.Web.OData.Builder
             }
             set
             {
-                //if (value == null)
-                //{
-                //    throw Error.PropertyNull();
-                //}
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
                 _dataServiceVersion = value;
             }
         }
@@ -82,10 +82,10 @@ namespace System.Web.OData.Builder
             }
             set
             {
-                //if (value == null)
-                //{
-                //    throw Error.PropertyNull();
-                //}
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
                 _maxDataServiceVersion = value;
             }
         }
@@ -243,10 +243,10 @@ namespace System.Web.OData.Builder
             else
             {
                 EntityTypeConfiguration config = _structuralTypes[type] as EntityTypeConfiguration;
-                //if (config == null || config.ClrType != type)
-                //{
-                //    throw Error.Argument("type", SRResources.TypeCannotBeEntityWasComplex, type.FullName);
-                //}
+                if (config == null || config.ClrType != type)
+                {
+                    throw Error.Argument("type", SRResources.TypeCannotBeEntityWasComplex, type.FullName);
+                }
 
                 return config;
             }
@@ -274,10 +274,10 @@ namespace System.Web.OData.Builder
             else
             {
                 ComplexTypeConfiguration complexTypeConfig = _structuralTypes[type] as ComplexTypeConfiguration;
-                //if (complexTypeConfig == null || complexTypeConfig.ClrType != type)
-                //{
-                //    throw Error.Argument("type", SRResources.TypeCannotBeComplexWasEntity, type.FullName);
-                //}
+                if (complexTypeConfig == null || complexTypeConfig.ClrType != type)
+                {
+                    throw Error.Argument("type", SRResources.TypeCannotBeComplexWasEntity, type.FullName);
+                }
 
                 return complexTypeConfig;
             }
@@ -295,10 +295,10 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("type");
             }
 
-            //if (!type.IsEnum)
-            //{
-            //    throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
-            //}
+            if (!type.IsEnum)
+            {
+                throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
+            }
 
             if (!_enumTypes.ContainsKey(type))
             {
@@ -309,10 +309,10 @@ namespace System.Web.OData.Builder
             else
             {
                 EnumTypeConfiguration enumTypeConfig = _enumTypes[type];
-                //if (enumTypeConfig.ClrType != type)
-                //{
-                //    throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
-                //}
+                if (enumTypeConfig.ClrType != type)
+                {
+                    throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
+                }
 
                 return enumTypeConfig;
             }
@@ -345,25 +345,25 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("entityType");
             }
 
-            //if (name.Contains("."))
-            //{
-            //    throw Error.NotSupported(SRResources.InvalidEntitySetName, name);
-            //}
+            if (name.Contains("."))
+            {
+                throw Error.NotSupported(SRResources.InvalidEntitySetName, name);
+            }
 
             EntitySetConfiguration entitySet = null;
             if (_navigationSources.ContainsKey(name))
             {
                 entitySet = _navigationSources[name] as EntitySetConfiguration;
-                //if (entitySet == null)
-                //{
-                //    throw Error.Argument("name", SRResources.EntitySetNameAlreadyConfiguredAsSingleton, name);
-                //}
+                if (entitySet == null)
+                {
+                    throw Error.Argument("name", SRResources.EntitySetNameAlreadyConfiguredAsSingleton, name);
+                }
 
-                //if (entitySet.EntityType != entityType)
-                //{
-                //    throw Error.Argument("entityType", SRResources.EntitySetAlreadyConfiguredDifferentEntityType,
-                //        entitySet.Name, entitySet.EntityType.Name);
-                //}
+                if (entitySet.EntityType != entityType)
+                {
+                    throw Error.Argument("entityType", SRResources.EntitySetAlreadyConfiguredDifferentEntityType,
+                        entitySet.Name, entitySet.EntityType.Name);
+                }
             }
             else
             {
@@ -393,25 +393,25 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("entityType");
             }
 
-            //if (name.Contains("."))
-            //{
-            //    throw Error.NotSupported(SRResources.InvalidSingletonName, name);
-            //}
+            if (name.Contains("."))
+            {
+                throw Error.NotSupported(SRResources.InvalidSingletonName, name);
+            }
 
             SingletonConfiguration singleton = null;
             if (_navigationSources.ContainsKey(name))
             {
                 singleton = _navigationSources[name] as SingletonConfiguration;
-                //if (singleton == null)
-                //{
-                //    throw Error.Argument("name", SRResources.SingletonNameAlreadyConfiguredAsEntitySet, name);
-                //}
+                if (singleton == null)
+                {
+                    throw Error.Argument("name", SRResources.SingletonNameAlreadyConfiguredAsEntitySet, name);
+                }
 
-                //if (singleton.EntityType != entityType)
-                //{
-                //    throw Error.Argument("entityType", SRResources.SingletonAlreadyConfiguredDifferentEntityType,
-                //        singleton.Name, singleton.EntityType.Name);
-                //}
+                if (singleton.EntityType != entityType)
+                {
+                    throw Error.Argument("entityType", SRResources.SingletonAlreadyConfiguredDifferentEntityType,
+                        singleton.Name, singleton.EntityType.Name);
+                }
             }
             else
             {
@@ -426,7 +426,7 @@ namespace System.Web.OData.Builder
         /// Removes the type from the model.
         /// </summary>
         /// <param name="type">The type to be removed.</param>
-        /// <returns><see>true</see> if the type is present in the model and <see>false</see> otherwise.</returns>
+        /// <returns><c>true</c> if the type is present in the model and <c>false</c> otherwise.</returns>
         public virtual bool RemoveStructuralType(Type type)
         {
             if (type == null)
@@ -441,7 +441,7 @@ namespace System.Web.OData.Builder
         /// Removes the type from the model.
         /// </summary>
         /// <param name="type">The type to be removed.</param>
-        /// <returns><see>true</see> if the type is present in the model and <see>false</see> otherwise.</returns>
+        /// <returns><c>true</c> if the type is present in the model and <c>false</c> otherwise.</returns>
         public virtual bool RemoveEnumType(Type type)
         {
             if (type == null)
@@ -456,7 +456,7 @@ namespace System.Web.OData.Builder
         /// Removes the entity set from the model.
         /// </summary>
         /// <param name="name">The name of the entity set to be removed.</param>
-        /// <returns><see>true</see> if the entity set is present in the model and <see>false</see> otherwise.</returns>
+        /// <returns><c>true</c> if the entity set is present in the model and <c>false</c> otherwise.</returns>
         public virtual bool RemoveEntitySet(string name)
         {
             if (name == null)
@@ -480,7 +480,7 @@ namespace System.Web.OData.Builder
         /// Removes the singleton from the model.
         /// </summary>
         /// <param name="name">The name of the singleton to be removed.</param>
-        /// <returns><see>true</see> if the singleton is present in the model and <see>false</see> otherwise.</returns>
+        /// <returns><c>true</c> if the singleton is present in the model and <c>false</c> otherwise.</returns>
         public virtual bool RemoveSingleton(string name)
         {
             if (name == null)
@@ -508,7 +508,7 @@ namespace System.Web.OData.Builder
         /// </remarks>
         /// </summary>
         /// <param name="name">The name of the procedure to be removed.</param>
-        /// <returns><see>true</see> if the procedure is present in the model and <see>false</see> otherwise.</returns>
+        /// <returns><c>true</c> if the procedure is present in the model and <c>false</c> otherwise.</returns>
         public virtual bool RemoveProcedure(string name)
         {
             if (name == null)
@@ -530,7 +530,7 @@ namespace System.Web.OData.Builder
             }
             else
             {
-                return false;
+                throw Error.InvalidOperation(SRResources.MoreThanOneProcedureFound, name);
             }
         }
 
@@ -538,7 +538,7 @@ namespace System.Web.OData.Builder
         /// Remove the procedure from the model
         /// </summary>
         /// <param name="procedure">The procedure to be removed.</param>
-        /// <returns><see>true</see> if the procedure is present in the model and <see>false</see> otherwise.</returns>
+        /// <returns><c>true</c> if the procedure is present in the model and <c>false</c> otherwise.</returns>
         public virtual bool RemoveProcedure(ProcedureConfiguration procedure)
         {
             if (procedure == null)
@@ -606,9 +606,18 @@ namespace System.Web.OData.Builder
 
             foreach (IEdmEntityType entity in model.SchemaElementsAcrossModels().OfType<IEdmEntityType>())
             {
-                if (entity.BaseEntityType() == null && (entity.DeclaredKey == null || entity.DeclaredKey.Count() == 0))
+                if (!entity.IsAbstract && !entity.Key().Any())
                 {
-                    //throw Error.InvalidOperation(SRResources.EntityTypeDoesntHaveKeyDefined, entity.Name);
+                    throw Error.InvalidOperation(SRResources.EntityTypeDoesntHaveKeyDefined, entity.Name);
+                }
+            }
+
+            foreach (IEdmNavigationSource navigationSource in model.EntityContainer.Elements.OfType<IEdmNavigationSource>())
+            {
+                if (!navigationSource.EntityType().Key().Any())
+                {
+                    throw Error.InvalidOperation(SRResources.NavigationSourceTypeHasNoKeys, navigationSource.Name,
+                        navigationSource.EntityType().FullName());
                 }
             }
         }

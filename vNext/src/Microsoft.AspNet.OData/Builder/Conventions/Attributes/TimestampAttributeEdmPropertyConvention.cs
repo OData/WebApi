@@ -20,25 +20,25 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             ODataConventionModelBuilder model)
         {
             EntityTypeConfiguration entity = structuralTypeConfiguration as EntityTypeConfiguration;
-            //if (entity != null)
-            //{
-            //    PrimitivePropertyConfiguration[] timestampProperties = GetPropertiesWithTimestamp(entity);
+            if (entity != null)
+            {
+                PrimitivePropertyConfiguration[] timestampProperties = GetPropertiesWithTimestamp(entity);
 
-            //    // We only support one Timestamp column per type, as a SQL table (the underlying concept this attribute
-            //    // is bounded to) only supports one row version column per table.
-            //    if (timestampProperties.Length == 1)
-            //    {
-            //        timestampProperties[0].IsConcurrencyToken();
-            //    }
-            //}
+                // We only support one Timestamp column per type, as a SQL table (the underlying concept this attribute
+                // is bounded to) only supports one row version column per table.
+                if (timestampProperties.Length == 1)
+                {
+                    timestampProperties[0].IsConcurrencyToken();
+                }
+            }
         }
 
-        //private static PrimitivePropertyConfiguration[] GetPropertiesWithTimestamp(EntityTypeConfiguration config)
-        //{
-        //    IEnumerable<PropertyConfiguration> properties = config.ThisAndBaseTypes().SelectMany(p => p.Properties);
-        //    return properties.OfType<PrimitivePropertyConfiguration>()
-        //        .Where(pc => pc.PropertyInfo.GetCustomAttributes(typeof(TimestampAttribute), inherit: true).Length > 0)
-        //        .ToArray();
-        //}
+        private static PrimitivePropertyConfiguration[] GetPropertiesWithTimestamp(EntityTypeConfiguration config)
+        {
+            IEnumerable<PropertyConfiguration> properties = config.ThisAndBaseTypes().SelectMany(p => p.Properties);
+            return properties.OfType<PrimitivePropertyConfiguration>()
+                .Where(pc => pc.PropertyInfo.GetCustomAttributes(typeof(TimestampAttribute), inherit: true).Length > 0)
+                .ToArray();
+        }
     }
 }

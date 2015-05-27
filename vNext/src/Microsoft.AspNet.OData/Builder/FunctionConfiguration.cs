@@ -2,8 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.AspNet.OData.Common;
-
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -73,10 +73,10 @@ namespace System.Web.OData.Builder
                 throw new ArgumentNullException("functionLinkFactory");
             }
 
-            //if (!IsBindable || BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Entity)
-            //{
-            //    throw Error.InvalidOperation(SRResources.HasActionLinkRequiresBindToEntity, Name);
-            //}
+            if (!IsBindable || BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Entity)
+            {
+                throw Error.InvalidOperation(SRResources.HasActionLinkRequiresBindToEntity, Name);
+            }
             LinkFactory = functionLinkFactory;
             FollowsConventions = followsConventions;
             return this;

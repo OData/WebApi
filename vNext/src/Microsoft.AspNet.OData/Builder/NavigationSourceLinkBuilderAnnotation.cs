@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;

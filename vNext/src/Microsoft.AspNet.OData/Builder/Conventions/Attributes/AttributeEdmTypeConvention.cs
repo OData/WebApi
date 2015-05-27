@@ -1,8 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
@@ -17,7 +16,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// Initializes a new instance of the <see cref="AttributeEdmTypeConvention{TEdmTypeConfiguration}"/> class.
         /// </summary>
         /// <param name="attributeFilter">A function to test whether this convention applies to an attribute or not.</param>
-        /// <param name="allowMultiple"><see langword="true"/> if the convention allows multiple attributes; otherwise, <see langword="false"/>.</param>
+        /// <param name="allowMultiple"><c>true</c> if the convention allows multiple attributes; otherwise, <c>false</c>.</param>
         protected AttributeEdmTypeConvention(Func<Attribute, bool> attributeFilter, bool allowMultiple)
             : base(attributeFilter, allowMultiple)
         {
@@ -48,8 +47,8 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             {
                 throw Error.ArgumentNull("edmTypeConfiguration");
             }
-            
-            foreach (Attribute attribute in edmTypeConfiguration.ClrType.GetTypeInfo().GetCustomAttributes<Attribute>(false))
+
+            foreach (Attribute attribute in GetAttributes(edmTypeConfiguration.ClrType))
             {
                 Apply(edmTypeConfiguration, model, attribute);
             }

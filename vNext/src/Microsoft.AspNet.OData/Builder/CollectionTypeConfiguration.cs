@@ -2,7 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Globalization;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder

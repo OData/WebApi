@@ -5,11 +5,9 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using System.Web.OData.Formatter;
-
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Extensions;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -46,7 +44,7 @@ namespace System.Web.OData.Builder
                 Type elementType;
                 if (!_relatedType.IsCollection(out elementType))
                 {
-                    //throw Error.Argument("property", SRResources.ManyToManyNavigationPropertyMustReturnCollection, property.Name, property.ReflectedType.Name);
+                    throw Error.Argument("property", SRResources.ManyToManyNavigationPropertyMustReturnCollection, property.Name, property.ReflectedType.Name);
                 }
 
                 _relatedType = elementType;
@@ -118,10 +116,10 @@ namespace System.Web.OData.Builder
         /// </summary>
         public NavigationPropertyConfiguration Optional()
         {
-            //if (Multiplicity == EdmMultiplicity.Many)
-            //{
-            //    throw Error.InvalidOperation(SRResources.ManyNavigationPropertiesCannotBeChanged, Name);
-            //}
+            if (Multiplicity == EdmMultiplicity.Many)
+            {
+                throw Error.InvalidOperation(SRResources.ManyNavigationPropertiesCannotBeChanged, Name);
+            }
 
             Multiplicity = EdmMultiplicity.ZeroOrOne;
             return this;
@@ -132,10 +130,10 @@ namespace System.Web.OData.Builder
         /// </summary>
         public NavigationPropertyConfiguration Required()
         {
-            //if (Multiplicity == EdmMultiplicity.Many)
-            //{
-            //    throw Error.InvalidOperation(SRResources.ManyNavigationPropertiesCannotBeChanged, Name);
-            //}
+            if (Multiplicity == EdmMultiplicity.Many)
+            {
+                throw Error.InvalidOperation(SRResources.ManyNavigationPropertiesCannotBeChanged, Name);
+            }
 
             Multiplicity = EdmMultiplicity.One;
             return this;
@@ -208,11 +206,11 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("principalPropertyInfo");
             }
 
-            //if (Multiplicity == EdmMultiplicity.Many)
-            //{
-            //    throw Error.NotSupported(SRResources.ReferentialConstraintOnManyNavigationPropertyNotSupported,
-            //        Name, DeclaringEntityType.ClrType.FullName);
-            //}
+            if (Multiplicity == EdmMultiplicity.Many)
+            {
+                throw Error.NotSupported(SRResources.ReferentialConstraintOnManyNavigationPropertyNotSupported,
+                    Name, DeclaringEntityType.ClrType.FullName);
+            }
 
             if (ValidateConstraint(constraint))
             {
@@ -254,24 +252,27 @@ namespace System.Web.OData.Builder
             PropertyInfo value;
             if (_referentialConstraint.TryGetValue(constraint.Key, out value))
             {
-                //throw Error.InvalidOperation(SRResources.ReferentialConstraintAlreadyConfigured, "dependent",
-                //    constraint.Key.Name, "principal", value.Name);
+                throw Error.InvalidOperation(SRResources.ReferentialConstraintAlreadyConfigured, "dependent",
+                    constraint.Key.Name, "principal", value.Name);
             }
 
             if (PrincipalProperties.Any(p => p == constraint.Value))
             {
                 PropertyInfo foundDependent = _referentialConstraint.First(r => r.Value == constraint.Value).Key;
 
-                //throw Error.InvalidOperation(SRResources.ReferentialConstraintAlreadyConfigured, "principal",
-                //    constraint.Value.Name, "dependent", foundDependent.Name);
+                throw Error.InvalidOperation(SRResources.ReferentialConstraintAlreadyConfigured, "principal",
+                    constraint.Value.Name, "dependent", foundDependent.Name);
             }
 
+            Type dependentType = Nullable.GetUnderlyingType(constraint.Key.PropertyType) ?? constraint.Key.PropertyType;
+            Type principalType = Nullable.GetUnderlyingType(constraint.Value.PropertyType) ?? constraint.Value.PropertyType;
+
             // The principal property and the dependent property must have the same data type.
-            //if (constraint.Key.PropertyType != constraint.Value.PropertyType)
-            //{
-            //    throw Error.InvalidOperation(SRResources.DependentAndPrincipalTypeNotMatch,
-            //        constraint.Key.PropertyType.FullName, constraint.Value.PropertyType.FullName);
-            //}
+            if (dependentType != principalType)
+            {
+                throw Error.InvalidOperation(SRResources.DependentAndPrincipalTypeNotMatch,
+                    constraint.Key.PropertyType.FullName, constraint.Value.PropertyType.FullName);
+            }
 
             // OData V4 spec says that the principal and dependent property MUST be a path expression resolving to a primitive
             // property of the dependent entity type itself or to a primitive property of a complex property (recursively) of
@@ -280,8 +281,8 @@ namespace System.Web.OData.Builder
             // There's an issue tracking on: https://github.com/OData/odata.net/issues/22
             if (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(constraint.Key.PropertyType) == null)
             {
-                //throw Error.InvalidOperation(SRResources.ReferentialConstraintPropertyTypeNotValid,
-                //    constraint.Key.PropertyType.FullName);
+                throw Error.InvalidOperation(SRResources.ReferentialConstraintPropertyTypeNotValid,
+                    constraint.Key.PropertyType.FullName);
             }
 
             return false;

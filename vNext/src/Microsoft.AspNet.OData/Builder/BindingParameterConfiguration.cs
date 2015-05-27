@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.AspNet.OData.Common;
-
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -42,10 +42,10 @@ namespace System.Web.OData.Builder
             {
                 kind = (parameterType as CollectionTypeConfiguration).ElementType.Kind;
             }
-            //if (kind != EdmTypeKind.Entity)
-            //{
-            //    throw Error.Argument("parameterType", SRResources.InvalidBindingParameterType, parameterType.FullName);
-            //}
+            if (kind != EdmTypeKind.Entity)
+            {
+                throw Error.Argument("parameterType", SRResources.InvalidBindingParameterType, parameterType.FullName);
+            }
         }
     }
 }

@@ -2,9 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
-
+using System.Web.Http;
+using System.Web.OData.Properties;
 
 namespace System.Web.OData.Builder
 {
@@ -23,7 +22,7 @@ namespace System.Web.OData.Builder
         {
             if (!property.PropertyType.IsCollection(out _elementType))
             {
-                //throw Error.Argument("property", SRResources.CollectionPropertiesMustReturnIEnumerable, property.Name, property.DeclaringType.FullName);
+                throw Error.Argument("property", SRResources.CollectionPropertiesMustReturnIEnumerable, property.Name, property.DeclaringType.FullName);
             }
         }
 

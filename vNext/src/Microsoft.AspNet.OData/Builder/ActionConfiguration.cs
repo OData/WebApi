@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.AspNet.OData.Common;
-
+using System.Web.Http;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -48,10 +48,10 @@ namespace System.Web.OData.Builder
             {
                 throw new ArgumentNullException("actionLinkFactory");
             }
-            //if (!IsBindable || BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Entity)
-            //{
-            //    throw Error.InvalidOperation(SRResources.HasActionLinkRequiresBindToEntity, Name);
-            //}
+            if (!IsBindable || BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Entity)
+            {
+                throw Error.InvalidOperation(SRResources.HasActionLinkRequiresBindToEntity, Name);
+            }
             LinkFactory = actionLinkFactory;
             FollowsConventions = followsConventions;
             return this;
@@ -139,10 +139,10 @@ namespace System.Web.OData.Builder
             Type returnType = typeof(TReturnType);
             IEdmTypeConfiguration configuration = ModelBuilder.GetTypeConfigurationOrNull(returnType);
 
-            //if (configuration is EntityTypeConfiguration)
-            //{
-            //    throw Error.InvalidOperation(SRResources.ReturnEntityWithoutEntitySet, configuration.FullName);
-            //}
+            if (configuration is EntityTypeConfiguration)
+            {
+                throw Error.InvalidOperation(SRResources.ReturnEntityWithoutEntitySet, configuration.FullName);
+            }
 
             ReturnsImplementation<TReturnType>();
             return this;
@@ -158,10 +158,10 @@ namespace System.Web.OData.Builder
             Type clrElementType = typeof(TReturnElementType);
             IEdmTypeConfiguration edmElementType = ModelBuilder.GetTypeConfigurationOrNull(clrElementType);
 
-            //if (edmElementType is EntityTypeConfiguration)
-            //{
-            //    throw Error.InvalidOperation(SRResources.ReturnEntityCollectionWithoutEntitySet, edmElementType.FullName);
-            //}
+            if (edmElementType is EntityTypeConfiguration)
+            {
+                throw Error.InvalidOperation(SRResources.ReturnEntityCollectionWithoutEntitySet, edmElementType.FullName);
+            }
 
             ReturnsCollectionImplementation<TReturnElementType>();
             return this;

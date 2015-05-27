@@ -6,10 +6,10 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Web.Http;
+using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
@@ -63,12 +63,11 @@ namespace System.Web.OData.Builder.Conventions
                 throw Error.ArgumentNull("type");
             }
 
-            Type elementType;
             return type
                 .ClrType
                 .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                 .Where(p => p.IsValidStructuralProperty() && !type.IgnoredProperties().Any(p1 => p1.Name == p.Name)
-                    && (includeReadOnly || p.GetSetMethod() != null || p.PropertyType.IsCollection(out elementType)));
+                    && (includeReadOnly || p.GetSetMethod() != null || p.PropertyType.IsCollection()));
         }
 
         public static bool IsValidStructuralProperty(this PropertyInfo propertyInfo)
@@ -124,7 +123,7 @@ namespace System.Web.OData.Builder.Conventions
 
             Type elementType;
 
-            return !(type.GetTypeInfo().IsGenericTypeDefinition
+            return !(type.IsGenericTypeDefinition
                      || type.IsPointer
                      || type == typeof(object)
                      || (type.IsCollection(out elementType) && elementType == typeof(object)));
@@ -136,15 +135,15 @@ namespace System.Web.OData.Builder.Conventions
             Contract.Assert(value != null);
 
             Type type = value.GetType();
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
             {
                 value = new ODataEnumValue(value.ToString(), type.EdmFullName());
             }
-            //else
-            //{
-            //    Contract.Assert(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(type) != null);
-            //    value = ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(value);
-            //}
+            else
+            {
+                Contract.Assert(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(type) != null);
+                value = ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(value);
+            }
 
             return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4);
         }
@@ -155,11 +154,11 @@ namespace System.Web.OData.Builder.Conventions
             Contract.Assert(entityInstanceContext != null);
 
             object value = entityInstanceContext.GetPropertyValue(key.Name);
-            //if (value == null)
-            //{
-            //    IEdmTypeReference edmType = entityInstanceContext.EdmObject.GetEdmType();
-            //    throw Error.InvalidOperation(SRResources.KeyValueCannotBeNull, key.Name, edmType.Definition);
-            //}
+            if (value == null)
+            {
+                IEdmTypeReference edmType = entityInstanceContext.EdmObject.GetEdmType();
+                throw Error.InvalidOperation(SRResources.KeyValueCannotBeNull, key.Name, edmType.Definition);
+            }
 
             return GetUriRepresentationForValue(value);
         }

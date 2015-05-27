@@ -85,7 +85,7 @@ namespace System.Web.OData.Builder
                 }
                 else
                 {
-                    stringBuilder.Append(Char.ToLower(name[index]));
+                    stringBuilder.Append(Char.ToLower(name[index], CultureInfo.InvariantCulture));
                 }
             }
 

@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using System.Web.OData.Builder.Conventions;
+using System.Web.OData.Extensions;
+using System.Web.OData.Properties;
 using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 
@@ -30,10 +32,10 @@ namespace System.Web.OData.Builder
             {
                 throw Error.ArgumentNull("entityContext");
             }
-            //if (entityContext.Url == null)
-            //{
-            //    throw Error.Argument("entityContext", SRResources.UrlHelperNull, typeof(EntityInstanceContext).Name);
-            //}
+            if (entityContext.Url == null)
+            {
+                throw Error.Argument("entityContext", SRResources.UrlHelperNull, typeof(EntityInstanceContext).Name);
+            }
 
             IList<ODataPathSegment> idLinkPathSegments = entityContext.GenerateBaseODataPathSegments();
 
@@ -43,14 +45,13 @@ namespace System.Web.OData.Builder
                 idLinkPathSegments.Add(new CastPathSegment(entityContext.EntityType));
             }
 
-            //string idLink = entityContext.Url.CreateODataLink(idLinkPathSegments);
-            //if (idLink == null)
-            //{
-            //    return null;
-            //}
+            string idLink = entityContext.Url.CreateODataLink(idLinkPathSegments);
+            if (idLink == null)
+            {
+                return null;
+            }
 
-            //return new Uri(idLink);
-            return null;
+            return new Uri(idLink);
         }
 
         /// <summary>
@@ -67,10 +68,10 @@ namespace System.Web.OData.Builder
             {
                 throw Error.ArgumentNull("entityContext");
             }
-            //if (entityContext.Url == null)
-            //{
-            //    throw Error.Argument("entityContext", SRResources.UrlHelperNull, typeof(EntityInstanceContext).Name);
-            //}
+            if (entityContext.Url == null)
+            {
+                throw Error.Argument("entityContext", SRResources.UrlHelperNull, typeof(EntityInstanceContext).Name);
+            }
 
             IList<ODataPathSegment> navigationPathSegments = entityContext.GenerateBaseODataPathSegments();
 
@@ -81,14 +82,13 @@ namespace System.Web.OData.Builder
 
             navigationPathSegments.Add(new NavigationPathSegment(navigationProperty));
 
-            //string link = entityContext.Url.CreateODataLink(navigationPathSegments);
-            //if (link == null)
-            //{
-            //    return null;
-            //}
+            string link = entityContext.Url.CreateODataLink(navigationPathSegments);
+            if (link == null)
+            {
+                return null;
+            }
 
-            //return new Uri(link);
-            return null;
+            return new Uri(link);
         }
 
         /// <summary>
@@ -110,10 +110,10 @@ namespace System.Web.OData.Builder
             }
 
             IEdmOperationParameter bindingParameter = action.Parameters.FirstOrDefault();
-            //if (bindingParameter == null || !bindingParameter.Type.IsEntity())
-            //{
-            //    throw Error.Argument("action", SRResources.ActionNotBoundToEntity, action.Name);
-            //}
+            if (bindingParameter == null || !bindingParameter.Type.IsEntity())
+            {
+                throw Error.Argument("action", SRResources.ActionNotBoundToEntity, action.Name);
+            }
 
             return GenerateActionLink(entityContext, bindingParameter.Type.FullName(), action.Name);
         }
@@ -136,9 +136,8 @@ namespace System.Web.OData.Builder
 
             actionPathSegments.Add(new BoundActionPathSegment(actionName));
 
-            //string actionLink = entityContext.Url.CreateODataLink(actionPathSegments);
-            //return actionLink == null ? null : new Uri(actionLink);
-            return null;
+            string actionLink = entityContext.Url.CreateODataLink(actionPathSegments);
+            return actionLink == null ? null : new Uri(actionLink);
         }
 
         /// <summary>
@@ -160,10 +159,10 @@ namespace System.Web.OData.Builder
             }
 
             IEdmOperationParameter bindingParameter = function.Parameters.FirstOrDefault();
-            //if (bindingParameter == null || !bindingParameter.Type.IsEntity())
-            //{
-            //    throw Error.Argument("function", SRResources.FunctionNotBoundToEntity, function.Name);
-            //}
+            if (bindingParameter == null || !bindingParameter.Type.IsEntity())
+            {
+                throw Error.Argument("function", SRResources.FunctionNotBoundToEntity, function.Name);
+            }
 
             return GenerateFunctionLink(entityContext, bindingParameter.Type.FullName(), function.Name, function.Parameters.Select(p => p.Name));
         }
@@ -186,9 +185,8 @@ namespace System.Web.OData.Builder
 
             functionPathSegments.Add(new BoundFunctionPathSegment(functionName, parametersDictionary));
 
-            //string functionLink = entityContext.Url.CreateODataLink(functionPathSegments);
-            //return functionLink == null ? null : new Uri(functionLink);
-            return null;
+            string functionLink = entityContext.Url.CreateODataLink(functionPathSegments);
+            return functionLink == null ? null : new Uri(functionLink);
         }
 
         internal static IList<ODataPathSegment> GenerateBaseODataPathSegments(this EntityInstanceContext entityContext)

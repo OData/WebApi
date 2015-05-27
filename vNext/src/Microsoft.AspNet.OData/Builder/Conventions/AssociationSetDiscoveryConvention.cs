@@ -3,8 +3,8 @@
 
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
-
+using System.Web.Http;
+using System.Web.OData.Properties;
 
 namespace System.Web.OData.Builder.Conventions
 {
@@ -43,11 +43,11 @@ namespace System.Web.OData.Builder.Conventions
                 .OfType<EntityTypeConfiguration>()
                 .Where(e => e.ClrType == navigationProperty.RelatedClrType).SingleOrDefault();
 
-            //if (targetEntityType == null)
-            //{
-            //    throw Error.InvalidOperation(SRResources.TargetEntityTypeMissing, navigationProperty.Name,
-            //        navigationProperty.PropertyInfo.ReflectedType.FullName);
-            //}
+            if (targetEntityType == null)
+            {
+                throw Error.InvalidOperation(SRResources.TargetEntityTypeMissing, navigationProperty.Name,
+                    navigationProperty.PropertyInfo.ReflectedType.FullName);
+            }
 
             bool hasSingletonAttribute = navigationProperty.PropertyInfo.GetCustomAttributes<SingletonAttribute>().Any();
 

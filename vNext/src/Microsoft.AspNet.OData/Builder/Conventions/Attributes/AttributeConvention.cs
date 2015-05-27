@@ -3,8 +3,8 @@
 
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
-
+using System.Web.Http;
+using System.Web.OData.Properties;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
@@ -17,7 +17,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// Initializes a new instance of the <see cref="AttributeConvention"/> class.
         /// </summary>
         /// <param name="attributeFilter">A function to test whether this convention applies to an attribute or not.</param>
-        /// <param name="allowMultiple"><see langword="true"/> if the convention allows multiple attribues; otherwise, <see langword="false"/>.</param>
+        /// <param name="allowMultiple"><c>true</c> if the convention allows multiple attribues; otherwise, <c>false</c>.</param>
         protected AttributeConvention(Func<Attribute, bool> attributeFilter, bool allowMultiple)
         {
             if (attributeFilter == null)
@@ -60,12 +60,12 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             if (!AllowMultiple && attributes.Length > 1)
             {
-                //throw Error.Argument(
-                //    "member",
-                //    SRResources.MultipleAttributesFound,
-                //    member.Name,
-                //    member.ReflectedType.Name,
-                //    attributes.First().GetType().Name);
+                throw Error.Argument(
+                    "member",
+                    SRResources.MultipleAttributesFound,
+                    member.Name,
+                    member.ReflectedType.Name,
+                    attributes.First().GetType().Name);
             }
 
             return attributes;

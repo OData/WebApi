@@ -2,7 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
@@ -10,7 +10,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
     /// <summary>
     /// Configures properties that have the <see cref="KeyAttribute"/> as keys in the <see cref="IEdmEntityType"/>.
     /// </summary>
-    internal class KeyAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PrimitivePropertyConfiguration>
+    internal class KeyAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<StructuralPropertyConfiguration>
     {
         public KeyAttributeEdmPropertyConvention()
             : base(attribute => attribute.GetType() == typeof(KeyAttribute), allowMultiple: false)
@@ -24,7 +24,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// <param name="structuralTypeConfiguration">The edm type being configured.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on the property.</param>
         /// <param name="model">The ODataConventionModelBuilder used to build the model.</param>
-        public override void Apply(PrimitivePropertyConfiguration edmProperty,
+        public override void Apply(StructuralPropertyConfiguration edmProperty,
             StructuralTypeConfiguration structuralTypeConfiguration,
             Attribute attribute,
             ODataConventionModelBuilder model)
@@ -34,10 +34,13 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 throw Error.ArgumentNull("edmProperty");
             }
 
-            EntityTypeConfiguration entity = structuralTypeConfiguration as EntityTypeConfiguration;
-            if (entity != null)
+            if (edmProperty.Kind == PropertyKind.Primitive || edmProperty.Kind == PropertyKind.Enum)
             {
-                entity.HasKey(edmProperty.PropertyInfo);
+                EntityTypeConfiguration entity = structuralTypeConfiguration as EntityTypeConfiguration;
+                if (entity != null)
+                {
+                    entity.HasKey(edmProperty.PropertyInfo);
+                }
             }
         }
     }

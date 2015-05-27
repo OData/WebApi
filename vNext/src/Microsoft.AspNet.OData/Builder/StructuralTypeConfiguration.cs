@@ -6,9 +6,9 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using System.Web.OData.Formatter;
-using Microsoft.AspNet.OData;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -56,7 +56,7 @@ namespace System.Web.OData.Builder
 
             ClrType = clrType;
             ModelBuilder = modelBuilder;
-            _name = clrType.Name;
+            _name = clrType.EdmName();
             _namespace = clrType.Namespace ?? DefaultNamespace;
         }
 
@@ -94,7 +94,7 @@ namespace System.Web.OData.Builder
             {
                 if (value == null)
                 {
-                    //throw Error.PropertyNull();
+                    throw Error.PropertyNull();
                 }
 
                 _namespace = value;
@@ -115,7 +115,7 @@ namespace System.Web.OData.Builder
             {
                 if (value == null)
                 {
-                    //throw Error.PropertyNull();
+                    throw Error.PropertyNull();
                 }
 
                 _name = value;
@@ -178,9 +178,9 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Gets or sets a value that is <see langword="true"/> if the type's name or namespace was set by the user; <see langword="false"/> if it was inferred through conventions.
+        /// Gets or sets a value that is <c>true</c> if the type's name or namespace was set by the user; <c>false</c> if it was inferred through conventions.
         /// </summary>
-        /// <remarks>The default value is <see langword="false"/>.</remarks>
+        /// <remarks>The default value is <c>false</c>.</remarks>
         public bool AddedExplicitly { get; set; }
 
         /// <summary>
@@ -232,8 +232,8 @@ namespace System.Web.OData.Builder
 
             if (!baseType.ClrType.IsAssignableFrom(ClrType) || baseType.ClrType == ClrType)
             {
-                //throw Error.Argument("baseType", SRResources.TypeDoesNotInheritFromBaseType,
-                //    ClrType.FullName, baseType.ClrType.FullName);
+                throw Error.Argument("baseType", SRResources.TypeDoesNotInheritFromBaseType,
+                    ClrType.FullName, baseType.ClrType.FullName);
             }
 
             foreach (PropertyConfiguration property in Properties)
@@ -259,10 +259,10 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            //if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
-            //{
-            //    throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
-            //}
+            if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
+            {
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
+            }
 
             ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
@@ -277,10 +277,10 @@ namespace System.Web.OData.Builder
             if (ExplicitProperties.ContainsKey(propertyInfo))
             {
                 propertyConfiguration = ExplicitProperties[propertyInfo] as PrimitivePropertyConfiguration;
-                //if (propertyConfiguration == null)
-                //{
-                //    throw Error.Argument("propertyInfo", SRResources.MustBePrimitiveProperty, propertyInfo.Name, ClrType.FullName);
-                //}
+                if (propertyConfiguration == null)
+                {
+                    throw Error.Argument("propertyInfo", SRResources.MustBePrimitiveProperty, propertyInfo.Name, ClrType.FullName);
+                }
             }
             else
             {
@@ -303,15 +303,15 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            //if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
-            //{
-            //    throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
-            //}
+            if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
+            {
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
+            }
 
-            //if (!TypeHelper.IsEnum(propertyInfo.PropertyType))
-            //{
-            //    throw Error.Argument("propertyInfo", SRResources.MustBeEnumProperty, propertyInfo.Name, ClrType.FullName);
-            //}
+            if (!TypeHelper.IsEnum(propertyInfo.PropertyType))
+            {
+                throw Error.Argument("propertyInfo", SRResources.MustBeEnumProperty, propertyInfo.Name, ClrType.FullName);
+            }
 
             ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
@@ -326,10 +326,10 @@ namespace System.Web.OData.Builder
             if (ExplicitProperties.ContainsKey(propertyInfo))
             {
                 propertyConfiguration = ExplicitProperties[propertyInfo] as EnumPropertyConfiguration;
-                //if (propertyConfiguration == null)
-                //{
-                //    throw Error.Argument("propertyInfo", SRResources.MustBeEnumProperty, propertyInfo.Name, ClrType.FullName);
-                //}
+                if (propertyConfiguration == null)
+                {
+                    throw Error.Argument("propertyInfo", SRResources.MustBeEnumProperty, propertyInfo.Name, ClrType.FullName);
+                }
             }
             else
             {
@@ -353,15 +353,15 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            //if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
-            //{
-            //    throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
-            //}
+            if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
+            {
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
+            }
 
-            //if (propertyInfo.PropertyType == ClrType)
-            //{
-            //    throw Error.Argument("propertyInfo", SRResources.RecursiveComplexTypesNotAllowed, ClrType.FullName, propertyInfo.Name);
-            //}
+            if (propertyInfo.PropertyType == ClrType)
+            {
+                throw Error.Argument("propertyInfo", SRResources.RecursiveComplexTypesNotAllowed, ClrType.FullName, propertyInfo.Name);
+            }
 
             ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
@@ -376,10 +376,10 @@ namespace System.Web.OData.Builder
             if (ExplicitProperties.ContainsKey(propertyInfo))
             {
                 propertyConfiguration = ExplicitProperties[propertyInfo] as ComplexPropertyConfiguration;
-                //if (propertyConfiguration == null)
-                //{
-                //    throw Error.Argument("propertyInfo", SRResources.MustBeComplexProperty, propertyInfo.Name, ClrType.FullName);
-                //}
+                if (propertyConfiguration == null)
+                {
+                    throw Error.Argument("propertyInfo", SRResources.MustBeComplexProperty, propertyInfo.Name, ClrType.FullName);
+                }
             }
             else
             {
@@ -405,10 +405,10 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            //if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
-            //{
-            //    throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
-            //}
+            if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
+            {
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
+            }
 
             ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
@@ -423,10 +423,10 @@ namespace System.Web.OData.Builder
             if (ExplicitProperties.ContainsKey(propertyInfo))
             {
                 propertyConfiguration = ExplicitProperties[propertyInfo] as CollectionPropertyConfiguration;
-                //if (propertyConfiguration == null)
-                //{
-                //    throw Error.Argument("propertyInfo", SRResources.MustBeCollectionProperty, propertyInfo.Name, propertyInfo.DeclaringType.FullName);
-                //}
+                if (propertyConfiguration == null)
+                {
+                    throw Error.Argument("propertyInfo", SRResources.MustBeCollectionProperty, propertyInfo.Name, propertyInfo.DeclaringType.FullName);
+                }
             }
             else
             {
@@ -436,10 +436,10 @@ namespace System.Web.OData.Builder
                 // If the ElementType is the same as this type this is recursive complex type nesting
                 if (propertyConfiguration.ElementType == ClrType)
                 {
-                    //throw Error.Argument("propertyInfo",
-                    //    SRResources.RecursiveComplexTypesNotAllowed,
-                    //    ClrType.Name,
-                    //    propertyConfiguration.Name);
+                    throw Error.Argument("propertyInfo",
+                        SRResources.RecursiveComplexTypesNotAllowed,
+                        ClrType.Name,
+                        propertyConfiguration.Name);
                 }
 
                 // If the ElementType is not primitive or enum treat as a ComplexType and Add to the model.
@@ -470,13 +470,13 @@ namespace System.Web.OData.Builder
 
             if (!typeof(IDictionary<string, object>).IsAssignableFrom(propertyInfo.PropertyType))
             {
-                //throw Error.Argument("propertyInfo", SRResources.ArgumentMustBeOfType,
-                //    "IDictionary<string, object>");
+                throw Error.Argument("propertyInfo", SRResources.ArgumentMustBeOfType,
+                    "IDictionary<string, object>");
             }
 
             if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
             {
-                //throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
             }
 
             // Remove from the ignored properties
@@ -487,7 +487,7 @@ namespace System.Web.OData.Builder
 
             if (_dynamicPropertyDictionary != null)
             {
-                //throw Error.Argument("propertyInfo", SRResources.MoreThanOneDynamicPropertyContainerFound, ClrType.Name);
+                throw Error.Argument("propertyInfo", SRResources.MoreThanOneDynamicPropertyContainerFound, ClrType.Name);
             }
 
             _dynamicPropertyDictionary = propertyInfo;
@@ -504,10 +504,10 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            //if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
-            //{
-            //    throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
-            //}
+            if (!propertyInfo.ReflectedType.IsAssignableFrom(ClrType))
+            {
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
+            }
 
             if (ExplicitProperties.ContainsKey(propertyInfo))
             {
@@ -531,8 +531,8 @@ namespace System.Web.OData.Builder
                 this.DerivedProperties().FirstOrDefault(p => p.Name == propertyInfo.Name);
             if (baseProperty != null)
             {
-                //throw Error.Argument("propertyInfo", SRResources.CannotRedefineBaseTypeProperty,
-                //    propertyInfo.Name, baseProperty.PropertyInfo.ReflectedType.FullName);
+                throw Error.Argument("propertyInfo", SRResources.CannotRedefineBaseTypeProperty,
+                    propertyInfo.Name, baseProperty.PropertyInfo.ReflectedType.FullName);
             }
         }
 
@@ -544,8 +544,8 @@ namespace System.Web.OData.Builder
                     derivedType.Properties.FirstOrDefault(p => p.Name == propertyInfo.Name);
                 if (propertyInDerivedType != null)
                 {
-                    //throw Error.Argument("propertyInfo", SRResources.PropertyAlreadyDefinedInDerivedType,
-                    //    propertyInfo.Name, FullName, derivedType.FullName);
+                    throw Error.Argument("propertyInfo", SRResources.PropertyAlreadyDefinedInDerivedType,
+                        propertyInfo.Name, FullName, derivedType.FullName);
                 }
             }
         }

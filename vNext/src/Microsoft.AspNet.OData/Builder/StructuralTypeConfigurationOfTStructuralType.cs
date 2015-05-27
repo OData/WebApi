@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder

@@ -3,9 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 using System.Web.OData.Formatter;
-using Microsoft.AspNet.OData;
 
 namespace System.Web.OData.Builder.Conventions
 {
@@ -28,19 +27,21 @@ namespace System.Web.OData.Builder.Conventions
             }
 
             // Suppress the EntityKeyConvention if there is any key in EntityTypeConfiguration.
-            if (entity.Keys.Any())
+            if (entity.Keys.Any() || entity.EnumKeys.Any())
             {
                 return;
             }
 
-            // Try to figure out keys only if there is no base type.
-            if (entity.BaseType == null)
+            // Suppress the EntityKeyConvention if base type has any key.
+            if (entity.BaseType != null && entity.BaseType.Keys().Any())
             {
-                PropertyConfiguration key = GetKeyProperty(entity);
-                if (key != null)
-                {
-                    entity.HasKey(key.PropertyInfo);
-                }
+                return;
+            }
+
+            PropertyConfiguration key = GetKeyProperty(entity);
+            if (key != null)
+            {
+                entity.HasKey(key.PropertyInfo);
             }
         }
 
@@ -49,7 +50,7 @@ namespace System.Web.OData.Builder.Conventions
             IEnumerable<PropertyConfiguration> keys =
                 entityType.Properties
                 .Where(p => (p.Name.Equals(entityType.Name + "Id", StringComparison.OrdinalIgnoreCase) || p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase))
-                && EdmLibHelpers.GetEdmPrimitiveTypeOrNull(p.PropertyInfo.PropertyType) != null);
+                && (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(p.PropertyInfo.PropertyType) != null || TypeHelper.IsEnum(p.PropertyInfo.PropertyType)));
 
             if (keys.Count() == 1)
             {

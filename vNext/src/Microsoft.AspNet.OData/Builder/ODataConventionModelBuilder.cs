@@ -6,13 +6,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
+using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder.Conventions;
 using System.Web.OData.Builder.Conventions.Attributes;
 using System.Web.OData.Formatter;
-
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Extensions;
+using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -67,15 +66,41 @@ namespace System.Web.OData.Builder
         private bool _isModelBeingBuilt;
         private bool _isQueryCompositionMode;
 
-        //// build the mapping between type and its derived types to be used later.
-        //private Lazy<IDictionary<Type, List<Type>>> _allTypesWithDerivedTypeMapping;
+        // build the mapping between type and its derived types to be used later.
+        private Lazy<IDictionary<Type, List<Type>>> _allTypesWithDerivedTypeMapping;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
         /// </summary>
         public ODataConventionModelBuilder()
         {
-            Initialize(isQueryCompositionMode: false);
+            Initialize(new DefaultAssembliesResolver(), isQueryCompositionMode: false);
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="ODataConventionModelBuilder"/>.
+        /// </summary>
+        /// <param name="configuration">The <see cref="HttpConfiguration"/> to use.</param>
+        public ODataConventionModelBuilder(HttpConfiguration configuration)
+            : this(configuration, isQueryCompositionMode: false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
+        /// </summary>
+        /// <param name="configuration">The <see cref="HttpConfiguration"/> to use.</param>
+        /// <param name="isQueryCompositionMode">If the model is being built for only querying.</param>
+        /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <c>true</c> has more relaxed
+        /// inference rules and also treats all types as entity types. This constructor is intended for use by unit testing only.</remarks>
+        public ODataConventionModelBuilder(HttpConfiguration configuration, bool isQueryCompositionMode)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            Initialize(configuration.Services.GetAssembliesResolver(), isQueryCompositionMode);
         }
 
         /// <summary>
@@ -90,16 +115,16 @@ namespace System.Web.OData.Builder
         /// <remarks>Use this action to modify the <see cref="ODataModelBuilder"/> configuration that has been inferred by convention.</remarks>
         public Action<ODataConventionModelBuilder> OnModelCreating { get; set; }
 
-        internal void Initialize(bool isQueryCompositionMode)
+        internal void Initialize(IAssembliesResolver assembliesResolver, bool isQueryCompositionMode)
         {
             _isQueryCompositionMode = isQueryCompositionMode;
             _configuredNavigationSources = new HashSet<INavigationSourceConfiguration>();
             _mappedTypes = new HashSet<StructuralTypeConfiguration>();
             _ignoredTypes = new HashSet<Type>();
             ModelAliasingEnabled = true;
-            //_allTypesWithDerivedTypeMapping = new Lazy<IDictionary<Type, List<Type>>>(
-            //    () => BuildDerivedTypesMapping(assembliesResolver),
-            //    isThreadSafe: false);
+            _allTypesWithDerivedTypeMapping = new Lazy<IDictionary<Type, List<Type>>>(
+                () => BuildDerivedTypesMapping(assembliesResolver),
+                isThreadSafe: false);
         }
 
         /// <summary>
@@ -185,10 +210,10 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("type");
             }
 
-            //if (!type.IsEnum)
-            //{
-            //    throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
-            //}
+            if (!type.IsEnum)
+            {
+                throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
+            }
 
             EnumTypeConfiguration enumTypeConfiguration = EnumTypes.SingleOrDefault(e => e.ClrType == type);
 
@@ -208,10 +233,10 @@ namespace System.Web.OData.Builder
         /// <inheritdoc />
         public override IEdmModel GetEdmModel()
         {
-            //if (_isModelBeingBuilt)
-            //{
-            //    throw Error.NotSupported(SRResources.GetEdmModelCalledMoreThanOnce);
-            //}
+            if (_isModelBeingBuilt)
+            {
+                throw Error.NotSupported(SRResources.GetEdmModelCalledMoreThanOnce);
+            }
 
             // before we begin, get the set of types the user had added explicitly.
             _explicitlyAddedTypes = new List<StructuralTypeConfiguration>(StructuralTypes);
@@ -266,7 +291,7 @@ namespace System.Web.OData.Builder
 
             foreach (EntityTypeConfiguration entity in StructuralTypes.OfType<EntityTypeConfiguration>().Where(e => !e.BaseTypeConfigured))
             {
-                Type baseClrType = entity.ClrType.GetTypeInfo().BaseType;
+                Type baseClrType = entity.ClrType.BaseType;
                 while (baseClrType != null)
                 {
                     // see if we there is an entity that we know mapping to this clr types base type.
@@ -283,13 +308,18 @@ namespace System.Web.OData.Builder
                             {
                                 entity.RemoveKey(keyProperty);
                             }
+
+                            foreach (EnumPropertyConfiguration enumKeyProperty in entity.EnumKeys.ToArray())
+                            {
+                                entity.RemoveKey(enumKeyProperty);
+                            }
                         }
 
                         entity.DerivesFrom(baseEntityType);
                         break;
                     }
 
-                    baseClrType = baseClrType.GetTypeInfo().BaseType;
+                    baseClrType = baseClrType.BaseType;
                 }
             }
 
@@ -298,7 +328,7 @@ namespace System.Web.OData.Builder
             foreach (ComplexTypeConfiguration complex in
                 StructuralTypes.OfType<ComplexTypeConfiguration>().Where(e => !e.BaseTypeConfigured))
             {
-                Type baseClrType = complex.ClrType.GetTypeInfo().BaseType;
+                Type baseClrType = complex.ClrType.BaseType;
                 while (baseClrType != null)
                 {
                     ComplexTypeConfiguration baseComplexType;
@@ -309,7 +339,7 @@ namespace System.Web.OData.Builder
                         break;
                     }
 
-                    baseClrType = baseClrType.GetTypeInfo().BaseType;
+                    baseClrType = baseClrType.BaseType;
                 }
             }
         }
@@ -327,18 +357,18 @@ namespace System.Web.OData.Builder
                 EntityTypeConfiguration baseEntity = entitiesToBeVisited.Dequeue();
                 visitedEntities.Add(baseEntity.ClrType);
 
-                //List<Type> derivedTypes;
-                //if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(baseEntity.ClrType, out derivedTypes))
-                //{
-                //    foreach (Type derivedType in derivedTypes)
-                //    {
-                //        if (!visitedEntities.Contains(derivedType) && !IsIgnoredType(derivedType))
-                //        {
-                //            EntityTypeConfiguration derivedEntity = AddEntityType(derivedType);
-                //            entitiesToBeVisited.Enqueue(derivedEntity);
-                //        }
-                //    }
-                //}
+                List<Type> derivedTypes;
+                if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(baseEntity.ClrType, out derivedTypes))
+                {
+                    foreach (Type derivedType in derivedTypes)
+                    {
+                        if (!visitedEntities.Contains(derivedType) && !IsIgnoredType(derivedType))
+                        {
+                            EntityTypeConfiguration derivedEntity = AddEntityType(derivedType);
+                            entitiesToBeVisited.Enqueue(derivedEntity);
+                        }
+                    }
+                }
             }
         }
 
@@ -355,18 +385,18 @@ namespace System.Web.OData.Builder
                 ComplexTypeConfiguration baseComplexType = complexTypeToBeVisited.Dequeue();
                 visitedComplexTypes.Add(baseComplexType.ClrType);
 
-                //List<Type> derivedTypes;
-                //if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(baseComplexType.ClrType, out derivedTypes))
-                //{
-                //    foreach (Type derivedType in derivedTypes)
-                //    {
-                //        if (!visitedComplexTypes.Contains(derivedType) && !IsIgnoredType(derivedType))
-                //        {
-                //            ComplexTypeConfiguration derivedComplexType = AddComplexType(derivedType);
-                //            complexTypeToBeVisited.Enqueue(derivedComplexType);
-                //        }
-                //    }
-                //}
+                List<Type> derivedTypes;
+                if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(baseComplexType.ClrType, out derivedTypes))
+                {
+                    foreach (Type derivedType in derivedTypes)
+                    {
+                        if (!visitedComplexTypes.Contains(derivedType) && !IsIgnoredType(derivedType))
+                        {
+                            ComplexTypeConfiguration derivedComplexType = AddComplexType(derivedType);
+                            complexTypeToBeVisited.Enqueue(derivedComplexType);
+                        }
+                    }
+                }
             }
         }
 
@@ -449,8 +479,8 @@ namespace System.Web.OData.Builder
                 {
                     if (actualEntityTypes.Any(e => e.ClrType == subEnityType.ClrType))
                     {
-                        //throw Error.InvalidOperation(SRResources.CannotReconfigEntityTypeAsComplexType,
-                        //    misconfiguredEntityType.ClrType.FullName, subEnityType.ClrType.FullName);
+                        throw Error.InvalidOperation(SRResources.CannotReconfigEntityTypeAsComplexType,
+                            misconfiguredEntityType.ClrType.FullName, subEnityType.ClrType.FullName);
                     }
 
                     RemoveStructuralType(subEnityType.ClrType);
@@ -629,7 +659,7 @@ namespace System.Web.OData.Builder
                     else if (_explicitlyAddedTypes.Contains(mappedType))
                     {
                         // user told us that this is an entity type.
-                        //throw Error.InvalidOperation(SRResources.ComplexTypeRefersToEntityType, complexType.ClrType.FullName, mappedType.ClrType.FullName, property.Name);
+                        throw Error.InvalidOperation(SRResources.ComplexTypeRefersToEntityType, complexType.ClrType.FullName, mappedType.ClrType.FullName, property.Name);
                     }
                     else
                     {
@@ -679,12 +709,12 @@ namespace System.Web.OData.Builder
                     Contract.Assert(propertyKind != PropertyKind.Complex, "we don't create complex types in query composition mode.");
                 }
 
-                if (property.PropertyType.GetTypeInfo().IsGenericType)
+                if (property.PropertyType.IsGenericType)
                 {
                     Type elementType = property.PropertyType.GetGenericArguments().First();
                     Type elementUnderlyingTypeOrSelf = TypeHelper.GetUnderlyingTypeOrSelf(elementType);
 
-                    if (elementUnderlyingTypeOrSelf.GetTypeInfo().IsEnum)
+                    if (elementUnderlyingTypeOrSelf.IsEnum)
                     {
                         AddEnumType(elementUnderlyingTypeOrSelf);
                     }
@@ -771,7 +801,7 @@ namespace System.Web.OData.Builder
 
             // If one of the base types is configured as complex type, the type of this property
             // should be configured as complex type too.
-            Type baseType = propertyType.GetTypeInfo().BaseType;
+            Type baseType = propertyType.BaseType;
             while (baseType != null && baseType != typeof(object))
             {
                 IEdmTypeConfiguration baseMappedType = GetStructuralTypeOrNull(baseType);
@@ -784,7 +814,7 @@ namespace System.Web.OData.Builder
                     }
                 }
 
-                baseType = baseType.GetTypeInfo().BaseType;
+                baseType = baseType.BaseType;
             }
 
             // refer the Edm type from the derived types
@@ -823,25 +853,25 @@ namespace System.Web.OData.Builder
                 Type currentType = typeToBeVisited.Dequeue();
                 visitedTypes.Add(currentType);
 
-                //List<Type> derivedTypes;
-                //if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(currentType, out derivedTypes))
-                //{
-                //    foreach (Type derivedType in derivedTypes)
-                //    {
-                //        if (!visitedTypes.Contains(derivedType))
-                //        {
-                //            StructuralTypeConfiguration structuralType = StructuralTypes.Except(_explicitlyAddedTypes)
-                //                .FirstOrDefault(c => c.ClrType == derivedType);
+                List<Type> derivedTypes;
+                if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(currentType, out derivedTypes))
+                {
+                    foreach (Type derivedType in derivedTypes)
+                    {
+                        if (!visitedTypes.Contains(derivedType))
+                        {
+                            StructuralTypeConfiguration structuralType = StructuralTypes.Except(_explicitlyAddedTypes)
+                                .FirstOrDefault(c => c.ClrType == derivedType);
 
-                //            if (structuralType != null && structuralType.Kind == EdmTypeKind.Entity)
-                //            {
-                //                foundMappedTypes.Add((EntityTypeConfiguration)structuralType);
-                //            }
+                            if (structuralType != null && structuralType.Kind == EdmTypeKind.Entity)
+                            {
+                                foundMappedTypes.Add((EntityTypeConfiguration)structuralType);
+                            }
 
-                //            typeToBeVisited.Enqueue(derivedType);
-                //        }
-                //    }
-                //}
+                            typeToBeVisited.Enqueue(derivedType);
+                        }
+                    }
+                }
             }
 
             if (foundMappedTypes.Any())
@@ -863,25 +893,25 @@ namespace System.Web.OData.Builder
                 Type currentType = typeToBeVisited.Dequeue();
                 visitedTypes.Add(currentType);
 
-                //List<Type> derivedTypes;
-                //if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(currentType, out derivedTypes))
-                //{
-                //    foreach (Type derivedType in derivedTypes)
-                //    {
-                //        if (!visitedTypes.Contains(derivedType))
-                //        {
-                //            StructuralTypeConfiguration structuralType =
-                //                _explicitlyAddedTypes.FirstOrDefault(c => c.ClrType == derivedType);
+                List<Type> derivedTypes;
+                if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(currentType, out derivedTypes))
+                {
+                    foreach (Type derivedType in derivedTypes)
+                    {
+                        if (!visitedTypes.Contains(derivedType))
+                        {
+                            StructuralTypeConfiguration structuralType =
+                                _explicitlyAddedTypes.FirstOrDefault(c => c.ClrType == derivedType);
 
-                //            if (structuralType != null)
-                //            {
-                //                foundMappedTypes.Add(structuralType);
-                //            }
+                            if (structuralType != null)
+                            {
+                                foundMappedTypes.Add(structuralType);
+                            }
 
-                //            typeToBeVisited.Enqueue(derivedType);
-                //        }
-                //    }
-                //}
+                            typeToBeVisited.Enqueue(derivedType);
+                        }
+                    }
+                }
             }
 
             if (!foundMappedTypes.Any())
@@ -906,11 +936,10 @@ namespace System.Web.OData.Builder
             }
             else
             {
-                //throw Error.InvalidOperation(SRResources.CannotInferEdmType,
-                //    propertyType.FullName,
-                //    String.Join(",", foundMappedEntityType.Select(e => e.ClrType.FullName)),
-                //    String.Join(",", foundMappedComplexType.Select(e => e.ClrType.FullName)));
-                return false;
+                throw Error.InvalidOperation(SRResources.CannotInferEdmType,
+                    propertyType.FullName,
+                    String.Join(",", foundMappedEntityType.Select(e => e.ClrType.FullName)),
+                    String.Join(",", foundMappedComplexType.Select(e => e.ClrType.FullName)));
             }
         }
 
@@ -1073,22 +1102,22 @@ namespace System.Web.OData.Builder
             }
         }
 
-        //private static Dictionary<Type, List<Type>> BuildDerivedTypesMapping(IAssembliesResolver assemblyResolver)
-        //{
-        //    IEnumerable<Type> allTypes = TypeHelper.GetLoadedTypes(assemblyResolver).Where(t => t.IsVisible && t.IsClass && t != typeof(object));
-        //    Dictionary<Type, List<Type>> allTypeMapping = allTypes.ToDictionary(k => k, k => new List<Type>());
+        private static Dictionary<Type, List<Type>> BuildDerivedTypesMapping(IAssembliesResolver assemblyResolver)
+        {
+            IEnumerable<Type> allTypes = TypeHelper.GetLoadedTypes(assemblyResolver).Where(t => t.IsVisible && t.IsClass && t != typeof(object));
+            Dictionary<Type, List<Type>> allTypeMapping = allTypes.ToDictionary(k => k, k => new List<Type>());
 
-        //    foreach (Type type in allTypes)
-        //    {
-        //        List<Type> derivedTypes;
-        //        if (type.GetTypeInfo().BaseType != null && allTypeMapping.TryGetValue(type.BaseType, out derivedTypes))
-        //        {
-        //            derivedTypes.Add(type);
-        //        }
-        //    }
+            foreach (Type type in allTypes)
+            {
+                List<Type> derivedTypes;
+                if (type.BaseType != null && allTypeMapping.TryGetValue(type.BaseType, out derivedTypes))
+                {
+                    derivedTypes.Add(type);
+                }
+            }
 
-        //    return allTypeMapping;
-        //}
+            return allTypeMapping;
+        }
 
         /// <inheritdoc />
         public override void ValidateModel(IEdmModel model)

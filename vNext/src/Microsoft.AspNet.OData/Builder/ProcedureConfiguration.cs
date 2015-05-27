@@ -4,10 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 using System.Web.OData.Formatter;
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Common;
 
 namespace System.Web.OData.Builder
 {
@@ -265,6 +262,39 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Adds a new non-binding entity type parameter.
+        /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter",
+            Justification = "In keeping with rest of API")]
+        public ParameterConfiguration EntityParameter<TEntityType>(string name) where TEntityType : class
+        {
+            Type entityType = typeof(TEntityType);
+            IEdmTypeConfiguration parameterType =
+                ModelBuilder.StructuralTypes.FirstOrDefault(t => t.ClrType == entityType) ??
+                ModelBuilder.AddEntityType(entityType);
+
+            return AddParameter(name, parameterType);
+        }
+
+        /// <summary>
+        /// Adds a new non-binding collection of entity type parameter.
+        /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter",
+            Justification = "In keeping with rest of API")]
+        public ParameterConfiguration CollectionEntityParameter<TElementEntityType>(string name) where TElementEntityType : class
+        {
+            Type elementType = typeof(TElementEntityType);
+            IEdmTypeConfiguration elementTypeConfiguration =
+                ModelBuilder.StructuralTypes.FirstOrDefault(t => t.ClrType == elementType) ??
+                ModelBuilder.AddEntityType(elementType);
+
+            CollectionTypeConfiguration parameterType = new CollectionTypeConfiguration(elementTypeConfiguration,
+                typeof(IEnumerable<>).MakeGenericType(elementType));
+
+            return AddParameter(name, parameterType);
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="ODataModelBuilder"/> used to create this configuration.
         /// </summary>
         protected ODataModelBuilder ModelBuilder { get; set; }
@@ -274,7 +304,7 @@ namespace System.Web.OData.Builder
             Type type = TypeHelper.GetUnderlyingTypeOrSelf(clrType);
             IEdmTypeConfiguration edmTypeConfiguration;
 
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
             {
                 edmTypeConfiguration = ModelBuilder.GetTypeConfigurationOrNull(type);
 
@@ -290,7 +320,7 @@ namespace System.Web.OData.Builder
 
             if (edmTypeConfiguration == null)
             {
-                if (type.GetTypeInfo().IsEnum)
+                if (type.IsEnum)
                 {
                     EnumTypeConfiguration enumTypeConfiguration = ModelBuilder.AddEnumType(type);
 

@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
+using System.Web.Http;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
@@ -27,6 +27,12 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             {
                 PrimitivePropertyConfiguration[] keys = edmTypeConfiguration.Keys.ToArray();
                 foreach (PrimitivePropertyConfiguration key in keys)
+                {
+                    edmTypeConfiguration.RemoveKey(key);
+                }
+
+                EnumPropertyConfiguration[] enumKeys = edmTypeConfiguration.EnumKeys.ToArray();
+                foreach (EnumPropertyConfiguration key in enumKeys)
                 {
                     edmTypeConfiguration.RemoveKey(key);
                 }

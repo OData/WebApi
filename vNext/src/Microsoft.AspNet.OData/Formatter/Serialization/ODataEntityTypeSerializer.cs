@@ -289,7 +289,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     properties.Add(etagProperty.Name, entityInstanceContext.GetPropertyValue(etagProperty.Name));
                 }
-                EntityTagHeaderValue etagHeaderValue = entityInstanceContext.Request.GetETagHandler().CreateETag(properties);
+                EntityTagHeaderValue etagHeaderValue = entityInstanceContext.Request.ETagHandler().CreateETag(properties);
                 if (etagHeaderValue != null)
                 {
                     return etagHeaderValue.ToString();

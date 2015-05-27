@@ -40,6 +40,13 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     keys.AddRange(keySegment.Keys);
                 }
 
+                var structuralPropertySegment =
+                    odataPath.FirstOrDefault((s => s is PropertySegment)) as PropertySegment;
+                if (structuralPropertySegment != null)
+                {
+                    actionName += structuralPropertySegment.Property.Name;
+                }
+
                 var navigationPropertySegment =
                     odataPath.FirstOrDefault(s => s is NavigationPropertySegment) as NavigationPropertySegment;
                 if (navigationPropertySegment != null)
@@ -59,10 +66,12 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 && c.Parameters.Count == keys.Count;
             });
 
-            if (actionDescriptor != null)
+            if (actionDescriptor == null)
             {
-                WriteRouteData(routeContext, actionDescriptor.Parameters, keys);
+                throw new NotSupportedException(string.Format("No action called '{0}' in '{1}Controller'", actionName, controllerName));
             }
+
+            WriteRouteData(routeContext, actionDescriptor.Parameters, keys);
 
             return actionDescriptor;
         }

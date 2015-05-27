@@ -2,6 +2,7 @@
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.Routing;
 using Microsoft.Framework.DependencyInjection;
 
@@ -27,6 +28,26 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             return httpContext.RequestServices.GetRequiredService<IUrlHelper>();
+        }
+
+        public static IETagHandler ETagHandler(this HttpContext httpContext)
+        {
+            if (httpContext == null)
+            {
+                throw Error.ArgumentNull("httpContext");
+            }
+
+            return httpContext.ApplicationServices.GetRequiredService<IETagHandler>();
+        }
+
+        public static IODataPathHandler ODataPathHandler(this HttpContext httpContext)
+        {
+            if (httpContext == null)
+            {
+                throw Error.ArgumentNull("httpContext");
+            }
+
+            return httpContext.ApplicationServices.GetRequiredService<IODataPathHandler>();
         }
     }
 }

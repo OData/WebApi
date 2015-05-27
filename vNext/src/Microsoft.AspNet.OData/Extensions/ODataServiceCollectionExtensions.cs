@@ -18,13 +18,17 @@ namespace Microsoft.AspNet.OData.Extensions
             services.AddTransient<IConfigureOptions<ODataOptions>, ODataOptionsSetup>();
             services.ConfigureMvc(options =>
             {
-                // use descriptor?
-                options.OutputFormatters.Insert(0, new ModernOutputFormatter());
+                foreach (var outputFormatter in ODataOutputFormatters.Create())
+                {
+                    options.OutputFormatters.Insert(0, outputFormatter);
+                }
+                //options.OutputFormatters.Insert(0, new ModernOutputFormatter());
             });
 
             services.AddSingleton<IActionSelector, ODataActionSelector>();
             services.AddSingleton<IODataRoutingConvention, DefaultODataRoutingConvention>();
             services.AddSingleton<IETagHandler, DefaultODataETagHandler>();
+            services.AddSingleton<IODataPathHandler, DefaultODataPathHandler>();
             return new ODataServiceBuilder(services);
         }
 

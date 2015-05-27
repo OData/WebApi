@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.AspNet.Mvc;
@@ -20,7 +21,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <param name="urlHelper">The URL helper.</param>
         /// <param name="segments">The OData path segments.</param>
         /// <returns>The generated OData link.</returns>
-        public static string CreateODataLink(this UrlHelper urlHelper, params ODataPathSegment[] segments)
+        public static string CreateODataLink(this IUrlHelper urlHelper, params ODataPathSegment[] segments)
         {
             return CreateODataLink(urlHelper, segments as IList<ODataPathSegment>);
         }
@@ -31,7 +32,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <param name="urlHelper">The URL helper.</param>
         /// <param name="segments">The OData path segments.</param>
         /// <returns>The generated OData link.</returns>
-        public static string CreateODataLink(this UrlHelper urlHelper, IList<ODataPathSegment> segments)
+        public static string CreateODataLink(this IUrlHelper urlHelper, IList<ODataPathSegment> segments)
         {
             //if (urlHelper == null)
             //{
@@ -49,7 +50,7 @@ namespace Microsoft.AspNet.OData.Extensions
 
             //IODataPathHandler pathHandler = request.ODataProperties().PathHandler;
             //return CreateODataLink(urlHelper, routeName, pathHandler, segments);
-            return null;
+            return "http://service-root/";
         }
 
         /// <summary>
@@ -60,7 +61,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <param name="pathHandler">The path handler to use for generating the link.</param>
         /// <param name="segments">The OData path segments.</param>
         /// <returns>The generated OData link.</returns>
-        public static string CreateODataLink(this UrlHelper urlHelper, string routeName, IODataPathHandler pathHandler,
+        public static string CreateODataLink(this IUrlHelper urlHelper, string routeName, IODataPathHandler pathHandler,
             IList<ODataPathSegment> segments)
         {
             //if (urlHelper == null)
@@ -75,9 +76,9 @@ namespace Microsoft.AspNet.OData.Extensions
 
             //string odataPath = pathHandler.Link(new ODataPath(segments));
             //return urlHelper.Link(
-            //    routeName,
-            //    new HttpRouteValueDictionary() { { ODataRouteConstants.ODataPath, odataPath } });
-            return null;
+            //     routeName,
+            //     new HttpRouteValueDictionary() { { ODataRouteConstants.ODataPath, odataPath } });
+            return "http://service-root/";
         }
     }
 }

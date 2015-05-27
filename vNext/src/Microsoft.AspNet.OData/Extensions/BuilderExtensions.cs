@@ -23,9 +23,7 @@ namespace Microsoft.AspNet.OData.Extensions
             var defaultAssemblyProvider = app.ApplicationServices.GetRequiredService<IAssemblyProvider>();
             AssemblyProviderManager.Register(defaultAssemblyProvider);
 
-            return app.UseMvc(builder => {
-                builder.MapODataRoute<T>(prefix);
-            });
+            return app.UseRouter(new ODataRoute(prefix, DefaultODataModelProvider.BuildEdmModel(typeof(T))));
         }
     }
 }

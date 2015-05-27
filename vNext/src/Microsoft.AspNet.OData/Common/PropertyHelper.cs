@@ -58,7 +58,7 @@ namespace Microsoft.AspNet.OData.Common
             // Create a delegate TValue -> "TDeclaringType.Property"
             var propertySetterAsAction = setMethod.CreateDelegate(typeof(Action<,>).MakeGenericType(typeInput, typeValue));
             var callPropertySetterClosedGenericMethod = _callPropertySetterOpenGenericMethod.MakeGenericMethod(typeInput, typeValue);
-            callPropertySetterDelegate = Delegate.CreateDelegate(typeof(Action<TDeclaringType, object>), propertySetterAsAction, callPropertySetterClosedGenericMethod);
+            callPropertySetterDelegate = callPropertySetterClosedGenericMethod.CreateDelegate(typeof(Action<TDeclaringType, object>), propertySetterAsAction);
 
             return (Action<TDeclaringType, object>)callPropertySetterDelegate;
         }
@@ -109,14 +109,14 @@ namespace Microsoft.AspNet.OData.Common
                 // Create a delegate (ref TDeclaringType) -> TValue
                 Delegate propertyGetterAsFunc = getMethod.CreateDelegate(typeof(ByRefFunc<,>).MakeGenericType(typeInput, typeOutput));
                 MethodInfo callPropertyGetterClosedGenericMethod = _callPropertyGetterByReferenceOpenGenericMethod.MakeGenericMethod(typeInput, typeOutput);
-                callPropertyGetterDelegate = Delegate.CreateDelegate(typeof(Func<object, object>), propertyGetterAsFunc, callPropertyGetterClosedGenericMethod);
+                callPropertyGetterDelegate = callPropertyGetterClosedGenericMethod.CreateDelegate(typeof (Func<object, object>), propertyGetterAsFunc);
             }
             else
             {
                 // Create a delegate TDeclaringType -> TValue
                 Delegate propertyGetterAsFunc = getMethod.CreateDelegate(typeof(Func<,>).MakeGenericType(typeInput, typeOutput));
                 MethodInfo callPropertyGetterClosedGenericMethod = _callPropertyGetterOpenGenericMethod.MakeGenericMethod(typeInput, typeOutput);
-                callPropertyGetterDelegate = Delegate.CreateDelegate(typeof(Func<object, object>), propertyGetterAsFunc, callPropertyGetterClosedGenericMethod);
+                callPropertyGetterDelegate = callPropertyGetterClosedGenericMethod.CreateDelegate(typeof(Func<object, object>), propertyGetterAsFunc);
             }
 
             return (Func<object, object>)callPropertyGetterDelegate;

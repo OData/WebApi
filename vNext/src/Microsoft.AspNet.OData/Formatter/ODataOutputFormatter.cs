@@ -126,50 +126,52 @@ namespace Microsoft.AspNet.OData.Formatter
             }
         }
 
-        //public override void WriteResponseHeaders(OutputFormatterContext context)
-        //{
-        //    HttpRequest request = context.ActionContext.HttpContext.Request;
-        //    HttpResponse response = context.ActionContext.HttpContext.Response;
+        public override void WriteResponseHeaders(OutputFormatterContext context)
+        {
+            HttpRequest request = context.ActionContext.HttpContext.Request;
+            HttpResponse response = context.ActionContext.HttpContext.Response;
 
-        //    // When the user asks for application/json we really need to set the content type to
-        //    // application/json; odata.metadata=minimal. If the user provides the media type and is
-        //    // application/json we are going to add automatically odata.metadata=minimal. Otherwise we are
-        //    // going to fallback to the default implementation.
+            //// When the user asks for application/json we really need to set the content type to
+            //// application/json; odata.metadata=minimal. If the user provides the media type and is
+            //// application/json we are going to add automatically odata.metadata=minimal. Otherwise we are
+            //// going to fallback to the default implementation.
 
-        //    // When calling this formatter as part of content negotiation the content negotiator will always
-        //    // pick a non null media type. In case the user creates a new ObjectContent<T> and doesn't pass in a
-        //    // media type, we delegate to the base class to rely on the default behavior. It's the user's 
-        //    // responsibility to pass in the right media type.
-        //    var mediaType = context.SelectedContentType;
-        //    if (mediaType != null)
-        //    {
-        //        if (mediaType.MediaType.Equals("application/json", StringComparison.OrdinalIgnoreCase) &&
-        //            !mediaType.Parameters.Any(p => p.Name.Equals("odata.metadata", StringComparison.OrdinalIgnoreCase)))
-        //        {
-        //            mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "minimal"));
-        //        }
-        //    }
-        //    else
-        //    {
-        //        // This is the case when a user creates a new ObjectContent<T> passing in a null mediaType
-        //        base.WriteResponseHeaders(context);
-        //    }
+            //// When calling this formatter as part of content negotiation the content negotiator will always
+            //// pick a non null media type. In case the user creates a new ObjectContent<T> and doesn't pass in a
+            //// media type, we delegate to the base class to rely on the default behavior. It's the user's 
+            //// responsibility to pass in the right media type.
+            //var mediaType = context.SelectedContentType;
+            //if (mediaType != null)
+            //{
+            //    if (mediaType.MediaType.Equals("application/json", StringComparison.OrdinalIgnoreCase) &&
+            //        !mediaType.Parameters.Any(p => p.Name.Equals("odata.metadata", StringComparison.OrdinalIgnoreCase)))
+            //    {
+            //        mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "minimal"));
+            //    }
+            //}
+            //else
+            //{
+            //    // This is the case when a user creates a new ObjectContent<T> passing in a null mediaType
+            //    base.WriteResponseHeaders(context);
+            //}
 
-        //    // In general, in Web API we pick a default charset based on the supported character sets
-        //    // of the formatter. However, according to the OData spec, the service shouldn't be sending
-        //    // a character set unless explicitly specified, so if the client didn't send the charset we chose
-        //    // we just clean it.
-        //    //if (headers.ContentType != null &&
-        //    //    !Request.Headers.AcceptCharset
-        //    //        .Any(cs => cs.Value.Equals(headers.ContentType.CharSet, StringComparison.OrdinalIgnoreCase)))
-        //    //{
-        //    //    headers.ContentType.CharSet = String.Empty;
-        //    //}
+            //// In general, in Web API we pick a default charset based on the supported character sets
+            //// of the formatter. However, according to the OData spec, the service shouldn't be sending
+            //// a character set unless explicitly specified, so if the client didn't send the charset we chose
+            //// we just clean it.
+            //if (headers.ContentType != null &&
+            //    !Request.Headers.AcceptCharset
+            //        .Any(cs => cs.Value.Equals(headers.ContentType.CharSet, StringComparison.OrdinalIgnoreCase)))
+            //{
+            //    headers.ContentType.CharSet = String.Empty;
+            //}
 
-        //    response.Headers.Append(
-        //        ODataProperties.ODataServiceVersionHeader,
-        //        ODataUtils.ODataVersionToString(ODataProperties.DefaultODataVersion));
-        //}
+            response.Headers.Append(
+                ODataProperties.ODataServiceVersionHeader,
+                ODataUtils.ODataVersionToString(ODataProperties.DefaultODataVersion));
+
+            base.WriteResponseHeaders(context);
+        }
 
         public override bool CanWriteResult([NotNull]OutputFormatterContext context, MediaTypeHeaderValue contentType)
         {

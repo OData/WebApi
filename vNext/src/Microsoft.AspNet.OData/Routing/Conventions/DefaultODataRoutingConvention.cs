@@ -26,7 +26,8 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         {
             var odataPath = routeContext.HttpContext.Request.ODataProperties().NewPath;
             var controllerName = string.Empty;
-            var actionName = _actionNameMappings[routeContext.HttpContext.Request.Method];
+            var methodName = routeContext.HttpContext.Request.Method;
+            var routeTemplate = string.Empty;
             var keys = new List<KeyValuePair<string, object>>();
 
             if (odataPath.FirstSegment is MetadataSegment)
@@ -48,19 +49,33 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     keys.AddRange(keySegment.Keys);
                 }
 
+                if (keys.Count == 1)
+                {
+                    routeTemplate = "{id}";
+                }
+
                 var structuralPropertySegment =
                     odataPath.FirstOrDefault((s => s is PropertySegment)) as PropertySegment;
                 if (structuralPropertySegment != null)
                 {
-                    actionName += structuralPropertySegment.Property.Name;
+                    routeTemplate += "/" + structuralPropertySegment.Property.Name;
                 }
 
                 var navigationPropertySegment =
                     odataPath.FirstOrDefault(s => s is NavigationPropertySegment) as NavigationPropertySegment;
                 if (navigationPropertySegment != null)
                 {
-                    actionName += navigationPropertySegment.NavigationProperty.Name;
+                    routeTemplate += "/" + navigationPropertySegment.NavigationProperty.Name;
                 }
+            }
+
+            if (string.IsNullOrEmpty(routeTemplate))
+            {
+                routeTemplate = controllerName;
+            }
+            else
+            {
+                routeTemplate = controllerName + "/" + routeTemplate;
             }
             
             var services = routeContext.HttpContext.ApplicationServices;
@@ -68,15 +83,15 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             var actionDescriptor = provider.ActionDescriptors.Items.SingleOrDefault(d =>
             {
                 var c = d as ControllerActionDescriptor;
-                return c != null
-                    && c.ControllerName == controllerName
-                    && c.Name == actionName
-                    && (actionName != "Get" || c.Parameters.Count == keys.Count);
+                return c != null && c.ControllerName == controllerName &&
+                    (controllerName == "Metadata" ||
+                        ((HttpMethodConstraint)c.ActionConstraints.First()).HttpMethods.Contains(methodName) &&
+                         c.AttributeRouteInfo.Template.EndsWith(routeTemplate));
             });
 
             if (actionDescriptor == null)
             {
-                throw new NotSupportedException(string.Format("No action called '{0}' in '{1}Controller'", actionName, controllerName));
+                throw new NotSupportedException(string.Format("No action match template '{0}' in '{1}Controller'", routeTemplate, controllerName));
             }
 
             if (keys.Any())

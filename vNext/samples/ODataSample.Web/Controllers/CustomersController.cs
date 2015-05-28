@@ -37,7 +37,7 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(customer);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}/FirstName")]
         public IActionResult GetFirstName(int id)
         {
             var customer = _sampleContext.FindCustomer(id);
@@ -49,7 +49,7 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(customer.FirstName);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}/LastName")]
         public IActionResult GetLastName(int id)
         {
             var customer = _sampleContext.FindCustomer(id);
@@ -61,7 +61,7 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(customer.LastName);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}/CustomerId")]
         public IActionResult GetCustomerId(int id)
         {
             var customer = _sampleContext.FindCustomer(id);
@@ -73,7 +73,7 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(customer.CustomerId);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}/Products")]
         public IActionResult GetProducts(int id)
         {
             var customer = _sampleContext.FindCustomer(id);

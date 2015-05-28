@@ -21,7 +21,7 @@ namespace ODataSample.Web.Controllers
         }
 
         // GET: api/Products
-        //[HttpGet]
+        [HttpGet]
         public IEnumerable<Product> Get()
         {
             return _sampleContext.Products;
@@ -40,7 +40,7 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(product);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}/Name")]
         public IActionResult GetName(int id)
         {
             var product = _sampleContext.FindProduct(id);
@@ -52,7 +52,7 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(product.Name);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}/Price")]
         public IActionResult GetPrice(int id)
         {
             var product = _sampleContext.FindProduct(id);
@@ -64,7 +64,7 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(product.Price);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}/ProductId")]
         public IActionResult GetProductId(int id)
         {
             var product = _sampleContext.FindProduct(id);

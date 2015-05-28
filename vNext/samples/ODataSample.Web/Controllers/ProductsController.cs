@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.OData;
 using Microsoft.Framework.DependencyInjection;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
 {
+    [EnableQuery]
     [Route("odata/Products")]
     public class ProductsController : Controller
     {

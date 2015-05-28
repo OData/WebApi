@@ -49,5 +49,15 @@ namespace Microsoft.AspNet.OData.Extensions
 
             return httpContext.ApplicationServices.GetRequiredService<IODataPathHandler>();
         }
+
+        public static IAssemblyProvider AssemblyProvider(this HttpContext httpContext)
+        {
+            if (httpContext == null)
+            {
+                throw Error.ArgumentNull("httpContext");
+            }
+
+            return httpContext.ApplicationServices.GetRequiredService<IAssemblyProvider>();
+        }
     }
 }

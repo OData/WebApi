@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.Framework.DependencyInjection;
@@ -33,6 +34,26 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             return request.HttpContext.ETagHandler();
+        }
+
+        public static IAssemblyProvider AssemblyProvider(this HttpRequest request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.HttpContext.AssemblyProvider();
+        }
+
+        public static bool HasQueryOptions(this HttpRequest request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request?.Query != null && request.Query.Count > 0;
         }
     }
 }

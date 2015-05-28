@@ -2,9 +2,11 @@
 using ODataSample.Web.Models;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNet.OData;
 
 namespace ODataSample.Web.Controllers
 {
+    [EnableQuery]
     [Route("odata/Customers")]
     public class CustomersController : Controller
     {

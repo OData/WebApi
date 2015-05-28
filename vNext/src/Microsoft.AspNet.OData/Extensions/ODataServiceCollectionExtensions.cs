@@ -18,6 +18,8 @@ namespace Microsoft.AspNet.OData.Extensions
             services.AddTransient<IConfigureOptions<ODataOptions>, ODataOptionsSetup>();
             services.ConfigureMvc(options =>
             {
+                options.InputFormatters.Insert(0, new ModernInputFormatter());
+
                 foreach (var outputFormatter in ODataOutputFormatters.Create())
                 {
                     options.OutputFormatters.Insert(0, outputFormatter);

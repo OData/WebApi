@@ -14,11 +14,19 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     public class DefaultODataRoutingConvention : IODataRoutingConvention
     {
+        private static readonly IDictionary<string, string> _actionNameMappings = new Dictionary<string, string>()
+        {
+            {"GET", "Get"},
+            {"POST", "Post"},
+            {"PUT", "Put"},
+            {"DELETE", "Delete"}
+        };
+
         public ActionDescriptor SelectAction(RouteContext routeContext)
         {
             var odataPath = routeContext.HttpContext.Request.ODataProperties().NewPath;
             var controllerName = string.Empty;
-            var actionName = "Get";
+            var actionName = _actionNameMappings[routeContext.HttpContext.Request.Method];
             var keys = new List<KeyValuePair<string, object>>();
 
             if (odataPath.FirstSegment is MetadataSegment)
@@ -61,9 +69,9 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             {
                 var c = d as ControllerActionDescriptor;
                 return c != null
-                && c.ControllerName == controllerName
-                && c.Name == actionName
-                && c.Parameters.Count == keys.Count;
+                    && c.ControllerName == controllerName
+                    && c.Name == actionName
+                    && (actionName != "Get" || c.Parameters.Count == keys.Count);
             });
 
             if (actionDescriptor == null)
@@ -71,7 +79,10 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 throw new NotSupportedException(string.Format("No action called '{0}' in '{1}Controller'", actionName, controllerName));
             }
 
-            WriteRouteData(routeContext, actionDescriptor.Parameters, keys);
+            if (keys.Any())
+            {
+                WriteRouteData(routeContext, actionDescriptor.Parameters, keys);
+            }
 
             return actionDescriptor;
         }

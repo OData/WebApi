@@ -104,7 +104,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
         private void WriteRouteData(RouteContext context, IList<ParameterDescriptor> parameters, IList<KeyValuePair<string, object>> keys)
         {
-            for (int i = 0; i < parameters.Count; ++i)
+            for (int i = 0; i < keys.Count; ++i)
             {
                 // TODO: check if parameters match keys.
                 context.RouteData.Values[parameters[i].Name] = keys[i].Value;

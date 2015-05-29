@@ -26,17 +26,20 @@ namespace Microsoft.AspNet.OData
             {
                 return;
             }
-
-            var result = context.Result as ObjectResult;
-            if (result == null)
-            {
-                throw Error.Argument("context", SRResources.QueryingRequiresObjectContent, context.Result.GetType().FullName);
-            }
-
+            
             var request = context.HttpContext.Request;
-            if (result.Value != null && request.HasQueryOptions())
+            if (request.HasQueryOptions())
             {
-                result.Value = ApplyQueryOptions(result.Value, request, context.ActionDescriptor);
+                var result = context.Result as ObjectResult;
+                if (result == null)
+                {
+                    throw Error.Argument("context", SRResources.QueryingRequiresObjectContent, context.Result.GetType().FullName);
+                }
+
+                if (result.Value != null)
+                {
+                    result.Value = ApplyQueryOptions(result.Value, request, context.ActionDescriptor);
+                }
             }
         }
 

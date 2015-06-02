@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
@@ -83,6 +84,41 @@ namespace System.Web.OData.Builder
 
             // Act
             Uri uri = entityContext.GenerateNavigationPropertyLink(ordersProperty, includeCast);
+
+            // Assert
+            Assert.Equal(expectedNavigationLink, uri.AbsoluteUri);
+        }
+
+        [Theory]
+        [InlineData(false, "http://localhost/MyOrders(42)/OrderLines(21)/OrderLines")]
+        [InlineData(true, "http://localhost/MyOrders(42)/OrderLines(21)/NS.OrderLine/OrderLines")]
+        public void GenerateNavigationLink_WorksToGenerateExpectedNavigationLink_ForContainedNavigation(
+            bool includeCast,
+            string expectedNavigationLink)
+        {
+            // NOTE: This test is generating a link that does not technically correspond to a valid model (specifically
+            //       the extra OrderLines navigation), but it allows us to validate the nested navigation scenario
+            //       without twisting the model unnecessarily.
+
+            // Arrange
+            IEdmEntityType myOrder = (IEdmEntityType)_model.Model.FindDeclaredType("NS.MyOrder");
+            IEdmNavigationProperty orderLinesProperty = myOrder.NavigationProperties().Single(x => x.ContainsTarget);
+
+            var serializerContext = new ODataSerializerContext
+            {
+                Model = _model.Model,
+                NavigationSource = _model.OrderLines,
+                Path = new ODataPath(
+                    new EntitySetPathSegment(_model.Model.FindDeclaredEntitySet("MyOrders")),
+                    new KeyValuePathSegment("42"),
+                    new NavigationPathSegment(orderLinesProperty),
+                    new KeyValuePathSegment("21")),
+                Url = GetODataRequest(_model.Model).GetUrlHelper(),
+            };
+            var entityContext = new EntityInstanceContext(serializerContext, _model.OrderLine.AsReference(), new { ID = 21 });
+
+            // Act
+            Uri uri = entityContext.GenerateNavigationPropertyLink(orderLinesProperty, includeCast);
 
             // Assert
             Assert.Equal(expectedNavigationLink, uri.AbsoluteUri);

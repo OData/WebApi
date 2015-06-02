@@ -223,6 +223,8 @@ namespace System.Web.OData.Builder
                             currentNavigationSource = navigationPathSegment.GetNavigationSource(previousNavigationSource);
                         }
 
+                        odataPath.Add(pathSegment);
+
                         // If we've found our target navigation in the path that means we've correctly populated the
                         // segments up to the navigation and we can ignore the remaining segments.
                         if (currentNavigationSource != null)
@@ -234,26 +236,10 @@ namespace System.Web.OData.Builder
                                 break;
                             }
                         }
-
-                        odataPath.Add(pathSegment);
                     }
                 }
 
-                if (segmentFound)
-                {
-                    if (odataPath.Count == 0)
-                    {
-                        // If we found our desired navigation source right at the beginning we need to make sure it
-                        // manifests as an EntitySetSegment.
-                        odataPath.Add(new EntitySetPathSegment((IEdmEntitySetBase)entityContext.NavigationSource));
-                    }
-                    else
-                    {
-                        // Otherwise add it as a NavigationPathSegment.
-                        odataPath.Add(new NavigationPathSegment(entityContext.NavigationSource.Name));
-                    }
-                }
-                else
+                if (!segmentFound)
                 {
                     // If the target navigation was not found in the current path that means we lack any context that
                     // would suggest a scenario other than directly accessing an entity set, so we must assume that's

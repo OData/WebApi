@@ -259,6 +259,31 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void CreateODataComplexValue_WritesDerivedComplexTypeProperty_IfNull()
+        {
+            // Arrange
+            Location location = new Location
+            {
+                Name = "Location #3",
+                Address = null
+            };
+
+            // Act
+            var odataValue = _serializer.CreateODataComplexValue(location, _locationTypeRef, new ODataSerializerContext { Model = _model });
+            ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
+
+            // Assert
+            Assert.Equal(complexValue.TypeName, "Default.Location");
+            Assert.Equal(2, complexValue.Properties.Count());
+
+            ODataProperty name = Assert.Single(complexValue.Properties.Where(p => p.Name == "Name"));
+            Assert.Equal("Location #3", name.Value);
+
+            ODataProperty address = Assert.Single(complexValue.Properties.Where(p => p.Name == "Address"));
+            Assert.Null(address.Value);
+        }
+
+        [Fact]
         public void CreateODataComplexValue_WritesAllDeclaredAndDynamicProperties_ForOpenComplexType()
         {
             // Arrange

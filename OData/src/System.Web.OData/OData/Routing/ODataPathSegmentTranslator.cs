@@ -18,7 +18,7 @@ namespace System.Web.OData.Routing
     /// <summary>
     /// Translator to convert an OData path segment to WebAPI path segment.
     /// </summary>
-    internal class ODataPathSegmentTranslator : PathSegmentTranslator<IEnumerable<ODataPathSegment>>
+    public class ODataPathSegmentTranslator : PathSegmentTranslator<IEnumerable<ODataPathSegment>>
     {
         private readonly IEdmModel _model;
         private readonly bool _enableUriTemplateParsing;

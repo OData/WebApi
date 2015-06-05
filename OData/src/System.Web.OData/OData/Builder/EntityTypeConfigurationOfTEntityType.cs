@@ -79,6 +79,16 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Marks this entity type as media type.
+        /// </summary>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public EntityTypeConfiguration<TEntityType> MediaType()
+        {
+            _configuration.HasStream = true;
+            return this;
+        }
+
+        /// <summary>
         /// Sets the base type of this entity type to <c>null</c> meaning that this entity type 
         /// does not derive from anything.
         /// </summary>

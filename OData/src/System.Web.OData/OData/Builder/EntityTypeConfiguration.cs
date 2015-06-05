@@ -48,6 +48,11 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this type is a media type.
+        /// </summary>
+        public virtual bool? HasStream { get; set; }
+
+        /// <summary>
         /// Gets the collection of <see cref="NavigationPropertyConfiguration"/> of this entity type.
         /// </summary>
         public virtual IEnumerable<NavigationPropertyConfiguration> NavigationProperties
@@ -99,6 +104,16 @@ namespace System.Web.OData.Builder
         public virtual EntityTypeConfiguration Abstract()
         {
             AbstractImpl();
+            return this;
+        }
+
+        /// <summary>
+        /// Marks this entity type as media type.
+        /// </summary>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public virtual EntityTypeConfiguration MediaType()
+        {
+            HasStream = true;
             return this;
         }
 

@@ -250,6 +250,24 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void CanCreateMediaTypeEntity()
+        {
+            // Arrange
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            builder
+                .EntityType<Vehicle>()
+                .MediaType();
+
+            // Act
+            var model = builder.GetEdmModel();
+            var edmCustomerType = model.FindType(typeof(Vehicle).FullName) as IEdmEntityType;
+
+            // Assert
+            Assert.True(edmCustomerType != null);
+            Assert.True(edmCustomerType.HasStream);
+        }
+
+        [Fact]
         public void CanCreateDerivedtypes()
         {
             var builder = new ODataModelBuilder();

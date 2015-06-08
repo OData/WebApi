@@ -123,6 +123,7 @@ namespace System.Web.OData
             builder.Add_Address_ComplexType();
             var customer = builder.EntityType<Customer>();
             customer.ComplexProperty(c => c.Address);
+            customer.Property(c => c.City);
             return builder;
         }
 

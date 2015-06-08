@@ -12,7 +12,7 @@ The scaffolding is used to generated the controller code for existing model clas
 
 Then, you can right click "Controller" folder, select "Add" -> "Controller". "Microsoft OData v4 Web API Controller" will be in the scaffolder list, as following:
 
-Select scaffoler item, please choose a model class you want to generate the controller:
+Select scaffoler item, please choose a model class you want to generate the controller. You can also select the "Using Async" if your data need to be got in Async call.
 
 After collect "Add", the controller will be genereted and added into your project. Meanwile, all reference needed, including OData Lib and OData Web API will be added into the project, too.
 
@@ -21,5 +21,16 @@ After genreating the controller code, you may need to add some code in WebApiCon
 
 Just need to copy/paste the code to WebApiConfig.cs.
 
-### Add the Code to return Data
-
+### Add the Code to retrieve Data
+As Scaffolding only genreate the frameowrk of controller code, data retrieve code should also be added into controller genreated. Here, we write a simple in memory data source and return all of them when call "GetProducts" method:
+#### Add in ProductsController:
+```
+private static List<Product> products = new List<Product>()
+{
+  new Product() {Id = 1, Name = "Test1"},
+};
+```
+#### Add in GetProducts Method:
+```
+return Ok(products);
+```

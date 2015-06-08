@@ -350,6 +350,29 @@ namespace System.Web.OData.Query
             Assert.Equal(1, results[2].CustomerId);
         }
 
+
+        [Fact]
+        public void ApplyTo_NestedProperties_WithDuplicateName_Succeeds()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType_With_Address().Add_Customers_EntitySet().GetServiceModel();
+            var orderByOption = new OrderByQueryOption("Address/City,City", new ODataQueryContext(model, typeof(Customer)));
+
+            var customers = (new List<Customer>{
+                new Customer { CustomerId = 1, City = "A", Address = new Address { City = "A" } },
+                new Customer { CustomerId = 2, City = "B", Address = new Address { City = "B" } },
+                new Customer { CustomerId = 3, City = "A", Address = new Address { City = "B" } }
+            }).AsQueryable();
+
+            // Act
+            var results = orderByOption.ApplyTo(customers).ToArray();
+
+            // Assert
+            Assert.Equal(1, results[0].CustomerId);
+            Assert.Equal(3, results[1].CustomerId);
+            Assert.Equal(2, results[2].CustomerId);
+        }
+
         [Fact]
         public void ApplyTo_NestedProperties_HandlesNullPropagation_Succeeds()
         {

@@ -207,7 +207,8 @@ namespace System.Web.OData.Query
             bool alreadyOrdered = false;
             IQueryable querySoFar = query;
 
-            HashSet<string> propertiesSoFar = new HashSet<string>();
+            HashSet<IEdmProperty> propertiesSoFar = new HashSet<IEdmProperty>();
+            HashSet<string> openPropertiesSoFar = new HashSet<string>();
             bool orderByItSeen = false;
 
             foreach (OrderByNode node in nodes)
@@ -221,11 +222,11 @@ namespace System.Web.OData.Query
                     OrderByDirection direction = propertyNode.Direction;
 
                     // This check prevents queries with duplicate properties (e.g. $orderby=Id,Id,Id,Id...) from causing stack overflows
-                    if (propertiesSoFar.Contains(property.Name))
+                    if (propertiesSoFar.Contains(property))
                     {
                         throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, property.Name));
                     }
-                    propertiesSoFar.Add(property.Name);
+                    propertiesSoFar.Add(property);
 
                     if (propertyNode.OrderByClause != null)
                     {
@@ -240,11 +241,11 @@ namespace System.Web.OData.Query
                 else if (openPropertyNode != null)
                 {
                     // This check prevents queries with duplicate properties (e.g. $orderby=Id,Id,Id,Id...) from causing stack overflows
-                    if (propertiesSoFar.Contains(openPropertyNode.PropertyName))
+                    if (openPropertiesSoFar.Contains(openPropertyNode.PropertyName))
                     {
                         throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, openPropertyNode.PropertyName));
                     }
-                    propertiesSoFar.Add(openPropertyNode.PropertyName);
+                    openPropertiesSoFar.Add(openPropertyNode.PropertyName);
                     Contract.Assert(openPropertyNode.OrderByClause != null);
                     querySoFar = AddOrderByQueryForProperty(query, querySettings, openPropertyNode.OrderByClause, querySoFar, openPropertyNode.Direction, alreadyOrdered);
                     alreadyOrdered = true;

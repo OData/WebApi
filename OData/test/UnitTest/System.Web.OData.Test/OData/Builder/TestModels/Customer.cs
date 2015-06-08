@@ -9,6 +9,7 @@ namespace System.Web.OData.Builder.TestModels
     {
         public int CustomerId { get; set; }
         public string Name { get; set; }
+        public string City { get; set; }
         public Address Address { get; set; }
         public string Website { get; set; }
         public string ShareSymbol { get; set; }

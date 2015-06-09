@@ -11,7 +11,7 @@ namespace System.Web.OData.Builder
     /// <summary>
     /// FunctionConfiguration represents an OData function that you wish to expose via your service.
     /// <remarks>
-    /// FunctionConfigurations are exposed via $metadata as a <FunctionImport/> element.
+    /// FunctionConfigurations are exposed via $metadata as a <Function/> element for bound function and <FunctionImport/> element for unbound function.
     /// </remarks>
     /// </summary>
     public class FunctionConfiguration : ProcedureConfiguration

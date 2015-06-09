@@ -108,6 +108,6 @@ public enum Color
 
 Here's the class heritance:
 
-![](../img/02-01-customer-order.png)
+![]({{site.baseurl}}/img/02-01-customer-order.png)
 
 

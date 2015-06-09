@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.OData.Builder
     /// <summary>
     /// ActionConfiguration represents an OData action that you wish to expose via your service.
     /// <remarks>
-    /// ActionConfigurations are exposed via $metadata as a <FunctionImport/> element.
+    /// ActionConfigurations are exposed via $metadata as a <Action/> element for bound function and <ActionImport/> element for unbound function.
     /// </remarks> 
     /// </summary>
     public class ActionConfiguration : ProcedureConfiguration

@@ -10,14 +10,24 @@ The installer of OData V4 Web API Scaffolding can be downloaded from Visual Stud
 ### Generate Controller Code With Scaffolding
 The scaffolding is used to generated the controller code for existing model class. Before using scaffolding, you need to create a web api project and add a model class, as following:
 
+![](https://github.com/LianwMS/WebApiF/blob/gh-pages/img/11-01-ProjAndClass.PNG)
+
 Then, you can right click "Controller" folder, select "Add" -> "Controller". "Microsoft OData v4 Web API Controller" will be in the scaffolder list, as following:
+
+![](https://github.com/LianwMS/WebApiF/blob/gh-pages/img/11-01-SelectController.PNG)
 
 Select scaffoler item, please choose a model class you want to generate the controller. You can also select the "Using Async" if your data need to be got in Async call.
 
+![](https://github.com/LianwMS/WebApiF/blob/gh-pages/img/11-01-SelectModelClass.PNG)
+
 After collect "Add", the controller will be genereted and added into your project. Meanwile, all reference needed, including OData Lib and OData Web API will be added into the project, too.
+
+![](https://github.com/LianwMS/WebApiF/blob/gh-pages/img/11-01-Complete.PNG)
 
 ### Change WebApiConfig.cs File
 After genreating the controller code, you may need to add some code in WebApiConfig.cs to generate model. Actually the code needed are in the comment of genreated controller:
+
+![](https://github.com/LianwMS/WebApiF/blob/gh-pages/img/11-01-ChangeWebApiConfig.PNG)
 
 Just need to copy/paste the code to WebApiConfig.cs.
 

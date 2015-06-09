@@ -13,7 +13,6 @@ namespace System.Web.Http.OData.Builder
     /// <summary>
     /// <see cref="ODataModelBuilder"/> is used to map CLR classes to an EDM model.
     /// </summary>
-    // TODO: Feature 443884: add support for starting from an original model
     public class ODataModelBuilder
     {
         private static readonly Version _defaultDataServiceVersion = new Version(3, 0);

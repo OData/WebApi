@@ -748,6 +748,24 @@ namespace System.Web.OData.Query
         }
 
         [Fact]
+        public void GetNextPageLink_WithNullRequestOrUri_Throws()
+        {
+            HttpRequestMessage nullRequest = null;
+            Assert.Throws<ArgumentNullException>(() => { ODataQueryOptions.GetNextPageLink(nullRequest, 10); });
+
+            HttpRequestMessage requestWithNullUri = new HttpRequestMessage() { RequestUri = null };
+            Assert.Throws<ArgumentNullException>(() => { ODataQueryOptions.GetNextPageLink(requestWithNullUri, 10); });
+        }
+
+        [Fact]
+        public void GetNextPageLink_WithRelativeUri_Throws()
+        {
+            Uri relativeUri = new Uri("/test", UriKind.Relative);
+            HttpRequestMessage requestWithRelativeUri = new HttpRequestMessage() { RequestUri = relativeUri };
+            Assert.Throws<ArgumentException>(() => { ODataQueryOptions.GetNextPageLink(requestWithRelativeUri, 10); });
+        }
+
+        [Fact]
         public void CanTurnOffAllValidation()
         {
             // Arrange

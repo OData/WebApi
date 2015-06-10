@@ -25,7 +25,6 @@ namespace System.Web.Http.OData.Builder.Conventions
 
             IEnumerable<IEdmProperty> keys = entityContext.EntityType.Key();
 
-            // TODO: BUG 453795: reflection cleanup
             if (keys.Count() == 1)
             {
                 return GetUriRepresentationForKeyValue(keys.First(), entityContext);

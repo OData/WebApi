@@ -575,7 +575,7 @@ namespace System.Web.OData.Formatter
             Type elementType;
             if (type.IsCollection(out elementType))
             {
-                if (typeof(IEdmComplexObject).IsAssignableFrom(elementType))
+                if (typeof(IEdmComplexObject).IsAssignableFrom(elementType) || typeof(IEdmEnumObject).IsAssignableFrom(elementType))
                 {
                     return ODataPayloadKind.Collection;
                 }
@@ -590,7 +590,7 @@ namespace System.Web.OData.Formatter
             }
             else
             {
-                if (typeof(IEdmComplexObject).IsAssignableFrom(elementType))
+                if (typeof(IEdmComplexObject).IsAssignableFrom(elementType) || typeof(IEdmEnumObject).IsAssignableFrom(elementType))
                 {
                     return ODataPayloadKind.Property;
                 }

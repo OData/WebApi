@@ -2371,6 +2371,20 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
+        public void ModelBuilder_MediaTypeAttribute()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Vehicle>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.True(model.AssertHasEntityType(typeof(Vehicle)).HasStream);
+        }
+
+        [Fact]
         public void ODataConventionModelBuilder_RequiredAttribute_WorksOnComplexTypeProperty()
         {
             // Arrange

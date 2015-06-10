@@ -43,6 +43,7 @@ namespace System.Web.OData.Builder
             new NotNavigableAttributeEdmPropertyConvention(),
             new NotExpandableAttributeEdmPropertyConvention(),
             new NotCountableAttributeEdmPropertyConvention(),
+            new MediaTypeAttributeConvention(),
 
             // INavigationSourceConvention's
             new SelfLinksGenerationConvention(),

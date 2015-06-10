@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace System.Web.OData.Builder.TestModels
 {
+    [MediaType]
     public abstract class Vehicle
     {
         [Key]

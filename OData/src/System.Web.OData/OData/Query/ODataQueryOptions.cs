@@ -516,11 +516,19 @@ namespace System.Web.OData.Query
         /// <returns>A next page link.</returns>
         public static Uri GetNextPageLink(HttpRequestMessage request, int pageSize)
         {
-            Contract.Assert(request != null);
-            Contract.Assert(request.RequestUri != null);
-            Contract.Assert(request.RequestUri.IsAbsoluteUri);
+            if (request == null || request.RequestUri == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
 
-            return GetNextPageLink(request.RequestUri, request.GetQueryNameValuePairs(), pageSize);
+            Uri requestUri = request.RequestUri;
+
+            if (!requestUri.IsAbsoluteUri)
+            {
+                throw Error.ArgumentUriNotAbsolute("request", requestUri);
+            }
+
+            return GetNextPageLink(requestUri, request.GetQueryNameValuePairs(), pageSize);
         }
 
         internal static Uri GetNextPageLink(Uri requestUri, int pageSize)

@@ -128,8 +128,13 @@ namespace System.Web.OData.Query.Expressions
             // The user asked for all the structural properties on this instance.
             if (Instance != null)
             {
-                foreach (IEdmStructuralProperty property in type.StructuralProperties())
+                foreach (IEdmProperty property in type.DeclaredProperties)
                 {
+                    if(!property.Type.IsStructured())
+                    {
+                        continue;
+                    }
+
                     object propertyValue;
                     if (TryGetPropertyValue(property.Name, out propertyValue))
                     {

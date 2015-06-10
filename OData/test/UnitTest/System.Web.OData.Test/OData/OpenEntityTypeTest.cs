@@ -121,6 +121,26 @@ namespace System.Web.OData
             Assert.Equal(expectedResult, response.Content.ReadAsStringAsync().Result);
         }
 
+        [Theory]
+        [InlineData("(1)/Color/$value", "Red")]
+        [InlineData("(1)/Color", "Red")]
+        [InlineData("(1)/DeclaredColors", "0")]
+        public void Get_UnTyped_Enum_Collection_Property(string requestUri, string expectedContainsResult)
+        {
+            // Arrange
+            var configuration = new[] { typeof(UntypedSimpleOpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetUntypedEdmModel());
+
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpResponseMessage response = client.GetAsync(_untypedCustomerRequestRooturl + requestUri).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Contains(expectedContainsResult, response.Content.ReadAsStringAsync().Result);
+        }
+
         [Fact]
         public void CanDispatch_ActionPayload_With_EdmEnumObject()
         {
@@ -526,6 +546,15 @@ namespace System.Web.OData
             object addresses;
             GetCustomers()[0].TryGetPropertyValue("DeclaredAddresses", out addresses);
             return Ok((EdmComplexObjectCollection)addresses);
+        }
+
+
+        [EnableQuery]
+        public IHttpActionResult GetColor(int key)
+        {
+            object color;
+            GetCustomers()[0].TryGetPropertyValue("Color", out color);
+            return Ok((EdmEnumObject)color);
         }
 
         [EnableQuery]

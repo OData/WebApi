@@ -7,6 +7,7 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
+using System.Web.OData.Query;
 using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 
@@ -108,6 +109,11 @@ namespace System.Web.OData
         /// Gets the <see cref="ODataPath"/>.
         /// </summary>
         public ODataPath Path { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the query parameters that are already applied in queries.
+        /// </summary>
+        public AllowedQueryOptions AppliedQueryOptions { get; set; }
 
         private static IEdmNavigationSource GetNavigationSource(IEdmModel model, IEdmType elementType, ODataPath odataPath)
         {

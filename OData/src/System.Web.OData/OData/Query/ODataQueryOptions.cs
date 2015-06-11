@@ -240,6 +240,7 @@ namespace System.Web.OData.Query
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The settings to use in query composition.</param>
         /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "These are simple conversion function and cannot be split up.")]
         public virtual IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
         {
             if (query == null)
@@ -255,12 +256,12 @@ namespace System.Web.OData.Query
             IQueryable result = query;
 
             // Construct the actual query and apply them in the following order: filter, orderby, skip, top
-            if (Filter != null)
+            if (IsAvailableODataQueryOption(Filter, AllowedQueryOptions.Filter))
             {
                 result = Filter.ApplyTo(result, querySettings, _assembliesResolver);
             }
 
-            if (Count != null)
+            if (IsAvailableODataQueryOption(Count, AllowedQueryOptions.Count))
             {
                 if (Request.ODataProperties().TotalCount == null)
                 {
@@ -284,7 +285,9 @@ namespace System.Web.OData.Query
             // If either is present in the query and we have permission,
             // generate an $orderby that will produce a stable sort.
             if (querySettings.EnsureStableOrdering &&
-                (Skip != null || Top != null || querySettings.PageSize.HasValue))
+                (IsAvailableODataQueryOption(Skip, AllowedQueryOptions.Skip) ||
+                 IsAvailableODataQueryOption(Top, AllowedQueryOptions.Top) || 
+                 querySettings.PageSize.HasValue))
             {
                 // If there is no OrderBy present, we manufacture a default.
                 // If an OrderBy is already present, we add any missing
@@ -296,32 +299,44 @@ namespace System.Web.OData.Query
                             : EnsureStableSortOrderBy(orderBy, Context);
             }
 
-            if (orderBy != null)
+            if (IsAvailableODataQueryOption(orderBy, AllowedQueryOptions.OrderBy))
             {
                 result = orderBy.ApplyTo(result, querySettings);
             }
 
-            if (Skip != null)
+            if (IsAvailableODataQueryOption(Skip, AllowedQueryOptions.Skip))
             {
                 result = Skip.ApplyTo(result, querySettings);
             }
 
-            if (Top != null)
+            if (IsAvailableODataQueryOption(Top, AllowedQueryOptions.Top))
             {
                 result = Top.ApplyTo(result, querySettings);
             }
 
             if (SelectExpand != null)
             {
-                SelectExpandClause processedClause = SelectExpand.ProcessLevels();
-                SelectExpandQueryOption newSelectExpand = new SelectExpandQueryOption(
-                    SelectExpand.RawSelect,
-                    SelectExpand.RawExpand,
-                    SelectExpand.Context,
-                    processedClause);
+                bool selectAvailable = IsAvailableODataQueryOption(SelectExpand.RawSelect, AllowedQueryOptions.Select);
+                bool expandAvailable = IsAvailableODataQueryOption(SelectExpand.RawExpand, AllowedQueryOptions.Expand);
+                if (selectAvailable || expandAvailable)
+                {
+                    if ((!selectAvailable && SelectExpand.RawSelect != null) || (!expandAvailable && SelectExpand.RawExpand != null))
+                    {
+                        SelectExpand = new SelectExpandQueryOption(
+                            selectAvailable ? RawValues.Select : null,
+                            expandAvailable ? RawValues.Expand : null,
+                            SelectExpand.Context);
+                    }
+                    SelectExpandClause processedClause = SelectExpand.ProcessLevels();
+                    SelectExpandQueryOption newSelectExpand = new SelectExpandQueryOption(
+                        SelectExpand.RawSelect,
+                        SelectExpand.RawExpand,
+                        SelectExpand.Context,
+                        processedClause);
 
-                Request.ODataProperties().SelectExpandClause = processedClause;
-                result = newSelectExpand.ApplyTo(result, querySettings);
+                    Request.ODataProperties().SelectExpandClause = processedClause;
+                    result = newSelectExpand.ApplyTo(result, querySettings);
+                }
             }
 
             if (querySettings.PageSize.HasValue)
@@ -364,15 +379,27 @@ namespace System.Web.OData.Query
 
             if (SelectExpand != null)
             {
-                SelectExpandClause processedClause = SelectExpand.ProcessLevels();
-                SelectExpandQueryOption newSelectExpand = new SelectExpandQueryOption(
-                    SelectExpand.RawSelect,
-                    SelectExpand.RawExpand,
-                    SelectExpand.Context,
-                    processedClause);
+                bool selectAvailable = IsAvailableODataQueryOption(SelectExpand.RawSelect, AllowedQueryOptions.Select);
+                bool expandAvailable = IsAvailableODataQueryOption(SelectExpand.RawExpand, AllowedQueryOptions.Expand);
+                if (selectAvailable || expandAvailable)
+                {
+                    if ((!selectAvailable && SelectExpand.RawSelect != null) || (!expandAvailable && SelectExpand.RawExpand != null))
+                    {
+                        SelectExpand = new SelectExpandQueryOption(
+                            selectAvailable ? RawValues.Select : null,
+                            expandAvailable ? RawValues.Expand : null,
+                            SelectExpand.Context);
+                    }
+                    SelectExpandClause processedClause = SelectExpand.ProcessLevels();
+                    SelectExpandQueryOption newSelectExpand = new SelectExpandQueryOption(
+                        SelectExpand.RawSelect,
+                        SelectExpand.RawExpand,
+                        SelectExpand.Context,
+                        processedClause);
 
-                Request.ODataProperties().SelectExpandClause = processedClause;
-                return newSelectExpand.ApplyTo(entity, querySettings);
+                    Request.ODataProperties().SelectExpandClause = processedClause;
+                    return newSelectExpand.ApplyTo(entity, querySettings);
+                }
             }
 
             return entity;
@@ -679,6 +706,11 @@ namespace System.Web.OData.Query
                         Context.NavigationSource,
                         new Dictionary<string, string> { { "$count", "true" } }));
             }
+        }
+
+        private bool IsAvailableODataQueryOption(object queryOption, AllowedQueryOptions queryOptionFlag)
+        {
+            return ((queryOption != null) && ((Context.AppliedQueryOptions & queryOptionFlag) == AllowedQueryOptions.None));
         }
     }
 }

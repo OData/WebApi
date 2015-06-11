@@ -5,12 +5,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Web.Http;
+using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
+using System.Web.OData.Test;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -980,6 +984,100 @@ namespace System.Web.OData.Query
             Assert.NotNull(queryOptions.SelectExpand);
             Assert.NotNull(queryOptions.Count);
         }
+
+        [Fact]
+        public void ODataQueryOptions_CanSetToApplied()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                "http://localhost/?$filter=Id eq 42&$orderby=Id&$skip=42&$top=42&$count=true&$select=Id&$expand=Orders");
+
+            // Act
+            ODataQueryOptions queryOptions = new ODataQueryOptions(context, request);
+            queryOptions.Context.AppliedQueryOptions = AllowedQueryOptions.Filter | AllowedQueryOptions.OrderBy;
+
+            // Assert
+            Assert.True((queryOptions.Context.AppliedQueryOptions & AllowedQueryOptions.Filter) != AllowedQueryOptions.None);
+            Assert.True((queryOptions.Context.AppliedQueryOptions & AllowedQueryOptions.OrderBy) != AllowedQueryOptions.None);
+            Assert.True((queryOptions.Context.AppliedQueryOptions & AllowedQueryOptions.Skip) == AllowedQueryOptions.None);
+            Assert.True((queryOptions.Context.AppliedQueryOptions & AllowedQueryOptions.Select) == AllowedQueryOptions.None);
+            Assert.True((queryOptions.Context.AppliedQueryOptions & AllowedQueryOptions.Expand) == AllowedQueryOptions.None);
+            Assert.True((queryOptions.Context.AppliedQueryOptions & AllowedQueryOptions.Count) == AllowedQueryOptions.None);
+        }
+
+        [Fact]
+        public void ODataQueryOptions_SetToApplied()
+        {
+            string url = "http://localhost/odata/EntityModels?$filter=ID eq 1&$skip=1&$select=A&$expand=ExpandProp";
+            HttpServer server = CreateServer();
+            HttpClient client = new HttpClient(server);
+
+            HttpResponseMessage response = client.GetAsync(url).Result;
+            var responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("Property", responseString);
+            Assert.DoesNotContain("1", responseString);
+            Assert.DoesNotContain("ExpandProperty", responseString);
+        }
+
+        private static HttpServer CreateServer()
+        {
+            HttpConfiguration configuration = new HttpConfiguration();
+
+            configuration.Services.Replace(
+                typeof(IAssembliesResolver),
+                new TestAssemblyResolver(
+                    typeof(EntityModelsController)));
+
+            ODataModelBuilder builder = new ODataConventionModelBuilder();
+
+            builder.EntitySet<ODataQueryOptionTest_EntityModel>("EntityModels");
+
+            IEdmModel model = builder.GetEdmModel();
+
+            configuration.MapODataServiceRoute("odata", "odata", model);
+
+            return new HttpServer(configuration);
+        }
+
+    }
+    
+    public class EntityModelsController : ApiController
+    {
+        private static readonly IQueryable<ODataQueryOptionTest_EntityModel> _entityModels;
+
+        public IHttpActionResult Get(ODataQueryOptions<ODataQueryOptionTest_EntityModel> queryOptions)
+        {
+            // Don't apply Filter and expand, but apply Select.
+            queryOptions.Context.AppliedQueryOptions = AllowedQueryOptions.Skip | AllowedQueryOptions.Filter | AllowedQueryOptions.Expand;
+            var res = queryOptions.ApplyTo(_entityModels);
+            return Ok(res.AsQueryable());
+        }
+
+        private static IEnumerable<ODataQueryOptionTest_EntityModel> CreateODataQueryOptionTest_EntityModel()
+        {
+            var entityModel = new ODataQueryOptionTest_EntityModel
+            {
+                ID = 1,
+                A = "Property",
+                ExpandProp = new ODataQueryOptionTest_EntityModelMultipleKeys
+                {
+                    ID1 = 2,
+                    ID2 = 3,
+                    A = "ExpandProperty"
+                }
+            };
+            yield return entityModel;
+        }
+
+        static EntityModelsController()
+        {
+            _entityModels = CreateODataQueryOptionTest_EntityModel().AsQueryable();
+        }
     }
 
     public class ODataQueryOptionTest_ComplexModel
@@ -994,6 +1092,8 @@ namespace System.Web.OData.Query
         public int ID { get; set; }
 
         public string A { get; set; }
+
+        public ODataQueryOptionTest_EntityModelMultipleKeys ExpandProp { get; set; }
     }
 
     public class ODataQueryOptionTest_EntityModelMultipleKeys

@@ -201,57 +201,64 @@ namespace System.Web.OData.Builder
             }
             else
             {
-                // If the navigation is not a singleton we need to walk all of the path segments to generate a
-                // contextually accurate URI.
-                bool segmentFound = false;
-                if (entityContext.SerializerContext.Path != null)
-                {
-                    IEdmNavigationSource previousNavigationSource = null;
-                    foreach (ODataPathSegment pathSegment in entityContext.SerializerContext.Path.Segments)
-                    {
-                        IEdmNavigationSource currentNavigationSource = null;
-
-                        var entitySetPathSegment = pathSegment as EntitySetPathSegment;
-                        if (entitySetPathSegment != null)
-                        {
-                            currentNavigationSource = entitySetPathSegment.EntitySetBase;
-                        }
-
-                        var navigationPathSegment = pathSegment as NavigationPathSegment;
-                        if (navigationPathSegment != null)
-                        {
-                            currentNavigationSource = navigationPathSegment.GetNavigationSource(previousNavigationSource);
-                        }
-
-                        odataPath.Add(pathSegment);
-
-                        // If we've found our target navigation in the path that means we've correctly populated the
-                        // segments up to the navigation and we can ignore the remaining segments.
-                        if (currentNavigationSource != null)
-                        {
-                            previousNavigationSource = currentNavigationSource;
-                            if (currentNavigationSource == entityContext.NavigationSource)
-                            {
-                                segmentFound = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (!segmentFound)
-                {
-                    // If the target navigation was not found in the current path that means we lack any context that
-                    // would suggest a scenario other than directly accessing an entity set, so we must assume that's
-                    // the case.
-                    odataPath.Clear();
-                    odataPath.Add(new EntitySetPathSegment((IEdmEntitySetBase)entityContext.NavigationSource));
-                }
-
-                odataPath.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext)));
+                GenerateBaseODataPathSegmentsForNonSingletons(entityContext, odataPath);
             }
 
             return odataPath;
+        }
+
+        private static void GenerateBaseODataPathSegmentsForNonSingletons(
+            EntityInstanceContext entityContext,
+            IList<ODataPathSegment> odataPath)
+        {
+            // If the navigation is not a singleton we need to walk all of the path segments to generate a
+            // contextually accurate URI.
+            bool segmentFound = false;
+            if (entityContext.SerializerContext.Path != null)
+            {
+                IEdmNavigationSource previousNavigationSource = null;
+                foreach (ODataPathSegment pathSegment in entityContext.SerializerContext.Path.Segments)
+                {
+                    IEdmNavigationSource currentNavigationSource = null;
+
+                    var entitySetPathSegment = pathSegment as EntitySetPathSegment;
+                    if (entitySetPathSegment != null)
+                    {
+                        currentNavigationSource = entitySetPathSegment.EntitySetBase;
+                    }
+
+                    var navigationPathSegment = pathSegment as NavigationPathSegment;
+                    if (navigationPathSegment != null)
+                    {
+                        currentNavigationSource = navigationPathSegment.GetNavigationSource(previousNavigationSource);
+                    }
+
+                    odataPath.Add(pathSegment);
+
+                    // If we've found our target navigation in the path that means we've correctly populated the
+                    // segments up to the navigation and we can ignore the remaining segments.
+                    if (currentNavigationSource != null)
+                    {
+                        previousNavigationSource = currentNavigationSource;
+                        if (currentNavigationSource == entityContext.NavigationSource)
+                        {
+                            segmentFound = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!segmentFound)
+            {
+                // If the target navigation was not found in the current path that means we lack any context that
+                // would suggest a scenario other than directly accessing an entity set, so we must assume that's
+                // the case.
+                odataPath.Clear();
+                odataPath.Add(new EntitySetPathSegment((IEdmEntitySetBase)entityContext.NavigationSource));
+            }
+
+            odataPath.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext)));
         }
     }
 }

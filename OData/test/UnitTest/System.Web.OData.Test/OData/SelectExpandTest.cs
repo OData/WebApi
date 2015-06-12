@@ -70,7 +70,7 @@ namespace System.Web.OData
             Assert.Equal("http://localhost/odata/$metadata#SelectExpandTestCustomers(ID,Orders)", result["@odata.context"]);
             ValidateCustomer(result["value"][0]);
         }
-
+    
         [Fact]
         public void SelectExpand_Works_WithNestedFilter()
         {
@@ -243,6 +243,31 @@ namespace System.Web.OData
         }
 
         [Fact]
+        public void SelectExpand_Works_WithComplexTypes()
+        {
+            string uri = "/api/?id=42&$expand=Orders";
+
+            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
+
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(42, result["ID"]);
+
+            var orders = result["Orders"] as JArray;
+            Assert.NotNull(orders);
+            Assert.Equal(2, orders.Count);
+            var order = orders[0];
+            Assert.Equal(24, order["ID"]);
+            Assert.Equal(100, order["Amount"]);
+            var status = order["Status"] as JObject;
+            Assert.NotNull(status);
+            Assert.Equal("001", status["StatusCode"]);
+            DateTime issueDate = (DateTime)status["IssueDate"];
+            Assert.Equal(2015, issueDate.Year);
+        }
+
+        [Fact]
         public void SelectExpand_Works_WithLevels()
         {
             // Arrange
@@ -356,6 +381,7 @@ namespace System.Web.OData
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<SelectExpandTestCustomer>("SelectExpandTestCustomers");
             builder.EntitySet<SelectExpandTestOrder>("SelectExpandTestOrders");
+            builder.ComplexType<SelectExpandTestOrderStatus>();
             builder.Ignore<SelectExpandTestSpecialCustomer>();
             builder.Ignore<SelectExpandTestSpecialOrder>();
             return builder.GetEdmModel();
@@ -412,7 +438,7 @@ namespace System.Web.OData
             get
             {
                 SelectExpandTestCustomer customer = new SelectExpandTestCustomer { ID = 42, Name = "Name" };
-                SelectExpandTestOrder order = new SelectExpandTestOrder { ID = 24, Amount = 100, Customer = customer };
+                SelectExpandTestOrder order = new SelectExpandTestOrder { ID = 24, Amount = 100, Customer = customer , Status=new SelectExpandTestOrderStatus(){ IssueDate=new DateTime(2015,01,02), StatusCode="001" }};
                 SelectExpandTestOrder anotherOrder = new SelectExpandTestSpecialOrder
                 {
                     ID = 28,
@@ -511,7 +537,11 @@ namespace System.Web.OData
         [DataMember(Name = "SpecialOrdersAlias")]
         public SelectExpandTestSpecialOrderWithAlias[] SpecialOrders { get; set; }
     }
-
+    public class SelectExpandTestOrderStatus
+    {
+        public DateTime IssueDate { get; set; }
+        public string StatusCode { get; set; }
+    }
     public class SelectExpandTestOrder
     {
         public int ID { get; set; }
@@ -519,6 +549,8 @@ namespace System.Web.OData
         public int Amount { get; set; }
 
         public SelectExpandTestCustomer Customer { get; set; }
+
+        public SelectExpandTestOrderStatus Status { get; set; }
     }
 
     public class SelectExpandTestSpecialOrder : SelectExpandTestOrder

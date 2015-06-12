@@ -102,7 +102,38 @@ namespace System.Web.OData.Query.Expressions
         {
             return ToDictionary(_mapperProvider);
         }
-
+        private bool IsStructuralOrComplex(IEdmProperty property)
+        {
+            bool result = false;
+            switch(property.PropertyKind)
+            {
+                case EdmPropertyKind.Structural:
+                    result = true;
+                    break;
+                case EdmPropertyKind.Navigation:
+                    {
+                        IEdmType propertyDefinition = property.Type.Definition;
+                        switch (propertyDefinition.TypeKind)
+                        {
+                            case EdmTypeKind.Collection:
+                                break;
+                            case EdmTypeKind.Entity:
+                                {
+                                    IEdmEntityType edmEntityType = propertyDefinition as IEdmEntityType;
+                                    if(edmEntityType!=null&&edmEntityType.DeclaredKey==null)
+                                    {
+                                       result = true;//Complex Type
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case EdmPropertyKind.None:
+                    break;
+            }
+            return result;
+        }
         public IDictionary<string, object> ToDictionary(Func<IEdmModel, IEdmStructuredType, IPropertyMapper> mapperProvider)
         {
             if (mapperProvider == null)
@@ -130,21 +161,19 @@ namespace System.Web.OData.Query.Expressions
             {
                 foreach (IEdmProperty property in type.DeclaredProperties)
                 {
-                    if(!property.Type.IsStructured())
+                    if (IsStructuralOrComplex(property))
                     {
-                        continue;
-                    }
-
-                    object propertyValue;
-                    if (TryGetPropertyValue(property.Name, out propertyValue))
-                    {
-                        string mappingName = mapper.MapProperty(property.Name);
-                        if (String.IsNullOrWhiteSpace(mappingName))
+                        object propertyValue;
+                        if (TryGetPropertyValue(property.Name, out propertyValue))
                         {
-                            throw Error.InvalidOperation(SRResources.InvalidPropertyMapping, property.Name);
-                        }
+                            string mappingName = mapper.MapProperty(property.Name);
+                            if (String.IsNullOrWhiteSpace(mappingName))
+                            {
+                                throw Error.InvalidOperation(SRResources.InvalidPropertyMapping, property.Name);
+                            }
 
-                        dictionary[mappingName] = propertyValue;
+                            dictionary[mappingName] = propertyValue;
+                        }
                     }
                 }
             }

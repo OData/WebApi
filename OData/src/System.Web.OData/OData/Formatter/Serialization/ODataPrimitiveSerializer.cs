@@ -144,8 +144,45 @@ namespace System.Web.OData.Formatter.Serialization
 
                     case TypeCode.DateTime:
                         DateTime dateTime = (DateTime)value;
+
                         TimeZoneInfo timeZone = TimeZoneInfoHelper.TimeZone;
-                        if (dateTime.Kind == DateTimeKind.Utc || dateTime.Kind == DateTimeKind.Local)
+                        if (timeZone.BaseUtcOffset.Hours >= 0)
+                        {
+                            if (dateTime <= DateTime.MinValue + timeZone.BaseUtcOffset)
+                            {
+                                return DateTimeOffset.MinValue;
+                            }
+                        }
+                        else
+                        {
+                            if (dateTime >= DateTime.MaxValue + timeZone.BaseUtcOffset)
+                            {
+                                return DateTimeOffset.MaxValue;
+                            }
+                        }
+
+                        if (dateTime.Kind == DateTimeKind.Local)
+                        {
+                            TimeZoneInfo localTimeZoneInfo = TimeZoneInfo.Local;
+                            if (localTimeZoneInfo.BaseUtcOffset.Hours < 0)
+                            {
+                                if (dateTime >= DateTime.MaxValue + localTimeZoneInfo.BaseUtcOffset)
+                                {
+                                    return DateTimeOffset.MaxValue;
+                                }
+                            }
+                            else
+                            {
+                                if (dateTime <= DateTime.MinValue + localTimeZoneInfo.BaseUtcOffset)
+                                {
+                                    return DateTimeOffset.MinValue;
+                                }
+                            }
+
+                            return TimeZoneInfo.ConvertTime(new DateTimeOffset(dateTime), timeZone);
+                        }
+
+                        if (dateTime.Kind == DateTimeKind.Utc)
                         {
                             return TimeZoneInfo.ConvertTime(new DateTimeOffset(dateTime), timeZone);
                         }

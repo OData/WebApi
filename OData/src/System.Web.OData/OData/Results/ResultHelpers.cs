@@ -94,7 +94,7 @@ namespace System.Web.OData.Results
 
             ODL.ODataPath odlPath = path.ODLPath;
             odlPath = new ContainmentPathBuilder().TryComputeCanonicalContainingPath(odlPath);
-            path = ODataPathSegmentTranslator.TranslateODLPathToWebAPIPath(
+            path = ODataPathSegmentTranslator.TranslateODataLibPathToWebApiPath(
                 odlPath,
                 entityContext.EdmModel,
                 unresolvedPathSegment: null,

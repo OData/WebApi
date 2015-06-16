@@ -202,7 +202,7 @@ namespace System.Web.OData.Routing
                 }
             }
 
-            ODataPath webAPIPath = ODataPathSegmentTranslator.TranslateODLPathToWebAPIPath(
+            ODataPath webAPIPath = ODataPathSegmentTranslator.TranslateODataLibPathToWebApiPath(
                 path,
                 model,
                 unresolvedPathSegment,

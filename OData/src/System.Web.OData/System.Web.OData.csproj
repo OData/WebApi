@@ -77,6 +77,9 @@
     <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\MediaTypeAttributeConvention.cs" />
     <Compile Include="OData\Builder\MediaTypeAttribute.cs" />
+    <Compile Include="OData\Builder\CapabilitiesVocabularyConstants.cs" />
+    <Compile Include="OData\Builder\CapabilitiesVocabularyExtensionMethods.cs" />
+    <Compile Include="OData\Builder\CapabilitiesNavigationType.cs" />
     <Compile Include="OData\EdmEnumObjectCollection.cs" />
     <Compile Include="OData\EdmEnumObject.cs" />
     <Compile Include="OData\IEdmEnumObject.cs" />
@@ -475,6 +478,5 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

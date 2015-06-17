@@ -268,21 +268,15 @@ namespace System.Web.OData.Builder
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
             // Remove from the ignored properties
-            if (RemovedProperties.Contains(propertyInfo))
+            if (RemovedProperties.Any(prop => prop.Name.Equals(propertyInfo.Name)))
             {
-                RemovedProperties.Remove(propertyInfo);
+                RemovedProperties.Remove(RemovedProperties.First(prop => prop.Name.Equals(propertyInfo.Name)));
             }
 
-            PrimitivePropertyConfiguration propertyConfiguration = null;
-            if (ExplicitProperties.ContainsKey(propertyInfo))
-            {
-                propertyConfiguration = ExplicitProperties[propertyInfo] as PrimitivePropertyConfiguration;
-                if (propertyConfiguration == null)
-                {
-                    throw Error.Argument("propertyInfo", SRResources.MustBePrimitiveProperty, propertyInfo.Name, ClrType.FullName);
-                }
-            }
-            else
+            PrimitivePropertyConfiguration propertyConfiguration =
+                ValidatePropertyNotAlreadyDefinedOtherTypes<PrimitivePropertyConfiguration>(propertyInfo,
+                    SRResources.MustBePrimitiveProperty);
+            if (propertyConfiguration == null)
             {
                 propertyConfiguration = new PrimitivePropertyConfiguration(propertyInfo, this);
                 ExplicitProperties[propertyInfo] = propertyConfiguration;
@@ -317,21 +311,15 @@ namespace System.Web.OData.Builder
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
             // Remove from the ignored properties
-            if (RemovedProperties.Contains(propertyInfo))
+            if (RemovedProperties.Any(prop => prop.Name.Equals(propertyInfo.Name)))
             {
-                RemovedProperties.Remove(propertyInfo);
+                RemovedProperties.Remove(RemovedProperties.First(prop => prop.Name.Equals(propertyInfo.Name)));
             }
 
-            EnumPropertyConfiguration propertyConfiguration;
-            if (ExplicitProperties.ContainsKey(propertyInfo))
-            {
-                propertyConfiguration = ExplicitProperties[propertyInfo] as EnumPropertyConfiguration;
-                if (propertyConfiguration == null)
-                {
-                    throw Error.Argument("propertyInfo", SRResources.MustBeEnumProperty, propertyInfo.Name, ClrType.FullName);
-                }
-            }
-            else
+            EnumPropertyConfiguration propertyConfiguration =
+                ValidatePropertyNotAlreadyDefinedOtherTypes<EnumPropertyConfiguration>(propertyInfo,
+                    SRResources.MustBeEnumProperty);
+            if (propertyConfiguration == null)
             {
                 propertyConfiguration = new EnumPropertyConfiguration(propertyInfo, this);
                 ExplicitProperties[propertyInfo] = propertyConfiguration;
@@ -367,21 +355,15 @@ namespace System.Web.OData.Builder
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
             // Remove from the ignored properties
-            if (RemovedProperties.Contains(propertyInfo))
+            if (RemovedProperties.Any(prop => prop.Name.Equals(propertyInfo.Name)))
             {
-                RemovedProperties.Remove(propertyInfo);
+                RemovedProperties.Remove(RemovedProperties.First(prop => prop.Name.Equals(propertyInfo.Name)));
             }
 
-            ComplexPropertyConfiguration propertyConfiguration = null;
-            if (ExplicitProperties.ContainsKey(propertyInfo))
-            {
-                propertyConfiguration = ExplicitProperties[propertyInfo] as ComplexPropertyConfiguration;
-                if (propertyConfiguration == null)
-                {
-                    throw Error.Argument("propertyInfo", SRResources.MustBeComplexProperty, propertyInfo.Name, ClrType.FullName);
-                }
-            }
-            else
+            ComplexPropertyConfiguration propertyConfiguration =
+                ValidatePropertyNotAlreadyDefinedOtherTypes<ComplexPropertyConfiguration>(propertyInfo,
+                    SRResources.MustBeComplexProperty);
+            if (propertyConfiguration == null)
             {
                 propertyConfiguration = new ComplexPropertyConfiguration(propertyInfo, this);
                 ExplicitProperties[propertyInfo] = propertyConfiguration;
@@ -414,21 +396,15 @@ namespace System.Web.OData.Builder
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
             // Remove from the ignored properties
-            if (IgnoredProperties.Contains(propertyInfo))
+            if (RemovedProperties.Any(prop => prop.Name.Equals(propertyInfo.Name)))
             {
-                RemovedProperties.Remove(propertyInfo);
+                RemovedProperties.Remove(RemovedProperties.First(prop => prop.Name.Equals(propertyInfo.Name)));
             }
 
-            CollectionPropertyConfiguration propertyConfiguration;
-            if (ExplicitProperties.ContainsKey(propertyInfo))
-            {
-                propertyConfiguration = ExplicitProperties[propertyInfo] as CollectionPropertyConfiguration;
-                if (propertyConfiguration == null)
-                {
-                    throw Error.Argument("propertyInfo", SRResources.MustBeCollectionProperty, propertyInfo.Name, propertyInfo.DeclaringType.FullName);
-                }
-            }
-            else
+            CollectionPropertyConfiguration propertyConfiguration =
+                ValidatePropertyNotAlreadyDefinedOtherTypes<CollectionPropertyConfiguration>(propertyInfo,
+                    SRResources.MustBeCollectionProperty);
+            if (propertyConfiguration == null)
             {
                 propertyConfiguration = new CollectionPropertyConfiguration(propertyInfo, this);
                 ExplicitProperties[propertyInfo] = propertyConfiguration;
@@ -509,12 +485,12 @@ namespace System.Web.OData.Builder
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
 
-            if (ExplicitProperties.ContainsKey(propertyInfo))
+            if (ExplicitProperties.Keys.Any(key => key.Name.Equals(propertyInfo.Name)))
             {
-                ExplicitProperties.Remove(propertyInfo);
+                ExplicitProperties.Remove(ExplicitProperties.Keys.First(key => key.Name.Equals(propertyInfo.Name)));
             }
 
-            if (!RemovedProperties.Contains(propertyInfo))
+            if (!RemovedProperties.Any(prop => prop.Name.Equals(propertyInfo.Name)))
             {
                 RemovedProperties.Add(propertyInfo);
             }
@@ -523,6 +499,22 @@ namespace System.Web.OData.Builder
             {
                 _dynamicPropertyDictionary = null;
             }
+        }
+
+        internal T ValidatePropertyNotAlreadyDefinedOtherTypes<T>(PropertyInfo propertyInfo, string typeErrorMessage) where T : class
+        {
+            T propertyConfiguration = default(T);
+            var explicitPropertyInfo = ExplicitProperties.Keys.FirstOrDefault(key => key.Name.Equals(propertyInfo.Name));
+            if (explicitPropertyInfo != null)
+            {
+                propertyConfiguration = ExplicitProperties[explicitPropertyInfo] as T;
+                if (propertyConfiguration == default(T))
+                {
+                    throw Error.Argument("propertyInfo", typeErrorMessage, propertyInfo.Name, ClrType.FullName);
+                }
+            }
+
+            return propertyConfiguration;
         }
 
         internal void ValidatePropertyNotAlreadyDefinedInBaseTypes(PropertyInfo propertyInfo)

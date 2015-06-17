@@ -7,7 +7,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http;
-using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
@@ -30,7 +29,9 @@ namespace System.Web.OData.Builder
             EdmEntityContainer container = new EdmEntityContainer(builder.Namespace, builder.ContainerName);
 
             // add types and sets, building an index on the way.
-            Dictionary<Type, IEdmType> edmTypeMap = model.AddTypes(builder.StructuralTypes, builder.EnumTypes);
+            IEnumerable<IEdmTypeConfiguration> configTypes = builder.StructuralTypes.Concat<IEdmTypeConfiguration>(builder.EnumTypes);
+            EdmTypeMap edmMap = EdmTypeBuilder.GetTypesAndProperties(configTypes);
+            Dictionary<Type, IEdmType> edmTypeMap = model.AddTypes(edmMap);
 
             // Add EntitySets and build the mapping between the EdmEntitySet and the NavigationSourceConfiguration
             NavigationSourceAndAnnotations[] entitySets = container.AddEntitySetAndAnnotations(builder, edmTypeMap);
@@ -43,6 +44,9 @@ namespace System.Web.OData.Builder
 
             // Build the navigation source map
             IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(builder, edmTypeMap, navigationSources);
+
+            // Add the capabilities vocabulary annotations
+            model.AddCapabilitiesVocabularyAnnotations(entitySets, edmMap);
 
             // add procedures
             model.AddProcedures(builder.Procedures, container, edmTypeMap, navigationSourceMap);
@@ -361,13 +365,9 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private static Dictionary<Type, IEdmType> AddTypes(this EdmModel model, IEnumerable<StructuralTypeConfiguration> types,
-            IEnumerable<EnumTypeConfiguration> enumTypes)
+        private static Dictionary<Type, IEdmType> AddTypes(this EdmModel model, EdmTypeMap edmTypeMap)
         {
-            IEnumerable<IEdmTypeConfiguration> configTypes = types.Concat<IEdmTypeConfiguration>(enumTypes);
-
             // build types
-            EdmTypeMap edmTypeMap = EdmTypeBuilder.GetTypesAndProperties(configTypes);
             Dictionary<Type, IEdmType> edmTypes = edmTypeMap.EdmTypes;
 
             // Add an annotate types
@@ -468,6 +468,178 @@ namespace System.Web.OData.Builder
                 IEdmProperty edmProperty = edmPropertyRestriction.Key;
                 QueryableRestrictions restrictions = edmPropertyRestriction.Value;
                 model.SetAnnotationValue(edmProperty, new QueryableRestrictionsAnnotation(restrictions));
+            }
+        }
+
+        private static void AddCapabilitiesVocabularyAnnotations(this EdmModel model, NavigationSourceAndAnnotations[] entitySets, EdmTypeMap edmTypeMap)
+        {
+            Contract.Assert(model != null);
+            Contract.Assert(edmTypeMap != null);
+
+            if (entitySets == null)
+            {
+                return;
+            }
+
+            foreach (NavigationSourceAndAnnotations source in entitySets)
+            {
+                IEdmEntitySet entitySet = source.NavigationSource as IEdmEntitySet;
+                if (entitySet == null)
+                {
+                    continue;
+                }
+
+                EntitySetConfiguration entitySetConfig = source.Configuration as EntitySetConfiguration;
+                if (entitySetConfig == null)
+                {
+                    continue;
+                }
+
+                model.AddCountRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddNavigationRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddFilterRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddSortRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddExpandRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+            }
+        }
+
+        private static void AddCountRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<PropertyConfiguration> notCountableProperties = entityTypeConfig.Properties.Where(property => property.NotCountable);
+
+            IList<IEdmProperty> nonCountableProperties = new List<IEdmProperty>();
+            IList<IEdmNavigationProperty> nonCountableNavigationProperties = new List<IEdmNavigationProperty>();
+            foreach (PropertyConfiguration property in notCountableProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null && value.Type.TypeKind() == EdmTypeKind.Collection)
+                    {
+                        if (value.PropertyKind == EdmPropertyKind.Navigation)
+                        {
+                            nonCountableNavigationProperties.Add((IEdmNavigationProperty)value);
+                        }
+                        else
+                        {
+                            nonCountableProperties.Add(value);
+                        }
+                    }
+                }
+            }
+
+            if (nonCountableProperties.Any() || nonCountableNavigationProperties.Any())
+            {
+                model.SetCountRestrictionsAnnotation(target, true, nonCountableProperties, nonCountableNavigationProperties);
+            }
+        }
+
+        private static void AddNavigationRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<PropertyConfiguration> notNavigableProperties = entityTypeConfig.Properties.Where(property => property.NotNavigable);
+
+            IList<Tuple<IEdmNavigationProperty, CapabilitiesNavigationType>> properties =
+                new List<Tuple<IEdmNavigationProperty, CapabilitiesNavigationType>>();
+            foreach (PropertyConfiguration property in notNavigableProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null && value.PropertyKind == EdmPropertyKind.Navigation)
+                    {
+                        properties.Add(new Tuple<IEdmNavigationProperty, CapabilitiesNavigationType>(
+                            (IEdmNavigationProperty)value, CapabilitiesNavigationType.Recursive));
+                    }
+                }
+            }
+
+            if (properties.Any())
+            {
+                model.SetNavigationRestrictionsAnnotation(target, CapabilitiesNavigationType.Recursive, properties);
+            }
+        }
+
+        private static void AddFilterRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<PropertyConfiguration> notFilterProperties = entityTypeConfig.Properties.Where(property => property.NonFilterable);
+
+            IList<IEdmProperty> properties = new List<IEdmProperty>();
+            foreach (PropertyConfiguration property in notFilterProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null)
+                    {
+                        properties.Add(value);
+                    }
+                }
+            }
+
+            if (properties.Any())
+            {
+                model.SetFilterRestrictionsAnnotation(target, true, true, null, properties);
+            }
+        }
+
+        private static void AddSortRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<PropertyConfiguration> nonSortableProperties = entityTypeConfig.Properties.Where(property => property.Unsortable);
+
+            IList<IEdmProperty> properties = new List<IEdmProperty>();
+            foreach (PropertyConfiguration property in nonSortableProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null)
+                    {
+                        properties.Add(value);
+                    }
+                }
+            }
+
+            if (properties.Any())
+            {
+                model.SetSortRestrictionsAnnotation(target, true, null, null, properties);
+            }
+        }
+
+        private static void AddExpandRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<PropertyConfiguration> nonExpandableProperties = entityTypeConfig.Properties.Where(property => property.NotExpandable);
+
+            IList<IEdmNavigationProperty> properties = new List<IEdmNavigationProperty>();
+            foreach (PropertyConfiguration property in nonExpandableProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null && value.PropertyKind == EdmPropertyKind.Navigation)
+                    {
+                        properties.Add((IEdmNavigationProperty)value);
+                    }
+                }
+            }
+
+            if (properties.Any())
+            {
+                model.SetExpandRestrictionsAnnotation(target, true, properties);
             }
         }
 

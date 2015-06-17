@@ -19,12 +19,19 @@ namespace System.Web.OData
         private const string BaseAddress = @"http://localhost";
         private HttpConfiguration _configuration;
         private HttpClient _client;
+        private IEdmModel _model;
 
         public QueryableLimitationTest()
         {
-            _configuration =
-                new[] { typeof(QueryLimitCustomersController), typeof(OpenCustomersController) }.GetHttpConfiguration();
-            _configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            _configuration = new[]
+            {
+                typeof(QueryLimitCustomersController),
+                typeof(OpenCustomersController),
+                typeof(MetadataController)
+            }.GetHttpConfiguration();
+
+            _model = GetEdmModel();
+            _configuration.MapODataServiceRoute("odata", "odata", _model);
             HttpServer server = new HttpServer(_configuration);
             _client = new HttpClient(server);
         }
@@ -47,6 +54,147 @@ namespace System.Web.OData
             customers.EntityType.HasMany(c => c.Orders).IsNotNavigable().IsNotExpandable().IsNotCountable();
 
             return builder.GetEdmModel();
+        }
+
+        [Fact]
+        public void QueryableLimitation_ExposedAsQueryCapabilitesVocabularyAnnotations_InMetadataDocument()
+        {
+            // Arrange
+            const string expect = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<edmx:Edmx Version=""4.0"" xmlns:edmx=""http://docs.oasis-open.org/odata/ns/edmx"">
+  <edmx:DataServices>
+    <Schema Namespace=""System.Web.OData"" xmlns=""http://docs.oasis-open.org/odata/ns/edm"">
+      <EntityType Name=""QueryLimitCustomer"">
+        <Key>
+          <PropertyRef Name=""Id"" />
+        </Key>
+        <Property Name=""Name"" Type=""Edm.String"" />
+        <Property Name=""Addresses"" Type=""Collection(Edm.String)"" />
+        <Property Name=""Age"" Type=""Edm.Int32"" Nullable=""false"" />
+        <Property Name=""Numbers"" Type=""Collection(Edm.Int32)"" Nullable=""false"" />
+        <Property Name=""Id"" Type=""Edm.Int32"" Nullable=""false"" />
+        <Property Name=""NotFilterableNotSortableLastName"" Type=""Edm.String"" />
+        <Property Name=""NonFilterableUnsortableLastName"" Type=""Edm.String"" />
+        <Property Name=""Address"" Type=""Edm.String"" />
+        <Property Name=""Notes"" Type=""Collection(Edm.String)"" />
+        <NavigationProperty Name=""Orders"" Type=""Collection(System.Web.OData.QueryLimitOrder)"" />
+        <NavigationProperty Name=""ImportantOrders"" Type=""Collection(System.Web.OData.QueryLimitOrder)"" />
+      </EntityType>
+      <EntityType Name=""QueryLimitOrder"">
+        <Key>
+          <PropertyRef Name=""Id"" />
+        </Key>
+        <Property Name=""Id"" Type=""Edm.Int32"" Nullable=""false"" />
+        <Property Name=""OrderName"" Type=""Edm.String"" />
+        <Property Name=""OrderValue"" Type=""Edm.Decimal"" Nullable=""false"" />
+      </EntityType>
+      <EntityType Name=""DerivedQueryLimitCustomer"" BaseType=""System.Web.OData.QueryLimitCustomer"">
+        <Property Name=""DerivedName"" Type=""Edm.String"" />
+      </EntityType>
+    </Schema>
+    <Schema Namespace=""Default"" xmlns=""http://docs.oasis-open.org/odata/ns/edm"">
+      <EntityContainer Name=""Container"">
+        <EntitySet Name=""QueryLimitCustomers"" EntityType=""System.Web.OData.QueryLimitCustomer"">
+          <NavigationPropertyBinding Path=""Orders"" Target=""QueryLimitOrders"" />
+          <NavigationPropertyBinding Path=""ImportantOrders"" Target=""QueryLimitOrders"" />
+          <Annotation Term=""Org.OData.Capabilities.V1.CountRestrictions"">
+            <Record>
+              <PropertyValue Property=""Countable"" Bool=""true"" />
+              <PropertyValue Property=""NonCountableProperties"">
+                <Collection>
+                  <PropertyPath>Addresses</PropertyPath>
+                </Collection>
+              </PropertyValue>
+              <PropertyValue Property=""NonCountableNavigationProperties"">
+                <Collection>
+                  <NavigationPropertyPath>Orders</NavigationPropertyPath>
+                  <NavigationPropertyPath>ImportantOrders</NavigationPropertyPath>
+                </Collection>
+              </PropertyValue>
+            </Record>
+          </Annotation>
+          <Annotation Term=""Org.OData.Capabilities.V1.NavigationRestrictions"">
+            <Record>
+              <PropertyValue Property=""Navigability"">
+                <EnumMember>Org.OData.Capabilities.V1.NavigationType/Recursive</EnumMember>
+              </PropertyValue>
+              <PropertyValue Property=""RestrictedProperties"">
+                <Collection>
+                  <Record>
+                    <PropertyValue Property=""NavigationProperty"" NavigationPropertyPath=""Orders"" />
+                    <PropertyValue Property=""Navigability"">
+                      <EnumMember>Org.OData.Capabilities.V1.NavigationType/Recursive</EnumMember>
+                    </PropertyValue>
+                  </Record>
+                </Collection>
+              </PropertyValue>
+            </Record>
+          </Annotation>
+          <Annotation Term=""Org.OData.Capabilities.V1.FilterRestrictions"">
+            <Record>
+              <PropertyValue Property=""Filterable"" Bool=""true"" />
+              <PropertyValue Property=""RequiresFilter"" Bool=""true"" />
+              <PropertyValue Property=""RequiredProperties"">
+                <Collection />
+              </PropertyValue>
+              <PropertyValue Property=""NonFilterableProperties"">
+                <Collection>
+                  <PropertyPath>Name</PropertyPath>
+                  <PropertyPath>Orders</PropertyPath>
+                  <PropertyPath>NotFilterableNotSortableLastName</PropertyPath>
+                  <PropertyPath>NonFilterableUnsortableLastName</PropertyPath>
+                </Collection>
+              </PropertyValue>
+            </Record>
+          </Annotation>
+          <Annotation Term=""Org.OData.Capabilities.V1.SortRestrictions"">
+            <Record>
+              <PropertyValue Property=""Sortable"" Bool=""true"" />
+              <PropertyValue Property=""AscendingOnlyProperties"">
+                <Collection />
+              </PropertyValue>
+              <PropertyValue Property=""DescendingOnlyProperties"">
+                <Collection />
+              </PropertyValue>
+              <PropertyValue Property=""NonSortableProperties"">
+                <Collection>
+                  <PropertyPath>Name</PropertyPath>
+                  <PropertyPath>Orders</PropertyPath>
+                  <PropertyPath>NotFilterableNotSortableLastName</PropertyPath>
+                  <PropertyPath>NonFilterableUnsortableLastName</PropertyPath>
+                </Collection>
+              </PropertyValue>
+            </Record>
+          </Annotation>
+          <Annotation Term=""Org.OData.Capabilities.V1.ExpandRestrictions"">
+            <Record>
+              <PropertyValue Property=""Expandable"" Bool=""true"" />
+              <PropertyValue Property=""NonExpandableProperties"">
+                <Collection>
+                  <NavigationPropertyPath>Orders</NavigationPropertyPath>
+                </Collection>
+              </PropertyValue>
+            </Record>
+          </Annotation>
+        </EntitySet>
+        <EntitySet Name=""QueryLimitOrders"" EntityType=""System.Web.OData.QueryLimitOrder"" />
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>";
+
+            string requestUri = BaseAddress + "/odata/$metadata";
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync(requestUri).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            // Remove the following condition after updating to ODL 6.13.
+            if (_model.FindValueTerm(CapabilitiesVocabularyConstants.CountRestrictions) != null)
+            {
+                Assert.Equal(expect, responseString);
+            }
         }
 
         [Fact]

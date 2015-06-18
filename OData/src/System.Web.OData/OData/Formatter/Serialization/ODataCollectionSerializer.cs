@@ -5,6 +5,7 @@ using System.Collections;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -86,10 +87,24 @@ namespace System.Web.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writer");
             }
 
+            ODataCollectionStart collectionStart = new ODataCollectionStart { Name = writeContext.RootElementName };
+
+            if (writeContext.Request != null)
+            {
+                if (writeContext.Request.ODataProperties().NextLink != null)
+                {
+                    collectionStart.NextPageLink = writeContext.Request.ODataProperties().NextLink;
+                }
+
+                if (writeContext.Request.ODataProperties().TotalCount != null)
+                {
+                    collectionStart.Count = writeContext.Request.ODataProperties().TotalCount;
+                }
+            }
+
+            writer.WriteStart(collectionStart);
+
             ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
-
-            writer.WriteStart(new ODataCollectionStart { Name = writeContext.RootElementName });
-
             if (collectionValue != null)
             {
                 foreach (object item in collectionValue.Items)

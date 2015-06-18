@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -12,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
+using Xunit.Extensions;
 
 namespace WebStack.QA.Test.OData.QueryComposition
 {
@@ -49,6 +51,53 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
             Assert.Equal(expectedData, actualData);
         }
+
+        [Fact]
+        public void PageSizeWorksOnCollectionOfComplexProperty()
+        {
+            string resquestUri = BaseAddress + "/odata/ComplextTypeCollectionTests_Persons(1)/PersonInfos";
+            HttpResponseMessage response = Client.GetAsync(resquestUri).Result;
+
+            response.EnsureSuccessStatusCode();
+
+            string responseContent = response.Content.ReadAsStringAsync().Result;
+
+            JObject result = JObject.Parse(responseContent);
+
+            Assert.Equal("XXX/odata/$metadata#Collection(WebStack.QA.Test.OData.QueryComposition.ComplexTypeCollectionTests_PersonInfo)".Replace("XXX", BaseAddress.ToLowerInvariant()),
+                result["@odata.context"]);
+
+            Assert.Equal("XXX/odata/ComplextTypeCollectionTests_Persons%281%29/PersonInfos?$skip=2".Replace("XXX", BaseAddress.ToLowerInvariant()),
+                result["@odata.nextLink"]);
+
+            JArray personInfos = result["value"] as JArray;
+            Assert.NotNull(personInfos);
+            IEnumerable<string> actualData = personInfos.Select(jt => jt["CompanyName"].ToString());
+            Assert.Equal(new[] {"Company 1", "Company 2"}, actualData);
+        }
+
+        [Theory]
+        [InlineData("", false)]
+        [InlineData("?$count=false", false)]
+        [InlineData("?$count=true", true)]
+        public void DollarCountWorksOnCollectionOfComplexProperty(string countOption, bool expect)
+        {
+            string resquestUri = BaseAddress + "/odata/ComplextTypeCollectionTests_Persons(1)/PersonInfos" + countOption;
+            HttpResponseMessage response = Client.GetAsync(resquestUri).Result;
+
+            response.EnsureSuccessStatusCode();
+
+            string responseContent = response.Content.ReadAsStringAsync().Result;
+
+            if (expect)
+            {
+                Assert.Contains("\"@odata.count\":5", responseContent);
+            }
+            else
+            {
+                Assert.DoesNotContain("\"@odata.count\":5", responseContent);
+            }
+        }
     }
 
     public class ComplextTypeCollectionTests_PersonsController : ODataController
@@ -84,13 +133,18 @@ namespace WebStack.QA.Test.OData.QueryComposition
             person.Addresses.Add(address2);
             person.Addresses.Add(address3);
 
+            person.PersonInfos = Enumerable.Range(1, 5).Select(e => new ComplexTypeCollectionTests_PersonInfo
+            {
+                CompanyName = "Company " + e,
+                Years = 10 + e
+            });
             Persons.Add(person);
         }
 
         [EnableQuery]
         public IQueryable<ComplextTypeCollectionTests_Address> GetAddresses([FromODataUri]int key)
         {
-            ComplextTypeCollectionTests_Person person = Persons.Where(p => p.Id == key).FirstOrDefault();
+            ComplextTypeCollectionTests_Person person = Persons.FirstOrDefault(p => p.Id == key);
 
             if (person == null)
             {
@@ -98,6 +152,19 @@ namespace WebStack.QA.Test.OData.QueryComposition
             }
 
             return person.Addresses.AsQueryable();
+        }
+
+        [EnableQuery(PageSize = 2)]
+        public IQueryable<ComplexTypeCollectionTests_PersonInfo> GetPersonInfos([FromODataUri]int key)
+        {
+            ComplextTypeCollectionTests_Person person = Persons.FirstOrDefault(p => p.Id == key);
+
+            if (person == null)
+            {
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
+
+            return person.PersonInfos.AsQueryable();
         }
     }
 
@@ -113,6 +180,8 @@ namespace WebStack.QA.Test.OData.QueryComposition
         public string Name { get; set; }
 
         public List<ComplextTypeCollectionTests_Address> Addresses { get; set; }
+
+        public IEnumerable<ComplexTypeCollectionTests_PersonInfo> PersonInfos { get; set; }
     }
 
     public class ComplextTypeCollectionTests_Address
@@ -123,5 +192,12 @@ namespace WebStack.QA.Test.OData.QueryComposition
         public string State { get; set; }
         public string Country { get; set; }
         public int Zipcode { get; set; }
+    }
+
+    public class ComplexTypeCollectionTests_PersonInfo
+    {
+        public string CompanyName { get; set; }
+
+        public int Years { get; set; }
     }
 }

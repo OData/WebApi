@@ -574,6 +574,41 @@ namespace System.Web.OData.Formatter
             }
         }
 
+        [Fact]
+        public void RequestCollectionProperty_HasNextPageLine_Count()
+        {
+            // Arrange
+            const string expect = @"{
+  ""@odata.context"": ""http://localhost/$metadata#Collection(System.Web.OData.Builder.TestModels.Color)"",
+  ""@odata.count"": 3,
+  ""@odata.nextLink"": ""http://localhost/EnumCustomers(5)/Colors?$count=true&$skip=2"",
+  ""value"": [
+    ""Blue"",
+    ""Green""
+  ]
+}";
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<EnumCustomer>("EnumCustomers");
+            IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(EnumCustomersController) };
+
+            using (HttpConfiguration configuration = controllers.GetHttpConfiguration())
+            {
+                configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
+                using (HttpServer host = new HttpServer(configuration))
+                using (HttpClient client = new HttpClient(host))
+
+                // Act
+                using (HttpResponseMessage response = client.GetAsync("http://localhost/EnumCustomers(5)/Colors?$count=true").Result)
+                {
+                    // Assert
+                    response.EnsureSuccessStatusCode();
+                    JObject payload = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                    Assert.Equal(expect, payload.ToString());
+                }
+            }
+        }
+
         public class EnumCustomer
         {
             public int ID { get; set; }
@@ -591,6 +626,13 @@ namespace System.Web.OData.Formatter
             public IHttpActionResult GetColor(int key)
             {
                 return Ok(Color.Green);
+            }
+
+            [EnableQuery(PageSize = 2)]
+            public IHttpActionResult GetColors(int key)
+            {
+                IList<Color> colors = new[] {Color.Blue, Color.Green, Color.Red};
+                return Ok(colors);
             }
         }
 

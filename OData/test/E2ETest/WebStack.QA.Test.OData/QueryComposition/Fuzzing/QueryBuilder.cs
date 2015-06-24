@@ -13,7 +13,7 @@ namespace WebStack.QA.Test.OData.QueryComposition.Fuzzing
             var stringLiteralExpr = new Literal("'stringLiternal'");
             var datetimeOffsetLiteralExpr = new Literal("2012-09-11T00:09:00%2B08:00");
             var nullLiteralExpr = new Literal("null");
-            var binaryLiteralExpr = new Literal("binary'010203'");
+            var binaryLiteralExpr = new Literal("binary'AQIE'"); // AQIE equals to new byte { 1, 2, 3} to Base64
             var decimalLiteralExpr = new Literal("123.123M");
             var doubleLiteralExpr = new Literal("1E%2B10") | new Literal("2.029");
             var floatLiteralExpr = new Literal("2.0f");

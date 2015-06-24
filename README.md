@@ -26,3 +26,6 @@ Please refer to the [CONTRIBUTION.md](https://github.com/OData/WebApi/blob/maste
 
 ### Samples
 Please refer to the [ODataSamples WebApi](https://github.com/OData/ODataSamples/tree/master/WebApi).
+
+### Debug
+Please refer to the [How to debug](http://odata.github.io/WebApi/10-01-debug-webapi-source).

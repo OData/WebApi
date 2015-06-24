@@ -104,7 +104,7 @@ namespace System.Web.OData.Formatter.Serialization
                 object propertyValue;
                 if (complexObject.TryGetPropertyValue(property.Name, out propertyValue))
                 {
-                    if (propertyType != null && propertyType.IsComplex())
+                    if (propertyValue != null && propertyType != null && propertyType.IsComplex())
                     {
                         IEdmTypeReference actualType = writeContext.GetEdmType(propertyValue, propertyValue.GetType());
                         if (actualType != null && propertyType != actualType)

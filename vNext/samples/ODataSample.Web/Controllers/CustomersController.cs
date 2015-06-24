@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Microsoft.AspNet.Mvc;
+using ODataSample.Web.Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
-using Microsoft.Framework.DependencyInjection;
-using ODataSample.Web.Models;
+using Microsoft.AspNet.OData;
 
 namespace ODataSample.Web.Controllers
 {
-    [Route("api/Customers")]
+    [EnableQuery]
+    [Route("odata/Customers")]
     public class CustomersController : Controller
     {
         private readonly SampleContext _sampleContext;
@@ -29,7 +28,61 @@ namespace ODataSample.Web.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            return Json(_sampleContext.Customers.Single(p => p.CustomerId == id));
+            var customer = _sampleContext.FindCustomer(id);
+            if (customer == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(customer);
+        }
+
+        [HttpGet("{id}/FirstName")]
+        public IActionResult GetFirstName(int id)
+        {
+            var customer = _sampleContext.FindCustomer(id);
+            if (customer == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(customer.FirstName);
+        }
+
+        [HttpGet("{id}/LastName")]
+        public IActionResult GetLastName(int id)
+        {
+            var customer = _sampleContext.FindCustomer(id);
+            if (customer == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(customer.LastName);
+        }
+
+        [HttpGet("{id}/CustomerId")]
+        public IActionResult GetCustomerId(int id)
+        {
+            var customer = _sampleContext.FindCustomer(id);
+            if (customer == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(customer.CustomerId);
+        }
+
+        [HttpGet("{id}/Products")]
+        public IActionResult GetProducts(int id)
+        {
+            var customer = _sampleContext.FindCustomer(id);
+            if (customer == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(customer.Products);
         }
 
         // POST api/Customers

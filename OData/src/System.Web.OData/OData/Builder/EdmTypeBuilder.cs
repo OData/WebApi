@@ -101,7 +101,7 @@ namespace System.Web.OData.Builder
                     }
 
                     EdmEntityType entityType = new EdmEntityType(config.Namespace, config.Name, baseType,
-                        entity.IsAbstract ?? false, entity.IsOpen);
+                        entity.IsAbstract ?? false, entity.IsOpen, entity.HasStream ?? false);
                     _types.Add(config.ClrType, entityType);
 
                     if (entity.IsOpen)

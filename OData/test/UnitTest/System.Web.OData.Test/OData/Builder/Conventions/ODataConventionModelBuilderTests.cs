@@ -2371,6 +2371,20 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
+        public void ModelBuilder_MediaTypeAttribute()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<Vehicle>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.True(model.AssertHasEntityType(typeof(Vehicle)).HasStream);
+        }
+
+        [Fact]
         public void ODataConventionModelBuilder_RequiredAttribute_WorksOnComplexTypeProperty()
         {
             // Arrange
@@ -2671,6 +2685,57 @@ namespace System.Web.OData.Builder.Conventions
                 "The complex type 'System.Web.OData.Builder.Conventions.RecursiveEmployee' has a reference to itself " +
                 "through the property 'Manager'. A recursive loop of complex types is not allowed.");
         }
+
+        [Fact]
+        public void ConventionModelBuilder_Work_With_ExpilitPropertyDeclare()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+
+            // Act 
+            var user = builder.EntitySet<IdentityUser>("IdentityUsers");
+            user.EntityType.HasKey(p => new { p.Provider, p.UserId });
+            user.EntityType.Property(p => p.Name).IsOptional();
+            user.EntityType.ComplexProperty<ProductVersion>(p => p.ProductVersion).IsRequired();
+            user.EntityType.EnumProperty<UserType>(p => p.UserType).IsRequired();
+            user.EntityType.CollectionProperty(p => p.Contacts).IsRequired();
+            var edmModel = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(edmModel);
+            IEdmEntityType entityType = edmModel.SchemaElements.OfType<IEdmEntityType>().First();
+            Assert.Equal(6, entityType.Properties().Count());
+            Assert.Equal(2, entityType.Key().Count());
+            Assert.True(entityType.Properties().First(p => p.Name.Equals("Name")).Type.IsNullable);
+            Assert.False(entityType.Properties().First(p => p.Name.Equals("ProductVersion")).Type.IsNullable);
+            Assert.False(entityType.Properties().First(p => p.Name.Equals("UserType")).Type.IsNullable);
+            Assert.False(entityType.Properties().First(p => p.Name.Equals("Contacts")).Type.IsNullable);
+        }
+    }
+
+    public enum UserType
+    {
+        Normal = 1,
+        Vip = 2
+    }
+
+    public class UserBase
+    {
+        public string Provider { get; set; }
+
+        public string UserId { get; set; }
+
+        public string Name { get; set; }
+
+        public ProductVersion ProductVersion { get; set; }
+
+        public IList<ProductVersion> Contacts { get; set; }
+
+        public UserType UserType { get; set; }
+    }
+
+    public class IdentityUser : UserBase
+    {
     }
 
     public class Product

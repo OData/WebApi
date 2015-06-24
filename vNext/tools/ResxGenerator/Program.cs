@@ -7,7 +7,8 @@ namespace ResxGenerator
     {
         private readonly string[] _resxFiles = new[]
         {
-            @"..\..\src\Microsoft.AspNet.OData\CommonWebApiResources.resx"
+            @"..\..\src\Microsoft.AspNet.OData\CommonWebApiResources.resx",
+            @"..\..\src\Microsoft.AspNet.OData\SRResources.resx"
         };
 
         public void Main()

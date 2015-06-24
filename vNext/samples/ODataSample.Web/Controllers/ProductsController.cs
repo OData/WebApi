@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.OData;
 using Microsoft.Framework.DependencyInjection;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
 {
-    [Route("api/Products")]
+    [EnableQuery]
+    [Route("odata/Products")]
     public class ProductsController : Controller
     {
         private readonly SampleContext _sampleContext;
@@ -29,7 +31,49 @@ namespace ODataSample.Web.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            return Json(_sampleContext.Products.Single(p => p.ProductId == id));
+            var product = _sampleContext.FindProduct(id);
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(product);
+        }
+
+        [HttpGet("{id}/Name")]
+        public IActionResult GetName(int id)
+        {
+            var product = _sampleContext.FindProduct(id);
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(product.Name);
+        }
+
+        [HttpGet("{id}/Price")]
+        public IActionResult GetPrice(int id)
+        {
+            var product = _sampleContext.FindProduct(id);
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(product.Price);
+        }
+
+        [HttpGet("{id}/ProductId")]
+        public IActionResult GetProductId(int id)
+        {
+            var product = _sampleContext.FindProduct(id);
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(product.ProductId);
         }
 
         // POST api/Products

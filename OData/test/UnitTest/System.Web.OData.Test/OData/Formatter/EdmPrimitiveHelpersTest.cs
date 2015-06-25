@@ -65,7 +65,7 @@ namespace System.Web.OData.Formatter
 
             // Assert
             DateTime dt = Assert.IsType<DateTime>(actual);
-            Assert.Equal(valueToConvert.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime, dt);
+            Assert.Equal(valueToConvert.LocalDateTime, dt);
         }
 
         [Theory]
@@ -73,12 +73,13 @@ namespace System.Web.OData.Formatter
         public void ConvertDateTimeValue_NonStandardPrimitives_CustomTimeZoneInfo(DateTimeOffset valueToConvert)
         {
             // Arrange & Act
-            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+            var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+            TimeZoneInfoHelper.TimeZone = timeZone;
             object actual = EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, typeof(DateTime));
 
             // Assert
             DateTime dt = Assert.IsType<DateTime>(actual);
-            Assert.Equal(valueToConvert.ToUniversalTime().ToOffset(new TimeSpan(-8, 0, 0)).DateTime, dt);
+            Assert.Equal(TimeZoneInfo.ConvertTime(valueToConvert, timeZone).DateTime, dt);
         }
 
         [Theory]

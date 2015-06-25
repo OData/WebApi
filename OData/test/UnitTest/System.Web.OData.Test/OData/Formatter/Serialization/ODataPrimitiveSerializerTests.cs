@@ -39,7 +39,7 @@ namespace System.Web.OData.Formatter.Serialization
                 return new TheoryDataSet<DateTime, DateTimeOffset>
                 {
                     { dtUtc, DateTimeOffset.Parse("2014-12-11T17:02:03-8:00") },
-                    { dtLocal, new DateTimeOffset(dtLocal.ToUniversalTime()).ToOffset(new TimeSpan(-8, 0, 0)) },
+                    { dtLocal, new DateTimeOffset(dtLocal).ToOffset(new TimeSpan(-8, 0, 0)) },
                     { unspecified, DateTimeOffset.Parse("2014-12-12T01:02:03-8:00") }
                 };
             }

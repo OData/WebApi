@@ -216,6 +216,22 @@ namespace System.Web.OData.Extensions
             settings.EnumPrefixFree = enumPrefixFree;
         }
 
+        /// <summary>
+        /// Sets the Alternate Key support for the Uri parser on the configuration.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="alternateKeys"><c>true</c> to enable Alternate Keys, <c>false</c> otherwise.</param>
+        public static void EnableAlternateKeys(this HttpConfiguration configuration, bool alternateKeys)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            ODataUriResolverSetttings settings = configuration.GetResolverSettings();
+            settings.AlternateKeys = alternateKeys;
+        }
+
         internal static ODataUriResolverSetttings GetResolverSettings(this HttpConfiguration configuration)
         {
             if (configuration == null)

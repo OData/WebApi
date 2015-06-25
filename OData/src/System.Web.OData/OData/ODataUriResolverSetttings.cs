@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using Microsoft.OData.Core.UriParser.Metadata;
+using Microsoft.OData.Edm;
 
 namespace System.Web.OData
 {
@@ -13,7 +14,9 @@ namespace System.Web.OData
 
         public bool EnumPrefixFree { get; set; }
 
-        public ODataUriResolver CreateResolver()
+        public bool AlternateKeys { get; set; }
+
+        public ODataUriResolver CreateResolver(IEdmModel model)
         {
             ODataUriResolver resolver;
             if (UnqualifiedNameCall && EnumPrefixFree)
@@ -27,6 +30,10 @@ namespace System.Web.OData
             else if (EnumPrefixFree)
             {
                 resolver = new StringAsEnumResolver();
+            }
+            else if (AlternateKeys)
+            {
+                resolver = new AlternateKeysODataUriResolver(model);
             }
             else
             {

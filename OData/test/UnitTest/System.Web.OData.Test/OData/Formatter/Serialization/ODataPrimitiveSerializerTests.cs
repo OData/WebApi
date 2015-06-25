@@ -164,6 +164,42 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.Equal(new DateTimeOffset(dt), primitiveValue.Value);
         }
 
+        [Fact]
+        public void CreateODataValue_ReturnsDateTimeOffsetMinValue_ForDateTimeMinValue()
+        {
+            // Arrange
+            IEdmPrimitiveTypeReference edmPrimitiveType =
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(DateTime));
+            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
+            DateTime dt = DateTime.MinValue;
+            TimeZoneInfoHelper.TimeZone = null;
+
+            // Act
+            ODataValue odataValue = serializer.CreateODataValue(dt, edmPrimitiveType, new ODataSerializerContext());
+
+            // Assert
+            ODataPrimitiveValue primitiveValue = Assert.IsType<ODataPrimitiveValue>(odataValue);
+            Assert.Equal(DateTimeOffset.MinValue, primitiveValue.Value);
+        }
+
+        [Fact]
+        public void CreateODataValue_ReturnsDateTimeOffsetMaxValue_ForDateTimeMaxValue()
+        {
+            // Arrange
+            IEdmPrimitiveTypeReference edmPrimitiveType =
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(DateTime));
+            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
+            DateTime dt = DateTime.MaxValue;
+            TimeZoneInfoHelper.TimeZone = null;
+
+            // Act
+            ODataValue odataValue = serializer.CreateODataValue(dt, edmPrimitiveType, new ODataSerializerContext());
+
+            // Assert
+            ODataPrimitiveValue primitiveValue = Assert.IsType<ODataPrimitiveValue>(odataValue);
+            Assert.Equal(DateTimeOffset.MaxValue, primitiveValue.Value);
+        }
+
         [Theory]
         [PropertyData("NonEdmPrimitiveConversionDateTime")]
         public void CreateODataValue_ReturnsDateTimeOffset_ForDateTime_WithDifferentTimeZone(DateTime value, DateTimeOffset expect)

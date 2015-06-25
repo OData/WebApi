@@ -144,14 +144,26 @@ namespace System.Web.OData.Formatter.Serialization
 
                     case TypeCode.DateTime:
                         DateTime dateTime = (DateTime)value;
-                        TimeZoneInfo timeZone = TimeZoneInfoHelper.TimeZone;
-                        if (dateTime.Kind == DateTimeKind.Utc || dateTime.Kind == DateTimeKind.Local)
-                        {
-                            return new DateTimeOffset(dateTime.ToUniversalTime()).ToOffset(timeZone.BaseUtcOffset);
-                        }
 
-                        DateTimeOffset dateTimeOffset = new DateTimeOffset(dateTime, timeZone.GetUtcOffset(dateTime));
-                        return dateTimeOffset.ToUniversalTime().ToOffset(timeZone.BaseUtcOffset);
+                        if (dateTime == DateTime.MinValue)
+                        {
+                            return DateTimeOffset.MinValue;
+                        }
+                        else if (dateTime == DateTime.MaxValue)
+                        {
+                            return DateTimeOffset.MaxValue;
+                        }
+                        else
+                        {
+                            TimeZoneInfo timeZone = TimeZoneInfoHelper.TimeZone;
+                            if (dateTime.Kind == DateTimeKind.Utc || dateTime.Kind == DateTimeKind.Local)
+                            {
+                                return new DateTimeOffset(dateTime.ToUniversalTime()).ToOffset(timeZone.BaseUtcOffset);
+                            }
+
+                            DateTimeOffset dateTimeOffset = new DateTimeOffset(dateTime, timeZone.GetUtcOffset(dateTime));
+                            return dateTimeOffset.ToUniversalTime().ToOffset(timeZone.BaseUtcOffset);
+                        }
 
                     default:
                         if (type == typeof(char[]))

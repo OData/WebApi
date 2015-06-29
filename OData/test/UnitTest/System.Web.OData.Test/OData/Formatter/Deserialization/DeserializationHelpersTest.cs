@@ -161,8 +161,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 new DateTimeOffset(dt, new TimeSpan(-8, 0, 0))
             };
 
-            IEnumerable<DateTime> expects =
-                dtos.Select(e => e.ToUniversalTime().ToOffset(TimeZoneInfo.Local.BaseUtcOffset).DateTime);
+            IEnumerable<DateTime> expects = dtos.Select(e => e.LocalDateTime);
 
             // Act
             DeserializationHelpers.SetCollectionProperty(source, edmProperty, dtos, edmProperty.Name);

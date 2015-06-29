@@ -18,7 +18,7 @@ namespace System.Web.OData
 {
     public class DateTimeTest
     {
-        private readonly TimeZoneInfo _utcTimeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("UTC");
+        private readonly TimeZoneInfo _utcTimeZoneInfo = TimeZoneInfo.Utc;
         private readonly TimeZoneInfo _pacificStandard = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
         private readonly TimeZoneInfo _chinaStandard = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
         private readonly string _bastUri = "http://localhost/odata/DateTimeModels";
@@ -99,7 +99,7 @@ namespace System.Web.OData
         {
             // Arrange
             const string Expected = "  ],\"BirthdayD@odata.type\":\"#Collection(DateTimeOffset)\",\"BirthdayD\":[\r\n" +
-               "    \"2018-12-31T12:12:30-08:00\",null,\"2015-04-30T12:12:30-08:00\"\r\n";
+               "    \"2018-12-31T12:12:30-08:00\",null,\"2015-04-30T13:12:30-07:00\"\r\n";
 
             const string Uri = "http://localhost/odata/DateTimeModels(2)";
             HttpClient client = GetClient(_pacificStandard);

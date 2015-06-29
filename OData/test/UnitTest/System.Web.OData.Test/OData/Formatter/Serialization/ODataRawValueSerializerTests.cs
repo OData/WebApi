@@ -62,7 +62,7 @@ namespace System.Web.OData.Formatter.Serialization
             get
             {
                 DateTime dt = DateTime.UtcNow;
-                DateTimeOffset dto = new DateTimeOffset(dt.ToUniversalTime()).ToOffset(TimeZoneInfo.Local.BaseUtcOffset);
+                DateTimeOffset dto = new DateTimeOffset(dt).ToLocalTime();
                 return new TheoryDataSet<object, DateTimeOffset>
                 {
                     { dt, dto},

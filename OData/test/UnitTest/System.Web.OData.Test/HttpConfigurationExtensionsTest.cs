@@ -162,13 +162,13 @@ namespace System.Web.OData
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
-            TimeZoneInfo tiemZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("UTC");
+            TimeZoneInfo timeZoneInfo = TimeZoneInfo.Utc;
 
             // Act
-            config.SetTimeZoneInfo(tiemZoneInfo);
+            config.SetTimeZoneInfo(timeZoneInfo);
 
             // Assert
-            Assert.Same(tiemZoneInfo, config.GetTimeZoneInfo());
+            Assert.Same(timeZoneInfo, config.GetTimeZoneInfo());
         }
 
         [Fact]

@@ -45,17 +45,17 @@ namespace System.Web.OData.Formatter.Deserialization
             {
                 DateTime dtUtc = new DateTime(2014, 10, 16, 1, 2, 3, DateTimeKind.Utc);
                 DateTime dtLocal = new DateTime(2014, 10, 16, 1, 2, 3, DateTimeKind.Local);
-                DateTime dtUnpsecified = new DateTime(2014, 10, 16, 1, 2, 3, DateTimeKind.Unspecified);
+                DateTime dtUnspecified = new DateTime(2014, 10, 16, 1, 2, 3, DateTimeKind.Unspecified);
                 TimeZoneInfo pacificStandard = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
                 TimeZoneInfo chinaStandard = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
                 return new TheoryDataSet<DateTimeOffset, DateTime, TimeZoneInfo>
                 {
                     { DateTimeOffset.Parse("2014-10-16T01:02:03Z"), dtUtc, null },
                     { new DateTimeOffset(dtLocal), dtLocal, null },
-                    { new DateTimeOffset(new DateTime(2014, 10, 16, 1, 2, 3, DateTimeKind.Unspecified)), dtUnpsecified, null },
+                    { new DateTimeOffset(new DateTime(2014, 10, 16, 1, 2, 3, DateTimeKind.Unspecified)), dtUnspecified, null },
                     { DateTimeOffset.Parse("2014-10-16T09:02:03+8:00"), dtUtc, chinaStandard },
                     { new DateTimeOffset(dtLocal).ToOffset(new TimeSpan(+8,0,0)), dtLocal, chinaStandard },
-                    { DateTimeOffset.Parse("2014-10-16T00:02:03-8:00"), dtUnpsecified, pacificStandard },
+                    { DateTimeOffset.Parse("2014-10-16T01:02:03-7:00"), dtUnspecified, pacificStandard },
                 };
             }
         }

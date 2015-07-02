@@ -72,7 +72,7 @@ namespace WebStack.QA.Test.OData.Singleton
             }
         }
 
-        [Theory(Skip = "github #188: Make test [SingletonTest::NotCountable] work on the CI ")]
+        [Theory]
         [InlineData("expCon/Umbrella/Partners/$count")]
         [InlineData("conCon/Umbrella/Partners/$count")]
         public async Task NotCountable(string url)

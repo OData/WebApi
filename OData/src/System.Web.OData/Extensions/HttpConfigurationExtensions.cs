@@ -338,10 +338,10 @@ namespace System.Web.OData.Extensions
                 routes.MapHttpBatchRoute(routeName + "Batch", batchTemplate, batchHandler);
             }
 
-            DefaultODataPathHandler odataPathHanlder = pathHandler as DefaultODataPathHandler;
-            if (odataPathHanlder != null)
+            DefaultODataPathHandler odataPathHandler = pathHandler as DefaultODataPathHandler;
+            if (odataPathHandler != null)
             {
-                odataPathHanlder.ResolverSetttings = configuration.GetResolverSettings();
+                odataPathHandler.ResolverSetttings = configuration.GetResolverSettings();
             }
 
             ODataPathRouteConstraint routeConstraint =
@@ -393,10 +393,10 @@ namespace System.Web.OData.Extensions
             HttpRouteCollection routes = configuration.Routes;
             routePrefix = RemoveTrailingSlash(routePrefix);
 
-            DefaultODataPathHandler odataPathHanlder = pathHandler as DefaultODataPathHandler;
-            if (odataPathHanlder != null)
+            DefaultODataPathHandler odataPathHandler = pathHandler as DefaultODataPathHandler;
+            if (odataPathHandler != null)
             {
-                odataPathHanlder.ResolverSetttings = configuration.GetResolverSettings();
+                odataPathHandler.ResolverSetttings = configuration.GetResolverSettings();
             }
 
             ODataPathRouteConstraint routeConstraint =

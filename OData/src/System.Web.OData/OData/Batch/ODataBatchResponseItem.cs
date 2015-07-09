@@ -88,6 +88,14 @@ namespace System.Web.OData.Batch
         public abstract Task WriteResponseAsync(ODataBatchWriter writer, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Gets a value that indicates if the responses in this item are successful.
+        /// </summary>
+        internal virtual bool IsResponseSuccessful()
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>

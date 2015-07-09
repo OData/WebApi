@@ -69,6 +69,30 @@ namespace System.Web.OData.Test
         }
 
         [Fact]
+        public void IsResponseSuccessful_TestResponse()
+        {
+            // Arrange
+            HttpResponseMessage[] successResponses = new HttpResponseMessage[]
+            {
+                new HttpResponseMessage(HttpStatusCode.Accepted),
+                new HttpResponseMessage(HttpStatusCode.Created),
+                new HttpResponseMessage(HttpStatusCode.OK)
+            };
+            HttpResponseMessage[] errorResponses = new HttpResponseMessage[]
+            {
+                new HttpResponseMessage(HttpStatusCode.Created),
+                new HttpResponseMessage(HttpStatusCode.BadGateway),
+                new HttpResponseMessage(HttpStatusCode.Ambiguous)
+            };
+            ChangeSetResponseItem successResponseItem = new ChangeSetResponseItem(successResponses);
+            ChangeSetResponseItem errorResponseItem = new ChangeSetResponseItem(errorResponses);
+
+            // Act & Assert
+            Assert.True(successResponseItem.IsResponseSuccessful());
+            Assert.False(errorResponseItem.IsResponseSuccessful());
+        }
+
+        [Fact]
         public void Dispose_DisposesAllHttpResponseMessages()
         {
             ChangeSetResponseItem responseItem = new ChangeSetResponseItem(new MockHttpResponseMessage[]

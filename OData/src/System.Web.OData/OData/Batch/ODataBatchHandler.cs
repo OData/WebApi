@@ -43,6 +43,11 @@ namespace System.Web.OData.Batch
         public string ODataRouteName { get; set; }
 
         /// <summary>
+        /// Gets or sets the value that defines whether the batch request contains preference 'continue-on-error'.
+        /// </summary>
+        public bool ContinueOnError { get; set; }
+
+        /// <summary>
         /// Creates the batch response message.
         /// </summary>
         /// <param name="responses">The responses for the batch requests.</param>

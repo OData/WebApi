@@ -56,6 +56,21 @@ namespace System.Web.OData.Batch
             writer.WriteEndChangeset();
         }
 
+        /// <summary>
+        /// Gets a value that indicates if the responses in this item are successful.
+        /// </summary>
+        internal override bool IsResponseSuccessful()
+        {
+            foreach (HttpResponseMessage response in Responses)
+            {
+                if (!response.IsSuccessStatusCode)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {

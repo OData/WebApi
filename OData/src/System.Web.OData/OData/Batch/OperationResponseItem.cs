@@ -48,6 +48,14 @@ namespace System.Web.OData.Batch
             return WriteMessageAsync(writer, Response, cancellationToken);
         }
 
+        /// <summary>
+        /// Gets a value that indicates if the responses in this item are successful.
+        /// </summary>
+        internal override bool IsResponseSuccessful()
+        {
+            return Response.IsSuccessStatusCode;
+        }
+
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {

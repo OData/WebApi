@@ -49,6 +49,16 @@ namespace System.Web.OData.Batch
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
             Guid batchId = Guid.NewGuid();
             List<IDisposable> resourcesToDispose = new List<IDisposable>();
+
+            string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(request);
+            if (preferHeader != null && preferHeader.Contains("odata.continue-on-error"))
+            {
+                ContinueOnError = true;
+            }
+            else
+            {
+                ContinueOnError = false;
+            }
             try
             {
                 while (batchReader.Read())
@@ -65,6 +75,10 @@ namespace System.Web.OData.Batch
                     if (responseItem != null)
                     {
                         responses.Add(responseItem);
+                        if (responseItem.IsResponseSuccessful() == false && ContinueOnError == false)
+                        {
+                            break;
+                        }
                     }
                 }
             }

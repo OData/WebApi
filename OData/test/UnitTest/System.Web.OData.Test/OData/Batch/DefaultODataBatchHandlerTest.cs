@@ -106,6 +106,81 @@ namespace System.Web.OData.Test
         }
 
         [Fact]
+        public void ProcessBatchAsync_ContinueOnError()
+        {
+            // Arrange
+            MockHttpServer server = new MockHttpServer(request =>
+            {
+                string responseContent = request.RequestUri.AbsoluteUri;
+                string content = "";
+                if (request.Content != null)
+                {
+                    content = request.Content.ReadAsStringAsync().Result;
+                    if (!String.IsNullOrEmpty(content))
+                    {
+                        responseContent += "," + content;
+                    }
+                }
+                HttpResponseMessage responseMessage = new HttpResponseMessage { Content = new StringContent(responseContent) };
+                if (content.Equals("foo"))
+                {
+                    responseMessage.StatusCode = HttpStatusCode.BadRequest;
+                }
+                return responseMessage;
+            });
+            DefaultODataBatchHandler batchHandler = new DefaultODataBatchHandler(server);
+            HttpRequestMessage batchRequest = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
+            {
+                Content = new MultipartContent("mixed")
+                {
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Get, "http://example.com/")),
+                    new MultipartContent("mixed") // ChangeSet
+                    {
+                        ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Post, "http://example.com/values")
+                        {
+                            Content = new StringContent("foo")
+                        })
+                    },
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Post, "http://example.com/values")
+                    {
+                        Content = new StringContent("bar")
+                    }),
+                }
+            };
+            HttpRequestMessage batchRequestWithPrefContinueOnError = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
+            {
+                Content = new MultipartContent("mixed")
+                {
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Get, "http://example.com/")),
+                    new MultipartContent("mixed") // ChangeSet
+                    {
+                        ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Post, "http://example.com/values")
+                        {
+                            Content = new StringContent("foo")
+                        })
+                    },
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Post, "http://example.com/values")
+                    {
+                        Content = new StringContent("bar")
+                    }),
+                }
+            };
+            batchRequestWithPrefContinueOnError.Headers.Add("prefer", "odata.continue-on-error");
+
+            // Act
+            var response = batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None).Result;
+            var batchContent = Assert.IsType<ODataBatchContent>(response.Content);
+            var batchResponses = batchContent.Responses.ToArray();
+            var responseWithPrefContinueOnError = batchHandler.ProcessBatchAsync(batchRequestWithPrefContinueOnError, CancellationToken.None).Result;
+            var batchContentWithPrefContinueOnError = Assert.IsType<ODataBatchContent>(responseWithPrefContinueOnError.Content);
+            var batchResponsesWithPrefContinueOnError = batchContentWithPrefContinueOnError.Responses.ToArray();
+
+            // Assert
+            Assert.Equal(2, batchResponses.Length);
+            Assert.Equal(3, batchResponsesWithPrefContinueOnError.Length);
+        }
+
+        [Fact]
         public void ExecuteRequestMessagesAsync_CallsInvokerForEachRequest()
         {
             MockHttpServer server = new MockHttpServer(request =>

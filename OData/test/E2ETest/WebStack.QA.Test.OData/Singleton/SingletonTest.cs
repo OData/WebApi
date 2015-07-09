@@ -78,6 +78,8 @@ namespace WebStack.QA.Test.OData.Singleton
         public async Task NotCountable(string url)
         {
             // Arrange
+            await ResetDataSource("expAttr", "Umbrella");
+            await ResetDataSource("conAttr", "Umbrella");
             string requestUri = string.Format("{0}/{1}", this.BaseAddress, url);
 
             // Act

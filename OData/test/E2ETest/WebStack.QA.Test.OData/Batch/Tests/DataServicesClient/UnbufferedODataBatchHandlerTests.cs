@@ -530,4 +530,191 @@ Content-Type: application/json;odata.metadata=minimal
             client.SaveChangesAsync(SaveChangesOptions.BatchWithSingleChangeset).Wait();
         }
     }
+
+    [NuwaFramework]
+    [NuwaHttpClientConfiguration(MessageLog = false)]
+    [NuwaTrace(typeof(PlaceholderTraceWriter))]
+    public class ContinueOnErrorBatchTests : IODataTestBase
+    {
+        private string baseAddress = null;
+
+        [NuwaBaseAddress]
+        public string BaseAddress
+        {
+            get
+            {
+                return baseAddress;
+            }
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    this.baseAddress = value.Replace("localhost", Environment.MachineName);
+                }
+            }
+        }
+
+        [NuwaHttpClient]
+        public HttpClient Client { get; set; }
+
+        [NuwaConfiguration]
+        public static void UpdateConfiguration(HttpConfiguration configuration)
+        {
+            HttpServer server = configuration.Properties["Nuwa.HttpServerKey"] as HttpServer;
+
+            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            configuration.MapODataServiceRoute(
+                "batch",
+                "UnbufferedBatch",
+                GetEdmModel(),
+                new DefaultODataPathHandler(),
+                ODataRoutingConventions.CreateDefault(),
+                new UnbufferedODataBatchHandler(server));
+        }
+
+        protected static IEdmModel GetEdmModel()
+        {
+            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            EntitySetConfiguration<UnbufferedBatchCustomer> customers = builder.EntitySet<UnbufferedBatchCustomer>("UnbufferedBatchCustomer");
+            EntitySetConfiguration<UnbufferedBatchOrder> orders = builder.EntitySet<UnbufferedBatchOrder>("UnbufferedBatchOrder");
+            customers.EntityType.Collection.Action("OddCustomers").ReturnsCollectionFromEntitySet<UnbufferedBatchCustomer>("UnbufferedBatchCustomer");
+            builder.MaxDataServiceVersion = builder.DataServiceVersion;
+            return builder.GetEdmModel();
+        }
+
+        [NuwaWebConfig]
+        public static void UpdateWebConfig(WebConfigHelper webConfig)
+        {
+            webConfig.AddAppSection("aspnet:UseTaskFriendlySynchronizationContext", "true");
+        }
+
+        [Fact]
+        public async Task CanNotContinueOnErrorWhenHeaderNotSet()
+        {
+            // Arrange
+            var requestUri = string.Format("{0}/UnbufferedBatch/$batch", this.BaseAddress);
+            string absoluteUri = this.BaseAddress + "/UnbufferedBatch/UnbufferedBatchCustomer";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("multipart/mixed"));
+            HttpContent content = new StringContent(
+@"--batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET " + absoluteUri + @"(0) HTTP/1.1
+
+--batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET " + absoluteUri + @"(-1) HTTP/1.1
+
+--batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET " + absoluteUri + @"(1) HTTP/1.1
+
+--batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0--
+");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/mixed; boundary=batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0");
+            request.Content = content;
+
+            // Act
+            HttpResponseMessage response = await Client.SendAsync(request);
+            var stream = response.Content.ReadAsStreamAsync().Result;
+            IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
+            int subResponseCount = 0;
+
+            // Assert
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel()))
+            {
+                var batchReader = messageReader.CreateODataBatchReader();
+                while (batchReader.Read())
+                {
+                    switch (batchReader.State)
+                    {
+                        case ODataBatchReaderState.Operation:
+                            var operationMessage = batchReader.CreateOperationResponseMessage();
+                            subResponseCount++;
+                            if (subResponseCount == 2)
+                            {
+                                Assert.Equal(500, operationMessage.StatusCode);
+                            }
+                            else
+                            {
+                                Assert.Equal(200, operationMessage.StatusCode);
+                            }
+                            break;
+                    }
+                }
+            }
+            Assert.Equal(2, subResponseCount);
+        }
+
+        [Fact]
+        public async Task CanContinueOnErrorWhenHeaderSet()
+        {
+            // Arrange
+            var requestUri = string.Format("{0}/UnbufferedBatch/$batch", this.BaseAddress);
+            string absoluteUri = this.BaseAddress + "/UnbufferedBatch/UnbufferedBatchCustomer";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("multipart/mixed"));
+            request.Headers.Add("prefer", "odata.continue-on-error");
+            HttpContent content = new StringContent(
+@"--batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET " + absoluteUri + @"(0) HTTP/1.1
+
+--batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET " + absoluteUri + @"(-1) HTTP/1.1
+
+--batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET " + absoluteUri + @"(1) HTTP/1.1
+
+--batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0--
+");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/mixed; boundary=batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0");
+            request.Content = content;
+
+            // Act
+            HttpResponseMessage response = await Client.SendAsync(request);
+            var stream = response.Content.ReadAsStreamAsync().Result;
+            IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
+            int subResponseCount = 0;
+
+            // Assert
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel()))
+            {
+                var batchReader = messageReader.CreateODataBatchReader();
+                while (batchReader.Read())
+                {
+                    switch (batchReader.State)
+                    {
+                        case ODataBatchReaderState.Operation:
+                            var operationMessage = batchReader.CreateOperationResponseMessage();
+                            subResponseCount++;
+                            if (subResponseCount == 2)
+                            {
+                                Assert.Equal(500, operationMessage.StatusCode);
+                            }
+                            else
+                            {
+                                Assert.Equal(200, operationMessage.StatusCode);
+                            }
+                            break;
+                    }
+                }
+            }
+            Assert.Equal(3, subResponseCount);
+        }
+    }
 }

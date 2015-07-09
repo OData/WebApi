@@ -61,6 +61,18 @@ namespace System.Web.OData.Test
         }
 
         [Fact]
+        public void IsResponseSucess_TestResponse()
+        {
+            // Arrange
+            OperationResponseItem successResponseItem = new OperationResponseItem(new HttpResponseMessage(HttpStatusCode.OK));
+            OperationResponseItem errorResponseItem = new OperationResponseItem(new HttpResponseMessage(HttpStatusCode.Ambiguous));
+
+            // Act & Assert
+            Assert.True(successResponseItem.IsResponseSuccessful());
+            Assert.False(errorResponseItem.IsResponseSuccessful());
+        }
+
+        [Fact]
         public void Dispose_DisposesHttpResponseMessage()
         {
             OperationResponseItem responseItem = new OperationResponseItem(new MockHttpResponseMessage());

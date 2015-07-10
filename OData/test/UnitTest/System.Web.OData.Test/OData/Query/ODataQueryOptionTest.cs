@@ -1010,10 +1010,12 @@ namespace System.Web.OData.Query
         [Fact]
         public void ODataQueryOptions_SetToApplied()
         {
+            // Arrange
             string url = "http://localhost/odata/EntityModels?$filter=ID eq 1&$skip=1&$select=A&$expand=ExpandProp";
             HttpServer server = CreateServer();
             HttpClient client = new HttpClient(server);
 
+            // Act
             HttpResponseMessage response = client.GetAsync(url).Result;
             var responseString = response.Content.ReadAsStringAsync().Result;
 
@@ -1034,13 +1036,9 @@ namespace System.Web.OData.Query
                     typeof(EntityModelsController)));
 
             ODataModelBuilder builder = new ODataConventionModelBuilder();
-
             builder.EntitySet<ODataQueryOptionTest_EntityModel>("EntityModels");
-
             IEdmModel model = builder.GetEdmModel();
-
             configuration.MapODataServiceRoute("odata", "odata", model);
-
             return new HttpServer(configuration);
         }
 
@@ -1052,7 +1050,7 @@ namespace System.Web.OData.Query
 
         public IHttpActionResult Get(ODataQueryOptions<ODataQueryOptionTest_EntityModel> queryOptions)
         {
-            // Don't apply Filter and expand, but apply Select.
+            // Don't apply Filter and Expand, but apply Select.
             queryOptions.Context.AppliedQueryOptions = AllowedQueryOptions.Skip | AllowedQueryOptions.Filter | AllowedQueryOptions.Expand;
             var res = queryOptions.ApplyTo(_entityModels);
             return Ok(res.AsQueryable());

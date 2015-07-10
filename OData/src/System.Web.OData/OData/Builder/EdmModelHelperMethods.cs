@@ -378,6 +378,7 @@ namespace System.Web.OData.Builder
             Dictionary<PropertyInfo, IEdmProperty> edmProperties = edmTypeMap.EdmProperties;
             model.AddClrPropertyInfoAnnotations(edmProperties);
             model.AddPropertyRestrictionsAnnotations(edmTypeMap.EdmPropertiesRestrictions);
+            model.AddNavigationPropertyConfigurationsAnnotations(edmTypeMap.EdmNavigationPropertiesConfigurations);
 
             // add dynamic dictionary property annotation for open types
             model.AddDynamicPropertyDictionaryAnnotations(edmTypeMap.OpenTypes);
@@ -468,6 +469,15 @@ namespace System.Web.OData.Builder
                 IEdmProperty edmProperty = edmPropertyRestriction.Key;
                 QueryableRestrictions restrictions = edmPropertyRestriction.Value;
                 model.SetAnnotationValue(edmProperty, new QueryableRestrictionsAnnotation(restrictions));
+            }
+        }
+        private static void AddNavigationPropertyConfigurationsAnnotations(this EdmModel model, Dictionary<IEdmProperty, NavigationPropertyQueryableConfiguration> edmNavigationPropertiesConfigurations)
+        {
+            foreach (KeyValuePair<IEdmProperty, NavigationPropertyQueryableConfiguration> edmNavigationPropertiesConfiguration in edmNavigationPropertiesConfigurations)
+            {
+                IEdmProperty edmProperty = edmNavigationPropertiesConfiguration.Key;
+                NavigationPropertyQueryableConfiguration configuration = edmNavigationPropertiesConfiguration.Value;
+                model.SetAnnotationValue(edmProperty, new NavigationPropertyQueryableConfigurationAnnotation(configuration));
             }
         }
 
@@ -595,9 +605,7 @@ namespace System.Web.OData.Builder
             EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
         {
             EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
-
             IEnumerable<PropertyConfiguration> nonSortableProperties = entityTypeConfig.Properties.Where(property => property.Unsortable);
-
             IList<IEdmProperty> properties = new List<IEdmProperty>();
             foreach (PropertyConfiguration property in nonSortableProperties)
             {
@@ -621,9 +629,7 @@ namespace System.Web.OData.Builder
             EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
         {
             EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
-
-            IEnumerable<PropertyConfiguration> nonExpandableProperties = entityTypeConfig.Properties.Where(property => property.NotExpandable);
-
+            IEnumerable<PropertyConfiguration> nonExpandableProperties = entityTypeConfig.Properties.Where(property => property.NotExpandable);     
             IList<IEdmNavigationProperty> properties = new List<IEdmNavigationProperty>();
             foreach (PropertyConfiguration property in nonExpandableProperties)
             {

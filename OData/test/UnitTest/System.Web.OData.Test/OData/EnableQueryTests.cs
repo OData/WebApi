@@ -105,6 +105,20 @@ namespace System.Web.OData.Test
                 };
             }
         }
+        public static TheoryDataSet<string> AutoExpandedTestData
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    {"?$select=Id"},
+                    {"?$filter=Id eq 1"},
+                    {"?$filter=Category/Id eq 1234"},
+                    {"?$expand=Category"},
+                    {""},
+                };
+            }
+        }
 
         public static TheoryDataSet<string, string> ArithmeticOperatorsTestData
         {
@@ -429,6 +443,31 @@ namespace System.Web.OData.Test
         }
 
         [Theory]
+        [PropertyData("AutoExpandedTestData")]
+        public void EnableQuery_Works_WithAutoExpanded(string queryString)
+        {
+            // Arrange
+            string url = "http://localhost/odata/AutoExpandedCustomers";
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(typeof(AutoExpandedCustomersController)));
+            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<AutoExpandedCustomer>("AutoExpandedCustomers");
+            IEdmModel model = builder.GetEdmModel();
+            configuration.MapODataServiceRoute("odata", "odata", model);
+            HttpServer server = new HttpServer(configuration);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = client.GetAsync(url + queryString).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("1234", responseString);
+            Assert.Contains("5678", responseString);
+        }
+
+        [Theory]
         [PropertyData("UnsupportedDateTimeFunctionsTestData")]
         public void EnableQuery_ReturnsBadRequest_ForUnsupportedFunctions(string queryString, string expectedElement)
         {
@@ -567,6 +606,22 @@ namespace System.Web.OData.Test
             }
         }
 
+        public class AutoExpandedCustomersController : ODataController
+        {
+            private static readonly IQueryable<AutoExpandedCustomer> _autoCustomers;
+
+            [EnableQuery]
+            public IQueryable<AutoExpandedCustomer> Get()
+            {
+                return _autoCustomers;
+            }
+
+            static AutoExpandedCustomersController()
+            {
+                _autoCustomers = CreateAutoExpandedCustomers().AsQueryable();
+            }
+        }
+
         // This controller exposes an action that has limitations on aspects
         // other than AllowedFunctions, AllowedLogicalOperators, etc.
         public class OtherLimitationsCustomersController : ODataController
@@ -655,6 +710,29 @@ namespace System.Web.OData.Test
             }).ToList<EnableQueryOrder>();
 
             yield return customer;
+        }
+
+        private static IEnumerable<AutoExpandedCustomer> CreateAutoExpandedCustomers()
+        {
+            AutoExpandedCustomer customer = new AutoExpandedCustomer();
+
+            customer.Id = 1;
+
+            customer.Category = new PremiumEnableQueryCategory
+            {
+                Id = 1234,
+                PremiumLevel = 5678,
+            };
+
+            yield return customer;
+        }
+
+        public class AutoExpandedCustomer
+        {
+            public int Id { get; set; }
+
+            [AutoExpand]
+            public EnableQueryCategory Category { get; set; }
         }
 
         public class EnableQueryCustomer

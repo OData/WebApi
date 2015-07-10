@@ -306,12 +306,26 @@ namespace System.Web.OData.Formatter
             return annotation == null ? false : annotation.Restrictions.NotCountable;
         }
 
+        public static bool IsAutoExpand(IEdmProperty edmProperty, IEdmModel edmModel)
+        {
+            NavigationPropertyQueryableConfigurationAnnotation annotation = GetNavigationPropertyConfiguration(edmProperty, edmModel);
+            return annotation == null ? false : annotation.Configuration.AutoExpand;
+        }
+
         private static QueryableRestrictionsAnnotation GetPropertyRestrictions(IEdmProperty edmProperty, IEdmModel edmModel)
         {
             Contract.Assert(edmProperty != null);
             Contract.Assert(edmModel != null);
 
             return edmModel.GetAnnotationValue<QueryableRestrictionsAnnotation>(edmProperty);
+        }
+
+        private static NavigationPropertyQueryableConfigurationAnnotation GetNavigationPropertyConfiguration(IEdmProperty edmProperty, IEdmModel edmModel)
+        {
+            Contract.Assert(edmProperty != null);
+            Contract.Assert(edmModel != null);
+
+            return edmModel.GetAnnotationValue<NavigationPropertyQueryableConfigurationAnnotation>(edmProperty);
         }
 
         public static string GetClrPropertyName(IEdmProperty edmProperty, IEdmModel edmModel)

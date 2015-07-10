@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web.Http.Dispatcher;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData;
@@ -13,19 +14,43 @@ using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Nuwa;
+using WebStack.QA.Common.XUnit;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
+using Xunit.Extensions;
 
 namespace WebStack.QA.Test.OData.QueryComposition
 {
     public class SelectExpandTests : ODataTestBase
     {
+        private const string AutoExpandTestUrl = "{0}/selectexpand/AutoExpandCustomer(1)";
+        
+        public static TheoryDataSet<string, int> AutoExpandTestData
+        {
+            get
+            {
+                return new TheoryDataSet<string, int>
+                {
+                    {AutoExpandTestUrl + "?$select=Stuff", 1},
+                    {AutoExpandTestUrl + "?$select=Id", 2},
+                    {AutoExpandTestUrl + "?$expand=Stuff&$select=Id", 2},
+                    {AutoExpandTestUrl + "?$expand=NormalStuff", 3},
+                    {AutoExpandTestUrl, 2},
+                };
+            }
+        }
+
         [NuwaConfiguration]
         public static void UpdateConfiguration(HttpConfiguration configuration)
         {
+            configuration.Services.Replace(
+                  typeof(IAssembliesResolver),
+                  new TestAssemblyResolver(
+                      typeof(SelectCustomerController),
+                      typeof(AutoExpandCustomerController)));
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            configuration.MapODataServiceRoute("selectexpand", "selectexpand", GetEdmModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            configuration.MapODataServiceRoute("selectexpand", "selectexpand", GetEdmModel(configuration));
         }
 
         private static IEdmModel GetEdmModel(HttpConfiguration configuration)
@@ -36,10 +61,12 @@ namespace WebStack.QA.Test.OData.QueryComposition
             customers.EntityType.Action("CreditRating").Returns<double>();
             customers.EntityType.Collection.Action("PremiumCustomers").ReturnsCollectionFromEntitySet<SelectCustomer>("SelectCustomer");
 
+            builder.EntitySet<AutoExpandCustomer>("AutoExpandCustomer");
             builder.EntitySet<SelectOrderDetail>("SelectOrderDetail");
             builder.EntityType<SelectPremiumCustomer>();
             builder.EntitySet<SelectOrder>("SelectOrder");
             builder.EntitySet<SelectBonus>("SelectBonus");
+            builder.EntitySet<AutoExpandStuff>("Stuff");
 
             IEdmModel model = builder.GetEdmModel();
             return model;
@@ -312,6 +339,35 @@ namespace WebStack.QA.Test.OData.QueryComposition
                 }
             }
         }
+
+        [PropertyData("AutoExpandTestData")]
+        public void QueryForAnEntryIncludeTheAutoExpandNavigationProperty(string url, int propCount)
+        {
+            // Arrange
+            string queryUrl = string.Format(url, BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Act
+            response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+
+            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            Assert.Equal(customer.Properties().Count(), propCount);
+
+            JObject stuff = customer["Stuff"] as JObject;
+            Assert.NotNull(stuff);
+
+            JObject bonus = stuff["Bonus"] as JObject;
+            Assert.Equal((int)stuff["Id"], bonus["Id"]);
+            Assert.Equal((int)stuff["Id"] * 1000, bonus["Ammount"]);
+        }
     }
 
     public class SelectCustomerController : ODataController
@@ -390,6 +446,58 @@ namespace WebStack.QA.Test.OData.QueryComposition
         {
             return 0;
         }
+    }
+
+    public class AutoExpandCustomerController : ODataController
+    {
+        public IList<AutoExpandCustomer> Customers { get; set; }
+
+        public AutoExpandCustomerController()
+        {
+            Customers = Enumerable.Range(0, 10).Select(i => new AutoExpandCustomer
+            {
+                Id = i,
+                Stuff = new AutoExpandStuff
+                {
+                    Id = i,
+                    Bonus = new SelectBonus
+                    {
+                        Id = i,
+                        Ammount = i * 1000
+                    }
+                }
+            }).ToList();
+        }
+
+        [EnableQuery]
+        public IQueryable<AutoExpandCustomer> Get()
+        {
+            return Customers.AsQueryable();
+        }
+
+        [EnableQuery]
+        public AutoExpandCustomer Get(int key)
+        {
+            return Customers.ElementAt(key);
+        }
+    }
+
+    public class AutoExpandCustomer
+    {
+        public int Id { get; set; }
+
+        [AutoExpand]
+        public AutoExpandStuff Stuff { get; set; }
+
+        public AutoExpandStuff NormalStuff { get; set; }
+    }
+
+    public class AutoExpandStuff
+    {
+        public int Id { get; set; }
+
+        [AutoExpand]
+        public SelectBonus Bonus { get; set; }
     }
 
     public class SelectCustomer

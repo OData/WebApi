@@ -77,8 +77,8 @@ namespace System.Web.OData.Query
 
             // Parse the query from request Uri
             RawValues = new ODataRawQueryOptions();
-            IDictionary<string, string> queryParameters =
-                request.GetQueryNameValuePairs().ToDictionary(p => p.Key, p => p.Value);
+            IDictionary<string, string> queryParameters = GetQueryParameters(request, context);
+            
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,
@@ -633,6 +633,44 @@ namespace System.Web.OData.Query
         internal virtual ETag GetETag(EntityTagHeaderValue etagHeaderValue)
         {
             return Request.GetETag(etagHeaderValue);
+        }
+
+        private static IDictionary<string, string> GetQueryParameters(HttpRequestMessage request, ODataQueryContext context)
+        {
+            IDictionary<string, string> parameters = request.GetQueryNameValuePairs().ToDictionary(p => p.Key, p => p.Value);
+            IEdmEntityType entityType = context.ElementType as IEdmEntityType;
+
+            if (entityType != null && parameters.ContainsKey("$select"))
+            {
+                var navigationProperties = entityType.NavigationProperties();
+                if (navigationProperties != null)
+                {
+                    string autoExpandNavigationProperties = String.Empty;
+                    foreach (var navigationProperty in navigationProperties)
+                    {
+                        if (EdmLibHelpers.IsAutoExpand(navigationProperty, context.Model))
+                        {
+                            if (!String.IsNullOrEmpty(autoExpandNavigationProperties))
+                            {
+                                autoExpandNavigationProperties += ",";
+                            }
+                            autoExpandNavigationProperties += navigationProperty.Name;
+                        }
+                    }
+                    if (!String.IsNullOrEmpty(autoExpandNavigationProperties))
+                    {
+                        if (parameters.ContainsKey("$expand"))
+                        {
+                            parameters["$expand"] += "," + autoExpandNavigationProperties;
+                        }
+                        else
+                        {
+                            parameters["$expand"] = autoExpandNavigationProperties;
+                        }
+                    }
+                }
+            }
+            return parameters;
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase",

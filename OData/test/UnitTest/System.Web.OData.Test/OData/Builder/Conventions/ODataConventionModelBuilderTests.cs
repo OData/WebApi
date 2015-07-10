@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Formatter;
 using System.Web.OData.Query;
@@ -302,6 +303,9 @@ namespace System.Web.OData.Builder.Conventions
             prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "Category");
             Assert.True(prop.NotNavigable);
             Assert.True(prop.NotExpandable);
+
+            NavigationPropertyConfiguration naviProp = entityTypeConf.NavigationProperties.FirstOrDefault(p => p.Name == "Category2");
+            Assert.True(naviProp.Expand);
 
             prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "CountableProperty");
             Assert.False(prop.NotCountable);
@@ -2711,6 +2715,23 @@ namespace System.Web.OData.Builder.Conventions
             Assert.False(entityType.Properties().First(p => p.Name.Equals("UserType")).Type.IsNullable);
             Assert.False(entityType.Properties().First(p => p.Name.Equals("Contacts")).Type.IsNullable);
         }
+
+        [Fact]
+        public void ConventionModelBuild_Work_With_AutoExpandEdmTypeAttribute()
+        {
+            // Arrange
+            var modelBuilder = new ODataConventionModelBuilder();
+            var entityTypeConf = modelBuilder.EntityType<Product>();
+
+            // Act 
+            modelBuilder.EntitySet<Product>("Products");
+            var model = modelBuilder.GetEdmModel();
+
+            // Assert
+            NavigationPropertyConfiguration category = entityTypeConf.NavigationProperties.FirstOrDefault(p => p.Name == "Category");
+            Assert.NotNull(category);
+            Assert.True(category.Expand);      
+        }
     }
 
     public enum UserType
@@ -2738,6 +2759,7 @@ namespace System.Web.OData.Builder.Conventions
     {
     }
 
+    [AutoExpand]
     public class Product
     {
         public int ID { get; set; }
@@ -2822,6 +2844,9 @@ namespace System.Web.OData.Builder.Conventions
         [NotNavigable]
         [NotExpandable]
         public CategoryWithKeyAttribute Category { get; set; }
+
+        [AutoExpand]
+        public CategoryWithKeyAttribute Category2 { get; set; }
     }
 
     public class CategoryWithKeyAttribute

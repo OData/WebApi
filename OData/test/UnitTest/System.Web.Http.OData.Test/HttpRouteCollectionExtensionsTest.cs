@@ -106,7 +106,7 @@ namespace System.Web.Http.OData
             string routePrefix = "prefix";
 
             // Act
-            config.Routes.MapODataServiceRoute(routeName, routePrefix, model).HasRelaxedODataVersionConstraint();
+            config.Routes.MapODataServiceRoute(routeName, routePrefix, model);
 
             // Assert
             IHttpRoute odataRoute = routes[routeName];

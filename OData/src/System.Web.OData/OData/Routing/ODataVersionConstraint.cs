@@ -30,6 +30,7 @@ namespace System.Web.OData.Routing
         public ODataVersionConstraint()
         {
             Version = ODataVersion.V4;
+            IsRelaxedMatch = true;
         }
 
         /// <summary>

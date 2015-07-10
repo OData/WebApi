@@ -75,6 +75,9 @@
     <Compile Include="Extensions\HttpErrorExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
+    <Compile Include="OData\Builder\AutoExpandAttribute.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\AutoExpandAttributeEdmTypeConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\AutoExpandAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\MediaTypeAttributeConvention.cs" />
     <Compile Include="OData\Builder\MediaTypeAttribute.cs" />
     <Compile Include="OData\Builder\CapabilitiesVocabularyConstants.cs" />
@@ -98,6 +101,7 @@
     <Compile Include="OData\IEdmDeltaDeletedEntityObject.cs" />
     <Compile Include="OData\IEdmDeltaDeletedLink.cs" />
     <Compile Include="OData\IEdmDeltaLinkBase.cs" />
+    <Compile Include="OData\NavigationPropertyQueryableConfigurationAnnotation.cs" />
     <Compile Include="OData\ODataUriResolverSetttings.cs" />
     <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
@@ -135,6 +139,7 @@
     <Compile Include="OData\Builder\DynamicPropertyDictionaryAnnotation.cs" />
     <Compile Include="OData\ETagMessageHandler.cs" />
     <Compile Include="OData\Formatter\ODataCountMediaTypeMapping.cs" />
+    <Compile Include="OData\NavigationPropertyQueryableConfiguration.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
     <Compile Include="OData\Query\NotCountableAttribute.cs" />

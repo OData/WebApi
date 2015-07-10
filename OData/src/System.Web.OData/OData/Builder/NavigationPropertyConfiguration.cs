@@ -96,6 +96,11 @@ namespace System.Web.OData.Builder
         public EdmOnDeleteAction OnDeleteAction { get; set; }
 
         /// <summary>
+        /// Gets or sets the the navigation property is auto expanded.
+        /// </summary>
+        public bool Expand { get; set; }
+
+        /// <summary>
         /// Gets the foreign keys in the referential constraint of this navigation property.
         /// </summary>
         public IEnumerable<PropertyInfo> DependentProperties
@@ -154,6 +159,15 @@ namespace System.Web.OData.Builder
         public NavigationPropertyConfiguration NonContained()
         {
             ContainsTarget = false;
+            return this;
+        }
+
+        /// <summary>
+        /// Marks the navigation property is auto expanded.
+        /// </summary>
+        public NavigationPropertyConfiguration IsAutoExpand()
+        {
+            Expand = true;
             return this;
         }
 

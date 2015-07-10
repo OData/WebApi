@@ -179,7 +179,7 @@ namespace System.Web.OData.Formatter.Serialization
             if (!writeContext.Items.TryGetValue(key, out selectExpandNode))
             {
                 // cache the selectExpandNode so that if we are writing a feed we don't have to construct it again.
-                selectExpandNode = new SelectExpandNode(writeContext.SelectExpandClause, entityType, writeContext.Model);
+                selectExpandNode = new SelectExpandNode(entityType, writeContext);
                 writeContext.Items[key] = selectExpandNode;
             }
             return selectExpandNode as SelectExpandNode;

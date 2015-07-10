@@ -7,6 +7,7 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
@@ -30,6 +31,43 @@ namespace System.Web.OData.Formatter.Serialization
             SelectedActions = new HashSet<IEdmAction>();
             SelectedFunctions = new HashSet<IEdmFunction>();
             SelectedDynamicProperties = new HashSet<string>();
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="SelectExpandNode"/> class describing the set of structural properties,
+        /// navigation properties, and actions to select and expand for the given <paramref name="writeContext"/>.
+        /// </summary>
+        /// <param name="entityType">The entity type of the entry that would be written.</param>
+        /// <param name="writeContext">The serializer context to be used while creating the collection.</param>
+        /// <remarks>The default constructor is for unit testing only.</remarks>
+        public SelectExpandNode(IEdmEntityType entityType, ODataSerializerContext writeContext)
+            : this(writeContext.SelectExpandClause, entityType, writeContext.Model)
+        {
+            var queryOptionParser = new ODataQueryOptionParser(
+                  writeContext.Model,
+                  entityType,
+                  writeContext.NavigationSource,
+                  _extraQueryParameters);
+
+            var selectExpandClause = queryOptionParser.ParseSelectAndExpand();
+            if (selectExpandClause != null)
+            {
+                foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
+                {
+                    ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
+                    if (expandItem != null)
+                    {
+                        ValidatePathIsSupported(expandItem.PathToNavigationProperty);
+                        NavigationPropertySegment navigationSegment = (NavigationPropertySegment)expandItem.PathToNavigationProperty.LastSegment;
+                        IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
+                        if (!ExpandedNavigationProperties.ContainsKey(navigationProperty))
+                        {
+                            ExpandedNavigationProperties.Add(navigationProperty, expandItem.SelectAndExpand);
+                        }
+                    }
+                }
+            }
+            SelectedNavigationProperties.ExceptWith(ExpandedNavigationProperties.Keys);
         }
 
         /// <summary>
@@ -85,6 +123,8 @@ namespace System.Web.OData.Formatter.Serialization
                 // remove expanded navigation properties from the selected navigation properties.
                 SelectedNavigationProperties.ExceptWith(ExpandedNavigationProperties.Keys);
             }
+
+            GetExtraQueryParameters(allNavigationProperties, model);
         }
 
         /// <summary>
@@ -121,6 +161,29 @@ namespace System.Web.OData.Formatter.Serialization
         /// Gets the list of OData functions to be included in the response.
         /// </summary>
         public ISet<IEdmFunction> SelectedFunctions { get; private set; }
+
+        /// <summary>
+        /// The query parameter for auto expaned navigation property.
+        /// </summary>
+        private IDictionary<string, string> _extraQueryParameters;
+
+        private void GetExtraQueryParameters(HashSet<IEdmNavigationProperty> allNavigationProperties, IEdmModel edmModel)
+        {
+            _extraQueryParameters = new Dictionary<string, string>();
+            string navigationProperties = String.Empty;
+            foreach (var navigationProperty in allNavigationProperties)
+            {
+                if (EdmLibHelpers.IsAutoExpand(navigationProperty, edmModel))
+                {
+                    if (!String.IsNullOrEmpty(navigationProperties))
+                    {
+                        navigationProperties += ",";
+                    }
+                    navigationProperties += navigationProperty.Name;
+                }
+            }
+            _extraQueryParameters.Add("$expand", navigationProperties);
+        }
 
         private void BuildExpansions(SelectExpandClause selectExpandClause, HashSet<IEdmNavigationProperty> allNavigationProperties)
         {

@@ -54,6 +54,7 @@ namespace System.Web.Http.OData.Routing
 
             MinVersion = minVersion;
             MaxVersion = maxVersion;
+            IsRelaxedMatch = true;
         }
 
         /// <summary>

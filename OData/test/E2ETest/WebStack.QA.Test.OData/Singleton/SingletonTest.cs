@@ -73,14 +73,14 @@ namespace WebStack.QA.Test.OData.Singleton
         }
 
         [Theory]
-        [InlineData("expCon/Umbrella/Partners/$count")]
-        [InlineData("conCon/Umbrella/Partners/$count")]
-        public async Task NotCountable(string url)
+        [InlineData("expCon", "Umbrella/Partners/$count")]
+        [InlineData("conCon", "Umbrella/Partners/$count")]
+        public async Task NotCountable(string model, string url)
         {
             // Arrange
-            await ResetDataSource("expAttr", "Umbrella");
-            await ResetDataSource("conAttr", "Umbrella");
-            string requestUri = string.Format("{0}/{1}", this.BaseAddress, url);
+            await ResetDataSource(model, "Umbrella");
+
+            string requestUri = string.Format("{0}/{1}/{2}", this.BaseAddress, model, url);
 
             // Act
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);

@@ -15,7 +15,7 @@ namespace WebStack.QA.Test.OData.SxS2.ODataV3
                 routeName: "SxSODataV3",
                 routePrefix: "SxSOData",
                 model: WebStack.QA.Test.OData.SxS2.ODataV3.Models.ModelBuilder.GetEdmModel())
-                .HasRelaxedODataVersionConstraint();
+                .SetODataVersionConstraint(true);
 
             var contraint = new ODataVersionRouteConstraint(new List<string>() { "OData-Version" });
             odataRoute.Constraints.Add("VersionContraintV1", contraint);

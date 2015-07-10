@@ -73,17 +73,19 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
-        public void HasRelaxedODataVersionConstraint_DefaultValueIsFalse()
+        public void ODataVersionConstraint_DefaultIsRelaxedValueIsTrue()
         {
             ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null);
-            Assert.False(((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
+            Assert.True(((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
         }
 
-        [Fact]
-        public void HasRelaxedODataVersionConstraint_SetValue()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SetODataVersionConstraint_SetValue(bool value)
         {
-            ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null).HasRelaxedODataVersionConstraint();
-            Assert.True(((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
+            ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null).SetODataVersionConstraint(value);
+            Assert.Equal(value, ((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
         }
 
         [Theory]

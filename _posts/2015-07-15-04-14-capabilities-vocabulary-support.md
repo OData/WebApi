@@ -5,14 +5,15 @@ category: "4. OData features"
 ---
 
 Web API OData supports some query limitations, for example:
-• NonFilterable / NotFilterable -- $filter
-• NotCountable -- $count
-• NotExpandable -- $expand
-• NotNavigable -- $select
-• NotSortable / Unsortable -- $orderby
 
-However, the corresponding annotations cannot be exposed in metadata document. This sample introduces the capabilities vocabulary support in Web API OData V5.7. 
-You can find the sample codes [here](https://github.com/OData/ODataSamples/tree/master/WebApi/v4/ODataCapabilitiesVocabularySample).
+* NonFilterable / NotFilterable -- $filter
+* NotCountable -- $count
+* NotExpandable -- $expand
+* NotNavigable -- $select
+* NotSortable / Unsortable -- $orderby
+
+However, the corresponding annotations cannot be exposed in metadata document. This sample introduces the capabilities vocabulary support in Web API OData V5.7, which will enable capabilites vocabulary annotations in metadata document. 
+The related sample codes can be found [here](https://github.com/OData/ODataSamples/tree/master/WebApi/v4/ODataCapabilitiesVocabularySample).
 
 
 ### Build Edm Model
@@ -44,7 +45,7 @@ public class Customer
 }
 {% endhighlight %}
 
-Where, `Address` is a normal complex type, `Color` is an enum type and `Order` is a normal entity type. You can find their definition from the sample codes.
+Where, `Address` is a normal complex type, `Color` is an enum type and `Order` is a normal entity type. You can find their definitions in the sample codes.
 
 Based on the above CLR classes, we can build the Edm model as:
 {% highlight csharp %}
@@ -59,7 +60,7 @@ private static IEdmModel GetEdmModel()
 
 ### Expose annotations
 
-Now, you query the metadata document for *Customer* entity type as:
+Now, you can query the metadata document for capabilites vocabulary annotation as:
 
 {% highlight xml %}
 <?xml version="1.0" encoding="utf-8"?>

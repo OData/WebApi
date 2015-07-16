@@ -170,7 +170,7 @@ namespace System.Web.OData
             var mySpecialOrder = array[1];
             Assert.Equal("http://localhost/odata/MyOrders(2)", mySpecialOrder["@odata.id"]);
             Assert.Equal("http://localhost/odata/MyOrders(2)/System.Web.OData.Builder.TestModels.MySpecialOrder", mySpecialOrder["@odata.editLink"]);
-            Assert.Equal("http://localhost/odata/MyOrders(2)/OrderLines", mySpecialOrder["OrderLines@odata.navigationLink"]);
+            Assert.Equal("http://localhost/odata/MyOrders(2)/System.Web.OData.Builder.TestModels.MySpecialOrder/OrderLines", mySpecialOrder["OrderLines@odata.navigationLink"]);
             Assert.Equal("http://localhost/odata/MyOrders(2)/System.Web.OData.Builder.TestModels.MySpecialOrder/OrderLines/$ref", mySpecialOrder["OrderLines@odata.associationLink"]);
         }
         

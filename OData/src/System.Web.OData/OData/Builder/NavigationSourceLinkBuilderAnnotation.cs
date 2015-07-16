@@ -236,9 +236,9 @@ namespace System.Web.OData.Builder
             }
 
             NavigationLinkBuilder navigationLinkBuilder;
-            if (_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder) &&
-                (metadataLevel == ODataMetadataLevel.FullMetadata ||
-                (metadataLevel == ODataMetadataLevel.MinimalMetadata && !navigationLinkBuilder.FollowsConventions)))
+            if (_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder)
+                && !navigationLinkBuilder.FollowsConventions
+                && (metadataLevel == ODataMetadataLevel.MinimalMetadata || metadataLevel == ODataMetadataLevel.FullMetadata))
             {
                 return navigationLinkBuilder.Factory(instanceContext, navigationProperty);
             }
@@ -250,7 +250,24 @@ namespace System.Web.OData.Builder
         // Build a naviation link unconditionally, it doesn't depend on metadata level but does require a non-null link builder.
         internal Uri BuildNavigationLink(EntityInstanceContext instanceContext, IEdmNavigationProperty navigationProperty)
         {
-            return BuildNavigationLink(instanceContext, navigationProperty, ODataMetadataLevel.FullMetadata);
+            if (instanceContext == null)
+            {
+                throw Error.ArgumentNull("instanceContext");
+            }
+
+            if (navigationProperty == null)
+            {
+                throw Error.ArgumentNull("navigationProperty");
+            }
+
+            NavigationLinkBuilder navigationLinkBuilder;
+            if (_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder))
+            {
+                return navigationLinkBuilder.Factory(instanceContext, navigationProperty);
+            }
+
+            // Return null to let ODL decide when and how to build the navigation link.
+            return null;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Data.Linq;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
@@ -178,9 +179,8 @@ namespace System.Web.OData.Builder
         }
 
         [Theory]
-        [InlineData(true, ODataMetadataLevel.FullMetadata)]
-        [InlineData(false, ODataMetadataLevel.FullMetadata)]
         [InlineData(false, ODataMetadataLevel.MinimalMetadata)]
+        [InlineData(false, ODataMetadataLevel.FullMetadata)]
         public void BuildNavigationLink_ReturnsTheNavigationLinkUri(bool followsConventions, ODataMetadataLevel metadataLevel)
         {
             // Arrange
@@ -199,6 +199,7 @@ namespace System.Web.OData.Builder
         }
 
         [Theory]
+        [InlineData(true, ODataMetadataLevel.FullMetadata)]
         [InlineData(true, ODataMetadataLevel.MinimalMetadata)]
         [InlineData(true, ODataMetadataLevel.NoMetadata)]
         [InlineData(false, ODataMetadataLevel.NoMetadata)]
@@ -320,7 +321,8 @@ namespace System.Web.OData.Builder
 
             // Act
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(model.Customers, model.Model);
-            Uri result = linkBuilder.BuildNavigationLink(instanceContext, ordersProperty, ODataMetadataLevel.FullMetadata);
+            linkBuilder.AddNavigationPropertyLinkBuilder(ordersProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: false), false));
+            Uri result = linkBuilder.BuildNavigationLink(instanceContext, ordersProperty, ODataMetadataLevel.MinimalMetadata);
 
             // Assert
             Assert.Equal("http://localhost/Customers(42)/Orders", result.AbsoluteUri);
@@ -338,7 +340,8 @@ namespace System.Web.OData.Builder
 
             // Act
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(model.Customers, model.Model);
-            Uri result = linkBuilder.BuildNavigationLink(instanceContext, ordersProperty, ODataMetadataLevel.FullMetadata);
+            linkBuilder.AddNavigationPropertyLinkBuilder(ordersProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: true), false));
+            Uri result = linkBuilder.BuildNavigationLink(instanceContext, ordersProperty, ODataMetadataLevel.MinimalMetadata);
 
             // Assert
             Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer/SpecialOrders", result.AbsoluteUri);

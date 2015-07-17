@@ -13,6 +13,9 @@ The master branch has the following libraries, and the packages are availabe fro
 cd OData
 build
 ```
+### Testing
+Each solution contains some test projects. Please open it, build it and run all the tests in the test explorer. For running tests you must open the solution as *Administrator*.
+
 ### Nightly builds
 1.	In your NuGet Package Manager settings add the following package source:
   * https://www.myget.org/F/aspnetwebstacknightly/

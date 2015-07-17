@@ -42,14 +42,15 @@ namespace System.Web.OData.Batch
             IList<ODataBatchRequestItem> subRequests = await ParseBatchRequestsAsync(request, cancellationToken);
 
             string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(request);
-            if (preferHeader != null && preferHeader.Contains("odata.continue-on-error"))
+            if (preferHeader != null && preferHeader.Contains(PreferenceContinueOnError))
             {
-                ContinueOnError = true;
+                IsPreferenceHeaderContinueOnError = true;
             }
             else
             {
-                ContinueOnError = false;
+                IsPreferenceHeaderContinueOnError = false;
             }
+
             try
             {
                 IList<ODataBatchResponseItem> responses = await ExecuteRequestMessagesAsync(subRequests, cancellationToken);
@@ -87,7 +88,7 @@ namespace System.Web.OData.Batch
                 {
                     ODataBatchResponseItem responseItem = await request.SendRequestAsync(Invoker, cancellationToken);
                     responses.Add(responseItem);
-                    if (responseItem != null && responseItem.IsResponseSuccessful() == false && ContinueOnError == false)
+                    if (responseItem != null && responseItem.IsResponseSuccessful() == false && IsPreferenceHeaderContinueOnError == false)
                     {
                         break;
                     }

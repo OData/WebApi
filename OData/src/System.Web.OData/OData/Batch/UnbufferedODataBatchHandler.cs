@@ -51,13 +51,13 @@ namespace System.Web.OData.Batch
             List<IDisposable> resourcesToDispose = new List<IDisposable>();
 
             string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(request);
-            if (preferHeader != null && preferHeader.Contains("odata.continue-on-error"))
+            if (preferHeader != null && preferHeader.Contains(PreferenceContinueOnError))
             {
-                ContinueOnError = true;
+                IsPreferenceHeaderContinueOnError = true;
             }
             else
             {
-                ContinueOnError = false;
+                IsPreferenceHeaderContinueOnError = false;
             }
             try
             {
@@ -75,7 +75,7 @@ namespace System.Web.OData.Batch
                     if (responseItem != null)
                     {
                         responses.Add(responseItem);
-                        if (responseItem.IsResponseSuccessful() == false && ContinueOnError == false)
+                        if (responseItem.IsResponseSuccessful() == false && IsPreferenceHeaderContinueOnError == false)
                         {
                             break;
                         }

@@ -233,6 +233,7 @@ namespace System.Web.OData.Test
             var response = batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None).Result;
             var batchContent = Assert.IsType<ODataBatchContent>(response.Content);
             var batchResponses = batchContent.Responses.ToArray();
+
             var responseWithPrefContinueOnError = batchHandler.ProcessBatchAsync(batchRequestWithPrefContinueOnError, CancellationToken.None).Result;
             var batchContentWithPrefContinueOnError = Assert.IsType<ODataBatchContent>(responseWithPrefContinueOnError.Content);
             var batchResponsesWithPrefContinueOnError = batchContentWithPrefContinueOnError.Responses.ToArray();

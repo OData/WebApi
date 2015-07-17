@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,14 +62,7 @@ namespace System.Web.OData.Batch
         /// </summary>
         internal override bool IsResponseSuccessful()
         {
-            foreach (HttpResponseMessage response in Responses)
-            {
-                if (!response.IsSuccessStatusCode)
-                {
-                    return false;
-                }
-            }
-            return true;
+            return Responses.All(r => r.IsSuccessStatusCode);
         }
 
         /// <inheritdoc/>

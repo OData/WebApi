@@ -21,6 +21,11 @@ namespace System.Web.OData.Batch
         private ODataMessageQuotas _messageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue };
 
         /// <summary>
+        /// Preference odata.continue-on-error.
+        /// </summary>
+        public const string PreferenceContinueOnError = "odata.continue-on-error";
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ODataBatchHandler"/> class.
         /// </summary>
         /// <param name="httpServer">The <see cref="HttpServer"/> for handling the individual batch requests.</param>
@@ -45,7 +50,7 @@ namespace System.Web.OData.Batch
         /// <summary>
         /// Gets or sets the value that defines whether the batch request contains preference 'continue-on-error'.
         /// </summary>
-        public bool ContinueOnError { get; set; }
+        public bool IsPreferenceHeaderContinueOnError { get; set; }
 
         /// <summary>
         /// Creates the batch response message.

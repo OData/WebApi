@@ -146,16 +146,17 @@ namespace System.Web.OData.Formatter.Serialization
                         DateTime dateTime = (DateTime)value;
 
                         TimeZoneInfo timeZone = TimeZoneInfoHelper.TimeZone;
-                        if (timeZone.BaseUtcOffset.Hours >= 0)
+                        TimeSpan utcOffset = timeZone.GetUtcOffset(dateTime);
+                        if (utcOffset >= TimeSpan.Zero)
                         {
-                            if (dateTime <= DateTime.MinValue + timeZone.BaseUtcOffset)
+                            if (dateTime <= DateTime.MinValue + utcOffset)
                             {
                                 return DateTimeOffset.MinValue;
                             }
                         }
                         else
                         {
-                            if (dateTime >= DateTime.MaxValue + timeZone.BaseUtcOffset)
+                            if (dateTime >= DateTime.MaxValue + utcOffset)
                             {
                                 return DateTimeOffset.MaxValue;
                             }
@@ -164,16 +165,17 @@ namespace System.Web.OData.Formatter.Serialization
                         if (dateTime.Kind == DateTimeKind.Local)
                         {
                             TimeZoneInfo localTimeZoneInfo = TimeZoneInfo.Local;
-                            if (localTimeZoneInfo.BaseUtcOffset.Hours < 0)
+                            TimeSpan localTimeSpan = localTimeZoneInfo.GetUtcOffset(dateTime);
+                            if (localTimeSpan < TimeSpan.Zero)
                             {
-                                if (dateTime >= DateTime.MaxValue + localTimeZoneInfo.BaseUtcOffset)
+                                if (dateTime >= DateTime.MaxValue + localTimeSpan)
                                 {
                                     return DateTimeOffset.MaxValue;
                                 }
                             }
                             else
                             {
-                                if (dateTime <= DateTime.MinValue + localTimeZoneInfo.BaseUtcOffset)
+                                if (dateTime <= DateTime.MinValue + localTimeSpan)
                                 {
                                     return DateTimeOffset.MinValue;
                                 }

@@ -75,6 +75,25 @@ namespace System.Web.OData
             Assert.Equal("Wash", action.Name);
         }
 
+        [Theory]
+        [InlineData("Vehicles(Model=8,Name='8')/System.Web.OData.Builder.TestModels.Car/customize.NSAction")]
+        [InlineData("MyVehicle/System.Web.OData.Builder.TestModels.Car/customize.NSAction")]
+        public void Can_find_customized_namespace_action(string url)
+        {
+            // Arrange
+            IEdmModel model = GetModel();
+            ODataPath path = new DefaultODataPathHandler().Parse(model, _serviceRoot, url);
+            Assert.NotNull(path); // Guard
+            ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = model };
+
+            // Act
+            IEdmAction action = ODataActionPayloadDeserializer.GetAction(context);
+
+            // Assert
+            Assert.NotNull(action);
+            Assert.Equal("NSAction", action.Name);
+        }
+
         [Fact]
         public void Throws_Serialization_WhenPathNotFound()
         {
@@ -111,6 +130,7 @@ namespace System.Web.OData
             // Valid overloads of "Wash" bound to different entities
             builder.EntityType<Motorcycle>().Action("Wash");
             builder.EntityType<Car>().Action("Wash");
+            builder.EntityType<Car>().Action("NSAction").Namespace = "customize";
 
             EdmModel model = (EdmModel)builder.GetEdmModel();
 

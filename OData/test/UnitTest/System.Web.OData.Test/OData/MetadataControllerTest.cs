@@ -917,6 +917,21 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void ServiceDocument_FunctionNamesapce_Configuration()
+        {
+            // Arrange
+            HttpServer server = new HttpServer(GetConfiguration());
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var response = client.GetAsync("http://localhost/$metadata").Result;
+            var responseString = response.Content.ReadAsStringAsync().Result;
+
+            Assert.Contains("CustomizeNamepace.GetNS", responseString);
+            Assert.Contains("Namespace=\"CustomizeNamepace\"", responseString);
+        }
+
+        [Fact]
         public void Controller_DoesNotAppear_InApiDescriptions()
         {
             var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();

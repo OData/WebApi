@@ -134,6 +134,11 @@ namespace System.Web.OData.Formatter
                 getSalary.Returns<int>();
                 getSalary.IncludeInServiceDocument = true;
 
+                // Add a function to test namespace configuration
+                var getNSFunction = model.Function("GetNS");
+                getNSFunction.Returns<int>();
+                getNSFunction.Namespace = "CustomizeNamepace";
+
                 // Add Singleton
                 var president = model.Singleton<FormatterPerson>("President");
                 president.HasIdLink(context =>

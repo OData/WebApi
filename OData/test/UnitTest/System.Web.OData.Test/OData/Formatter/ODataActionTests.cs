@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
@@ -115,13 +116,15 @@ namespace System.Web.OData.Formatter
             Assert.Contains("\"@odata.context\":\"http://localhost/$metadata#Edm.Boolean\",\"value\":true", responseString);
         }
 
-        [Fact]
-        public void Response_Includes_ActionLink_WithAcceptHeader()
+        [Theory]
+        [InlineData("org.odata.DoSomething", "DoSomething")]
+        [InlineData("customize.CNSAction", "CNSAction")]
+        public void Response_Includes_ActionLink_WithAcceptHeader(string fullname, string name)
         {
             // Arrange
             string editLink = "http://localhost/Customers(1)";
-            string expectedTarget = editLink + "/org.odata.DoSomething";
-            string expectedMetadata = "#org.odata.DoSomething";
+            string expectedTarget = editLink + "/" + fullname;
+            string expectedMetadata = "#" + fullname;
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, editLink);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
@@ -130,12 +133,12 @@ namespace System.Web.OData.Formatter
             HttpResponseMessage response = _client.SendAsync(request).Result;
             string responseString = response.Content.ReadAsStringAsync().Result;
             dynamic result = JObject.Parse(responseString);
-            dynamic doSomething = result[expectedMetadata];
+            dynamic action = result[expectedMetadata];
 
             // Assert
-            Assert.NotNull(doSomething);
-            Assert.Equal(expectedTarget, (string)doSomething.target);
-            Assert.Equal("DoSomething", (string)doSomething.title);
+            Assert.NotNull(action);
+            Assert.Equal(expectedTarget, (string)action.target);
+            Assert.Equal(name, (string)action.title);
         }
 
         [Fact]
@@ -169,6 +172,9 @@ namespace System.Web.OData.Formatter
             action = customer.Collection.Action("MyAction");
             action.EntityParameter<Customer>("Customer");
             action.CollectionEntityParameter<Customer>("Customers");
+
+            action = customer.Action("CNSAction");
+            action.Namespace = "customize";
             return builder.GetEdmModel();
         }
 
@@ -247,6 +253,12 @@ namespace System.Web.OData.Formatter
         public ODataActionTests.Customer Get(int key)
         {
             return new ODataActionTests.Customer { ID = key, Name = "Name" + key.ToString() };
+        }
+
+        [HttpGet]
+        public bool CNSAction(int key, ODataActionParameters parameters)
+        {
+            return true;
         }
 
         [HttpPost]

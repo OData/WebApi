@@ -26,6 +26,8 @@ namespace System.Web.OData.Builder
             builder.Namespace = "MyNamespace";
             builder.ContainerName = "MyContainer";
             FunctionConfiguration function = builder.Function("Format");
+            ActionConfiguration functionII = builder.Action("FormatII");
+            functionII.Namespace = "MyNamespaceII";
 
             // Assert
             Assert.Equal("Format", function.Name);
@@ -38,9 +40,12 @@ namespace System.Web.OData.Builder
             Assert.False(function.IsBindable);
             Assert.False(function.SupportedInFilter);
             Assert.False(function.SupportedInOrderBy);
+            Assert.Equal("MyNamespace", function.Namespace);
             Assert.Equal("MyNamespace.Format", function.FullyQualifiedName);
+            Assert.Equal("MyNamespaceII", functionII.Namespace);
+            Assert.Equal("MyNamespaceII.FormatII", functionII.FullyQualifiedName);
             Assert.NotNull(builder.Procedures);
-            Assert.Equal(1, builder.Procedures.Count());
+            Assert.Equal(2, builder.Procedures.Count());
         }
 
         [Fact]

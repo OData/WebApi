@@ -30,6 +30,8 @@ namespace System.Web.OData.Builder
             builder.Namespace = "MyNamespace";
             builder.ContainerName = "MyContainer";
             ActionConfiguration action = builder.Action("Format");
+            ActionConfiguration actionII = builder.Action("FormatII");
+            actionII.Namespace = "MyNamespaceII";
 
             // Assert
             Assert.Equal("Format", action.Name);
@@ -40,9 +42,12 @@ namespace System.Web.OData.Builder
             Assert.True(action.IsSideEffecting);
             Assert.False(action.IsComposable);
             Assert.False(action.IsBindable);
+            Assert.Equal("MyNamespace", action.Namespace);
             Assert.Equal("MyNamespace.Format", action.FullyQualifiedName);
+            Assert.Equal("MyNamespaceII", actionII.Namespace);
+            Assert.Equal("MyNamespaceII.FormatII", actionII.FullyQualifiedName);
             Assert.NotNull(builder.Procedures);
-            Assert.Equal(1, builder.Procedures.Count());
+            Assert.Equal(2, builder.Procedures.Count());
         }
 
         [Fact]

@@ -15,6 +15,7 @@ namespace System.Web.OData.Builder
     {
         private List<ParameterConfiguration> _parameters = new List<ParameterConfiguration>();
         private BindingParameterConfiguration _bindingParameter;
+        private string _namespace;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ProcedureConfiguration" /> class.
@@ -25,6 +26,7 @@ namespace System.Web.OData.Builder
         {
             Name = name;
             ModelBuilder = builder;
+            _namespace = null;
         }
 
         /// <summary>
@@ -73,7 +75,16 @@ namespace System.Web.OData.Builder
         /// </summary>
         public string FullyQualifiedName
         {
-            get { return ModelBuilder.Namespace + "." + Name; }
+            get { return Namespace + "." + Name; }
+        }
+
+        /// <summary>
+        /// The Namespace by default is the ModelBuilder's Namespace.
+        /// </summary>
+        public string Namespace
+        {
+            get { return _namespace ?? ModelBuilder.Namespace; } 
+            set { _namespace = value;  }
         }
 
         /// <summary>

@@ -282,7 +282,7 @@ namespace System.Web.OData.Builder
             IEdmPathExpression pathExpression)
         {
             EdmAction operation = new EdmAction(
-                container.Namespace,
+                procedure.Namespace,
                 procedure.Name,
                 returnReference,
                 procedure.IsBindable,
@@ -298,7 +298,7 @@ namespace System.Web.OData.Builder
             IEdmPathExpression pathExpression)
         {
             EdmFunction operation = new EdmFunction(
-                    container.Namespace,
+                    function.Namespace,
                     function.Name,
                     returnReference,
                     function.IsBindable,

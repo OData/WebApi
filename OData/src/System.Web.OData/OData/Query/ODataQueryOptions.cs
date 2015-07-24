@@ -89,7 +89,7 @@ namespace System.Web.OData.Query
             if (configuration != null)
             {
                 ODataUriResolverSetttings resolverSettings = configuration.GetResolverSettings();
-                _queryOptionParser.Resolver = resolverSettings.CreateResolver();
+                _queryOptionParser.Resolver = resolverSettings.CreateResolver(context.Model);
             }
 
             BuildQueryOptions(queryParameters);

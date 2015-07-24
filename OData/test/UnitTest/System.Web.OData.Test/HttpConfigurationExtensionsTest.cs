@@ -228,6 +228,20 @@ namespace System.Web.OData
             Assert.True(resolverSetttings.EnumPrefixFree);
         }
 
+        [Fact]
+        public void EnableAlternateKeys_Sets_AlternateKeyFlag()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            config.EnableAlternateKeys(alternateKeys: true);
+            ODataUriResolverSetttings resolverSetttings = config.GetResolverSettings();
+
+            // Assert
+            Assert.True(resolverSetttings.AlternateKeys);
+        }
+
         private static ODataMediaTypeFormatter CreateODataFormatter()
         {
             return new ODataMediaTypeFormatter(new ODataPayloadKind[0]);

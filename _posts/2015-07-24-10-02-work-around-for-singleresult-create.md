@@ -1,12 +1,12 @@
 ---
-title : "Work around for SingleResult.Create an empty result throwing a exception"
+title : "10.2 Work around for SingleResult.Create an empty result"
 layout: post
-category: work-around, V5.6
+category: "10. Others"
 ---
 
 When SingleResult.Create takes in a query that returns an empty result, a SerializationException is being thrown.
 
-Let's see a work-around about this (issue)[https://github.com/OData/WebApi/issues/170].
+Let's see a work-around about this [issue](https://github.com/OData/WebApi/issues/170).
 
 ### NullEntityTypeSerializer
 

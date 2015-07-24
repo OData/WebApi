@@ -229,7 +229,7 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void EnableAlternateKeys_Sets_EnumPrefixFreeFlag()
+        public void EnableAlternateKeys_Sets_AlternateKeysFlag()
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();

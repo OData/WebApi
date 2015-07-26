@@ -155,6 +155,7 @@
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesController.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesModel.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesTest.cs" />
+    <Compile Include="UriParserExtension\AlternateKeysTest.cs" />
     <Compile Include="UriParserExtension\CaseInsensitiveTest.cs" />
     <Compile Include="UriParserExtension\EnumPrefixFreeTest.cs" />
     <Compile Include="UriParserExtension\UnqualifiedCallTest.cs" />

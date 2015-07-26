@@ -1,5 +1,7 @@
-﻿using System.Web.OData.Builder;
+﻿using System.Collections.Generic;
+using System.Web.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 
 namespace WebStack.QA.Test.OData.UriParserExtension
 {
@@ -19,6 +21,22 @@ namespace WebStack.QA.Test.OData.UriParserExtension
                 .Parameter<Gender>("gender");
 
             return builder.GetEdmModel();
+        }
+
+        public static IEdmModel GetEdmModelWithAlternateKeys()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers");
+            builder.EntitySet<Order>("Orders");
+
+            EdmModel edmModel = new EdmModel();
+            edmModel.AddElements(builder.GetEdmModel().SchemaElements);
+            IEdmEntityType customerType = (IEdmEntityType)edmModel.FindDeclaredType("WebStack.QA.Test.OData.UriParserExtension.Customer"); 
+            IEdmProperty nameProperty = customerType.FindProperty("Name");
+
+            edmModel.AddAlternateKeyAnnotation(customerType, new Dictionary<string, IEdmProperty>() { { "Name", nameProperty } });
+
+            return edmModel;
         }
     }
 }

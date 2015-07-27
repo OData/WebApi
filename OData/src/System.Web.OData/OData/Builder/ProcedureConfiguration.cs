@@ -26,7 +26,6 @@ namespace System.Web.OData.Builder
         {
             Name = name;
             ModelBuilder = builder;
-            _namespace = null;
         }
 
         /// <summary>

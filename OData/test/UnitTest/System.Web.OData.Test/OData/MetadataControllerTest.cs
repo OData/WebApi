@@ -917,7 +917,7 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void ServiceDocument_FunctionNamesapce_Configuration()
+        public void ServiceDocument_FunctionNamespace_Configuration()
         {
             // Arrange
             HttpServer server = new HttpServer(GetConfiguration());
@@ -927,6 +927,7 @@ namespace System.Web.OData.Builder
             var response = client.GetAsync("http://localhost/$metadata").Result;
             var responseString = response.Content.ReadAsStringAsync().Result;
 
+            // Assert
             Assert.Contains("CustomizeNamepace.GetNS", responseString);
             Assert.Contains("Namespace=\"CustomizeNamepace\"", responseString);
         }

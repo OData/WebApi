@@ -78,7 +78,7 @@ namespace System.Web.OData
         [Theory]
         [InlineData("Vehicles(Model=8,Name='8')/System.Web.OData.Builder.TestModels.Car/customize.NSAction")]
         [InlineData("MyVehicle/System.Web.OData.Builder.TestModels.Car/customize.NSAction")]
-        public void Can_find_customized_namespace_action(string url)
+        public void Can_Find_Customized_Namespace_Action(string url)
         {
             // Arrange
             IEdmModel model = GetModel();

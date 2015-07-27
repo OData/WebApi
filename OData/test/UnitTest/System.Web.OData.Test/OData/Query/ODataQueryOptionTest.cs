@@ -946,6 +946,70 @@ namespace System.Web.OData.Query
                 "The requested resource is not a collection. Query options $filter, $orderby, $count, $skip, and $top can be applied only on collections.");
         }
 
+        [Theory]
+        [InlineData("?$select=Orders/OrderId", AllowedQueryOptions.Select)]
+        [InlineData("?$expand=Orders", AllowedQueryOptions.Expand)]
+        public void ApplyTo_Entity_DoesnotApply_IfSetApplied(string queryOption, AllowedQueryOptions allowedQueryOptions)
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + queryOption);
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers");
+            ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
+            ODataQueryOptions options = new ODataQueryOptions(context, request);
+            options.Context.AppliedQueryOptions = allowedQueryOptions;
+            Customer customer = new Customer
+            {
+                CustomerId = 1,
+                Orders = new List<Order>
+                {
+                    new Order {OrderId = 1}
+                }
+            };
+
+            // Act
+            object result = options.ApplyTo(customer, new ODataQuerySettings());
+
+            // Assert
+            Assert.Equal(customer, (result as Customer));
+        }
+
+        [Theory]
+        [InlineData("?$filter=CustomerId eq 1", AllowedQueryOptions.Filter)]
+        [InlineData("?$orderby=CustomerId", AllowedQueryOptions.OrderBy)]
+        [InlineData("?$count=true", AllowedQueryOptions.Count)]
+        [InlineData("?$skip=1", AllowedQueryOptions.Skip)]
+        [InlineData("?$top=1", AllowedQueryOptions.Top)]
+        [InlineData("?$select=CustomerId", AllowedQueryOptions.Select)]
+        [InlineData("?$expand=Orders", AllowedQueryOptions.Expand)]
+        public void ApplyTo_DoesnotApply_IfSetApplied(string queryOption, AllowedQueryOptions allowedQueryOptions)
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + queryOption);
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers");
+            ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
+            ODataQueryOptions options = new ODataQueryOptions(context, request);
+            options.Context.AppliedQueryOptions = allowedQueryOptions;
+            IQueryable<Customer> customers = 
+                Enumerable.Range(1, 10).Select(
+                    i => new Customer
+                    {
+                        CustomerId = i, 
+                        Orders = new List<Order>
+                        {
+                            new Order {OrderId = i}
+                        }
+                    })
+                .AsQueryable();
+
+            // Act
+            IQueryable result = options.ApplyTo(customers, new ODataQuerySettings());
+
+            // Assert
+            Assert.Equal(10, (result as IQueryable<Customer>).Count());
+        }
+
         [Fact]
         public void ApplyTo_DoesnotCalculateNextPageLink_IfRequestAlreadyHasNextPageLink()
         {

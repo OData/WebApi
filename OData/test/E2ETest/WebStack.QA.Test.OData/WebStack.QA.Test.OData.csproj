@@ -135,6 +135,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AlternateKeys\AlternateKeysDataSource.cs" />
+    <Compile Include="AlternateKeys\AlternateKeysEdmModel.cs" />
+    <Compile Include="AlternateKeys\AlternateKeysTest.cs" />
+    <Compile Include="AlternateKeys\AlternateKeysController.cs" />
     <Compile Include="Batch\Client\DefaultBatchGeneratedClient.cs" />
     <Compile Include="Batch\Client\JsonLightContent.cs" />
     <Compile Include="Batch\Client\ODataChangeSet.cs" />

@@ -1779,7 +1779,7 @@ namespace System.Web.OData.Query.Expressions
             if (arguments.Any())
             {
                 return arguments
-                    .Aggregate((left, right) => Expression.Or(left, right));
+                    .Aggregate((left, right) => Expression.OrElse(left, right));
             }
             else
             {

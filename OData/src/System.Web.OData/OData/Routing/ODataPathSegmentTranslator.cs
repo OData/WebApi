@@ -208,7 +208,7 @@ namespace System.Web.OData.Routing
         /// <returns>Translated WebApi path segment.</returns>
         public override IEnumerable<ODataPathSegment> Translate(KeySegment segment)
         {
-            yield return new KeyValuePathSegment(ConvertKeysToString(segment.Keys, _enableUriTemplateParsing));
+            yield return new KeyValuePathSegment(ConvertKeysToString(segment.Keys, segment.EdmType, _enableUriTemplateParsing));
         }
 
         /// <summary>
@@ -375,7 +375,7 @@ namespace System.Web.OData.Routing
                 return;
             }
 
-            segments.Add(new KeyValuePathSegment(ConvertKeysToString(id.Keys, enableUriTemplateParsing: false)));
+            segments.Add(new KeyValuePathSegment(ConvertKeysToString(id.Keys, id.EdmType, enableUriTemplateParsing: false)));
         }
 
         // We need to reverse the order of RefPathSegment and KeyValuePathSegment.
@@ -398,30 +398,34 @@ namespace System.Web.OData.Routing
 
         // Convert the objects of keys in ODL path to string literals.
         private static string ConvertKeysToString(
-            IEnumerable<KeyValuePair<string, object>> keys,
+            IEnumerable<KeyValuePair<string, object>> keys, IEdmType edmType,
             bool enableUriTemplateParsing)
         {
             Contract.Assert(keys != null);
 
-            string value;
+            IEdmEntityType entityType = edmType as IEdmEntityType;
+            Contract.Assert(entityType != null);
+
             if (keys.Count() < 2)
             {
-                value = String.Join(
-                    ",",
-                    keys.Select(keyValuePair =>
-                        TranslateKeySegmentValue(keyValuePair.Value, enableUriTemplateParsing)).ToArray());
-            }
-            else
-            {
-                value = String.Join(
-                    ",",
-                    keys.Select(keyValuePair =>
-                        (keyValuePair.Key +
-                        "=" +
-                        TranslateKeySegmentValue(keyValuePair.Value, enableUriTemplateParsing))).ToArray());
+                var keyValue = keys.First();
+                bool isDeclaredKey = entityType.Key().Any(k => k.Name == keyValue.Key);
+
+                if (isDeclaredKey)
+                {
+                    return String.Join(
+                        ",",
+                        keys.Select(keyValuePair =>
+                            TranslateKeySegmentValue(keyValuePair.Value, enableUriTemplateParsing)).ToArray());
+                }
             }
 
-            return value;
+            return String.Join(
+                ",",
+                keys.Select(keyValuePair =>
+                    (keyValuePair.Key +
+                     "=" +
+                     TranslateKeySegmentValue(keyValuePair.Value, enableUriTemplateParsing))).ToArray());
         }
 
         // Translate the object of key in ODL path to string literal.

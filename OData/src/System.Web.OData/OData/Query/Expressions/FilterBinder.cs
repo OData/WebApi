@@ -238,16 +238,28 @@ namespace System.Web.OData.Query.Expressions
         {
             var prop = GetDynamicPropertyContainer(openNode);
             var propertyAccessExpression = BindPropertyAccessExpression(openNode, prop);
-
-            var dynamicDictIsNotNull = Expression.NotEqual(propertyAccessExpression, Expression.Constant(null));
-            var containsKeyExpression = Expression.Call(propertyAccessExpression, propertyAccessExpression.Type.GetMethod("ContainsKey"), Expression.Constant(openNode.Name));
-            var dynamicDictExitsAndIsNotNull = Expression.AndAlso(dynamicDictIsNotNull, containsKeyExpression);
+            var readDictionaryIndexerExpression = Expression.Property(propertyAccessExpression,
+                _dictionaryStringObjectIndexerName, Expression.Constant(openNode.Name));
+            var containsKeyExpression = Expression.Call(propertyAccessExpression,
+                propertyAccessExpression.Type.GetMethod("ContainsKey"), Expression.Constant(openNode.Name));
             var nullExpression = Expression.Constant(null);
-            var readDictionaryIndexerExpression = Expression.Property(propertyAccessExpression, _dictionaryStringObjectIndexerName, Expression.Constant(openNode.Name));
-            return Expression.Condition(
-                dynamicDictExitsAndIsNotNull,
-                readDictionaryIndexerExpression,
-                nullExpression);
+
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
+            {
+                var dynamicDictIsNotNull = Expression.NotEqual(propertyAccessExpression, Expression.Constant(null));
+                var dynamicDictExitsAndIsNotNull = Expression.AndAlso(dynamicDictIsNotNull, containsKeyExpression);
+                return Expression.Condition(
+                    dynamicDictExitsAndIsNotNull,
+                    readDictionaryIndexerExpression,
+                    nullExpression);
+            }
+            else
+            {
+                return Expression.Condition(
+                    containsKeyExpression,
+                    readDictionaryIndexerExpression,
+                    nullExpression);
+            }
         }
 
         private Expression BindPropertyAccessExpression(SingleValueOpenPropertyAccessNode openNode, PropertyInfo prop)

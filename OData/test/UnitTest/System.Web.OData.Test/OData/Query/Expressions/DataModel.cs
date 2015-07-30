@@ -141,4 +141,9 @@ namespace System.Web.OData.Query.Expressions
     {
         public string DerivedCategoryName { get; set; }
     }
+
+    public class DynamicProduct : Product
+    {
+        public Dictionary<string, object> ProductProperties { get; set; }
+    }
 }

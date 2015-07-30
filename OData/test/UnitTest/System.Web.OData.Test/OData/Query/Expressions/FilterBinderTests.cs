@@ -2700,6 +2700,14 @@ namespace System.Web.OData.Query.Expressions
             Assert.Equal("$it => ($it.ProductName == \"1\")", (filters.WithoutNullPropagation as Expression).ToString());
         }
 
+        [Fact]
+        public void FilterByDynamicProperty()
+        {
+            VerifyQueryDeserialization<DynamicProduct>("Token eq '1'",
+                "$it => (Convert(IIF($it.ProductProperties.ContainsKey(Token), $it.ProductPropertiesToken, null)) == \"1\")",
+                "$it => (Convert(IIF((($it.ProductProperties != null) AndAlso $it.ProductProperties.ContainsKey(Token)), $it.ProductPropertiesToken, null)) == \"1\")");
+        }
+
         #region Negative Tests
 
         [Fact]

@@ -45,7 +45,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                 var products = ModelHelper.CreateRandomProducts().OrderBy(p => p.ID);
                 var data = new TheoryDataSet<string, IEnumerable<Product>>();
                 // 392, 394, 395
-                string name = products.First(p => p.Name != null && !p.Name.Contains("&") && !p.Name.Contains("+") && !p.Name.Contains("#")).Name;
+                string name = products.First(p => p.Name != null && !p.Name.Contains("&") && !p.Name.Contains("+") && !p.Name.Contains("#") && !p.Name.Contains("%")).Name;
                 data.Add("1 eq 1", products);
                 data.Add(string.Format("Name eq '{0}'", Encoding(name)), products.Where(p => p.Name == name));
                 data.Add(string.Format("Name ne '{0}'", Encoding(name)), products.Where(p => p.Name != name));

@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Batch;
+using System.Web.OData.Extensions;
+using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 
 namespace System.Web.OData.Batch
@@ -49,9 +51,9 @@ namespace System.Web.OData.Batch
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
             Guid batchId = Guid.NewGuid();
             List<IDisposable> resourcesToDispose = new List<IDisposable>();
-
+            
             string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(request);
-            if (preferHeader != null && preferHeader.Contains(PreferenceContinueOnError))
+            if ((preferHeader != null && preferHeader.Contains(PreferenceContinueOnError)) || (!request.GetConfiguration().HasEnabledContinueOnErrorHeader()))
             {
                 IsPreferenceHeaderContinueOnError = true;
             }

@@ -32,6 +32,8 @@ namespace System.Web.OData.Extensions
 
         private const string ResolverSettingsKey = "System.Web.OData.ResolverSettingsKey";
 
+        private const string ContinueOnErrorKey = "System.Web.OData.ContinueOnErrorKey";
+
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
         /// type. To avoid processing unexpected or malicious queries, use the validation settings on
@@ -230,6 +232,38 @@ namespace System.Web.OData.Extensions
 
             ODataUriResolverSetttings settings = configuration.GetResolverSettings();
             settings.AlternateKeys = alternateKeys;
+        }
+
+        /// <summary>
+        /// Enable the continue-on-error header.
+        /// </summary>
+        public static void EnableContinueOnErrorHeader(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            configuration.Properties[ContinueOnErrorKey] = true;
+        }
+
+        /// <summary>
+        /// Check the continue-on-error header is enable or not.
+        /// </summary>
+        /// <returns></returns>
+        internal static bool HasEnabledContinueOnErrorHeader(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            object value;
+            if (configuration.Properties.TryGetValue(ContinueOnErrorKey, out value))
+            {
+                return (bool)value;
+            }
+            return false;
         }
 
         internal static ODataUriResolverSetttings GetResolverSettings(this HttpConfiguration configuration)

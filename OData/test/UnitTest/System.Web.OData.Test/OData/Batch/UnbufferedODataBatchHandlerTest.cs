@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Batch;
+using System.Web.OData.Extensions;
 using Microsoft.OData.Core;
 using Microsoft.TestCommon;
 
@@ -58,6 +59,7 @@ namespace System.Web.OData.Test
         [Fact]
         public void ProcessBatchAsync_CallsRegisterForDispose()
         {
+            // Arrange
             List<IDisposable> expectedResourcesForDisposal = new List<IDisposable>();
             MockHttpServer server = new MockHttpServer(request =>
             {
@@ -78,10 +80,13 @@ namespace System.Web.OData.Test
                     }
                 }
             };
+            batchRequest.SetConfiguration(new HttpConfiguration());
 
+            // Act
             var response = batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None).Result;
             var resourcesForDisposal = batchRequest.GetResourcesForDisposal();
 
+            // Assert
             foreach (var expectedResource in expectedResourcesForDisposal)
             {
                 Assert.Contains(expectedResource, resourcesForDisposal);
@@ -91,6 +96,7 @@ namespace System.Web.OData.Test
         [Fact]
         public void ProcessBatchAsync_CallsInvokerForEachRequest()
         {
+            // Arrange
             MockHttpServer server = new MockHttpServer(request =>
             {
                 string responseContent = request.RequestUri.AbsoluteUri;
@@ -119,9 +125,12 @@ namespace System.Web.OData.Test
                     }
                 }
             };
+            batchRequest.SetConfiguration(new HttpConfiguration());
 
+            // Act
             var response = batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None).Result;
 
+            // Assert
             var batchContent = Assert.IsType<ODataBatchContent>(response.Content);
             var batchResponses = batchContent.Responses.ToArray();
             Assert.Equal(2, batchResponses.Length);
@@ -132,6 +141,7 @@ namespace System.Web.OData.Test
         [Fact]
         public void ProcessBatchAsync_DisposesResponseInCaseOfException()
         {
+            // Arrange
             List<MockHttpResponseMessage> responses = new List<MockHttpResponseMessage>();
             MockHttpServer server = new MockHttpServer(request =>
             {
@@ -156,7 +166,9 @@ namespace System.Web.OData.Test
                     }
                 }
             };
+            batchRequest.SetConfiguration(new HttpConfiguration());
 
+            // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None).Result);
 
@@ -167,8 +179,10 @@ namespace System.Web.OData.Test
             }
         }
 
-        [Fact]
-        public void ProcessBatchAsync_ContinueOnError()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ProcessBatchAsync_ContinueOnError(bool enableContinueOnError)
         {
             // Arrange
             MockHttpServer server = new MockHttpServer(request =>
@@ -209,6 +223,9 @@ namespace System.Web.OData.Test
                     }),
                 }
             };
+            var enableContinueOnErrorconfig = new HttpConfiguration();
+            enableContinueOnErrorconfig.EnableContinueOnErrorHeader();
+            batchRequest.SetConfiguration(enableContinueOnErrorconfig);
             HttpRequestMessage batchRequestWithPrefContinueOnError = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
             {
                 Content = new MultipartContent("mixed")
@@ -227,7 +244,15 @@ namespace System.Web.OData.Test
                     }),
                 }
             };
-            batchRequestWithPrefContinueOnError.Headers.Add("prefer", "odata.continue-on-error");
+            if (enableContinueOnError)
+            {
+                batchRequestWithPrefContinueOnError.SetConfiguration(enableContinueOnErrorconfig);
+                batchRequestWithPrefContinueOnError.Headers.Add("prefer", "odata.continue-on-error");
+            }
+            else
+            {
+                batchRequestWithPrefContinueOnError.SetConfiguration(new HttpConfiguration());
+            }
 
             // Act
             var response = batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None).Result;

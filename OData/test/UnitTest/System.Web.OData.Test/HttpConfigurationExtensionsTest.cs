@@ -242,6 +242,19 @@ namespace System.Web.OData
             Assert.True(resolverSetttings.AlternateKeys);
         }
 
+        [Fact]
+        public void EnableAlternateKeys_Sets_ContinueOnErrorKeyFlag()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            config.EnableContinueOnErrorHeader();
+
+            // Assert
+            Assert.True(config.HasEnabledContinueOnErrorHeader());
+        }
+
         private static ODataMediaTypeFormatter CreateODataFormatter()
         {
             return new ODataMediaTypeFormatter(new ODataPayloadKind[0]);

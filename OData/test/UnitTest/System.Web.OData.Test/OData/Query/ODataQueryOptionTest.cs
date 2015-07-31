@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
@@ -21,6 +22,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
+using Newtonsoft.Json.Linq;
 
 namespace System.Web.OData.Query
 {
@@ -1090,6 +1092,60 @@ namespace System.Web.OData.Query
             Assert.DoesNotContain("ExpandProperty", responseString);
         }
 
+        [Theory]
+        [InlineData("ExpandProp1")]
+        [InlineData("ExpandProp2")]
+        public void ODataQueryOptions_ApplyOrderByInExpandResult_WhenSetPageSize(string propName)
+        {
+            // Arrange
+            string url = "http://localhost/odata/Products?$expand=" + propName;
+            HttpServer server = CreateServer();
+            HttpClient client = new HttpClient(server);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+            var responseObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var result = responseObject["value"] as JArray;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(result);
+            var expandProp = result[0][propName] as JArray;
+            Assert.Equal(expandProp.Count, 2);
+            Assert.Equal(expandProp[0]["ID"], 1);
+            Assert.Equal(expandProp[1]["ID"], 2);
+        }
+
+        [Theory]
+        [InlineData("ExpandProp3")]
+        [InlineData("ExpandProp4")]
+        public void ODataQueryOptions_ApplyOrderByInExpandResult_WhenSetPageSize_MultiplyKeys(string propName)
+        {
+            // Arrange
+            string url = "http://localhost/odata/Products?$expand=" + propName;
+            HttpServer server = CreateServer();
+            HttpClient client = new HttpClient(server);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+            var responseObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var result = responseObject["value"] as JArray;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(result);
+            var expandProp = result[0][propName] as JArray;
+            Assert.Equal(expandProp.Count, 2);
+            Assert.Equal(expandProp[0]["ID1"], 1);
+            Assert.Equal(expandProp[0]["ID2"], 1);
+            Assert.Equal(expandProp[1]["ID1"], 2);
+            Assert.Equal(expandProp[1]["ID2"], 1);
+        }
+
         private static HttpServer CreateServer()
         {
             HttpConfiguration configuration = new HttpConfiguration();
@@ -1097,10 +1153,13 @@ namespace System.Web.OData.Query
             configuration.Services.Replace(
                 typeof(IAssembliesResolver),
                 new TestAssemblyResolver(
-                    typeof(EntityModelsController)));
+                    typeof(EntityModelsController),
+                    typeof(ProductsController)));
 
             ODataModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<ODataQueryOptionTest_EntityModel>("EntityModels");
+            builder.EntitySet<MyProduct>("Products");
+            builder.EntitySet<ODataQueryOptionTest_EntityModelMultipleKeys>("ODataQueryOptionTest_EntityModelMultipleKeys");
             IEdmModel model = builder.GetEdmModel();
             configuration.MapODataServiceRoute("odata", "odata", model);
             return new HttpServer(configuration);
@@ -1140,6 +1199,89 @@ namespace System.Web.OData.Query
         {
             _entityModels = CreateODataQueryOptionTest_EntityModel().AsQueryable();
         }
+    }
+
+    public class ProductsController : ODataController
+    {
+        private static readonly IQueryable<MyProduct> _products;
+
+        [EnableQuery(PageSize = 2)]
+        public IHttpActionResult Get()
+        {
+            return Ok(_products);
+        }
+        private static IEnumerable<MyProduct> CreateProducts()
+        {
+            var prop1 = new List<ODataQueryOptionTest_EntityModel>
+            {
+                new ODataQueryOptionTest_EntityModel
+                {
+                    ID = 2,
+                    A = "",
+                    ExpandProp = null
+                },
+                new ODataQueryOptionTest_EntityModel
+                {
+                    ID = 1,
+                    A = "",
+                    ExpandProp = null
+                },
+                new ODataQueryOptionTest_EntityModel
+                {
+                    ID = 3,
+                    A = "",
+                    ExpandProp = null
+                }
+            };
+            var prop2 = new List<ODataQueryOptionTest_EntityModelMultipleKeys>
+            {
+                new ODataQueryOptionTest_EntityModelMultipleKeys
+                {
+                    ID1 = 2,
+                    ID2 = 3,
+                    A = ""
+                },
+                new ODataQueryOptionTest_EntityModelMultipleKeys
+                {
+                    ID1 = 1,
+                    ID2 = 1,
+                    A = ""
+                },
+                new ODataQueryOptionTest_EntityModelMultipleKeys
+                {
+                    ID1 = 2,
+                    ID2 = 1,
+                    A = ""
+                }
+            };
+            var product = new MyProduct
+            {
+                Id = 1,
+                ExpandProp1 = prop1,
+                ExpandProp2 = prop1.AsQueryable(),
+                ExpandProp3 = prop2,
+                ExpandProp4 = prop2.AsQueryable()
+            };
+            yield return product;
+        }
+
+        static ProductsController()
+        {
+            _products = CreateProducts().AsQueryable();
+        }
+    }
+
+    public class MyProduct
+    {
+        public int Id { get; set; }
+
+        public List<ODataQueryOptionTest_EntityModel> ExpandProp1 { get; set; }
+
+        public IQueryable<ODataQueryOptionTest_EntityModel> ExpandProp2 { get; set; }
+
+        public List<ODataQueryOptionTest_EntityModelMultipleKeys> ExpandProp3 { get; set; }
+
+        public IQueryable<ODataQueryOptionTest_EntityModelMultipleKeys> ExpandProp4 { get; set; }
     }
 
     public class ODataQueryOptionTest_ComplexModel

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -10,7 +11,6 @@ using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
-using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Nuwa;
@@ -47,7 +47,8 @@ namespace WebStack.QA.Test.OData.QueryComposition
                   typeof(IAssembliesResolver),
                   new TestAssemblyResolver(
                       typeof(SelectCustomerController),
-                      typeof(AutoExpandCustomerController)));
+                      typeof(AutoExpandCustomerController),
+                      typeof(EFSelectCustomersController)));
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.MapODataServiceRoute("selectexpand", "selectexpand", GetEdmModel(configuration));
@@ -62,11 +63,14 @@ namespace WebStack.QA.Test.OData.QueryComposition
             customers.EntityType.Collection.Action("PremiumCustomers").ReturnsCollectionFromEntitySet<SelectCustomer>("SelectCustomer");
 
             builder.EntitySet<AutoExpandCustomer>("AutoExpandCustomer");
+            builder.EntitySet<EFSelectCustomer>("EFSelectCustomers");
+            builder.EntitySet<EFSelectOrder>("EFSelectOrders");
             builder.EntitySet<SelectOrderDetail>("SelectOrderDetail");
             builder.EntityType<SelectPremiumCustomer>();
             builder.EntitySet<SelectOrder>("SelectOrder");
             builder.EntitySet<SelectBonus>("SelectBonus");
             builder.EntitySet<AutoExpandStuff>("Stuff");
+            builder.Action("ResetDataSource");
 
             IEdmModel model = builder.GetEdmModel();
             return model;
@@ -368,6 +372,41 @@ namespace WebStack.QA.Test.OData.QueryComposition
             Assert.Equal((int)stuff["Id"], bonus["Id"]);
             Assert.Equal((int)stuff["Id"] * 1000, bonus["Ammount"]);
         }
+
+        [Fact]
+        public void QueryForAnEntryWithExpandNavigationPropertyExceedPageSize()
+        {
+            // Arrange
+            RestoreData();
+            string queryUrl = string.Format("{0}/selectexpand/EFSelectCustomers?$expand=SelectOrders", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Act
+            response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            
+            var responseObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var result = responseObject["value"] as JArray;
+            var expandProp = result[0]["SelectOrders"] as JArray;
+            Assert.Equal(expandProp.Count, 2);
+            Assert.Equal(expandProp[0]["Id"], 1);
+            Assert.Equal(expandProp[1]["Id"], 2);
+        }
+
+        private void RestoreData()
+        {
+            string requestUri = BaseAddress + "/selectexpand/ResetDataSource";
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = client.GetAsync(requestUri).Result;
+            response.EnsureSuccessStatusCode();
+        }
     }
 
     public class SelectCustomerController : ODataController
@@ -482,6 +521,68 @@ namespace WebStack.QA.Test.OData.QueryComposition
         }
     }
 
+    public class EFSelectCustomersController : ODataController
+    {
+        private readonly SampleContext _db = new SampleContext();
+
+        [EnableQuery(PageSize = 2)]
+        public IHttpActionResult Get()
+        {
+            return Ok(_db.Customers);
+        }
+
+        [HttpGet]
+        [ODataRoute("ResetDataSource")]
+        public IHttpActionResult ResetDataSource()
+        {
+            if (_db.Database.Exists())
+            {
+                _db.Database.Delete();
+                _db.Database.Create();
+            }
+
+            Generate();
+            return Ok();
+        }
+
+        public void Generate()
+        {
+            var customer = new EFSelectCustomer
+            {
+                Id = 1,
+                SelectOrders = new List<EFSelectOrder>
+                {
+                    new EFSelectOrder
+                    {
+                        Id = 3,
+                    },
+                    new EFSelectOrder
+                    {
+                        Id = 1,
+                    },
+                    new EFSelectOrder
+                    {
+                        Id = 2,
+                    }
+                }
+            };
+            _db.Customers.Add(customer);
+            _db.SaveChanges();
+        }
+    }
+
+    public class SampleContext : DbContext
+    {
+        public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=SelectExpandTest";
+
+        public SampleContext()
+            : base(ConnectionString)
+        {
+        }
+
+        public DbSet<EFSelectCustomer> Customers { get; set; }
+    }
+
     public class AutoExpandCustomer
     {
         public int Id { get; set; }
@@ -498,6 +599,16 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
         [AutoExpand]
         public SelectBonus Bonus { get; set; }
+    }
+    public class EFSelectCustomer
+    {
+        public int Id { get; set; }
+        public virtual IList<EFSelectOrder> SelectOrders { get; set; }
+    }
+
+    public class EFSelectOrder
+    {
+        public int Id { get; set; }
     }
 
     public class SelectCustomer

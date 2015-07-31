@@ -168,11 +168,14 @@ namespace System.Web.OData.Query.Expressions
         }
 
         [Fact]
-        public void ProjectAsWrapper_Collection_AppliesPageSize()
+        public void ProjectAsWrapper_Collection_AppliesPageSize_AndOrderBy()
         {
             // Arrange
             int pageSize = 5;
-            var orders = Enumerable.Range(0, 10).Select(i => new Order());
+            var orders = Enumerable.Range(0, 10).Select(i => new Order
+            {
+                ID = 10 - i,
+            });
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
             Expression source = Expression.Constant(orders);
             _settings.PageSize = pageSize;
@@ -184,6 +187,7 @@ namespace System.Web.OData.Query.Expressions
             IEnumerable<SelectExpandWrapper<Order>> projectedOrders = Expression.Lambda(projection).Compile().DynamicInvoke() as IEnumerable<SelectExpandWrapper<Order>>;
             Assert.NotNull(projectedOrders);
             Assert.Equal(pageSize + 1, projectedOrders.Count());
+            Assert.Equal(1, projectedOrders.First().Instance.ID);
         }
 
         [Fact]

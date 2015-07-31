@@ -51,6 +51,45 @@ namespace System.Web.OData
             return takeQuery;
         }
 
+        public static Expression OrderByPropertyExpression(
+            Expression source, 
+            string propertyName, 
+            Type elementType, 
+            bool alreadyOrdered = false)
+        {
+            LambdaExpression orderByLambda = GetPropertyAccessLambda(elementType, propertyName);
+            Type returnType = orderByLambda.Body.Type;
+            MethodInfo orderByMethod;
+
+            if (!alreadyOrdered)
+            {
+                if (typeof(IQueryable).IsAssignableFrom(source.Type))
+                {
+                    orderByMethod = ExpressionHelperMethods.QueryableOrderByGeneric.MakeGenericMethod(elementType,
+                        returnType);
+                }
+                else
+                {
+                    orderByMethod = ExpressionHelperMethods.EnumerableOrderByGeneric.MakeGenericMethod(elementType,
+                        returnType);
+                }
+            }
+            else
+            {
+                if (typeof(IQueryable).IsAssignableFrom(source.Type))
+                {
+                    orderByMethod = ExpressionHelperMethods.QueryableThenByGeneric.MakeGenericMethod(elementType,
+                        returnType);
+                }
+                else
+                {
+                    orderByMethod = ExpressionHelperMethods.EnumerableThenByGeneric.MakeGenericMethod(elementType,
+                        returnType);
+                }
+            }
+            return Expression.Call(null, orderByMethod, new[] { source, orderByLambda });
+        }
+
         public static IQueryable OrderByIt(IQueryable query, OrderByDirection direction, Type type, bool alreadyOrdered = false)
         {
             ParameterExpression odataItParameter = Expression.Parameter(type, "$it");

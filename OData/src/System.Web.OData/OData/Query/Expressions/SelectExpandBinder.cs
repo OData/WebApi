@@ -428,8 +428,24 @@ namespace System.Web.OData.Query.Expressions
 
             if (_settings.PageSize != null && _settings.PageSize.HasValue)
             {
-                // nested paging. Take one more than page size as we need to know whether the collection
-                // was truncated or not while generating next page links.
+                // nested paging. Need to apply order by first, and take one more than page size as we need to know
+                // whether the collection was truncated or not while generating next page links.
+                IEnumerable<IEdmStructuralProperty> properties =
+                    entityType.Key().Any()
+                        ? entityType.Key()
+                        : entityType
+                            .StructuralProperties()
+                            .Where(property => property.Type.IsPrimitive()).OrderBy(property => property.Name);
+                bool alreadyOrdered = false;
+                foreach (var prop in properties)
+                {
+                    source = ExpressionHelpers.OrderByPropertyExpression(source, prop.Name, elementType, alreadyOrdered);
+                    if (!alreadyOrdered)
+                    {
+                        alreadyOrdered = true;
+                    }
+                }
+
                 source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType, _settings.EnableConstantParameterization);
             }
 

@@ -51,129 +51,129 @@ namespace WebStack.QA.Test.OData.AlternateKeys
         [Fact]
         public async Task AlteranteKeysMetadata()
         {
-            const string expect = @"<?xml version=""1.0"" encoding=""utf-8""?>
-<edmx:Edmx Version=""4.0"" xmlns:edmx=""http://docs.oasis-open.org/odata/ns/edmx"">
-  <edmx:DataServices>
-    <Schema Namespace=""NS"" xmlns=""http://docs.oasis-open.org/odata/ns/edm"">
-      <EntityType Name=""Customer"">
-        <Key>
-          <PropertyRef Name=""ID"" />
-        </Key>
-        <Property Name=""ID"" Type=""Edm.Int32"" />
-        <Property Name=""Name"" Type=""Edm.String"" />
-        <Property Name=""SSN"" Type=""Edm.String"" />
-        <Annotation Term=""OData.Community.Keys.V1.AlternateKeys"">
-          <Collection>
-            <Record Type=""OData.Community.Keys.V1.AlternateKey"">
-              <PropertyValue Property=""Key"">
-                <Collection>
-                  <Record Type=""OData.Community.Keys.V1.PropertyRef"">
-                    <PropertyValue Property=""Alias"" String=""SSN"" />
-                    <PropertyValue Property=""Name"" PropertyPath=""SSN"" />
-                  </Record>
-                </Collection>
-              </PropertyValue>
-            </Record>
-          </Collection>
-        </Annotation>
-      </EntityType>
-      <EntityType Name=""Order"">
-        <Key>
-          <PropertyRef Name=""OrderId"" />
-        </Key>
-        <Property Name=""OrderId"" Type=""Edm.Int32"" />
-        <Property Name=""Name"" Type=""Edm.String"" />
-        <Property Name=""Token"" Type=""Edm.Guid"" />
-        <Property Name=""Amount"" Type=""Edm.Int32"" />
-        <Annotation Term=""OData.Community.Keys.V1.AlternateKeys"">
-          <Collection>
-            <Record Type=""OData.Community.Keys.V1.AlternateKey"">
-              <PropertyValue Property=""Key"">
-                <Collection>
-                  <Record Type=""OData.Community.Keys.V1.PropertyRef"">
-                    <PropertyValue Property=""Alias"" String=""Name"" />
-                    <PropertyValue Property=""Name"" PropertyPath=""Name"" />
-                  </Record>
-                </Collection>
-              </PropertyValue>
-            </Record>
-            <Record Type=""OData.Community.Keys.V1.AlternateKey"">
-              <PropertyValue Property=""Key"">
-                <Collection>
-                  <Record Type=""OData.Community.Keys.V1.PropertyRef"">
-                    <PropertyValue Property=""Alias"" String=""Token"" />
-                    <PropertyValue Property=""Name"" PropertyPath=""Token"" />
-                  </Record>
-                </Collection>
-              </PropertyValue>
-            </Record>
-          </Collection>
-        </Annotation>
-      </EntityType>
-      <EntityType Name=""Person"">
-        <Key>
-          <PropertyRef Name=""ID"" />
-        </Key>
-        <Property Name=""ID"" Type=""Edm.Int32"" />
-        <Property Name=""Country"" Type=""Edm.String"" />
-        <Property Name=""Passport"" Type=""Edm.String"" />
-        <Annotation Term=""OData.Community.Keys.V1.AlternateKeys"">
-          <Collection>
-            <Record Type=""OData.Community.Keys.V1.AlternateKey"">
-              <PropertyValue Property=""Key"">
-                <Collection>
-                  <Record Type=""OData.Community.Keys.V1.PropertyRef"">
-                    <PropertyValue Property=""Alias"" String=""Country"" />
-                    <PropertyValue Property=""Name"" PropertyPath=""Country"" />
-                  </Record>
-                  <Record Type=""OData.Community.Keys.V1.PropertyRef"">
-                    <PropertyValue Property=""Alias"" String=""Passport"" />
-                    <PropertyValue Property=""Name"" PropertyPath=""Passport"" />
-                  </Record>
-                </Collection>
-              </PropertyValue>
-            </Record>
-          </Collection>
-        </Annotation>
-      </EntityType>
-      <ComplexType Name=""Address"">
-        <Property Name=""Street"" Type=""Edm.String"" />
-        <Property Name=""City"" Type=""Edm.String"" />
-      </ComplexType>
-      <EntityType Name=""Company"">
-        <Key>
-          <PropertyRef Name=""ID"" />
-        </Key>
-        <Property Name=""ID"" Type=""Edm.Int32"" />
-        <Property Name=""Location"" Type=""NS.Address"" />
-        <Annotation Term=""OData.Community.Keys.V1.AlternateKeys"">
-          <Collection>
-            <Record Type=""OData.Community.Keys.V1.AlternateKey"">
-              <PropertyValue Property=""Key"">
-                <Collection>
-                  <Record Type=""OData.Community.Keys.V1.PropertyRef"">
-                    <PropertyValue Property=""Alias"" String=""City"" />
-                    <PropertyValue Property=""Name"" PropertyPath=""City"" />
-                  </Record>
-                  <Record Type=""OData.Community.Keys.V1.PropertyRef"">
-                    <PropertyValue Property=""Alias"" String=""Street"" />
-                    <PropertyValue Property=""Name"" PropertyPath=""Street"" />
-                  </Record>
-                </Collection>
-              </PropertyValue>
-            </Record>
-          </Collection>
-        </Annotation>
-      </EntityType>
-      <EntityContainer Name=""Default"">
-        <EntitySet Name=""Customers"" EntityType=""NS.Customer"" />
-        <EntitySet Name=""Orders"" EntityType=""NS.Order"" />
-        <EntitySet Name=""People"" EntityType=""NS.Person"" />
-        <EntitySet Name=""Companies"" EntityType=""NS.Company"" />
-      </EntityContainer>
-    </Schema>
-  </edmx:DataServices>
-</edmx:Edmx>";
+            const string expect = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
+"<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">\r\n" +
+"  <edmx:DataServices>\r\n" +
+"    <Schema Namespace=\"NS\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">\r\n" +
+"      <EntityType Name=\"Customer\">\r\n" +
+"        <Key>\r\n" +
+"          <PropertyRef Name=\"ID\" />\r\n" +
+"        </Key>\r\n" +
+"        <Property Name=\"ID\" Type=\"Edm.Int32\" />\r\n" +
+"        <Property Name=\"Name\" Type=\"Edm.String\" />\r\n" +
+"        <Property Name=\"SSN\" Type=\"Edm.String\" />\r\n" +
+"        <Annotation Term=\"OData.Community.Keys.V1.AlternateKeys\">\r\n" +
+"          <Collection>\r\n" +
+"            <Record Type=\"OData.Community.Keys.V1.AlternateKey\">\r\n" +
+"              <PropertyValue Property=\"Key\">\r\n" +
+"                <Collection>\r\n" +
+"                  <Record Type=\"OData.Community.Keys.V1.PropertyRef\">\r\n" +
+"                    <PropertyValue Property=\"Alias\" String=\"SSN\" />\r\n" +
+"                    <PropertyValue Property=\"Name\" PropertyPath=\"SSN\" />\r\n" +
+"                  </Record>\r\n" +
+"                </Collection>\r\n" +
+"              </PropertyValue>\r\n" +
+"            </Record>\r\n" +
+"          </Collection>\r\n" +
+"        </Annotation>\r\n" +
+"      </EntityType>\r\n" +
+"      <EntityType Name=\"Order\">\r\n" +
+"        <Key>\r\n" +
+"          <PropertyRef Name=\"OrderId\" />\r\n" +
+"        </Key>\r\n" +
+"        <Property Name=\"OrderId\" Type=\"Edm.Int32\" />\r\n" +
+"        <Property Name=\"Name\" Type=\"Edm.String\" />\r\n" +
+"        <Property Name=\"Token\" Type=\"Edm.Guid\" />\r\n" +
+"        <Property Name=\"Amount\" Type=\"Edm.Int32\" />\r\n" +
+"        <Annotation Term=\"OData.Community.Keys.V1.AlternateKeys\">\r\n" +
+"          <Collection>\r\n" +
+"            <Record Type=\"OData.Community.Keys.V1.AlternateKey\">\r\n" +
+"              <PropertyValue Property=\"Key\">\r\n" +
+"                <Collection>\r\n" +
+"                  <Record Type=\"OData.Community.Keys.V1.PropertyRef\">\r\n" +
+"                    <PropertyValue Property=\"Alias\" String=\"Name\" />\r\n" +
+"                    <PropertyValue Property=\"Name\" PropertyPath=\"Name\" />\r\n" +
+"                  </Record>\r\n" +
+"                </Collection>\r\n" +
+"              </PropertyValue>\r\n" +
+"            </Record>\r\n" +
+"            <Record Type=\"OData.Community.Keys.V1.AlternateKey\">\r\n" +
+"              <PropertyValue Property=\"Key\">\r\n" +
+"                <Collection>\r\n" +
+"                  <Record Type=\"OData.Community.Keys.V1.PropertyRef\">\r\n" +
+"                    <PropertyValue Property=\"Alias\" String=\"Token\" />\r\n" +
+"                    <PropertyValue Property=\"Name\" PropertyPath=\"Token\" />\r\n" +
+"                  </Record>\r\n" +
+"                </Collection>\r\n" +
+"              </PropertyValue>\r\n" +
+"            </Record>\r\n" +
+"          </Collection>\r\n" +
+"        </Annotation>\r\n" +
+"      </EntityType>\r\n" +
+"      <EntityType Name=\"Person\">\r\n" +
+"        <Key>\r\n" +
+"          <PropertyRef Name=\"ID\" />\r\n" +
+"        </Key>\r\n" +
+"        <Property Name=\"ID\" Type=\"Edm.Int32\" />\r\n" +
+"        <Property Name=\"Country\" Type=\"Edm.String\" />\r\n" +
+"        <Property Name=\"Passport\" Type=\"Edm.String\" />\r\n" +
+"        <Annotation Term=\"OData.Community.Keys.V1.AlternateKeys\">\r\n" +
+"          <Collection>\r\n" +
+"            <Record Type=\"OData.Community.Keys.V1.AlternateKey\">\r\n" +
+"              <PropertyValue Property=\"Key\">\r\n" +
+"                <Collection>\r\n" +
+"                  <Record Type=\"OData.Community.Keys.V1.PropertyRef\">\r\n" +
+"                    <PropertyValue Property=\"Alias\" String=\"Country\" />\r\n" +
+"                    <PropertyValue Property=\"Name\" PropertyPath=\"Country\" />\r\n" +
+"                  </Record>\r\n" +
+"                  <Record Type=\"OData.Community.Keys.V1.PropertyRef\">\r\n" +
+"                    <PropertyValue Property=\"Alias\" String=\"Passport\" />\r\n" +
+"                    <PropertyValue Property=\"Name\" PropertyPath=\"Passport\" />\r\n" +
+"                  </Record>\r\n" +
+"                </Collection>\r\n" +
+"              </PropertyValue>\r\n" +
+"            </Record>\r\n" +
+"          </Collection>\r\n" +
+"        </Annotation>\r\n" +
+"      </EntityType>\r\n" +
+"      <ComplexType Name=\"Address\">\r\n" +
+"        <Property Name=\"Street\" Type=\"Edm.String\" />\r\n" +
+"        <Property Name=\"City\" Type=\"Edm.String\" />\r\n" +
+"      </ComplexType>\r\n" +
+"      <EntityType Name=\"Company\">\r\n" +
+"        <Key>\r\n" +
+"          <PropertyRef Name=\"ID\" />\r\n" +
+"        </Key>\r\n" +
+"        <Property Name=\"ID\" Type=\"Edm.Int32\" />\r\n" +
+"        <Property Name=\"Location\" Type=\"NS.Address\" />\r\n" +
+"        <Annotation Term=\"OData.Community.Keys.V1.AlternateKeys\">\r\n" +
+"          <Collection>\r\n" +
+"            <Record Type=\"OData.Community.Keys.V1.AlternateKey\">\r\n" +
+"              <PropertyValue Property=\"Key\">\r\n" +
+"                <Collection>\r\n" +
+"                  <Record Type=\"OData.Community.Keys.V1.PropertyRef\">\r\n" +
+"                    <PropertyValue Property=\"Alias\" String=\"City\" />\r\n" +
+"                    <PropertyValue Property=\"Name\" PropertyPath=\"City\" />\r\n" +
+"                  </Record>\r\n" +
+"                  <Record Type=\"OData.Community.Keys.V1.PropertyRef\">\r\n" +
+"                    <PropertyValue Property=\"Alias\" String=\"Street\" />\r\n" +
+"                    <PropertyValue Property=\"Name\" PropertyPath=\"Street\" />\r\n" +
+"                  </Record>\r\n" +
+"                </Collection>\r\n" +
+"              </PropertyValue>\r\n" +
+"            </Record>\r\n" +
+"          </Collection>\r\n" +
+"        </Annotation>\r\n" +
+"      </EntityType>\r\n" +
+"      <EntityContainer Name=\"Default\">\r\n" +
+"        <EntitySet Name=\"Customers\" EntityType=\"NS.Customer\" />\r\n" +
+"        <EntitySet Name=\"Orders\" EntityType=\"NS.Order\" />\r\n" +
+"        <EntitySet Name=\"People\" EntityType=\"NS.Person\" />\r\n" +
+"        <EntitySet Name=\"Companies\" EntityType=\"NS.Company\" />\r\n" +
+"      </EntityContainer>\r\n" +
+"    </Schema>\r\n" +
+"  </edmx:DataServices>\r\n" +
+"</edmx:Edmx>";
             var requestUri = string.Format("{0}/odata/$metadata", this.BaseAddress);
             HttpResponseMessage response = await Client.GetAsync(requestUri);
 
@@ -187,9 +187,10 @@ namespace WebStack.QA.Test.OData.AlternateKeys
         public async Task QueryEntityWithSingleAlternateKeysWorks()
         {
             // query with alternate keys
-            string expect = @"{
-  ""@odata.context"":""{XXXX}/odata/$metadata#Edm.String"",""value"":""special-SSN""
-}".Replace("{XXXX}", BaseAddress.ToLowerInvariant());
+            string expect = "{\r\n" +
+                            "  \"@odata.context\":\"{XXXX}\",\"value\":\"special-SSN\"\r\n" +
+                            "}";
+            expect = expect.Replace("{XXXX}", string.Format("{0}/odata/$metadata#Edm.String", BaseAddress.ToLowerInvariant()));
 
             var requestUri = string.Format("{0}/odata/Customers(SSN='special-SSN')", this.BaseAddress);
             HttpResponseMessage response = await Client.GetAsync(requestUri);
@@ -312,9 +313,10 @@ namespace WebStack.QA.Test.OData.AlternateKeys
         [Fact]
         public async Task CanUpdateEntityWithSingleAlternateKeys()
         {
-            string expect = @"{
-  ""@odata.context"":""{XXXX}/odata/$metadata#Customers/$entity"",""ID"":6,""Name"":""Updated Customer Name"",""SSN"":""SSN-6-T-006""
-}".Replace("{XXXX}", BaseAddress.ToLowerInvariant());
+            string expect = "{\r\n" +
+                            "  \"@odata.context\":\"{XXXX}\",\"ID\":6,\"Name\":\"Updated Customer Name\",\"SSN\":\"SSN-6-T-006\"\r\n" +
+                            "}";
+            expect = expect.Replace("{XXXX}", string.Format("{0}/odata/$metadata#Customers/$entity", BaseAddress.ToLowerInvariant()));
 
             var requestUri = string.Format("{0}/odata/Customers(SSN='SSN-6-T-006')", this.BaseAddress);
 

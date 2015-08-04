@@ -39,7 +39,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             {
                 if (!property.AddedExplicitly)
                 {
-                    property.IsAutoExpand();
+                    property.AutomaticallyExpand();
                 }
             }
         }

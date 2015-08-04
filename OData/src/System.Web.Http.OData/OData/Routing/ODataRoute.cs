@@ -105,20 +105,13 @@ namespace System.Web.Http.OData.Routing
         /// Headers for the next max version will be ignored.
         /// </summary>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        [Obsolete("Suggest to use API SetODataVersionConstraint")]
+        [Obsolete("The version constraint is relax by default")]
         public ODataRoute HasRelaxedODataVersionConstraint()
         {
             return SetODataVersionConstraint(true);
         }
 
-        /// <summary>
-        /// Set flag to enable/disable the version constraint relaxing.
-        /// When enable relaxing. The service will allow clients to send both OData V1 to V3 and next max version headers.
-        /// Headers for the next max version will be ignored.
-        /// </summary>
-        /// <param name="isRelaxedMatch">True for enable, false for disable</param>
-        /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public ODataRoute SetODataVersionConstraint(bool isRelaxedMatch)
+        private ODataRoute SetODataVersionConstraint(bool isRelaxedMatch)
         {
             object constraint;
             if (Constraints.TryGetValue(ODataRouteConstants.VersionConstraintName, out constraint))

@@ -24,8 +24,6 @@ namespace System.Web.OData.Builder
         private readonly Dictionary<Type, IEdmType> _types = new Dictionary<Type, IEdmType>();
         private readonly Dictionary<PropertyInfo, IEdmProperty> _properties = new Dictionary<PropertyInfo, IEdmProperty>();
         private readonly Dictionary<IEdmProperty, QueryableRestrictions> _propertiesRestrictions = new Dictionary<IEdmProperty, QueryableRestrictions>();
-        private readonly Dictionary<IEdmProperty, NavigationPropertyQueryableConfiguration> _navigationPropertiesConfigurations
-            = new Dictionary<IEdmProperty, NavigationPropertyQueryableConfiguration>();
         private readonly Dictionary<Enum, IEdmEnumMember> _members = new Dictionary<Enum, IEdmEnumMember>();
         private readonly Dictionary<IEdmStructuredType, PropertyInfo> _openTypes = new Dictionary<IEdmStructuredType, PropertyInfo>();
 
@@ -103,7 +101,7 @@ namespace System.Web.OData.Builder
                     }
 
                     EdmEntityType entityType = new EdmEntityType(config.Namespace, config.Name, baseType,
-                        entity.IsAbstract ?? false, entity.IsOpen, entity.HasStream ?? false);
+                        entity.IsAbstract ?? false, entity.IsOpen, entity.HasStream);
                     _types.Add(config.ClrType, entityType);
 
                     if (entity.IsOpen)
@@ -337,11 +335,6 @@ namespace System.Web.OData.Builder
                 {
                     _propertiesRestrictions[edmProperty] = new QueryableRestrictions(navProp);
                 }
-
-                if (edmProperty != null && navProp.Expand)
-                {
-                    _navigationPropertiesConfigurations[edmProperty] = new NavigationPropertyQueryableConfiguration(navProp);
-                }
             }
         }
 
@@ -430,7 +423,6 @@ namespace System.Web.OData.Builder
             return new EdmTypeMap(builder.GetEdmTypes(),
                 builder._properties,
                 builder._propertiesRestrictions,
-                builder._navigationPropertiesConfigurations,
                 builder._members,
                 builder._openTypes);
         }

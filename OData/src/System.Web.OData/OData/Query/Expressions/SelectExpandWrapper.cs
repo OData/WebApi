@@ -119,12 +119,29 @@ namespace System.Web.OData.Query.Expressions
                                 break;
                             case EdmTypeKind.Entity:
                                 {
-                                    IEdmEntityType edmEntityType = propertyDefinition as IEdmEntityType;
-                                    if(edmEntityType!=null&&edmEntityType.DeclaredKey==null)
+                                    var edmEntityType = propertyDefinition as IEdmEntityType;
+
+                                    while(edmEntityType!=null)
                                     {
-                                       result = true;//Complex Type
+                                        if (edmEntityType.DeclaredKey != null)
+                                        {
+                                            break;
+                                        }
+
+                                        if (edmEntityType.BaseType == null)
+                                        {
+                                            result = true;//Complex Type
+                                            break;
+                                        }
+                                            
+                                        edmEntityType = edmEntityType.BaseType as IEdmEntityType;
                                     }
                                 }
+                                break;
+                            case EdmTypeKind.Complex:
+                                result = true;
+                                break;
+                            default://Cannot be complex
                                 break;
                         }
                     }
@@ -159,7 +176,7 @@ namespace System.Web.OData.Query.Expressions
             // The user asked for all the structural properties on this instance.
             if (Instance != null)
             {
-                foreach (IEdmProperty property in type.DeclaredProperties)
+                foreach (IEdmProperty property in type.Properties())
                 {
                     if (IsStructuralOrComplex(property))
                     {

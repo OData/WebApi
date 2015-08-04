@@ -196,7 +196,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             if (navigationLink != null)
             {
-                return ODataQueryOptions.GetNextPageLink(navigationLink, pageSize);
+                return HttpRequestMessageExtensions.GetNextPageLink(navigationLink, pageSize);
             }
 
             return null;

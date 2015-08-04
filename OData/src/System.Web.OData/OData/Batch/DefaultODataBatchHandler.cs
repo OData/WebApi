@@ -44,11 +44,11 @@ namespace System.Web.OData.Batch
             string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(request);
             if (preferHeader != null && preferHeader.Contains(PreferenceContinueOnError))
             {
-                IsPreferenceHeaderContinueOnError = true;
+                ContinueOnError = true;
             }
             else
             {
-                IsPreferenceHeaderContinueOnError = false;
+                ContinueOnError = false;
             }
 
             try
@@ -88,7 +88,7 @@ namespace System.Web.OData.Batch
                 {
                     ODataBatchResponseItem responseItem = await request.SendRequestAsync(Invoker, cancellationToken);
                     responses.Add(responseItem);
-                    if (responseItem != null && responseItem.IsResponseSuccessful() == false && IsPreferenceHeaderContinueOnError == false)
+                    if (responseItem != null && responseItem.IsResponseSuccessful() == false && ContinueOnError == false)
                     {
                         break;
                     }

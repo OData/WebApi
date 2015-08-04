@@ -235,7 +235,7 @@ namespace System.Web.OData
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            config.EnableAlternateKeys(alternateKeys: true);
+            config.EnableAlternateKeys(true);
             ODataUriResolverSetttings resolverSetttings = config.GetResolverSettings();
 
             // Assert

@@ -55,13 +55,11 @@ namespace System.Web.Http.OData.Routing
             Assert.True(((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void SetODataVersionConstraint_SetValue(bool value)
+        [Fact]
+        public void SetODataVersionConstraint_SetValue()
         {
-            ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null).SetODataVersionConstraint(value);
-            Assert.Equal(value, ((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
+            ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null);
+            Assert.Equal(true, ((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
         }
     }
 }

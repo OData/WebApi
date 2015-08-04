@@ -305,7 +305,7 @@ namespace System.Web.OData.Builder.Conventions
             Assert.True(prop.NotExpandable);
 
             NavigationPropertyConfiguration naviProp = entityTypeConf.NavigationProperties.FirstOrDefault(p => p.Name == "Category2");
-            Assert.True(naviProp.Expand);
+            Assert.True(naviProp.AutoExpand);
 
             prop = entityTypeConf.Properties.FirstOrDefault(p => p.Name == "CountableProperty");
             Assert.False(prop.NotCountable);
@@ -2730,7 +2730,7 @@ namespace System.Web.OData.Builder.Conventions
             // Assert
             NavigationPropertyConfiguration category = entityTypeConf.NavigationProperties.FirstOrDefault(p => p.Name == "Category");
             Assert.NotNull(category);
-            Assert.True(category.Expand);      
+            Assert.True(category.AutoExpand);      
         }
     }
 

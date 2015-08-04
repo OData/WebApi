@@ -108,7 +108,7 @@ namespace System.Web.OData.Routing
         /// <param name="node">The node to be translated.</param>
         /// <param name="parameterAliasNodes">The parameter alias node mapping.</param>
         /// <returns>The translated node.</returns>
-        public static SingleValueNode TranslateParameterAlias(
+        internal static SingleValueNode TranslateParameterAlias(
             SingleValueNode node,
             IDictionary<string, SingleValueNode> parameterAliasNodes)
         {

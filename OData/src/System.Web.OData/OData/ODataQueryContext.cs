@@ -110,11 +110,6 @@ namespace System.Web.OData
         /// </summary>
         public ODataPath Path { get; private set; }
 
-        /// <summary>
-        /// Gets or sets the query parameters that are already applied in queries.
-        /// </summary>
-        public AllowedQueryOptions AppliedQueryOptions { get; set; }
-
         private static IEdmNavigationSource GetNavigationSource(IEdmModel model, IEdmType elementType, ODataPath odataPath)
         {
             Contract.Assert(model != null);

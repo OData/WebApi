@@ -19,8 +19,7 @@ namespace WebStack.QA.Test.OData.SxS2.ODataV4
                 routePrefix: "SxSOData",
                 model: model,
                 pathHandler: new DefaultODataPathHandler(),
-                routingConventions: conventions)
-                .SetODataVersionConstraint(true);
+                routingConventions: conventions);
 
             var constraint = new ODataVersionRouteConstraint(new List<string>() { "DataServiceVersion" });
             odataRoute.Constraints.Add("VersionConstraintV2", constraint);

@@ -45,6 +45,8 @@ namespace System.Web.OData.Query
 
         private ODataQueryOptionParser _queryOptionParser;
 
+        private AllowedQueryOptions _appliedQueryOptions = AllowedQueryOptions.None;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
         /// the <see cref="ODataQueryContext"/>.
@@ -238,6 +240,32 @@ namespace System.Web.OData.Query
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <param name="appliedQueryOptions">The query parameters that are already applied in queries.</param>
+        /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
+        public virtual IQueryable ApplyTo(IQueryable query, AllowedQueryOptions appliedQueryOptions)
+        {
+            _appliedQueryOptions = appliedQueryOptions;
+            return ApplyTo(query, new ODataQuerySettings());
+        }
+
+        /// <summary>
+        /// Apply the individual query to the given IQueryable in the right order.
+        /// </summary>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <param name="querySettings">The settings to use in query composition.</param>
+        /// <param name="appliedQueryOptions">The query parameters that are already applied in queries.</param>
+        /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
+        public virtual IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings,
+            AllowedQueryOptions appliedQueryOptions)
+        {
+            _appliedQueryOptions = appliedQueryOptions;
+            return ApplyTo(query, querySettings);
+        }
+
+        /// <summary>
+        /// Apply the individual query to the given IQueryable in the right order.
+        /// </summary>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The settings to use in query composition.</param>
         /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
         [SuppressMessage(
@@ -332,12 +360,27 @@ namespace System.Web.OData.Query
                 result = LimitResults(result, querySettings.PageSize.Value, out resultsLimited);
                 if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri && Request.ODataProperties().NextLink == null)
                 {
-                    Uri nextPageLink = GetNextPageLink(Request, querySettings.PageSize.Value);
+                    Uri nextPageLink = Request.GetNextPageLink(querySettings.PageSize.Value);
                     Request.ODataProperties().NextLink = nextPageLink;
                 }
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Apply the individual query to the given IQueryable in the right order.
+        /// </summary>
+        /// <param name="entity">The original entity.</param>
+        /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
+        /// <param name="appliedQueryOptions">The query parameters that are already applied in queries.</param>  
+        /// <returns>The new entity after the $select and $expand query has been applied to.</returns>     
+        /// <remarks>Only $select and $expand query options can be applied on single entities. This method throws if the query contains any other
+        /// query options.</remarks>
+        public virtual object ApplyTo(object entity, ODataQuerySettings querySettings, AllowedQueryOptions appliedQueryOptions)
+        {
+            _appliedQueryOptions = appliedQueryOptions;
+            return ApplyTo(entity, new ODataQuerySettings());
         }
 
         /// <summary>
@@ -506,101 +549,6 @@ namespace System.Web.OData.Query
             return truncatedCollection.AsQueryable();
         }
 
-        /// <summary>
-        /// Creates a link for the next page of results; To be used as the value of @odata.nextLink.
-        /// </summary>
-        /// <param name="request">The request on which to base the next page link.</param>
-        /// <param name="pageSize">The number of results allowed per page.</param>
-        /// <returns>A next page link.</returns>
-        public static Uri GetNextPageLink(HttpRequestMessage request, int pageSize)
-        {
-            if (request == null || request.RequestUri == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
-            Uri requestUri = request.RequestUri;
-
-            if (!requestUri.IsAbsoluteUri)
-            {
-                throw Error.ArgumentUriNotAbsolute("request", requestUri);
-            }
-
-            return GetNextPageLink(requestUri, request.GetQueryNameValuePairs(), pageSize);
-        }
-
-        internal static Uri GetNextPageLink(Uri requestUri, int pageSize)
-        {
-            Contract.Assert(requestUri != null);
-            Contract.Assert(requestUri.IsAbsoluteUri);
-
-            return GetNextPageLink(requestUri, new FormDataCollection(requestUri), pageSize);
-        }
-
-        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize)
-        {
-            Contract.Assert(requestUri != null);
-            Contract.Assert(queryParameters != null);
-            Contract.Assert(requestUri.IsAbsoluteUri);
-
-            StringBuilder queryBuilder = new StringBuilder();
-
-            int nextPageSkip = pageSize;
-
-            foreach (KeyValuePair<string, string> kvp in queryParameters)
-            {
-                string key = kvp.Key;
-                string value = kvp.Value;
-                switch (key)
-                {
-                    case "$top":
-                        int top;
-                        if (Int32.TryParse(value, out top))
-                        {
-                            // There is no next page if the $top query option's value is less than or equal to the page size.
-                            Contract.Assert(top > pageSize);
-                            // We decrease top by the pageSize because that's the number of results we're returning in the current page
-                            value = (top - pageSize).ToString(CultureInfo.InvariantCulture);
-                        }
-                        break;
-                    case "$skip":
-                        int skip;
-                        if (Int32.TryParse(value, out skip))
-                        {
-                            // We increase skip by the pageSize because that's the number of results we're returning in the current page
-                            nextPageSkip += skip;
-                        }
-                        continue;
-                    default:
-                        break;
-                }
-
-                if (key.Length > 0 && key[0] == '$')
-                {
-                    // $ is a legal first character in query keys
-                    key = '$' + Uri.EscapeDataString(key.Substring(1));
-                }
-                else
-                {
-                    key = Uri.EscapeDataString(key);
-                }
-                value = Uri.EscapeDataString(value);
-
-                queryBuilder.Append(key);
-                queryBuilder.Append('=');
-                queryBuilder.Append(value);
-                queryBuilder.Append('&');
-            }
-
-            queryBuilder.AppendFormat("$skip={0}", nextPageSkip);
-
-            UriBuilder uriBuilder = new UriBuilder(requestUri)
-            {
-                Query = queryBuilder.ToString()
-            };
-            return uriBuilder.Uri;
-        }
-
         internal virtual ETag GetETag(EntityTagHeaderValue etagHeaderValue)
         {
             return Request.GetETag(etagHeaderValue);
@@ -719,7 +667,7 @@ namespace System.Web.OData.Query
 
         private bool IsAvailableODataQueryOption(object queryOption, AllowedQueryOptions queryOptionFlag)
         {
-            return ((queryOption != null) && ((Context.AppliedQueryOptions & queryOptionFlag) == AllowedQueryOptions.None));
+            return ((queryOption != null) && ((_appliedQueryOptions & queryOptionFlag) == AllowedQueryOptions.None));
         }
 
         private T ApplySelectExpand<T>(T entity, ODataQuerySettings querySettings)

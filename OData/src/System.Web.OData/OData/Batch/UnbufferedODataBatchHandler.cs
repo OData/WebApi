@@ -53,11 +53,11 @@ namespace System.Web.OData.Batch
             string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(request);
             if (preferHeader != null && preferHeader.Contains(PreferenceContinueOnError))
             {
-                IsPreferenceHeaderContinueOnError = true;
+                ContinueOnError = true;
             }
             else
             {
-                IsPreferenceHeaderContinueOnError = false;
+                ContinueOnError = false;
             }
             try
             {
@@ -75,7 +75,7 @@ namespace System.Web.OData.Batch
                     if (responseItem != null)
                     {
                         responses.Add(responseItem);
-                        if (responseItem.IsResponseSuccessful() == false && IsPreferenceHeaderContinueOnError == false)
+                        if (responseItem.IsResponseSuccessful() == false && ContinueOnError == false)
                         {
                             break;
                         }

@@ -50,7 +50,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Gets or sets a value indicating whether this type is a media type.
         /// </summary>
-        public virtual bool? HasStream { get; set; }
+        public virtual bool HasStream { get; set; }
 
         /// <summary>
         /// Gets the collection of <see cref="NavigationPropertyConfiguration"/> of this entity type.

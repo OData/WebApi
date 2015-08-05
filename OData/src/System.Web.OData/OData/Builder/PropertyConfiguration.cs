@@ -84,17 +84,22 @@ namespace System.Web.OData.Builder
 
         /// <summary>
         /// Gets whether the property is restricted, i.e. not filterable, not sortable, not navigable,
-        /// not expandable, or not countable.
+        /// not expandable, not countable, or automatically expand.
         /// </summary>
         public bool IsRestricted
         {
-            get { return NotFilterable || NotSortable || NotNavigable || NotExpandable || NotCountable; }
+            get { return NotFilterable || NotSortable || NotNavigable || NotExpandable || NotCountable || AutoExpand; }
         }
 
         /// <summary>
         /// Gets or sets whether the property is not filterable. default is false.
         /// </summary>
         public bool NotFilterable { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the property is automatically expanded. default is false.
+        /// </summary>
+        public bool AutoExpand { get; set; }
 
         /// <summary>
         /// Gets or sets whether the property is nonfilterable. default is false.

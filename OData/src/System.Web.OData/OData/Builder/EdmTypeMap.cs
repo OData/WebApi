@@ -13,14 +13,12 @@ namespace System.Web.OData.Builder
             Dictionary<Type, IEdmType> edmTypes,
             Dictionary<PropertyInfo, IEdmProperty> edmProperties,
             Dictionary<IEdmProperty, QueryableRestrictions> edmPropertiesRestrictions,
-            Dictionary<IEdmProperty, NavigationPropertyQueryableConfiguration> edmNavigationPropertiesConfigurations,
             Dictionary<Enum, IEdmEnumMember> enumMembers,
             Dictionary<IEdmStructuredType, PropertyInfo> openTypes)
         {
             EdmTypes = edmTypes;
             EdmProperties = edmProperties;
             EdmPropertiesRestrictions = edmPropertiesRestrictions;
-            EdmNavigationPropertiesConfigurations = edmNavigationPropertiesConfigurations;
             EnumMembers = enumMembers;
             OpenTypes = openTypes;
         }
@@ -30,8 +28,6 @@ namespace System.Web.OData.Builder
         public Dictionary<PropertyInfo, IEdmProperty> EdmProperties { get; private set; }
 
         public Dictionary<IEdmProperty, QueryableRestrictions> EdmPropertiesRestrictions { get; private set; }
-
-        public Dictionary<IEdmProperty, NavigationPropertyQueryableConfiguration> EdmNavigationPropertiesConfigurations { get; private set; }
 
         public Dictionary<Enum, IEdmEnumMember> EnumMembers { get; private set; }
 

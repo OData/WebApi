@@ -308,8 +308,8 @@ namespace System.Web.OData.Formatter
 
         public static bool IsAutoExpand(IEdmProperty edmProperty, IEdmModel edmModel)
         {
-            NavigationPropertyQueryableConfigurationAnnotation annotation = GetNavigationPropertyConfiguration(edmProperty, edmModel);
-            return annotation == null ? false : annotation.Configuration.AutoExpand;
+            QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(edmProperty, edmModel);
+            return annotation == null ? false : annotation.Restrictions.AutoExpand;
         }
 
         private static QueryableRestrictionsAnnotation GetPropertyRestrictions(IEdmProperty edmProperty, IEdmModel edmModel)
@@ -318,14 +318,6 @@ namespace System.Web.OData.Formatter
             Contract.Assert(edmModel != null);
 
             return edmModel.GetAnnotationValue<QueryableRestrictionsAnnotation>(edmProperty);
-        }
-
-        private static NavigationPropertyQueryableConfigurationAnnotation GetNavigationPropertyConfiguration(IEdmProperty edmProperty, IEdmModel edmModel)
-        {
-            Contract.Assert(edmProperty != null);
-            Contract.Assert(edmModel != null);
-
-            return edmModel.GetAnnotationValue<NavigationPropertyQueryableConfigurationAnnotation>(edmProperty);
         }
 
         public static string GetClrPropertyName(IEdmProperty edmProperty, IEdmModel edmModel)

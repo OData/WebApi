@@ -728,48 +728,7 @@ namespace System.Web.OData.Query
 
             Assert.Equal(Math.Min(limit, 4), result.Count());
             Assert.Equal(resultsLimitedExpected, resultsLimited);
-        }
-
-        [Theory]
-        [InlineData("http://localhost/Customers", 10, "http://localhost/Customers?$skip=10")]
-        [InlineData("http://localhost/Customers?$filter=Age ge 18", 10, "http://localhost/Customers?$filter=Age%20ge%2018&$skip=10")]
-        [InlineData("http://localhost/Customers?$top=20", 10, "http://localhost/Customers?$top=10&$skip=10")]
-        [InlineData("http://localhost/Customers?$skip=5&$top=10", 2, "http://localhost/Customers?$top=8&$skip=7")]
-        [InlineData("http://localhost/Customers?$filter=Age ge 18&$orderby=Name&$top=11&$skip=6", 10, "http://localhost/Customers?$filter=Age%20ge%2018&$orderby=Name&$top=1&$skip=16")]
-        [InlineData("http://localhost/Customers?testkey%23%2B%3D%3F%26=testvalue%23%2B%3D%3F%26", 10, "http://localhost/Customers?testkey%23%2B%3D%3F%26=testvalue%23%2B%3D%3F%26&$skip=10")]
-        public void GetNextPageLink_GetsNextPageLink(string requestUri, int pageSize, string nextPageUri)
-        {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-
-            Uri nextPageLink = ODataQueryOptions.GetNextPageLink(request, pageSize);
-
-            Assert.Equal(nextPageUri, nextPageLink.AbsoluteUri);
-        }
-
-        [Fact]
-        public void GetNextPageLink_ThatTakesUri_GetsNextPageLink()
-        {
-            Uri nextPageLink = ODataQueryOptions.GetNextPageLink(new Uri("http://localhost/Customers?$filter=Age ge 18"), 10);
-            Assert.Equal("http://localhost/Customers?$filter=Age%20ge%2018&$skip=10", nextPageLink.AbsoluteUri);
-        }
-
-        [Fact]
-        public void GetNextPageLink_WithNullRequestOrUri_Throws()
-        {
-            HttpRequestMessage nullRequest = null;
-            Assert.Throws<ArgumentNullException>(() => { ODataQueryOptions.GetNextPageLink(nullRequest, 10); });
-
-            HttpRequestMessage requestWithNullUri = new HttpRequestMessage() { RequestUri = null };
-            Assert.Throws<ArgumentNullException>(() => { ODataQueryOptions.GetNextPageLink(requestWithNullUri, 10); });
-        }
-
-        [Fact]
-        public void GetNextPageLink_WithRelativeUri_Throws()
-        {
-            Uri relativeUri = new Uri("/test", UriKind.Relative);
-            HttpRequestMessage requestWithRelativeUri = new HttpRequestMessage() { RequestUri = relativeUri };
-            Assert.Throws<ArgumentException>(() => { ODataQueryOptions.GetNextPageLink(requestWithRelativeUri, 10); });
-        }
+        }        
 
         [Fact]
         public void CanTurnOffAllValidation()
@@ -951,7 +910,7 @@ namespace System.Web.OData.Query
         [Theory]
         [InlineData("?$select=Orders/OrderId", AllowedQueryOptions.Select)]
         [InlineData("?$expand=Orders", AllowedQueryOptions.Expand)]
-        public void ApplyTo_Entity_DoesnotApply_IfSetApplied(string queryOption, AllowedQueryOptions allowedQueryOptions)
+        public void ApplyTo_Entity_DoesnotApply_IfSetApplied(string queryOption, AllowedQueryOptions appliedQueryOptions)
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + queryOption);
@@ -959,7 +918,6 @@ namespace System.Web.OData.Query
             builder.EntitySet<Customer>("Customers");
             ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
             ODataQueryOptions options = new ODataQueryOptions(context, request);
-            options.Context.AppliedQueryOptions = allowedQueryOptions;
             Customer customer = new Customer
             {
                 CustomerId = 1,
@@ -970,7 +928,7 @@ namespace System.Web.OData.Query
             };
 
             // Act
-            object result = options.ApplyTo(customer, new ODataQuerySettings());
+            object result = options.ApplyTo(customer, new ODataQuerySettings(), appliedQueryOptions);
 
             // Assert
             Assert.Equal(customer, (result as Customer));
@@ -984,7 +942,7 @@ namespace System.Web.OData.Query
         [InlineData("?$top=1", AllowedQueryOptions.Top)]
         [InlineData("?$select=CustomerId", AllowedQueryOptions.Select)]
         [InlineData("?$expand=Orders", AllowedQueryOptions.Expand)]
-        public void ApplyTo_DoesnotApply_IfSetApplied(string queryOption, AllowedQueryOptions allowedQueryOptions)
+        public void ApplyTo_DoesnotApply_IfSetApplied(string queryOption, AllowedQueryOptions appliedQueryOptions)
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + queryOption);
@@ -992,7 +950,6 @@ namespace System.Web.OData.Query
             builder.EntitySet<Customer>("Customers");
             ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
             ODataQueryOptions options = new ODataQueryOptions(context, request);
-            options.Context.AppliedQueryOptions = allowedQueryOptions;
             IQueryable<Customer> customers = 
                 Enumerable.Range(1, 10).Select(
                     i => new Customer
@@ -1006,7 +963,7 @@ namespace System.Web.OData.Query
                 .AsQueryable();
 
             // Act
-            IQueryable result = options.ApplyTo(customers, new ODataQuerySettings());
+            IQueryable result = options.ApplyTo(customers, new ODataQuerySettings(), appliedQueryOptions);
 
             // Assert
             Assert.Equal(10, (result as IQueryable<Customer>).Count());
@@ -1049,28 +1006,6 @@ namespace System.Web.OData.Query
             Assert.NotNull(queryOptions.Top);
             Assert.NotNull(queryOptions.SelectExpand);
             Assert.NotNull(queryOptions.Count);
-        }
-
-        [Fact]
-        public void ODataQueryOptions_CanSetToApplied()
-        {
-            // Arrange
-            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
-                "http://localhost/?$filter=Id eq 42&$orderby=Id&$skip=42&$top=42&$count=true&$select=Id&$expand=Orders");
-
-            // Act
-            ODataQueryOptions queryOptions = new ODataQueryOptions(context, request);
-            queryOptions.Context.AppliedQueryOptions = AllowedQueryOptions.Filter | AllowedQueryOptions.OrderBy;
-
-            // Assert
-            Assert.True((queryOptions.Context.AppliedQueryOptions & AllowedQueryOptions.Filter) != AllowedQueryOptions.None);
-            Assert.True((queryOptions.Context.AppliedQueryOptions & AllowedQueryOptions.OrderBy) != AllowedQueryOptions.None);
-            Assert.True((queryOptions.Context.AppliedQueryOptions & AllowedQueryOptions.Skip) == AllowedQueryOptions.None);
-            Assert.True((queryOptions.Context.AppliedQueryOptions & AllowedQueryOptions.Select) == AllowedQueryOptions.None);
-            Assert.True((queryOptions.Context.AppliedQueryOptions & AllowedQueryOptions.Expand) == AllowedQueryOptions.None);
-            Assert.True((queryOptions.Context.AppliedQueryOptions & AllowedQueryOptions.Count) == AllowedQueryOptions.None);
         }
 
         [Fact]
@@ -1174,8 +1109,8 @@ namespace System.Web.OData.Query
         public IHttpActionResult Get(ODataQueryOptions<ODataQueryOptionTest_EntityModel> queryOptions)
         {
             // Don't apply Filter and Expand, but apply Select.
-            queryOptions.Context.AppliedQueryOptions = AllowedQueryOptions.Skip | AllowedQueryOptions.Filter | AllowedQueryOptions.Expand;
-            var res = queryOptions.ApplyTo(_entityModels);
+            var appliedQueryOptions = AllowedQueryOptions.Skip | AllowedQueryOptions.Filter | AllowedQueryOptions.Expand;
+            var res = queryOptions.ApplyTo(_entityModels, appliedQueryOptions);
             return Ok(res.AsQueryable());
         }
 

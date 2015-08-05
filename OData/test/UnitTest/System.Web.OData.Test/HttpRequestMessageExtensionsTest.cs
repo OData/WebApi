@@ -313,5 +313,46 @@ namespace System.Net.Http
         {
             return new SelectExpandClause(new SelectItem[0], allSelected: true);
         }
+
+        [Theory]
+        [InlineData("http://localhost/Customers", 10, "http://localhost/Customers?$skip=10")]
+        [InlineData("http://localhost/Customers?$filter=Age ge 18", 10, "http://localhost/Customers?$filter=Age%20ge%2018&$skip=10")]
+        [InlineData("http://localhost/Customers?$top=20", 10, "http://localhost/Customers?$top=10&$skip=10")]
+        [InlineData("http://localhost/Customers?$skip=5&$top=10", 2, "http://localhost/Customers?$top=8&$skip=7")]
+        [InlineData("http://localhost/Customers?$filter=Age ge 18&$orderby=Name&$top=11&$skip=6", 10, "http://localhost/Customers?$filter=Age%20ge%2018&$orderby=Name&$top=1&$skip=16")]
+        [InlineData("http://localhost/Customers?testkey%23%2B%3D%3F%26=testvalue%23%2B%3D%3F%26", 10, "http://localhost/Customers?testkey%23%2B%3D%3F%26=testvalue%23%2B%3D%3F%26&$skip=10")]
+        public void GetNextPageLink_GetsNextPageLink(string requestUri, int pageSize, string nextPageUri)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+            Uri nextPageLink = request.GetNextPageLink(pageSize);
+
+            Assert.Equal(nextPageUri, nextPageLink.AbsoluteUri);
+        }
+
+        [Fact]
+        public void GetNextPageLink_ThatTakesUri_GetsNextPageLink()
+        {
+            Uri nextPageLink = Web.OData.Extensions.HttpRequestMessageExtensions.GetNextPageLink(new Uri("http://localhost/Customers?$filter=Age ge 18"), 10);
+            Assert.Equal("http://localhost/Customers?$filter=Age%20ge%2018&$skip=10", nextPageLink.AbsoluteUri);
+        }
+
+        [Fact]
+        public void GetNextPageLink_WithNullRequestOrUri_Throws()
+        {
+            HttpRequestMessage nullRequest = null;
+            Assert.Throws<ArgumentNullException>(() => { Web.OData.Extensions.HttpRequestMessageExtensions.GetNextPageLink(nullRequest, 10); });
+
+            HttpRequestMessage requestWithNullUri = new HttpRequestMessage() { RequestUri = null };
+            Assert.Throws<ArgumentNullException>(() => { Web.OData.Extensions.HttpRequestMessageExtensions.GetNextPageLink(requestWithNullUri, 10); });
+        }
+
+        [Fact]
+        public void GetNextPageLink_WithRelativeUri_Throws()
+        {
+            Uri relativeUri = new Uri("/test", UriKind.Relative);
+            HttpRequestMessage requestWithRelativeUri = new HttpRequestMessage() { RequestUri = relativeUri };
+            Assert.Throws<ArgumentException>(() => { Web.OData.Extensions.HttpRequestMessageExtensions.GetNextPageLink(requestWithRelativeUri, 10); });
+        }
     }
 }

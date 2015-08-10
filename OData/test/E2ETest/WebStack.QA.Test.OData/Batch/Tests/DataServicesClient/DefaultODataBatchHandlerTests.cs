@@ -498,6 +498,7 @@ Content-Type: application/json;odata.metadata=minimal
                 new DefaultODataPathHandler(),
                 ODataRoutingConventions.CreateDefault(),
                 new DefaultODataBatchHandler(server));
+            configuration.EnableContinueOnErrorHeader();
         }
 
         protected static IEdmModel GetEdmModel()

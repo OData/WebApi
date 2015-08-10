@@ -23,11 +23,21 @@ namespace System.Web.OData.Routing
     public class DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler
     {
         private ODataUriResolverSetttings _resolverSettings = new ODataUriResolverSetttings();
+        private ODataUrlConventions _urlConventions = ODataUrlConventions.Default;
 
         internal ODataUriResolverSetttings ResolverSetttings
         {
             get { return _resolverSettings; }
             set { _resolverSettings = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ODataUrlConventions"/> used by the parser.
+        /// </summary>
+        public ODataUrlConventions UrlConventions
+        {
+            get { return _urlConventions; }
+            set { _urlConventions = value; }
         }
 
         /// <summary>
@@ -52,7 +62,7 @@ namespace System.Web.OData.Routing
                 throw Error.ArgumentNull("odataPath");
             }
 
-            return Parse(model, serviceRoot, odataPath, ResolverSetttings, enableUriTemplateParsing: false);
+            return Parse(model, serviceRoot, odataPath, ResolverSetttings, UrlConventions, enableUriTemplateParsing: false);
         }
 
         /// <summary>
@@ -75,6 +85,7 @@ namespace System.Web.OData.Routing
 
             return Templatify(
                 Parse(model, serviceRoot: null, odataPath: odataPathTemplate, resolverSettings: ResolverSetttings,
+                conventions: UrlConventions,
                 enableUriTemplateParsing: true),
                 odataPathTemplate);
         }
@@ -101,6 +112,7 @@ namespace System.Web.OData.Routing
             string serviceRoot,
             string odataPath,
             ODataUriResolverSetttings resolverSettings,
+            ODataUrlConventions conventions,
             bool enableUriTemplateParsing)
         {
             ODataUriParser uriParser;
@@ -126,6 +138,8 @@ namespace System.Web.OData.Routing
                 queryString = fullUri.ParseQueryString();
                 uriParser = new ODataUriParser(model, serviceRootUri, fullUri);
             }
+
+            uriParser.UrlConventions = conventions;
 
             uriParser.Resolver = resolverSettings.CreateResolver(model);
 

@@ -45,7 +45,7 @@ namespace System.Web.OData.Query
 
         private ODataQueryOptionParser _queryOptionParser;
 
-        private AllowedQueryOptions _appliedQueryOptions = AllowedQueryOptions.None;
+        private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
@@ -240,11 +240,11 @@ namespace System.Web.OData.Query
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
-        /// <param name="appliedQueryOptions">The query parameters that are already applied in queries.</param>
+        /// <param name="ignoreQueryOptions">The query parameters that are already applied in queries.</param>
         /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
-        public virtual IQueryable ApplyTo(IQueryable query, AllowedQueryOptions appliedQueryOptions)
+        public virtual IQueryable ApplyTo(IQueryable query, AllowedQueryOptions ignoreQueryOptions)
         {
-            _appliedQueryOptions = appliedQueryOptions;
+            _ignoreQueryOptions = ignoreQueryOptions;
             return ApplyTo(query, new ODataQuerySettings());
         }
 
@@ -253,12 +253,12 @@ namespace System.Web.OData.Query
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The settings to use in query composition.</param>
-        /// <param name="appliedQueryOptions">The query parameters that are already applied in queries.</param>
+        /// <param name="ignoreQueryOptions">The query parameters that are already applied in queries.</param>
         /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
         public virtual IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings,
-            AllowedQueryOptions appliedQueryOptions)
+            AllowedQueryOptions ignoreQueryOptions)
         {
-            _appliedQueryOptions = appliedQueryOptions;
+            _ignoreQueryOptions = ignoreQueryOptions;
             return ApplyTo(query, querySettings);
         }
 
@@ -373,13 +373,13 @@ namespace System.Web.OData.Query
         /// </summary>
         /// <param name="entity">The original entity.</param>
         /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
-        /// <param name="appliedQueryOptions">The query parameters that are already applied in queries.</param>  
+        /// <param name="ignoreQueryOptions">The query parameters that are already applied in queries.</param>  
         /// <returns>The new entity after the $select and $expand query has been applied to.</returns>     
         /// <remarks>Only $select and $expand query options can be applied on single entities. This method throws if the query contains any other
         /// query options.</remarks>
-        public virtual object ApplyTo(object entity, ODataQuerySettings querySettings, AllowedQueryOptions appliedQueryOptions)
+        public virtual object ApplyTo(object entity, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)
         {
-            _appliedQueryOptions = appliedQueryOptions;
+            _ignoreQueryOptions = ignoreQueryOptions;
             return ApplyTo(entity, new ODataQuerySettings());
         }
 
@@ -667,7 +667,7 @@ namespace System.Web.OData.Query
 
         private bool IsAvailableODataQueryOption(object queryOption, AllowedQueryOptions queryOptionFlag)
         {
-            return ((queryOption != null) && ((_appliedQueryOptions & queryOptionFlag) == AllowedQueryOptions.None));
+            return ((queryOption != null) && ((_ignoreQueryOptions & queryOptionFlag) == AllowedQueryOptions.None));
         }
 
         private T ApplySelectExpand<T>(T entity, ODataQuerySettings querySettings)

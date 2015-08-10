@@ -115,7 +115,7 @@ namespace System.Web.OData.Routing
         /// Headers for the previous max version will be ignored.
         /// </summary>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        [Obsolete("The version constraint is relax by default")]
+        [Obsolete("The version constraint is relaxed by default")]
         public ODataRoute HasRelaxedODataVersionConstraint()
         {
             return SetODataVersionConstraint(true);

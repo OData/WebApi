@@ -410,11 +410,10 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
 
-        [Theory]
-        [InlineData("Abcd", true, true)]
-        public void NullHandling_StringFunctionWithStringParameret(string productName, bool withNullPropagation, object withoutNullPropagation)
+        [Fact]
+        public void NullHandling_StringFunctionWithStringParameret()
         {
-            var filters = VerifyQueryDeserialization(
+            VerifyQueryDeserialization(
                 "startswith(ProductName, 'Abc')",
                 NotTesting,
                 "$it => (IIF((($it.ProductName == null) OrElse (\"Abc\" == null)), null, Convert($it.ProductName.StartsWith(\"Abc\"))) == True)");

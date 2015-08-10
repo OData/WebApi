@@ -396,7 +396,8 @@ namespace System.Web.OData
                     (!String.IsNullOrWhiteSpace(request.RequestUri.Query) ||
                     _querySettings.PageSize.HasValue ||
                     responseContent.Value is SingleResult ||
-                    ODataCountMediaTypeMapping.IsCountRequest(request));
+                    ODataCountMediaTypeMapping.IsCountRequest(request) ||
+                    ContainsAutoExpandProperty(responseContent.Value, request, actionDescriptor));
 
                 if (shouldApplyQuery)
                 {
@@ -688,6 +689,33 @@ namespace System.Web.OData
             {
                 throw new ODataException(Error.Format(SRResources.NonSelectExpandOnSingleEntity));
             }
+        }
+
+        private bool ContainsAutoExpandProperty(object response, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
+        {
+            Type elementClrType = GetElementType(response, actionDescriptor);
+
+            IEdmModel model = GetModel(elementClrType, request, actionDescriptor);
+            if (model == null)
+            {
+                throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
+            }
+            IEdmEntityType entityType = model.GetEdmType(elementClrType) as IEdmEntityType;
+            if (entityType != null)
+            {
+                var navigationProperties = entityType.NavigationProperties();
+                if (navigationProperties != null)
+                {
+                    foreach (var navigationProperty in navigationProperties)
+                    {
+                        if (EdmLibHelpers.IsAutoExpand(navigationProperty, model))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
     }
 }

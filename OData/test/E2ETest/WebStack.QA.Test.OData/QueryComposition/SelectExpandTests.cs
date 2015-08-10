@@ -344,6 +344,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             }
         }
 
+        [Theory]
         [PropertyData("AutoExpandTestData")]
         public void QueryForAnEntryIncludeTheAutoExpandNavigationProperty(string url, int propCount)
         {
@@ -489,35 +490,53 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
     public class AutoExpandCustomerController : ODataController
     {
-        public IList<AutoExpandCustomer> Customers { get; set; }
-
-        public AutoExpandCustomerController()
-        {
-            Customers = Enumerable.Range(0, 10).Select(i => new AutoExpandCustomer
-            {
-                Id = i,
-                Stuff = new AutoExpandStuff
-                {
-                    Id = i,
-                    Bonus = new SelectBonus
-                    {
-                        Id = i,
-                        Ammount = i * 1000
-                    }
-                }
-            }).ToList();
-        }
+        private readonly SampleContext _db = new SampleContext();
 
         [EnableQuery]
         public IQueryable<AutoExpandCustomer> Get()
         {
-            return Customers.AsQueryable();
+            ResetDataSource();
+            return _db.AutoExpandCustomers;
         }
 
         [EnableQuery]
         public AutoExpandCustomer Get(int key)
         {
-            return Customers.ElementAt(key);
+            ResetDataSource();
+            return _db.AutoExpandCustomers.First(c => c.Id == key);
+        }
+
+        public void Generate()
+        {
+            for (int i = 1; i < 10; i++)
+            {
+                var customer = new AutoExpandCustomer
+                {
+                    Id = i,
+                    Stuff = new AutoExpandStuff
+                    {
+                        Id = i,
+                        Bonus = new SelectBonus
+                        {
+                            Id = i,
+                            Ammount = i*1000
+                        }
+                    }
+                };
+                _db.AutoExpandCustomers.Add(customer);
+            }
+            _db.SaveChanges();
+        }
+
+        private void ResetDataSource()
+        {
+            if (_db.Database.Exists())
+            {
+                _db.Database.Delete();
+                _db.Database.Create();
+            }
+
+            Generate();
         }
     }
 
@@ -581,6 +600,8 @@ namespace WebStack.QA.Test.OData.QueryComposition
         }
 
         public DbSet<EFSelectCustomer> Customers { get; set; }
+
+        public DbSet<AutoExpandCustomer> AutoExpandCustomers { get; set; }
     }
 
     public class AutoExpandCustomer

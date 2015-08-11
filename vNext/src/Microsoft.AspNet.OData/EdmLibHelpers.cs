@@ -188,7 +188,20 @@ namespace Microsoft.AspNet.OData
                 Type elementType;
                 if (clrType.IsCollection(out elementType))
                 {
-                    edmType = new EdmCollectionType(edmModel.GetEdmType(elementType).ToEdmTypeReference(IsNullable(elementType)));
+                    //edmType = new EdmCollectionType(edmModel.GetEdmType(elementType).ToEdmTypeReference(IsNullable(elementType)));
+                    IEdmTypeReference value = null;
+
+                    try
+                    {
+                        value = edmModel.GetEdmType(elementType).ToEdmTypeReference(IsNullable(elementType));
+                    }
+                    catch { }
+
+                    if (value == null)
+                    {
+                        value = edmModel.FindType(elementType.Name).ToEdmTypeReference(IsNullable(elementType));
+                    }
+                    edmType = new EdmCollectionType(value);
                 }
                 else
                 {

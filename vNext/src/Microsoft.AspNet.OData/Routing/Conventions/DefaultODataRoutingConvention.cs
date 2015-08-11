@@ -59,6 +59,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 if (structuralPropertySegment != null)
                 {
                     routeTemplate += "/" + structuralPropertySegment.Property.Name;
+                    methodName += structuralPropertySegment.Property.Name;
                 }
 
                 var navigationPropertySegment =
@@ -80,14 +81,61 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             
             var services = routeContext.HttpContext.ApplicationServices;
             var provider = services.GetRequiredService<IActionDescriptorsCollectionProvider>();
-            var actionDescriptor = provider.ActionDescriptors.Items.SingleOrDefault(d =>
+
+            var methodDescriptor = new List<ActionDescriptor>();
+            ActionDescriptor actionDescriptor = null;
+
+            // Find all the matching methods
+            foreach (var descriptor in provider.ActionDescriptors.Items)
             {
-                var c = d as ControllerActionDescriptor;
-                return c != null && c.ControllerName == controllerName &&
-                    (controllerName == "Metadata" ||
-                        ((HttpMethodConstraint)c.ActionConstraints.First()).HttpMethods.Contains(methodName) &&
-                         c.AttributeRouteInfo.Template.EndsWith(routeTemplate));
-            });
+                if (string.Equals(descriptor.Name, methodName, StringComparison.OrdinalIgnoreCase)
+                    && ((ControllerActionDescriptor)descriptor).ControllerName == controllerName)
+                {
+                    methodDescriptor.Add(descriptor);
+                }
+            }
+
+            // Now match the parameters
+            foreach (var descriptor in methodDescriptor)
+            {
+                bool matchFound = true;
+                if (descriptor.Parameters.Count(d => d.BindingInfo == null) == keys.Count)
+                {
+                    foreach (var key in keys)
+                    {
+                        if (descriptor.Parameters.FirstOrDefault(d => d.Name.Equals(key.Key, StringComparison.OrdinalIgnoreCase)) != null)
+                        {
+                            continue;
+                        }
+                        matchFound = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    matchFound = false;
+                }
+
+                if (!matchFound)
+                {
+                    continue;
+                }
+
+                actionDescriptor = descriptor;
+                break;
+            }
+
+            //if (actionDescriptor == null)
+            //{
+            //    actionDescriptor = provider.ActionDescriptors.Items.SingleOrDefault(d =>
+            //    {
+            //        var c = d as ControllerActionDescriptor;
+            //        return c != null && c.ControllerName == controllerName &&
+            //            (controllerName == "Metadata" ||
+            //                ((HttpMethodConstraint)c.ActionConstraints.First()).HttpMethods.Contains(methodName) &&
+            //                 c.AttributeRouteInfo.Template.EndsWith(routeTemplate));
+            //    });
+            //}
 
             if (actionDescriptor == null)
             {
@@ -104,10 +152,15 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
         private void WriteRouteData(RouteContext context, IList<ParameterDescriptor> parameters, IList<KeyValuePair<string, object>> keys)
         {
-            for (int i = 0; i < keys.Count; ++i)
+            foreach (var key in keys)
             {
-                // TODO: check if parameters match keys.
-                context.RouteData.Values[parameters[i].Name] = keys[i].Value;
+                var param = parameters.FirstOrDefault(p => p.Name.Equals(key.Key, StringComparison.OrdinalIgnoreCase));
+                if (param == null)
+                {
+                    continue;
+                }
+
+                context.RouteData.Values.Add(param.Name, key.Value);
             }
         }
     }

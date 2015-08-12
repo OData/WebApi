@@ -375,4 +375,15 @@ namespace System.Web.OData.Formatter
         public int? FkSupplier3Id { get; set; }
         public FkSupplier3 Supplier3 { get; set; }
     }
+
+    public class CustomerWithConcurrencyAttribute
+    {
+        public int ID { get; set; }
+
+        [ConcurrencyCheck]
+        public string Name { get; set; }
+
+        [Timestamp]
+        public DateTimeOffset Birthday { get; set; }
+    }
 }

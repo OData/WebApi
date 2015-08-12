@@ -8,6 +8,9 @@ using System.Web.OData.Properties;
 using System.Web.OData.TestCommon;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Annotations;
+using Microsoft.OData.Edm.Expressions;
+using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.TestCommon;
 using Moq;
 using BuilderTestModels = System.Web.OData.Builder.TestModels;
@@ -177,6 +180,38 @@ namespace System.Web.OData.Builder
             IEdmStructuralProperty property =
                 type.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
             Assert.Equal(EdmConcurrencyMode.Fixed, property.ConcurrencyMode);
+        }
+
+        [Fact]
+        public void GetEdmModel_PropertyWithETag_IsConcurrencyToken_HasVocabularyAnnotation()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
+            customer.HasKey(c => c.Id);
+            customer.Property(c => c.Id);
+            customer.Property(c => c.Name).IsConcurrencyToken();
+            builder.EntitySet<Customer>("Customers");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            var customers = model.FindDeclaredEntitySet("Customers");
+            Assert.NotNull(customers);
+
+            var annotations = model.FindVocabularyAnnotations<IEdmValueAnnotation>(customers, CoreVocabularyModel.ConcurrencyTerm);
+            IEdmValueAnnotation concurrencyAnnotation = Assert.Single(annotations);
+
+            IEdmCollectionExpression properties = concurrencyAnnotation.Value as IEdmCollectionExpression;
+            Assert.NotNull(properties);
+
+            Assert.Equal(1, properties.Elements.Count());
+            var element = properties.Elements.First() as IEdmPathExpression;
+            Assert.NotNull(element);
+
+            string path = Assert.Single(element.Path);
+            Assert.Equal("Name", path);
         }
 
         [Fact]

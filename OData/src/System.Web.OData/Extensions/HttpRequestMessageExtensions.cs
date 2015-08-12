@@ -133,11 +133,12 @@ namespace System.Web.OData.Extensions
 
                 // get property names from request
                 ODataPath odataPath = request.ODataProperties().Path;
-                IEdmEntityType type = odataPath.EdmType as IEdmEntityType;
-                if (type != null)
+                IEdmModel model = request.ODataProperties().Model;
+                IEdmEntitySet entitySet = odataPath.NavigationSource as IEdmEntitySet;
+                if (model != null && entitySet != null)
                 {
                     IList<string> concurrencyPropertyNames =
-                        type.GetConcurrencyProperties().OrderBy(c => c.Name).Select(c => c.Name).AsList();
+                        model.GetConcurrencyProperties(entitySet).OrderBy(c => c.Name).Select(c => c.Name).AsList();
                     ETag etag = new ETag();
 
                     if (parsedETagValues.Count != concurrencyPropertyNames.Count)

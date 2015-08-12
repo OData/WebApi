@@ -45,6 +45,9 @@ namespace System.Web.OData.Builder
             // Build the navigation source map
             IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(builder, edmTypeMap, navigationSources);
 
+            // Add the core vocabulary annotations
+            model.AddCoreVocabularyAnnotations(entitySets, edmMap);
+
             // Add the capabilities vocabulary annotations
             model.AddCapabilitiesVocabularyAnnotations(entitySets, edmMap);
 
@@ -468,6 +471,63 @@ namespace System.Web.OData.Builder
                 IEdmProperty edmProperty = edmPropertyRestriction.Key;
                 QueryableRestrictions restrictions = edmPropertyRestriction.Value;
                 model.SetAnnotationValue(edmProperty, new QueryableRestrictionsAnnotation(restrictions));
+            }
+        }
+
+        private static void AddCoreVocabularyAnnotations(this EdmModel model, NavigationSourceAndAnnotations[] entitySets, EdmTypeMap edmTypeMap)
+        {
+            Contract.Assert(model != null);
+            Contract.Assert(edmTypeMap != null);
+
+            if (entitySets == null)
+            {
+                return;
+            }
+
+            foreach (NavigationSourceAndAnnotations source in entitySets)
+            {
+                IEdmEntitySet entitySet = source.NavigationSource as IEdmEntitySet;
+                if (entitySet == null)
+                {
+                    continue;
+                }
+
+                EntitySetConfiguration entitySetConfig = source.Configuration as EntitySetConfiguration;
+                if (entitySetConfig == null)
+                {
+                    continue;
+                }
+
+                model.AddOptimisticConcurrencyAnnotation(entitySet, entitySetConfig, edmTypeMap);
+            }
+        }
+
+        private static void AddOptimisticConcurrencyAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<StructuralPropertyConfiguration> concurrencyPropertyies =
+                entityTypeConfig.Properties.OfType<StructuralPropertyConfiguration>().Where(property => property.ConcurrencyToken);
+
+            IList<IEdmStructuralProperty> edmProperties = new List<IEdmStructuralProperty>();
+
+            foreach (StructuralPropertyConfiguration property in concurrencyPropertyies)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    var item = value as IEdmStructuralProperty;
+                    if (item != null)
+                    {
+                        edmProperties.Add(item);
+                    }
+                }
+            }
+
+            if (edmProperties.Any())
+            {
+                model.SetOptimisticConcurrencyAnnotation(target, edmProperties);
             }
         }
 

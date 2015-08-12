@@ -269,9 +269,10 @@ namespace System.Net.Http
 
             Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
             mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.Customer);
-            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns((IEdmNavigationSource)null);
+            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns((IEdmNavigationSource)model.Customers);
             ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
             request.ODataProperties().Path = odataPath;
+            request.ODataProperties().Model = model.Model;
 
             // Act
             ETag result = request.GetETag(etagHeaderValue);
@@ -296,9 +297,10 @@ namespace System.Net.Http
 
             Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
             mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.Customer);
-            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns((IEdmNavigationSource)null);
+            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns((IEdmNavigationSource)model.Customers);
             ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
             request.ODataProperties().Path = odataPath;
+            request.ODataProperties().Model = model.Model;
 
             // Act
             ETag<Customer> result = request.GetETag<Customer>(etagHeaderValue);

@@ -83,13 +83,16 @@ namespace System.Web.OData.Query
             customer.HasKey(c => c.Id);
             customer.Property(c => c.Id);
             customer.Property(c => c.Name).IsConcurrencyToken();
+            builder.EntitySet<Customer>("Customers");
             IEdmModel model = builder.GetEdmModel();
 
+            var customers = model.FindDeclaredEntitySet("Customers");
             Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
             mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.GetEdmType(typeof(Customer)));
-            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns((IEdmNavigationSource)null);
+            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns((IEdmNavigationSource)customers);
             ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
             request.ODataProperties().Path = odataPath;
+            request.ODataProperties().Model = model;
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));
 
             // Act

@@ -9,7 +9,10 @@ using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Formatter;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Annotations;
+using Microsoft.OData.Edm.Expressions;
 using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 
@@ -210,6 +213,36 @@ namespace System.Web.OData.Builder
             Assert.NotNull(requiredColor);
             Assert.True(requiredColor.Type.IsNullable);
             Assert.Equal(EdmConcurrencyMode.Fixed, requiredColor.ConcurrencyMode);
+        }
+
+        [Fact]
+        public void EnumPropertyWithConcurrencyToken_SetsVocabuaryAnnotaion()
+        {
+            // Arrange
+            var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>().Add_Color_EnumType();
+            var entityTypeConfiguration = builder.EntityType<EntityTypeWithEnumTypePropertyTestModel>();
+            entityTypeConfiguration.EnumProperty(c => c.RequiredColor).IsOptional().IsConcurrencyToken();
+            builder.EntitySet<EntityTypeWithEnumTypePropertyTestModel>("EnumEntities");
+
+            // Act
+            var model = builder.GetEdmModel();
+
+            // Assert
+            var entityset = model.FindDeclaredEntitySet("EnumEntities");
+            Assert.NotNull(entityset);
+
+            var annotations = model.FindVocabularyAnnotations<IEdmValueAnnotation>(entityset, CoreVocabularyModel.ConcurrencyTerm);
+            IEdmValueAnnotation concurrencyAnnotation = Assert.Single(annotations);
+
+            IEdmCollectionExpression properties = concurrencyAnnotation.Value as IEdmCollectionExpression;
+            Assert.NotNull(properties);
+
+            Assert.Equal(1, properties.Elements.Count());
+            var element = properties.Elements.First() as IEdmPathExpression;
+            Assert.NotNull(element);
+
+            string path = Assert.Single(element.Path);
+            Assert.Equal("RequiredColor", path);
         }
 
         [Fact]

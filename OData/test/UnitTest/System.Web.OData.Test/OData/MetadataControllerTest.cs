@@ -757,6 +757,40 @@ namespace System.Web.OData.Builder
             Assert.Contains(expectMetadata, payload);
         }
 
+        [Fact]
+        public void DollarMetadata_Works_WithConcurrencyVocabuaryAnnotation()
+        {
+            // Arrange
+            const string expectMetadata =
+                "        <EntitySet Name=\"Customers\" EntityType=\"System.Web.OData.Formatter.CustomerWithConcurrencyAttribute\">\r\n" +
+                "          <Annotation Term=\"Org.OData.Core.V1.OptimisticConcurrency\">\r\n" +
+                "            <Collection>\r\n" +
+                "              <PropertyPath>Name</PropertyPath>\r\n" +
+                "              <PropertyPath>Birthday</PropertyPath>\r\n" +
+                "            </Collection>\r\n" +
+                "          </Annotation>\r\n" +
+                "        </EntitySet>";
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<CustomerWithConcurrencyAttribute>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(model);
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var response = client.GetAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+
+            string payload = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains(expectMetadata, payload);
+        }
+
         private static void AssertHasEntitySet(HttpClient client, string uri, string entitySetName)
         {
             var response = client.GetAsync(uri).Result;

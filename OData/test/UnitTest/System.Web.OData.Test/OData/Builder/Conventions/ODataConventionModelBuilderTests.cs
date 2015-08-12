@@ -15,7 +15,10 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Query;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Annotations;
+using Microsoft.OData.Edm.Expressions;
 using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -349,7 +352,7 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
-        public void ModelBuilder_ProductsWithConcurrentcyCheckAttribute()
+        public void ModelBuilder_ProductsWithConcurrencyCheckAttribute()
         {
             // Arrange
             var modelBuilder = new ODataConventionModelBuilder();
@@ -374,6 +377,36 @@ namespace System.Web.OData.Builder.Conventions
         }
 
         [Fact]
+        public void ModelBuilder_ProductsWithConcurrencyCheckAttribute_HasVocabuaryAnnotation()
+        {
+            // Arrange
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<ProductWithETagAttribute>("Products");
+
+            // Act
+            var model = modelBuilder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(model.SchemaElements.OfType<IEdmSchemaType>().Count(), 1);
+
+            var entitySet = model.FindDeclaredEntitySet("Products");
+            Assert.NotNull(entitySet);
+
+            var annotations = model.FindVocabularyAnnotations<IEdmValueAnnotation>(entitySet, CoreVocabularyModel.ConcurrencyTerm);
+            IEdmValueAnnotation concurrencyAnnotation = Assert.Single(annotations);
+
+            IEdmCollectionExpression properties = concurrencyAnnotation.Value as IEdmCollectionExpression;
+            Assert.NotNull(properties);
+
+            Assert.Equal(1, properties.Elements.Count());
+            var element = properties.Elements.First() as IEdmPathExpression;
+            Assert.NotNull(element);
+
+            string path = Assert.Single(element.Path);
+            Assert.Equal("Name", path);
+        }
+
+        [Fact]
         public void ModelBuilder_ProductWithTimestampAttribute()
         {
             // Arrange
@@ -389,6 +422,36 @@ namespace System.Web.OData.Builder.Conventions
             IEdmStructuralProperty nameProperty =
                 product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
             Assert.Equal(EdmConcurrencyMode.Fixed, nameProperty.ConcurrencyMode);
+        }
+
+        [Fact]
+        public void ModelBuilder_ProductWithTimestampAttribute_HasVocabuaryAnnotation()
+        {
+            // Arrange
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<ProductWithTimestampAttribute>("Products");
+
+            // Act
+            var model = modelBuilder.GetEdmModel();
+
+            // Assert
+            Assert.Equal(model.SchemaElements.OfType<IEdmSchemaType>().Count(), 1);
+
+            var entitySet = model.FindDeclaredEntitySet("Products");
+            Assert.NotNull(entitySet);
+
+            var annotations = model.FindVocabularyAnnotations<IEdmValueAnnotation>(entitySet, CoreVocabularyModel.ConcurrencyTerm);
+            IEdmValueAnnotation concurrencyAnnotation = Assert.Single(annotations);
+
+            IEdmCollectionExpression properties = concurrencyAnnotation.Value as IEdmCollectionExpression;
+            Assert.NotNull(properties);
+
+            Assert.Equal(1, properties.Elements.Count());
+            var element = properties.Elements.First() as IEdmPathExpression;
+            Assert.NotNull(element);
+
+            string path = Assert.Single(element.Path);
+            Assert.Equal("Name", path);
         }
 
         [Theory]

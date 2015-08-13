@@ -605,7 +605,7 @@ namespace Microsoft.AspNet.OData.Builder
 
             foreach (IEdmEntityType entity in model.SchemaElementsAcrossModels().OfType<IEdmEntityType>())
             {
-                if (!entity.IsAbstract && !entity.Key().Any())
+                if (!entity.IsAbstract && !entity.Key().Any() && entity.DeclaredProperties.Any())
                 {
                     throw Error.InvalidOperation(SRResources.EntityTypeDoesntHaveKeyDefined, entity.Name);
                 }

@@ -43,13 +43,36 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     controllerName = entitySetSegment.EntitySet.Name;
                 }
 
+                var operationImportSegment = odataPath.FirstSegment as OperationImportSegment;
+                if (operationImportSegment != null)
+                {
+                    controllerName = operationImportSegment.EntitySet.Name;
+                    var edmOperationImport = operationImportSegment.OperationImports.FirstOrDefault();
+                    if (edmOperationImport != null)
+                    {
+                        routeTemplate = edmOperationImport.Name;
+                        methodName = edmOperationImport.Name;
+                    }
+
+                    foreach (var operationSegmentParameter in operationImportSegment.Parameters)
+                    {
+                        var keyName = operationSegmentParameter.Name;
+                        var keyValue =
+                            ((Microsoft.OData.Core.UriParser.Semantic.ConstantNode)operationSegmentParameter.Value)
+                                .Value;
+
+                        var newKey = new KeyValuePair<string, object>(keyName, keyValue);
+                        keys.Add(newKey);
+                    }
+                }
+
                 var keySegment = odataPath.FirstOrDefault(s => s is KeySegment) as KeySegment;
                 if (keySegment != null)
                 {
                     keys.AddRange(keySegment.Keys);
                 }
 
-                if (keys.Count == 1)
+                if (keys.Count == 1 && operationImportSegment == null)
                 {
                     routeTemplate = "{id}";
                 }
@@ -78,7 +101,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             {
                 routeTemplate = controllerName + "/" + routeTemplate;
             }
-            
+
             var services = routeContext.HttpContext.ApplicationServices;
             var provider = services.GetRequiredService<IActionDescriptorsCollectionProvider>();
 
@@ -125,18 +148,6 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 break;
             }
 
-            //if (actionDescriptor == null)
-            //{
-            //    actionDescriptor = provider.ActionDescriptors.Items.SingleOrDefault(d =>
-            //    {
-            //        var c = d as ControllerActionDescriptor;
-            //        return c != null && c.ControllerName == controllerName &&
-            //            (controllerName == "Metadata" ||
-            //                ((HttpMethodConstraint)c.ActionConstraints.First()).HttpMethods.Contains(methodName) &&
-            //                 c.AttributeRouteInfo.Template.EndsWith(routeTemplate));
-            //    });
-            //}
-
             if (actionDescriptor == null)
             {
                 throw new NotSupportedException(string.Format("No action match template '{0}' in '{1}Controller'", routeTemplate, controllerName));
@@ -144,7 +155,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
             if (keys.Any())
             {
-                WriteRouteData(routeContext, actionDescriptor.Parameters, keys);
+                this.WriteRouteData(routeContext, actionDescriptor.Parameters, keys);
             }
 
             return actionDescriptor;

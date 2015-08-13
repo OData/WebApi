@@ -51,7 +51,7 @@ namespace System.Web.OData.TestCommon
             IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance.GetPrimitive(
                 EdmPrimitiveTypeKind.String,
                 isNullable: true);
-            customer.AddStructuralProperty(
+            var city = customer.AddStructuralProperty(
                 "City",
                 primitiveTypeReference,
                 defaultValue: null,
@@ -119,6 +119,9 @@ namespace System.Web.OData.TestCommon
             EdmSingleton vipCustomer = container.AddSingleton("VipCustomer", customer);
             EdmSingleton mary = container.AddSingleton("Mary", customer);
             EdmSingleton rootOrder = container.AddSingleton("RootOrder", order);
+
+            // annotations
+            model.SetOptimisticConcurrencyAnnotation(customers, new[] { city });
 
             // containment
             IEdmContainedEntitySet orderLines = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderLinesNavProp);

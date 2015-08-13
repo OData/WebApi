@@ -286,8 +286,18 @@ namespace System.Web.OData.Formatter.Serialization
                     throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
                 }
 
-                IEnumerable<IEdmStructuralProperty> concurrencyProperties =
-                    entityInstanceContext.EntityType.GetConcurrencyProperties().OrderBy(c => c.Name);
+                IEdmModel model = entityInstanceContext.EdmModel;
+                IEdmEntitySet entitySet = entityInstanceContext.NavigationSource as IEdmEntitySet;
+
+                IEnumerable<IEdmStructuralProperty> concurrencyProperties;
+                if (model != null && entitySet != null)
+                {
+                    concurrencyProperties = model.GetConcurrencyProperties(entitySet).OrderBy(c => c.Name);
+                }
+                else
+                {
+                    concurrencyProperties = Enumerable.Empty<IEdmStructuralProperty>();
+                }
 
                 IDictionary<string, object> properties = new Dictionary<string, object>();
                 foreach (IEdmStructuralProperty etagProperty in concurrencyProperties)

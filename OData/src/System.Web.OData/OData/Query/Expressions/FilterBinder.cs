@@ -247,9 +247,9 @@ namespace System.Web.OData.Query.Expressions
             if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
                 var dynamicDictIsNotNull = Expression.NotEqual(propertyAccessExpression, Expression.Constant(null));
-                var dynamicDictExitsAndIsNotNull = Expression.AndAlso(dynamicDictIsNotNull, containsKeyExpression);
+                var dynamicDictIsNotNullAndContainsKey = Expression.AndAlso(dynamicDictIsNotNull, containsKeyExpression);
                 return Expression.Condition(
-                    dynamicDictExitsAndIsNotNull,
+                    dynamicDictIsNotNullAndContainsKey,
                     readDictionaryIndexerExpression,
                     nullExpression);
             }

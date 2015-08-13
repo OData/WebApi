@@ -6,7 +6,7 @@ using System.Web.Http;
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
     /// <summary>
-    /// Configures classes that have the <see cref="AutoExpandAttribute"/> to specify all navigathion properties are auto expanded.
+    /// Configures classes that have the <see cref="AutoExpandAttribute"/> to specify all navigation properties are auto expanded.
     /// </summary>
     internal class AutoExpandAttributeEdmTypeConvention : AttributeEdmTypeConvention<StructuralTypeConfiguration>
     {

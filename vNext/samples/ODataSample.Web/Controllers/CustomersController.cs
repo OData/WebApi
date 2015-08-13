@@ -37,6 +37,19 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(customer);
         }
 
+        // GET api/Customers/5
+        [HttpGet("FindCustomersWithProduct(ProductId={productId})")]
+        public IActionResult FindCustomersWithProduct(int productId)
+        {
+            var customer = _sampleContext.FindCustomersWithProduct(productId);
+            if (customer == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(customer);
+        }
+
         [HttpGet("{id}/FirstName")]
         public IActionResult GetFirstName(int customerId)
         {

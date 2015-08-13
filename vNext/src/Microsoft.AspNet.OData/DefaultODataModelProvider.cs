@@ -7,6 +7,8 @@ using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData
 {
+    using System.Linq;
+
     internal class DefaultODataModelProvider
     {
         public static IEdmModel BuildEdmModel(Type ApiContextType)
@@ -30,21 +32,27 @@ namespace Microsoft.AspNet.OData
                 {
                     var entityClrType = TypeHelper.GetImplementedIEnumerableType(method.ReturnType) ?? method.ReturnType;
                     ProcedureConfiguration configuration;
+                    var functionAttribute =
+                        method.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ODataFunctionAttribute));
 
-                    if (entityClrType.Name != "Void")
+                    if (functionAttribute != null)
                     {
-                        var returnType = builder.AddEntityType(entityClrType);
                         configuration = builder.Function(method.Name);
-                        configuration.ReturnType = returnType;
                     }
                     else
                     {
                         configuration = builder.Action(method.Name);
                     }
 
+                    var entityType = builder.AddEntityType(entityClrType);
+                    configuration.ReturnType = entityType;
+                    configuration.IsComposable = true;
+                    configuration.NavigationSource =
+                        builder.NavigationSources.FirstOrDefault(n => n.EntityType == entityType) as NavigationSourceConfiguration;
+
                     foreach (var parameterInfo in method.GetParameters())
                     {
-                        var parameterType = builder.AddEntityType(parameterInfo.ParameterType);
+                        var parameterType = builder.GetTypeConfigurationOrNull(parameterInfo.ParameterType);
                         configuration.AddParameter(parameterInfo.Name, parameterType);
                     }
                 }

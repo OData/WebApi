@@ -31,6 +31,12 @@ namespace ODataSample.Web.Models
         public IEnumerable<Product> Products => _products;
 
         public IEnumerable<Customer> Customers => _customers;
+
+        public IEnumerable<Customer> FindCustomersWithProduct(int productId)
+        {
+            return _customers.Where(c => c.Products.FirstOrDefault(p => p.ProductId == productId) != null);
+        }
+
         #endregion
 
         #region Products business logic
@@ -47,7 +53,7 @@ namespace ODataSample.Web.Models
             {
                 return existingProduct;
             }
-            
+
             _products.Add(product);
             return product;
         }

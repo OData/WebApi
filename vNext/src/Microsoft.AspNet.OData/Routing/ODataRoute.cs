@@ -42,7 +42,16 @@ namespace Microsoft.AspNet.OData.Routing
             
             context.HttpContext.ODataProperties().Model = _model;
             var parser = new ODataUriParser(_model, uri);
-            var path = parser.ParsePath();
+            Microsoft.OData.Core.UriParser.Semantic.ODataPath path;
+            try
+            {
+                path = parser.ParsePath();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            //var path = parser.ParsePath();
             context.HttpContext.ODataProperties().NewPath = path;
             context.HttpContext.ODataProperties().Path =
                 context.HttpContext.ODataPathHandler().Parse(_model, "http://service-root/", remaining.ToString());

@@ -67,6 +67,8 @@ namespace System.Web.OData
             if (typeReference != null)
             {
                 EntityInstanceContext context = CreateInstanceContext(typeReference, value);
+                context.EdmModel = model;
+                context.NavigationSource = path.NavigationSource;
                 IETagHandler etagHandler = configuration.GetETagHandler();
                 EntityTagHeaderValue etag = CreateETag(context, etagHandler);
 
@@ -105,8 +107,18 @@ namespace System.Web.OData
             EntityInstanceContext entityInstanceContext,
             IETagHandler handler)
         {
-            IEnumerable<IEdmStructuralProperty> concurrencyProperties =
-                entityInstanceContext.EntityType.GetConcurrencyProperties().OrderBy(c => c.Name);
+            IEdmModel model = entityInstanceContext.EdmModel;
+            IEdmEntitySet entitySet = entityInstanceContext.NavigationSource as IEdmEntitySet;
+
+            IEnumerable<IEdmStructuralProperty> concurrencyProperties;
+            if (model != null && entitySet != null)
+            {
+                concurrencyProperties = model.GetConcurrencyProperties(entitySet).OrderBy(c => c.Name);
+            }
+            else
+            {
+                concurrencyProperties = Enumerable.Empty<IEdmStructuralProperty>();
+            }
 
             IDictionary<string, object> properties = new Dictionary<string, object>();
             foreach (IEdmStructuralProperty etagProperty in concurrencyProperties)

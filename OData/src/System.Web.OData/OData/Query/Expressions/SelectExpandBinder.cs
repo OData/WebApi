@@ -297,7 +297,9 @@ namespace System.Web.OData.Query.Expressions
             {
                 Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand = GetPropertiesToExpandInQuery(selectExpandClause);
                 ISet<IEdmStructuralProperty> autoSelectedProperties;
-                ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, out autoSelectedProperties);
+
+                IEdmEntitySet entityset = _context.NavigationSource as IEdmEntitySet;
+                ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, entityset, _model, out autoSelectedProperties);
                 bool isSelectingOpenTypeSegments = GetSelectsOpenTypeSegments(selectExpandClause, entityType);
 
                 if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0)
@@ -569,7 +571,7 @@ namespace System.Web.OData.Query.Expressions
         }
 
         private static ISet<IEdmStructuralProperty> GetPropertiesToIncludeInQuery(
-            SelectExpandClause selectExpandClause, IEdmEntityType entityType, out ISet<IEdmStructuralProperty> autoSelectedProperties)
+            SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet, IEdmModel model, out ISet<IEdmStructuralProperty> autoSelectedProperties)
         {
             autoSelectedProperties = new HashSet<IEdmStructuralProperty>();
             HashSet<IEdmStructuralProperty> propertiesToInclude = new HashSet<IEdmStructuralProperty>();
@@ -598,12 +600,15 @@ namespace System.Web.OData.Query.Expressions
                 }
 
                 // add concurrency properties, if not added
-                IEnumerable<IEdmStructuralProperty> concurrencyProperties = entityType.GetConcurrencyProperties();
-                foreach (IEdmStructuralProperty concurrencyProperty in concurrencyProperties)
+                if (entitySet != null && model != null)
                 {
-                    if (!propertiesToInclude.Contains(concurrencyProperty))
+                    IEnumerable<IEdmStructuralProperty> concurrencyProperties = model.GetConcurrencyProperties(entitySet);
+                    foreach (IEdmStructuralProperty concurrencyProperty in concurrencyProperties)
                     {
-                        autoSelectedProperties.Add(concurrencyProperty);
+                        if (!propertiesToInclude.Contains(concurrencyProperty))
+                        {
+                            autoSelectedProperties.Add(concurrencyProperty);
+                        }
                     }
                 }
             }

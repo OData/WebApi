@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Linq;
 using System.Diagnostics.Contracts;
@@ -413,10 +414,17 @@ namespace System.Web.OData.Formatter
             return String.Format(CultureInfo.InvariantCulture, "{0}.{1}", clrType.Namespace, clrType.EdmName());
         }
 
+        private static ConcurrentDictionary<IEdmEntitySet, IEnumerable<IEdmStructuralProperty>> _concurrencyProperties;
         public static IEnumerable<IEdmStructuralProperty> GetConcurrencyProperties(this IEdmModel model, IEdmEntitySet entitySet)
         {
             Contract.Assert(model != null);
             Contract.Assert(entitySet != null);
+
+            IEnumerable<IEdmStructuralProperty> cachedProperties;
+            if (_concurrencyProperties != null && _concurrencyProperties.TryGetValue(entitySet, out cachedProperties))
+            {
+                return cachedProperties;
+            }
 
             IList<IEdmStructuralProperty> results = new List<IEdmStructuralProperty>();
             IEdmEntityType entityType = entitySet.EntityType();
@@ -446,6 +454,12 @@ namespace System.Web.OData.Formatter
                 }
             }
 
+            if (_concurrencyProperties == null)
+            {
+                _concurrencyProperties = new ConcurrentDictionary<IEdmEntitySet, IEnumerable<IEdmStructuralProperty>>();
+            }
+
+            _concurrencyProperties[entitySet] = results;
             return results;
         }
 

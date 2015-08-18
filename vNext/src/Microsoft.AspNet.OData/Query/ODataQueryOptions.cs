@@ -48,9 +48,6 @@ namespace Microsoft.AspNet.OData.Query
                 context.NavigationSource,
                 queryOptionDict);
 
-            // Support for $expand
-            request.ODataProperties().SelectExpandClause = this._queryOptionParser.ParseSelectAndExpand();
-
             BuildQueryOptions(queryOptionDict);
         }
 
@@ -128,6 +125,8 @@ namespace Microsoft.AspNet.OData.Query
                         break;
                     case "$expand":
                         RawValues.Expand = kvp.Value;
+                        // Support for $expand
+                        Request.ODataProperties().SelectExpandClause = _queryOptionParser.ParseSelectAndExpand();
                         break;
                     case "$format":
                         RawValues.Format = kvp.Value;

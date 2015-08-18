@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Microsoft.AspNet.OData.Builder;
 
 namespace ODataSample.Web.Models
 {
-    using Microsoft.AspNet.OData.Builder;
-    using Microsoft.OData.Edm.Library;
-
     public interface ISampleService
     {
         IEnumerable<Product> Products { get; }

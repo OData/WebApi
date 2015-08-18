@@ -415,6 +415,7 @@ namespace System.Web.OData.Formatter
         }
 
         private static ConcurrentDictionary<IEdmEntitySet, IEnumerable<IEdmStructuralProperty>> _concurrencyProperties;
+
         public static IEnumerable<IEdmStructuralProperty> GetConcurrencyProperties(this IEdmModel model, IEdmEntitySet entitySet)
         {
             Contract.Assert(model != null);

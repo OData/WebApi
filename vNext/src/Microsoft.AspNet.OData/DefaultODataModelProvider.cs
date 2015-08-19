@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.OData
                 if (!method.IsSpecialName)
                 {
                     var entityClrType = TypeHelper.GetImplementedIEnumerableType(method.ReturnType) ?? method.ReturnType;
-                    ProcedureConfiguration configuration;
+                    ProcedureConfiguration configuration = null;
                     var functionAttribute =
                         method.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ODataFunctionAttribute));
 
@@ -39,21 +39,27 @@ namespace Microsoft.AspNet.OData
                     {
                         configuration = builder.Function(method.Name);
                     }
-                    else
+
+                    var actionAttribute =
+                        method.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ODataActionAttribute));
+                    if (actionAttribute != null)
                     {
                         configuration = builder.Action(method.Name);
                     }
 
                     var entityType = builder.AddEntityType(entityClrType);
-                    configuration.ReturnType = entityType;
-                    configuration.IsComposable = true;
-                    configuration.NavigationSource =
-                        builder.NavigationSources.FirstOrDefault(n => n.EntityType == entityType) as NavigationSourceConfiguration;
-
-                    foreach (var parameterInfo in method.GetParameters())
+                    if (configuration != null)
                     {
-                        var parameterType = builder.GetTypeConfigurationOrNull(parameterInfo.ParameterType);
-                        configuration.AddParameter(parameterInfo.Name, parameterType);
+                        configuration.ReturnType = entityType;
+                        configuration.IsComposable = true;
+                        configuration.NavigationSource =
+                            builder.NavigationSources.FirstOrDefault(n => n.EntityType == entityType) as NavigationSourceConfiguration;
+
+                        foreach (var parameterInfo in method.GetParameters())
+                        {
+                            var parameterType = builder.AddEntityType(parameterInfo.ParameterType);
+                            configuration.AddParameter(parameterInfo.Name, parameterType);
+                        }
                     }
                 }
             }

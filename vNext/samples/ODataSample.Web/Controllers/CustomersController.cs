@@ -37,7 +37,7 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(customer);
         }
 
-        // GET api/Customers/5
+        // GET api//FindCustomersWithProduct(productId=1)
         [HttpGet("FindCustomersWithProduct(ProductId={productId})")]
         public IActionResult FindCustomersWithProduct(int productId)
         {

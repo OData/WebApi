@@ -71,6 +71,8 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         public FilterQueryOption Filter { get; private set; }
 
+        public SelectExpandQueryOption SelectExpand { get; private set; }
+
         /// <summary>
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>
@@ -83,11 +85,16 @@ namespace Microsoft.AspNet.OData.Query
             {
                 throw Error.ArgumentNull("query");
             }
-            
+
             // Construct the actual query and apply them in the following order: filter
             if (Filter != null)
             {
                 query = Filter.ApplyTo(query, querySettings, _assemblyProvider);
+            }
+
+            if (SelectExpand != null)
+            {
+                query = SelectExpand.ApplyTo(query, querySettings, _assemblyProvider);
             }
 
             return query;
@@ -125,8 +132,9 @@ namespace Microsoft.AspNet.OData.Query
                         break;
                     case "$expand":
                         RawValues.Expand = kvp.Value;
-                        // Support for $expand
+                        // TODO Parse the select statement if any
                         Request.ODataProperties().SelectExpandClause = _queryOptionParser.ParseSelectAndExpand();
+                        SelectExpand = new SelectExpandQueryOption(string.Empty, kvp.Value, Context, _queryOptionParser, Request);
                         break;
                     case "$format":
                         RawValues.Format = kvp.Value;

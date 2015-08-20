@@ -7,6 +7,8 @@ using Microsoft.AspNet.OData.Query;
 
 namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
 {
+
+
     internal class NotFilterableAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PropertyConfiguration>
     {
         public NotFilterableAttributeEdmPropertyConvention()

@@ -1,16 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.AspNet.OData.Builder;
 
 namespace Microsoft.AspNet.OData
 {
+    using Microsoft.AspNet.OData.Builder;
+
     /// <summary>
     /// Represents a queryable restriction on an EDM property, including not filterable, not sortable,
-    /// not navigable, not expandable, not countable.
+    /// not navigable, not expandable, not countable, automatically expand.
     /// </summary>
     public class QueryableRestrictions
     {
+        private bool _autoExpand;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryableRestrictions"/> class.
         /// </summary>
@@ -29,6 +32,7 @@ namespace Microsoft.AspNet.OData
             NotNavigable = propertyConfiguration.NotNavigable;
             NotExpandable = propertyConfiguration.NotExpandable;
             NotCountable = propertyConfiguration.NotCountable;
+            _autoExpand = propertyConfiguration.AutoExpand;
         }
 
         /// <summary>
@@ -73,5 +77,14 @@ namespace Microsoft.AspNet.OData
         /// Gets or sets whether the property is not countable. default is false.
         /// </summary>
         public bool NotCountable { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the property is automatically expanded. default is false.
+        /// </summary>
+        public bool AutoExpand 
+        {
+            get { return !NotExpandable && _autoExpand; }
+            set { _autoExpand = value; }
+        }
     }
 }

@@ -3,6 +3,8 @@ using System.Linq;
 
 namespace ODataSample.Web.Models
 {
+    using System;
+
     public class SampleContext : ISampleService
     {
         #region In-memory data
@@ -35,6 +37,47 @@ namespace ODataSample.Web.Models
         public IEnumerable<Customer> FindCustomersWithProduct(int productId)
         {
             return _customers.Where(c => c.Products.FirstOrDefault(p => p.ProductId == productId) != null);
+        }
+
+        public Customer AddCustomerProduct(int customerId, int productId)
+        {
+            var customer = _customers.SingleOrDefault(p => p.CustomerId == customerId);
+            var product = _products.SingleOrDefault(p => p.ProductId == productId);
+
+            if (product == null)
+            {
+                throw new ArgumentNullException(nameof(product));
+            }
+
+            if (customer != null)
+            {
+                customer.Products.Add(product);
+            }
+
+            return customer;
+        }
+
+
+        public Customer AddCustomerProducts(int customerId, IEnumerable<int> productIds)
+        {
+            var customer = _customers.SingleOrDefault(p => p.CustomerId == customerId);
+            if (customer == null)
+            {
+                throw new ArgumentNullException(nameof(customer));
+            }
+
+            foreach (var productId in productIds)
+            {
+                var product = _products.SingleOrDefault(p => p.ProductId == productId);
+
+                if (product == null)
+                {
+                    throw new ArgumentNullException(nameof(product));
+                }
+                customer.Products.Add(product);
+            }
+
+            return customer;
         }
 
         #endregion
@@ -114,6 +157,7 @@ namespace ODataSample.Web.Models
                 return false;
             }
 
+            customer.Products = _customers[index].Products;
             _customers[index] = customer;
             return true;
         }

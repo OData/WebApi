@@ -11,6 +11,8 @@ using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData
 {
+    using Microsoft.AspNet.OData.Formatter;
+
     /// <summary>
     /// Represents an <see cref="IEdmStructuredObject"/> with no backing CLR <see cref="Type"/>.
     /// </summary>

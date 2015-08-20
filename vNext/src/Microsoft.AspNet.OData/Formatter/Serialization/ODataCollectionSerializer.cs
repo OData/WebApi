@@ -12,8 +12,10 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Formatter.Serialization
+namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
+    using System;
+
     /// <summary>
     /// ODataSerializer for serializing collection of Entities or Complex types or primitives.
     /// </summary>
@@ -163,7 +165,8 @@ namespace System.Web.OData.Formatter.Serialization
             // string typeName = _edmCollectionType.FullName();
             // But ODataLib currently doesn't support .FullName() for collections. As a workaround, we construct the
             // collection type name the hard way.
-            string typeName = "Collection(" + elementType.FullName() + ")";
+            // Work around for primitive type arrays
+            string typeName = "Collection(" + elementType.FullName().Replace("System","Edm") + ")";
 
             // ODataCollectionValue is only a V3 property, arrays inside Complex Types or Entity types are only supported in V3
             // if a V1 or V2 Client requests a type that has a collection within it ODataLib will throw.

@@ -10,7 +10,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Microsoft.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNet.OData
 {
     using Microsoft.AspNet.OData.Formatter;
 

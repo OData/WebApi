@@ -32,22 +32,33 @@ namespace Microsoft.AspNet.OData
                 {
                     var entityClrType = TypeHelper.GetImplementedIEnumerableType(method.ReturnType) ?? method.ReturnType;
                     ProcedureConfiguration configuration = null;
-                    var functionAttribute =
-                        method.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ODataFunctionAttribute));
+
+                    var entityType = builder.AddEntityType(entityClrType);
+
+                    var functionAttribute = method.GetCustomAttribute<ODataFunctionAttribute>();
+                        //method.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ODataFunctionAttribute));
 
                     if (functionAttribute != null)
                     {
                         configuration = builder.Function(method.Name);
+                        if (functionAttribute.IsBound)
+                        {
+                            configuration.SetBindingParameterImplementation(functionAttribute.BindingName, entityType);
+                        }
                     }
 
-                    var actionAttribute =
-                        method.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ODataActionAttribute));
+                    var actionAttribute = method.GetCustomAttribute<ODataActionAttribute>();
+                    //method.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ODataActionAttribute));
                     if (actionAttribute != null)
                     {
                         configuration = builder.Action(method.Name);
+                        if (actionAttribute.IsBound)
+                        {
+                            configuration.SetBindingParameterImplementation(actionAttribute.BindingName, entityType);
+                        }
                     }
 
-                    var entityType = builder.AddEntityType(entityClrType);
+                    
                     if (configuration != null)
                     {
                         configuration.ReturnType = entityType;
@@ -57,8 +68,16 @@ namespace Microsoft.AspNet.OData
 
                         foreach (var parameterInfo in method.GetParameters())
                         {
-                            var parameterType = builder.AddEntityType(parameterInfo.ParameterType);
-                            configuration.AddParameter(parameterInfo.Name, parameterType);
+                            if (parameterInfo.ParameterType.GetTypeInfo().IsPrimitive)
+                            {
+                                var primitiveType = builder.AddPrimitiveType(parameterInfo.ParameterType);
+                                configuration.AddParameter(parameterInfo.Name, primitiveType);
+                            }
+                            else
+                            {
+                                var parameterType = builder.AddEntityType(parameterInfo.ParameterType);
+                                configuration.AddParameter(parameterInfo.Name, parameterType);
+                            }
                         }
                     }
                 }

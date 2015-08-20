@@ -12,5 +12,7 @@ namespace Microsoft.AspNet.OData.Builder
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class ODataFunctionAttribute : Attribute
     {
+        public bool IsBound { get; set; }
+        public string BindingName { get; set; }
     }
 }

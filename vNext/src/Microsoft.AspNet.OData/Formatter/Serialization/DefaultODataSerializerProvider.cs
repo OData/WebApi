@@ -1,19 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Web.Http;
-using System.Web.OData.Formatter.Serialization;
-using Microsoft.AspNet.Http;
-using Microsoft.OData.Core;
-using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
-
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using System.Web.Http;
+
+    using Microsoft.AspNet.Http;
+    using Microsoft.AspNet.OData.Common;
+    using Microsoft.AspNet.OData.Extensions;
+    using Microsoft.OData.Core;
+    using Microsoft.OData.Edm;
+
     /// <summary>
     /// The default <see cref="ODataSerializerProvider"/>.
     /// </summary>

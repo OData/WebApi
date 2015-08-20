@@ -14,6 +14,8 @@ using Microsoft.OData.Edm.Library.Values;
 
 namespace Microsoft.AspNet.OData.Builder
 {
+    using Microsoft.AspNet.OData.Formatter;
+
     /// <summary>
     /// <see cref="EdmTypeBuilder"/> builds <see cref="IEdmType"/>'s from <see cref="StructuralTypeConfiguration"/>'s.
     /// </summary>
@@ -230,15 +232,24 @@ namespace Microsoft.AspNet.OData.Builder
                 if (edmType != null)
                 {
                     IEdmComplexType elementType = edmType as IEdmComplexType;
-                    Contract.Assert(elementType != null);
-                    elementTypeReference = new EdmComplexTypeReference(elementType, collectionProperty.OptionalProperty);
+                    // Work around for primitive types (ex: Int32 would be typed to System.Int32 instead of EdmInt)
+                    if (elementType != null)
+                    {
+                        elementTypeReference = new EdmComplexTypeReference(elementType, collectionProperty.OptionalProperty);
+                    }
+                    else
+                    {
+                        elementTypeReference =
+                       EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(collectionProperty.ElementType);
+                    }
                 }
                 else
                 {
                     elementTypeReference =
                         EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(collectionProperty.ElementType);
-                    Contract.Assert(elementTypeReference != null);
                 }
+
+                Contract.Assert(elementTypeReference != null);
             }
 
             return type.AddStructuralProperty(

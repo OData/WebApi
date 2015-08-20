@@ -7,10 +7,11 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System;
 
-namespace Microsoft.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNet.OData
 {
+    using System;
+
     internal class ExpressionHelperMethods
     {
         private static MethodInfo _orderByMethod = GenericMethodOf(_ => Queryable.OrderBy<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));

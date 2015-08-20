@@ -12,6 +12,10 @@ using Microsoft.Framework.DependencyInjection;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
 {
+    using System.Text;
+
+    using Newtonsoft.Json;
+
     public class DefaultODataRoutingConvention : IODataRoutingConvention
     {
         private static readonly IDictionary<string, string> _actionNameMappings = new Dictionary<string, string>()
@@ -55,6 +59,27 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     }
 
                     foreach (var operationSegmentParameter in operationImportSegment.Parameters)
+                    {
+                        var keyName = operationSegmentParameter.Name;
+                        var keyValue =
+                            ((Microsoft.OData.Core.UriParser.Semantic.ConstantNode)operationSegmentParameter.Value)
+                                .Value;
+
+                        var newKey = new KeyValuePair<string, object>(keyName, keyValue);
+                        keys.Add(newKey);
+                    }
+                }
+                var operationSegment = odataPath.LastSegment as OperationSegment;
+                if (operationSegment != null)
+                {
+                    var edmOperationImport = operationSegment.Operations.FirstOrDefault();
+                    if (edmOperationImport != null)
+                    {
+                        routeTemplate = edmOperationImport.Name;
+                        methodName = edmOperationImport.Name;
+                    }
+
+                    foreach (var operationSegmentParameter in operationSegment.Parameters)
                     {
                         var keyName = operationSegmentParameter.Name;
                         var keyValue =

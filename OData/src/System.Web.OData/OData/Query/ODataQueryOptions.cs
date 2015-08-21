@@ -120,9 +120,15 @@ namespace System.Web.OData.Query
         public SelectExpandQueryOption SelectExpand { get; private set; }
 
         /// <summary>
+        /// Gets the <see cref="ApplyQueryOption"/>.
+        /// </summary>
+        public ApplyQueryOption Apply { get; private set; }
+
+        /// <summary>
         /// Gets the <see cref="FilterQueryOption"/>.
         /// </summary>
         public FilterQueryOption Filter { get; private set; }
+
 
         /// <summary>
         /// Gets the <see cref="OrderByQueryOption"/>.
@@ -604,6 +610,11 @@ namespace System.Web.OData.Query
                         ThrowIfEmpty(kvp.Value, "$filter");
                         RawValues.Filter = kvp.Value;
                         Filter = new FilterQueryOption(kvp.Value, Context, _queryOptionParser);
+                        break;
+                    case "$apply":
+                        ThrowIfEmpty(kvp.Value, "$apply");
+                        RawValues.Apply = kvp.Value;
+                        Apply = new ApplyQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
                     case "$orderby":
                         ThrowIfEmpty(kvp.Value, "$orderby");

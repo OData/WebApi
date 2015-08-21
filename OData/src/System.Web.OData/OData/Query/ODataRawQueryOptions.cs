@@ -14,6 +14,11 @@ namespace System.Web.OData.Query
         public string Filter { get; internal set; }
 
         /// <summary>
+        ///  Gets the raw $apply query value from the incoming request Uri if exists.
+        /// </summary>
+        public string Apply { get; internal set; }
+
+        /// <summary>
         ///  Gets the raw $orderby query value from the incoming request Uri if exists.
         /// </summary>
         public string OrderBy { get; internal set; }

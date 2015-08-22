@@ -102,7 +102,55 @@ namespace System.Web.OData.Query.Expressions
         {
             return ToDictionary(_mapperProvider);
         }
+        private bool IsStructuralOrComplex(IEdmProperty property)
+        {
+            bool result = false;
+            switch(property.PropertyKind)
+            {
+                case EdmPropertyKind.Structural:
+                    result = true;
+                    break;
+                case EdmPropertyKind.Navigation:
+                    {
+                        IEdmType propertyDefinition = property.Type.Definition;
+                        switch (propertyDefinition.TypeKind)
+                        {
+                            case EdmTypeKind.Collection:
+                                break;
+                            case EdmTypeKind.Entity:
+                                {
+                                    var edmEntityType = propertyDefinition as IEdmEntityType;
 
+                                    while(edmEntityType!=null)
+                                    {
+                                        if (edmEntityType.DeclaredKey != null)
+                                        {
+                                            break;
+                                        }
+
+                                        if (edmEntityType.BaseType == null)
+                                        {
+                                            result = true;//Complex Type
+                                            break;
+                                        }
+                                            
+                                        edmEntityType = edmEntityType.BaseType as IEdmEntityType;
+                                    }
+                                }
+                                break;
+                            case EdmTypeKind.Complex:
+                                result = true;
+                                break;
+                            default://Cannot be complex
+                                break;
+                        }
+                    }
+                    break;
+                case EdmPropertyKind.None:
+                    break;
+            }
+            return result;
+        }
         public IDictionary<string, object> ToDictionary(Func<IEdmModel, IEdmStructuredType, IPropertyMapper> mapperProvider)
         {
             if (mapperProvider == null)
@@ -128,18 +176,21 @@ namespace System.Web.OData.Query.Expressions
             // The user asked for all the structural properties on this instance.
             if (Instance != null)
             {
-                foreach (IEdmStructuralProperty property in type.StructuralProperties())
+                foreach (IEdmProperty property in type.Properties())
                 {
-                    object propertyValue;
-                    if (TryGetPropertyValue(property.Name, out propertyValue))
+                    if (IsStructuralOrComplex(property))
                     {
-                        string mappingName = mapper.MapProperty(property.Name);
-                        if (String.IsNullOrWhiteSpace(mappingName))
+                        object propertyValue;
+                        if (TryGetPropertyValue(property.Name, out propertyValue))
                         {
-                            throw Error.InvalidOperation(SRResources.InvalidPropertyMapping, property.Name);
-                        }
+                            string mappingName = mapper.MapProperty(property.Name);
+                            if (String.IsNullOrWhiteSpace(mappingName))
+                            {
+                                throw Error.InvalidOperation(SRResources.InvalidPropertyMapping, property.Name);
+                            }
 
-                        dictionary[mappingName] = propertyValue;
+                            dictionary[mappingName] = propertyValue;
+                        }
                     }
                 }
             }

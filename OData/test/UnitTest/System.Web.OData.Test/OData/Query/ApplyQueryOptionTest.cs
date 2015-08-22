@@ -19,11 +19,101 @@ using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
 using Address = System.Web.OData.Builder.TestModels.Address;
+using System.Web.OData.Query;
 
 namespace System.Web.OData.Test.OData.Query
 {
     public class ApplyQueryOptionTest
     {
+        // Legal apply queries usable against CustomerApplyTestData.
+        // Tuple is: apply, expected number
+        public static TheoryDataSet<string, int> CustomerTestApplies
+        {
+            get
+            {
+                return new TheoryDataSet<string, int>
+                {
+                    // Primitive properties
+                    { "aggregate(CustomerId with sum as CustomerId)", 10 },
+                };
+            }
+        }
 
+        // Test data used by CustomerTestApplies TheoryDataSet
+        public static List<Customer> CustomerApplyTestData
+        {
+            get
+            {
+                List<Customer> customerList = new List<Customer>();
+
+                Customer c = new Customer
+                {
+                    CustomerId = 1,
+                    Name = "Lowest",
+                    Address = new Address { City = "redmond" },
+                };
+                c.Orders = new List<Order>
+                {
+                    new Order { OrderId = 11, Customer = c },
+                    new Order { OrderId = 12, Customer = c },
+                };
+                customerList.Add(c);
+
+                c = new Customer
+                {
+                    CustomerId = 2,
+                    Name = "Highest",
+                    Address = new Address { City = "seattle" },
+                    Aliases = new List<string> { "alias2", "alias2" }
+                };
+                customerList.Add(c);
+
+                c = new Customer
+                {
+                    CustomerId = 3,
+                    Name = "Middle",
+                    Address = new Address { City = "hobart" },
+                    Aliases = new List<string> { "alias2", "alias34", "alias31" }
+                };
+                customerList.Add(c);
+
+                c = new Customer
+                {
+                    CustomerId = 4,
+                    Name = "NewLow",
+                    Aliases = new List<string> { "alias34", "alias4" }
+                };
+                customerList.Add(c);
+
+                return customerList;
+            }
+        }
+
+        [Theory]
+        [PropertyData("CustomerTestApplies")]
+        public void ApplyTo_Returns_Correct_Queryable(string filter, int customerIds)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer));
+            var applyOption = new ApplyQueryOption(filter, context);
+            IEnumerable<Customer> customers = CustomerApplyTestData;
+
+            // Act
+            IQueryable queryable = applyOption.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+
+            // Assert
+            Assert.NotNull(queryable);
+            IEnumerable<Customer> actualCustomers = Assert.IsAssignableFrom<IEnumerable<Customer>>(queryable);
+            //Assert.Equal(
+            //    customerIds,
+            //    actualCustomers.Select(customer => customer.CustomerId));
+        }
     }
 }

@@ -211,7 +211,8 @@ namespace System.Web.OData.Query
                  queryOptionName == "$select" ||
                  queryOptionName == "$format" ||
                  queryOptionName == "$skiptoken" ||
-                 queryOptionName == "$deltatoken";
+                 queryOptionName == "$deltatoken" ||
+                 queryOptionName == "$apply";
         }
 
         /// <summary>
@@ -291,6 +292,12 @@ namespace System.Web.OData.Query
             }
 
             IQueryable result = query;
+
+            // TODO: Pick proper order
+            if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
+            {
+                result = Apply.ApplyTo(result, querySettings, _assembliesResolver);
+            }
 
             // Construct the actual query and apply them in the following order: filter, orderby, skip, top
             if (IsAvailableODataQueryOption(Filter, AllowedQueryOptions.Filter))

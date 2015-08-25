@@ -11,4 +11,11 @@ namespace System.Web.OData
     public interface IEdmEntityObject : IEdmStructuredObject
     {
     }
+
+    /// <summary>
+    /// Represents an instance of an <see cref="IEdmEntityType"/>.
+    /// </summary>
+    public interface IEdmGeneratedObject : IEdmStructuredObject
+    {
+    }
 }

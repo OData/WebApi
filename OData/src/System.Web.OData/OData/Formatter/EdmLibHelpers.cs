@@ -138,6 +138,12 @@ namespace System.Web.OData.Formatter
                         {
                             elementClrType = entityType;
                         }
+                        else if (IsAggregationWrapper(elementClrType, out entityType))
+                        {
+                            //elementClrType = entityType;
+                            return new EdmCollectionType(Extension.GetDynamicEntityType().ToEdmTypeReference(true));
+
+                        }
 
                         IEdmType elementType = GetEdmType(edmModel, elementClrType, testCollections: false);
                         if (elementType != null)
@@ -489,6 +495,23 @@ namespace System.Web.OData.Formatter
             }
 
             return IsSelectExpandWrapper(type.BaseType, out entityType);
+        }
+
+        private static bool IsAggregationWrapper(Type type, out Type entityType)
+        {
+            if (type == null)
+            {
+                entityType = null;
+                return false;
+            }
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(AggregationWrapper<>))
+            {
+                entityType = type.GetGenericArguments()[0];
+                return true;
+            }
+
+            return IsAggregationWrapper(type.BaseType, out entityType);
         }
 
         private static Type ExtractGenericInterface(Type queryType, Type interfaceType)

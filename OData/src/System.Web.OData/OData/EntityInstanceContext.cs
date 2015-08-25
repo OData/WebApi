@@ -256,6 +256,12 @@ namespace System.Web.OData
             }
             else
             {
+                IEdmGeneratedObject edmGeneratedObject = entityInstance as IEdmGeneratedObject;
+                if (edmGeneratedObject != null)
+                {
+                    return new GeneratedEdmObject(edmGeneratedObject);
+                }
+
                 return new TypedEdmEntityObject(entityInstance, entityType, model);
             }
         }

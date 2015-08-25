@@ -293,7 +293,8 @@ namespace System.Web.OData.Query
 
             IQueryable result = query;
 
-            // TODO: Pick proper order
+            // First apply $apply
+            // Secrion 3.15 of the spec http://docs.oasis-open.org/odata/odata-data-aggregation-ext/v4.0/cs01/odata-data-aggregation-ext-v4.0-cs01.html#_Toc378326311
             if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
             {
                 result = Apply.ApplyTo(result, querySettings, _assembliesResolver);

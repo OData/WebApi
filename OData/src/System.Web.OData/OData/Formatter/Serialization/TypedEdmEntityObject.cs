@@ -21,4 +21,25 @@ namespace System.Web.OData.Formatter.Serialization
         {
         }
     }
+
+    internal class GeneratedEdmObject : IEdmEntityObject
+    {
+        private IEdmGeneratedObject _instance;
+
+        public GeneratedEdmObject(IEdmGeneratedObject instance)
+        {
+
+            this._instance = instance;
+        }
+
+        public IEdmTypeReference GetEdmType()
+        {
+            return this._instance.GetEdmType();
+        }
+
+        public bool TryGetPropertyValue(string propertyName, out object value)
+        {
+            return this._instance.TryGetPropertyValue(propertyName, out value);
+        }
+    }
 }

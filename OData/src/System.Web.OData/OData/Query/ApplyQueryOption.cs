@@ -4,6 +4,7 @@ using Microsoft.OData.Edm;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Properties;
+using System.Web.OData.Query.Expressions;
 
 namespace System.Web.OData.Query
 {
@@ -161,6 +163,7 @@ namespace System.Web.OData.Query
             ApplyClause applyClause = ApplyClause;
             Contract.Assert(applyClause != null);
 
+            // All following code is just PoC 
             // Ensure we have decided how to handle null propagation
             ODataQuerySettings updatedSettings = querySettings;
             if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
@@ -169,37 +172,49 @@ namespace System.Web.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
             }
 
+            // Hardcoded test support for aggregation sum.
+            // It must be properly implmeneted and moved to odata.net as a binder
+            if (applyClause.Transformations.Count != 1)
+            {
+                throw new NotImplementedException("Only one transformation is supported");
+            }
             var transformation = applyClause.Transformations.First().Item2 as ApplyAggregateClause;
+            if (transformation == null)
+            {
+                throw new NotImplementedException("Only aggregation transformation is supported");
+            }
 
-            //Expression filter = FilterBinder.Bind(filterClause, Context.ElementClrType, Context.Model, assembliesResolver, updatedSettings);
-            //query = ExpressionHelpers.Where(query, filter, Context.ElementClrType);
-            return query;
+            var propertyName = transformation.AggregatableProperty;
+            var aggProperty = ExpressionHelpers.GetPropertyAccessLambda(Context.ElementClrType, propertyName);
+
+            Type elementType = Context.ElementClrType;
+            ParameterExpression source = Expression.Parameter(elementType);
+
+            Type wrapperType = typeof(AggregationWrapper<>).MakeGenericType(elementType);
+            ParameterExpression accum = Expression.Parameter(wrapperType);
+            MethodInfo getPropMethod = wrapperType.GetMethod("GetProperty");
+
+            ConstructorInfo wrapperConstructor = wrapperType.GetConstructor(new Type[] { typeof(string), typeof(int) });
+
+            NewExpression init = Expression.New(wrapperConstructor, Expression.Constant(transformation.Alias), Expression.Constant(0));
+
+            var starter = wrapperConstructor.Invoke(new object[] { transformation.Alias, 0 });
+
+            var valuePropAccess = Expression.Property(source, propertyName);
+            var accumPropAccess = Expression.Call(accum, getPropMethod, Expression.Constant(transformation.Alias));
+
+
+            //step = { (Param_0, Param_1) => new AggregationWrapper`1("Alias", (Param_1.Amount + Param_0.GetProperty("Alias")))}
+            LambdaExpression step = Expression.Lambda(
+                    Expression.New(wrapperConstructor, Expression.Constant(transformation.Alias), Expression.Add(valuePropAccess, accumPropAccess)),
+                    accum,
+                    source);
+
+
+            var result = ExpressionHelpers.Aggregate(query, starter, step, Context.ElementClrType, wrapperType);
+
+            return result;
         }
-
-        //private IQueryable Bind(IQueryable queryable)
-        //{
-        //    Type elementType = Context.ElementClrType;
-
-        //    LambdaExpression projectionLambda = GetProjectionLambda();
-
-        //    MethodInfo selectMethod = ExpressionHelperMethods.QueryableSelectGeneric.MakeGenericMethod(elementType, projectionLambda.Body.Type);
-        //    return selectMethod.Invoke(null, new object[] { queryable, projectionLambda }) as IQueryable;
-        //}
-
-        //private LambdaExpression GetProjectionLambda()
-        //{
-        //    Type elementType = Context.ElementClrType;
-        //    ParameterExpression source = Expression.Parameter(elementType);
-
-        //    // expression looks like -> new Wrapper { Instance = source , Properties = "...", Container = new PropertyContainer { ... } }
-        //    Expression projectionExpression = ProjectElement(source, _selectExpandQuery.SelectExpandClause, _context.ElementType as IEdmEntityType);
-
-        //    // expression looks like -> source => new Wrapper { Instance = source .... }
-        //    LambdaExpression projectionLambdaExpression = Expression.Lambda(projectionExpression, source);
-
-        //    return projectionLambdaExpression;
-        //}
-
-
     }
+
 }

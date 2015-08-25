@@ -19,6 +19,8 @@ namespace System.Web.OData
         private static MethodInfo _enumerableThenByMethod = GenericMethodOf(_ => Enumerable.ThenBy<int, int>(default(IOrderedEnumerable<int>), default(Func<int, int>)));
         private static MethodInfo _thenByDescendingMethod = GenericMethodOf(_ => Queryable.ThenByDescending<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _countMethod = GenericMethodOf(_ => Queryable.LongCount<int>(default(IQueryable<int>)));
+        private static MethodInfo _sumMethod = GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
+        private static MethodInfo _aggregateMethod = GenericMethodOf(_ => Queryable.Aggregate<int, int>(default(IQueryable<int>), default(int),default(Expression<Func<int, int, int>>)));
         private static MethodInfo _skipMethod = GenericMethodOf(_ => Queryable.Skip<int>(default(IQueryable<int>), default(int)));
         private static MethodInfo _whereMethod = GenericMethodOf(_ => Queryable.Where<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
 
@@ -40,6 +42,8 @@ namespace System.Web.OData
         private static MethodInfo _enumerableTakeMethod = GenericMethodOf(_ => Enumerable.Take<int>(default(IEnumerable<int>), default(int)));
 
         private static MethodInfo _queryableAsQueryableMethod = GenericMethodOf(_ => Queryable.AsQueryable<int>(default(IEnumerable<int>)));
+
+        private static MethodInfo _toQueryableMethod = GenericMethodOf(_ => ExpressionHelperMethods.ToQueryable<int>(default(int)));
 
         public static MethodInfo QueryableOrderByGeneric
         {
@@ -74,6 +78,16 @@ namespace System.Web.OData
         public static MethodInfo QueryableCountGeneric
         {
             get { return _countMethod; }
+        }
+
+        public static MethodInfo QueryableSumGeneric
+        {
+            get { return _sumMethod; }
+        }
+
+        public static MethodInfo QueryableAggregateGeneric
+        {
+            get { return _aggregateMethod; }
         }
 
         public static MethodInfo QueryableTakeGeneric
@@ -149,6 +163,16 @@ namespace System.Web.OData
         public static MethodInfo QueryableAsQueryable
         {
             get { return _queryableAsQueryableMethod; }
+        }
+
+        public static MethodInfo EntityAsQueryable
+        {
+            get { return _toQueryableMethod; }
+        }
+
+        public static IQueryable ToQueryable<T>(T value)
+        {
+            return (new List<T> { value }).AsQueryable();
         }
 
         private static MethodInfo GenericMethodOf<TReturn>(Expression<Func<object, TReturn>> expression)

@@ -126,6 +126,7 @@
     <Compile Include="OData\Builder\DynamicPropertyDictionaryAnnotation.cs" />
     <Compile Include="OData\ETagMessageHandler.cs" />
     <Compile Include="OData\Formatter\ODataCountMediaTypeMapping.cs" />
+    <Compile Include="OData\Query\Expressions\AggregationWrapper.cs" />
     <Compile Include="OData\Query\ApplyQueryOption.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />

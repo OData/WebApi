@@ -27,14 +27,16 @@ namespace System.Web.OData.Test.OData.Query
     {
         // Legal apply queries usable against CustomerApplyTestData.
         // Tuple is: apply, expected number
-        public static TheoryDataSet<string, int> CustomerTestApplies
+        public static TheoryDataSet<string, Dictionary<string, object>> CustomerTestApplies
         {
             get
             {
-                return new TheoryDataSet<string, int>
+                return new TheoryDataSet<string, Dictionary<string, object>>
                 {
                     // Primitive properties
-                    { "aggregate(CustomerId with sum as CustomerId)", 10 },
+                    { "aggregate(CustomerId with sum as CustomerId)", new Dictionary<string, object> {
+                        { "CustomerId", 10}
+                    } },
                 };
             }
         }
@@ -91,7 +93,7 @@ namespace System.Web.OData.Test.OData.Query
 
         [Theory]
         [PropertyData("CustomerTestApplies")]
-        public void ApplyTo_Returns_Correct_Queryable(string filter, int customerIds)
+        public void ApplyTo_Returns_Correct_Queryable(string filter, Dictionary<string, object> aggregation)
         {
             // Arrange
             var model = new ODataModelBuilder()
@@ -111,9 +113,16 @@ namespace System.Web.OData.Test.OData.Query
             // Assert
             Assert.NotNull(queryable);
             IEnumerable<AggregationWrapper<Customer>> actualCustomers = Assert.IsAssignableFrom<IEnumerable<AggregationWrapper<Customer>>>(queryable);
-            //Assert.Equal(
-            //    customerIds,
-            //    actualCustomers.Select(customer => customer.CustomerId));
+
+            Assert.Equal(1, actualCustomers.Count());//, "Expected only one item in the result set");
+
+            var agg = actualCustomers.Single();
+
+            foreach(var key in aggregation.Keys)
+            {
+                Assert.Equal(aggregation[key], agg.GetProperty(key));
+            }
+         
         }
     }
 }

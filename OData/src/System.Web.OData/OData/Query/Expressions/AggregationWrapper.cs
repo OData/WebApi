@@ -27,11 +27,6 @@ namespace System.Web.OData.Query.Expressions
         }
 
         /// <summary>
-        /// An ID to uniquely identify the model in the <see cref="ModelContainer"/>.
-        /// </summary>
-        public string ModelID { get; private set; }
-
-        /// <summary>
         /// Gets Type.
         /// </summary>
         /// <returns></returns>
@@ -44,8 +39,6 @@ namespace System.Web.OData.Query.Expressions
             }
 
             return type.ToEdmTypeReference(true);
-            //Type elementType = GetElementType();
-            //return GetModel().GetEdmTypeReference(elementType);
         }
 
         /// <summary>
@@ -74,16 +67,6 @@ namespace System.Web.OData.Query.Expressions
         public int GetProperty(string propertyName)
         {
             return this._values[propertyName];
-        }
-
-        private Type GetElementType()
-        {
-            return typeof(TElement);
-        }
-
-        private IEdmModel GetModel()
-        {
-            return ModelContainer.GetModel(ModelID);
         }
     }
 }

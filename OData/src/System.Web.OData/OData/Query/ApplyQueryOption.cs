@@ -97,6 +97,7 @@ namespace System.Web.OData.Query
                 if (_applyClause == null)
                 {
                     _applyClause = _queryOptionParser.ParseApply();
+                    // TODO: After refactoring to QueryNodes re-thingk do we need that part.
                     //SingleValueNode filterExpression = _applyClause.Expression.Accept(
                     //    new ParameterAliasNodeTranslator(_queryOptionParser.ParameterAliasNodes)) as SingleValueNode;
                     //filterExpression = filterExpression ?? new ConstantNode(null);

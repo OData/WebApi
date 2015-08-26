@@ -114,7 +114,7 @@ namespace System.Web.OData.Test.OData.Query
             Assert.NotNull(queryable);
             IEnumerable<AggregationWrapper<Customer>> actualCustomers = Assert.IsAssignableFrom<IEnumerable<AggregationWrapper<Customer>>>(queryable);
 
-            Assert.Equal(1, actualCustomers.Count());//, "Expected only one item in the result set");
+            Assert.Equal(1, actualCustomers.Count());
 
             var agg = actualCustomers.Single();
 

@@ -110,7 +110,7 @@ namespace System.Web.OData.Test.OData.Query
 
             // Assert
             Assert.NotNull(queryable);
-            IEnumerable<Customer> actualCustomers = Assert.IsAssignableFrom<IEnumerable<Customer>>(queryable);
+            IEnumerable<AggregationWrapper<Customer>> actualCustomers = Assert.IsAssignableFrom<IEnumerable<AggregationWrapper<Customer>>>(queryable);
             //Assert.Equal(
             //    customerIds,
             //    actualCustomers.Select(customer => customer.CustomerId));

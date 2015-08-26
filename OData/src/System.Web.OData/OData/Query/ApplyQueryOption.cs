@@ -210,6 +210,7 @@ namespace System.Web.OData.Query
                     accum,
                     source);
 
+            
 
             var result = ExpressionHelpers.Aggregate(query, starter, step, Context.ElementClrType, wrapperType);
 

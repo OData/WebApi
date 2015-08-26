@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.OData.Query.Expressions;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
 
@@ -179,43 +180,16 @@ namespace System.Web.OData.Query
             {
                 throw new NotImplementedException("Only one transformation is supported");
             }
-            var transformation = applyClause.Transformations.First().Item2 as ApplyAggregateClause;
+
+            var transformation = applyClause.Transformations.First().Item2 as ApplyGroupbyClause;
             if (transformation == null)
             {
-                throw new NotImplementedException("Only aggregation transformation is supported");
+                throw new NotImplementedException("Only groupby transformation is supported");
             }
 
-            var propertyName = transformation.AggregatableProperty;
-            var aggProperty = ExpressionHelpers.GetPropertyAccessLambda(Context.ElementClrType, propertyName);
+            var binder = new AggregationBinder(querySettings, assembliesResolver, Context.ElementClrType, transformation);
 
-            Type elementType = Context.ElementClrType;
-            ParameterExpression source = Expression.Parameter(elementType);
-
-            Type wrapperType = typeof(AggregationWrapper<>).MakeGenericType(elementType);
-            ParameterExpression accum = Expression.Parameter(wrapperType);
-            MethodInfo getPropMethod = wrapperType.GetMethod("GetProperty");
-
-            ConstructorInfo wrapperConstructor = wrapperType.GetConstructor(new Type[] { typeof(string), typeof(int) });
-
-            NewExpression init = Expression.New(wrapperConstructor, Expression.Constant(transformation.Alias), Expression.Constant(0));
-
-            var starter = wrapperConstructor.Invoke(new object[] { transformation.Alias, 0 });
-
-            var valuePropAccess = Expression.Property(source, propertyName);
-            var accumPropAccess = Expression.Call(accum, getPropMethod, Expression.Constant(transformation.Alias));
-
-
-            //step = { (Param_0, Param_1) => new AggregationWrapper`1("Alias", (Param_1.Amount + Param_0.GetProperty("Alias")))}
-            LambdaExpression step = Expression.Lambda(
-                    Expression.New(wrapperConstructor, Expression.Constant(transformation.Alias), Expression.Add(valuePropAccess, accumPropAccess)),
-                    accum,
-                    source);
-
-            
-
-            var result = ExpressionHelpers.Aggregate(query, starter, step, Context.ElementClrType, wrapperType);
-
-            return result;
+            return binder.Bind(query);
         }
     }
 

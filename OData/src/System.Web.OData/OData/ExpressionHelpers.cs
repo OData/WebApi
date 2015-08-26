@@ -147,6 +147,29 @@ namespace System.Web.OData
             return orderedQuery;
         }
 
+        public static int Sum(IQueryable query, LambdaExpression sumLambda, Type type)
+        {
+            Type returnType = sumLambda.Body.Type;
+            MethodInfo sumMethod = ExpressionHelperMethods.QueryableSumGeneric.MakeGenericMethod(type);
+            var agg = sumMethod.Invoke(null, new object[] { query, sumLambda });
+
+            return (int)agg;
+        }
+
+        public static IQueryable GroupBy(IQueryable query, Expression expression, Type type, Type wrapperType)
+        {
+            MethodInfo groupByMethod = ExpressionHelperMethods.QueryableGroupByGeneric.MakeGenericMethod(type, wrapperType);
+            var grp = groupByMethod.Invoke(null, new object[] { query, expression }) as IQueryable;
+
+            return grp;
+        }
+
+        public static IQueryable Select(IQueryable query, LambdaExpression expression, Type type)
+        {
+            MethodInfo selectMethod = ExpressionHelperMethods.QueryableSelectGeneric.MakeGenericMethod(type, expression.Body.Type);
+            return selectMethod.Invoke(null, new object[] { query, expression  }) as IQueryable;
+        }
+
         public static IQueryable Aggregate(IQueryable query, object init, LambdaExpression sumLambda, Type type, Type wrapperType)
         {
             Type returnType = sumLambda.Body.Type;
@@ -157,7 +180,6 @@ namespace System.Web.OData
 
             return converterMethod.Invoke(null, new object[] { agg } ) as IQueryable;
         }
-
 
         public static IQueryable Where(IQueryable query, Expression where, Type type)
         {

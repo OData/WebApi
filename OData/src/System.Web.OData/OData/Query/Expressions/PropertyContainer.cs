@@ -151,7 +151,7 @@ namespace System.Web.OData.Query.Expressions
             return namedPropertyGenericType.MakeGenericType(elementType);
         }
 
-        private class NamedProperty<T> : PropertyContainer
+        internal class NamedProperty<T> : PropertyContainer
         {
             public string Name { get; set; }
 

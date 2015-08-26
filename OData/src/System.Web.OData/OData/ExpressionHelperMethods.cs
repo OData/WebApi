@@ -20,6 +20,7 @@ namespace System.Web.OData
         private static MethodInfo _thenByDescendingMethod = GenericMethodOf(_ => Queryable.ThenByDescending<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _countMethod = GenericMethodOf(_ => Queryable.LongCount<int>(default(IQueryable<int>)));
         private static MethodInfo _sumMethod = GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
+        private static MethodInfo _groupByMethod = GenericMethodOf(_ => Queryable.GroupBy<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _aggregateMethod = GenericMethodOf(_ => Queryable.Aggregate<int, int>(default(IQueryable<int>), default(int),default(Expression<Func<int, int, int>>)));
         private static MethodInfo _skipMethod = GenericMethodOf(_ => Queryable.Skip<int>(default(IQueryable<int>), default(int)));
         private static MethodInfo _whereMethod = GenericMethodOf(_ => Queryable.Where<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
@@ -83,6 +84,11 @@ namespace System.Web.OData
         public static MethodInfo QueryableSumGeneric
         {
             get { return _sumMethod; }
+        }
+
+        public static MethodInfo QueryableGroupByGeneric
+        {
+            get { return _groupByMethod; }
         }
 
         public static MethodInfo QueryableAggregateGeneric

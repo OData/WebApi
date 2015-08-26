@@ -505,7 +505,7 @@ namespace System.Web.OData.Formatter
                 return false;
             }
 
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(AggregationWrapper<>))
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(GroupingWrapper<>))
             {
                 entityType = type.GetGenericArguments()[0];
                 return true;

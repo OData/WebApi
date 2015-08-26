@@ -12,30 +12,38 @@ namespace System.Web.OData.Query.Expressions
     /// <summary>
     /// Represents a container class that contains properties that are either aggregared or grouped by using $apply.
     /// </summary>
-    public class AggregationWrapper<TElement> : IEdmGeneratedObject
+    internal class GroupingWrapper<TElement> : IEdmGeneratedObject
     {
-        private readonly Dictionary<string, int> _values = new Dictionary<string, int>();
+        private readonly Dictionary<string, int?> _values = new Dictionary<string, int?>();
+        protected static readonly IPropertyMapper DefaultPropertyMapper = new IdentityPropertyMapper();
+
 
         /// <summary>
-        /// Creates aggregation results for predefined property
+        /// Create aggregation result
         /// </summary>
-        /// <param name="alias"></param>
-        /// <param name="value"></param>
-        public AggregationWrapper( string alias, int value)
+        public GroupingWrapper()
         {
-            this._values.Add(alias, value);
+
         }
+
+        /// <summary>
+        /// Gets or sets the property container that contains the properties being expanded. 
+        /// </summary>
+        public virtual PropertyContainer GroupByContainer { get; set; }
 
         /// <summary>
         /// Gets Type.
         /// </summary>
         /// <returns></returns>
-        public IEdmTypeReference GetEdmType()
+        public virtual IEdmTypeReference GetEdmType()
         {
-            var type = new EdmEntityType(string.Empty, "AggregationWrapper", baseType: null ,isAbstract: false, isOpen: true);
-            foreach (var prop in this._values)
+            var type = new EdmEntityType(string.Empty, "GroupingWrapper", baseType: null, isAbstract: false, isOpen: true);
+            if (this.GroupByContainer != null)
             {
-                var structProp = type.AddStructuralProperty(prop.Key, EdmPrimitiveTypeKind.Int32);
+                foreach (var prop in this.GroupByContainer.ToDictionary(DefaultPropertyMapper))
+                {
+                    var structProp = type.AddStructuralProperty(prop.Key, EdmPrimitiveTypeKind.Int32);
+                }
             }
 
             return type.ToEdmTypeReference(true);
@@ -49,14 +57,7 @@ namespace System.Web.OData.Query.Expressions
         /// <returns></returns>
         public bool TryGetPropertyValue(string propertyName, out object value)
         {
-            int intValue;
-            if (this._values.TryGetValue(propertyName, out intValue))
-            {
-                value = intValue;
-                return true;
-            }
-            value = null;
-            return false;
+            return this.GroupByContainer.ToDictionary(DefaultPropertyMapper).TryGetValue(propertyName, out value);
         }
 
         /// <summary>
@@ -64,9 +65,43 @@ namespace System.Web.OData.Query.Expressions
         /// </summary>
         /// <param name="propertyName"></param>
         /// <returns></returns>
-        public int GetProperty(string propertyName)
+        public int? GetProperty(string propertyName)
         {
             return this._values[propertyName];
+        }
+    }
+
+    internal class AggregationWrapper<TElement> : GroupingWrapper<TElement>
+    {
+        /// <summary>
+        /// Gets or sets the property container that contains the properties being expanded. 
+        /// </summary>
+        public virtual PropertyContainer Container { get; set; }
+
+        /// <summary>
+        /// Gets Type.
+        /// </summary>
+        /// <returns></returns>
+        public override IEdmTypeReference GetEdmType()
+        {
+            var type = new EdmEntityType(string.Empty, "AggregationWrapper", baseType: null, isAbstract: false, isOpen: true);
+            if (this.GroupByContainer != null)
+            {
+                foreach (var prop in this.GroupByContainer.ToDictionary(DefaultPropertyMapper))
+                {
+                    var structProp = type.AddStructuralProperty(prop.Key, EdmPrimitiveTypeKind.Int32);
+                }
+            }
+
+            if (this.Container != null)
+            {
+                foreach (var prop in this.Container.ToDictionary(DefaultPropertyMapper))
+                {
+                    var structProp = type.AddStructuralProperty(prop.Key, EdmPrimitiveTypeKind.Int32);
+                }
+            }
+
+            return type.ToEdmTypeReference(true);
         }
     }
 }

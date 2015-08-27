@@ -27,16 +27,37 @@ namespace System.Web.OData.Test.OData.Query
     {
         // Legal apply queries usable against CustomerApplyTestData.
         // Tuple is: apply, expected number
-        public static TheoryDataSet<string, Dictionary<string, object>> CustomerTestApplies
+        public static TheoryDataSet<string, List<Dictionary<string, object>>> CustomerTestApplies
         {
             get
             {
-                return new TheoryDataSet<string, Dictionary<string, object>>
+                return new TheoryDataSet<string, List<Dictionary<string, object>>>
                 {
-                    // Primitive properties
-                    { "aggregate(CustomerId with sum as CustomerId)", new Dictionary<string, object> {
-                        { "CustomerId", 10}
-                    } },
+                    {
+                        "aggregate(CustomerId with sum as CustomerId)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", "10"} }
+                        }
+                    },
+                    {
+                        "groupby(Name,aggregate(CustomerId with sum as CustomerId))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "CustomerId", "5"} },
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "CustomerId", "2" } },
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "CustomerId", "3"} }
+                        }
+                    },
+                    {
+                        "groupby(Name)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"} },
+                            new Dictionary<string, object> { { "Name", "Highest"} },
+                            new Dictionary<string, object> { { "Name", "Middle"} }
+                        }
+                    },
                 };
             }
         }
@@ -82,7 +103,7 @@ namespace System.Web.OData.Test.OData.Query
                 c = new Customer
                 {
                     CustomerId = 4,
-                    Name = "NewLow",
+                    Name = "Lowest",
                     Aliases = new List<string> { "alias34", "alias4" }
                 };
                 customerList.Add(c);
@@ -93,7 +114,7 @@ namespace System.Web.OData.Test.OData.Query
 
         [Theory]
         [PropertyData("CustomerTestApplies")]
-        public void ApplyTo_Returns_Correct_Queryable(string filter, Dictionary<string, object> aggregation)
+        public void ApplyTo_Returns_Correct_Queryable(string filter, List<Dictionary<string, object>> aggregation)
         {
             // Arrange
             var model = new ODataModelBuilder()
@@ -110,19 +131,28 @@ namespace System.Web.OData.Test.OData.Query
             // Act
             IQueryable queryable = applyOption.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
 
+
             // Assert
             Assert.NotNull(queryable);
-            IEnumerable<GroupingWrapper<Customer>> actualCustomers = Assert.IsAssignableFrom<IEnumerable<GroupingWrapper<Customer>>>(queryable);
+            IList<GroupingWrapper<Customer>> actualCustomers = Assert.IsAssignableFrom<IEnumerable<GroupingWrapper<Customer>>>(queryable).ToList();
 
-            Assert.Equal(1, actualCustomers.Count());
+            Assert.Equal(aggregation.Count(), actualCustomers.Count());
 
-            var agg = actualCustomers.Single();
+            var aggEnum = actualCustomers.GetEnumerator();
 
-            foreach(var key in aggregation.Keys)
+            foreach (var expected in aggregation)
             {
-                Assert.Equal(aggregation[key], agg.GetProperty(key));
+                aggEnum.MoveNext();
+                var agg = aggEnum.Current;
+                foreach (var key in expected.Keys)
+                {
+                    object value;
+                    Assert.True(agg.TryGetPropertyValue(key, out value), "Property " + key + "not found");
+                    Assert.Equal(expected[key], value);
+                }
+
             }
-         
+
         }
     }
 }

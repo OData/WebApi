@@ -181,10 +181,10 @@ namespace System.Web.OData.Query
                 throw new NotImplementedException("Only one transformation is supported");
             }
 
-            var transformation = applyClause.Transformations.First().Item2 as ApplyGroupbyClause;
-            if (transformation == null)
+            var transformation = applyClause.Transformations.First().Item2;
+            if (!(transformation is ApplyGroupbyClause || transformation is ApplyAggregateClause))
             {
-                throw new NotImplementedException("Only groupby transformation is supported");
+                throw new NotImplementedException("Only groupby and aggregate transformations are supported");
             }
 
             var binder = new AggregationBinder(querySettings, assembliesResolver, Context.ElementClrType, transformation);

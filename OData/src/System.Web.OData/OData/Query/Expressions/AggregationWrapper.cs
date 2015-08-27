@@ -42,7 +42,7 @@ namespace System.Web.OData.Query.Expressions
             {
                 foreach (var prop in this.GroupByContainer.ToDictionary(DefaultPropertyMapper))
                 {
-                    var structProp = type.AddStructuralProperty(prop.Key, EdmPrimitiveTypeKind.Int32);
+                    var structProp = type.AddStructuralProperty(prop.Key, EdmPrimitiveTypeKind.String);
                 }
             }
 
@@ -57,19 +57,58 @@ namespace System.Web.OData.Query.Expressions
         /// <returns></returns>
         public virtual bool TryGetPropertyValue(string propertyName, out object value)
         {
-            return this.GroupByContainer.ToDictionary(DefaultPropertyMapper).TryGetValue(propertyName, out value);
+            if (this.GroupByContainer != null)
+            {
+                return this.GroupByContainer.ToDictionary(DefaultPropertyMapper).TryGetValue(propertyName, out value);
+            }
+            else
+            {
+                value = null;
+                return false;
+            }
         }
 
-        /// <summary>
-        /// Temp method to get property value
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
-        public int? GetProperty(string propertyName)
+        public override bool Equals(object obj)
         {
-            return this._values[propertyName];
+            var compareWith = obj as GroupingWrapper<TElement>;
+            if (compareWith == null)
+            {
+                return false;
+            }
+            else if (this.GroupByContainer == null && compareWith.GroupByContainer == null)
+            {
+                return true;
+            }
+            else if (this.GroupByContainer != null && compareWith.GroupByContainer != null)
+            {
+                var dictionary1 = this.GroupByContainer.ToDictionary(DefaultPropertyMapper);
+                var dictionary2 = compareWith.GroupByContainer.ToDictionary(DefaultPropertyMapper);
+                return dictionary1.Count() == dictionary2.Count() && !dictionary1.Except(dictionary2).Any();
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            if (this.GroupByContainer == null)
+            {
+                return 0;
+            }
+
+            long hash = 1870403278L ; //Arbitrary number from Anonymous Type GetHashCode implementation
+            var dictionary = this.GroupByContainer.ToDictionary(DefaultPropertyMapper);
+            foreach(var v in dictionary.Values)
+            {
+                hash = hash * -1521134295L + v.GetHashCode();
+            }
+
+            return (int)hash;
         }
     }
+
 
     internal class AggregationWrapper<TElement> : GroupingWrapper<TElement>
     {
@@ -89,7 +128,7 @@ namespace System.Web.OData.Query.Expressions
             {
                 foreach (var prop in this.GroupByContainer.ToDictionary(DefaultPropertyMapper))
                 {
-                    var structProp = type.AddStructuralProperty(prop.Key, EdmPrimitiveTypeKind.Int32);
+                    var structProp = type.AddStructuralProperty(prop.Key, EdmPrimitiveTypeKind.String);
                 }
             }
 
@@ -97,7 +136,7 @@ namespace System.Web.OData.Query.Expressions
             {
                 foreach (var prop in this.Container.ToDictionary(DefaultPropertyMapper))
                 {
-                    var structProp = type.AddStructuralProperty(prop.Key, EdmPrimitiveTypeKind.Int32);
+                    var structProp = type.AddStructuralProperty(prop.Key, EdmPrimitiveTypeKind.String);
                 }
             }
 
@@ -106,8 +145,18 @@ namespace System.Web.OData.Query.Expressions
 
         public override bool TryGetPropertyValue(string propertyName, out object value)
         {
-            return this.GroupByContainer.ToDictionary(DefaultPropertyMapper).TryGetValue(propertyName, out value)
-                || this.Container.ToDictionary(DefaultPropertyMapper).TryGetValue(propertyName, out value);
+            if (base.TryGetPropertyValue(propertyName, out value)
+                || this.Container.ToDictionary(DefaultPropertyMapper).TryGetValue(propertyName, out value))
+            {
+                // TODO: Refactor ApplyClause by OData team spec and infer type sduring parsing
+                if (value != null)
+                {
+                    value = value.ToString();
+                }
+                return true;
+            }
+
+            return false;
         }
 
     }

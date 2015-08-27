@@ -55,7 +55,7 @@ namespace System.Web.OData.Query.Expressions
         /// <param name="propertyName"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public bool TryGetPropertyValue(string propertyName, out object value)
+        public virtual bool TryGetPropertyValue(string propertyName, out object value)
         {
             return this.GroupByContainer.ToDictionary(DefaultPropertyMapper).TryGetValue(propertyName, out value);
         }
@@ -103,5 +103,12 @@ namespace System.Web.OData.Query.Expressions
 
             return type.ToEdmTypeReference(true);
         }
+
+        public override bool TryGetPropertyValue(string propertyName, out object value)
+        {
+            return this.GroupByContainer.ToDictionary(DefaultPropertyMapper).TryGetValue(propertyName, out value)
+                || this.Container.ToDictionary(DefaultPropertyMapper).TryGetValue(propertyName, out value);
+        }
+
     }
 }

@@ -49,6 +49,10 @@ namespace System.Web.OData.OData.Query.Expressions
                     aggregateClause = groupByClause.Aggregate;
                     grouped = true;
                 }
+                else
+                {
+                    throw new NotSupportedException(string.Format("Not supported transformation type {0}", this._transformation));
+                }
             }
 
             // Answer is query.GroupBy($it => new GroupByWrapper() {...}).Select(GroupBy($it => new AggregationWrapper() {...}))
@@ -118,7 +122,7 @@ namespace System.Web.OData.OData.Query.Expressions
             get
             {
                 // TODO: Add caching
-                return typeof(GroupingWrapper<>).MakeGenericType(this._elementType);
+                return typeof(GroupByWrapper<>).MakeGenericType(this._elementType);
             }
         }
 

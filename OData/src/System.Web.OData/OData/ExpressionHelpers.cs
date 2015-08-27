@@ -159,8 +159,6 @@ namespace System.Web.OData
         public static IQueryable GroupBy(IQueryable query, Expression expression, Type type, Type wrapperType)
         {
             MethodInfo groupByMethod = ExpressionHelperMethods.QueryableGroupByGeneric.MakeGenericMethod(type, wrapperType);
-            //var comparerType = typeof(GroupingComparer<>).MakeGenericType(type);
-            //var comparer = comparerType.GetConstructor(new Type[] { }).Invoke(new object[] { });
             var grp = groupByMethod.Invoke(null, new object[] { query, expression }) as IQueryable;
 
             return grp;

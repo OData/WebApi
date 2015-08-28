@@ -100,9 +100,10 @@ namespace System.Web.OData.OData.Query.Expressions
             {
                 var wrapperProperty = wrapperType2.GetProperty("Container");
                 var properties = new List<NamedPropertyExpression>();
-                var aggregationMethod = ExpressionHelperMethods.QueryableSumGeneric.MakeGenericMethod(this._elementType);
-                var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(this._elementType);
                 var propertyLambda = ExpressionHelpers.GetPropertyAccessLambda(this._elementType, aggregateClause.AggregatableProperty);
+                var aggregationMethod = ExpressionHelperMethods.QueryableSumGenerics[propertyLambda.Body.Type].MakeGenericMethod(this._elementType);
+                var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(this._elementType);
+                
                 Expression asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
                 Expression aggregationExpression = Expression.Call(null, aggregationMethod, asQuerableExpression, propertyLambda );
                 

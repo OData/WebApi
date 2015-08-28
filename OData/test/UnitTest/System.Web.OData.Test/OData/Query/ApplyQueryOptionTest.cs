@@ -41,6 +41,13 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
+                        "aggregate(SharePrice with sum as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", "12.5"} }
+                        }
+                    },
+                    {
                         "groupby(Name,aggregate(CustomerId with sum as CustomerId))",
                         new List<Dictionary<string, object>>
                         {
@@ -73,6 +80,7 @@ namespace System.Web.OData.Test.OData.Query
                 {
                     CustomerId = 1,
                     Name = "Lowest",
+                    SharePrice = 10,
                     Address = new Address { City = "redmond" },
                 };
                 c.Orders = new List<Order>
@@ -86,6 +94,7 @@ namespace System.Web.OData.Test.OData.Query
                 {
                     CustomerId = 2,
                     Name = "Highest",
+                    SharePrice = 2.5M,
                     Address = new Address { City = "seattle" },
                     Aliases = new List<string> { "alias2", "alias2" }
                 };

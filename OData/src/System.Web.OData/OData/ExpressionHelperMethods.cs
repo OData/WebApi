@@ -19,9 +19,8 @@ namespace System.Web.OData
         private static MethodInfo _enumerableThenByMethod = GenericMethodOf(_ => Enumerable.ThenBy<int, int>(default(IOrderedEnumerable<int>), default(Func<int, int>)));
         private static MethodInfo _thenByDescendingMethod = GenericMethodOf(_ => Queryable.ThenByDescending<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _countMethod = GenericMethodOf(_ => Queryable.LongCount<int>(default(IQueryable<int>)));
-        private static MethodInfo _sumMethod = GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _groupByMethod = GenericMethodOf(_ => Queryable.GroupBy<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
-        private static MethodInfo _aggregateMethod = GenericMethodOf(_ => Queryable.Aggregate<int, int>(default(IQueryable<int>), default(int),default(Expression<Func<int, int, int>>)));
+        private static MethodInfo _aggregateMethod = GenericMethodOf(_ => Queryable.Aggregate<int, int>(default(IQueryable<int>), default(int), default(Expression<Func<int, int, int>>)));
         private static MethodInfo _skipMethod = GenericMethodOf(_ => Queryable.Skip<int>(default(IQueryable<int>), default(int)));
         private static MethodInfo _whereMethod = GenericMethodOf(_ => Queryable.Where<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
 
@@ -46,6 +45,21 @@ namespace System.Web.OData
 
         private static MethodInfo _toQueryableMethod = GenericMethodOf(_ => ExpressionHelperMethods.ToQueryable<int>(default(int)));
 
+        // Sum to not have generic by property method so have to generate a table
+        // TODO: Think how to avoid hardcoding
+        private static Dictionary<Type, MethodInfo> _sumMethods = new Dictionary<Type, MethodInfo>
+        {
+            { typeof(int), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, int>>))) },
+            { typeof(int?), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, int?>>))) },
+            { typeof(long), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, long>>))) },
+            { typeof(long?), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, long?>>))) },
+            { typeof(decimal), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, decimal>>))) },
+            { typeof(decimal?), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, decimal?>>))) },
+            { typeof(float), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, float>>))) },
+            { typeof(float?), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, float?>>))) },
+            { typeof(double), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, double>>))) },
+            { typeof(double?), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, double?>>))) },
+        };
         public static MethodInfo QueryableOrderByGeneric
         {
             get { return _orderByMethod; }
@@ -81,9 +95,9 @@ namespace System.Web.OData
             get { return _countMethod; }
         }
 
-        public static MethodInfo QueryableSumGeneric
+        public static Dictionary<Type,MethodInfo> QueryableSumGenerics
         {
-            get { return _sumMethod; }
+            get { return _sumMethods; }
         }
 
         public static MethodInfo QueryableGroupByGeneric

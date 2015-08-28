@@ -147,15 +147,6 @@ namespace System.Web.OData
             return orderedQuery;
         }
 
-        public static int Sum(IQueryable query, LambdaExpression sumLambda, Type type)
-        {
-            Type returnType = sumLambda.Body.Type;
-            MethodInfo sumMethod = ExpressionHelperMethods.QueryableSumGeneric.MakeGenericMethod(type);
-            var agg = sumMethod.Invoke(null, new object[] { query, sumLambda });
-
-            return (int)agg;
-        }
-
         public static IQueryable GroupBy(IQueryable query, Expression expression, Type type, Type wrapperType)
         {
             MethodInfo groupByMethod = ExpressionHelperMethods.QueryableGroupByGeneric.MakeGenericMethod(type, wrapperType);

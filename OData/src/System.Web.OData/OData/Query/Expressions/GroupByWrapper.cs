@@ -12,7 +12,7 @@ using System.Web.OData.Query;
 namespace System.Web.OData.Query.Expressions
 {
     /// <summary>
-    /// Represents a container class that contains properties that are either grouped by using $apply.
+    /// Represents a container class that contains properties that are grouped by using $apply.
     /// </summary>
     internal class GroupByWrapper<TElement> : IEdmGeneratedObject
     {

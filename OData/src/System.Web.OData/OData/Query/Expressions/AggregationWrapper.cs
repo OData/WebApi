@@ -10,7 +10,7 @@ using System.Web.OData.Formatter;
 namespace System.Web.OData.Query.Expressions
 {
     /// <summary>
-    /// Represents a container class that contains properties that are either aggregated  using $apply.
+    /// Represents a container class that contains properties that are aggregated  using $apply.
     /// </summary>
     internal class AggregationWrapper<TElement> : GroupByWrapper<TElement>
     {

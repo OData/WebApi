@@ -56,7 +56,7 @@ namespace System.Web.OData.OData.Query.Expressions
             }
 
             // Answer is query.GroupBy($it => new GroupByWrapper() {...}).Select(GroupBy($it => new AggregationWrapper() {...}))
-            // We are doing Grouping even if onle aggregate was specified to have a IQuaryable after aggregation
+            // We are doing Grouping even if only aggregate was specified to have a IQuaryable after aggregation
             IQueryable grouping = BindGroupBy(query, selectedStatements);
 
             IQueryable result = BindSelect(grouping, aggregateClause, grouped);

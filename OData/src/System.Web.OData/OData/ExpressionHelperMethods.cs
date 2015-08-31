@@ -45,21 +45,8 @@ namespace System.Web.OData
 
         private static MethodInfo _toQueryableMethod = GenericMethodOf(_ => ExpressionHelperMethods.ToQueryable<int>(default(int)));
 
-        // Sum to not have generic by property method so have to generate a table
-        // TODO: Think how to avoid hardcoding
-        private static Dictionary<Type, MethodInfo> _sumMethods = new Dictionary<Type, MethodInfo>
-        {
-            { typeof(int), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, int>>))) },
-            { typeof(int?), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, int?>>))) },
-            { typeof(long), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, long>>))) },
-            { typeof(long?), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, long?>>))) },
-            { typeof(decimal), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, decimal>>))) },
-            { typeof(decimal?), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, decimal?>>))) },
-            { typeof(float), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, float>>))) },
-            { typeof(float?), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, float?>>))) },
-            { typeof(double), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, double>>))) },
-            { typeof(double?), GenericMethodOf(_ => Queryable.Sum<int>(default(IQueryable<int>), default(Expression<Func<int, double?>>))) },
-        };
+        private static Dictionary<Type, MethodInfo> _sumMethods = GenericAggreagtionMethods("Sum");
+
         public static MethodInfo QueryableOrderByGeneric
         {
             get { return _orderByMethod; }
@@ -209,6 +196,20 @@ namespace System.Web.OData
             Contract.Assert(lambdaExpression.Body.NodeType == ExpressionType.Call);
 
             return (lambdaExpression.Body as MethodCallExpression).Method.GetGenericMethodDefinition();
+        }
+
+        private static Dictionary<Type, MethodInfo> GenericAggreagtionMethods(string methodName)
+        {
+            //Sum to not have generic by property method return type so have to generate a table
+            var methods = typeof(Queryable).GetMethods()
+                .Where( m => m.Name == methodName);
+
+            // Looking for methods like
+            // Queryable.Sum<TSource>(default(IQueryable<TSource>), default(Expression<Func<TSource, int?>>)))
+            return (from m in methods
+                        let parameters = m.GetParameters()
+                        where parameters.Count() == 2
+                        select new { m.ReturnType, Method = m }).ToDictionary(kvp => kvp.ReturnType, kvp => kvp.Method);
         }
     }
 }

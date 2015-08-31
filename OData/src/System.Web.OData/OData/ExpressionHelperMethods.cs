@@ -45,7 +45,7 @@ namespace System.Web.OData
 
         private static MethodInfo _toQueryableMethod = GenericMethodOf(_ => ExpressionHelperMethods.ToQueryable<int>(default(int)));
 
-        private static Dictionary<Type, MethodInfo> _sumMethods = GenericAggreagtionMethods("Sum");
+        private static Dictionary<Type, MethodInfo> _sumMethods = GenericAggregationMethods("Sum");
 
         public static MethodInfo QueryableOrderByGeneric
         {
@@ -198,7 +198,7 @@ namespace System.Web.OData
             return (lambdaExpression.Body as MethodCallExpression).Method.GetGenericMethodDefinition();
         }
 
-        private static Dictionary<Type, MethodInfo> GenericAggreagtionMethods(string methodName)
+        private static Dictionary<Type, MethodInfo> GenericAggregationMethods(string methodName)
         {
             //Sum to not have generic by property method return type so have to generate a table
             var methods = typeof(Queryable).GetMethods()

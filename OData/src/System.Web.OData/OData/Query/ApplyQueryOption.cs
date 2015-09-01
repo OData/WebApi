@@ -174,12 +174,6 @@ namespace System.Web.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
             }
 
-            // Hardcoded test support for aggregation sum.
-            // It must be properly implmeneted and moved to odata.net as a binder
-            //if (applyClause.Transformations.Count != 1)
-            //{
-            //    throw new NotImplementedException("Only one transformation is supported");
-            //}
             var elementType = Context.ElementClrType;
             foreach (var tuple in applyClause.Transformations) {
                 // TODO: We have an issue with Expression generation for classes that not backed by ClrTypes

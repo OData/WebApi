@@ -1,4 +1,5 @@
-﻿using Microsoft.OData.Core.UriParser.Semantic;
+﻿using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -7,6 +8,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Query;
 using System.Web.OData.Query.Expressions;
@@ -101,7 +103,12 @@ namespace System.Web.OData.OData.Query.Expressions
                 var wrapperProperty = wrapperType2.GetProperty("Container");
                 var properties = new List<NamedPropertyExpression>();
                 var propertyLambda = ExpressionHelpers.GetPropertyAccessLambda(this._elementType, aggregateClause.AggregatableProperty);
-                var aggregationMethod = ExpressionHelperMethods.QueryableSumGenerics[propertyLambda.Body.Type].MakeGenericMethod(this._elementType);
+                MethodInfo aggregationMethod;
+                if (!ExpressionHelperMethods.QueryableSumGenerics.TryGetValue(propertyLambda.Body.Type, out aggregationMethod))
+                {
+                    throw new ODataException(Error.Format("Aggregation not supported for property {0} of {1} type", aggregateClause.AggregatableProperty, propertyLambda.Body.Type));
+                }
+                aggregationMethod = aggregationMethod.MakeGenericMethod(this._elementType);
                 var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(this._elementType);
                 
                 Expression asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);

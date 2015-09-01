@@ -65,6 +65,40 @@ namespace System.Web.OData.Test.OData.Query
                             new Dictionary<string, object> { { "Name", "Middle"} }
                         }
                     },
+                    {
+                        "filter(Name eq 'Lowest')/groupby(Name)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"} }
+                        }
+                    },
+                };
+            }
+        }
+
+        // Legal filter queries usable against CustomerFilterTestData.
+        // Tuple is: filter, expected list of customer ID's
+        public static TheoryDataSet<string, int[]> CustomerTestFilters
+        {
+            get
+            {
+                return new TheoryDataSet<string, int[]>
+                {
+                    // Primitive properties
+                    { "Name eq 'Highest'", new int[] { 2 } },
+                    { "endswith(Name, 'est')", new int[] { 1, 2, 4 } },
+
+                    // Complex properties
+                    { "Address/City eq 'redmond'", new int[] { 1 } },
+                    { "contains(Address/City, 'e')", new int[] { 1, 2 } },
+
+                    // Primitive property collections
+                    { "Aliases/any(alias: alias eq 'alias34')", new int[] { 3, 4 } },
+                    { "Aliases/any(alias: alias eq 'alias4')", new int[] { 4 } },
+                    { "Aliases/all(alias: alias eq 'alias2')", new int[] { 2 } },
+
+                    // Navigational properties
+                    { "Orders/any(order: order/OrderId eq 12)", new int[] { 1 } },
                 };
             }
         }
@@ -143,7 +177,7 @@ namespace System.Web.OData.Test.OData.Query
 
             // Assert
             Assert.NotNull(queryable);
-            IList<GroupByWrapper<Customer>> actualCustomers = Assert.IsAssignableFrom<IEnumerable<GroupByWrapper<Customer>>>(queryable).ToList();
+            var  actualCustomers = Assert.IsAssignableFrom<IEnumerable<GroupByWrapper<Customer>>>(queryable).ToList();
 
             Assert.Equal(aggregation.Count(), actualCustomers.Count());
 
@@ -161,7 +195,33 @@ namespace System.Web.OData.Test.OData.Query
                 }
 
             }
+        }
 
+        [Theory]
+        [PropertyData("CustomerTestFilters")]
+        public void ApplyTo_Returns_Correct_Queryable_ForFilter(string filter, int[] customerIds)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer));
+            var filterOption = new ApplyQueryOption(string.Format("filter({0})",filter), context);
+            IEnumerable<Customer> customers = CustomerApplyTestData;
+
+            // Act
+            IQueryable queryable = filterOption.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+
+            // Assert
+            Assert.NotNull(queryable);
+            IEnumerable<Customer> actualCustomers = Assert.IsAssignableFrom<IEnumerable<Customer>>(queryable);
+            Assert.Equal(
+                customerIds,
+                actualCustomers.Select(customer => customer.CustomerId));
         }
     }
 }

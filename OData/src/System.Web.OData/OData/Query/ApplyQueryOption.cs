@@ -176,20 +176,41 @@ namespace System.Web.OData.Query
 
             // Hardcoded test support for aggregation sum.
             // It must be properly implmeneted and moved to odata.net as a binder
-            if (applyClause.Transformations.Count != 1)
-            {
-                throw new NotImplementedException("Only one transformation is supported");
+            //if (applyClause.Transformations.Count != 1)
+            //{
+            //    throw new NotImplementedException("Only one transformation is supported");
+            //}
+            var elementType = Context.ElementClrType;
+            foreach (var tuple in applyClause.Transformations) {
+                // TODO: We have an issue with Expression generation for classes that not backed by ClrTypes
+                // It's honestly the biggest challenge to date with OData itself
+                // Aggreagtion wrapper doesn't show properties of that types as a result we are getting "Instance property not found exception"
+                // After we switch to OData design for Clauses we should implement that in proper way
+                // For now just throw exception if we have transformations after aggregation
+
+                if (elementType.IsGenericType && elementType.GetGenericTypeDefinition() == typeof(AggregationWrapper<>))
+                {
+                        throw new NotImplementedException("Transformations after aggregation or groupby not supported yet");
+                }
+
+                var transformation = tuple.Item2;
+                if (!(transformation is ApplyGroupbyClause || transformation is ApplyAggregateClause))
+                {
+                    var filterTransformation = transformation as ApplyFilterClause;
+                    Expression filter = FilterBinder.Bind(filterTransformation.Filter, elementType, Context.Model, assembliesResolver, updatedSettings);
+                    query = ExpressionHelpers.Where(query, filter, elementType);
+                }
+                else
+                {
+
+                    var binder = new AggregationBinder(querySettings, assembliesResolver, elementType, transformation);
+                    query =  binder.Bind(query);
+                    elementType = typeof(AggregationWrapper<>).MakeGenericType(elementType);
+                }
+                
             }
 
-            var transformation = applyClause.Transformations.First().Item2;
-            if (!(transformation is ApplyGroupbyClause || transformation is ApplyAggregateClause))
-            {
-                throw new NotImplementedException("Only groupby and aggregate transformations are supported");
-            }
-
-            var binder = new AggregationBinder(querySettings, assembliesResolver, Context.ElementClrType, transformation);
-
-            return binder.Bind(query);
+            return query;
         }
     }
 

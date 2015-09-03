@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 Version = ODataProperties.DefaultODataVersion,
             };
 
-            string metadataLink = urlHelper.CreateODataLink(new MetadataPathSegment());
+            string metadataLink = urlHelper.CreateODataLink(request, new MetadataPathSegment());
             if (metadataLink == null)
             {
                 throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
@@ -103,7 +103,8 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
                 SelectAndExpand = request.ODataProperties().SelectExpandClause,
-                Path = (path == null || IsOperationPath(path)) ? null : path.ODLPath,
+                Path = (path == null) ? null : path.ODLPath
+                //Path = (path == null || IsOperationPath(path)) ? null : path.ODLPath,
             };
             
             using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, model))
@@ -243,7 +244,7 @@ namespace Microsoft.AspNet.OData.Formatter
         {
             IUrlHelper urlHelper = request.HttpContext.UrlHelper();
 
-            string baseAddress = urlHelper.CreateODataLink();
+            string baseAddress = urlHelper.CreateODataLink(request);
             if (baseAddress == null)
             {
                 throw new SerializationException(SRResources.UnableToDetermineBaseUrl);

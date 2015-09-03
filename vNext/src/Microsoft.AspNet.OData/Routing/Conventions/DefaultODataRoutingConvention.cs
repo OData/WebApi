@@ -14,6 +14,8 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     using System.Text;
 
+    using Microsoft.OData.Core.UriParser.TreeNodeKinds;
+
     using Newtonsoft.Json;
 
     public class DefaultODataRoutingConvention : IODataRoutingConvention
@@ -61,14 +63,25 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     foreach (var operationSegmentParameter in operationImportSegment.Parameters)
                     {
                         var keyName = operationSegmentParameter.Name;
-                        var keyValue =
-                            ((Microsoft.OData.Core.UriParser.Semantic.ConstantNode)operationSegmentParameter.Value)
-                                .Value;
+                        var convertNode = operationSegmentParameter.Value as ConvertNode;
+                        var constantNode = operationSegmentParameter.Value as ConstantNode;
+                        object keyValue = null;
 
+                        if (constantNode != null)
+                        {
+                            keyValue = constantNode.Value;
+                        }
+
+                        if (convertNode != null)
+                        {
+                            keyValue = ((ConstantNode)convertNode.Source).Value;
+                        }
+                       
                         var newKey = new KeyValuePair<string, object>(keyName, keyValue);
                         keys.Add(newKey);
                     }
                 }
+
                 var operationSegment = odataPath.LastSegment as OperationSegment;
                 if (operationSegment != null)
                 {
@@ -115,6 +128,18 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 if (navigationPropertySegment != null)
                 {
                     routeTemplate += "/" + navigationPropertySegment.NavigationProperty.Name;
+                }
+
+                var navigationPropertyLinkSegment =
+                    odataPath.FirstOrDefault(s => s is NavigationPropertyLinkSegment) as NavigationPropertyLinkSegment;
+                if (navigationPropertyLinkSegment != null)
+                {
+                    routeTemplate += "/" + navigationPropertyLinkSegment.NavigationProperty.Name;
+                    methodName = "CreateRef";
+                    var navigationKey = new KeyValuePair<string, object>("navigationProperty", navigationPropertyLinkSegment.NavigationProperty.Name);
+                    keys.Add(navigationKey);
+                    //var navigationSourceKey = new KeyValuePair<string, object>("navigationSource", navigationPropertyLinkSegment.NavigationSource.Name);
+                    //keys.Add(navigationSourceKey);
                 }
             }
 

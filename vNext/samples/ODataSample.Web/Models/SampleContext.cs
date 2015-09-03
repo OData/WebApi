@@ -58,7 +58,7 @@ namespace ODataSample.Web.Models
         }
 
 
-        public Customer AddCustomerProducts(int customerId, IEnumerable<int> productIds)
+        public Customer AddCustomerProducts(int customerId, IEnumerable<int> products)
         {
             var customer = _customers.SingleOrDefault(p => p.CustomerId == customerId);
             if (customer == null)
@@ -66,7 +66,7 @@ namespace ODataSample.Web.Models
                 throw new ArgumentNullException(nameof(customer));
             }
 
-            foreach (var productId in productIds)
+            foreach (var productId in products)
             {
                 var product = _products.SingleOrDefault(p => p.ProductId == productId);
 

@@ -1,17 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.AspNet.OData.Builder;
+using System;
+using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData
 {
-    using System.Linq;
-
-    using Microsoft.AspNet.OData.Formatter;
-    using Microsoft.AspNet.OData.Formatter.Deserialization;
-
     internal class DefaultODataModelProvider
     {
         public static IEdmModel BuildEdmModel(Type ApiContextType)
@@ -70,6 +64,7 @@ namespace Microsoft.AspNet.OData
                         foreach (var parameterInfo in method.GetParameters())
                         {
                             if (parameterInfo.ParameterType.GetTypeInfo().IsPrimitive || parameterInfo.ParameterType == typeof(decimal)
+                                 || parameterInfo.ParameterType == typeof(string))
                             {
                                 var primitiveType = builder.AddPrimitiveType(parameterInfo.ParameterType);
                                 configuration.AddParameter(parameterInfo.Name, primitiveType);
@@ -91,16 +86,16 @@ namespace Microsoft.AspNet.OData
                                         var collectionTypeConfig = new CollectionTypeConfiguration(parameterType, parameterInfo.ParameterType.GenericTypeArguments[0]);
                                         configuration.AddParameter(parameterInfo.Name, collectionTypeConfig);
                                     }
-                            }
-                            else
-                            {
-                                var parameterType = builder.AddEntityType(parameterInfo.ParameterType);
-                                configuration.AddParameter(parameterInfo.Name, parameterType);
+                                }
+                                else
+                                {
+                                    var parameterType = builder.AddEntityType(parameterInfo.ParameterType);
+                                    configuration.AddParameter(parameterInfo.Name, parameterType);
+                                }
                             }
                         }
                     }
                 }
-            }
             }
 
             return builder.GetEdmModel();

@@ -6,14 +6,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData.Routing;
+using System.Diagnostics.Contracts;
+using Microsoft.AspNet.Http;
+using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
-    using System.Diagnostics.Contracts;
-
-    using Microsoft.AspNet.Http;
-    using Microsoft.AspNet.OData.Common;
-
     /// <summary>
     /// Provides extension methods for the <see cref="UrlHelper"/> class.
     /// </summary>
@@ -27,7 +25,6 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("urlHelper");
             }
 
-            //HttpRequestMessage request = urlHelper.Request;
             Contract.Assert(request != null);
 
             string routeName = request.ODataProperties().Path.PathTemplate;
@@ -36,9 +33,10 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.InvalidOperation(SRResources.RequestMustHaveODataRouteName);
             }
 
-            //IODataPathHandler pathHandler = request.ODataProperties().NewPath;
+            var routePrefix = request.ODataProperties().RoutePrefix;
+            
             //return CreateODataLink(urlHelper, routeName, pathHandler, segments);
-            return request.Scheme + "://" + request.Host + "/odata/";  //request.Path; //"http://service-root/";
+            return request.Scheme + "://" + request.Host + "/" + routePrefix + "/";  
         }
 
         /// <summary>

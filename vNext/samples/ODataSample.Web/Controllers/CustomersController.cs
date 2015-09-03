@@ -1,15 +1,9 @@
-﻿using Microsoft.AspNet.Mvc;
-using ODataSample.Web.Models;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNet.OData;
-
-namespace ODataSample.Web.Controllers
+﻿namespace ODataSample.Web.Controllers
 {
-    using System.Dynamic;
-
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
+    using System.Collections.Generic;
+    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNet.OData;
+    using ODataSample.Web.Models;
 
     [EnableQuery]
     [Route("odata/Customers")]
@@ -57,9 +51,9 @@ namespace ODataSample.Web.Controllers
 
         // PUT odata//FindCustomersWithProduct(productId=1)
         [HttpPut("{customerId}/AddCustomerProduct(ProductId={productId})")]
-        public IActionResult AddCustomerProduct(int customerId, [FromBody] Product productId)
+        public IActionResult AddCustomerProduct(int customerId, [FromBody] int productId)
         {
-            var customer = _sampleContext.AddCustomerProduct(customerId, productId.ProductId);
+            var customer = _sampleContext.AddCustomerProduct(customerId, productId);
             if (customer == null)
             {
                 return HttpNotFound();
@@ -70,7 +64,7 @@ namespace ODataSample.Web.Controllers
 
         // PUT odata//FindCustomersWithProduct(productId=1)
         [HttpPut("{customerId}/AddCustomerProducts(ProductId={productId})")]
-        public IActionResult AddCustomerProducts(int customerId, [FromBody] JObject products)
+        public IActionResult AddCustomerProducts(int customerId, [FromBody] List<int> products)
         {
             var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
@@ -78,7 +72,7 @@ namespace ODataSample.Web.Controllers
                 return HttpNotFound();
             }
 
-            foreach (var productId in products.Last.Children().Values<int>())
+            foreach (var productId in products)
             {
                 _sampleContext.AddCustomerProduct(customerId, productId);
             }

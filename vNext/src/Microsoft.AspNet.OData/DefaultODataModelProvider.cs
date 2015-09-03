@@ -1,17 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.AspNet.OData.Builder;
+using System;
+using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData
 {
-    using System.Linq;
-
-    using Microsoft.AspNet.OData.Formatter;
-    using Microsoft.AspNet.OData.Formatter.Deserialization;
-
     internal class DefaultODataModelProvider
     {
         public static IEdmModel BuildEdmModel(Type ApiContextType)
@@ -71,7 +65,8 @@ namespace Microsoft.AspNet.OData
 
                         foreach (var parameterInfo in method.GetParameters())
                         {
-                            if (parameterInfo.ParameterType.GetTypeInfo().IsPrimitive || parameterInfo.ParameterType == typeof(decimal)
+                            if (parameterInfo.ParameterType.GetTypeInfo().IsPrimitive
+                                || parameterInfo.ParameterType == typeof(decimal)
                                 || parameterInfo.ParameterType == typeof(string))
                             {
                                 var primitiveType = builder.AddPrimitiveType(parameterInfo.ParameterType);

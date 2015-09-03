@@ -41,18 +41,11 @@ namespace Microsoft.AspNet.OData.Routing
             uri = new Uri(remaining.ToString(), UriKind.Relative);
 
             context.HttpContext.ODataProperties().Model = _model;
+            context.HttpContext.ODataProperties().RoutePrefix = _routePrefix;
+
             var parser = new ODataUriParser(_model, uri);
-
-            try
-            {
-                var path = parser.ParsePath();
-                context.HttpContext.ODataProperties().NewPath = path;
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
+            var path = parser.ParsePath();
+            context.HttpContext.ODataProperties().NewPath = path;
             context.HttpContext.ODataProperties().Path =
                 context.HttpContext.ODataPathHandler().Parse(_model, "http://service-root/", remaining.ToString());
             context.HttpContext.ODataProperties().IsValidODataRequest = true;

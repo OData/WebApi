@@ -39,7 +39,6 @@ namespace Microsoft.AspNet.OData
                     var entityType = builder.AddEntityType(entityClrType);
 
                     var functionAttribute = method.GetCustomAttribute<ODataFunctionAttribute>();
-                    //method.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ODataFunctionAttribute));
 
                     if (functionAttribute != null)
                     {
@@ -61,7 +60,6 @@ namespace Microsoft.AspNet.OData
                         }
                     }
 
-
                     if (configuration != null)
                     {
                         configuration.ReturnType = entityType;
@@ -72,7 +70,6 @@ namespace Microsoft.AspNet.OData
                         foreach (var parameterInfo in method.GetParameters())
                         {
                             if (parameterInfo.ParameterType.GetTypeInfo().IsPrimitive || parameterInfo.ParameterType == typeof(decimal)
-                                || parameterInfo.ParameterType == typeof(string))
                             {
                                 var primitiveType = builder.AddPrimitiveType(parameterInfo.ParameterType);
                                 configuration.AddParameter(parameterInfo.Name, primitiveType);
@@ -94,16 +91,16 @@ namespace Microsoft.AspNet.OData
                                         var collectionTypeConfig = new CollectionTypeConfiguration(parameterType, parameterInfo.ParameterType.GenericTypeArguments[0]);
                                         configuration.AddParameter(parameterInfo.Name, collectionTypeConfig);
                                     }
-                                }
-                                else
-                                {
-                                    var parameterType = builder.AddEntityType(parameterInfo.ParameterType);
-                                    configuration.AddParameter(parameterInfo.Name, parameterType);
-                                }
+                            }
+                            else
+                            {
+                                var parameterType = builder.AddEntityType(parameterInfo.ParameterType);
+                                configuration.AddParameter(parameterInfo.Name, parameterType);
                             }
                         }
                     }
                 }
+            }
             }
 
             return builder.GetEdmModel();

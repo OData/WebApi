@@ -11,12 +11,6 @@ namespace Microsoft.AspNet.OData.Formatter
 {
     public class ModernInputFormatter : InputFormatter
     {
-        /// <summary>
-        /// Returns UTF8 Encoding without BOM and throws on invalid bytes.
-        /// </summary>
-        public static readonly Encoding UTF8EncodingWithoutBOM
-            = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
-
         private JsonSerializerSettings _serializerSettings;
 
         public ModernInputFormatter()

@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.OData.Formatter
     {
         private static readonly EdmCoreModel _coreModel = EdmCoreModel.Instance;
 
-        private static readonly IAssemblyProvider _defaultAssemblyProvider;
+        private static readonly IAssemblyProvider _defaultAssemblyProvider = null;
 
         private static readonly Dictionary<Type, IEdmPrimitiveType> _builtInTypesMapping =
             new[]

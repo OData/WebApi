@@ -5,9 +5,6 @@ using System.Threading.Tasks;
 
 namespace ODataSample.Web.Models
 {
-    using Microsoft.AspNet.OData.Builder;
-    using Microsoft.OData.Edm.Library;
-
     public class Customer
     {
         private List<Product> _products;
@@ -15,7 +12,6 @@ namespace ODataSample.Web.Models
         public int CustomerId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        [Contained]
         public List<Product> Products
         {
             get

@@ -12,7 +12,7 @@ namespace ODataSample.Web.Models
         [ODataAction(IsBound = true, BindingName = "customer")]
         Customer AddCustomerProduct(int customerId, int productId);
         [ODataAction(IsBound = true, BindingName = "customer")]
-        Customer AddCustomerProducts(int customerId, IEnumerable<int> products);
+        Customer AddCustomerProducts(int customerId, IEnumerable<int> productId);
     }
 
 }

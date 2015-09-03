@@ -28,7 +28,7 @@ namespace ODataSample.Web.Controllers
         }
 
         // GET api/Products/5
-        [HttpGet("{id}")]
+        [HttpGet("{productId}")]
         public IActionResult Get(int productId)
         {
             var product = _sampleContext.FindProduct(productId);
@@ -40,7 +40,7 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(product);
         }
 
-        [HttpGet("{id}/Name")]
+        [HttpGet("{productId}/Name")]
         public IActionResult GetName(int productId)
         {
             var product = _sampleContext.FindProduct(productId);
@@ -52,7 +52,7 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(product.Name);
         }
 
-        [HttpGet("{id}/Price")]
+        [HttpGet("{productId}/Price")]
         public IActionResult GetPrice(int productId)
         {
             var product = _sampleContext.FindProduct(productId);
@@ -64,7 +64,7 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(product.Price);
         }
 
-        [HttpGet("{id}/ProductId")]
+        [HttpGet("{productId}/ProductId")]
         public IActionResult GetProductId(int productId)
         {
             var product = _sampleContext.FindProduct(productId);
@@ -85,7 +85,7 @@ namespace ODataSample.Web.Controllers
         }
 
         // PUT api/Products/5
-        [HttpPut("{id}")]
+        [HttpPut("{productId}")]
         public IActionResult Put(int productId, [FromBody]Product value)
         {
             if (!_sampleContext.UpdateProduct(productId, value))
@@ -97,7 +97,7 @@ namespace ODataSample.Web.Controllers
         }
 
         // DELETE api/Products/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{productId}")]
         public IActionResult Delete(int productId)
         {
             if (!_sampleContext.DeleteProduct(productId))

@@ -16,7 +16,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             services.AddScoped<ODataProperties>();
             services.AddTransient<IConfigureOptions<ODataOptions>, ODataOptionsSetup>();
-            services.ConfigureMvc(options =>
+            services.AddMvc(options =>
             {
                 options.InputFormatters.Insert(0, new ModernInputFormatter());
 

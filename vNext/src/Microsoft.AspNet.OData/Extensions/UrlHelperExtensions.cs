@@ -9,12 +9,38 @@ using Microsoft.AspNet.OData.Routing;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
+    using System.Diagnostics.Contracts;
+
+    using Microsoft.AspNet.Http;
+    using Microsoft.AspNet.OData.Common;
+
     /// <summary>
     /// Provides extension methods for the <see cref="UrlHelper"/> class.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class UrlHelperExtensions
     {
+        public static string CreateODataLink(this IUrlHelper urlHelper, HttpRequest request, params ODataPathSegment[] segments)
+        {
+            if (urlHelper == null)
+            {
+                throw Error.ArgumentNull("urlHelper");
+            }
+
+            //HttpRequestMessage request = urlHelper.Request;
+            Contract.Assert(request != null);
+
+            string routeName = request.ODataProperties().Path.PathTemplate;
+            if (String.IsNullOrEmpty(routeName))
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustHaveODataRouteName);
+            }
+
+            //IODataPathHandler pathHandler = request.ODataProperties().NewPath;
+            //return CreateODataLink(urlHelper, routeName, pathHandler, segments);
+            return request.Scheme + "://" + request.Host + "/odata/";  //request.Path; //"http://service-root/";
+        }
+
         /// <summary>
         /// Generates an OData link using the request's OData route name and path handler and given segments.
         /// </summary>

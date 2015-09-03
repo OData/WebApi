@@ -6,6 +6,11 @@ using Microsoft.AspNet.OData;
 
 namespace ODataSample.Web.Controllers
 {
+    using System.Dynamic;
+
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
+
     [EnableQuery]
     [Route("odata/Customers")]
     public class CustomersController : Controller
@@ -52,9 +57,9 @@ namespace ODataSample.Web.Controllers
 
         // PUT odata//FindCustomersWithProduct(productId=1)
         [HttpPut("{customerId}/AddCustomerProduct(ProductId={productId})")]
-        public IActionResult AddCustomerProduct(int customerId, [FromBody] int productId)
+        public IActionResult AddCustomerProduct(int customerId, [FromBody] Product productId)
         {
-            var customer = _sampleContext.AddCustomerProduct(customerId, productId);
+            var customer = _sampleContext.AddCustomerProduct(customerId, productId.ProductId);
             if (customer == null)
             {
                 return HttpNotFound();
@@ -65,7 +70,7 @@ namespace ODataSample.Web.Controllers
 
         // PUT odata//FindCustomersWithProduct(productId=1)
         [HttpPut("{customerId}/AddCustomerProducts(ProductId={productId})")]
-        public IActionResult AddCustomerProducts(int customerId, [FromBody] IEnumerable<int> listProductId)
+        public IActionResult AddCustomerProducts(int customerId, [FromBody] JObject products)
         {
             var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
@@ -73,7 +78,7 @@ namespace ODataSample.Web.Controllers
                 return HttpNotFound();
             }
 
-            foreach (var productId in listProductId)
+            foreach (var productId in products.Last.Children().Values<int>())
             {
                 _sampleContext.AddCustomerProduct(customerId, productId);
             }
@@ -137,7 +142,7 @@ namespace ODataSample.Web.Controllers
         [HttpPost]
         public IActionResult Post([FromBody]Customer value)
         {
-            var locationUri = $"http://localhost:9091/odata/Customers/{value.CustomerId}";
+            var locationUri = $"http://localhost:5000/odata/Customers/{value.CustomerId}";
             return Created(locationUri, _sampleContext.AddCustomer(value));
         }
 

@@ -61,6 +61,13 @@ namespace System.Web.OData.Test.OData.Query
                             new Dictionary<string, object> { { "SharePrice", "10"} }
                         }
                     },
+                      {
+                        "aggregate(SharePrice with average as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", "6.25"} }
+                        }
+                    },
                     {
                         "groupby(Name,aggregate(CustomerId with sum as CustomerId))",
                         new List<Dictionary<string, object>>

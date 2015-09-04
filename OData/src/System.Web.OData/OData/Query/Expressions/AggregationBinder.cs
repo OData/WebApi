@@ -120,6 +120,13 @@ namespace System.Web.OData.OData.Query.Expressions
                         }
                         aggregationMethod = aggregationMethod.MakeGenericMethod(this._elementType);
                         break;
+                    case "average":
+                        if (!ExpressionHelperMethods.QueryableAverageGenerics.TryGetValue(propertyLambda.Body.Type, out aggregationMethod))
+                        {
+                            throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", aggregateClause.AggregationMethod, aggregateClause.AggregatableProperty, propertyLambda.Body.Type));
+                        }
+                        aggregationMethod = aggregationMethod.MakeGenericMethod(this._elementType);
+                        break;
                     default:
                         throw new ODataException(Error.Format("Aggregation method '{0}' is not supported.", aggregateClause.AggregationMethod));
                 }

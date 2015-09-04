@@ -47,6 +47,9 @@ namespace System.Web.OData
 
         private static Dictionary<Type, MethodInfo> _sumMethods = GetQueryableAggregationMethods("Sum");
 
+        private static MethodInfo _minMethod = GenericMethodOf(_ => Queryable.Min<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
+        private static MethodInfo _maxMethod = GenericMethodOf(_ => Queryable.Max<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
+
         public static MethodInfo QueryableOrderByGeneric
         {
             get { return _orderByMethod; }
@@ -85,6 +88,16 @@ namespace System.Web.OData
         public static Dictionary<Type,MethodInfo> QueryableSumGenerics
         {
             get { return _sumMethods; }
+        }
+
+        public static MethodInfo QueryableMin
+        {
+            get { return _minMethod; }
+        }
+
+        public static MethodInfo QueryableMax
+        {
+            get { return _maxMethod; }
         }
 
         public static MethodInfo QueryableGroupByGeneric
@@ -198,11 +211,13 @@ namespace System.Web.OData
             return (lambdaExpression.Body as MethodCallExpression).Method.GetGenericMethodDefinition();
         }
 
+       
         private static Dictionary<Type, MethodInfo> GetQueryableAggregationMethods(string methodName)
         {
             //Sum to not have generic by property method return type so have to generate a table
             // Looking for methods like
             // Queryable.Sum<TSource>(default(IQueryable<TSource>), default(Expression<Func<TSource, int?>>)))
+
             return typeof(Queryable).GetMethods()
                 .Where(m => m.Name == methodName)
                 .Where(m => m.GetParameters().Count() == 2)

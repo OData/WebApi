@@ -92,7 +92,7 @@ namespace System.Web.OData.OData.Query.Expressions
             // Setting GroupByContainer property when previous step was grouping
             if (grouped)
             {
-                
+
                 var wrapperProperty2 = wrapperType2.GetProperty(GroupByContainerProperty);
                 wrapperTypeMemberAssignments2.Add(Expression.Bind(wrapperProperty2, Expression.Property(Expression.Property(accum, "Key"), GroupByContainerProperty)));
             }
@@ -104,16 +104,32 @@ namespace System.Web.OData.OData.Query.Expressions
                 var properties = new List<NamedPropertyExpression>();
                 var propertyLambda = ExpressionHelpers.GetPropertyAccessLambda(this._elementType, aggregateClause.AggregatableProperty);
                 MethodInfo aggregationMethod;
-                if (!ExpressionHelperMethods.QueryableSumGenerics.TryGetValue(propertyLambda.Body.Type, out aggregationMethod))
+
+                switch (aggregateClause.AggregationMethod)
                 {
-                    throw new ODataException(Error.Format("Aggregation not supported for property {0} of {1} type", aggregateClause.AggregatableProperty, propertyLambda.Body.Type));
+                    case "min":
+                        aggregationMethod = ExpressionHelperMethods.QueryableMin.MakeGenericMethod(this._elementType, propertyLambda.Body.Type);
+                        break;
+                    case "max":
+                        aggregationMethod = ExpressionHelperMethods.QueryableMax.MakeGenericMethod(this._elementType, propertyLambda.Body.Type);
+                        break;
+                    case "sum":
+                        if (!ExpressionHelperMethods.QueryableSumGenerics.TryGetValue(propertyLambda.Body.Type, out aggregationMethod))
+                        {
+                            throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", aggregateClause.AggregationMethod, aggregateClause.AggregatableProperty, propertyLambda.Body.Type));
+                        }
+                        aggregationMethod = aggregationMethod.MakeGenericMethod(this._elementType);
+                        break;
+                    default:
+                        throw new ODataException(Error.Format("Aggregation method '{0}' is not supported.", aggregateClause.AggregationMethod));
                 }
-                aggregationMethod = aggregationMethod.MakeGenericMethod(this._elementType);
+
+                // I substitute the element type for all generic arguments.                                                
                 var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(this._elementType);
-                
+
                 Expression asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
-                Expression aggregationExpression = Expression.Call(null, aggregationMethod, asQuerableExpression, propertyLambda );
-                
+                Expression aggregationExpression = Expression.Call(null, aggregationMethod, asQuerableExpression, propertyLambda);
+
                 properties.Add(new NamedPropertyExpression(Expression.Constant(aggregateClause.Alias), aggregationExpression));
                 wrapperTypeMemberAssignments2.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreatePropertyContainer(properties)));
             }
@@ -169,7 +185,7 @@ namespace System.Web.OData.OData.Query.Expressions
                 // .GroupBy($it => new GroupingByClause())
                 groupLambda = Expression.Lambda(Expression.New(GroupByWrapperType), source);
             }
-            
+
             return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, GroupByWrapperType);
         }
     }

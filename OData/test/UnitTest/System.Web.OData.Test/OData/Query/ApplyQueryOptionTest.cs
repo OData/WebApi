@@ -48,6 +48,20 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
+                        "aggregate(SharePrice with min as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", "2.5"} }
+                        }
+                    },
+                     {
+                        "aggregate(SharePrice with max as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", "10"} }
+                        }
+                    },
+                    {
                         "groupby(Name,aggregate(CustomerId with sum as CustomerId))",
                         new List<Dictionary<string, object>>
                         {

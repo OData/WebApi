@@ -65,6 +65,111 @@ namespace System.Web.OData.OData.Query.Expressions
 
             return result;
         }
+
+        private IQueryable BindSelect(IQueryable grouping, ApplyAggregateClause aggregateClause, bool grouped)
+        {
+            // Should return following expression
+            // .Select($it => New AggregationWrapper() 
+            //                  {
+            //                      GroupByContainer = $it.Key.GroupByContainer,
+            //                      Container = new { Alias = $it.AsQuaryable().Sum(i => i.AggregatableProperty)
+            //                  })
+
+            var groupingType = typeof(IGrouping<,>).MakeGenericType(GroupByWrapperType, this._elementType);
+            ParameterExpression accum = Expression.Parameter(groupingType);
+            Type wrapperType2 = typeof(AggregationWrapper<>).MakeGenericType(this._elementType);
+
+            var keyProperty = ExpressionHelpers.GetPropertyAccessLambda(groupingType, "Key");
+
+            List<MemberAssignment> wrapperTypeMemberAssignments2 = new List<MemberAssignment>();
+
+            // Setting GroupByContainer property when previous step was grouping
+            if (grouped)
+            {
+
+                var wrapperProperty2 = wrapperType2.GetProperty(GroupByContainerProperty);
+                wrapperTypeMemberAssignments2.Add(Expression.Bind(wrapperProperty2, Expression.Property(Expression.Property(accum, "Key"), GroupByContainerProperty)));
+            }
+
+            // Setting Container property when we have aggregation clauses
+            if (aggregateClause != null)
+            {
+                var wrapperProperty = wrapperType2.GetProperty("Container");
+                var properties = new List<NamedPropertyExpression>();
+                var propertyLambda = ExpressionHelpers.GetPropertyAccessLambda(this._elementType, aggregateClause.AggregatableProperty);
+
+                // I substitute the element type for all generic arguments.                                                
+                var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(this._elementType);
+                Expression asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
+
+                Expression aggregationExpression;
+
+                switch (aggregateClause.AggregationMethod)
+                {
+                    case "min":
+                        {
+                            var minMethod = ExpressionHelperMethods.QueryableMin.MakeGenericMethod(this._elementType, propertyLambda.Body.Type);
+                            aggregationExpression = Expression.Call(null, minMethod, asQuerableExpression, propertyLambda);
+                        }
+                        break;
+                    case "max":
+                        {
+                            var maxMethod = ExpressionHelperMethods.QueryableMax.MakeGenericMethod(this._elementType, propertyLambda.Body.Type);
+                            aggregationExpression = Expression.Call(null, maxMethod, asQuerableExpression, propertyLambda);
+                        }
+                        break;
+                    case "sum":
+                        {
+                            MethodInfo sumGenericMethod;
+                            if (!ExpressionHelperMethods.QueryableSumGenerics.TryGetValue(propertyLambda.Body.Type, out sumGenericMethod))
+                            {
+                                throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", aggregateClause.AggregationMethod, aggregateClause.AggregatableProperty, propertyLambda.Body.Type));
+                            }
+                            var sumMethod = sumGenericMethod.MakeGenericMethod(this._elementType);
+                            aggregationExpression = Expression.Call(null, sumMethod, asQuerableExpression, propertyLambda);
+                        }
+                        break;
+                    case "average":
+                        {
+                            MethodInfo averageGenericMethod;
+                            if (!ExpressionHelperMethods.QueryableAverageGenerics.TryGetValue(propertyLambda.Body.Type, out averageGenericMethod))
+                            {
+                                throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", aggregateClause.AggregationMethod, aggregateClause.AggregatableProperty, propertyLambda.Body.Type));
+                            }
+                            var averageMethod = averageGenericMethod.MakeGenericMethod(this._elementType);
+                            aggregationExpression = Expression.Call(null, averageMethod, asQuerableExpression, propertyLambda);
+                        }
+                        break;
+                    case "countdistinct":
+                        {
+                            // I select the specific field 
+                            var selectMethod = ExpressionHelperMethods.QueryableSelectGeneric.MakeGenericMethod(this._elementType, propertyLambda.Body.Type);
+                            Expression queryableSelectExpression = Expression.Call(null, selectMethod, asQuerableExpression, propertyLambda);
+
+                            // I run distinct over the set of items
+                            var distinctMethod = ExpressionHelperMethods.QueryableDistinct.MakeGenericMethod(propertyLambda.Body.Type);
+                            Expression distinctExpression = Expression.Call(null, distinctMethod, queryableSelectExpression);
+
+                            // I count the distinct items as the aggregation expression
+                            var countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(propertyLambda.Body.Type);
+                            aggregationExpression = Expression.Call(null, countMethod, distinctExpression);
+                        }
+                        break;
+                    default:
+                        throw new ODataException(Error.Format("Aggregation method '{0}' is not supported.", aggregateClause.AggregationMethod));
+                }
+
+                properties.Add(new NamedPropertyExpression(Expression.Constant(aggregateClause.Alias), aggregationExpression));
+                wrapperTypeMemberAssignments2.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreatePropertyContainer(properties)));
+            }
+
+            var selectLambda = Expression.Lambda(Expression.MemberInit(Expression.New(wrapperType2), wrapperTypeMemberAssignments2), accum);
+
+            var result = ExpressionHelpers.Select(grouping, selectLambda, groupingType);
+            return result;
+        }
+
+
         /// <summary>
         /// Generating Select clause 
         /// </summary>
@@ -72,7 +177,7 @@ namespace System.Web.OData.OData.Query.Expressions
         /// <param name="aggregateClause"></param>
         /// <param name="grouped"></param>
         /// <returns></returns>
-        private IQueryable BindSelect(IQueryable grouping, ApplyAggregateClause aggregateClause, bool grouped)
+        private IQueryable BindSelect2(IQueryable grouping, ApplyAggregateClause aggregateClause, bool grouped)
         {
             // Should return following expression
             // .Select($it => New AggregationWrapper() 

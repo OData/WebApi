@@ -50,6 +50,8 @@ namespace System.Web.OData
         private static MethodInfo _minMethod = GenericMethodOf(_ => Queryable.Min<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _maxMethod = GenericMethodOf(_ => Queryable.Max<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
 
+        private static MethodInfo _distinctMethod = GenericMethodOf(_ => Queryable.Distinct<int>(default(IQueryable<int>)));
+
         //Unlike the Sum method, the return types are not unique and do not match the input type of the expression.
         //Inspecting the 2nd parameters expression's function's 2nd argument is too specific for the GetQueryableAggregationMethods        
         private static Dictionary<Type, MethodInfo> _averageMethods = new Dictionary<Type, MethodInfo>()
@@ -119,6 +121,11 @@ namespace System.Web.OData
         public static Dictionary<Type, MethodInfo> QueryableAverageGenerics
         {
             get { return _averageMethods; }
+        }
+
+        public static MethodInfo QueryableDistinct
+        {
+            get { return _distinctMethod; }
         }
 
         public static MethodInfo QueryableGroupByGeneric

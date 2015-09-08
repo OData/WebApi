@@ -40,7 +40,7 @@ namespace System.Web.OData.OData.Query.Expressions
         {
             // TODO: After we switch to QueryNode result for parsing refactor to use 1 binder class per case
             ApplyAggregateClause aggregateClause = this._transformation as ApplyAggregateClause;
-            bool grouped = false;
+            //bool grouped = false;
             IEnumerable<string> selectedStatements = null;
             if (aggregateClause == null)
             {
@@ -49,7 +49,7 @@ namespace System.Web.OData.OData.Query.Expressions
                 {
                     selectedStatements = groupByClause.SelectedStatements;
                     aggregateClause = groupByClause.Aggregate;
-                    grouped = true;
+                    //grouped = true;
                 }
                 else
                 {
@@ -61,9 +61,9 @@ namespace System.Web.OData.OData.Query.Expressions
             // We are doing Grouping even if only aggregate was specified to have a IQuaryable after aggregation
             IQueryable grouping = BindGroupBy(query, selectedStatements);
 
-            IQueryable result = BindSelect(grouping, aggregateClause, grouped);
+            //IQueryable result = BindSelect(grouping, aggregateClause, grouped);
 
-            return result;
+            return grouping;
         }
 
         private IQueryable BindSelect(IQueryable grouping, ApplyAggregateClause aggregateClause, bool grouped)
@@ -265,9 +265,19 @@ namespace System.Web.OData.OData.Query.Expressions
         private IQueryable BindGroupBy(IQueryable query, IEnumerable<string> selectedStatements)
         {
 
+            TypeDefinition resultTypeDefinition = new TypeDefinition();
             ParameterExpression source = Expression.Parameter(this._elementType);
+            if (selectedStatements != null && selectedStatements.Any())
+            {
+                foreach (var propName in selectedStatements)
+                {
+                    var propertyName = propName.Trim();
+                    resultTypeDefinition.Properties.Add(propertyName, Expression.Property(source, propertyName).Type);
+                }
+            }
+            var resultType = TypeProvider.CompileResultType(resultTypeDefinition);
 
-            ConstructorInfo wrapperConstructor = GroupByWrapperType.GetConstructor(new Type[] { });
+            ConstructorInfo wrapperConstructor = resultType.GetConstructor(new Type[] { });
             NewExpression newExpression = Expression.New(wrapperConstructor);
             LambdaExpression groupLambda = null;
             if (selectedStatements != null && selectedStatements.Any())
@@ -278,27 +288,24 @@ namespace System.Web.OData.OData.Query.Expressions
                 //                                          GroupByContainer = new  { $it.Prop1, $it.Prop2, ...}
                 //                                      }) 
 
-                var properties = new List<NamedPropertyExpression>();
-                foreach (var propName in selectedStatements)
+                List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
+                foreach (var prop in resultTypeDefinition.Properties)
                 {
-                    var propertyName = propName.Trim();
-                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.Property(source, propertyName)));
+                    wrapperTypeMemberAssignments.Add(Expression.Bind(resultType.GetMember(prop.Key).Single(), Expression.Property(source, prop.Key)));
                 }
 
-                List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
-                var wrapperProperty = GroupByWrapperType.GetProperty(GroupByContainerProperty);
-                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreatePropertyContainer(properties)));
-                groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(GroupByWrapperType), wrapperTypeMemberAssignments), source);
+                
+                groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(resultType), wrapperTypeMemberAssignments), source);
             }
             else
             {
 
                 // We do not have properties to aggregate
                 // .GroupBy($it => new GroupingByClause())
-                groupLambda = Expression.Lambda(Expression.New(GroupByWrapperType), source);
+                groupLambda = Expression.Lambda(Expression.New(resultType), source);
             }
 
-            return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, GroupByWrapperType);
+            return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, resultType);
         }
     }
 }

@@ -131,6 +131,7 @@
     <Compile Include="OData\Query\ApplyQueryOption.cs" />
     <Compile Include="OData\Query\Expressions\GroupByWrapper.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
+    <Compile Include="OData\Query\Expressions\TypeProvider.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
     <Compile Include="OData\Query\NotCountableAttribute.cs" />
     <Compile Include="OData\Query\NotFilterableAttribute.cs" />

@@ -55,7 +55,8 @@ namespace System.Web.OData.Routing.Conventions
                 new RefRoutingConvention(),
                 new ActionRoutingConvention(),
                 new FunctionRoutingConvention(),
-                new UnmappedRequestRoutingConvention()
+                new UnmappedRequestRoutingConvention(),
+                new SwaggerRoutingConvention()
             };
         }
     }

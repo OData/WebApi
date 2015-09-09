@@ -138,7 +138,13 @@ namespace System.Web.OData.Routing
             }
             catch (ODataUnrecognizedPathException ex)
             {
-                if (ex.ParsedSegments != null &&
+                if (ex.CurrentSegment.Equals(ODataSegmentKinds.Swagger))
+                {
+                    IList<ODataPathSegment> segments = new List<ODataPathSegment>();
+                    segments.Add(new SwaggerPathSegment());
+                    return new ODataPath(segments);
+                }
+                else if (ex.ParsedSegments != null &&
                     ex.ParsedSegments.Count() > 0 &&
                     (ex.ParsedSegments.Last().EdmType is IEdmComplexType ||
                      ex.ParsedSegments.Last().EdmType is IEdmEntityType) &&

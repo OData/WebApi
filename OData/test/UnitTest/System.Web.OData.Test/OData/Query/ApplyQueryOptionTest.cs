@@ -77,15 +77,6 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
-                        "groupby(Name,aggregate(CustomerId with sum as CustomerId))",
-                        new List<Dictionary<string, object>>
-                        {
-                            new Dictionary<string, object> { { "Name", "Lowest"}, { "CustomerId", "5"} },
-                            new Dictionary<string, object> { { "Name", "Highest"}, { "CustomerId", "2" } },
-                            new Dictionary<string, object> { { "Name", "Middle"}, { "CustomerId", "3"} }
-                        }
-                    },
-                    {
                         "groupby(Name)",
                         new List<Dictionary<string, object>>
                         {
@@ -96,6 +87,13 @@ namespace System.Web.OData.Test.OData.Query
                     },
                     {
                         "filter(Name eq 'Lowest')/groupby(Name)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"} }
+                        }
+                    },
+                    {
+                        "groupby(Name)/filter(Name eq 'Lowest')",
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> { { "Name", "Lowest"} }

@@ -13,6 +13,9 @@ namespace System.Web.OData.OData.Query.Expressions
 {
     internal class TypeProvider
     {
+        private static readonly MethodInfo getPropertyValueMethod = typeof(GrpWrapper).GetMethod("GetPropertyValue");
+        private static readonly MethodInfo setPropertyValueMethod = typeof(GrpWrapper).GetMethod("SetPropertyValue");
+
         public static Type GetResultType(TypeDefinition definition)
         {
             // Do not have properties, just return base class
@@ -61,7 +64,7 @@ namespace System.Web.OData.OData.Query.Expressions
 
             getIl.Emit(OpCodes.Ldarg_0);
             getIl.Emit(OpCodes.Ldstr, propertyName);
-            getIl.Emit(OpCodes.Callvirt, typeof(GrpWrapper).GetMethod("GetPropertyValue"));
+            getIl.Emit(OpCodes.Callvirt, getPropertyValueMethod);
             if (propertyType.IsValueType)
             {
                 getIl.Emit(OpCodes.Unbox_Any, propertyType);
@@ -93,7 +96,7 @@ namespace System.Web.OData.OData.Query.Expressions
             {
                 setIl.Emit(OpCodes.Box, propertyType);
             }
-            setIl.Emit(OpCodes.Callvirt, typeof(GrpWrapper).GetMethod("SetPropertyValue"));
+            setIl.Emit(OpCodes.Callvirt, setPropertyValueMethod);
             setIl.Emit(OpCodes.Ret);
 
             propertyBuilder.SetGetMethod(getPropMthdBldr);

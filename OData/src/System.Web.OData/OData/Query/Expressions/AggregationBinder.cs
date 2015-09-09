@@ -93,7 +93,7 @@ namespace System.Web.OData.OData.Query.Expressions
                 }
             }
 
-            GroupByWrapperType = TypeProvider.CompileResultType(groupByTypeDef);
+            GroupByWrapperType = TypeProvider.GetResultType(groupByTypeDef);
         }
 
         private IQueryable BindSelect(IQueryable grouping)
@@ -116,7 +116,7 @@ namespace System.Web.OData.OData.Query.Expressions
             }
 
             // TODO: Move and initialize earlier?
-            this.ResultType = TypeProvider.CompileResultType(resultTypeDef);
+            this.ResultType = TypeProvider.GetResultType(resultTypeDef);
 
             var keyProperty = ExpressionHelpers.GetPropertyAccessLambda(groupingType, "Key");
 

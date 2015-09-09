@@ -13,23 +13,29 @@ namespace System.Web.OData.OData.Query.Expressions
 {
     internal class TypeProvider
     {
-        public static Type CompileResultType(TypeDefinition definition)
+        public static Type GetResultType(TypeDefinition definition)
         {
+            // Do not have properties, just return base class
+            if (!definition.Properties.Any())
+            {
+                return typeof(GrpWrapper);
+            }
+
             TypeBuilder tb = GetTypeBuilder(definition.Name);
             ConstructorBuilder constructor = tb.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
 
-            // NOTE: assuming your list contains Field objects with fields FieldName(string) and FieldType(Type)
             foreach (var field in definition.Properties)
+            {
                 CreateProperty(tb, field.Key, field.Value);
+            }
 
-            Type objectType = tb.CreateType();
-            return objectType;
+            return tb.CreateType();
         }
 
         private static TypeBuilder GetTypeBuilder(string typeSignature)
         {
             var an = new AssemblyName(typeSignature);
-            AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
+            AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.RunAndCollect);
             ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
             TypeBuilder tb = moduleBuilder.DefineType(typeSignature
                                 , TypeAttributes.Public |
@@ -48,14 +54,14 @@ namespace System.Web.OData.OData.Query.Expressions
 
             // Property get method
             // get {
-            //  return this.GetProperty("propertyName");
+            //  return this.GetPropertyValue("propertyName");
             // }
             MethodBuilder getPropMthdBldr = tb.DefineMethod("get_" + propertyName, MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, propertyType, Type.EmptyTypes);
             ILGenerator getIl = getPropMthdBldr.GetILGenerator();
 
             getIl.Emit(OpCodes.Ldarg_0);
             getIl.Emit(OpCodes.Ldstr, propertyName);
-            getIl.Emit(OpCodes.Callvirt, typeof(GrpWrapper).GetMethod("GetProperty"));
+            getIl.Emit(OpCodes.Callvirt, typeof(GrpWrapper).GetMethod("GetPropertyValue"));
             if (propertyType.IsValueType)
             {
                 getIl.Emit(OpCodes.Unbox_Any, propertyType);
@@ -69,7 +75,7 @@ namespace System.Web.OData.OData.Query.Expressions
 
             // Property get method
             // set {
-            //  return this.SetValue("propertyName", value);
+            //  return this.SetPropertyValue("propertyName", value);
             // }
 
             MethodBuilder setPropMthdBldr =
@@ -87,7 +93,7 @@ namespace System.Web.OData.OData.Query.Expressions
             {
                 setIl.Emit(OpCodes.Box, propertyType);
             }
-            setIl.Emit(OpCodes.Callvirt, typeof(GrpWrapper).GetMethod("SetValue"));
+            setIl.Emit(OpCodes.Callvirt, typeof(GrpWrapper).GetMethod("SetPropertyValue"));
             setIl.Emit(OpCodes.Ret);
 
             propertyBuilder.SetGetMethod(getPropMthdBldr);
@@ -99,7 +105,7 @@ namespace System.Web.OData.OData.Query.Expressions
     {
         public TypeDefinition()
         {
-            this.Name = "MyDynamicType" + Guid.NewGuid().ToString();
+            this.Name = "Dynamic_" + Guid.NewGuid().ToString();
             this.Properties = new Dictionary<string, Type>();
         }
 
@@ -168,7 +174,7 @@ namespace System.Web.OData.OData.Query.Expressions
         /// </summary>
         /// <param name="propertyName"></param>
         /// <returns></returns>
-        public object GetProperty(string propertyName)
+        public object GetPropertyValue(string propertyName)
         {
             return this._values[propertyName];
         }
@@ -178,7 +184,7 @@ namespace System.Web.OData.OData.Query.Expressions
         /// </summary>
         /// <param name="propertyName"></param>
         /// <param name="value"></param>
-        public void SetValue(string propertyName, object value)
+        public void SetPropertyValue(string propertyName, object value)
         {
             this._values[propertyName] = value;
         }

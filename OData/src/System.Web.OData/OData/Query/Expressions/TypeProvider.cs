@@ -56,7 +56,14 @@ namespace System.Web.OData.OData.Query.Expressions
             getIl.Emit(OpCodes.Ldarg_0);
             getIl.Emit(OpCodes.Ldstr, propertyName);
             getIl.Emit(OpCodes.Callvirt, typeof(GrpWrapper).GetMethod("GetProperty"));
-            getIl.Emit(OpCodes.Castclass, propertyType);
+            if (propertyType.IsValueType)
+            {
+                getIl.Emit(OpCodes.Unbox_Any, propertyType);
+            }
+            else
+            {
+                getIl.Emit(OpCodes.Castclass, propertyType);
+            }
             getIl.Emit(OpCodes.Ret);
 
 
@@ -76,6 +83,10 @@ namespace System.Web.OData.OData.Query.Expressions
             setIl.Emit(OpCodes.Ldarg_0);
             setIl.Emit(OpCodes.Ldstr, propertyName);
             setIl.Emit(OpCodes.Ldarg_1);
+            if (propertyType.IsValueType)
+            {
+                setIl.Emit(OpCodes.Box, propertyType);
+            }
             setIl.Emit(OpCodes.Callvirt, typeof(GrpWrapper).GetMethod("SetValue"));
             setIl.Emit(OpCodes.Ret);
 
@@ -97,6 +108,13 @@ namespace System.Web.OData.OData.Query.Expressions
         public IDictionary<string, Type> Properties
         {
             get; set;
+        }
+
+        public TypeDefinition Clone()
+        {
+            var result = new TypeDefinition();
+            result.Properties = this.Properties.ToList().ToDictionary(kvp=> kvp.Key, kvp => kvp.Value);
+            return result;
         }
     }
 
@@ -131,7 +149,18 @@ namespace System.Web.OData.OData.Query.Expressions
         /// <returns></returns>
         public bool TryGetPropertyValue(string propertyName, out object value)
         {
-            return this._values.TryGetValue(propertyName, out value);
+            if( this._values.TryGetValue(propertyName, out value))
+            {
+                // TODO: Refactor ApplyClause by OData team spec and infer type sduring parsing
+                if (value != null)
+                {
+                    value = value.ToString();
+                }
+                return true;
+            }
+
+            value = null;
+            return false;
         }
 
         /// <summary>

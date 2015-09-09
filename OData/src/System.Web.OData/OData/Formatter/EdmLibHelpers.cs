@@ -21,6 +21,7 @@ using Microsoft.OData.Edm.Expressions;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.Spatial;
+using System.Web.OData.OData.Query.Expressions;
 
 namespace System.Web.OData.Formatter
 {
@@ -499,6 +500,12 @@ namespace System.Web.OData.Formatter
 
         private static bool IsAggregationWrapper(Type type, out Type entityType)
         {
+            if (type == typeof(GrpWrapper))
+            {
+                entityType = null;
+                return true;
+            }
+
             if (type == null)
             {
                 entityType = null;

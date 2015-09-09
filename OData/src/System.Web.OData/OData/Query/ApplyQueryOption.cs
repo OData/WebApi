@@ -199,7 +199,7 @@ namespace System.Web.OData.Query
 
                     var binder = new AggregationBinder(querySettings, assembliesResolver, elementType, transformation);
                     query =  binder.Bind(query);
-                    elementType = typeof(AggregationWrapper<>).MakeGenericType(elementType);
+                    elementType = binder.ResultType;
                 }
                 
             }

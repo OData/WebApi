@@ -41,7 +41,8 @@ namespace System.Web.OData.OData.Query.Expressions
             _elementType = elementType;
             _transformation = transformation;
 
-            Init();
+            CreateQueryClauses();
+            CreateGroupByType();
         }
 
         /// <summary>
@@ -63,7 +64,7 @@ namespace System.Web.OData.OData.Query.Expressions
             return result;
         }
 
-        private void Init()
+        private void CreateQueryClauses()
         {
             _aggregateClause = this._transformation as ApplyAggregateClause;
             _grouped = false;
@@ -82,7 +83,10 @@ namespace System.Web.OData.OData.Query.Expressions
                     throw new NotSupportedException(string.Format("Not supported transformation type {0}", this._transformation));
                 }
             }
+        }
 
+        private void CreateGroupByType()
+        {
             _groupByTypeDef = new TypeDefinition();
             ParameterExpression source = Expression.Parameter(this._elementType);
             if (_selectedStatements != null && _selectedStatements.Any())

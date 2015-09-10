@@ -139,7 +139,7 @@ namespace System.Web.OData.Formatter
                         {
                             elementClrType = entityType;
                         }
-                        else if (IsAggregationWrapper(elementClrType))
+                        else if (IsDynamicTypeWrapper(elementClrType))
                         {
                             return new EdmCollectionType(Extension.GetDynamicEntityType().ToEdmTypeReference(true));
                         }
@@ -496,7 +496,7 @@ namespace System.Web.OData.Formatter
             return IsSelectExpandWrapper(type.BaseType, out entityType);
         }
 
-        private static bool IsAggregationWrapper(Type type)
+        private static bool IsDynamicTypeWrapper(Type type)
         {
             return typeof(DynamicTypeWrapper).IsAssignableFrom(type);
         }

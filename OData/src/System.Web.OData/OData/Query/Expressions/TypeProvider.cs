@@ -3,25 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using System.Web.OData.Formatter;
 
-namespace System.Web.OData.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
+    /// <summary>
+    /// Factory for dynamic types
+    /// </summary>
+    /// <remarks>
+    /// Implemented as "skyhook" so far. Need to look for DI in WebAPI
+    /// </remarks>
     internal class TypeProvider
     {
-        private static readonly MethodInfo getPropertyValueMethod = typeof(GrpWrapper).GetMethod("GetPropertyValue");
-        private static readonly MethodInfo setPropertyValueMethod = typeof(GrpWrapper).GetMethod("SetPropertyValue");
+        private static readonly MethodInfo getPropertyValueMethod = typeof(GroupByWrapper).GetMethod("GetPropertyValue");
+        private static readonly MethodInfo setPropertyValueMethod = typeof(GroupByWrapper).GetMethod("SetPropertyValue");
 
+        private const string ModuleName = "MainModule";
+
+        /// <summary>
+        /// Generates type by provided definition.
+        /// </summary>
+        /// <param name="definition"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// We create new assembly each time, but they will be collected by GC.
+        /// Current performance testing results is 0.5ms per type. We should consider caching types, however trade off is between CPU perfomance and memory usage (might be it will we an option for library user)
+        /// </remarks>
         public static Type GetResultType(TypeDefinition definition)
         {
             // Do not have properties, just return base class
             if (!definition.Properties.Any())
             {
-                return typeof(GrpWrapper);
+                return typeof(GroupByWrapper);
             }
 
             TypeBuilder tb = GetTypeBuilder(definition.Name);
@@ -38,16 +50,18 @@ namespace System.Web.OData.OData.Query.Expressions
         private static TypeBuilder GetTypeBuilder(string typeSignature)
         {
             var an = new AssemblyName(typeSignature);
+
+            // Create GC collectable assembly. It will be collected after usage and we don't need to worry about memmory usage
             AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.RunAndCollect);
-            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
-            TypeBuilder tb = moduleBuilder.DefineType(typeSignature
-                                , TypeAttributes.Public |
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule( ModuleName);
+            TypeBuilder tb = moduleBuilder.DefineType(typeSignature,
+                                TypeAttributes.Public |
                                 TypeAttributes.Class |
                                 TypeAttributes.AutoClass |
                                 TypeAttributes.AnsiClass |
                                 TypeAttributes.BeforeFieldInit |
                                 TypeAttributes.AutoLayout
-                                , typeof(GrpWrapper));
+                                , typeof(GroupByWrapper));
             return tb;
         }
 
@@ -56,8 +70,9 @@ namespace System.Web.OData.OData.Query.Expressions
             PropertyBuilder propertyBuilder = tb.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
 
             // Property get method
-            // get {
-            //  return this.GetPropertyValue("propertyName");
+            // get
+            // {
+            //  return (propertyType)this.GetPropertyValue("propertyName");
             // }
             MethodBuilder getPropMthdBldr = tb.DefineMethod("get_" + propertyName, MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, propertyType, Type.EmptyTypes);
             ILGenerator getIl = getPropMthdBldr.GetILGenerator();
@@ -65,19 +80,23 @@ namespace System.Web.OData.OData.Query.Expressions
             getIl.Emit(OpCodes.Ldarg_0);
             getIl.Emit(OpCodes.Ldstr, propertyName);
             getIl.Emit(OpCodes.Callvirt, getPropertyValueMethod);
+
             if (propertyType.IsValueType)
             {
+                // for value type (type) means unboxing
                 getIl.Emit(OpCodes.Unbox_Any, propertyType);
             }
             else
             {
+                // for ref types (type) means cast
                 getIl.Emit(OpCodes.Castclass, propertyType);
             }
             getIl.Emit(OpCodes.Ret);
 
 
-            // Property get method
-            // set {
+            // Property set method
+            // set 
+            // {
             //  return this.SetPropertyValue("propertyName", value);
             // }
 
@@ -94,6 +113,7 @@ namespace System.Web.OData.OData.Query.Expressions
             setIl.Emit(OpCodes.Ldarg_1);
             if (propertyType.IsValueType)
             {
+                // Boxing value types to store as an object
                 setIl.Emit(OpCodes.Box, propertyType);
             }
             setIl.Emit(OpCodes.Callvirt, setPropertyValueMethod);
@@ -101,129 +121,6 @@ namespace System.Web.OData.OData.Query.Expressions
 
             propertyBuilder.SetGetMethod(getPropMthdBldr);
             propertyBuilder.SetSetMethod(setPropMthdBldr);
-        }
-    }
-
-    internal class TypeDefinition
-    {
-        public TypeDefinition()
-        {
-            this.Name = "Dynamic_" + Guid.NewGuid().ToString();
-            this.Properties = new Dictionary<string, Type>();
-        }
-
-        public string Name { get; private set; }
-
-        public IDictionary<string, Type> Properties
-        {
-            get; set;
-        }
-
-        public TypeDefinition Clone()
-        {
-            var result = new TypeDefinition();
-            result.Properties = this.Properties.ToList().ToDictionary(kvp=> kvp.Key, kvp => kvp.Value);
-            return result;
-        }
-    }
-
-    /// <summary>
-    /// Base class for autogenerated classes
-    /// </summary>
-    public class GrpWrapper : IEdmGeneratedObject
-    {
-        private readonly Dictionary<string, object> _values = new Dictionary<string, object>();
-
-        /// <summary>
-        /// Gets Type.
-        /// </summary>
-        /// <returns></returns>
-        public IEdmTypeReference GetEdmType()
-        {
-            var type = new EdmEntityType(string.Empty, "GroupingWrapper", baseType: null, isAbstract: false, isOpen: true);
-            foreach (var prop in this._values)
-            {
-                type.AddStructuralProperty(prop.Key, EdmPrimitiveTypeKind.String);
-            }
-
-            return type.ToEdmTypeReference(true);
-        }
-
-
-        /// <summary>
-        /// Get property value
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public bool TryGetPropertyValue(string propertyName, out object value)
-        {
-            if( this._values.TryGetValue(propertyName, out value))
-            {
-                // TODO: Refactor ApplyClause by OData team spec and infer type sduring parsing
-                if (value != null)
-                {
-                    value = value.ToString();
-                }
-                return true;
-            }
-
-            value = null;
-            return false;
-        }
-
-        /// <summary>
-        /// Get property value.
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
-        public object GetPropertyValue(string propertyName)
-        {
-            return this._values[propertyName];
-        }
-
-        /// <summary>
-        /// Set property value
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <param name="value"></param>
-        public void SetPropertyValue(string propertyName, object value)
-        {
-            this._values[propertyName] = value;
-        }
-
-        /// <summary>
-        /// Compares to wrappers
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public override bool Equals(object obj)
-        {
-            var compareWith = obj as GrpWrapper;
-            if (compareWith == null)
-            {
-                return false;
-            }
-
-            var dictionary1 = this._values;
-            var dictionary2 = compareWith._values;
-            return dictionary1.Count() == dictionary2.Count() && !dictionary1.Except(dictionary2).Any();
-        }
-
-
-        /// <summary>
-        /// Gets hashcode.
-        /// </summary>
-        /// <returns></returns>
-        public override int GetHashCode()
-        {
-            long hash = 1870403278L; //Arbitrary number from Anonymous Type GetHashCode implementation
-            foreach (var v in this._values.Values)
-            {
-                hash = hash * -1521134295L + v.GetHashCode();
-            }
-
-            return (int)hash;
         }
     }
 }

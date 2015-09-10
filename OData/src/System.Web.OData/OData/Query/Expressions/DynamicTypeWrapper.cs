@@ -14,7 +14,7 @@ namespace System.Web.OData.Query.Expressions
     /// <summary>
     /// Represents a container class that contains properties that are grouped by using $apply.
     /// </summary>
-    public class GroupByWrapper : IEdmGeneratedObject
+    public class DynamicTypeWrapper : IEdmGeneratedObject
     {
         private readonly Dictionary<string, object> _values = new Dictionary<string, object>();
 
@@ -24,7 +24,7 @@ namespace System.Web.OData.Query.Expressions
         /// <returns></returns>
         public IEdmTypeReference GetEdmType()
         {
-            var type = new EdmEntityType(string.Empty, "GroupingWrapper", baseType: null, isAbstract: false, isOpen: true);
+            var type = new EdmEntityType(string.Empty, "DynamicTypeWrapper", baseType: null, isAbstract: false, isOpen: true);
             foreach (var prop in this._values)
             {
                 type.AddStructuralProperty(prop.Key, EdmPrimitiveTypeKind.String);
@@ -83,7 +83,7 @@ namespace System.Web.OData.Query.Expressions
         /// <returns></returns>
         public override bool Equals(object obj)
         {
-            var compareWith = obj as GroupByWrapper;
+            var compareWith = obj as DynamicTypeWrapper;
             if (compareWith == null)
             {
                 return false;

@@ -14,8 +14,8 @@ namespace System.Web.OData.Query.Expressions
     /// </remarks>
     internal class TypeProvider
     {
-        private static readonly MethodInfo getPropertyValueMethod = typeof(GroupByWrapper).GetMethod("GetPropertyValue");
-        private static readonly MethodInfo setPropertyValueMethod = typeof(GroupByWrapper).GetMethod("SetPropertyValue");
+        private static readonly MethodInfo getPropertyValueMethod = typeof(DynamicTypeWrapper).GetMethod("GetPropertyValue");
+        private static readonly MethodInfo setPropertyValueMethod = typeof(DynamicTypeWrapper).GetMethod("SetPropertyValue");
 
         private const string ModuleName = "MainModule";
 
@@ -33,7 +33,7 @@ namespace System.Web.OData.Query.Expressions
             // Do not have properties, just return base class
             if (!definition.Properties.Any())
             {
-                return typeof(GroupByWrapper);
+                return typeof(DynamicTypeWrapper);
             }
 
             TypeBuilder tb = GetTypeBuilder(definition.Name);
@@ -61,7 +61,7 @@ namespace System.Web.OData.Query.Expressions
                                 TypeAttributes.AnsiClass |
                                 TypeAttributes.BeforeFieldInit |
                                 TypeAttributes.AutoLayout
-                                , typeof(GroupByWrapper));
+                                , typeof(DynamicTypeWrapper));
             return tb;
         }
 

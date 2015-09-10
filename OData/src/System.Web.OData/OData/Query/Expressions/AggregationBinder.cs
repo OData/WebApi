@@ -17,7 +17,6 @@ namespace System.Web.OData.OData.Query.Expressions
 {
     internal class AggregationBinder
     {
-        private const string GroupByContainerProperty = "GroupByContainer";
         private ODataQuerySettings _settings;
         private IAssembliesResolver _assembliesResolver;
         private Type _elementType;
@@ -41,6 +40,8 @@ namespace System.Web.OData.OData.Query.Expressions
             _assembliesResolver = assembliesResolver;
             _elementType = elementType;
             _transformation = transformation;
+
+            Init();
         }
 
         internal Type ResultType
@@ -50,10 +51,7 @@ namespace System.Web.OData.OData.Query.Expressions
 
         public IQueryable Bind(IQueryable query)
         {
-            // TODO: After we switch to QueryNode result for parsing refactor to use 1 binder class per case
-            Init();
-
-            // Answer is query.GroupBy($it => new GroupByWrapper() {...}).Select(GroupBy($it => new AggregationWrapper() {...}))
+            // Answer is query.GroupBy($it => new DynamicType1() {...}).Select(GroupBy($it => new DynamicType1() {...}))
             // We are doing Grouping even if only aggregate was specified to have a IQuaryable after aggregation
             IQueryable grouping = BindGroupBy(query);
 
@@ -99,10 +97,12 @@ namespace System.Web.OData.OData.Query.Expressions
         private IQueryable BindSelect(IQueryable grouping)
         {
             // Should return following expression
-            // .Select($it => New AggregationWrapper() 
+            // .Select($it => New DynamicType2() 
             //                  {
-            //                      GroupByContainer = $it.Key.GroupByContainer,
-            //                      Container = new { Alias = $it.AsQuaryable().Sum(i => i.AggregatableProperty)
+            //                      Prop1 = $it.Prop1,
+            //                      Prop2 = $it.Prop2,
+            //                      ...
+            //                      Alias1 = $it.AsQuaryable().Sum(i => i.AggregatableProperty)
             //                  })
 
             var groupingType = typeof(IGrouping<,>).MakeGenericType(GroupByWrapperType, this._elementType);
@@ -115,7 +115,7 @@ namespace System.Web.OData.OData.Query.Expressions
                 resultTypeDef.Properties.Add(aggregateClause.Alias, aggregationExpression.Type);
             }
 
-            // TODO: Move and initialize earlier?
+            // TODO: Move and initialize earlier as soon as we switch to EdmTypes build during parsing
             this.ResultType = TypeProvider.GetResultType(resultTypeDef);
 
             var keyProperty = ExpressionHelpers.GetPropertyAccessLambda(groupingType, "Key");
@@ -227,9 +227,11 @@ namespace System.Web.OData.OData.Query.Expressions
             if (selectedStatements != null && selectedStatements.Any())
             {
                 // Generates expression
-                // .GroupBy($it => new GroupingByClause()
+                // .GroupBy($it => new DynamicType1()
                 //                                      {
-                //                                          GroupByContainer = new  { $it.Prop1, $it.Prop2, ...}
+                //                                          Prop1 = $it.Prop1,
+                //                                          Prop2 = $it.Prop2,
+                //                                          ...
                 //                                      }) 
 
                 List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
@@ -245,7 +247,7 @@ namespace System.Web.OData.OData.Query.Expressions
             {
 
                 // We do not have properties to aggregate
-                // .GroupBy($it => new GroupingByClause())
+                // .GroupBy($it => new GroupByWrapper())
                 groupLambda = Expression.Lambda(Expression.New(GroupByWrapperType), source);
             }
 

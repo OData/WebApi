@@ -498,7 +498,7 @@ namespace System.Web.OData.Formatter
 
         private static bool IsAggregationWrapper(Type type)
         {
-            return type.IsAssignableFrom(typeof(GroupByWrapper));
+            return typeof(DynamicTypeWrapper).IsAssignableFrom(type);
         }
 
         private static Type ExtractGenericInterface(Type queryType, Type interfaceType)

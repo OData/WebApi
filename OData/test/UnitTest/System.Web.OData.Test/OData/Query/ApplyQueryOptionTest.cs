@@ -204,7 +204,7 @@ namespace System.Web.OData.Test.OData.Query
 
             // Assert
             Assert.NotNull(queryable);
-            var  actualCustomers = Assert.IsAssignableFrom<IEnumerable<GroupByWrapper>>(queryable).ToList();
+            var  actualCustomers = Assert.IsAssignableFrom<IEnumerable<DynamicTypeWrapper>>(queryable).ToList();
 
             Assert.Equal(aggregation.Count(), actualCustomers.Count());
 

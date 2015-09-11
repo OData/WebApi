@@ -20,11 +20,8 @@ using System.Web.OData.Query.Expressions;
 
 namespace System.Web.OData.OData.Query.Expressions
 {
-    internal class AggregationBinder
+    internal class AggregationBinder : ExpressionBinderBase
     {
-        private ODataQuerySettings _settings;
-        private IEdmModel _model;
-        private IAssembliesResolver _assembliesResolver;
         private Type _elementType;
         private AggregationTransformationBase _transformation;
 
@@ -39,17 +36,11 @@ namespace System.Web.OData.OData.Query.Expressions
 
 
         public AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType, IEdmModel model, AggregationTransformationBase transformation)
+            :base(model, assembliesResolver, settings)
         {
-            Contract.Assert(settings != null);
-            Contract.Assert(model != null);
-            Contract.Assert(assembliesResolver != null);
             Contract.Assert(elementType != null);
             Contract.Assert(transformation != null);
 
-
-            _settings = settings;
-            _model = model;
-            _assembliesResolver = assembliesResolver;
             _elementType = elementType;
             _transformation = transformation;
 
@@ -243,11 +234,16 @@ namespace System.Web.OData.OData.Query.Expressions
                     return this._source;
                     // TODO: Add null checks
                 case QueryNodeKind.SingleValuePropertyAccess:
-                    var propAccessNode = (SingleValuePropertyAccessNode)node;
+                    var propAccessNode = node as SingleValuePropertyAccessNode;
                     return Expression.Property(BindAccessor(propAccessNode.Source), propAccessNode.Property.Name);
                 case QueryNodeKind.SingleNavigationNode:
-                    var navNode = (SingleNavigationNode)node;
+                    var navNode = node as SingleNavigationNode;
                     return Expression.Property(BindAccessor(navNode.Source), navNode.NavigationProperty.Name);
+                case QueryNodeKind.BinaryOperator:
+                    var binaryNode = node as BinaryOperatorNode;
+                    var leftExpression = BindAccessor(binaryNode.Left);
+                    var rightExpression = BindAccessor(binaryNode.Right);
+                    return CreateBinaryExpression(binaryNode.OperatorKind, leftExpression, rightExpression, liftToNull: true);
                 default:
                     throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(AggregationBinder).Name);
             }

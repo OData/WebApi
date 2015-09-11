@@ -108,6 +108,14 @@ namespace System.Web.OData.Test.OData.Query
                             new Dictionary<string, object> { { "City", "hobart"} }
                         }
                     },
+                    {
+                        "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", "14"} }
+                        }
+                    },
+
                 };
             }
         }

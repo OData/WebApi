@@ -88,7 +88,6 @@ namespace System.Web.OData.OData.Query.Expressions
                 var groupByClause = this._transformation as ApplyGroupbyClause;
                 if (groupByClause != null)
                 {
-                    //_selectedStatements = groupByClause.SelectedStatements;
                     _selectedProperties = groupByClause.SelectedPropertiesExpressions;
                     _aggregateClause = groupByClause.Aggregate;
                     _grouped = true;
@@ -103,7 +102,6 @@ namespace System.Web.OData.OData.Query.Expressions
         private void CreateGroupByType()
         {
             _groupByTypeDef = new TypeDefinition();
-            ParameterExpression source = Expression.Parameter(this._elementType);
             if (_selectedProperties != null && _selectedProperties.Any())
             {
                 foreach (var prop in _selectedProperties)
@@ -123,6 +121,7 @@ namespace System.Web.OData.OData.Query.Expressions
             //                  {
             //                      Prop1 = $it.Prop1,
             //                      Prop2 = $it.Prop2,
+            //                      Prop3 = $it.NavProp.Prop3
             //                      ...
             //                      Alias1 = $it.AsQuaryable().Sum(i => i.AggregatableProperty)
             //                  })
@@ -139,8 +138,6 @@ namespace System.Web.OData.OData.Query.Expressions
 
             // TODO: Move and initialize earlier as soon as we switch to EdmTypes build during parsing
             this.ResultType = TypeProvider.GetResultType(resultTypeDef);
-
-            var keyProperty = ExpressionHelpers.GetPropertyAccessLambda(groupingType, "Key");
 
             List<MemberAssignment> wrapperTypeMemberAssignments2 = new List<MemberAssignment>();
 
@@ -170,7 +167,7 @@ namespace System.Web.OData.OData.Query.Expressions
         {
             if (_aggregateClause != null)
             {
-                LambdaExpression propertyLambda = ExpressionHelpers.GetPropertyAccessLambda(this._elementType, _aggregateClause.AggregatableProperty);
+                LambdaExpression propertyLambda = Expression.Lambda(BindAccessor(_aggregateClause.AggregatablePropertyExpression.Expression), this._source);
                 // I substitute the element type for all generic arguments.                                                
                 var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(this._elementType);
                 Expression asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
@@ -238,20 +235,19 @@ namespace System.Web.OData.OData.Query.Expressions
             return null;
         }
 
-
-        private Expression BindProperty(SingleValueNode node)
+        private Expression BindAccessor( SingleValueNode node)
         {
             switch(node.Kind)
             {
                 case QueryNodeKind.EntityRangeVariableReference:
                     return this._source;
+                    // TODO: Add null checks
                 case QueryNodeKind.SingleValuePropertyAccess:
                     var propAccessNode = (SingleValuePropertyAccessNode)node;
-                    return Expression.Property(BindProperty(propAccessNode.Source), propAccessNode.Property.Name);
+                    return Expression.Property(BindAccessor(propAccessNode.Source), propAccessNode.Property.Name);
                 case QueryNodeKind.SingleNavigationNode:
                     var navNode = (SingleNavigationNode)node;
-                    return Expression.Property(BindProperty(navNode.Source), navNode.NavigationProperty.Name);
-
+                    return Expression.Property(BindAccessor(navNode.Source), navNode.NavigationProperty.Name);
                 default:
                     throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(AggregationBinder).Name);
             }
@@ -259,11 +255,6 @@ namespace System.Web.OData.OData.Query.Expressions
 
         private IQueryable BindGroupBy(IQueryable query)
         {
-
-            
-
-            ConstructorInfo wrapperConstructor = _groupByWrapperType.GetConstructor(new Type[] { });
-            NewExpression newExpression = Expression.New(wrapperConstructor);
             LambdaExpression groupLambda = null;
             if (_selectedProperties != null && _selectedProperties.Any())
             {
@@ -272,21 +263,17 @@ namespace System.Web.OData.OData.Query.Expressions
                 //                                      {
                 //                                          Prop1 = $it.Prop1,
                 //                                          Prop2 = $it.Prop2,
+                //                                          Prop3 = $it.NavProp.Prop3
                 //                                          ...
                 //                                      }) 
 
                 List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
                 foreach (var prop in _selectedProperties)
                 {
+                    // TODO: Do we support other types except SingleValuePropertyAccessNode?
                     var exp = ((SingleValuePropertyAccessNode)prop.Expression);
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(_groupByWrapperType.GetMember(exp.Property.Name).Single(), BindProperty(prop.Expression)));
-                    //_groupByTypeDef.Properties.Add(property.Name, EdmLibHelpers.GetClrType(property.Type, _model));
+                    wrapperTypeMemberAssignments.Add(Expression.Bind(_groupByWrapperType.GetMember(exp.Property.Name).Single(), BindAccessor(prop.Expression)));
                 }
-                //foreach (var prop in _groupByTypeDef.Properties)
-                //{
-                //    wrapperTypeMemberAssignments.Add(Expression.Bind(_groupByWrapperType.GetMember(prop.Key).Single(), Expression.Property(source, prop.Key)));
-                //}
-
 
                 groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(_groupByWrapperType), wrapperTypeMemberAssignments), this._source);
             }

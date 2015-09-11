@@ -1,4 +1,5 @@
 ﻿using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;
@@ -64,7 +65,7 @@ namespace System.Web.OData.Query.Expressions
         }
 
         private void CreateQueryClauses()
-        {
+            {
             _aggregateClause = this._transformation as ApplyAggregateClause;
             _grouped = false;
             if (_aggregateClause == null)
@@ -159,43 +160,43 @@ namespace System.Web.OData.Query.Expressions
 
                 Expression aggregationExpression;
 
-                switch (_aggregateClause.AggregationMethod)
+                switch (_aggregateClause.AggregationVerb)
                 {
-                    case "min":
+                    case AggregationVerb.Min:
                         {
                             var minMethod = ExpressionHelperMethods.QueryableMin.MakeGenericMethod(this._elementType, propertyLambda.Body.Type);
                             aggregationExpression = Expression.Call(null, minMethod, asQuerableExpression, propertyLambda);
                         }
                         break;
-                    case "max":
+                    case AggregationVerb.Max:
                         {
                             var maxMethod = ExpressionHelperMethods.QueryableMax.MakeGenericMethod(this._elementType, propertyLambda.Body.Type);
                             aggregationExpression = Expression.Call(null, maxMethod, asQuerableExpression, propertyLambda);
                         }
                         break;
-                    case "sum":
+                    case AggregationVerb.Sum:
                         {
                             MethodInfo sumGenericMethod;
                             if (!ExpressionHelperMethods.QueryableSumGenerics.TryGetValue(propertyLambda.Body.Type, out sumGenericMethod))
                             {
-                                throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", _aggregateClause.AggregationMethod, _aggregateClause.AggregatableProperty, propertyLambda.Body.Type));
+                                throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", _aggregateClause.AggregationVerb, _aggregateClause.AggregatableProperty, propertyLambda.Body.Type));
                             }
                             var sumMethod = sumGenericMethod.MakeGenericMethod(this._elementType);
                             aggregationExpression = Expression.Call(null, sumMethod, asQuerableExpression, propertyLambda);
                         }
                         break;
-                    case "average":
+                    case AggregationVerb.Average:
                         {
                             MethodInfo averageGenericMethod;
                             if (!ExpressionHelperMethods.QueryableAverageGenerics.TryGetValue(propertyLambda.Body.Type, out averageGenericMethod))
                             {
-                                throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", _aggregateClause.AggregationMethod, _aggregateClause.AggregatableProperty, propertyLambda.Body.Type));
+                                throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", _aggregateClause.AggregationVerb, _aggregateClause.AggregatableProperty, propertyLambda.Body.Type));
                             }
                             var averageMethod = averageGenericMethod.MakeGenericMethod(this._elementType);
                             aggregationExpression = Expression.Call(null, averageMethod, asQuerableExpression, propertyLambda);
                         }
                         break;
-                    case "countdistinct":
+                    case AggregationVerb.CountDistinct:
                         {
                             // I select the specific field 
                             var selectMethod = ExpressionHelperMethods.QueryableSelectGeneric.MakeGenericMethod(this._elementType, propertyLambda.Body.Type);
@@ -211,11 +212,11 @@ namespace System.Web.OData.Query.Expressions
                         }
                         break;
                     default:
-                        throw new ODataException(Error.Format("Aggregation method '{0}' is not supported.", _aggregateClause.AggregationMethod));
-                }
+                        throw new ODataException(Error.Format("Aggregation method '{0}' is not supported.", _aggregateClause.AggregationVerb));
+            }
 
                 return aggregationExpression;
-            }
+        }
 
             return null;
         }

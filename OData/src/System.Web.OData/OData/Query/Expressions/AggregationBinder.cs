@@ -1,5 +1,8 @@
 ﻿using Microsoft.OData.Core;
+using Microsoft.OData.Core.Aggregation;
 using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Core.UriParser.TreeNodeKinds;
+using Microsoft.OData.Edm;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -10,6 +13,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.Formatter;
+using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using System.Web.OData.Query.Expressions;
 
@@ -18,28 +23,38 @@ namespace System.Web.OData.OData.Query.Expressions
     internal class AggregationBinder
     {
         private ODataQuerySettings _settings;
+        private IEdmModel _model;
         private IAssembliesResolver _assembliesResolver;
         private Type _elementType;
         private AggregationTransformationBase _transformation;
 
+        ParameterExpression _source; 
+
         private ApplyAggregateClause _aggregateClause;
-        private IEnumerable<string> _selectedStatements;
+        //private IEnumerable<string> _selectedStatements;
+        private IList<ExpressionClause> _selectedProperties;
         private bool _grouped = false;
         private Type _groupByWrapperType;
         private TypeDefinition _groupByTypeDef;
 
 
-        public AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType, AggregationTransformationBase transformation)
+        public AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType, IEdmModel model, AggregationTransformationBase transformation)
         {
             Contract.Assert(settings != null);
+            Contract.Assert(model != null);
             Contract.Assert(assembliesResolver != null);
             Contract.Assert(elementType != null);
             Contract.Assert(transformation != null);
 
+
             _settings = settings;
+            _model = model;
             _assembliesResolver = assembliesResolver;
             _elementType = elementType;
             _transformation = transformation;
+
+            // TODO: Do we need to use Range?
+            this._source = Expression.Parameter(this._elementType);
 
             CreateQueryClauses();
             CreateGroupByType();
@@ -68,13 +83,13 @@ namespace System.Web.OData.OData.Query.Expressions
         {
             _aggregateClause = this._transformation as ApplyAggregateClause;
             _grouped = false;
-            _selectedStatements = null;
             if (_aggregateClause == null)
             {
                 var groupByClause = this._transformation as ApplyGroupbyClause;
                 if (groupByClause != null)
                 {
-                    _selectedStatements = groupByClause.SelectedStatements;
+                    //_selectedStatements = groupByClause.SelectedStatements;
+                    _selectedProperties = groupByClause.SelectedPropertiesExpressions;
                     _aggregateClause = groupByClause.Aggregate;
                     _grouped = true;
                 }
@@ -89,12 +104,12 @@ namespace System.Web.OData.OData.Query.Expressions
         {
             _groupByTypeDef = new TypeDefinition();
             ParameterExpression source = Expression.Parameter(this._elementType);
-            if (_selectedStatements != null && _selectedStatements.Any())
+            if (_selectedProperties != null && _selectedProperties.Any())
             {
-                foreach (var propName in _selectedStatements)
+                foreach (var prop in _selectedProperties)
                 {
-                    var propertyName = propName.Trim();
-                    _groupByTypeDef.Properties.Add(propertyName, Expression.Property(source, propertyName).Type);
+                    var property = ((SingleValuePropertyAccessNode)prop.Expression).Property;
+                    _groupByTypeDef.Properties.Add(property.Name, EdmLibHelpers.GetClrType(property.Type, _model));
                 }
             }
 
@@ -223,15 +238,34 @@ namespace System.Web.OData.OData.Query.Expressions
             return null;
         }
 
+
+        private Expression BindProperty(SingleValueNode node)
+        {
+            switch(node.Kind)
+            {
+                case QueryNodeKind.EntityRangeVariableReference:
+                    return this._source;
+                case QueryNodeKind.SingleValuePropertyAccess:
+                    var propAccessNode = (SingleValuePropertyAccessNode)node;
+                    return Expression.Property(BindProperty(propAccessNode.Source), propAccessNode.Property.Name);
+                case QueryNodeKind.SingleNavigationNode:
+                    var navNode = (SingleNavigationNode)node;
+                    return Expression.Property(BindProperty(navNode.Source), navNode.NavigationProperty.Name);
+
+                default:
+                    throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(AggregationBinder).Name);
+            }
+        }
+
         private IQueryable BindGroupBy(IQueryable query)
         {
 
-            ParameterExpression source = Expression.Parameter(this._elementType);
+            
 
             ConstructorInfo wrapperConstructor = _groupByWrapperType.GetConstructor(new Type[] { });
             NewExpression newExpression = Expression.New(wrapperConstructor);
             LambdaExpression groupLambda = null;
-            if (_selectedStatements != null && _selectedStatements.Any())
+            if (_selectedProperties != null && _selectedProperties.Any())
             {
                 // Generates expression
                 // .GroupBy($it => new DynamicType1()
@@ -242,20 +276,26 @@ namespace System.Web.OData.OData.Query.Expressions
                 //                                      }) 
 
                 List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
-                foreach (var prop in _groupByTypeDef.Properties)
+                foreach (var prop in _selectedProperties)
                 {
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(_groupByWrapperType.GetMember(prop.Key).Single(), Expression.Property(source, prop.Key)));
+                    var exp = ((SingleValuePropertyAccessNode)prop.Expression);
+                    wrapperTypeMemberAssignments.Add(Expression.Bind(_groupByWrapperType.GetMember(exp.Property.Name).Single(), BindProperty(prop.Expression)));
+                    //_groupByTypeDef.Properties.Add(property.Name, EdmLibHelpers.GetClrType(property.Type, _model));
                 }
+                //foreach (var prop in _groupByTypeDef.Properties)
+                //{
+                //    wrapperTypeMemberAssignments.Add(Expression.Bind(_groupByWrapperType.GetMember(prop.Key).Single(), Expression.Property(source, prop.Key)));
+                //}
 
-                
-                groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(_groupByWrapperType), wrapperTypeMemberAssignments), source);
+
+                groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(_groupByWrapperType), wrapperTypeMemberAssignments), this._source);
             }
             else
             {
 
                 // We do not have properties to aggregate
                 // .GroupBy($it => new GroupByWrapper())
-                groupLambda = Expression.Lambda(Expression.New(_groupByWrapperType), source);
+                groupLambda = Expression.Lambda(Expression.New(_groupByWrapperType), this._source);
             }
 
             return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, _groupByWrapperType);

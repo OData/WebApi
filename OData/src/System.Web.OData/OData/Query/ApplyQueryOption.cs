@@ -186,7 +186,7 @@ namespace System.Web.OData.Query
                 else
                 {
 
-                    var binder = new AggregationBinder(querySettings, assembliesResolver, elementType, transformation);
+                    var binder = new AggregationBinder(querySettings, assembliesResolver, elementType, Context.Model, transformation);
                     query =  binder.Bind(query);
                     elementType = binder.ResultType;
                 }

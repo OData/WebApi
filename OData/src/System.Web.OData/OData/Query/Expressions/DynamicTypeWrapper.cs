@@ -104,7 +104,7 @@ namespace System.Web.OData.Query.Expressions
             long hash = 1870403278L; //Arbitrary number from Anonymous Type GetHashCode implementation
             foreach (var v in this._values.Values)
             {
-                hash = hash * -1521134295L + v.GetHashCode();
+                hash = hash * -1521134295L + (v == null ? 0: v.GetHashCode());
             }
 
             return (int)hash;

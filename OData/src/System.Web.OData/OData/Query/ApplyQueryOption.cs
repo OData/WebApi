@@ -176,17 +176,6 @@ namespace System.Web.OData.Query
 
             var elementType = Context.ElementClrType;
             foreach (var tuple in applyClause.Transformations) {
-                // TODO: We have an issue with Expression generation for classes that not backed by ClrTypes
-                // It's honestly the biggest challenge to date with OData itself
-                // Aggreagtion wrapper doesn't show properties of that types as a result we are getting "Instance property not found exception"
-                // After we switch to OData design for Clauses we should implement that in proper way
-                // For now just throw exception if we have transformations after aggregation
-
-                if (elementType.IsGenericType && elementType.GetGenericTypeDefinition() == typeof(AggregationWrapper<>))
-                {
-                        throw new NotImplementedException("Transformations after aggregation or groupby not supported yet");
-                }
-
                 var transformation = tuple.Item2;
                 if (!(transformation is ApplyGroupbyClause || transformation is ApplyAggregateClause))
                 {
@@ -199,7 +188,7 @@ namespace System.Web.OData.Query
 
                     var binder = new AggregationBinder(querySettings, assembliesResolver, elementType, transformation);
                     query =  binder.Bind(query);
-                    elementType = typeof(AggregationWrapper<>).MakeGenericType(elementType);
+                    elementType = binder.ResultType;
                 }
                 
             }

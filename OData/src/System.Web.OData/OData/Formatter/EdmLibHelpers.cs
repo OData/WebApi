@@ -21,6 +21,7 @@ using Microsoft.OData.Edm.Expressions;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.Spatial;
+using System.Web.OData.OData.Query.Expressions;
 
 namespace System.Web.OData.Formatter
 {
@@ -138,11 +139,9 @@ namespace System.Web.OData.Formatter
                         {
                             elementClrType = entityType;
                         }
-                        else if (IsAggregationWrapper(elementClrType, out entityType))
+                        else if (IsDynamicTypeWrapper(elementClrType))
                         {
-                            //elementClrType = entityType;
                             return new EdmCollectionType(Extension.GetDynamicEntityType().ToEdmTypeReference(true));
-
                         }
 
                         IEdmType elementType = GetEdmType(edmModel, elementClrType, testCollections: false);
@@ -497,21 +496,9 @@ namespace System.Web.OData.Formatter
             return IsSelectExpandWrapper(type.BaseType, out entityType);
         }
 
-        private static bool IsAggregationWrapper(Type type, out Type entityType)
+        private static bool IsDynamicTypeWrapper(Type type)
         {
-            if (type == null)
-            {
-                entityType = null;
-                return false;
-            }
-
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(GroupByWrapper<>))
-            {
-                entityType = type.GetGenericArguments()[0];
-                return true;
-            }
-
-            return IsAggregationWrapper(type.BaseType, out entityType);
+            return typeof(DynamicTypeWrapper).IsAssignableFrom(type);
         }
 
         private static Type ExtractGenericInterface(Type queryType, Type interfaceType)

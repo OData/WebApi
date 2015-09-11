@@ -127,10 +127,11 @@
     <Compile Include="OData\ETagMessageHandler.cs" />
     <Compile Include="OData\Formatter\ODataCountMediaTypeMapping.cs" />
     <Compile Include="OData\Query\Expressions\AggregationBinder.cs" />
-    <Compile Include="OData\Query\Expressions\AggregationWrapper.cs" />
     <Compile Include="OData\Query\ApplyQueryOption.cs" />
-    <Compile Include="OData\Query\Expressions\GroupByWrapper.cs" />
+    <Compile Include="OData\Query\Expressions\DynamicTypeWrapper.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
+    <Compile Include="OData\Query\Expressions\TypeDefinition.cs" />
+    <Compile Include="OData\Query\Expressions\TypeProvider.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
     <Compile Include="OData\Query\NotCountableAttribute.cs" />
     <Compile Include="OData\Query\NotFilterableAttribute.cs" />

@@ -20,6 +20,7 @@ using Microsoft.TestCommon.Types;
 using Moq;
 using Address = System.Web.OData.Builder.TestModels.Address;
 using System.Web.OData.Query;
+using System.Web.OData.OData.Query.Expressions;
 
 namespace System.Web.OData.Test.OData.Query
 {
@@ -76,15 +77,6 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
-                        "groupby(Name,aggregate(CustomerId with sum as CustomerId))",
-                        new List<Dictionary<string, object>>
-                        {
-                            new Dictionary<string, object> { { "Name", "Lowest"}, { "CustomerId", "5"} },
-                            new Dictionary<string, object> { { "Name", "Highest"}, { "CustomerId", "2" } },
-                            new Dictionary<string, object> { { "Name", "Middle"}, { "CustomerId", "3"} }
-                        }
-                    },
-                    {
                         "groupby(Name)",
                         new List<Dictionary<string, object>>
                         {
@@ -95,6 +87,13 @@ namespace System.Web.OData.Test.OData.Query
                     },
                     {
                         "filter(Name eq 'Lowest')/groupby(Name)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"} }
+                        }
+                    },
+                    {
+                        "groupby(Name)/filter(Name eq 'Lowest')",
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> { { "Name", "Lowest"} }
@@ -205,7 +204,7 @@ namespace System.Web.OData.Test.OData.Query
 
             // Assert
             Assert.NotNull(queryable);
-            var  actualCustomers = Assert.IsAssignableFrom<IEnumerable<GroupByWrapper<Customer>>>(queryable).ToList();
+            var  actualCustomers = Assert.IsAssignableFrom<IEnumerable<DynamicTypeWrapper>>(queryable).ToList();
 
             Assert.Equal(aggregation.Count(), actualCustomers.Count());
 

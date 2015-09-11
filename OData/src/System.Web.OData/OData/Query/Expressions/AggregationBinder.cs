@@ -25,18 +25,17 @@ namespace System.Web.OData.OData.Query.Expressions
         private Type _elementType;
         private AggregationTransformationBase _transformation;
 
-        ParameterExpression _source; 
+        ParameterExpression _lambdaParameter;
 
         private ApplyAggregateClause _aggregateClause;
-        //private IEnumerable<string> _selectedStatements;
-        private IList<ExpressionClause> _selectedProperties;
+        private IList<SingleValuePropertyAccessNode> _selectedProperties;
         private bool _grouped = false;
         private Type _groupByWrapperType;
         private TypeDefinition _groupByTypeDef;
 
 
         public AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType, IEdmModel model, AggregationTransformationBase transformation)
-            :base(model, assembliesResolver, settings)
+            : base(model, assembliesResolver, settings)
         {
             Contract.Assert(elementType != null);
             Contract.Assert(transformation != null);
@@ -45,7 +44,7 @@ namespace System.Web.OData.OData.Query.Expressions
             _transformation = transformation;
 
             // TODO: Do we need to use Range?
-            this._source = Expression.Parameter(this._elementType);
+            this._lambdaParameter = Expression.Parameter(this._elementType);
 
             CreateQueryClauses();
             CreateGroupByType();
@@ -79,7 +78,8 @@ namespace System.Web.OData.OData.Query.Expressions
                 var groupByClause = this._transformation as ApplyGroupbyClause;
                 if (groupByClause != null)
                 {
-                    _selectedProperties = groupByClause.SelectedPropertiesExpressions;
+                    // TODO: After refactoring of GroupByClause it will just have that property IList<SingleValuePropertyAccessNode>
+                    _selectedProperties = groupByClause.SelectedPropertiesExpressions.Select(p => p.Expression).Cast<SingleValuePropertyAccessNode>().ToList();
                     _aggregateClause = groupByClause.Aggregate;
                     _grouped = true;
                 }
@@ -93,12 +93,12 @@ namespace System.Web.OData.OData.Query.Expressions
         private void CreateGroupByType()
         {
             _groupByTypeDef = new TypeDefinition();
+            // TODO: As soon we have IEdmType after parsing just use it
             if (_selectedProperties != null && _selectedProperties.Any())
             {
-                foreach (var prop in _selectedProperties)
+                foreach (var node in _selectedProperties)
                 {
-                    var property = ((SingleValuePropertyAccessNode)prop.Expression).Property;
-                    _groupByTypeDef.Properties.Add(property.Name, EdmLibHelpers.GetClrType(property.Type, _model));
+                    _groupByTypeDef.Properties.Add(node.Property.Name, EdmLibHelpers.GetClrType(node.Property.Type, _model));
                 }
             }
 
@@ -135,7 +135,7 @@ namespace System.Web.OData.OData.Query.Expressions
             // Setting GroupByContainer property when previous step was grouping
             if (_grouped)
             {
-                
+
                 foreach (var prop in _groupByTypeDef.Properties)
                 {
                     wrapperTypeMemberAssignments2.Add(Expression.Bind(ResultType.GetMember(prop.Key).Single(), Expression.Property(Expression.Property(accum, "Key"), prop.Key)));
@@ -158,7 +158,7 @@ namespace System.Web.OData.OData.Query.Expressions
         {
             if (_aggregateClause != null)
             {
-                LambdaExpression propertyLambda = Expression.Lambda(BindAccessor(_aggregateClause.AggregatablePropertyExpression.Expression), this._source);
+                LambdaExpression propertyLambda = Expression.Lambda(BindAccessor(_aggregateClause.AggregatablePropertyExpression.Expression), this._lambdaParameter);
                 // I substitute the element type for all generic arguments.                                                
                 var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(this._elementType);
                 Expression asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
@@ -226,28 +226,55 @@ namespace System.Web.OData.OData.Query.Expressions
             return null;
         }
 
-        private Expression BindAccessor( SingleValueNode node)
+        private Expression BindAccessor(SingleValueNode node)
         {
-            switch(node.Kind)
+            switch (node.Kind)
             {
                 case QueryNodeKind.EntityRangeVariableReference:
-                    return this._source;
-                    // TODO: Add null checks
+                    return this._lambdaParameter;
+                // TODO: Add null checks
                 case QueryNodeKind.SingleValuePropertyAccess:
                     var propAccessNode = node as SingleValuePropertyAccessNode;
-                    return Expression.Property(BindAccessor(propAccessNode.Source), propAccessNode.Property.Name);
+                    return CreatePropertyAccessExpression(BindAccessor(propAccessNode.Source), propAccessNode.Property);
                 case QueryNodeKind.SingleNavigationNode:
                     var navNode = node as SingleNavigationNode;
-                    return Expression.Property(BindAccessor(navNode.Source), navNode.NavigationProperty.Name);
+                    return CreatePropertyAccessExpression(BindAccessor(navNode.Source), navNode.NavigationProperty);
                 case QueryNodeKind.BinaryOperator:
                     var binaryNode = node as BinaryOperatorNode;
                     var leftExpression = BindAccessor(binaryNode.Left);
                     var rightExpression = BindAccessor(binaryNode.Right);
                     return CreateBinaryExpression(binaryNode.OperatorKind, leftExpression, rightExpression, liftToNull: true);
+                case QueryNodeKind.Convert:
+                    var convertNode = node as ConvertNode;
+                    return CreateConvertExpression(convertNode, BindAccessor(convertNode.Source));
                 default:
                     throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(AggregationBinder).Name);
             }
         }
+
+        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property)
+        {
+            string propertyName = EdmLibHelpers.GetClrPropertyName(property, _model);
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) && source != this._lambdaParameter)
+            {
+                Expression propertyAccessExpression = Expression.Property(RemoveInnerNullPropagation(source), propertyName);
+
+                // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
+                // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
+
+                Expression ifFalse = ToNullable(ConvertNonStandardPrimitives(propertyAccessExpression));
+                return
+                    Expression.Condition(
+                        test: Expression.Equal(source, _nullConstant),
+                        ifTrue: Expression.Constant(null, ifFalse.Type),
+                        ifFalse: ifFalse);
+            }
+            else
+            {
+                return ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+            }
+        }
+
 
         private IQueryable BindGroupBy(IQueryable query)
         {
@@ -264,21 +291,19 @@ namespace System.Web.OData.OData.Query.Expressions
                 //                                      }) 
 
                 List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
-                foreach (var prop in _selectedProperties)
+                foreach (var node in _selectedProperties)
                 {
-                    // TODO: Do we support other types except SingleValuePropertyAccessNode?
-                    var exp = ((SingleValuePropertyAccessNode)prop.Expression);
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(_groupByWrapperType.GetMember(exp.Property.Name).Single(), BindAccessor(prop.Expression)));
+                    wrapperTypeMemberAssignments.Add(Expression.Bind(_groupByWrapperType.GetMember(node.Property.Name).Single(), BindAccessor(node)));
                 }
 
-                groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(_groupByWrapperType), wrapperTypeMemberAssignments), this._source);
+                groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(_groupByWrapperType), wrapperTypeMemberAssignments), this._lambdaParameter);
             }
             else
             {
 
                 // We do not have properties to aggregate
                 // .GroupBy($it => new GroupByWrapper())
-                groupLambda = Expression.Lambda(Expression.New(_groupByWrapperType), this._source);
+                groupLambda = Expression.Lambda(Expression.New(_groupByWrapperType), this._lambdaParameter);
             }
 
             return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, _groupByWrapperType);

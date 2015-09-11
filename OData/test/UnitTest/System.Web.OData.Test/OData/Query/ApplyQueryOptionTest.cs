@@ -105,17 +105,25 @@ namespace System.Web.OData.Test.OData.Query
                         {
                             new Dictionary<string, object> { { "City", "redmond"} },
                             new Dictionary<string, object> { { "City", "seattle"} },
-                            new Dictionary<string, object> { { "City", "hobart"} }
+                            new Dictionary<string, object> { { "City", "hobart"} },
+                            new Dictionary<string, object> { { "City", null} },
                         }
                     },
                     {
                         "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "CustomerId", "14"} }
+                            new Dictionary<string, object> { { "CustomerId", "30"} }
                         }
                     },
-
+                    {
+                        // Note SharePrice and CustomerId have different type
+                        "aggregate(SharePrice mul CustomerId with sum as Result)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Result", "15.0"} }
+                        }
+                    },
                 };
             }
         }
@@ -213,7 +221,7 @@ namespace System.Web.OData.Test.OData.Query
                             .GetEdmModel();
             var context = new ODataQueryContext(model, typeof(Customer));
             var applyOption = new ApplyQueryOption(filter, context);
-            IEnumerable<Customer> customers = CustomerApplyTestData.Where( c=> c.Address != null);
+            IEnumerable<Customer> customers = CustomerApplyTestData;
 
             // Act
             IQueryable queryable = applyOption.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });

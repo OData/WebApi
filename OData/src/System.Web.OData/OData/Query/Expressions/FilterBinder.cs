@@ -453,53 +453,7 @@ namespace System.Web.OData.Query.Expressions
 
             Expression source = Bind(convertNode.Source);
 
-            Type conversionType = EdmLibHelpers.GetClrType(convertNode.TypeReference, _model, _assembliesResolver);
-
-            if (conversionType == typeof(bool?) && source.Type == typeof(bool))
-            {
-                // we handle null propagation ourselves. So, if converting from bool to Nullable<bool> ignore.
-                return source;
-            }
-            else if (conversionType == typeof(Date?) && 
-                (source.Type == typeof(DateTimeOffset?) || source.Type == typeof(DateTime?)))
-            {
-                return source;
-            }
-            else if (conversionType == typeof(TimeOfDay?) &&
-                (source.Type == typeof(DateTimeOffset?) || source.Type == typeof(DateTime?)))
-            {
-                return source;
-            }
-            else if (source == _nullConstant)
-            {
-                return source;
-            }
-            else
-            {
-                if (TypeHelper.IsEnum(source.Type))
-                {
-                    // we handle enum conversions ourselves
-                    return source;
-                }
-                else
-                {
-                    // if a cast is from Nullable<T> to Non-Nullable<T> we need to check if source is null
-                    if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True
-                        && IsNullable(source.Type) && !IsNullable(conversionType))
-                    {
-                        // source == null ? null : source.Value
-                        return
-                            Expression.Condition(
-                            test: CheckForNull(source),
-                            ifTrue: Expression.Constant(null, ToNullable(conversionType)),
-                            ifFalse: Expression.Convert(ExtractValueFromNullableExpression(source), ToNullable(conversionType)));
-                    }
-                    else
-                    {
-                        return Expression.Convert(source, conversionType);
-                    }
-                }
-            }
+            return CreateConvertExpression(convertNode, source);
         }
 
         private LambdaExpression BindExpression(SingleValueNode expression, RangeVariable rangeVariable, Type elementType)
@@ -1235,83 +1189,6 @@ namespace System.Web.OData.Query.Expressions
 
             _lambdaParameters = newParameters;
             return lambdaIt;
-        }
-
-        // If the expression is of non-standard edm primitive type (like uint), convert the expression to its standard edm type.
-        // Also, note that only expressions generated for ushort, uint and ulong can be understood by linq2sql and EF.
-        // The rest (char, char[], Binary) would cause issues with linq2sql and EF.
-        private Expression ConvertNonStandardPrimitives(Expression source)
-        {
-            bool isNonstandardEdmPrimitive;
-            Type conversionType = EdmLibHelpers.IsNonstandardEdmPrimitive(source.Type, out isNonstandardEdmPrimitive);
-
-            if (isNonstandardEdmPrimitive)
-            {
-                Type sourceType = TypeHelper.GetUnderlyingTypeOrSelf(source.Type);
-
-                Contract.Assert(sourceType != conversionType);
-
-                Expression convertedExpression = null;
-
-                if (sourceType.IsEnum)
-                {
-                    // we handle enum conversions ourselves
-                    convertedExpression = source;
-                }
-                else
-                {
-                    switch (Type.GetTypeCode(sourceType))
-                    {
-                        case TypeCode.UInt16:
-                        case TypeCode.UInt32:
-                        case TypeCode.UInt64:
-                            convertedExpression = Expression.Convert(ExtractValueFromNullableExpression(source), conversionType);
-                            break;
-
-                        case TypeCode.Char:
-                            convertedExpression = Expression.Call(ExtractValueFromNullableExpression(source), "ToString", typeArguments: null, arguments: null);
-                            break;
-
-                        case TypeCode.DateTime:
-                            convertedExpression = source;
-                            break;
-
-                        case TypeCode.Object:
-                            if (sourceType == typeof(char[]))
-                            {
-                                convertedExpression = Expression.New(typeof(string).GetConstructor(new[] { typeof(char[]) }), source);
-                            }
-                            else if (sourceType == typeof(XElement))
-                            {
-                                convertedExpression = Expression.Call(source, "ToString", typeArguments: null, arguments: null);
-                            }
-                            else if (sourceType == typeof(Binary))
-                            {
-                                convertedExpression = Expression.Call(source, "ToArray", typeArguments: null, arguments: null);
-                            }
-                            break;
-
-                        default:
-                            Contract.Assert(false, Error.Format("missing non-standard type support for {0}", sourceType.Name));
-                            break;
-                    }
-                }
-
-                if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
-                {
-                    // source == null ? null : source
-                    return Expression.Condition(
-                        CheckForNull(source),
-                        ifTrue: Expression.Constant(null, ToNullable(convertedExpression.Type)),
-                        ifFalse: ToNullable(convertedExpression));
-                }
-                else
-                {
-                    return convertedExpression;
-                }
-            }
-
-            return source;
         }
 
         private void EnterLambdaScope()

@@ -1,24 +1,18 @@
 ﻿using Microsoft.OData.Core;
-using Microsoft.OData.Core.Aggregation;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
-using System.Web.OData.Query;
-using System.Web.OData.Query.Expressions;
 
-namespace System.Web.OData.OData.Query.Expressions
+namespace System.Web.OData.Query.Expressions
 {
     internal class AggregationBinder : ExpressionBinderBase
     {

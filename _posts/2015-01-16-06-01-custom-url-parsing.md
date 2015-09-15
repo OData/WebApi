@@ -40,6 +40,16 @@ Original call:
 Now, you can call as:
 * ~/odata/Customers(112)/GetOrdersCount(factor=1)
 
+Since Web API OData 5.6, it enables unqualified function in attribut routing. So, Users can add the unqualified function template. For example:
+{% highlight csharp %}
+[HttpGet]  
+ODataRoute("Customers({key})/GetOrdersCount(factor={factor})")]  
+public IHttpActionResult GetOrdersCount(int key, [FromODataUri]int factor)
+{
+ ...
+ }
+{% endhighlight %}
+
 #### Enum prefix free
 User can configure as below to support basic string as enum parser behavior.
 

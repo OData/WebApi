@@ -65,7 +65,7 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
-                        "groupby(Name)",
+                        "groupby((Name))",
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> { { "Name", "Lowest"} },
@@ -74,21 +74,21 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
-                        "filter(Name eq 'Lowest')/groupby(Name)",
+                        "filter(Name eq 'Lowest')/groupby((Name))",
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> { { "Name", "Lowest"} }
                         }
                     },
                     {
-                        "groupby(Name)/filter(Name eq 'Lowest')",
+                        "groupby((Name))/filter(Name eq 'Lowest')",
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> { { "Name", "Lowest"} }
                         }
                     },
                     {
-                        "groupby(Address/City)",
+                        "groupby((Address/City))",
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> { { "City", "redmond"} },

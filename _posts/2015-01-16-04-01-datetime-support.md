@@ -47,7 +47,7 @@ GET ~/Customers?$filter=Birthday lt cast(2015-04-01T04:11:31%2B08:00,Edm.DateTim
 GET ~/Customers?$filter=year(Birthday) eq 2010
 {% endhighlight %}
 
-### $order **DateTime** 
+### $orderby **DateTime** 
 
 Since Web API OData 5.6, it supports to orderby on DateTime type. For example:
 {% highlight csharp %}

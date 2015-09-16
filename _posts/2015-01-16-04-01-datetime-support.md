@@ -39,4 +39,20 @@ TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standar
 configuration.SetTimeZoneInfo(timeZoneInfo);
 {% endhighlight %}
 
+### $filter **DateTime** 
+
+Since Web API OData 5.6, it supports to filter on DateTime type. For example:
+{% highlight csharp %}
+GET ~/Customers?$filter=Birthday lt cast(2015-04-01T04:11:31%2B08:00,Edm.DateTimeOffset)
+GET ~/Customers?$filter=year(Birthday) eq 2010
+{% endhighlight %}
+
+### $order **DateTime** 
+
+Since Web API OData 5.6, it supports to orderby on DateTime type. For example:
+{% highlight csharp %}
+GET ~/Customers?$orderby=Birthday
+GET ~/Customers?$orderby=Birthday desc
+{% endhighlight %}
+
 Thanks.

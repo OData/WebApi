@@ -12,14 +12,19 @@ OData methods and properties can be GET/SET through ODataProperties, including:
 	 
 <strong>Model</strong>
 The EDM model associated with the request.
+
 <strong>Path</strong>
 The ODataPath of the request.
+
 <strong>PathHandler</strong>  
 By default, it would return DefaultODataPathHandler.
+
 <strong>RouteName</strong>
 The Route name for generating OData links.
+
 <strong>SelectExpandClause</strong>
 The parsed the OData SelectExpandClause of the request.
+
 <strong>NextLink</strong> 
 Next page link of the results, can be set through GetNextPageLink.
 

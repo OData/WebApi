@@ -16,8 +16,8 @@ The EDM model associated with the request.
 <strong>Path</strong>
 The ODataPath of the request.
 
-<strong>PathHandler</strong>  
-By default, it would return DefaultODataPathHandler.
+<strong>PathHandler</strong>
+Return DefaultODataPathHandler by default.
 
 <strong>RouteName</strong>
 The Route name for generating OData links.

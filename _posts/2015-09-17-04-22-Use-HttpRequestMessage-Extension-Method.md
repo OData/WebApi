@@ -34,7 +34,7 @@ private string GetServiceRootUri()
   var serviceRootUri = requestUri.Substring(0, requestUri.IndexOf(prefixName) + prefixName.Length);
   return serviceRootUri;
 }
-{% highlight csharp %}
+{% endhighlight %}
   
 ## GetNextPageLink
 Create a link for the next page of results, can be used as the value of `@odata.nextLink`.
@@ -42,7 +42,7 @@ For example, the request Url is `http://localhost/Customers/?$select=Name`.
 {% highlight csharp %}
 Uri nextlink = this.Request.GetNextPageLink(pageSize:10);
 this.Request.ODataProperties().NextLink = nextlink;
-{% highlight csharp %}
+{% endhighlight %}
 Then the nextlink generated is `http://localhost/Customers/?$select=Name&$skip=10`.
 
 ## GetETag
@@ -50,7 +50,7 @@ Get the etag for the given request.
 {% highlight csharp %}
 EntityTagHeaderValue etagHeaderValue = this.Request.Headers.IfMatch.SingleOrDefault();
 ETag etag = this.Request.GetETag(etagHeaderValue);
-{% highlight csharp %}
+{% endhighlight %}
 
 ## CreateErrorResponse
 Create a HttpResponseMessage to represent an error.
@@ -69,7 +69,7 @@ public HttpResponseMessage Post()
 
   return this.Request.CreateErrorResponse(HttpStatusCode.BadRequest, error);
 }
-{% highlight csharp %}
+{% endhighlight %}
 
 Then payload would be like:
 

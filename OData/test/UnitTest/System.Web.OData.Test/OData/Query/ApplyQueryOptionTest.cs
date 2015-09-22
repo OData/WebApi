@@ -64,14 +64,13 @@ namespace System.Web.OData.Test.OData.Query
                             new Dictionary<string, object> { { "SharePrice", "6.25"} }
                         }
                     },
-                    // TODO: Uncomment when parser will support multiple statements in aggregate
-                    //{
-                    //    "aggregate(CustomerId with sum as Total, SharePrice with countdistinct as SharePriceDistinctCount)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "SharePriceDistinctCount", "3"}, { "Total", "10"} }
-                    //    }
-                    //},
+                    {
+                        "aggregate(CustomerId with sum as Total, SharePrice with countdistinct as SharePriceDistinctCount)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePriceDistinctCount", "3"}, { "Total", "10"} }
+                        }
+                    },
                     {
                         "groupby((Name))",
                         new List<Dictionary<string, object>>

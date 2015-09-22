@@ -18,18 +18,17 @@ namespace System.Web.OData.Query.Expressions
     internal class AggregationBinder : ExpressionBinderBase
     {
         private Type _elementType;
-        private AggregationTransformationBase _transformation;
+        private QueryNode _transformation;
 
         ParameterExpression _lambdaParameter;
 
-        private ApplyAggregateClause _aggregateClause;
-        private IList<SingleValuePropertyAccessNode> _selectedProperties;
+        private AggregateNode2 _aggregateClause;
+        private IEnumerable<SingleValuePropertyAccessNode> _selectedProperties;
         private bool _grouped = false;
-        private Type _groupByWrapperType;
-        private TypeDefinition _groupByTypeDef;
 
+        private Type _groupByClrType;
 
-        public AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType, IEdmModel model, AggregationTransformationBase transformation)
+        public AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType, IEdmModel model, QueryNode transformation)
             : base(model, assembliesResolver, settings)
         {
             Contract.Assert(elementType != null);
@@ -38,17 +37,45 @@ namespace System.Web.OData.Query.Expressions
             _elementType = elementType;
             _transformation = transformation;
 
-            // TODO: Do we need to use Range?
             this._lambdaParameter = Expression.Parameter(this._elementType);
 
-            CreateQueryClauses();
-            CreateGroupByType();
+            _aggregateClause = this._transformation as AggregateNode2;
+            _grouped = false;
+            if (_aggregateClause == null)
+            {
+                var groupByClause = this._transformation as GroupByNode2;
+                if (groupByClause != null)
+                {
+                    _selectedProperties = groupByClause.GroupingProperties;
+                    ResultType = groupByClause.TypeReference.Definition as IEdmStructuredType;
+                    _aggregateClause = groupByClause.Aggregate;
+                    _grouped = true;
+                    _groupByClrType = TypeProvider.GetResultType(groupByClause.GroupingTypeReference.Definition as IEdmStructuredType, _model);
+                }
+                else
+                {
+                    throw new NotSupportedException(string.Format("Not supported transformation type {0}", this._transformation));
+                }
+            }
+            else
+            {
+                ResultType = _aggregateClause.TypeReference.Definition as IEdmStructuredType;
+            }
+
+            ResultClrType = TypeProvider.GetResultType(ResultType, _model);
+
+            _groupByClrType = _groupByClrType ?? ResultClrType;
         }
 
         /// <summary>
         /// Gets CLR type returned from the query.
         /// </summary>
-        public Type ResultType
+        public Type ResultClrType
+        {
+            get; private set;
+        }
+
+        public IEdmStructuredType ResultType
         {
             get; private set;
         }
@@ -64,42 +91,6 @@ namespace System.Web.OData.Query.Expressions
             return result;
         }
 
-        private void CreateQueryClauses()
-            {
-            _aggregateClause = this._transformation as ApplyAggregateClause;
-            _grouped = false;
-            if (_aggregateClause == null)
-            {
-                var groupByClause = this._transformation as ApplyGroupbyClause;
-                if (groupByClause != null)
-                {
-                    // TODO: After refactoring of GroupByClause it will just have that property IList<SingleValuePropertyAccessNode>
-                    _selectedProperties = groupByClause.SelectedPropertiesExpressions.Select(p => p.Expression).Cast<SingleValuePropertyAccessNode>().ToList();
-                    _aggregateClause = groupByClause.Aggregate;
-                    _grouped = true;
-                }
-                else
-                {
-                    throw new NotSupportedException(string.Format("Not supported transformation type {0}", this._transformation));
-                }
-            }
-        }
-
-        private void CreateGroupByType()
-        {
-            _groupByTypeDef = new TypeDefinition();
-            // TODO: As soon we have IEdmType after parsing just use it
-            if (_selectedProperties != null && _selectedProperties.Any())
-            {
-                foreach (var node in _selectedProperties)
-                {
-                    _groupByTypeDef.Properties.Add(node.Property.Name, EdmLibHelpers.GetClrType(node.Property.Type, _model));
-                }
-            }
-
-            _groupByWrapperType = TypeProvider.GetResultType(_groupByTypeDef);
-        }
-
         private IQueryable BindSelect(IQueryable grouping)
         {
             // Should return following expression
@@ -112,55 +103,47 @@ namespace System.Web.OData.Query.Expressions
             //                      Alias1 = $it.AsQuaryable().Sum(i => i.AggregatableProperty)
             //                  })
 
-            var groupingType = typeof(IGrouping<,>).MakeGenericType(_groupByWrapperType, this._elementType);
+            var groupingType = typeof(IGrouping<,>).MakeGenericType(this._groupByClrType, this._elementType);
             ParameterExpression accum = Expression.Parameter(groupingType);
-            Expression aggregationExpression = CreateAggregationExpression(accum);
-
-            var resultTypeDef = this._groupByTypeDef.Clone();
-            if (_aggregateClause != null)
-            {
-                resultTypeDef.Properties.Add(_aggregateClause.Alias, aggregationExpression.Type);
-            }
-
-            // TODO: Move and initialize earlier as soon as we switch to EdmTypes build during parsing
-            this.ResultType = TypeProvider.GetResultType(resultTypeDef);
 
             List<MemberAssignment> wrapperTypeMemberAssignments2 = new List<MemberAssignment>();
 
             // Setting GroupByContainer property when previous step was grouping
             if (_grouped)
             {
-
-                foreach (var prop in _groupByTypeDef.Properties)
+                foreach (var prop in _selectedProperties)
                 {
-                    wrapperTypeMemberAssignments2.Add(Expression.Bind(ResultType.GetMember(prop.Key).Single(), Expression.Property(Expression.Property(accum, "Key"), prop.Key)));
+                    wrapperTypeMemberAssignments2.Add(Expression.Bind(ResultClrType.GetMember(prop.Property.Name).Single(), Expression.Property(Expression.Property(accum, "Key"), prop.Property.Name)));
                 }
             }
 
             // Setting Container property when we have aggregation clauses
             if (_aggregateClause != null)
             {
-                wrapperTypeMemberAssignments2.Add(Expression.Bind(ResultType.GetMember(_aggregateClause.Alias).Single(), aggregationExpression));
+                foreach (var aggStatement in _aggregateClause.Statements)
+                {
+                    wrapperTypeMemberAssignments2.Add(Expression.Bind(ResultClrType.GetMember(aggStatement.AsAlias).Single(), CreateAggregationExpression(accum, aggStatement)));
+                }
             }
 
-            var selectLambda = Expression.Lambda(Expression.MemberInit(Expression.New(ResultType), wrapperTypeMemberAssignments2), accum);
+            var selectLambda = Expression.Lambda(Expression.MemberInit(Expression.New(ResultClrType), wrapperTypeMemberAssignments2), accum);
 
             var result = ExpressionHelpers.Select(grouping, selectLambda, groupingType);
             return result;
         }
 
-        private Expression CreateAggregationExpression(ParameterExpression accum)
+        private Expression CreateAggregationExpression(ParameterExpression accum, AggregateStatementNode2 statement)
         {
             if (_aggregateClause != null)
             {
-                LambdaExpression propertyLambda = Expression.Lambda(BindAccessor(_aggregateClause.AggregatablePropertyExpression.Expression), this._lambdaParameter);
+                LambdaExpression propertyLambda = Expression.Lambda(BindAccessor(statement.Expression), this._lambdaParameter);
                 // I substitute the element type for all generic arguments.                                                
                 var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(this._elementType);
                 Expression asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
 
                 Expression aggregationExpression;
 
-                switch (_aggregateClause.AggregationVerb)
+                switch (statement.WithVerb)
                 {
                     case AggregationVerb.Min:
                         {
@@ -179,7 +162,7 @@ namespace System.Web.OData.Query.Expressions
                             MethodInfo sumGenericMethod;
                             if (!ExpressionHelperMethods.QueryableSumGenerics.TryGetValue(propertyLambda.Body.Type, out sumGenericMethod))
                             {
-                                throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", _aggregateClause.AggregationVerb, _aggregateClause.AggregatableProperty, propertyLambda.Body.Type));
+                                throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", statement.WithVerb, statement.Expression, propertyLambda.Body.Type));
                             }
                             var sumMethod = sumGenericMethod.MakeGenericMethod(this._elementType);
                             aggregationExpression = Expression.Call(null, sumMethod, asQuerableExpression, propertyLambda);
@@ -190,7 +173,7 @@ namespace System.Web.OData.Query.Expressions
                             MethodInfo averageGenericMethod;
                             if (!ExpressionHelperMethods.QueryableAverageGenerics.TryGetValue(propertyLambda.Body.Type, out averageGenericMethod))
                             {
-                                throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", _aggregateClause.AggregationVerb, _aggregateClause.AggregatableProperty, propertyLambda.Body.Type));
+                                throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", statement.WithVerb, statement.Expression, propertyLambda.Body.Type));
                             }
                             var averageMethod = averageGenericMethod.MakeGenericMethod(this._elementType);
                             aggregationExpression = Expression.Call(null, averageMethod, asQuerableExpression, propertyLambda);
@@ -212,7 +195,7 @@ namespace System.Web.OData.Query.Expressions
                         }
                         break;
                     default:
-                        throw new ODataException(Error.Format("Aggregation method '{0}' is not supported.", _aggregateClause.AggregationVerb));
+                        throw new ODataException(Error.Format("Aggregation method '{0}' is not supported.", statement.WithVerb));
             }
 
                 return aggregationExpression;
@@ -227,7 +210,6 @@ namespace System.Web.OData.Query.Expressions
             {
                 case QueryNodeKind.EntityRangeVariableReference:
                     return this._lambdaParameter;
-                // TODO: Add null checks
                 case QueryNodeKind.SingleValuePropertyAccess:
                     var propAccessNode = node as SingleValuePropertyAccessNode;
                     return CreatePropertyAccessExpression(BindAccessor(propAccessNode.Source), propAccessNode.Property);
@@ -270,7 +252,6 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
-
         private IQueryable BindGroupBy(IQueryable query)
         {
             LambdaExpression groupLambda = null;
@@ -288,20 +269,20 @@ namespace System.Web.OData.Query.Expressions
                 List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
                 foreach (var node in _selectedProperties)
                 {
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(_groupByWrapperType.GetMember(node.Property.Name).Single(), BindAccessor(node)));
+                    wrapperTypeMemberAssignments.Add(Expression.Bind(_groupByClrType.GetMember(node.Property.Name).Single(), BindAccessor(node)));
                 }
 
-                groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(_groupByWrapperType), wrapperTypeMemberAssignments), this._lambdaParameter);
+                groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(this._groupByClrType), wrapperTypeMemberAssignments), this._lambdaParameter);
             }
             else
             {
 
                 // We do not have properties to aggregate
                 // .GroupBy($it => new GroupByWrapper())
-                groupLambda = Expression.Lambda(Expression.New(_groupByWrapperType), this._lambdaParameter);
+                groupLambda = Expression.Lambda(Expression.New(this._groupByClrType), this._lambdaParameter);
             }
 
-            return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, _groupByWrapperType);
+            return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, this._groupByClrType);
         }
     }
 }

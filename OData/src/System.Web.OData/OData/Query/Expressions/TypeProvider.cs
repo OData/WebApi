@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.OData.Edm;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Web.OData.Formatter;
 
 namespace System.Web.OData.Query.Expressions
 {
@@ -23,25 +25,27 @@ namespace System.Web.OData.Query.Expressions
         /// Generates type by provided definition.
         /// </summary>
         /// <param name="definition"></param>
+        /// <param name="model"></param>
         /// <returns></returns>
         /// <remarks>
         /// We create new assembly each time, but they will be collected by GC.
         /// Current performance testing results is 0.5ms per type. We should consider caching types, however trade off is between CPU perfomance and memory usage (might be it will we an option for library user)
         /// </remarks>
-        public static Type GetResultType(TypeDefinition definition)
+        public static Type GetResultType(IEdmStructuredType definition, IEdmModel model)
         {
             // Do not have properties, just return base class
-            if (!definition.Properties.Any())
+            if (!definition.DeclaredProperties.Any())
             {
                 return typeof(DynamicTypeWrapper);
             }
 
-            TypeBuilder tb = GetTypeBuilder(definition.Name);
+            TypeBuilder tb = GetTypeBuilder(definition.FullTypeName() + Guid.NewGuid().ToString());
             ConstructorBuilder constructor = tb.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
 
-            foreach (var field in definition.Properties)
+            foreach (var field in definition.Properties())
             {
-                CreateProperty(tb, field.Key, field.Value);
+
+                CreateProperty(tb, field.Name, EdmLibHelpers.GetClrType(field.Type, model));
             }
 
             return tb.CreateType();
@@ -53,7 +57,7 @@ namespace System.Web.OData.Query.Expressions
 
             // Create GC collectable assembly. It will be collected after usage and we don't need to worry about memmory usage
             AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.RunAndCollect);
-            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule( ModuleName);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(ModuleName);
             TypeBuilder tb = moduleBuilder.DefineType(typeSignature,
                                 TypeAttributes.Public |
                                 TypeAttributes.Class |

@@ -1,5 +1,6 @@
 ﻿using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
 
@@ -18,7 +20,7 @@ namespace System.Web.OData.Query
     public class ApplyQueryOption
     {
         private static readonly IAssembliesResolver _defaultAssembliesResolver = new DefaultAssembliesResolver();
-        private ApplyClause _applyClause;
+        private ApplyClause2 _applyClause;
         private ODataQueryOptionParser _queryOptionParser;
 
 
@@ -85,7 +87,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// Gets the parsed <see cref="ApplyClause"/> for this query option.
         /// </summary>
-        public ApplyClause ApplyClause
+        public ApplyClause2 ApplyClause
         {
             get
             {
@@ -156,10 +158,9 @@ namespace System.Web.OData.Query
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
 
-            ApplyClause applyClause = ApplyClause;
+            ApplyClause2 applyClause = ApplyClause;
             Contract.Assert(applyClause != null);
 
-            // All following code is just PoC 
             // Ensure we have decided how to handle null propagation
             ODataQuerySettings updatedSettings = querySettings;
             if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
@@ -169,22 +170,19 @@ namespace System.Web.OData.Query
             }
 
             var elementType = Context.ElementClrType;
-            foreach (var tuple in applyClause.Transformations) {
-                var transformation = tuple.Item2;
-                if (!(transformation is ApplyGroupbyClause || transformation is ApplyAggregateClause))
+            foreach (var transformation in applyClause.Transformations) {
+                if (transformation.Kind == QueryNodeKind.Aggregate || transformation.Kind == QueryNodeKind.GroupBy)
                 {
-                    var filterTransformation = transformation as ApplyFilterClause;
-                    Expression filter = FilterBinder.Bind(filterTransformation.Filter, elementType, Context.Model, assembliesResolver, updatedSettings);
-                    query = ExpressionHelpers.Where(query, filter, elementType);
+                    var binder = new AggregationBinder(updatedSettings, assembliesResolver, elementType, Context.Model, transformation as QueryNode);
+                    query = binder.Bind(query);
+                    elementType = binder.ResultClrType;
                 }
                 else
                 {
-
-                    var binder = new AggregationBinder(updatedSettings, assembliesResolver, elementType, Context.Model, transformation);
-                    query =  binder.Bind(query);
-                    elementType = binder.ResultType;
+                    var filterClause = transformation as FilterClause;
+                    Expression filter = FilterBinder.Bind(filterClause, elementType, Context.Model, assembliesResolver, updatedSettings);
+                    query = ExpressionHelpers.Where(query, filter, elementType);
                 }
-                
             }
 
             return query;

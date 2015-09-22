@@ -1,6 +1,7 @@
 ﻿using Microsoft.OData.Edm;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -24,15 +25,24 @@ namespace System.Web.OData.Query.Expressions
         /// <summary>
         /// Generates type by provided definition.
         /// </summary>
-        /// <param name="definition"></param>
+        /// <param name="typeReference"></param>
         /// <param name="model"></param>
         /// <returns></returns>
         /// <remarks>
         /// We create new assembly each time, but they will be collected by GC.
         /// Current performance testing results is 0.5ms per type. We should consider caching types, however trade off is between CPU perfomance and memory usage (might be it will we an option for library user)
         /// </remarks>
-        public static Type GetResultType(IEdmStructuredType definition, IEdmModel model)
+        public static Type GetResultType(IEdmTypeReference typeReference, IEdmModel model)
         {
+            Contract.Assert(typeReference != null);
+            Contract.Assert(model != null);
+
+            IEdmStructuredType definition = typeReference.Definition as IEdmStructuredType;
+            if (definition == null)
+            {
+                throw new NotSupportedException(string.Format("Type generation not supported for {0}", typeReference.TypeKind()));
+            }
+
             // Do not have properties, just return base class
             if (!definition.DeclaredProperties.Any())
             {

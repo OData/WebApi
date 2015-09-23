@@ -20,7 +20,7 @@ namespace System.Web.OData.Query
     public class ApplyQueryOption
     {
         private static readonly IAssembliesResolver _defaultAssembliesResolver = new DefaultAssembliesResolver();
-        private ApplyClause2 _applyClause;
+        private ApplyClause _applyClause;
         private ODataQueryOptionParser _queryOptionParser;
 
 
@@ -87,7 +87,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// Gets the parsed <see cref="ApplyClause"/> for this query option.
         /// </summary>
-        public ApplyClause2 ApplyClause
+        public ApplyClause ApplyClause
         {
             get
             {
@@ -158,7 +158,7 @@ namespace System.Web.OData.Query
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
 
-            ApplyClause2 applyClause = ApplyClause;
+            ApplyClause applyClause = ApplyClause;
             Contract.Assert(applyClause != null);
 
             // Ensure we have decided how to handle null propagation

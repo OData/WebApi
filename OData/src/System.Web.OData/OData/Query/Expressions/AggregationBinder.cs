@@ -22,7 +22,7 @@ namespace System.Web.OData.Query.Expressions
 
         ParameterExpression _lambdaParameter;
 
-        private IEnumerable<AggregateStatementNode2> _aggregateStatements;
+        private IEnumerable<AggregateStatementNode> _aggregateStatements;
         private IEnumerable<SingleValuePropertyAccessNode> _groupingProperties;
 
         private Type _groupByClrType;
@@ -41,12 +41,12 @@ namespace System.Web.OData.Query.Expressions
             switch (transformation.Kind)
             {
                 case QueryNodeKind.Aggregate:
-                    var aggregateClause = this._transformation as AggregateNode2;
+                    var aggregateClause = this._transformation as AggregateNode;
                     ResultType = aggregateClause.TypeReference;
                     _aggregateStatements = aggregateClause.Statements;
                     break;
                 case QueryNodeKind.GroupBy:
-                    var groupByClause = this._transformation as GroupByNode2;
+                    var groupByClause = this._transformation as GroupByNode;
                     ResultType = groupByClause.TypeReference;
                     _groupingProperties = groupByClause.GroupingProperties;
                     _aggregateStatements = groupByClause.Aggregate != null ? groupByClause.Aggregate.Statements : null;
@@ -126,7 +126,7 @@ namespace System.Web.OData.Query.Expressions
             return result;
         }
 
-        private Expression CreateAggregationExpression(ParameterExpression accum, AggregateStatementNode2 statement)
+        private Expression CreateAggregationExpression(ParameterExpression accum, AggregateStatementNode statement)
         {
             LambdaExpression propertyLambda = Expression.Lambda(BindAccessor(statement.Expression), this._lambdaParameter);
             // I substitute the element type for all generic arguments.                                                

@@ -298,6 +298,7 @@ namespace System.Web.OData.Query
             if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
             {
                 result = Apply.ApplyTo(result, querySettings, _assembliesResolver);
+                // TODO: Find a better way to modify Context
                 this.Context.ElementClrType = Apply.ResultClrType;
                 this.Context.ElementType = Apply.ResultType;
             }

@@ -3,6 +3,7 @@ using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -58,7 +59,7 @@ namespace System.Web.OData.Query.Expressions
 
             ResultClrType = TypeProvider.GetResultType(ResultType, _model);
 
-            _groupByClrType = _groupByClrType ?? ResultClrType;
+            _groupByClrType = _groupByClrType ?? typeof(DynamicTypeWrapper);
         }
 
         /// <summary>

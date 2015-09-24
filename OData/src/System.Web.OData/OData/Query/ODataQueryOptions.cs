@@ -298,7 +298,8 @@ namespace System.Web.OData.Query
             if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
             {
                 result = Apply.ApplyTo(result, querySettings, _assembliesResolver);
-                // TODO: Modify Context to provide new ElementType and ClrElementType for the next step
+                this.Context.ElementClrType = Apply.ResultClrType;
+                this.Context.ElementType = Apply.ResultType;
             }
 
             // Construct the actual query and apply them in the following order: filter, orderby, skip, top

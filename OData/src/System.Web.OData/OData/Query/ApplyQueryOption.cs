@@ -53,6 +53,9 @@ namespace System.Web.OData.Query
             // TODO: Implement and add validator
             //Validator = new FilterQueryValidator();
             _queryOptionParser = queryOptionParser;
+
+            ResultClrType = Context.ElementClrType;
+            ResultType = Context.ElementType;
         }
 
         // This constructor is intended for unit testing only.
@@ -76,6 +79,9 @@ namespace System.Web.OData.Query
                 context.ElementType,
                 context.NavigationSource,
                 new Dictionary<string, string> { { "$apply", rawValue } });
+
+            ResultClrType = Context.ElementClrType;
+            ResultType = Context.ElementType;
         }
 
         /// <summary>
@@ -111,6 +117,15 @@ namespace System.Web.OData.Query
         /// </summary>
         public string RawValue { get; private set; }
 
+        /// <summary>
+        /// ClrType for result of transformations
+        /// </summary>
+        public Type ResultClrType { get; private set; }
+
+        /// <summary>
+        /// EdmType for transformation result
+        /// </summary>
+        public IEdmType ResultType { get; private set; }
 
         /// <summary>
         /// Apply the apply query to the given IQueryable.
@@ -169,21 +184,22 @@ namespace System.Web.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
             }
 
-            var elementType = Context.ElementClrType;
             foreach (var transformation in applyClause.Transformations) {
                 if (transformation.Kind == QueryNodeKind.Aggregate || transformation.Kind == QueryNodeKind.GroupBy)
                 {
-                    var binder = new AggregationBinder(updatedSettings, assembliesResolver, elementType, Context.Model, transformation as QueryNode);
+                    var binder = new AggregationBinder(updatedSettings, assembliesResolver, ResultClrType, Context.Model, transformation as QueryNode);
                     query = binder.Bind(query);
-                    elementType = binder.ResultClrType;
+                    this.ResultClrType = binder.ResultClrType;
                 }
                 else
                 {
                     var filterClause = transformation as FilterClause;
-                    Expression filter = FilterBinder.Bind(filterClause, elementType, Context.Model, assembliesResolver, updatedSettings);
-                    query = ExpressionHelpers.Where(query, filter, elementType);
+                    Expression filter = FilterBinder.Bind(filterClause, ResultClrType, Context.Model, assembliesResolver, updatedSettings);
+                    query = ExpressionHelpers.Where(query, filter, ResultClrType);
                 }
             }
+
+            ResultType = applyClause.TypeReference.Definition;
 
             return query;
         }

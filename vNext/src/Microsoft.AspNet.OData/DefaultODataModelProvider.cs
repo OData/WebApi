@@ -6,6 +6,10 @@ using System.Reflection;
 
 namespace Microsoft.AspNet.OData
 {
+    using System.Runtime.Serialization;
+
+    using Microsoft.AspNet.OData.Formatter;
+
     internal class DefaultODataModelProvider
     {
         public static IEdmModel BuildEdmModel(Type ApiContextType)
@@ -16,9 +20,31 @@ namespace Microsoft.AspNet.OData
             var publicProperties = ApiContextType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             foreach (var property in publicProperties)
             {
+                var propertyAttribute = property.GetCustomAttribute<IgnoreDataMemberAttribute>();
+                if (propertyAttribute != null)
+                {
+                    continue;
+                }
+
                 var entityClrType = TypeHelper.GetImplementedIEnumerableType(property.PropertyType);
-                EntityTypeConfiguration entity = builder.AddEntityType(entityClrType);
-                builder.AddEntitySet(property.Name, entity);
+                if (entityClrType != null)
+                {
+                    var entity = builder.AddEntityType(entityClrType);
+                    builder.AddEntitySet(property.Name, entity);
+                }
+                else
+                {
+                    if (property.PropertyType.GetTypeInfo().IsPrimitive
+                        || EdmLibHelpers.GetEdmPrimitiveTypeOrNull(property.PropertyType) != null)
+                    {
+                        builder.AddPrimitiveType(property.PropertyType);
+                    }
+                    else
+                    {
+                        // The property is not an IEnumerable implementation
+                        builder.AddEntityType(property.PropertyType);
+                    }
+                }
             }
 
             // Get the actions and functions into the model
@@ -56,15 +82,22 @@ namespace Microsoft.AspNet.OData
 
                     if (configuration != null)
                     {
-                        configuration.ReturnType = entityType;
+                        if (method.ReturnType.IsCollection())
+                        {
+                            configuration.ReturnType = new CollectionTypeConfiguration(entityType, method.ReturnType);
+                        }
+                        else
+                        {
+                            configuration.ReturnType = entityType;
+                        }
+
                         configuration.IsComposable = true;
                         configuration.NavigationSource =
                             builder.NavigationSources.FirstOrDefault(n => n.EntityType == entityType) as NavigationSourceConfiguration;
 
                         foreach (var parameterInfo in method.GetParameters())
                         {
-                            if (parameterInfo.ParameterType.GetTypeInfo().IsPrimitive || parameterInfo.ParameterType == typeof(decimal)
-                                 || parameterInfo.ParameterType == typeof(string))
+                            if (parameterInfo.ParameterType.GetTypeInfo().IsPrimitive || EdmLibHelpers.GetEdmPrimitiveTypeOrNull(parameterInfo.ParameterType) != null)
                             {
                                 var primitiveType = builder.AddPrimitiveType(parameterInfo.ParameterType);
                                 configuration.AddParameter(parameterInfo.Name, primitiveType);
@@ -74,7 +107,7 @@ namespace Microsoft.AspNet.OData
 
                                 if (parameterInfo.ParameterType.IsCollection())
                                 {
-                                    if (parameterInfo.ParameterType.GenericTypeArguments[0].GetTypeInfo().IsPrimitive)
+                                    if (parameterInfo.ParameterType.GenericTypeArguments[0].GetTypeInfo().IsPrimitive || EdmLibHelpers.GetEdmPrimitiveTypeOrNull(parameterInfo.ParameterType) != null)
                                     {
                                         var parameterType = builder.AddPrimitiveType(parameterInfo.ParameterType.GenericTypeArguments[0]);
                                         var collectionTypeConfig = new CollectionTypeConfiguration(parameterType, parameterInfo.ParameterType.GenericTypeArguments[0]);

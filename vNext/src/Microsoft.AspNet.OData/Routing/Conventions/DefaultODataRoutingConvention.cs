@@ -52,7 +52,8 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 var operationImportSegment = odataPath.FirstSegment as OperationImportSegment;
                 if (operationImportSegment != null)
                 {
-                    controllerName = operationImportSegment.EntitySet.Name;
+                    controllerName = operationImportSegment.EntitySet != null ? operationImportSegment.EntitySet.Name : routeContext.HttpContext.Request.ODataProperties().RoutePrefix;
+
                     var edmOperationImport = operationImportSegment.OperationImports.FirstOrDefault();
                     if (edmOperationImport != null)
                     {

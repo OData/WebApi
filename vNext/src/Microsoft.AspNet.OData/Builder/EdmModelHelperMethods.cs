@@ -204,7 +204,7 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
-        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",
             Justification = "The majority of types referenced by this method are EdmLib types this method needs to know about to operate correctly")]
         private static void AddProcedures(this EdmModel model, IEnumerable<ProcedureConfiguration> configurations, EdmEntityContainer container,
             Dictionary<Type, IEdmType> edmTypeMap, IDictionary<string, EdmNavigationSource> edmNavigationSourceMap)
@@ -514,6 +514,11 @@ namespace Microsoft.AspNet.OData.Builder
                     new EdmCollectionType(GetEdmTypeReference(availableTypes, collectionType.ElementType, nullable));
                 return new EdmCollectionTypeReference(edmCollectionType);
             }
+            else if (kind == EdmTypeKind.Primitive)
+            {
+                PrimitiveTypeConfiguration primitiveTypeConfiguration = configuration as PrimitiveTypeConfiguration;
+                return new EdmPrimitiveTypeReference(primitiveTypeConfiguration.EdmPrimitiveType, nullable);
+            }
             else
             {
                 Type configurationClrType = TypeHelper.GetUnderlyingTypeOrSelf(configuration.ClrType);
@@ -543,11 +548,6 @@ namespace Microsoft.AspNet.OData.Builder
                     {
                         throw Error.InvalidOperation(SRResources.UnsupportedEdmTypeKind, kind.ToString());
                     }
-                }
-                else if (configuration.Kind == EdmTypeKind.Primitive)
-                {
-                    PrimitiveTypeConfiguration primitiveTypeConfiguration = configuration as PrimitiveTypeConfiguration;
-                    return new EdmPrimitiveTypeReference(primitiveTypeConfiguration.EdmPrimitiveType, nullable);
                 }
                 else
                 {

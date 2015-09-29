@@ -162,6 +162,11 @@
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesController.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesModel.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesTest.cs" />
+    <Compile Include="Swagger\SwaggerController.cs" />
+    <Compile Include="Swagger\SwaggerMetadataTest.cs" />
+    <Compile Include="Swagger\SwaggerPathHandler.cs" />
+    <Compile Include="Swagger\SwaggerPathSegment.cs" />
+    <Compile Include="Swagger\SwaggerRoutingConvention.cs" />
     <Compile Include="UriParserExtension\CaseInsensitiveTest.cs" />
     <Compile Include="UriParserExtension\EnumPrefixFreeTest.cs" />
     <Compile Include="UriParserExtension\UnqualifiedCallTest.cs" />

@@ -140,7 +140,7 @@ namespace System.Web.OData.Formatter
                         }
                         else if (IsDynamicTypeWrapper(elementClrType))
                         {
-                            return new EdmCollectionType(Extension.GetDynamicEntityType().ToEdmTypeReference(true));
+                            return new EdmCollectionType(Extension.GetDynamicEntityType(elementClrType).ToEdmTypeReference(true));
                         }
 
                         IEdmType elementType = GetEdmType(edmModel, elementClrType, testCollections: false);

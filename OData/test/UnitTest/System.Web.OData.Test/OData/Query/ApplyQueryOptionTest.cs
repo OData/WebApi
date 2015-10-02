@@ -26,49 +26,49 @@ namespace System.Web.OData.Test.OData.Query
                         "aggregate(CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "CustomerId", "10"} }
+                            new Dictionary<string, object> { { "CustomerId", 10} }
                         }
                     },
                     {
                         "aggregate(SharePrice with sum as SharePrice)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "SharePrice", "12.5"} }
+                            new Dictionary<string, object> { { "SharePrice", 12.5M} }
                         }
                     },
                     {
                         "aggregate(SharePrice with min as SharePrice)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "SharePrice", "2.5"} }
+                            new Dictionary<string, object> { { "SharePrice", 2.5M} }
                         }
                     },
                      {
                         "aggregate(SharePrice with max as SharePrice)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "SharePrice", "10"} }
+                            new Dictionary<string, object> { { "SharePrice", 10M} }
                         }
                     },
                     {
                         "aggregate(SharePrice with average as SharePrice)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "SharePrice", "6.25"} }
+                            new Dictionary<string, object> { { "SharePrice", 6.25M} }
                         }
                     },
                     {
                         "aggregate(SharePrice with average as SharePrice)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "SharePrice", "6.25"} }
+                            new Dictionary<string, object> { { "SharePrice", 6.25M} }
                         }
                     },
                     {
                         "aggregate(CustomerId with sum as Total, SharePrice with countdistinct as SharePriceDistinctCount)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "SharePriceDistinctCount", "3"}, { "Total", "10"} }
+                            new Dictionary<string, object> { { "SharePriceDistinctCount", 3L}, { "Total", 10} }
                         }
                     },
                     {
@@ -84,9 +84,9 @@ namespace System.Web.OData.Test.OData.Query
                         "groupby((Name), aggregate(CustomerId with sum as Total))",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", "5"} },
-                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", "2"} },
-                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", "3" } }
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 5} },
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} },
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
                         }
                     },
                     {
@@ -125,7 +125,7 @@ namespace System.Web.OData.Test.OData.Query
                         "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "CustomerId", "30"} }
+                            new Dictionary<string, object> { { "CustomerId", 30} }
                         }
                     },
                     {
@@ -133,7 +133,7 @@ namespace System.Web.OData.Test.OData.Query
                         "aggregate(SharePrice mul CustomerId with sum as Result)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Result", "15.0"} }
+                            new Dictionary<string, object> { { "Result", 15.0M} }
                         }
                     },
                 };

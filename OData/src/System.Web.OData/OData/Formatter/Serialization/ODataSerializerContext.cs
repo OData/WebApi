@@ -181,7 +181,7 @@ namespace System.Web.OData.Formatter.Serialization
                         DynamicTypeWrapper dynamicWrapper = instance as DynamicTypeWrapper;
                         if (dynamicWrapper != null)
                         {
-                            return Extension.GetDynamicEntityType(type).ToEdmTypeReference(true);
+                            return type.GetDynamicEntityType().ToEdmTypeReference(true);
                         }
                         else
                         {

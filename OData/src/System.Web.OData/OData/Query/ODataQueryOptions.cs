@@ -299,6 +299,7 @@ namespace System.Web.OData.Query
             {
                 result = Apply.ApplyTo(result, querySettings, _assembliesResolver);
                 // TODO: Find a better way to modify Context
+                Request.ODataProperties().ApplyClause = Apply.ApplyClause;
                 this.Context.ElementClrType = Apply.ResultClrType;
                 this.Context.ElementType = Apply.ResultType;
             }

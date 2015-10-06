@@ -63,7 +63,7 @@ namespace WebStack.QA.Test.OData.AlternateKeys
         {
             IEdmEntityType orderType = model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "Order");
 
-            Guid[] tokes =
+            Guid[] guids =
             {
                 new Guid("196B3584-EF3D-41FD-90B4-76D59F9B929C"),
                 new Guid("6CED5600-28BA-40EE-A2DF-E80AFADBE6C7"),
@@ -78,7 +78,7 @@ namespace WebStack.QA.Test.OData.AlternateKeys
                 dynamic untypedOrder = new EdmEntityObject(orderType);
                 untypedOrder.OrderId = i;
                 untypedOrder.Name = string.Format("Order-{0}", i);
-                untypedOrder.Token = tokes[i];
+                untypedOrder.Token = guids[i];
                 untypedOrder.Amount = 10 + i;
                 untypedOrders[i] = untypedOrder;
             }

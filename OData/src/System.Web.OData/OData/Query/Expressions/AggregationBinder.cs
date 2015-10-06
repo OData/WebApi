@@ -43,15 +43,15 @@ namespace System.Web.OData.Query.Expressions
             {
                 case QueryNodeKind.Aggregate:
                     var aggregateClause = this._transformation as AggregateNode;
-                    ResultType = aggregateClause.TypeReference;
+                    ResultType = aggregateClause.ItemType;
                     _aggregateStatements = aggregateClause.Statements;
                     break;
                 case QueryNodeKind.GroupBy:
                     var groupByClause = this._transformation as GroupByNode;
-                    ResultType = groupByClause.TypeReference;
+                    ResultType = groupByClause.ItemType;
                     _groupingProperties = groupByClause.GroupingProperties;
                     _aggregateStatements = groupByClause.Aggregate != null ? groupByClause.Aggregate.Statements : null;
-                    _groupByClrType = TypeProvider.GetResultType(groupByClause.GroupingTypeReference, _model);
+                    _groupByClrType = TypeProvider.GetResultType(groupByClause.GroupingItemType, _model);
                     break;
                 default:
                     throw new NotSupportedException(string.Format("Not supported transformation kind {0}", transformation.Kind));

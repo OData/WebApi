@@ -15,7 +15,7 @@ cd OData
 build
 ```
 ### Testing
-Each solution contains some test projects. Install this [runner](https://xunit.codeplex.com/downloads/get/755091) first, then open the project, build it and run all the tests in the test explorer. For running tests you must open the solution as *Administrator*. More detail at [this](http://odata.github.io/WebApi/#09-01-unittest-e2etest).
+Each solution contains some test projects. Test projects use xUnit runner nuget package. Open the project, build it, and then test cases should appear in test explorer. Run all the tests in the test explorer. For running end-to-end tests you must open the solution as *Administrator*. More detail at [this](http://odata.github.io/WebApi/#09-01-unittest-e2etest).
 
 ### Nightly builds
 1.	In your NuGet Package Manager settings add the following package source:

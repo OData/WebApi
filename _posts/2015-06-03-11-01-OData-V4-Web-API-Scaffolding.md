@@ -33,14 +33,15 @@ Just need to copy/paste the code to WebApiConfig.cs.
 
 ### Add the Code to retrieve Data
 As Scaffolding only genreate the frameowrk of controller code, data retrieve part should also be added into controller generated. Here, we write a simple in-memory data source and return all of them when call "GetProducts" method:
-#### Add in ProductsController:
+
+##### Add in ProductsController:
 ```
 private static List<Product> products = new List<Product>()
 {
   new Product() {Id = 1, Name = "Test1"},
 };
 ```
-#### Add in GetProducts Method:
+##### Add in GetProducts Method:
 ```
 return Ok(products);
 ```

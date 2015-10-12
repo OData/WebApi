@@ -39,7 +39,11 @@ namespace System.Web.OData.Query.Validators
 
             if (validationSettings.MaxExpansionDepth > 0)
             {
-                if (selectExpandQueryOption.LevelsMaxLiteralExpansionDepth > validationSettings.MaxExpansionDepth)
+                if (selectExpandQueryOption.LevelsMaxLiteralExpansionDepth < 0)
+                {
+                    selectExpandQueryOption.LevelsMaxLiteralExpansionDepth = validationSettings.MaxExpansionDepth;
+                }
+                else if (selectExpandQueryOption.LevelsMaxLiteralExpansionDepth > validationSettings.MaxExpansionDepth)
                 {
                     throw new ODataException(Error.Format(
                         SRResources.InvalidExpansionDepthValue,

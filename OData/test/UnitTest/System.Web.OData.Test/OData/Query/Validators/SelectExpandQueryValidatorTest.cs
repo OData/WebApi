@@ -123,6 +123,28 @@ namespace System.Web.OData.Query.Validators
         }
 
         [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void Validate_DoesNotThrow_DefaultLevelsMaxLiteralExpansionDepth(int maxExpansionDepth)
+        {
+            // Arrange
+            string expand = "Parent($levels=1)";
+            var validator = new SelectExpandQueryValidator();
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
+            IEdmModel model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
+            var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
+
+            // Act & Assert
+            Assert.DoesNotThrow(
+                () => validator.Validate(
+                    selectExpandQueryOption,
+                    new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }));
+        }
+
+        [Theory]
         [InlineData(2, 3)]
         [InlineData(4, 4)]
         [InlineData(3, 0)]

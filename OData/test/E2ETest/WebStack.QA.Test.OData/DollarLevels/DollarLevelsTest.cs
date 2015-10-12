@@ -26,7 +26,7 @@ namespace WebStack.QA.Test.OData.DollarLevels
         [NuwaConfiguration]
         public static void UpdateConfiguration(HttpConfiguration configuration)
         {
-            var controllers = new[] { typeof(DLManagersController) };
+            var controllers = new[] { typeof(DLManagersController), typeof(DLEmployeesController) };
             TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
 
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
@@ -113,6 +113,88 @@ namespace WebStack.QA.Test.OData.DollarLevels
             var baseline = await response.Content.ReadAsAsync<JObject>();
 
             Assert.True(JToken.DeepEquals(baseline, result));
+        }
+
+        [Theory]
+        [InlineData("$expand=Manager($levels=max)",
+            "$expand=Manager")]
+        [InlineData("$expand=Manager($levels=1)",
+            "$expand=Manager")]
+        public async Task LevelsWithValidator(string originalQuery, string expandedQuery)
+        {
+            string requestUri = this.BaseAddress + "/odata/DLManagers?" + originalQuery;
+
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsAsync<JObject>();
+
+            requestUri = this.BaseAddress + "/odata/DLManagers?" + expandedQuery;
+            response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var baseline = await response.Content.ReadAsAsync<JObject>();
+
+            Assert.True(JToken.DeepEquals(baseline, result));
+        }
+
+        [Theory]
+        [InlineData("$expand=Manager($levels=2)", 
+            "The request includes a $expand path which is too deep. The maximum depth allowed is 1.")]
+        public async Task InvalidLevelsWithValidator(string query, string errorMessage)
+        {
+            string requestUri = this.BaseAddress + "/odata/DLManagers?" + query;
+
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var result = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains(errorMessage,
+                result);
+        }
+
+        [Theory]
+        [InlineData("DLEmployees?$expand=Friend($levels=max)",
+            "DLEmployees?$expand=Friend($expand=Friend)")]
+        [InlineData("DLEmployees?$expand=Friend($levels=1)",
+            "DLEmployees?$expand=Friend")]
+        [InlineData("DLEmployees(1)?$expand=Friend($levels=max)",
+            "DLEmployees(1)?$expand=Friend($expand=Friend($expand=Friend))")]
+        [InlineData("DLEmployees(1)?$expand=Friend($levels=2)",
+            "DLEmployees(1)?$expand=Friend($expand=Friend)")]
+        public async Task LevelsWithSettingMaxExpansionDepth(string originalQuery, string expandedQuery)
+        {
+            string requestUri = this.BaseAddress + "/odata/" + originalQuery;
+
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsAsync<JObject>();
+
+            requestUri = this.BaseAddress + "/odata/" + expandedQuery;
+            response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var baseline = await response.Content.ReadAsAsync<JObject>();
+
+            Assert.True(JToken.DeepEquals(baseline, result));
+        }
+
+        [Theory]
+        [InlineData("DLEmployees?$expand=Friend($levels=5)",
+            "The request includes a $expand path which is too deep. The maximum depth allowed is 4.")]
+        [InlineData("DLEmployees(1)?$expand=Friend($levels=4)",
+            "The request includes a $expand path which is too deep. The maximum depth allowed is 3.")]
+        public async Task InvalidLevelsWithSettingMaxExpansionDepth(string query, string errorMessage)
+        {
+            string requestUri = this.BaseAddress + "/odata/" + query;
+
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var result = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains(errorMessage,
+                result);
         }
     }
 }

@@ -1,10 +1,13 @@
 OData-WebAPI
 
-Copyright (c) Microsoft Corporation
+Copyright (c) Microsoft. All rights reserved.
 
-All rights reserved. 
+Material in this repository is made available under the following terms:
+  1. Code is licensed under the MIT license, reproduced below.
+  2. Documentation is licensed under the Creative Commons Attribution 3.0 United States (Unported) License.
+     The text of the license can be found here: http://creativecommons.org/licenses/by/3.0/legalcode
 
-MIT License
+The MIT License (MIT)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
 associated documentation files (the "Software"), to deal in the Software without restriction, 

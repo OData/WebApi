@@ -3,7 +3,7 @@ using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web
@@ -16,7 +16,7 @@ namespace ODataSample.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvcCore();
             services.AddOData();
 
             services.AddSingleton<SampleContext>();
@@ -25,9 +25,10 @@ namespace ODataSample.Web
         public void Configure(IApplicationBuilder app)
         {
             app.UseOData<ISampleService>("odata");
-            //app.UseMvc(builder => {
-            //    builder.MapODataRoute<ISampleService>("odata");
-            //});
+            app.UseMvc(builder =>
+            {
+                builder.MapODataRoute<ISampleService>("odata");
+            });
         }
     }
 }

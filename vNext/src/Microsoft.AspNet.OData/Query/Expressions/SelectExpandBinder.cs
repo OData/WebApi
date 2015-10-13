@@ -22,6 +22,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     using System;
 
     using Microsoft.AspNet.OData.Formatter;
+    using Mvc.Infrastructure;
 
     /// <summary>
     /// Applies the given <see cref="SelectExpandQueryOption"/> to the given <see cref="IQueryable"/>.

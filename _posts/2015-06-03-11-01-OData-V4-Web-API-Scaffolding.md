@@ -10,8 +10,7 @@ The installer of OData V4 Web API Scaffolding can be downloaded from Visual Stud
 ### Generate Controller Code With Scaffolding
 The scaffolding is used to generate controller code for model class. Two kinds of scaffolders are provided: for model without entity framework(Microsoft OData v4 Web API Controller) and model using entity framework(Microsoft OData v4 Web API Controller Using Entity Framework). 
 
-##### Scaffolder for model without entity framework:
-
+#### Scaffolder for model without entity framework:
 Before using scaffolding, you need to create a web api project and add model classes, the following is a sample:
 
 ![]({{site.baseurl}}/img/11-01-ProjAndClass.PNG)
@@ -28,8 +27,7 @@ After click "Add", the controller will be genereted and added into your project.
 
 ![]({{site.baseurl}}/img/11-01-Complete.PNG)
 
-##### Scaffolder for model using entity framework:
-
+#### Scaffolder for model using entity framework:
 If want to use entity framework as provider in service, no matter whether derived class of DbContext contained in project, when right click "Controller" folder in solution explorer, select "Add" -> "Controller" -> "Microsoft OData v4 Web API Controller Using Entity Framework" as scaffolder:
 
 ![]({{site.baseurl}}/img/11-01-SelectScaffolderWithContext.PNG)
@@ -54,14 +52,14 @@ Just need to copy/paste the code to WebApiConfig.cs.
 ### Add the Code to retrieve Data
 As Scaffolding only genreate the frameowrk of controller code, data retrieve part should also be added into controller generated. Here, we write a simple in-memory data source and return all of them when call "GetProducts" method:
 
-##### Add in ProductsController:
+#### Add in ProductsController:
 ```
 private static List<Product> products = new List<Product>()
 {
   new Product() {Id = 1, Name = "Test1"},
 };
 ```
-##### Add in GetProducts Method:
+#### Add in GetProducts Method:
 ```
 return Ok(products);
 ```

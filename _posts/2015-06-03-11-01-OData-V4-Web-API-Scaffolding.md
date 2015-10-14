@@ -59,6 +59,7 @@ private static List<Product> products = new List<Product>()
   new Product() {Id = 1, Name = "Test1"},
 };
 ```
+
 #### Add in GetProducts Method:
 ```
 return Ok(products);

@@ -8,6 +8,8 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
+using Microsoft.AspNet.Mvc.Infrastructure;
+using System.Globalization;
 
 namespace Microsoft.AspNet.OData.Query
 {
@@ -74,6 +76,22 @@ namespace Microsoft.AspNet.OData.Query
         public SelectExpandQueryOption SelectExpand { get; private set; }
 
         /// <summary>
+        /// Specifies a non-negative integer n that excludes the first n items of the queried collection from the result.         
+        /// </summary>
+        /// <remarks>
+        /// Corresponds to the $skip query option.  The service returns items starting at position n+1.
+        /// </remarks>
+        public int? Skip { get; private set; }
+
+        /// <summary>
+        /// Specifies a non-negative integer n that limits the number of items returned from a collection.
+        /// </summary>
+        /// <remarks>
+        /// Corresponds to the $take query option.  he service returns the number of available items up to but not greater than the specified value n.
+        /// </remarks>
+        public int? Top { get; private set; }
+
+        /// <summary>
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
@@ -97,6 +115,25 @@ namespace Microsoft.AspNet.OData.Query
                 query = SelectExpand.ApplyTo(query, querySettings, _assemblyProvider);
             }
 
+            if (Skip.HasValue)
+            {
+                query = ExpressionHelpers.Skip(query, Skip.Value, Context.ElementClrType, false);
+            }
+
+            int? take = null;
+            if (querySettings.PageSize.HasValue)
+            {
+                take = Math.Min(querySettings.PageSize.Value, int.MaxValue);
+            }
+            if (Top.HasValue)
+            {
+                take = Math.Min(Top.Value, take ?? int.MaxValue);
+            }
+            if (take.HasValue)
+            {
+                query = ExpressionHelpers.Take(query, take.Value, Context.ElementClrType, false);
+            }
+
             return query;
         }
 
@@ -118,10 +155,12 @@ namespace Microsoft.AspNet.OData.Query
                     case "$top":
                         ThrowIfEmpty(kvp.Value, "$top");
                         RawValues.Top = kvp.Value;
+                        Top = TryParseNonNegativeInteger("$top", kvp.Value);
                         break;
                     case "$skip":
                         ThrowIfEmpty(kvp.Value, "$skip");
                         RawValues.Skip = kvp.Value;
+                        Skip = TryParseNonNegativeInteger("$skip", kvp.Value);
                         break;
                     case "$select":
                         RawValues.Select = kvp.Value;
@@ -152,6 +191,24 @@ namespace Microsoft.AspNet.OData.Query
             {
                 throw new ODataException(Error.Format("Query '{0}' cannot be empty", queryName));
             }
+        }
+
+        private static int TryParseNonNegativeInteger(string parameterName,
+            string value,
+            System.Globalization.NumberStyles styles = System.Globalization.NumberStyles.Any,
+            IFormatProvider provider = null)
+        {
+            provider = provider ?? CultureInfo.InvariantCulture;
+            int n;
+            if (int.TryParse(value, styles, provider, out n) == false)
+            {
+                throw new ODataException($"Query '{parameterName}' must be an integer.");
+            }
+            if (n < 0)
+            {
+                throw new ODataException($"Query '{parameterName}' must be an non-negative integer.");
+            }
+            return n;
         }
     }
 }

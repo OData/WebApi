@@ -6,6 +6,15 @@
       "environmentVariables": {
         "ASPNET_ENV": "Development"
       }
+    },
+    "dev": {
+      "commandName": "dev",
+      "launchUrl": "localhost:5000"
+    },
+    "web": {
+      "commandName": "web",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:5000"
     }
   }
 }

@@ -17,6 +17,7 @@ namespace Microsoft.AspNet.OData.Query
     using Microsoft.OData.Core.UriParser;
     using Microsoft.OData.Core.UriParser.Semantic;
     using Microsoft.OData.Edm;
+    using Mvc.Infrastructure;
 
     /// <summary>
     /// Represents the OData $select and $expand query options.

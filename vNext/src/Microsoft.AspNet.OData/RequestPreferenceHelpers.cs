@@ -3,6 +3,7 @@
 
 using System.Linq;
 using Microsoft.AspNet.Http;
+using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.AspNet.OData
 {
@@ -14,7 +15,7 @@ namespace Microsoft.AspNet.OData
 
         internal static bool RequestPrefersReturnContent(HttpRequest request)
         {
-            string[] preferences = null;
+            StringValues preferences;
             if (request.Headers.TryGetValue(PreferHeaderName, out preferences))
             {
                 return preferences.Contains(ReturnContentHeaderValue);
@@ -24,7 +25,7 @@ namespace Microsoft.AspNet.OData
 
         internal static bool RequestPrefersReturnNoContent(HttpRequest request)
         {
-            string[] preferences = null;
+            StringValues preferences;
             if (request.Headers.TryGetValue(PreferHeaderName, out preferences))
             {
                 return preferences.Contains(ReturnNoContentHeaderValue);
@@ -34,7 +35,7 @@ namespace Microsoft.AspNet.OData
 
         internal static string GetRequestPreferHeader(HttpRequest request)
         {
-            string[] values;
+            StringValues values;
             if (request.Headers.TryGetValue(PreferHeaderName, out values))
             {
                 // If there are many "Prefer" headers, pick up the first one.

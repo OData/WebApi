@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Framework.Internal;
+using Microsoft.AspNet.Mvc.Formatters;
 
 namespace Microsoft.AspNet.OData.Formatter
 {

@@ -1,4 +1,4 @@
-﻿using Microsoft.Framework.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Framework.Internal;
 using System.Collections.Generic;
 

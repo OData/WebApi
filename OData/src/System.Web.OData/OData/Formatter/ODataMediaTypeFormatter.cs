@@ -544,7 +544,14 @@ namespace System.Web.OData.Formatter
                     SelectExpandClause = Request.ODataProperties().SelectExpandClause
                 };
 
-                serializer.WriteObject(value, type, messageWriter, writeContext);
+                if (type == typeof (SwaggerModel))
+                {
+                    ((ODataSwaggerSerializer)serializer).WriteSwagger(model, writeStream, Request.RequestUri);
+                }
+                else
+                {
+                    serializer.WriteObject(value, type, messageWriter, writeContext);
+                }
             }
         }
 

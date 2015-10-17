@@ -85,6 +85,7 @@
     <Compile Include="OData\Builder\CapabilitiesNavigationType.cs" />
     <Compile Include="OData\EdmEnumObjectCollection.cs" />
     <Compile Include="OData\EdmEnumObject.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataSwaggerSerializer.cs" />
     <Compile Include="OData\IEdmEnumObject.cs" />
     <Compile Include="OData\EdmChangedObjectCollection.cs" />
     <Compile Include="OData\EdmDeltaCollectionType.cs" />
@@ -237,12 +238,14 @@
     <Compile Include="OData\Routing\Conventions\DynamicPropertyRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\NavigationSourceRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\SingletonRoutingConvention.cs" />
+    <Compile Include="OData\Routing\Conventions\SwaggerRoutingConvention.cs" />
     <Compile Include="OData\Routing\CountPathSegment.cs" />
     <Compile Include="OData\Routing\DynamicPropertyPathSegmentTemplate.cs" />
     <Compile Include="OData\Routing\ODataParameterValue.cs" />
     <Compile Include="OData\Routing\SingletonPathSegment.cs" />
     <Compile Include="OData\Routing\ODataPathSegmentTranslator.cs" />
     <Compile Include="OData\Routing\ODataVersionConstraint.cs" />
+    <Compile Include="OData\Routing\SwaggerPathSegment.cs" />
     <Compile Include="OData\Routing\UnboundFunctionPathSegmentTemplate.cs" />
     <Compile Include="OData\Routing\UnboundFunctionPathSegment.cs" />
     <Compile Include="OData\Routing\UnboundActionPathSegment.cs" />
@@ -433,6 +436,8 @@
     <Compile Include="Extensions\HttpActionDescriptorExtensions.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandler.cs" />
     <Compile Include="OData\Routing\ODataPathSegment.cs" />
+    <Compile Include="OData\SwaggerController.cs" />
+    <Compile Include="OData\SwaggerModel.cs" />
     <Compile Include="OData\TimeZoneInfoHelper.cs" />
     <Compile Include="OData\TypedDelta.cs" />
     <Compile Include="OData\UnqualifiedCallAndEnumPrefixFreeResolver.cs" />

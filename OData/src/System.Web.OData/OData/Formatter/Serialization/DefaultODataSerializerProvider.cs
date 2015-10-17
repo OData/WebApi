@@ -22,6 +22,7 @@ namespace System.Web.OData.Formatter.Serialization
         private static readonly ODataRawValueSerializer _rawValueSerializer = new ODataRawValueSerializer();
         private static readonly ODataPrimitiveSerializer _primitiveSerializer = new ODataPrimitiveSerializer();
         private static readonly ODataEnumSerializer _enumSerializer = new ODataEnumSerializer();
+        private static readonly ODataSwaggerSerializer _SwaggerSerializer = new ODataSwaggerSerializer();
 
         private static readonly DefaultODataSerializerProvider _instance = new DefaultODataSerializerProvider();
 
@@ -132,6 +133,10 @@ namespace System.Web.OData.Formatter.Serialization
             else if (typeof(IEdmModel).IsAssignableFrom(type))
             {
                 return _metadataSerializer;
+            }
+            else if (type == typeof(SwaggerModel))
+            {
+                return _SwaggerSerializer;
             }
 
             // if it is not a special type, assume it has a corresponding EdmType.

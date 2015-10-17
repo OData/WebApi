@@ -28,6 +28,7 @@ namespace System.Web.OData.Routing
         internal const string _Property = "property";
         internal const string _DynamicProperty = "dynamicproperty";
         internal const string _Unresolved = "unresolved";
+        internal const string _Swagger = "$swagger";
 
         /// <summary>
         /// Represents the service root segment (for OData service document).
@@ -123,5 +124,10 @@ namespace System.Web.OData.Routing
         /// Represents a segment that is not understood.
         /// </summary>
         public static readonly string Unresolved = _Unresolved;
+
+        /// <summary>
+        /// Represents the OData $swagger segment.
+        /// </summary>
+        public static readonly string Swagger = _Swagger;
     }
 }

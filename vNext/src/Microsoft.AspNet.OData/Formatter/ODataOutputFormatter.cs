@@ -61,8 +61,21 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
             }
 
-            object value = context.Object;
-            Type type = value.GetType();
+            object value = null;
+            object graph = null;
+            var objectResult = context.Object as PageResult<object>;
+            if (objectResult != null)
+            {
+                value = objectResult.Items;
+                graph = objectResult;
+            }
+            else
+            {
+                value = context.Object;
+                graph = value;
+            }
+            var type = value.GetType();
+
             ODataSerializer serializer = GetSerializer(type, value, model, new DefaultODataSerializerProvider(), request);
 
             IUrlHelper urlHelper = context.HttpContext.UrlHelper();
@@ -121,10 +134,10 @@ namespace Microsoft.AspNet.OData.Formatter
                     SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                     Path = path,
                     MetadataLevel = ODataMediaTypes.GetMetadataLevel(context.SelectedContentType),
-                    SelectExpandClause = request.ODataProperties().SelectExpandClause
+                    SelectExpandClause = request.ODataProperties().SelectExpandClause,
                 };
 
-                serializer.WriteObject(value, type, messageWriter, writeContext);
+                serializer.WriteObject(graph, type, messageWriter, writeContext);
             }
         }
 
@@ -177,7 +190,16 @@ namespace Microsoft.AspNet.OData.Formatter
 
         public override bool CanWriteResult([NotNull]OutputFormatterContext context, MediaTypeHeaderValue contentType)
         {
-            var type = context.Object.GetType();
+            Type type = null;
+            var pageResult = context.Object as PageResult<object>;
+            if (pageResult != null)
+            {
+                type = pageResult.Items.GetType();
+            }
+            else
+            {
+                type = context.Object.GetType();
+            }
             var request = context.HttpContext.Request;
 
             if (request != null)
@@ -187,7 +209,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 {
                     ODataPayloadKind? payloadKind = null;
 
-                    Type elementType;
+                    Type elementType;                    
                     if (typeof(IEdmObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()) ||
                         (type.IsCollection(out elementType) && typeof(IEdmObject).GetTypeInfo().IsAssignableFrom(elementType.GetTypeInfo())))
                     {

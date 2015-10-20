@@ -71,7 +71,6 @@ namespace Microsoft.AspNet.OData.Formatter
                 WriteMetadata(writer, (IEdmModel)value);
                 return;
             }
-
             using (var jsonWriter = CreateJsonWriter(writer))
             {
                 var jsonSerializer = CreateJsonSerializer();

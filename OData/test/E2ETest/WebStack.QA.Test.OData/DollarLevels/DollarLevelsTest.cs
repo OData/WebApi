@@ -116,10 +116,8 @@ namespace WebStack.QA.Test.OData.DollarLevels
         }
 
         [Theory]
-        [InlineData("$expand=Manager($levels=max)",
-            "$expand=Manager")]
-        [InlineData("$expand=Manager($levels=1)",
-            "$expand=Manager")]
+        [InlineData("$expand=Manager($levels=max)", "$expand=Manager")]
+        [InlineData("$expand=Manager($levels=1)", "$expand=Manager")]
         public async Task LevelsWithValidator(string originalQuery, string expandedQuery)
         {
             string requestUri = this.BaseAddress + "/odata/DLManagers?" + originalQuery;

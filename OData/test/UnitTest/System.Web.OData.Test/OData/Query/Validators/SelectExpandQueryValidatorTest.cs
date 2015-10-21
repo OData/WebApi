@@ -144,6 +144,27 @@ namespace System.Web.OData.Query.Validators
                     new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }));
         }
 
+        [Fact]
+        public void Validate_Throw_WithInvalidMaxExpansionDepth()
+        {
+            int maxExpansionDepth = -1;
+            // Arrange
+            string expand = "Parent($levels=1)";
+            var validator = new SelectExpandQueryValidator();
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
+            IEdmModel model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
+            var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
+
+            // Act & Assert
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => validator.Validate(
+                    selectExpandQueryOption,
+                    new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }),
+                "Value must be greater than or equal to 0.\r\nParameter name: value\r\nActual value was -1.");
+        }
+
         [Theory]
         [InlineData(2, 3)]
         [InlineData(4, 4)]

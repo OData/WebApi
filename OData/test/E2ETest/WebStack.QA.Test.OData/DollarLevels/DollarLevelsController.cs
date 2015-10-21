@@ -35,7 +35,7 @@ namespace WebStack.QA.Test.OData.DollarLevels
                             Name = "Name" + i,
                         }).ToList();
 
-            for (int i = 1; i < 9; i++)
+            for (int i = 0; i < 9; i++)
             {
                 _DLManagers[i].Manager = _DLManagers[i + 1];
                 _DLManagers[i + 1].DirectReports = new List<DLManager> { _DLManagers[i] };
@@ -97,7 +97,7 @@ namespace WebStack.QA.Test.OData.DollarLevels
                             ID = i,
                         }).ToList();
 
-            for (int i = 1; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
                 _DLEmployees[i].Friend = _DLEmployees[i + 1];
             }
@@ -149,7 +149,6 @@ namespace WebStack.QA.Test.OData.DollarLevels
             var employee = _DLEmployees.Single(e=>e.ID == key);
             var appliedEmployee = queryOptions.ApplyTo(employee, new ODataQuerySettings());
             return Ok(appliedEmployee, appliedEmployee.GetType());
-
         }
 
         private IHttpActionResult Ok(object content, Type type)

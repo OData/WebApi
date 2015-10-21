@@ -9,7 +9,10 @@ namespace WebStack.QA.Test.OData.ETags
 {
     public class ETagCurrencyTokenEfContext : DbContext
     {
+        public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=ETagCurrencyTokenEfContext";
+
         public ETagCurrencyTokenEfContext()
+            : base(ConnectionString)
         {
             Database.SetInitializer(new ETagCurrencyTokenEfContextInitializer());
         }

@@ -47,19 +47,19 @@ namespace WebStack.QA.Test.OData.ETags
         [Fact]
         public async Task NestedDollarSelectWorksOnCurrencyTokenProperty()
         {
-            string expect = @"{
-  ""@odata.context"":""{XXXX}"",""value"":[
-    {
-      ""@odata.etag"":""ETAG1"",""Id"":""1"",""Descrizione"":""Test1"",""ServerAutenticazioneId"":""1"",""RECVER"":null,""ServerAutenticazione"":{
-        ""@odata.etag"":""ETAG1"",""Id"":""1"",""RECVER"":null
-      }
-    },{
-      ""@odata.etag"":""ETAG2"",""Id"":""2"",""Descrizione"":""Test2"",""ServerAutenticazioneId"":""2"",""RECVER"":10,""ServerAutenticazione"":{
-        ""@odata.etag"":""ETAG3"",""Id"":""2"",""RECVER"":5
-      }
-    }
-  ]
-}".Replace("ETAG1", "W/\\\"bnVsbA==\\\"").Replace("ETAG2", "W/\\\"MTA=\\\"").Replace("ETAG3", "W/\\\"NQ==\\\"");
+            string expect = "{\r\n" +
+"  \"@odata.context\":\"{XXXX}\",\"value\":[\r\n" +
+"    {\r\n" +
+"      \"@odata.etag\":\"W/\\\"bnVsbA==\\\"\",\"Id\":\"1\",\"Descrizione\":\"Test1\",\"ServerAutenticazioneId\":\"1\",\"RECVER\":null,\"ServerAutenticazione\":{\r\n" +
+"        \"@odata.etag\":\"W/\\\"bnVsbA==\\\"\",\"Id\":\"1\",\"RECVER\":null\r\n" +
+"      }\r\n" +
+"    },{\r\n" +
+"      \"@odata.etag\":\"W/\\\"MTA=\\\"\",\"Id\":\"2\",\"Descrizione\":\"Test2\",\"ServerAutenticazioneId\":\"2\",\"RECVER\":10,\"ServerAutenticazione\":{\r\n" +
+"        \"@odata.etag\":\"W/\\\"NQ==\\\"\",\"Id\":\"2\",\"RECVER\":5\r\n" +
+"      }\r\n" +
+"    }\r\n" +
+"  ]\r\n" +
+"}";
 
             expect = expect.Replace("{XXXX}", string.Format("{0}/odata/$metadata#Dominios(ServerAutenticazione(Id,RECVER))", BaseAddress.ToLowerInvariant()));
 

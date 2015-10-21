@@ -92,6 +92,43 @@ namespace Microsoft.AspNet.OData.Query
         public int? Top { get; private set; }
 
         /// <summary>
+        /// The $count system query option allows clients to request a count of the matching resources included with the resources in the response. 
+        /// The $count query option has a Boolean value of true or false.       
+        /// </summary>
+        /// <remarks>
+        /// The semantics of $count is covered in the [OData - Protocol] document.
+        /// </remarks>
+        public bool Count { get; private set; }
+
+        /// <summary>
+        /// Applies the queries that are applicable to the $count computation, as per the OData protocol.
+        /// </summary>
+        /// <remarks>
+        /// According to the protocol:
+        /// <para>
+        /// The $count system query option ignores any $top, $skip, or $expand query options, and returns the total count of results across all pages including only those results matching any specified $filter and $search. Clients should be aware that the count returned inline may not exactly equal the actual number of items returned, due to latency between calculating the count and enumerating the last value or due to inexact calculations on the service.
+        /// </para>
+        /// </remarks>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <param name="querySettings">The settings to use in query composition.</param>
+        /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
+        public virtual IQueryable ApplyForCount(IQueryable query, ODataQuerySettings querySettings)
+        {
+            if (query == null)
+            {
+                throw Error.ArgumentNull("query");
+            }
+
+            // Construct the actual query and apply them in the following order: filter
+            if (Filter != null)
+            {
+                query = Filter.ApplyTo(query, querySettings, _assemblyProvider);
+            }
+
+            return query;
+        }
+
+        /// <summary>
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
@@ -108,11 +145,6 @@ namespace Microsoft.AspNet.OData.Query
             if (Filter != null)
             {
                 query = Filter.ApplyTo(query, querySettings, _assemblyProvider);
-            }
-
-            if (SelectExpand != null)
-            {
-                query = SelectExpand.ApplyTo(query, querySettings, _assemblyProvider);
             }
 
             if (Skip.HasValue)
@@ -132,6 +164,11 @@ namespace Microsoft.AspNet.OData.Query
             if (take.HasValue)
             {
                 query = ExpressionHelpers.Take(query, take.Value, Context.ElementClrType, false);
+            }
+
+            if (SelectExpand != null)
+            {
+                query = SelectExpand.ApplyTo(query, querySettings, _assemblyProvider);
             }
 
             return query;
@@ -166,8 +203,22 @@ namespace Microsoft.AspNet.OData.Query
                         RawValues.Select = kvp.Value;
                         break;
                     case "$count":
-                        ThrowIfEmpty(kvp.Value, "$count");
+                        // According to the OData 4 protocol, the value of this query option is optional:
+                        // http://docs.oasis-open.org/odata/odata/v4.0/errata02/os/complete/part1-protocol/odata-v4.0-errata02-os-part1-protocol-complete.html#_Toc406398308
+                        // "A $count query option with a value of false (or not specified) hints that the service SHOULD NOT return a count."
                         RawValues.Count = kvp.Value;
+                        if (string.IsNullOrWhiteSpace(kvp.Value) == false)
+                        {
+                            bool count;
+                            if (bool.TryParse(kvp.Value, out count))
+                            {
+                                Count = count;
+                            }
+                            else
+                            {
+                                throw new ODataException($"If a value for the query '$count' is specified, it must have a value of '{bool.TrueString}' or '{bool.FalseString}'");
+                            }
+                        }
                         break;
                     case "$expand":
                         RawValues.Expand = kvp.Value;

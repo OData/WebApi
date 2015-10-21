@@ -24,11 +24,11 @@ namespace Microsoft.AspNet.OData.Formatter
         private readonly ODataMessageWriterSettings _messageWriterSettings;
         private readonly ODataSerializerProvider _serializerProvider;
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
-        
+
         public ODataOutputFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
             : this(new DefaultODataSerializerProvider(), payloadKinds)
         {
-            
+
         }
 
         public ODataOutputFormatter(ODataSerializerProvider serializerProvider, IEnumerable<ODataPayloadKind> payloadKinds)
@@ -44,7 +44,7 @@ namespace Microsoft.AspNet.OData.Formatter
             _serializerProvider = serializerProvider;
             _payloadKinds = payloadKinds;
         }
-        
+
         public override Task WriteResponseBodyAsync(OutputFormatterContext context)
         {
             return Task.Run(() => WriteResponseBody(context));
@@ -120,7 +120,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 Path = (path == null) ? null : path.ODLPath
                 //Path = (path == null || IsOperationPath(path)) ? null : path.ODLPath,
             };
-            
+
             using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, model))
             {
                 ODataSerializerContext writeContext = new ODataSerializerContext()
@@ -209,7 +209,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 {
                     ODataPayloadKind? payloadKind = null;
 
-                    Type elementType;                    
+                    Type elementType;
                     if (typeof(IEdmObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()) ||
                         (type.IsCollection(out elementType) && typeof(IEdmObject).GetTypeInfo().IsAssignableFrom(elementType.GetTypeInfo())))
                     {

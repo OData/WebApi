@@ -26,7 +26,9 @@
         "System.Resources.ResourceManager": "4.0.1-beta-*",
         "System.Runtime": "4.0.21-beta-*",
         "System.Threading": "4.0.11-beta-*",
-        "Microsoft.CSharp": "4.0.1-beta-*"
+        "Microsoft.CSharp": "4.0.1-beta-*",
+        "System.Reflection.Primitives": "4.0.1-beta-*",
+        "System.Xml.XmlDocument": "4.0.1-beta-*"
       }
     }
   }

@@ -14,7 +14,12 @@
 
   "frameworks": {
     "dnx451": { },
-    "dnxcore50": { }
+    "dnxcore50": {
+      "dependencies": {
+        "System.Reflection.Primitives": "4.0.1-beta-*",
+        "System.Xml.XmlDocument": "4.0.1-beta-*"
+      }
+    }
   },
 
   "exclude": [

@@ -25,5 +25,12 @@ namespace Microsoft.AspNet.OData.Extensions
 
             return app.UseRouter(new ODataRoute(prefix, DefaultODataModelProvider.BuildEdmModel(typeof(T))));
         }
+
+        public static IApplicationBuilder InitializeODataBuilder([NotNull] this IApplicationBuilder app)        {
+            var defaultAssemblyProvider = app.ApplicationServices.GetRequiredService<IAssemblyProvider>();
+            AssemblyProviderManager.Register(defaultAssemblyProvider);
+
+            return app;
+        }
     }
 }

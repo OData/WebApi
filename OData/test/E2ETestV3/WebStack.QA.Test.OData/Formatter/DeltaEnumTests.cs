@@ -60,6 +60,12 @@ namespace WebStack.QA.Test.OData.Formatter
             {
                 var data = new TheoryDataSet<string>();
 
+                data.Add("{\"Color\":\"1\",\"NullableColor\":null}");
+
+                data.Add("{\"Color\":\"1\",\"NullableColor\":\"0\"}");
+
+                data.Add("{\"Color\":\"1\",\"NullableColor\":\"Blue\",\"Colors\":[\"1\", \"Blue\"]}");
+
                 data.Add("{\"Color\":\"Red\",\"NullableColor\":null}");
 
                 data.Add("{\"Color\":\"Red\",\"NullableColor\":\"Blue\"}");
@@ -94,7 +100,6 @@ namespace WebStack.QA.Test.OData.Formatter
             HttpResponseMessage response = Client.SendAsync(request).Result;
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-            Console.WriteLine(response.Content.ReadAsStringAsync().Result);
         }
     }
 

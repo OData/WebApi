@@ -6,6 +6,7 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.Framework.Internal;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
+using Microsoft.AspNet.Mvc.Formatters;
 
 namespace Microsoft.AspNet.OData.Formatter
 {
@@ -40,16 +41,14 @@ namespace Microsoft.AspNet.OData.Formatter
         }
 
         /// <inheritdoc />
-        public override Task<object> ReadRequestBodyAsync([NotNull] InputFormatterContext context)
+        public override Task<InputFormatterResult> ReadRequestBodyAsync([NotNull] InputFormatterContext context)
         {
             var type = context.ModelType;
             var request = context.HttpContext.Request;
-            MediaTypeHeaderValue requestContentType = null;
-            MediaTypeHeaderValue.TryParse(request.ContentType, out requestContentType);
 
             // Get the character encoding for the content
             // Never non-null since SelectCharacterEncoding() throws in error / not found scenarios
-            var effectiveEncoding = SelectCharacterEncoding(requestContentType);
+            var effectiveEncoding = SelectCharacterEncoding(context);
 
             using (var jsonReader = CreateJsonReader(context, request.Body, effectiveEncoding))
             {
@@ -72,7 +71,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 try
                 {
-                    return Task.FromResult(jsonSerializer.Deserialize(jsonReader, type));
+                    return InputFormatterResult.SuccessAsync(jsonSerializer.Deserialize(jsonReader, type));
                 }
                 finally
                 {

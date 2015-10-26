@@ -4,6 +4,7 @@
 namespace Microsoft.AspNet.OData.Formatter
 {
     using Microsoft.AspNet.Mvc;
+    using Mvc.Infrastructure;
     using Microsoft.AspNet.OData.Builder;
     using Microsoft.AspNet.OData.Common;
     using Microsoft.AspNet.OData.Query.Expressions;

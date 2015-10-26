@@ -1,5 +1,5 @@
 {
-  "version": "6.0.0-alpha1-beta7",
+  "version": "6.0.0-alpha1-beta8",
   "description": "Microsoft.AspNet.OData",
 
   "dependencies": {
@@ -7,9 +7,9 @@
     "Microsoft.OData.Edm": "6.13.0",
     "Microsoft.Spatial": "6.13.0",
     "Microsoft.AspNet.Mvc": "6.0.0-beta7-*",
-    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-beta7-*",
-    "Microsoft.Framework.OptionsModel": "1.0.0-beta7-*",
-    "Microsoft.Framework.NotNullAttribute.Internal": { "version": "1.0.0-beta5-*", "type": "build" }
+    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc1-*",
+    "Microsoft.Framework.OptionsModel": "1.0.0-rc1-*",
+    "Microsoft.Framework.NotNullAttribute.Internal": { "version": "1.0.0-beta5-10302", "type": "build" }
   },
 
   "frameworks": {

@@ -8,7 +8,7 @@ using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.AspNet.Routing;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
 {
@@ -17,6 +17,9 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 
     using Newtonsoft.Json;
+    using Mvc.Abstractions;
+    using Mvc.Infrastructure;
+    using Mvc.Controllers;
 
     public class DefaultODataRoutingConvention : IODataRoutingConvention
     {

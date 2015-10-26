@@ -16,6 +16,7 @@ using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Builder
 {
+    using Mvc.Infrastructure;
     using Microsoft.AspNet.OData.Formatter;
 
     /// <summary>

@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.Mvc.Abstractions;
+using Microsoft.AspNet.Mvc.Filters;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
+using System;
 using System.Collections;
 using System.Linq;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.OData.Query;
-using Microsoft.AspNet.OData.Routing;
 
 namespace Microsoft.AspNet.OData
 {

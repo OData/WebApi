@@ -12,6 +12,9 @@ namespace ODataSample.Web.Models
         {
             new Product { ProductId = 1, Name = "Apple",  Price = 10 },
             new Product { ProductId = 2, Name = "Orange", Price = 20 },
+            new Product { ProductId = 3, Name = "Banana", Price = 30 },
+            new Product { ProductId = 4, Name = "Cherry", Price = 40 },
+
         };
 
         private readonly List<Customer> _customers = new List<Customer>
@@ -58,7 +61,7 @@ namespace ODataSample.Web.Models
         }
 
 
-        public Customer AddCustomerProducts(int customerId, IEnumerable<int> productIds)
+        public Customer AddCustomerProducts(int customerId, IEnumerable<int> products)
         {
             var customer = _customers.SingleOrDefault(p => p.CustomerId == customerId);
             if (customer == null)
@@ -66,7 +69,7 @@ namespace ODataSample.Web.Models
                 throw new ArgumentNullException(nameof(customer));
             }
 
-            foreach (var productId in productIds)
+            foreach (var productId in products)
             {
                 var product = _products.SingleOrDefault(p => p.ProductId == productId);
 

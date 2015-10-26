@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNet.OData.Formatter;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Framework.Internal;
-using Microsoft.Framework.OptionsModel;
+using Microsoft.Extensions.OptionsModel;
 using System;
-using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.Mvc.Infrastructure;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
@@ -16,7 +16,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             services.AddScoped<ODataProperties>();
             services.AddTransient<IConfigureOptions<ODataOptions>, ODataOptionsSetup>();
-            services.AddMvc(options =>
+            services.AddMvcCore(options =>
             {
                 options.InputFormatters.Insert(0, new ModernInputFormatter());
 

@@ -6,10 +6,13 @@ using System.Reflection;
 
 namespace Microsoft.AspNet.OData
 {
+<<<<<<< HEAD
     using System.Runtime.Serialization;
 
     using Microsoft.AspNet.OData.Formatter;
 
+=======
+>>>>>>> refs/remotes/OData/vNext
     internal class DefaultODataModelProvider
     {
         public static IEdmModel BuildEdmModel(Type ApiContextType)
@@ -59,6 +62,10 @@ namespace Microsoft.AspNet.OData
                     var entityType = builder.AddEntityType(entityClrType);
 
                     var functionAttribute = method.GetCustomAttribute<ODataFunctionAttribute>();
+<<<<<<< HEAD
+=======
+                    //method.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ODataFunctionAttribute));
+>>>>>>> refs/remotes/OData/vNext
 
                     if (functionAttribute != null)
                     {
@@ -80,6 +87,10 @@ namespace Microsoft.AspNet.OData
                         }
                     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> refs/remotes/OData/vNext
                     if (configuration != null)
                     {
                         if (method.ReturnType.IsCollection())
@@ -97,7 +108,13 @@ namespace Microsoft.AspNet.OData
 
                         foreach (var parameterInfo in method.GetParameters())
                         {
+<<<<<<< HEAD
                             if (parameterInfo.ParameterType.GetTypeInfo().IsPrimitive || EdmLibHelpers.GetEdmPrimitiveTypeOrNull(parameterInfo.ParameterType) != null)
+=======
+                            if (parameterInfo.ParameterType.GetTypeInfo().IsPrimitive
+                                || parameterInfo.ParameterType == typeof(decimal)
+                                || parameterInfo.ParameterType == typeof(string))
+>>>>>>> refs/remotes/OData/vNext
                             {
                                 var primitiveType = builder.AddPrimitiveType(parameterInfo.ParameterType);
                                 configuration.AddParameter(parameterInfo.Name, primitiveType);
@@ -107,7 +124,11 @@ namespace Microsoft.AspNet.OData
 
                                 if (parameterInfo.ParameterType.IsCollection())
                                 {
+<<<<<<< HEAD
                                     if (parameterInfo.ParameterType.GenericTypeArguments[0].GetTypeInfo().IsPrimitive || EdmLibHelpers.GetEdmPrimitiveTypeOrNull(parameterInfo.ParameterType) != null)
+=======
+                                    if (parameterInfo.ParameterType.GenericTypeArguments[0].GetTypeInfo().IsPrimitive)
+>>>>>>> refs/remotes/OData/vNext
                                     {
                                         var parameterType = builder.AddPrimitiveType(parameterInfo.ParameterType.GenericTypeArguments[0]);
                                         var collectionTypeConfig = new CollectionTypeConfiguration(parameterType, parameterInfo.ParameterType.GenericTypeArguments[0]);

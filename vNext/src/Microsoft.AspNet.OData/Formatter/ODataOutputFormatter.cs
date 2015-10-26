@@ -15,6 +15,7 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Framework.Internal;
 using Microsoft.OData.Core;
+using Microsoft.AspNet.Mvc.Formatters;
 
 namespace Microsoft.AspNet.OData.Formatter
 {

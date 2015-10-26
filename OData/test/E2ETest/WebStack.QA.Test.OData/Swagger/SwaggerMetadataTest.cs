@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -6,16 +7,16 @@ using System.Net.Http.Formatting;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.OData.Routing;
 using System.Web.OData;
-using System.Web.OData.Extensions;
-using Microsoft.OData.Edm;
-using Nuwa;
-using WebStack.QA.Test.OData.Common;
-using System.Web.OData.Routing.Conventions;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
+using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
+using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Newtonsoft.Json.Linq;
+using Nuwa;
+using WebStack.QA.Test.OData.Common;
 using Xunit;
 using Xunit.Extensions;
 
@@ -41,10 +42,8 @@ namespace WebStack.QA.Test.OData.Swagger
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
             configuration.Routes.Clear();
-           // configuration.Formatters.Add(new JsonMediaTypeFormatter());
 
             JsonMediaTypeFormatter jsonFormatter = new JsonMediaTypeFormatter();
-            //jsonFormatter.SerializerSettings. = true;
             configuration.Formatters.Add(jsonFormatter);
 
             IODataPathHandler handler = new SwaggerPathHandler();

@@ -99,7 +99,7 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Convert the Edm model to Swagger model.
+        /// Converts the Edm model to Swagger model.
         /// </summary>
         /// <returns>The <see cref="Newtonsoft.Json.Linq.JObject"/> represents the Swagger model.</returns>
         public virtual JObject ConvertToSwaggerModel()
@@ -173,7 +173,8 @@ namespace System.Web.OData
             {
                 SwaggerPaths.Add("/" + entitySet.Name, ODataSwaggerUtilities.CreateSwaggerPathForEntitySet(entitySet));
 
-                SwaggerPaths.Add(ODataSwaggerUtilities.GetPathForEntity(entitySet), ODataSwaggerUtilities.CreateSwaggerPathForEntity(entitySet));
+                SwaggerPaths.Add(ODataSwaggerUtilities.GetPathForEntity(entitySet),
+                    ODataSwaggerUtilities.CreateSwaggerPathForEntity(entitySet));
             }
 
             foreach (var operationImport in EdmModel.EntityContainer.OperationImports())
@@ -196,7 +197,8 @@ namespace System.Web.OData
 
             foreach (var type in EdmModel.SchemaElements.OfType<IEdmStructuredType>())
             {
-                SwaggerDefinitions.Add(type.FullTypeName(), ODataSwaggerUtilities.CreateSwaggerDefinitionForStructureType(type));
+                SwaggerDefinitions.Add(type.FullTypeName(),
+                    ODataSwaggerUtilities.CreateSwaggerDefinitionForStructureType(type));
             }
         }
 

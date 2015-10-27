@@ -545,11 +545,6 @@ namespace System.Web.OData
                 request.ODataProperties().Path);
             ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
 
-            if (queryOptions.SelectExpand != null)
-            {
-                queryOptions.SelectExpand.LevelsMaxLiteralExpansionDepth = _validationSettings.MaxExpansionDepth;
-            }
-
             ValidateQuery(request, queryOptions);
 
             // apply the query

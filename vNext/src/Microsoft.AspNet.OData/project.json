@@ -6,7 +6,7 @@
     "Microsoft.OData.Core": "6.13.0",
     "Microsoft.OData.Edm": "6.13.0",
     "Microsoft.Spatial": "6.13.0",
-    "Microsoft.AspNet.Mvc": "6.0.0-beta7-*",
+    "Microsoft.AspNet.Mvc": "6.0.0-beta8-*",
     "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc1-*",
     "Microsoft.Framework.OptionsModel": "1.0.0-rc1-*",
     "Microsoft.Framework.NotNullAttribute.Internal": { "version": "1.0.0-beta5-10302", "type": "build" }

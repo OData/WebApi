@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -2791,9 +2792,82 @@ namespace System.Web.OData.Builder.Conventions
             var model = modelBuilder.GetEdmModel();
 
             // Assert
+            Assert.NotNull(model);
             NavigationPropertyConfiguration category = entityTypeConf.NavigationProperties.FirstOrDefault(p => p.Name == "Category");
             Assert.NotNull(category);
-            Assert.True(category.AutoExpand);      
+            Assert.True(category.AutoExpand);
+        }
+
+        [Fact]
+        public void CanConfig_SystemCultureInfo_AsEntityType()
+        {
+            // Arrange
+            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntityType<CultureInfo>().HasKey(c => c.LCID);
+
+            // Act
+            IEdmModel model = modelBuilder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+
+            Assert.Equal(24, model.SchemaElements.Count());
+
+            // only one entity type.
+            var entityTypes = model.SchemaElements.OfType<IEdmEntityType>();
+            IEdmEntityType cultureInfo = Assert.Single(entityTypes);
+            Assert.NotNull(cultureInfo);
+            Assert.Equal(EdmTypeKind.Entity, cultureInfo.TypeKind);
+            Assert.Equal("System.Globalization.CultureInfo", cultureInfo.FullTypeName());
+
+            IEdmComplexType calendar = model.SchemaElements.OfType<IEdmComplexType>()
+                .FirstOrDefault(e => e.FullTypeName() == "System.Globalization.Calendar");
+            Assert.NotNull(calendar);
+            Assert.Equal(EdmTypeKind.Complex, calendar.TypeKind);
+            Assert.True(calendar.IsAbstract);
+
+            IEdmComplexType gregorianCalendar  = model.SchemaElements.OfType<IEdmComplexType>()
+                .FirstOrDefault(e => e.FullTypeName() == "System.Globalization.GregorianCalendar");
+            Assert.NotNull(gregorianCalendar);
+            Assert.Equal(EdmTypeKind.Complex, gregorianCalendar.TypeKind);
+            Assert.False(gregorianCalendar.IsAbstract);
+            Assert.Equal(calendar, gregorianCalendar.BaseType);
+        }
+
+        [Fact]
+        public void CanConfig_SystemCultureInfo_AsComplexType()
+        {
+            // Arrange
+            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.ComplexType<CultureInfo>();
+
+            // Act
+            IEdmModel model = modelBuilder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+
+            Assert.Equal(24, model.SchemaElements.Count());
+            Assert.Empty(model.SchemaElements.OfType<IEdmEntityType>());
+
+            IEdmComplexType cultureInfo = model.SchemaElements.OfType<IEdmComplexType>()
+                .FirstOrDefault(e => e.FullTypeName() == "System.Globalization.CultureInfo");
+            Assert.NotNull(cultureInfo);
+            Assert.Equal(EdmTypeKind.Complex, cultureInfo.TypeKind);
+            Assert.False(cultureInfo.IsAbstract);
+
+            IEdmComplexType calendar = model.SchemaElements.OfType<IEdmComplexType>()
+                .FirstOrDefault(e => e.FullTypeName() == "System.Globalization.Calendar");
+            Assert.NotNull(calendar);
+            Assert.Equal(EdmTypeKind.Complex, calendar.TypeKind);
+            Assert.True(calendar.IsAbstract);
+
+            IEdmComplexType gregorianCalendar = model.SchemaElements.OfType<IEdmComplexType>()
+                .FirstOrDefault(e => e.FullTypeName() == "System.Globalization.GregorianCalendar");
+            Assert.NotNull(gregorianCalendar);
+            Assert.Equal(EdmTypeKind.Complex, gregorianCalendar.TypeKind);
+            Assert.False(gregorianCalendar.IsAbstract);
+            Assert.Equal(calendar, gregorianCalendar.BaseType);
         }
     }
 

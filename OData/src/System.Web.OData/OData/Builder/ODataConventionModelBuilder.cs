@@ -456,7 +456,10 @@ namespace System.Web.OData.Builder
         private void ReconfigureEntityTypesAsComplexType(EntityTypeConfiguration[] misconfiguredEntityTypes)
         {
             IList<EntityTypeConfiguration> actualEntityTypes =
-                StructuralTypes.Except(misconfiguredEntityTypes).OfType<EntityTypeConfiguration>().ToList();
+                StructuralTypes.OfType<EntityTypeConfiguration>()
+                    .Where(entity => entity.Keys().Any())
+                    .Concat(_explicitlyAddedTypes.OfType<EntityTypeConfiguration>())
+                    .ToList();
 
             HashSet<EntityTypeConfiguration> visitedEntityType = new HashSet<EntityTypeConfiguration>();
             foreach (EntityTypeConfiguration misconfiguredEntityType in misconfiguredEntityTypes)

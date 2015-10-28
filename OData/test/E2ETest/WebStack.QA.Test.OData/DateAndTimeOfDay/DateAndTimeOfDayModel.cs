@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.OData.Edm.Library;
 
 namespace WebStack.QA.Test.OData.DateAndTimeOfDay
@@ -44,5 +45,13 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
         // nullable
         public DateTime? NullableDateTime { get; set; }
         public DateTimeOffset? NullableOffset { get; set; }
+    }
+
+    public class EfPerson
+    {
+        public int Id { get; set; }
+
+        [Column("Birthday", TypeName = "Date")]
+        public DateTime? Birthday { get; set; }
     }
 }

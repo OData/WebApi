@@ -1522,7 +1522,7 @@ namespace System.Web.OData.Query.Expressions
                 left = ConvertToEnumUnderlyingType(left, enumType, enumUnderlyingType);
                 right = ConvertToEnumUnderlyingType(right, enumType, enumUnderlyingType);
             }
-
+           
             if (leftUnderlyingType == typeof(DateTime) && rightUnderlyingType == typeof(DateTimeOffset))
             {
                 right = DateTimeOffsetToDateTime(right);
@@ -1660,6 +1660,8 @@ namespace System.Web.OData.Query.Expressions
 
         private Expression CreateDateBinaryExpression(Expression source)
         {
+            source = ConvertToDateTimeRelatedConstExpression(source);
+
             // Year, Month, Day
             Expression year = GetProperty(source, ClrCanonicalFunctions.YearFunctionName);
             Expression month = GetProperty(source, ClrCanonicalFunctions.MonthFunctionName);
@@ -1676,6 +1678,8 @@ namespace System.Web.OData.Query.Expressions
 
         private Expression CreateTimeBinaryExpression(Expression source)
         {
+            source = ConvertToDateTimeRelatedConstExpression(source);
+
             // Hour, Minute, Second, Millisecond
             Expression hour = GetProperty(source, ClrCanonicalFunctions.HourFunctionName);
             Expression minute = GetProperty(source, ClrCanonicalFunctions.MinuteFunctionName);
@@ -1690,6 +1694,39 @@ namespace System.Web.OData.Query.Expressions
             Expression result = Expression.Add(hourTicks, Expression.Add(minuteTicks, Expression.Add(secondTicks, Expression.Convert(milliSecond, typeof(long)))));
 
             return CreateFunctionCallWithNullPropagation(result, new[] { source });
+        }
+
+        private Expression ConvertToDateTimeRelatedConstExpression(Expression source)
+        {
+            var parameterizedConstantValue = ExtractParameterizedConstant(source);
+            if (parameterizedConstantValue != null)
+            {
+                var dateTimeOffset = parameterizedConstantValue as DateTimeOffset?;
+                if (dateTimeOffset != null)
+                {
+                    source = Expression.Constant(dateTimeOffset.Value, typeof(DateTimeOffset));
+                }
+
+                var dateTime = parameterizedConstantValue as DateTime?;
+                if (dateTime != null)
+                {
+                    source = Expression.Constant(dateTime.Value, typeof(DateTime));
+                }
+
+                var date = parameterizedConstantValue as Date?;
+                if (date != null)
+                {
+                    source = Expression.Constant(date.Value, typeof(Date));
+                }
+
+                var timeOfDay = parameterizedConstantValue as TimeOfDay?;
+                if (timeOfDay != null)
+                {
+                    source = Expression.Constant(timeOfDay.Value, typeof(TimeOfDay));
+                }
+            }
+
+            return source;
         }
 
         private static Expression ConvertToEnumUnderlyingType(Expression expression, Type enumType, Type enumUnderlyingType)

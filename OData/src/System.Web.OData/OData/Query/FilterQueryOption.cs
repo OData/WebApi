@@ -98,14 +98,24 @@ namespace System.Web.OData.Query
                 if (_filterClause == null)
                 {
                     _filterClause = _queryOptionParser.ParseFilter();
-                    SingleValueNode filterExpression = _filterClause.Expression.Accept(
-                        new ParameterAliasNodeTranslator(_queryOptionParser.ParameterAliasNodes)) as SingleValueNode;
+                    var visitor = GetVisitor(_queryOptionParser);
+                    SingleValueNode filterExpression = _filterClause.Expression.Accept(visitor) as SingleValueNode;
                     filterExpression = filterExpression ?? new ConstantNode(null);
                     _filterClause = new FilterClause(filterExpression, _filterClause.RangeVariable);
                 }
 
                 return _filterClause;
             }
+        }
+
+        /// <summary>
+        /// Returns a new instance of the vistor to use to transform the filterclause's expression into the actual 
+        /// expression to use 
+        /// </summary>
+        /// <param name="queryOptionsParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option</param>
+        /// <returns>A new visitor instance</returns>
+        protected virtual Microsoft.OData.Core.UriParser.Visitors.QueryNodeVisitor<QueryNode> GetVisitor(ODataQueryOptionParser queryOptionsParser) {
+            return new ParameterAliasNodeTranslator(_queryOptionParser.ParameterAliasNodes);
         }
 
         /// <summary>

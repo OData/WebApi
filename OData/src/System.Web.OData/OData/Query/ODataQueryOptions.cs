@@ -603,22 +603,22 @@ namespace System.Web.OData.Query
                     case "$filter":
                         ThrowIfEmpty(kvp.Value, "$filter");
                         RawValues.Filter = kvp.Value;
-                        Filter = new FilterQueryOption(kvp.Value, Context, _queryOptionParser);
+                        Filter = CreateFilterQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
                     case "$orderby":
                         ThrowIfEmpty(kvp.Value, "$orderby");
                         RawValues.OrderBy = kvp.Value;
-                        OrderBy = new OrderByQueryOption(kvp.Value, Context, _queryOptionParser);
+                        OrderBy = CreateOrderByQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
                     case "$top":
                         ThrowIfEmpty(kvp.Value, "$top");
                         RawValues.Top = kvp.Value;
-                        Top = new TopQueryOption(kvp.Value, Context, _queryOptionParser);
+                        Top = CreateTopQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
                     case "$skip":
                         ThrowIfEmpty(kvp.Value, "$skip");
                         RawValues.Skip = kvp.Value;
-                        Skip = new SkipQueryOption(kvp.Value, Context, _queryOptionParser);
+                        Skip = CreateSkipQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
                     case "$select":
                         RawValues.Select = kvp.Value;
@@ -626,7 +626,7 @@ namespace System.Web.OData.Query
                     case "$count":
                         ThrowIfEmpty(kvp.Value, "$count");
                         RawValues.Count = kvp.Value;
-                        Count = new CountQueryOption(kvp.Value, Context, _queryOptionParser);
+                        Count = CreateCountQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
                     case "$expand":
                         RawValues.Expand = kvp.Value;
@@ -654,7 +654,7 @@ namespace System.Web.OData.Query
 
             if (ODataCountMediaTypeMapping.IsCountRequest(Request))
             {
-                Count = new CountQueryOption(
+                Count = CreateCountQueryOption(
                     "true",
                     Context,
                     new ODataQueryOptionParser(
@@ -663,6 +663,74 @@ namespace System.Web.OData.Query
                         Context.NavigationSource,
                         new Dictionary<string, string> { { "$count", "true" } }));
             }
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="FilterQueryOption"/> based on the raw $filter value and 
+        /// an EdmModel from <see cref="ODataQueryContext"/>.
+        /// </summary>
+        /// <param name="rawValue">The raw value for $filter query. It can be null or empty.</param>
+        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
+        /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
+        /// <returns>A new <see cref="FilterQueryOption"/> instance</returns>
+        protected virtual FilterQueryOption CreateFilterQueryOption(string rawValue, ODataQueryContext context, ODataQueryOptionParser queryOptionParser) {
+            return new FilterQueryOption(rawValue, context, queryOptionParser);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="OrderByQueryOption"/> based on the raw $orderby value and 
+        /// an EdmModel from <see cref="ODataQueryContext"/>.
+        /// </summary>
+        /// <param name="rawValue">The raw value for $orderby query. It can be null or empty.</param>
+        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
+        /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
+        /// <returns>A new <see cref="OrderByQueryOption"/> instance</returns>
+        protected virtual OrderByQueryOption CreateOrderByQueryOption(string rawValue, ODataQueryContext context, ODataQueryOptionParser queryOptionParser) {
+            return new OrderByQueryOption(rawValue, context, queryOptionParser);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="OrderByQueryOption"/> based on the pased copy
+        /// </summary>
+        /// <param name="orderbyQueryOption">An instance of <see cref="OrderByQueryOption"/> to use as a source  for the new instnace's values</param>
+        /// <returns>A new <see cref="OrderByQueryOption"/> instance</returns>
+        protected virtual OrderByQueryOption CreateOrderByQueryOption(OrderByQueryOption orderbyQueryOption) {
+            return new OrderByQueryOption(orderbyQueryOption);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="TopQueryOption"/> based on the raw $top value and 
+        /// an EdmModel from <see cref="ODataQueryContext"/>.
+        /// </summary>
+        /// <param name="rawValue">The raw value for $top query. It can be null or empty.</param>
+        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
+        /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
+        /// <returns>A new <see cref="TopQueryOption"/> instance</returns>
+        protected virtual TopQueryOption CreateTopQueryOption(string rawValue, ODataQueryContext context, ODataQueryOptionParser queryOptionParser) {
+            return new TopQueryOption(rawValue, context, queryOptionParser);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="SkipQueryOption"/> based on the raw $skip value and 
+        /// an EdmModel from <see cref="ODataQueryContext"/>.
+        /// </summary>
+        /// <param name="rawValue">The raw value for $skip query. It can be null or empty.</param>
+        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
+        /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
+        /// <returns>A new <see cref="SkipQueryOption"/> instance</returns>
+        protected virtual SkipQueryOption CreateSkipQueryOption(string rawValue, ODataQueryContext context, ODataQueryOptionParser queryOptionParser) {
+            return new SkipQueryOption(rawValue, context, queryOptionParser);
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="CountQueryOption" /> class.
+        /// </summary>
+        /// <param name="rawValue">The raw value for the $count query option.</param>
+        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the query context.</param>
+        /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
+        /// <returns>A new <see cref="CountQueryOption" /> instance</returns>
+        protected virtual CountQueryOption CreateCountQueryOption(string rawValue, ODataQueryContext context, ODataQueryOptionParser queryOptionParser) {
+            return new CountQueryOption(rawValue, context, queryOptionParser);
         }
 
         private bool IsAvailableODataQueryOption(object queryOption, AllowedQueryOptions queryOptionFlag)

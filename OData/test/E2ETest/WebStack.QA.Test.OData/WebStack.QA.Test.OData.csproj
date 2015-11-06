@@ -160,6 +160,7 @@
     <Compile Include="ETags\DominiosController.cs" />
     <Compile Include="ETags\ETagCurrencyTokenEfContext.cs" />
     <Compile Include="ETags\ETagCurrencyTokenEfContextTest.cs" />
+    <Compile Include="ETags\ETagsOtherTypesTest.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesController.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesModel.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesTest.cs" />

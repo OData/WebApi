@@ -2,10 +2,20 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading;
+using System.Web.Http;
+using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization.Models;
+using System.Web.OData.Routing;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using Moq;
 
 namespace System.Web.OData.Formatter
 {
@@ -174,6 +184,190 @@ namespace System.Web.OData.Formatter
             // Assert
             Assert.NotNull(queryable);
             Assert.Same(queryable, customers);
+        }
+
+        [Theory]
+        [InlineData(1.0, true, new[] { 1, 3 })]
+        [InlineData(1.0, false, new[] { 2 })]
+        [InlineData(1.1, true, null)]
+        [InlineData(1.1, false, new[] { 1, 2, 3 })]
+        public void ApplyTo_NewQueryReturned_ForDouble(double value, bool ifMatch, IList<int> expect)
+        {
+            // Arrange
+            var myCustomers = new List<MyETagCustomer>
+            {
+                new MyETagCustomer
+                {
+                    ID = 1,
+                    DoubleETag = 1.0,
+                },
+                new MyETagCustomer
+                {
+                    ID = 2,
+                    DoubleETag = 1.1,
+                },
+                new MyETagCustomer
+                {
+                    ID = 3,
+                    DoubleETag = 1.0,
+                },
+            };
+
+            IETagHandler handerl = new DefaultODataETagHandler();
+            Dictionary<string, object> properties = new Dictionary<string, object> { { "DoubleETag", value } };
+            EntityTagHeaderValue etagHeaderValue = handerl.CreateETag(properties);
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpConfiguration cofiguration = new HttpConfiguration();
+            request.SetConfiguration(cofiguration);
+
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<MyETagCustomer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType customer = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "MyEtagCustomer");
+            IEdmEntitySet customers = model.FindDeclaredEntitySet("Customers");
+            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
+            mockSegment.Setup(s => s.GetEdmType(null)).Returns(customer);
+            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns(customers);
+            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+            request.ODataProperties().Path = odataPath;
+            request.ODataProperties().Model = model;
+
+            ETag etagCustomer = request.GetETag(etagHeaderValue);
+            etagCustomer.EntityType = typeof(MyETagCustomer);
+            etagCustomer.IsIfNoneMatch = !ifMatch;
+
+            // Act
+            IQueryable queryable = etagCustomer.ApplyTo(myCustomers.AsQueryable());
+
+            // Assert
+            Assert.NotNull(queryable);
+            IList<MyETagCustomer> actualCustomers = Assert.IsAssignableFrom<IEnumerable<MyETagCustomer>>(queryable).ToList();
+            if (expect != null)
+            {
+                Assert.Equal(expect, actualCustomers.Select(c => c.ID));
+            }
+
+            MethodCallExpression methodCall = queryable.Expression as MethodCallExpression;
+            Assert.NotNull(methodCall);
+            Assert.Equal(2, methodCall.Arguments.Count);
+            if (ifMatch)
+            {
+                Assert.Equal(
+                    "Param_0 => (Param_0.DoubleETag == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Double]).TypedProperty)",
+                    methodCall.Arguments[1].ToString());
+            }
+            else
+            {
+                Assert.Equal(
+                    "Param_0 => Not((Param_0.DoubleETag == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Double]).TypedProperty))",
+                    methodCall.Arguments[1].ToString());
+            }
+        }
+
+        public class MyETagCustomer
+        {
+            public int ID { get; set; }
+
+            [ConcurrencyCheck]
+            public double DoubleETag { get; set; }
+        }
+
+        [Theory]
+        [InlineData((sbyte)1, (short)1, true, new int[] {})]
+        [InlineData((sbyte)1, (short)1, false, new[] { 1, 2, 3 })]
+        [InlineData(SByte.MaxValue, Int16.MaxValue, true, new[] { 2 })]
+        [InlineData(SByte.MaxValue, Int16.MaxValue, false, new[] { 1, 3 })]
+        [InlineData(SByte.MinValue, Int16.MinValue, true, new[] { 3 })]
+        [InlineData(SByte.MinValue, Int16.MinValue, false, new[] { 1, 2 })]
+        public void ApplyTo_NewQueryReturned_ForInteger(sbyte byteVal, short shortVal, bool ifMatch, IList<int> expect)
+        {
+            // Arrange
+            var mycustomers = new List<MyETagOrder>
+            {
+                new MyETagOrder
+                {
+                    ID = 1,
+                    ByteVal = 7,
+                    ShortVal = 8
+                },
+                new MyETagOrder
+                {
+                    ID = 2,
+                    ByteVal = SByte.MaxValue,
+                    ShortVal = Int16.MaxValue
+                },
+                new MyETagOrder
+                {
+                    ID = 3,
+                    ByteVal = SByte.MinValue,
+                    ShortVal = Int16.MinValue
+                },
+            };
+            IETagHandler handerl = new DefaultODataETagHandler();
+            Dictionary<string, object> properties = new Dictionary<string, object>
+            {
+                { "ByteVal", byteVal },
+                { "ShortVal", shortVal }
+            };
+            EntityTagHeaderValue etagHeaderValue = handerl.CreateETag(properties);
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpConfiguration cofiguration = new HttpConfiguration();
+            request.SetConfiguration(cofiguration);
+
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<MyETagOrder>("Orders");
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType order = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "MyETagOrder");
+            IEdmEntitySet orders = model.FindDeclaredEntitySet("Orders");
+            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
+            mockSegment.Setup(s => s.GetEdmType(null)).Returns(order);
+            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns(orders);
+            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+            request.ODataProperties().Path = odataPath;
+            request.ODataProperties().Model = model;
+
+            ETag etagCustomer = request.GetETag(etagHeaderValue);
+            etagCustomer.EntityType = typeof(MyETagOrder);
+            etagCustomer.IsIfNoneMatch = !ifMatch;
+
+            // Act
+            IQueryable queryable = etagCustomer.ApplyTo(mycustomers.AsQueryable());
+
+            // Assert
+            Assert.NotNull(queryable);
+            IEnumerable<MyETagOrder> actualOrders = Assert.IsAssignableFrom<IEnumerable<MyETagOrder>>(queryable);
+            Assert.Equal(expect, actualOrders.Select(c => c.ID));
+            MethodCallExpression methodCall = queryable.Expression as MethodCallExpression;
+            Assert.NotNull(methodCall);
+            Assert.Equal(2, methodCall.Arguments.Count);
+
+            if (ifMatch)
+            {
+                Assert.Equal(
+                    "Param_0 => ((Param_0.ByteVal == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.SByte]).TypedProperty) " +
+                    "AndAlso (Param_0.ShortVal == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int16]).TypedProperty))",
+                    methodCall.Arguments[1].ToString());
+            }
+            else
+            {
+                Assert.Equal(
+                    "Param_0 => Not(((Param_0.ByteVal == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.SByte]).TypedProperty) " +
+                    "AndAlso (Param_0.ShortVal == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int16]).TypedProperty)))",
+                    methodCall.Arguments[1].ToString());
+            }
+        }
+
+        public class MyETagOrder
+        {
+            public int ID { get; set; }
+
+            [ConcurrencyCheck]
+            public sbyte ByteVal { get; set; }
+
+            [ConcurrencyCheck]
+            public short ShortVal { get; set; }
         }
     }
 }

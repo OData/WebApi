@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Mvc.Infrastructure;
-using Microsoft.Framework.Internal;
+﻿using Microsoft.AspNet.Mvc.Infrastructure;
+using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData
 {

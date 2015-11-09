@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Framework.DependencyInjection;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web

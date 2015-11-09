@@ -1,15 +1,17 @@
-﻿{
+{
   "webroot": "wwwroot",
 
   "dependencies": {
-    "Microsoft.AspNet.Mvc": "6.0.0-beta8-*",
-    "Microsoft.AspNet.Server.WebListener": "1.0.0-*",
-    "Microsoft.AspNet.StaticFiles": "1.0.0-beta8-*",
+    "Microsoft.AspNet.IISPlatformHandler": "1.0.0-beta8",
+    "Microsoft.AspNet.Mvc": "6.0.0-beta8",
+    "Microsoft.AspNet.Server.Kestrel": "1.0.0-beta8",
+    "Microsoft.AspNet.Server.WebListener": "1.0.0-beta8",
+    "Microsoft.AspNet.StaticFiles": "1.0.0-beta8",
     "Microsoft.AspNet.OData": "6.0.0-alpha1-beta8-*"
   },
 
   "commands": {
-    "web": "Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.WebListener --server.urls http://localhost:5000"
+    "web": "Microsoft.AspNet.Server.Kestrel"
   },
 
   "frameworks": {

@@ -3,7 +3,7 @@
 
 using System.Linq;
 using Microsoft.AspNet.Http;
-using Microsoft.Extensions.Primitives;
+using Microsoft.Framework.Primitives;
 
 namespace Microsoft.AspNet.OData
 {

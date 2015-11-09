@@ -1,26 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.Mvc.Abstractions;
+using Microsoft.AspNet.Mvc.Controllers;
+using Microsoft.AspNet.Mvc.Infrastructure;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.AspNet.Routing;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Framework.DependencyInjection;
+using Microsoft.OData.Core.UriParser.Semantic;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
 {
-    using System.Text;
-
-    using Microsoft.OData.Core.UriParser.TreeNodeKinds;
-
-    using Newtonsoft.Json;
-    using Mvc.Abstractions;
-    using Mvc.Infrastructure;
-    using Mvc.Controllers;
-
     public class DefaultODataRoutingConvention : IODataRoutingConvention
     {
         private static readonly IDictionary<string, string> _actionNameMappings = new Dictionary<string, string>()
@@ -99,7 +89,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     {
                         var keyName = operationSegmentParameter.Name;
                         var keyValue =
-                            ((Microsoft.OData.Core.UriParser.Semantic.ConstantNode)operationSegmentParameter.Value)
+                            ((ConstantNode)operationSegmentParameter.Value)
                                 .Value;
 
                         var newKey = new KeyValuePair<string, object>(keyName, keyValue);

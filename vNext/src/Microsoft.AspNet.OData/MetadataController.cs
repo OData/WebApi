@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Mvc;
-using Microsoft.Framework.Internal;
+﻿using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData

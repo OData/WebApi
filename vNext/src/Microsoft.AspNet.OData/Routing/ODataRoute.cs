@@ -1,15 +1,12 @@
-﻿using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Routing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Edm;
-using System;
-using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Mvc.Infrastructure;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.AspNet.Mvc.Infrastructure;
+using Microsoft.AspNet.Routing;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Routing
 {

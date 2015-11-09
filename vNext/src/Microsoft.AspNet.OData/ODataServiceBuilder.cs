@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Framework.Internal;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.Framework.DependencyInjection;
 
 namespace Microsoft.AspNet.OData
 {

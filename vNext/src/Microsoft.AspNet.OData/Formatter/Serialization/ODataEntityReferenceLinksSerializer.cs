@@ -8,7 +8,6 @@ using System.Runtime.Serialization;
 using Microsoft.OData.Core;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {

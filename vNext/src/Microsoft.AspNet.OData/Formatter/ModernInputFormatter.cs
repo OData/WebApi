@@ -2,11 +2,10 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
-using Microsoft.Framework.Internal;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
 using Microsoft.AspNet.Mvc.Formatters;
+using Microsoft.AspNet.OData.Common;
+using Newtonsoft.Json;
 
 namespace Microsoft.AspNet.OData.Formatter
 {

@@ -79,4 +79,20 @@ namespace System.Web.OData.Query.Expressions
             return (int)hash;
         }
     }
+
+    /// <summary>
+    /// Wrapper for Entity (top level)
+    /// </summary>
+    public class DynamicEntityWrapper : DynamicTypeWrapper
+    {
+
+    }
+
+    /// <summary>
+    /// Wrapper for Complex (netsed)
+    /// </summary>
+    public class DynamicComplexWrapper : DynamicTypeWrapper
+    {
+
+    }
 }

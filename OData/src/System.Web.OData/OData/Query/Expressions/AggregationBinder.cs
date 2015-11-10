@@ -51,13 +51,13 @@ namespace System.Web.OData.Query.Expressions
                     ResultType = groupByClause.ItemType;
                     _groupingProperties = groupByClause.GroupingProperties;
                     _aggregateStatements = groupByClause.Aggregate != null ? groupByClause.Aggregate.Statements : null;
-                    _groupByClrType = TypeProvider.GetResultType(groupByClause.GroupingItemType, _model);
+                    _groupByClrType = TypeProvider.GetResultType<DynamicEntityWrapper>(groupByClause.GroupingItemType, _model);
                     break;
                 default:
                     throw new NotSupportedException(string.Format("Not supported transformation kind {0}", transformation.Kind));
             }
 
-            ResultClrType = TypeProvider.GetResultType(ResultType, _model);
+            ResultClrType = TypeProvider.GetResultType<DynamicEntityWrapper>(ResultType, _model);
 
             _groupByClrType = _groupByClrType ?? typeof(DynamicTypeWrapper);
         }
@@ -101,14 +101,40 @@ namespace System.Web.OData.Query.Expressions
             var groupingType = typeof(IGrouping<,>).MakeGenericType(this._groupByClrType, this._elementType);
             ParameterExpression accum = Expression.Parameter(groupingType);
 
-            List<MemberAssignment> wrapperTypeMemberAssignments2 = new List<MemberAssignment>();
+            List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
 
             // Setting GroupByContainer property when previous step was grouping
             if (_groupingProperties != null)
             {
-                foreach (var prop in _groupingProperties)
+                foreach (var node in _groupingProperties)
                 {
-                    wrapperTypeMemberAssignments2.Add(Expression.Bind(ResultClrType.GetMember(prop.Property.Name).Single(), Expression.Property(Expression.Property(accum, "Key"), prop.Property.Name)));
+                    var stack = ReverseAccessNode(node);
+                    var propertyAccessor = Expression.Property(accum, "Key");
+                    while (stack.Count != 0)
+                    {
+                        var propNode = stack.Pop();
+                        propertyAccessor = Expression.Property(propertyAccessor, GetNodePropertyName(propNode));
+                    }
+                    stack = ReverseAccessNode(node);
+                    var prop = stack.Pop();
+                    var member = ResultClrType.GetMember(GetNodePropertyName(prop)).Single();
+                    if (stack.Count == 0)
+                    {
+                        wrapperTypeMemberAssignments.Add(Expression.Bind(member, propertyAccessor));
+                    }
+                    else
+                    {
+                        // TODO: Do proper recursion
+                        var wrapperTypeMemberAssignments2 = new List<MemberAssignment>();
+                        var membetType = (member as PropertyInfo).PropertyType;
+                        var prop2 = stack.Pop();
+                        var member2 = membetType.GetMember(GetNodePropertyName(prop2)).Single();
+                        wrapperTypeMemberAssignments2.Add(Expression.Bind(member2, propertyAccessor));
+                        var expr = Expression.MemberInit(Expression.New(membetType), wrapperTypeMemberAssignments2);
+                        wrapperTypeMemberAssignments.Add(Expression.Bind(member, expr));
+                    }
+
+                    //wrapperTypeMemberAssignments.Add(Expression.Bind(ResultClrType.GetMember(node.Property.Name).Single(), propertyAccessor));
                 }
             }
 
@@ -117,11 +143,11 @@ namespace System.Web.OData.Query.Expressions
             {
                 foreach (var aggStatement in _aggregateStatements)
                 {
-                    wrapperTypeMemberAssignments2.Add(Expression.Bind(ResultClrType.GetMember(aggStatement.AsAlias).Single(), CreateAggregationExpression(accum, aggStatement)));
+                    wrapperTypeMemberAssignments.Add(Expression.Bind(ResultClrType.GetMember(aggStatement.AsAlias).Single(), CreateAggregationExpression(accum, aggStatement)));
                 }
             }
 
-            var selectLambda = Expression.Lambda(Expression.MemberInit(Expression.New(ResultClrType), wrapperTypeMemberAssignments2), accum);
+            var selectLambda = Expression.Lambda(Expression.MemberInit(Expression.New(ResultClrType), wrapperTypeMemberAssignments), accum);
 
             var result = ExpressionHelpers.Select(grouping, selectLambda, groupingType);
             return result;
@@ -259,7 +285,25 @@ namespace System.Web.OData.Query.Expressions
                 List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
                 foreach (var node in _groupingProperties)
                 {
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(_groupByClrType.GetMember(node.Property.Name).Single(), BindAccessor(node)));
+                    var stack = ReverseAccessNode(node);
+                    var prop = stack.Pop();
+                    var member = _groupByClrType.GetMember(GetNodePropertyName(prop)).Single();
+                    var nodeAccessor = BindAccessor(node);
+                    if (stack.Count == 0)
+                    {
+                        wrapperTypeMemberAssignments.Add(Expression.Bind(member, nodeAccessor));
+                    }
+                    else
+                    {
+                        // TODO: Do proper recursion
+                        var wrapperTypeMemberAssignments2 = new List<MemberAssignment>();
+                        var membetType = (member as PropertyInfo).PropertyType;
+                        var prop2 = stack.Pop();
+                        var member2 = membetType.GetMember(GetNodePropertyName(prop2)).Single();
+                        wrapperTypeMemberAssignments2.Add(Expression.Bind(member2, nodeAccessor));
+                        var expr = Expression.MemberInit(Expression.New(membetType), wrapperTypeMemberAssignments2);
+                        wrapperTypeMemberAssignments.Add(Expression.Bind(member, expr));
+                    }
                 }
 
                 groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(this._groupByClrType), wrapperTypeMemberAssignments), this._lambdaParameter);
@@ -273,6 +317,47 @@ namespace System.Web.OData.Query.Expressions
             }
 
             return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, this._groupByClrType);
+        }
+
+        // TODO: Find good extension class to land that method
+        private Stack<SingleValueNode> ReverseAccessNode(SingleValueNode node)
+        {
+            var result = new Stack<SingleValueNode>();
+            do
+            {
+                result.Push(node);
+                if (node.Kind == QueryNodeKind.SingleValuePropertyAccess)
+                {
+                    node = ((SingleValuePropertyAccessNode)node).Source;
+
+                }
+                else if (node.Kind == QueryNodeKind.SingleNavigationNode)
+                {
+                    node = ((SingleNavigationNode)node).NavigationSource as SingleValueNode;
+                }
+            } while (node != null && (node.Kind == QueryNodeKind.SingleValuePropertyAccess || node.Kind == QueryNodeKind.SingleNavigationNode));
+
+            return result;
+        }
+
+        private static string GetNodePropertyName(SingleValueNode property)
+        {
+            string propertyName = null;
+            if (property.Kind == QueryNodeKind.SingleValuePropertyAccess)
+            {
+                propertyName = ((SingleValuePropertyAccessNode)property).Property.Name;
+            }
+            else if (property.Kind == QueryNodeKind.SingleNavigationNode)
+            {
+                propertyName = ((SingleNavigationNode)property).NavigationProperty.Name;
+            }
+
+            else
+            {
+                // TODO: Throw?
+            }
+
+            return propertyName;
         }
     }
 }

@@ -32,7 +32,7 @@ namespace System.Web.OData.Query.Expressions
         /// We create new assembly each time, but they will be collected by GC.
         /// Current performance testing results is 0.5ms per type. We should consider caching types, however trade off is between CPU perfomance and memory usage (might be it will we an option for library user)
         /// </remarks>
-        public static Type GetResultType(IEdmTypeReference typeReference, IEdmModel model)
+        public static Type GetResultType<T>(IEdmTypeReference typeReference, IEdmModel model) where T : DynamicTypeWrapper
         {
             Contract.Assert(typeReference != null);
             Contract.Assert(model != null);
@@ -46,22 +46,33 @@ namespace System.Web.OData.Query.Expressions
             // Do not have properties, just return base class
             if (!definition.DeclaredProperties.Any())
             {
-                return typeof(DynamicTypeWrapper);
+                return typeof(T);
             }
 
-            TypeBuilder tb = GetTypeBuilder(definition.FullTypeName() + Guid.NewGuid().ToString());
+            TypeBuilder tb = GetTypeBuilder<T>(definition.FullTypeName() + Guid.NewGuid().ToString());
             ConstructorBuilder constructor = tb.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
 
             foreach (var field in definition.Properties())
             {
+                var primitiveType = EdmLibHelpers.GetClrType(field.Type, model);
+                if (primitiveType != null)
+                {
+                    CreateProperty(tb, field.Name, primitiveType);
+                }
+                else
+                {
+                    // It's not primitive type
+                    // Create new type for the property
+                    //TODO: Could we create all types in open model?
+                    CreateProperty(tb, field.Name, GetResultType<DynamicComplexWrapper>(field.Type, model));
 
-                CreateProperty(tb, field.Name, EdmLibHelpers.GetClrType(field.Type, model));
+                }
             }
 
             return tb.CreateType();
         }
 
-        private static TypeBuilder GetTypeBuilder(string typeSignature)
+        private static TypeBuilder GetTypeBuilder<T>(string typeSignature) where T : DynamicTypeWrapper
         {
             var an = new AssemblyName(typeSignature);
 
@@ -75,7 +86,7 @@ namespace System.Web.OData.Query.Expressions
                                 TypeAttributes.AnsiClass |
                                 TypeAttributes.BeforeFieldInit |
                                 TypeAttributes.AutoLayout
-                                , typeof(DynamicTypeWrapper));
+                                , typeof(T));
             return tb;
         }
 

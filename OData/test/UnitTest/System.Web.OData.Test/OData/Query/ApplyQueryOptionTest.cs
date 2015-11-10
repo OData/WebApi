@@ -115,10 +115,10 @@ namespace System.Web.OData.Test.OData.Query
                         "groupby((Address/City))",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "City", "redmond"} },
-                            new Dictionary<string, object> { { "City", "seattle"} },
-                            new Dictionary<string, object> { { "City", "hobart"} },
-                            new Dictionary<string, object> { { "City", null} },
+                            new Dictionary<string, object> { { "Address/City", "redmond"} },
+                            new Dictionary<string, object> { { "Address/City", "seattle"} },
+                            new Dictionary<string, object> { { "Address/City", "hobart"} },
+                            new Dictionary<string, object> { { "Address/City", null} },
                         }
                     },
                     {
@@ -134,6 +134,13 @@ namespace System.Web.OData.Test.OData.Query
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> { { "Result", 15.0M} }
+                        }
+                    },
+                    {
+                        "groupby((Website))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Website", null} },
                         }
                     },
                 };
@@ -253,8 +260,7 @@ namespace System.Web.OData.Test.OData.Query
                 var agg = aggEnum.Current;
                 foreach (var key in expected.Keys)
                 {
-                    object value;
-                    Assert.True(agg.TryGetPropertyValue(key, out value), "Property " + key + " not found");
+                    object value = GetValue(agg, key);
                     Assert.Equal(expected[key], value);
                 }
 
@@ -286,6 +292,24 @@ namespace System.Web.OData.Test.OData.Query
             Assert.Equal(
                 customerIds,
                 actualCustomers.Select(customer => customer.CustomerId));
+        }
+
+        private object GetValue(DynamicTypeWrapper wrapper, string path)
+        {
+            var parts = path.Split('/');
+            foreach(var part in parts)
+            {
+                object value;
+                wrapper.TryGetPropertyValue(part, out value);
+                wrapper = value as DynamicTypeWrapper;
+                if (wrapper == null)
+                {
+                    return value;
+                }
+            }
+
+            Assert.False(true, "Property " + path + " not found");
+            return null;
         }
     }
 }

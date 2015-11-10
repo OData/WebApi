@@ -178,10 +178,13 @@ namespace System.Web.OData.Formatter.Serialization
 
                     if (edmType == null)
                     {
-                        DynamicTypeWrapper dynamicWrapper = instance as DynamicTypeWrapper;
-                        if (dynamicWrapper != null)
+                        if (typeof(DynamicEntityWrapper).IsAssignableFrom(type))
                         {
                             return type.GetDynamicEntityType().ToEdmTypeReference(true);
+                        }
+                        else if (typeof(DynamicComplexWrapper).IsAssignableFrom(type))
+                        {
+                            return type.GetDynamicNestedType().ToEdmTypeReference(true);
                         }
                         else
                         {

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Mvc;
+﻿using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Abstractions;
 using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.AspNet.OData.Common;
@@ -23,7 +22,7 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("context");
             }
 
-            var response = context.HttpContext.Response;
+            var response = context.Result as HttpStatusCodeResult;
             if (!response.IsSuccessStatusCode())
             {
                 return;

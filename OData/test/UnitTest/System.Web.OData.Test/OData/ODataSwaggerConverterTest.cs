@@ -56,6 +56,7 @@ namespace System.Web.OData
     ""/Customers"": {
       ""get"": {
         ""summary"": ""Get EntitySet Customers"",
+        ""operationId"": ""Customers_Get"",
         ""description"": ""Returns the EntitySet Customers"",
         ""tags"": [
           ""Customers""
@@ -115,6 +116,7 @@ namespace System.Web.OData
       },
       ""post"": {
         ""summary"": ""Post a new entity to EntitySet Customers"",
+        ""operationId"": ""Customers_Post"",
         ""description"": ""Post a new entity to EntitySet Customers"",
         ""tags"": [
           ""Customers""
@@ -148,6 +150,7 @@ namespace System.Web.OData
     ""/Customers({CustomerId})"": {
       ""get"": {
         ""summary"": ""Get entity from Customers by key."",
+        ""operationId"": ""Customers_GetById"",
         ""description"": ""Returns the entity with the key from Customers"",
         ""tags"": [
           ""Customers""
@@ -184,6 +187,7 @@ namespace System.Web.OData
       },
       ""patch"": {
         ""summary"": ""Update entity in EntitySet Customers"",
+        ""operationId"": ""Customers_PatchById"",
         ""description"": ""Update entity in EntitySet Customers"",
         ""tags"": [
           ""Customers""
@@ -219,6 +223,7 @@ namespace System.Web.OData
       },
       ""delete"": {
         ""summary"": ""Delete entity in EntitySet Customers"",
+        ""operationId"": ""Customers_DeleteById"",
         ""description"": ""Delete entity in EntitySet Customers"",
         ""tags"": [
           ""Customers""
@@ -254,6 +259,7 @@ namespace System.Web.OData
     ""/Orders"": {
       ""get"": {
         ""summary"": ""Get EntitySet Orders"",
+        ""operationId"": ""Orders_Get"",
         ""description"": ""Returns the EntitySet Orders"",
         ""tags"": [
           ""Orders""
@@ -313,6 +319,7 @@ namespace System.Web.OData
       },
       ""post"": {
         ""summary"": ""Post a new entity to EntitySet Orders"",
+        ""operationId"": ""Orders_Post"",
         ""description"": ""Post a new entity to EntitySet Orders"",
         ""tags"": [
           ""Orders""
@@ -346,6 +353,7 @@ namespace System.Web.OData
     ""/Orders({OrderId})"": {
       ""get"": {
         ""summary"": ""Get entity from Orders by key."",
+        ""operationId"": ""Orders_GetById"",
         ""description"": ""Returns the entity with the key from Orders"",
         ""tags"": [
           ""Orders""
@@ -382,6 +390,7 @@ namespace System.Web.OData
       },
       ""patch"": {
         ""summary"": ""Update entity in EntitySet Orders"",
+        ""operationId"": ""Orders_PatchById"",
         ""description"": ""Update entity in EntitySet Orders"",
         ""tags"": [
           ""Orders""
@@ -417,6 +426,7 @@ namespace System.Web.OData
       },
       ""delete"": {
         ""summary"": ""Delete entity in EntitySet Orders"",
+        ""operationId"": ""Orders_DeleteById"",
         ""description"": ""Delete entity in EntitySet Orders"",
         ""tags"": [
           ""Orders""
@@ -452,6 +462,7 @@ namespace System.Web.OData
     ""/UnboundFunction(param={param})"": {
       ""get"": {
         ""summary"": ""Call operation import  UnboundFunction"",
+        ""operationId"": ""UnboundFunction_FunctionImportGet"",
         ""description"": ""Call operation import  UnboundFunction"",
         ""tags"": [
           ""Function Import""
@@ -484,6 +495,7 @@ namespace System.Web.OData
     ""/UnboundAction()"": {
       ""post"": {
         ""summary"": ""Call operation import  UnboundAction"",
+        ""operationId"": ""UnboundAction_ActionImportPost"",
         ""description"": ""Call operation import  UnboundAction"",
         ""tags"": [
           ""Action Import""
@@ -515,6 +527,7 @@ namespace System.Web.OData
     ""/Customers({CustomerId})/Default.BoundFunction(name='{name}')"": {
       ""get"": {
         ""summary"": ""Call operation  BoundFunction"",
+        ""operationId"": ""BoundFunction_FunctionGetById"",
         ""description"": ""Call operation  BoundFunction"",
         ""tags"": [
           ""Customers"",

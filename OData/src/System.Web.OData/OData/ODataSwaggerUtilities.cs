@@ -33,6 +33,7 @@ namespace System.Web.OData
                 {
                     "get", new JObject()
                         .Summary("Get EntitySet " + entitySet.Name)
+                        .OperationId(entitySet.Name + "_Get")
                         .Description("Returns the EntitySet " + entitySet.Name)
                         .Tags(entitySet.Name)
                         .Parameters(new JArray()
@@ -49,6 +50,7 @@ namespace System.Web.OData
                 {
                     "post", new JObject()
                         .Summary("Post a new entity to EntitySet " + entitySet.Name)
+                        .OperationId(entitySet.Name + "_Post")
                         .Description("Post a new entity to EntitySet " + entitySet.Name)
                         .Tags(entitySet.Name)
                         .Parameters(new JArray()
@@ -87,6 +89,7 @@ namespace System.Web.OData
                 {
                     "get", new JObject()
                         .Summary("Get entity from " + entitySet.Name + " by key.")
+                        .OperationId(entitySet.Name + "_GetById")
                         .Description("Returns the entity with the key from " + entitySet.Name)
                         .Tags(entitySet.Name)
                         .Parameters((keyParameters.DeepClone() as JArray)
@@ -98,6 +101,7 @@ namespace System.Web.OData
                 {
                     "patch", new JObject()
                         .Summary("Update entity in EntitySet " + entitySet.Name)
+                        .OperationId(entitySet.Name + "_PatchById")
                         .Description("Update entity in EntitySet " + entitySet.Name)
                         .Tags(entitySet.Name)
                         .Parameters((keyParameters.DeepClone() as JArray)
@@ -110,6 +114,7 @@ namespace System.Web.OData
                 {
                     "delete", new JObject()
                         .Summary("Delete entity in EntitySet " + entitySet.Name)
+                        .OperationId(entitySet.Name + "_DeleteById")
                         .Description("Delete entity in EntitySet " + entitySet.Name)
                         .Tags(entitySet.Name)
                         .Parameters((keyParameters.DeepClone() as JArray)
@@ -154,6 +159,7 @@ namespace System.Web.OData
 
             JObject swaggerOperationImport = new JObject()
                 .Summary("Call operation import  " + operationImport.Name)
+                .OperationId(operationImport.Name + (isFunctionImport ? "_FunctionImportGet" : "_ActionImportPost"))
                 .Description("Call operation import  " + operationImport.Name)
                 .Tags(isFunctionImport ? "Function Import" : "Action Import");
 
@@ -204,6 +210,7 @@ namespace System.Web.OData
 
             JObject swaggerOperation = new JObject()
                 .Summary("Call operation  " + operation.Name)
+                .OperationId(operation.Name + (isFunction ? "_FunctionGet" : "_ActionPost"))
                 .Description("Call operation  " + operation.Name)
                 .Tags(entitySet.Name, isFunction ? "Function" : "Action");
 
@@ -262,6 +269,7 @@ namespace System.Web.OData
 
             JObject swaggerOperation = new JObject()
                 .Summary("Call operation  " + operation.Name)
+                .OperationId(operation.Name + (isFunction ? "_FunctionGetById" : "_ActionPostById"))
                 .Description("Call operation  " + operation.Name)
                 .Tags(entitySet.Name, isFunction ? "Function" : "Action");
 
@@ -627,6 +635,12 @@ namespace System.Web.OData
         private static JObject Description(this JObject obj, string description)
         {
             obj.Add("description", description);
+            return obj;
+        }
+
+        private static JObject OperationId(this JObject obj, string operationId)
+        {
+            obj.Add("operationId", operationId);
             return obj;
         }
     }

@@ -110,6 +110,7 @@ namespace WebStack.QA.Test.OData.Swagger
     ""/Customers"": {
       ""get"": {
         ""summary"": ""Get EntitySet Customers"",
+        ""operationId"": ""Customers_Get"",
         ""description"": ""Returns the EntitySet Customers"",
         ""tags"": [
           ""Customers""
@@ -169,6 +170,7 @@ namespace WebStack.QA.Test.OData.Swagger
       },
       ""post"": {
         ""summary"": ""Post a new entity to EntitySet Customers"",
+        ""operationId"": ""Customers_Post"",
         ""description"": ""Post a new entity to EntitySet Customers"",
         ""tags"": [
           ""Customers""
@@ -202,6 +204,7 @@ namespace WebStack.QA.Test.OData.Swagger
     ""/Customers({CustomerId})"": {
       ""get"": {
         ""summary"": ""Get entity from Customers by key."",
+        ""operationId"": ""Customers_GetById"",
         ""description"": ""Returns the entity with the key from Customers"",
         ""tags"": [
           ""Customers""
@@ -238,6 +241,7 @@ namespace WebStack.QA.Test.OData.Swagger
       },
       ""patch"": {
         ""summary"": ""Update entity in EntitySet Customers"",
+        ""operationId"": ""Customers_PatchById"",
         ""description"": ""Update entity in EntitySet Customers"",
         ""tags"": [
           ""Customers""
@@ -273,6 +277,7 @@ namespace WebStack.QA.Test.OData.Swagger
       },
       ""delete"": {
         ""summary"": ""Delete entity in EntitySet Customers"",
+        ""operationId"": ""Customers_DeleteById"",
         ""description"": ""Delete entity in EntitySet Customers"",
         ""tags"": [
           ""Customers""
@@ -308,6 +313,7 @@ namespace WebStack.QA.Test.OData.Swagger
     ""/Orders"": {
       ""get"": {
         ""summary"": ""Get EntitySet Orders"",
+        ""operationId"": ""Orders_Get"",
         ""description"": ""Returns the EntitySet Orders"",
         ""tags"": [
           ""Orders""
@@ -367,6 +373,7 @@ namespace WebStack.QA.Test.OData.Swagger
       },
       ""post"": {
         ""summary"": ""Post a new entity to EntitySet Orders"",
+        ""operationId"": ""Orders_Post"",
         ""description"": ""Post a new entity to EntitySet Orders"",
         ""tags"": [
           ""Orders""
@@ -400,6 +407,7 @@ namespace WebStack.QA.Test.OData.Swagger
     ""/Orders({OrderId})"": {
       ""get"": {
         ""summary"": ""Get entity from Orders by key."",
+        ""operationId"": ""Orders_GetById"",
         ""description"": ""Returns the entity with the key from Orders"",
         ""tags"": [
           ""Orders""
@@ -436,6 +444,7 @@ namespace WebStack.QA.Test.OData.Swagger
       },
       ""patch"": {
         ""summary"": ""Update entity in EntitySet Orders"",
+        ""operationId"": ""Orders_PatchById"",
         ""description"": ""Update entity in EntitySet Orders"",
         ""tags"": [
           ""Orders""
@@ -471,6 +480,7 @@ namespace WebStack.QA.Test.OData.Swagger
       },
       ""delete"": {
         ""summary"": ""Delete entity in EntitySet Orders"",
+        ""operationId"": ""Orders_DeleteById"",
         ""description"": ""Delete entity in EntitySet Orders"",
         ""tags"": [
           ""Orders""
@@ -506,6 +516,7 @@ namespace WebStack.QA.Test.OData.Swagger
     ""/UnboundFunction(param={param})"": {
       ""get"": {
         ""summary"": ""Call operation import  UnboundFunction"",
+        ""operationId"": ""UnboundFunction_FunctionImportGet"",
         ""description"": ""Call operation import  UnboundFunction"",
         ""tags"": [
           ""Function Import""
@@ -538,6 +549,7 @@ namespace WebStack.QA.Test.OData.Swagger
     ""/UnboundAction()"": {
       ""post"": {
         ""summary"": ""Call operation import  UnboundAction"",
+        ""operationId"": ""UnboundAction_ActionImportPost"",
         ""description"": ""Call operation import  UnboundAction"",
         ""tags"": [
           ""Action Import""
@@ -569,6 +581,7 @@ namespace WebStack.QA.Test.OData.Swagger
     ""/Customers({CustomerId})/Default.BoundFunction(name='{name}')"": {
       ""get"": {
         ""summary"": ""Call operation  BoundFunction"",
+        ""operationId"": ""BoundFunction_FunctionGetById"",
         ""description"": ""Call operation  BoundFunction"",
         ""tags"": [
           ""Customers"",
@@ -652,9 +665,9 @@ namespace WebStack.QA.Test.OData.Swagger
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject acutal = await response.Content.ReadAsAsync<JObject>();
+            JObject actual = await response.Content.ReadAsAsync<JObject>();
 
-            Assert.Equal(expectObj, acutal);
+            Assert.Equal(expectObj, actual);
         }
 
         public class Customer

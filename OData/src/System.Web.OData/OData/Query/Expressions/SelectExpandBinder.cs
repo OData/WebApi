@@ -336,6 +336,47 @@ namespace System.Web.OData.Query.Expressions
             return selectExpandClause.SelectedItems.OfType<PathSelectItem>().Any(x => x.SelectedPath.LastSegment is OpenPropertySegment);
         }
 
+        private Expression CreateTotalCountExpression(Expression source, ExpandedNavigationSelectItem expandItem)
+        {
+            Expression countExpression = Expression.Constant(null, typeof(long?));
+            if (expandItem.CountOption == null || !expandItem.CountOption.Value)
+            {
+                return countExpression;
+            }
+
+            Type elementType;
+            if (!source.Type.IsCollection(out elementType))
+            {
+                return countExpression;
+            }
+
+            MethodInfo countMethod;
+            if (typeof(IQueryable).IsAssignableFrom(source.Type))
+            {
+                countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(elementType);
+            }
+            else
+            {
+                countMethod = ExpressionHelperMethods.EnumerableCountGeneric.MakeGenericMethod(elementType);
+            }
+
+            // call Count() method.
+            countExpression = Expression.Call(null, countMethod, new[] { source });
+
+            if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
+            {
+                // source == null ? null : countExpression
+                return Expression.Condition(
+                       test: Expression.Equal(source, Expression.Constant(null)),
+                       ifTrue: Expression.Constant(null, typeof(long?)),
+                       ifFalse: ExpressionHelpers.ToNullable(countExpression));
+            }
+            else
+            {
+                return countExpression;
+            }
+        }
+
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
         private Expression BuildPropertyContainer(IEdmEntityType elementType, Expression source,
             Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand,
@@ -354,6 +395,8 @@ namespace System.Web.OData.Query.Expressions
                     expandItem.FilterOption);
                 Expression nullCheck = Expression.Equal(propertyValue, Expression.Constant(null));
 
+                Expression countExpression = CreateTotalCountExpression(propertyValue, expandItem);
+
                 // projection can be null if the expanded navigation property is not further projected or expanded.
                 if (projection != null)
                 {
@@ -371,6 +414,9 @@ namespace System.Web.OData.Query.Expressions
                     {
                         propertyExpression.PageSize = _settings.PageSize.Value;
                     }
+
+                    propertyExpression.TotalCount = countExpression;
+                    propertyExpression.CountOption = expandItem.CountOption;
                 }
 
                 includedProperties.Add(propertyExpression);
@@ -461,9 +507,9 @@ namespace System.Web.OData.Query.Expressions
             {
                 // source == null ? null : projectedCollection
                 return Expression.Condition(
-                        test: Expression.Equal(source, Expression.Constant(null)),
-                        ifTrue: Expression.Constant(null, selectedExpresion.Type),
-                        ifFalse: selectedExpresion);
+                       test: Expression.Equal(source, Expression.Constant(null)),
+                       ifTrue: Expression.Constant(null, selectedExpresion.Type),
+                       ifFalse: selectedExpresion);
             }
             else
             {

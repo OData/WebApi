@@ -142,6 +142,7 @@
     <Compile Include="OData\Formatter\ODataCountMediaTypeMapping.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
+    <Compile Include="OData\Query\ICountOptionCollection.cs" />
     <Compile Include="OData\Query\NotCountableAttribute.cs" />
     <Compile Include="OData\Query\NotFilterableAttribute.cs" />
     <Compile Include="OData\Query\NotSortableAttribute.cs" />

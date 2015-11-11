@@ -6,7 +6,6 @@ using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Web.Http;
 using System.Web.OData.Properties;
-using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Query.Expressions
 {
@@ -82,14 +81,24 @@ namespace System.Web.OData.Query.Expressions
 
             memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Name"), property.Name));
 
-            if (property.PageSize == null)
+            if (property.PageSize != null || property.CountOption != null)
             {
-                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Value"), property.Value));
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Collection"), property.Value));
+
+                if (property.PageSize != null)
+                {
+                    memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("PageSize"),
+                        Expression.Constant(property.PageSize)));
+                }
+
+                if (property.CountOption != null && property.CountOption.Value)
+                {
+                     memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("TotalCount"), property.TotalCount));
+                }
             }
             else
             {
-                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Collection"), property.Value));
-                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("PageSize"), Expression.Constant(property.PageSize)));
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Value"), property.Value));
             }
 
             if (next != null)
@@ -114,7 +123,7 @@ namespace System.Web.OData.Query.Expressions
                 {
                     namedPropertyGenericType = typeof(SingleExpandedProperty<>);
                 }
-                else if (property.PageSize != null)
+                else if (property.PageSize != null || property.CountOption != null)
                 {
                     namedPropertyGenericType = typeof(CollectionExpandedProperty<>);
                 }
@@ -133,7 +142,7 @@ namespace System.Web.OData.Query.Expressions
                 {
                     namedPropertyGenericType = typeof(SingleExpandedPropertyWithNext<>);
                 }
-                else if (property.PageSize != null)
+                else if (property.PageSize != null || property.CountOption != null)
                 {
                     namedPropertyGenericType = typeof(CollectionExpandedPropertyWithNext<>);
                 }
@@ -147,7 +156,9 @@ namespace System.Web.OData.Query.Expressions
                 }
             }
 
-            Type elementType = property.PageSize == null ? property.Value.Type : property.Value.Type.GetInnerElementType();
+            Type elementType = (property.PageSize == null && property.CountOption == null)
+                ? property.Value.Type
+                : property.Value.Type.GetInnerElementType();
             return namedPropertyGenericType.MakeGenericType(elementType);
         }
 
@@ -204,11 +215,20 @@ namespace System.Web.OData.Query.Expressions
         {
             public int PageSize { get; set; }
 
+            public long? TotalCount { get; set; }
+
             public IEnumerable<T> Collection { get; set; }
 
             public override object GetValue()
             {
-                return new TruncatedCollection<T>(Collection, PageSize);
+                if (TotalCount == null)
+                {
+                    return new TruncatedCollection<T>(Collection, PageSize);
+                }
+                else
+                {
+                    return new TruncatedCollection<T>(Collection, PageSize, TotalCount);
+                }
             }
         }
 

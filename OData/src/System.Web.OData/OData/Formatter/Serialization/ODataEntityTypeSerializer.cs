@@ -230,7 +230,7 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             // Mark dynamicly generated enities as Transient
-            entry.IsTransient = entityInstanceContext.EntityType is DynamicEdmType;
+            entry.IsTransient = entityInstanceContext.EntityType is EdmDynamicEntityType;
 
             IEnumerable<ODataAction> actions = CreateODataActions(selectExpandNode.SelectedActions, entityInstanceContext);
             foreach (ODataAction action in actions)
@@ -519,17 +519,6 @@ namespace System.Web.OData.Formatter.Serialization
 
             return serializer.CreateProperty(propertyValue, propertyType, structuralProperty.Name, writeContext);
         }
-
-        
-        //public override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
-        //{
-        //    var structialType = expectedType.AsStructured();
-        //    if (structialType != null)
-        //    {
-        //        return new ODataComplexValue();
-        //    }
-        //    throw Error.NotSupported(SRResources.CreateODataValueNotSupported, GetType().Name);
-        //}
 
         private IEnumerable<ODataAction> CreateODataActions(
             IEnumerable<IEdmAction> actions, EntityInstanceContext entityInstanceContext)

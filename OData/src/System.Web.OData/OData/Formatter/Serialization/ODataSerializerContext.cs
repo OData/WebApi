@@ -184,7 +184,7 @@ namespace System.Web.OData.Formatter.Serialization
                         }
                         else if (typeof(DynamicComplexWrapper).IsAssignableFrom(type))
                         {
-                            return type.GetDynamicNestedType().ToEdmTypeReference(true);
+                            return type.GetDynamicComplexType().ToEdmTypeReference(true);
                         }
                         else
                         {

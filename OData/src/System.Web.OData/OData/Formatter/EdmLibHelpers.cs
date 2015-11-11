@@ -144,7 +144,7 @@ namespace System.Web.OData.Formatter
                         }
                         else if (typeof(DynamicComplexWrapper).IsAssignableFrom(elementClrType))
                         {
-                            return new EdmCollectionType(elementClrType.GetDynamicNestedType().ToEdmTypeReference(true));
+                            return new EdmCollectionType(elementClrType.GetDynamicComplexType().ToEdmTypeReference(true));
                         }
 
                         IEdmType elementType = GetEdmType(edmModel, elementClrType, testCollections: false);

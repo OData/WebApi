@@ -122,6 +122,17 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
+                        "groupby((Address/City, Address/State))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Address/City", "redmond"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "Address/City", "seattle"}, { "Address/State", "WA"}  },
+                            new Dictionary<string, object> { { "Address/City", "hobart"}, { "Address/State", null}  },
+                            new Dictionary<string, object> { { "Address/City", null}, { "Address/State", null}  },
+                        }
+                    },
+
+                    {
                         "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
                         {
@@ -186,7 +197,7 @@ namespace System.Web.OData.Test.OData.Query
                     CustomerId = 1,
                     Name = "Lowest",
                     SharePrice = 10,
-                    Address = new Address { City = "redmond" },
+                    Address = new Address { City = "redmond", State = "WA" },
                 };
                 c.Orders = new List<Order>
                 {
@@ -200,7 +211,7 @@ namespace System.Web.OData.Test.OData.Query
                     CustomerId = 2,
                     Name = "Highest",
                     SharePrice = 2.5M,
-                    Address = new Address { City = "seattle" },
+                    Address = new Address { City = "seattle", State = "WA" },
                     Aliases = new List<string> { "alias2", "alias2" }
                 };
                 customerList.Add(c);

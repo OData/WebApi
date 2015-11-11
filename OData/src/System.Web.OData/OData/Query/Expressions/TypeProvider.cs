@@ -44,7 +44,7 @@ namespace System.Web.OData.Query.Expressions
             }
 
             // Do not have properties, just return base class
-            if (!definition.DeclaredProperties.Any())
+            if (!definition.Properties().Any())
             {
                 return typeof(T);
             }

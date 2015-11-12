@@ -125,6 +125,33 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void GenerateNavigationLink_WorksToGenerateExpectedNavigationLink_ForNonContainedNavigation()
+        {
+            // Arrange
+            IEdmEntityType myOrder = (IEdmEntityType)_model.Model.FindDeclaredType("NS.MyOrder");
+            IEdmNavigationProperty orderLinesProperty = myOrder.NavigationProperties().Single(x => x.Name.Equals("NonContainedOrderLines"));
+
+            var serializerContext = new ODataSerializerContext
+            {
+                Model = _model.Model,
+                NavigationSource = _model.OrderLines,
+                Path = new ODataPath(
+                    new EntitySetPathSegment(_model.Model.FindDeclaredEntitySet("MyOrders")),
+                    new KeyValuePathSegment("42"),
+                    new NavigationPathSegment(orderLinesProperty),
+                    new KeyValuePathSegment("21")),
+                Url = GetODataRequest(_model.Model).GetUrlHelper(),
+            };
+            var entityContext = new EntityInstanceContext(serializerContext, _model.OrderLine.AsReference(), new { ID = 21 });
+
+            // Act
+            Uri uri = entityContext.GenerateSelfLink(false);
+
+            // Assert
+            Assert.Equal("http://localhost/OrderLines(21)", uri.AbsoluteUri);
+        }
+
+        [Fact]
         public void GenerateSelfLink_ThrowsArgumentNull_EntityContext()
         {
             Assert.ThrowsArgumentNull(

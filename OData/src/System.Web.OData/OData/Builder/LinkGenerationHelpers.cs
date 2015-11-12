@@ -214,11 +214,16 @@ namespace System.Web.OData.Builder
             // If the navigation is not a singleton we need to walk all of the path segments to generate a
             // contextually accurate URI.
             bool segmentFound = false;
+            bool containedFound = false;
             if (entityContext.SerializerContext.Path != null)
             {
                 IEdmNavigationSource previousNavigationSource = null;
-                foreach (ODataPathSegment pathSegment in entityContext.SerializerContext.Path.Segments)
+                var segments = entityContext.SerializerContext.Path.Segments;
+                int length = segments.Count;
+                int previousNavigationPathIndex = -1;
+                for (int i = 0; i < length; i++)
                 {
+                    ODataPathSegment pathSegment = segments[i];
                     IEdmNavigationSource currentNavigationSource = null;
 
                     var entitySetPathSegment = pathSegment as EntitySetPathSegment;
@@ -232,14 +237,33 @@ namespace System.Web.OData.Builder
                     {
                         currentNavigationSource = navigationPathSegment.GetNavigationSource(previousNavigationSource);
                     }
-
-                    odataPath.Add(pathSegment);
+                    if (containedFound)
+                    {
+                        odataPath.Add(pathSegment);
+                    }
+                    else
+                    {
+                        if (navigationPathSegment != null &&
+                            navigationPathSegment.NavigationProperty.ContainsTarget)
+                        {
+                            containedFound = true;
+                            //The path should have the last non-contained navegation property
+                            if (previousNavigationPathIndex != -1)
+                            {
+                                for (int j = previousNavigationPathIndex; j <= i; j++)
+                                {
+                                    odataPath.Add(segments[j]);
+                                }
+                            }
+                        }
+                    }
 
                     // If we've found our target navigation in the path that means we've correctly populated the
                     // segments up to the navigation and we can ignore the remaining segments.
                     if (currentNavigationSource != null)
                     {
                         previousNavigationSource = currentNavigationSource;
+                        previousNavigationPathIndex = i;
                         if (currentNavigationSource == entityContext.NavigationSource)
                         {
                             segmentFound = true;
@@ -249,7 +273,7 @@ namespace System.Web.OData.Builder
                 }
             }
 
-            if (!segmentFound)
+            if (!segmentFound || !containedFound)
             {
                 // If the target navigation was not found in the current path that means we lack any context that
                 // would suggest a scenario other than directly accessing an entity set, so we must assume that's

@@ -104,6 +104,15 @@ namespace System.Web.OData.TestCommon
                     ContainsTarget = true,
                 });
 
+           EdmNavigationProperty nonContainedOrderLinesNavProp = myOrder.AddUnidirectionalNavigation(
+                new EdmNavigationPropertyInfo
+                {
+                    Name = "NonContainedOrderLines",
+                    TargetMultiplicity = EdmMultiplicity.Many,
+                    Target = orderLine,
+                    ContainsTarget = false,
+                });
+
             EdmAction tag = new EdmAction("NS", "tag", returnType: null, isBound: true, entitySetPathExpression: null);
             tag.AddParameter("entity", new EdmEntityTypeReference(orderLine, false));
             model.AddElement(tag);
@@ -125,6 +134,9 @@ namespace System.Web.OData.TestCommon
 
             // containment
             IEdmContainedEntitySet orderLines = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderLinesNavProp);
+            
+            // no-containment
+            IEdmNavigationSource nonContainedOrderLines = myOrders.FindNavigationTarget(nonContainedOrderLinesNavProp);
 
             // actions
             EdmAction upgrade = new EdmAction("NS", "upgrade", returnType: null, isBound: true, entitySetPathExpression: null);
@@ -313,7 +325,8 @@ namespace System.Web.OData.TestCommon
             Mary = mary;
             RootOrder = rootOrder;
             OrderLine = orderLine;
-            OrderLines = orderLines;
+            OrderLines = orderLines; 
+            NonContainedOrderLines = nonContainedOrderLines;
             UpgradeCustomer = upgrade;
             UpgradeSpecialCustomer = specialUpgrade;
             CustomerName = customerName;
@@ -349,6 +362,8 @@ namespace System.Web.OData.TestCommon
         public EdmSingleton RootOrder { get; private set; }
 
         public IEdmContainedEntitySet OrderLines { get; private set; }
+        
+        public IEdmNavigationSource NonContainedOrderLines { get; private set; }
 
         public EdmEntityContainer Container { get; private set; }
 

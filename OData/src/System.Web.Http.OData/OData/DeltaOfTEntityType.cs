@@ -109,7 +109,26 @@ namespace System.Web.Http.OData
             Type propertyType = cacheHit.Property.PropertyType;
             if (value != null && !propertyType.IsCollection() && !propertyType.IsAssignableFrom(value.GetType()))
             {
-                return false;
+                try
+                {
+                    if (propertyType.IsNullable()
+                            && Nullable.GetUnderlyingType(propertyType).IsEnum)
+                    {
+                        value = Enum.Parse(Nullable.GetUnderlyingType(propertyType), value.ToString());
+                    }
+                    else if (propertyType.IsEnum)
+                    {
+                        value = Enum.Parse(propertyType, value.ToString());
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
             }
 
             //.Setter.Invoke(_entity, new object[] { value });

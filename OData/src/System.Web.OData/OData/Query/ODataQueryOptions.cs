@@ -94,6 +94,27 @@ namespace System.Web.OData.Query
                 _queryOptionParser.Resolver = resolverSettings.CreateResolver(context.Model);
             }
 
+            // Build Apply first
+            BuildApplyQueryOption(queryParameters);
+
+            if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
+            {
+                // We have $apply clause and need to modify context for other clauses
+                this.Context.ElementType = Apply.ApplyClause.TypeReference.Definition;
+
+                // And reconfigure _queryOptionParser
+                var resolver = _queryOptionParser.Resolver;
+                _queryOptionParser = new ODataQueryOptionParser(
+                   context.Model,
+                   context.ElementType,
+                   context.NavigationSource,
+                   queryParameters)
+                {
+                    Resolver = resolver
+                };
+            }
+
+            // Build other query options for modified context
             BuildQueryOptions(queryParameters);
 
             Validator = new ODataQueryValidator();
@@ -298,10 +319,9 @@ namespace System.Web.OData.Query
             if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
             {
                 result = Apply.ApplyTo(result, querySettings, _assembliesResolver);
-                // TODO: Find a better way to modify Context
                 Request.ODataProperties().ApplyClause = Apply.ApplyClause;
+                // We know ClrType returned from the $apply clause (it was generated on the fly). Letting other to use it
                 this.Context.ElementClrType = Apply.ResultClrType;
-                this.Context.ElementType = Apply.ResultType;
             }
 
             // Construct the actual query and apply them in the following order: filter, orderby, skip, top
@@ -610,6 +630,23 @@ namespace System.Web.OData.Query
             return parameters;
         }
 
+        private void BuildApplyQueryOption(IDictionary<string, string> queryParameters)
+        {
+            var applyQuery = queryParameters.Where(kvp => kvp.Key.ToLowerInvariant() == "$apply").Select(kvp => kvp.Value).FirstOrDefault();
+            if (applyQuery != null)
+            {
+                ThrowIfEmpty(applyQuery, "$apply");
+                RawValues.Apply = applyQuery;
+                Apply = new ApplyQueryOption(applyQuery, Context, _queryOptionParser);
+            }
+            else
+            {
+                // We do not have $apply, do nothing
+            }
+
+        }
+
+
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase",
             Justification = "Need lower case string here.")]
         private void BuildQueryOptions(IDictionary<string, string> queryParameters)
@@ -623,11 +660,11 @@ namespace System.Web.OData.Query
                         RawValues.Filter = kvp.Value;
                         Filter = new FilterQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
-                    case "$apply":
-                        ThrowIfEmpty(kvp.Value, "$apply");
-                        RawValues.Apply = kvp.Value;
-                        Apply = new ApplyQueryOption(kvp.Value, Context, _queryOptionParser);
-                        break;
+                    //case "$apply":
+                    //    ThrowIfEmpty(kvp.Value, "$apply");
+                    //    RawValues.Apply = kvp.Value;
+                    //    Apply = new ApplyQueryOption(kvp.Value, Context, _queryOptionParser);
+                    //    break;
                     case "$orderby":
                         ThrowIfEmpty(kvp.Value, "$orderby");
                         RawValues.OrderBy = kvp.Value;

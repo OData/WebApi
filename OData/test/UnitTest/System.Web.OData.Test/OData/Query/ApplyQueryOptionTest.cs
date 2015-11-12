@@ -9,6 +9,7 @@ using System.Web.OData.Query.Expressions;
 using Microsoft.TestCommon;
 using Address = System.Web.OData.Builder.TestModels.Address;
 using System.Web.OData.Query;
+using System.Net.Http;
 
 namespace System.Web.OData.Test.OData.Query
 {
@@ -158,6 +159,73 @@ namespace System.Web.OData.Test.OData.Query
             }
         }
 
+        public static TheoryDataSet<string, List<Dictionary<string, object>>> CustomerTestAppliesMixedWithOthers
+        {
+            get
+            {
+                return new TheoryDataSet<string, List<Dictionary<string, object>>>
+                {
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$filter=Total eq 3",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$orderby=Name",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} },
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 5} },
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } },
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$orderby=Total",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} },
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } },
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 5} },
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City))&$orderby=Address/City",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Address/City", null} },
+                            new Dictionary<string, object> { { "Address/City", "hobart"} },
+                            new Dictionary<string, object> { { "Address/City", "redmond"} },
+                            new Dictionary<string, object> { { "Address/City", "seattle"} },
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City))&$filter=Address/City eq 'redmond'",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Address/City", "redmond"} },
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))&$top=1",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Highest"} },
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))&$skip=1",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"} },
+                            new Dictionary<string, object> { { "Name", "Middle"} },
+                        }
+                    },
+                };
+            }
+        }
+
         // Legal filter queries usable against CustomerFilterTestData.
         // Tuple is: filter, expected list of customer ID's
         public static TheoryDataSet<string, int[]> CustomerTestFilters
@@ -256,6 +324,48 @@ namespace System.Web.OData.Test.OData.Query
             // Act
             IQueryable queryable = applyOption.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
 
+            // Assert
+            Assert.NotNull(queryable);
+            var actualCustomers = Assert.IsAssignableFrom<IEnumerable<DynamicTypeWrapper>>(queryable).ToList();
+
+            Assert.Equal(aggregation.Count(), actualCustomers.Count());
+
+            var aggEnum = actualCustomers.GetEnumerator();
+
+            foreach (var expected in aggregation)
+            {
+                aggEnum.MoveNext();
+                var agg = aggEnum.Current;
+                foreach (var key in expected.Keys)
+                {
+                    object value = GetValue(agg, key);
+                    Assert.Equal(expected[key], value);
+                }
+
+            }
+        }
+
+        [Theory]
+        [PropertyData("CustomerTestAppliesMixedWithOthers")]
+        public void ClausesAfterApplyTo_Returns_Correct_Queryable(string filter, List<Dictionary<string, object>> aggregation)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer));
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + filter);
+
+            var options = new ODataQueryOptions(context, request);
+
+            IEnumerable<Customer> customers = CustomerApplyTestData;
+            // Act
+            IQueryable queryable = options.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+
 
             // Assert
             Assert.NotNull(queryable);
@@ -277,6 +387,7 @@ namespace System.Web.OData.Test.OData.Query
 
             }
         }
+
 
         [Theory]
         [PropertyData("CustomerTestFilters")]

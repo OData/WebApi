@@ -660,11 +660,6 @@ namespace System.Web.OData.Query
                         RawValues.Filter = kvp.Value;
                         Filter = new FilterQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
-                    //case "$apply":
-                    //    ThrowIfEmpty(kvp.Value, "$apply");
-                    //    RawValues.Apply = kvp.Value;
-                    //    Apply = new ApplyQueryOption(kvp.Value, Context, _queryOptionParser);
-                    //    break;
                     case "$orderby":
                         ThrowIfEmpty(kvp.Value, "$orderby");
                         RawValues.OrderBy = kvp.Value;

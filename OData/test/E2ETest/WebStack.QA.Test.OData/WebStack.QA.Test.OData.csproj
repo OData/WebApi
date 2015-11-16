@@ -161,6 +161,10 @@
     <Compile Include="ETags\ETagCurrencyTokenEfContext.cs" />
     <Compile Include="ETags\ETagCurrencyTokenEfContextTest.cs" />
     <Compile Include="ETags\ETagsOtherTypesTest.cs" />
+    <Compile Include="ODataCountTest\CountController.cs" />
+    <Compile Include="ODataCountTest\CountDataModel.cs" />
+    <Compile Include="ODataCountTest\CountEdmModel.cs" />
+    <Compile Include="ODataCountTest\CountTest.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesController.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesModel.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesTest.cs" />

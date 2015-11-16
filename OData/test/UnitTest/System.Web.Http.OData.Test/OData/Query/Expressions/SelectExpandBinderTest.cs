@@ -402,6 +402,18 @@ namespace System.Web.Http.OData.Query.Expressions
         }
 
         [Fact]
+        public void CreatePropertyNameExpression_BaseProperty_From_DerivedType_ReturnsConstantExpression()
+        {
+            Expression customer = Expression.Constant(new SpecialCustomer());
+            IEdmNavigationProperty ordersProperty = _model.Customer.NavigationProperties().Single();
+
+            Expression property = _binder.CreatePropertyNameExpression(_model.SpecialCustomer, ordersProperty, customer);
+
+            Assert.Equal(ExpressionType.Constant, property.NodeType);
+            Assert.Equal(ordersProperty.Name, (property as ConstantExpression).Value);
+        }
+
+        [Fact]
         public void CreatePropertyValueExpression_NonDerivedProperty_ReturnsMemberAccessExpression()
         {
             Expression customer = Expression.Constant(new Customer());

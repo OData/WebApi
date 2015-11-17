@@ -5,7 +5,7 @@ description: "how to debug odata webapi source"
 category: "10. Others"
 ---
 
-If you want to debug **OData WebAPI** source, open `DEBUG` -> `Options and Settings` in VS, configure below things in `General` tab:
+If you want to debug **OData Lib, WebAPI, Restier** source, open `DEBUG` -> `Options and Settings` in VS, configure below things in `General` tab:
 
 1. Uncheck `Enable Just My Code (Managed only)`.
 2. Uncheck `Enable .NET Framework source stepping`.

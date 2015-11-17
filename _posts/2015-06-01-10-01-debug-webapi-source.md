@@ -9,7 +9,8 @@ If you want to debug **OData WebAPI** source, open `DEBUG` -> `Options and Setti
 
 1. Uncheck `Enable Just My Code (Managed only)`.
 2. Uncheck `Enable .NET Framework source stepping`.
-3. Check `Enable source server support`.
+3. UnCheck `Require source files to exactly match the original version`.
+4. Check `Enable source server support`.
 
 Setup your symbol source in `Symbols` tab:
 

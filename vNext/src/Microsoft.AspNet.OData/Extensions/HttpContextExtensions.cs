@@ -4,7 +4,7 @@ using Microsoft.AspNet.Mvc.Infrastructure;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Framework.DependencyInjection;
 
 namespace Microsoft.AspNet.OData.Extensions
 {

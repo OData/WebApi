@@ -59,7 +59,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 errorHandler = (sender, e) =>
                 {
                     var exception = e.ErrorContext.Error;
-                    context.ModelState.TryAddModelError(e.ErrorContext.Path, e.ErrorContext.Error, context.Metadata);
+                    context.ModelState.TryAddModelError(e.ErrorContext.Path, e.ErrorContext.Error);
 
                     // Error must always be marked as handled
                     // Failure to do so can cause the exception to be rethrown at every recursive level and

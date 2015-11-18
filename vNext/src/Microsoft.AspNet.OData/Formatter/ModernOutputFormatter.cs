@@ -11,7 +11,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using Microsoft.Extensions.Internal;
+using Microsoft.Framework.Internal;
 using Microsoft.AspNet.Mvc.Formatters;
 
 namespace Microsoft.AspNet.OData.Formatter
@@ -37,10 +37,10 @@ namespace Microsoft.AspNet.OData.Formatter
             }
         }
 
-        public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
+        public override Task WriteResponseBodyAsync(OutputFormatterContext context)
         {
             var response = context.HttpContext.Response;
-            var selectedEncoding = context.ContentType.Encoding;
+            var selectedEncoding = context.SelectedEncoding;
 
             using (var delegatingStream = new NonDisposableStream(response.Body))
             using (var writer = new StreamWriter(delegatingStream, selectedEncoding, 1024, leaveOpen: true))
@@ -51,11 +51,11 @@ namespace Microsoft.AspNet.OData.Formatter
             return Task.FromResult(true);
         }
 
-        public override void WriteResponseHeaders(OutputFormatterWriteContext context)
+        public override void WriteResponseHeaders(OutputFormatterContext context)
         {
             if (context.Object is IEdmModel)
             {
-                context.ContentType = SupportedMediaTypes[2];
+                context.SelectedContentType = SupportedMediaTypes[2];
             }
 
             context.HttpContext.Response.Headers.Add("OData-Version", new[] { "4.0" });

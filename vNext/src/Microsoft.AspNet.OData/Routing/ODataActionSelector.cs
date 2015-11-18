@@ -7,7 +7,7 @@ using Microsoft.AspNet.Mvc.Routing;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNet.Routing;
-using Microsoft.Extensions.Logging;
+using Microsoft.Framework.Logging;
 
 namespace Microsoft.AspNet.OData.Routing
 {

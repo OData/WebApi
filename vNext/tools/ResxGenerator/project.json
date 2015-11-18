@@ -7,6 +7,7 @@
   "licenseUrl": "",
 
   "dependencies": {
+    "System.Xml.XDocument": "4.0.10-beta-22816"
   },
 
   "commands": {
@@ -14,24 +15,17 @@
   },
 
   "frameworks": {
-    "dnx451": {
-      "frameworkAssemblies": {
-         "System.Xml": "4.0.0.0",
-         "System.Xml.XDocument": "4.0.0.0",
-         "System.Xml.Linq": "4.0.0.0"
-      }
-    },
+    "dnx451": { },
     "dnxcore50": {
       "dependencies": {
-        "System.Console": "4.0.0-*",
-        "System.Collections": "4.0.10-*",
-        "System.IO.FileSystem": "4.0.0-*",
-        "System.Linq": "4.0.0-*",
-        "System.Runtime": "4.0.20-*",
-        "System.Runtime.Extensions": "4.0.10-*",
-        "System.Text.RegularExpressions": "4.0.10-*",
-        "Microsoft.CSharp": "4.0.0-*",
-        "System.Xml.XDocument": "4.0.11-*"
+        "System.Console": "4.0.0-beta-22816",
+        "System.Collections": "4.0.10-beta-22816",
+        "System.IO.FileSystem": "4.0.0-beta-22816",
+        "System.Linq": "4.0.0-beta-22816",
+        "System.Runtime": "4.0.20-beta-22816",
+        "System.Runtime.Extensions": "4.0.10-beta-22816",
+        "System.Text.RegularExpressions": "4.0.10-beta-22816",
+        "Microsoft.CSharp": "4.0.0-beta-22816"
       }
     }
   }

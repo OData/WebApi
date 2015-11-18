@@ -6,7 +6,7 @@ using Microsoft.AspNet.Mvc.Controllers;
 using Microsoft.AspNet.Mvc.Infrastructure;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.Routing;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Framework.DependencyInjection;
 using Microsoft.OData.Core.UriParser.Semantic;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions

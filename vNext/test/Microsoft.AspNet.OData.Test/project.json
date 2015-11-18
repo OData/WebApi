@@ -2,7 +2,7 @@
   "dependencies": {
     "Microsoft.AspNet.OData": "6.0.0-*",
     "xunit.runner.utility": "2.1.0",
-    "xunit.runner.dnx": "2.1.0-beta6-build191"
+    "xunit.runner.dnx": "2.1.0-*"
   },
 
   "commands": {
@@ -13,12 +13,12 @@
     "dnx451": { },
     "dnxcore50" : {
       "dependencies": {
-        "System.Collections": "4.0.10-beta-*",
-        "System.Linq": "4.0.0-beta-*",
-        "System.Threading": "4.0.10-beta-*",
-        "Microsoft.CSharp": "4.0.0-beta-*",
-        "System.Reflection.Primitives": "4.0.1-beta-*",
-        "System.Xml.XmlDocument": "4.0.1-beta-*"
+        "System.Collections": "4.0.10-*",
+        "System.Linq": "4.0.0-*",
+        "System.Threading": "4.0.10-*",
+        "Microsoft.CSharp": "4.0.0-*",
+        "System.Reflection.Primitives": "4.0.1-*",
+        "System.Xml.XmlDocument": "4.0.1-*"
       }
     }
   }

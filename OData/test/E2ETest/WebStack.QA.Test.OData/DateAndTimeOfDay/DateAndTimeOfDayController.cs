@@ -180,4 +180,36 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
             return Ok();
         }
     }
+
+    public class EfPeopleController : ODataController
+    {
+        private static EdmDateWithEfContext _db = new EdmDateWithEfContext();
+
+        static EfPeopleController()
+        {
+            if (_db.People.Any())
+            {
+                return;
+            }
+
+            var people = Enumerable.Range(1, 5).Select(e => new EfPerson
+            {
+                Id = e,
+                Birthday = e % 2 == 0 ? (DateTime?)null : new DateTime(2015, 10, e)
+            });
+
+            foreach (var person in people)
+            {
+                _db.People.Add(person);
+            }
+
+            _db.SaveChanges();
+        }
+
+        [EnableQuery]
+        public IHttpActionResult Get()
+        {
+            return Ok(_db.People);
+        }
+    }
 }

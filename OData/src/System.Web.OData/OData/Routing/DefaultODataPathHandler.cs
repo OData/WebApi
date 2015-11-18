@@ -96,6 +96,16 @@ namespace System.Web.OData.Routing
             return path.ToString();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public virtual ODataPath HandleUnresolvedODataPath(Semantic.ODataPath path)
+        {
+            return null;
+        }
+
         private static ODataPath Parse(
             IEdmModel model,
             string serviceRoot,

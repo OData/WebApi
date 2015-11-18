@@ -83,6 +83,8 @@
     <Compile Include="OData\Builder\CapabilitiesVocabularyConstants.cs" />
     <Compile Include="OData\Builder\CapabilitiesVocabularyExtensionMethods.cs" />
     <Compile Include="OData\Builder\CapabilitiesNavigationType.cs" />
+    <Compile Include="OData\ODataSwaggerUtilities.cs" />
+    <Compile Include="OData\ODataSwaggerConverter.cs" />
     <Compile Include="OData\EdmEnumObjectCollection.cs" />
     <Compile Include="OData\EdmEnumObject.cs" />
     <Compile Include="OData\IEdmEnumObject.cs" />
@@ -140,6 +142,7 @@
     <Compile Include="OData\Formatter\ODataCountMediaTypeMapping.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
+    <Compile Include="OData\Query\ICountOptionCollection.cs" />
     <Compile Include="OData\Query\NotCountableAttribute.cs" />
     <Compile Include="OData\Query\NotFilterableAttribute.cs" />
     <Compile Include="OData\Query\NotSortableAttribute.cs" />

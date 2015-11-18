@@ -638,6 +638,7 @@
     <Compile Include="Formatter\Atom\AtomRandomModelTests.cs" />
     <Compile Include="Formatter\CollectionPropertyTests.cs" />
     <Compile Include="Formatter\ComplexTypeTests.cs" />
+    <Compile Include="Formatter\DeltaEnumTests.cs" />
     <Compile Include="Formatter\ErrorMessagesTests.cs" />
     <Compile Include="Formatter\Extensibility\SerializeEntityReferenceLinks.cs" />
     <Compile Include="Formatter\Extensibility\SupportDollarValue.cs" />

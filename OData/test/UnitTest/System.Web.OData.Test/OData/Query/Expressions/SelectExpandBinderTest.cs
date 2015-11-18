@@ -97,7 +97,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source = Expression.Constant(order);
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order, _model.Orders);
 
             // Assert
             SelectExpandWrapper<Order> projectedOrder = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Order>;
@@ -119,7 +119,7 @@ namespace System.Web.OData.Query.Expressions
             _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order, _model.Orders);
 
             // Assert
             SelectExpandWrapper<Order> projectedOrder = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Order>;
@@ -142,7 +142,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source = Expression.Constant(null, typeof(Order));
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order, _model.Orders);
 
             // Assert
             var e = Assert.Throws<TargetInvocationException>(
@@ -159,7 +159,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source = Expression.Constant(orders);
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order, _model.Orders);
 
             // Assert
             IEnumerable<SelectExpandWrapper<Order>> projectedOrders = Expression.Lambda(projection).Compile().DynamicInvoke() as IEnumerable<SelectExpandWrapper<Order>>;
@@ -181,7 +181,7 @@ namespace System.Web.OData.Query.Expressions
             _settings.PageSize = pageSize;
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order, _model.Orders);
 
             // Assert
             IEnumerable<SelectExpandWrapper<Order>> projectedOrders = Expression.Lambda(projection).Compile().DynamicInvoke() as IEnumerable<SelectExpandWrapper<Order>>;
@@ -204,7 +204,7 @@ namespace System.Web.OData.Query.Expressions
             _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order, _model.Orders);
 
             // Assert
             SelectExpandWrapper<Order> projectedOrder = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Order>;
@@ -227,7 +227,7 @@ namespace System.Web.OData.Query.Expressions
             _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order, _model.Orders);
 
             // Assert
             SelectExpandWrapper<Order> projectedOrder = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Order>;
@@ -245,7 +245,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source = Expression.Constant(null, typeof(Order[]));
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order, _model.Orders);
 
             // Assert
             IEnumerable<SelectExpandWrapper<Order>> projectedOrders = Expression.Lambda(projection).Compile().DynamicInvoke() as IEnumerable<SelectExpandWrapper<Order>>;
@@ -261,7 +261,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source = Expression.Constant(null, typeof(Order[]));
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Order, _model.Orders);
 
             // Assert
             var e = Assert.Throws<TargetInvocationException>(
@@ -278,7 +278,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source = Expression.Constant(customer);
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer, _model.Customers);
 
             // Assert
             SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
@@ -303,7 +303,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source = Expression.Constant(customer);
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer, _model.Customers);
 
             // Assert
             Assert.Equal(ExpressionType.MemberInit, projection.NodeType);
@@ -323,7 +323,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source = Expression.Constant(customer);
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer, _model.Customers);
 
             // Assert
             Assert.Equal(ExpressionType.MemberInit, projection.NodeType);
@@ -343,7 +343,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source = Expression.Constant(customer);
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer, _model.Customers);
 
             // Assert
             SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
@@ -364,7 +364,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source = Expression.Constant(customer);
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer, _model.Customers);
 
             // Assert
             SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
@@ -385,7 +385,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source = Expression.Constant(customer);
 
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer);
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer, _model.Customers);
 
             // Assert
             SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;

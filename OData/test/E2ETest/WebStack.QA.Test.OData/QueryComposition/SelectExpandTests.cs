@@ -401,6 +401,115 @@ namespace WebStack.QA.Test.OData.QueryComposition
             Assert.Equal(expandProp[1]["Id"], 2);
         }
 
+        [Fact]
+        public void NestedDollarCountInDollarExpandWorks()
+        {
+            string queryUrl = string.Format("{0}/selectexpand/SelectCustomer?&$expand=SelectOrders($count=true)", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            Assert.NotNull(response.Content);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.NotNull(result);
+
+            JsonAssert.ArrayLength(10, "value", result);
+            JArray customers = (JArray)result["value"];
+            Assert.True(customers.OfType<JObject>().All(x => x.Properties().Count() == 4));
+            foreach (JObject customer in (IEnumerable<JToken>)customers)
+            {
+                JArray orders = customer["SelectOrders"] as JArray;
+                Assert.Equal((int)customer["Id"], orders.Count);
+                Assert.Equal((int)customer["Id"], (int)customer["SelectOrders@odata.count"]);
+                foreach (JObject order in (IEnumerable<JToken>)orders)
+                {
+                    Assert.Equal(3, order.Properties().Count());
+                }
+            }
+        }
+
+        [Fact]
+        public void NestedDollarCountInDollarExpandWithNestedDollarFilterWorks()
+        {
+            string queryUrl = string.Format("{0}/selectexpand/SelectCustomer?&$expand=SelectOrders($filter=Id lt 1;$count=true)", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            Assert.NotNull(response.Content);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.NotNull(result);
+            Console.WriteLine(result);
+            JsonAssert.ArrayLength(10, "value", result);
+            JArray customers = (JArray)result["value"];
+            Assert.True(customers.OfType<JObject>().All(x => x.Properties().Count() == 4));
+            foreach (JObject customer in (IEnumerable<JToken>)customers)
+            {
+                JArray orders = customer["SelectOrders"] as JArray;
+                Assert.NotNull(orders);
+
+                int customerId = (int)customer["Id"];
+                if (customerId == 0)
+                {
+                    // the "SelectOrders" in the first customer is empty.
+                    Assert.Equal(0, orders.Count);
+                    Assert.Equal(0, (int)customer["SelectOrders@odata.count"]);
+                }
+                else
+                {
+                    // the "SelectOrders" in other customers has only one entity, because the result is filtered by "Id" < 1.
+                    Assert.Equal(1, orders.Count);
+                    Assert.Equal(1, (int)customer["SelectOrders@odata.count"]);
+                }
+
+                foreach (JObject order in (IEnumerable<JToken>)orders)
+                {
+                    Assert.Equal(3, order.Properties().Count());
+                }
+            }
+        }
+
+        [Fact]
+        public void NestedNestedDollarCountInDollarExpandWorks()
+        {
+            string queryUrl = string.Format("{0}/selectexpand/SelectCustomer?&$expand=SelectOrders($count=true;$expand=OrderDetails($count=true))", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            Assert.NotNull(response.Content);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.NotNull(result);
+
+            JsonAssert.ArrayLength(10, "value", result);
+            JArray customers = (JArray)result["value"];
+            Assert.True(customers.OfType<JObject>().All(x => x.Properties().Count() == 4));
+            foreach (JObject customer in (IEnumerable<JToken>)customers)
+            {
+                JArray orders = customer["SelectOrders"] as JArray;
+                Assert.Equal((int)customer["Id"], orders.Count);
+                Assert.Equal((int)customer["Id"], (int)customer["SelectOrders@odata.count"]);
+                foreach (JObject order in (IEnumerable<JToken>)orders)
+                {
+                    Assert.Equal(5, order.Properties().Count());
+                    Assert.Equal((int)order["Id"], (int)order["OrderDetails@odata.count"]);
+                }
+            }
+        }
+
         private void RestoreData()
         {
             string requestUri = BaseAddress + "/selectexpand/ResetDataSource";

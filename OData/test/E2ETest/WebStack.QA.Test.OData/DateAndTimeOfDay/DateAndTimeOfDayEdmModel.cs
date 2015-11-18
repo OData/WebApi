@@ -102,5 +102,25 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
                             new KeyValuePathSegment(id.ToString()));
             return new Uri(uri);
         };
+
+        public static IEdmModel BuildEfPersonEdmModel()
+        {
+            string Namespace = typeof(EfPerson).Namespace;
+
+            EdmModel model = new EdmModel();
+
+            EdmEntityType person = new EdmEntityType(Namespace, "Person");
+            person.AddKeys(person.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32, isNullable: false));
+            person.AddStructuralProperty("Birthday", EdmPrimitiveTypeKind.Date, isNullable: true);
+            model.AddElement(person);
+
+            EdmEntityContainer container = new EdmEntityContainer(Namespace, "Default");
+            container.AddEntitySet("EfPeople", person);
+
+            model.AddElement(container);
+            model.SetAnnotationValue<ClrTypeAnnotation>(person, new ClrTypeAnnotation(typeof(EfPerson)));
+
+            return model;
+        }
     }
 }

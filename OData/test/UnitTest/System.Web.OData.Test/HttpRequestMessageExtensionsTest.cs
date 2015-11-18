@@ -2,9 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Hosting;
+using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization.Models;
@@ -355,6 +358,130 @@ namespace System.Net.Http
             Uri relativeUri = new Uri("/test", UriKind.Relative);
             HttpRequestMessage requestWithRelativeUri = new HttpRequestMessage() { RequestUri = relativeUri };
             Assert.Throws<ArgumentException>(() => { Web.OData.Extensions.HttpRequestMessageExtensions.GetNextPageLink(requestWithRelativeUri, 10); });
+        }
+
+        [Theory]
+        [InlineData(0, true)]
+        [InlineData(0.0, true)]
+        [InlineData(10.0, true)]
+        [InlineData(-9999.0, true)]
+        [InlineData(1.0, true)]
+        [InlineData(-10.0, true)]
+        [InlineData(0.1, false)]
+        [InlineData(-1.9, false)]
+        [InlineData(0.123456, false)]
+        public void GetETag_Returns_ETagInHeader_ForDouble(double value, bool isEqual)
+        {
+            // Arrange
+            Dictionary<string, object> properties = new Dictionary<string, object> { { "Version", value } };
+            EntityTagHeaderValue etagHeaderValue = new DefaultODataETagHandler().CreateETag(properties);
+
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<MyEtagCustomer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType customer = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "MyEtagCustomer");
+            IEdmEntitySet customers = model.FindDeclaredEntitySet("Customers");
+            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
+            mockSegment.Setup(s => s.GetEdmType(null)).Returns(customer);
+            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns(customers);
+            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpConfiguration cofiguration = new HttpConfiguration();
+            request.SetConfiguration(cofiguration);
+            request.ODataProperties().Path = odataPath;
+            request.ODataProperties().Model = model;
+
+            // Act
+            ETag result = request.GetETag(etagHeaderValue);
+            dynamic dynamicResult = result;
+
+            // Assert
+            double actual = Assert.IsType<double>(result["Version"]);
+            Assert.Equal(actual, dynamicResult.Version);
+
+            if (isEqual)
+            {
+                Assert.Equal(value, actual);
+            }
+            else
+            {
+                Assert.NotEqual(value, actual);
+
+                Assert.True(actual - value < 0.0000001);
+            }
+        }
+
+        public class MyEtagCustomer
+        {
+            public int Id { get; set; }
+
+            [ConcurrencyCheck]
+            public double Version { get; set; }
+        }
+
+        [Theory]
+        [InlineData((byte)1, (short)2, 3)]
+        [InlineData(Byte.MaxValue, Int16.MaxValue, Int64.MaxValue)]
+        [InlineData(Byte.MinValue, Int16.MinValue, Int64.MinValue)]
+        public void GetETag_Returns_ETagInHeader_ForInteger(byte byteValue, short shortValue, long longValue)
+        {
+            // Arrange
+            Dictionary<string, object> properties = new Dictionary<string, object>
+            {
+                { "ByteVal", byteValue },
+                { "LongVal", longValue },
+                { "ShortVal", shortValue }
+            };
+            EntityTagHeaderValue etagHeaderValue = new DefaultODataETagHandler().CreateETag(properties);
+
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<MyEtagOrder>("Orders");
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType order = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "MyEtagOrder");
+            IEdmEntitySet orders = model.FindDeclaredEntitySet("Orders");
+            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
+            mockSegment.Setup(s => s.GetEdmType(null)).Returns(order);
+            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns(orders);
+            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpConfiguration cofiguration = new HttpConfiguration();
+            request.SetConfiguration(cofiguration);
+            request.ODataProperties().Path = odataPath;
+            request.ODataProperties().Model = model;
+
+            // Act
+            ETag result = request.GetETag(etagHeaderValue);
+            dynamic dynamicResult = result;
+
+            // Assert
+            byte actualByte = Assert.IsType<byte>(result["ByteVal"]);
+            Assert.Equal(actualByte, dynamicResult.ByteVal);
+            Assert.Equal(byteValue, actualByte);
+
+            short actualShort = Assert.IsType<short>(result["ShortVal"]);
+            Assert.Equal(actualShort, dynamicResult.ShortVal);
+            Assert.Equal(shortValue, actualShort);
+
+            long actualLong = Assert.IsType<long>(result["LongVal"]);
+            Assert.Equal(actualLong, dynamicResult.LongVal);
+            Assert.Equal(longValue, actualLong);
+
+        }
+
+        public class MyEtagOrder
+        {
+            public int Id { get; set; }
+
+            [ConcurrencyCheck]
+            public byte ByteVal { get; set; }
+
+            [ConcurrencyCheck]
+            public short ShortVal { get; set; }
+
+            [ConcurrencyCheck]
+            public long LongVal { get; set; }
         }
     }
 }

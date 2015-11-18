@@ -41,6 +41,8 @@ namespace System.Web.OData
 
         private static MethodInfo _queryableAsQueryableMethod = GenericMethodOf(_ => Queryable.AsQueryable<int>(default(IEnumerable<int>)));
 
+        private static MethodInfo _enumerableCountMethod = GenericMethodOf(_ => Enumerable.LongCount<int>(default(IEnumerable<int>)));
+
         public static MethodInfo QueryableOrderByGeneric
         {
             get { return _orderByMethod; }
@@ -149,6 +151,11 @@ namespace System.Web.OData
         public static MethodInfo QueryableAsQueryable
         {
             get { return _queryableAsQueryableMethod; }
+        }
+
+        public static MethodInfo EnumerableCountGeneric
+        {
+            get { return _enumerableCountMethod; }
         }
 
         private static MethodInfo GenericMethodOf<TReturn>(Expression<Func<object, TReturn>> expression)

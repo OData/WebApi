@@ -200,7 +200,6 @@ namespace Microsoft.AspNet.OData.Formatter
             {
                 type = context.Object.GetType();
             }
-            //ToDo: I am not sure if this is the correct way to get the request
             HttpRequest request = null;
             if (context is OutputFormatterWriteContext)
                request = ((OutputFormatterWriteContext)context).HttpContext.Request;

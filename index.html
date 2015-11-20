@@ -64,31 +64,32 @@ $(document).ready(function(){
     <div id="nav-sidebar" class="col-md-3" data-spy="affix" data-offset-top="60000">
       <ul class="nav nav-pills nav-stacked">
         {% assign sortedCategories = site.categories | sort %}
-        {% for myIndex in (1..20) %}
-        {% assign myIndexStr = myIndex | upcase %}
-        {% for category in sortedCategories %}
-        {% if category[0] contains myIndexStr %}
-        <li class="panel panel-default">
-          <a class="panel-heading">
-            <small>{{ category[0] | upcase }}</small>
-          </a>
-          <div class="panel-body">
-            <ul class="nav nav-pills nav-stacked">
-              {% for posts in category %}
-              {% for post in posts reversed %}
-              {% if post.title != null%}
-              <li class="nav-item">
-                <a href="#{{ post.id | remove_first:'/'}}"><small>{{ post.title }}</small></a>
+        {% for loop in site.categories %}
+          {% assign myIndexStr = forloop.index | upcase %}
+          {% for category in sortedCategories %}
+		    {% assign index = category[0] | split:"." | first %}
+            {% if index == myIndexStr %}
+              <li class="panel panel-default">
+                <a class="panel-heading">
+                  <small>{{ category[0] | upcase }}</small>
+                </a>
+                <div class="panel-body">
+                  <ul class="nav nav-pills nav-stacked">
+                    {% for posts in category %}
+                    {% for post in posts reversed %}
+                    {% if post.title != null%}
+                    <li class="nav-item">
+                      <a href="#{{ post.id | remove_first:'/'}}"><small>{{ post.title }}</small></a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                  </ul>
+                </div>
               </li>
-              {% endif %}
-              {% endfor %}
-              {% endfor %}
-            </ul>
-          </div>
-        </li>
-        {% break %}
-        {% endif %}
-        {% endfor %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
         {% endfor %}
       </ul>
     </div>
@@ -97,31 +98,32 @@ $(document).ready(function(){
       <div class="alert alert-success" role="alert">
         For a unified experience, please go to the <a href="https://github.com/odata/WebApi/issues" target="_blank">GitHub Issues</a> to ask question, report bugs, and ask for features.
       </div>
-      {% assign sortedCategories = site.categories | sort %}
-      {% for myIndex in (1..20) %}
-      {% assign myIndexStr = myIndex | upcase %}
-      {% for category in sortedCategories %}
-      {% if category[0] contains myIndexStr %}
-      <h1 class="post-title" id="{{ category[0] | replace:' ','-' | replace:'.','' }}">{{ category[0] | join: "/" | upcase }}</h1>
-      <ul class="post-list">
-        {% for posts in category %}
-        {% for post in posts reversed %}
-        {% if post.title != null%}
-        <li>
-          <h2 class="post-title" id="{{ post.id | remove_first:'/'}}">{{ post.title }}</h2>
-          <article class="post-content">
-            {{ post.content }}
-          </article>
-        </li>
-        {% endif %}
+        {% assign sortedCategories = site.categories | sort %}
+        {% for loop in site.categories %}
+          {% assign myIndexStr = forloop.index | upcase %}
+          {% for category in sortedCategories %}
+		    {% assign index = category[0] | split:"." | first %}
+            {% if index == myIndexStr %}
+		      <h1 class="post-title" id="{{ category[0] | replace:' ','-' | replace:'.','' }}">{{ category[0] | join: "/" | upcase }}</h1>
+		      <ul class="post-list">
+		      	{% for posts in category %}
+		      	{% for post in posts reversed %}
+		      	{% if post.title != null%}
+		      	<li>
+		      	<h2 class="post-title" id="{{ post.id | remove_first:'/'}}">{{ post.title }}</h2>
+		      	<article class="post-content">
+		      		{{ post.content }}
+		      	</article>
+		      	</li>
+		      	{% endif %}
+		      	{% endfor %}
+		      	{% endfor %}
+		      </ul>
+		      {% break %}
+            {% endif %}
+          {% endfor %}
         {% endfor %}
-        {% endfor %}
-      </ul>
-      {% break %}
-      {% endif %}
-      {% endfor %}
-      {% endfor %}
-    </div>
+      </div>
 
     <div class="col-md-3">
     </div>

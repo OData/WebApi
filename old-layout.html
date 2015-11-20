@@ -5,21 +5,22 @@ permalink: /old-layout/
 ---
 
 {% assign sortedCategories = site.categories | sort %}
-{% for myIndex in (1..20) %} 
-{% assign myIndexStr = myIndex | upcase %} 
-{% for category in sortedCategories %} 
-{% if category[0] contains myIndexStr %} 
-  <h2>{{ category[0] | join: "/" }}</h2>
-  <ul>
-  	{% for posts in category %}
-      {% for post in posts reversed %}
-      {% if post.url %} 
-        <li><a href="{{site.baseurl}}{{ post.url }}">{{ post.title }}</a></li>
-      {% endif %}
-      {% endfor %}
-    {% endfor %}
-  </ul>
-{% break %}
-{% endif %}
-{% endfor %}
+{% for loop in site.categories %}
+  {% assign myIndexStr = forloop.index | upcase %}
+  {% for category in sortedCategories %}
+    {% assign index = category[0] | split:"." | first %}
+    {% if index == myIndexStr %}
+      <h2>{{ category[0] | join: "/" }}</h2>
+      <ul>
+	  {% for posts in category %}
+          {% for post in posts reversed %}
+          {% if post.url %}
+            <li><a href="{{site.baseurl}}{{ post.url }}">{{ post.title }}</a></li>
+          {% endif %}
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    {% break %}
+    {% endif %}
+  {% endfor %}
 {% endfor %}

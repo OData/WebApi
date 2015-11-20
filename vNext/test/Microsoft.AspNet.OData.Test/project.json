@@ -10,7 +10,9 @@
 
   "frameworks": {
     "net451": { },
-    "dnx451": { },
+    "dnx451": {
+      "dependencies": { "xunit.runner.dnx": "2.1.0-rc1-*" }
+    },
     "dnxcore50": {
       "dependencies": {
         "System.Collections": "4.0.10-beta-*",

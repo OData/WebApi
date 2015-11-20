@@ -2,7 +2,7 @@
 using Microsoft.AspNet.Mvc.Infrastructure;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNet.OData.Extensions
 {

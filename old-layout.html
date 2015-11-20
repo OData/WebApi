@@ -5,7 +5,10 @@ permalink: /old-layout/
 ---
 
 {% assign sortedCategories = site.categories | sort %}
-{% for category in sortedCategories %}
+{% for myIndex in (1..20) %} 
+{% assign myIndexStr = myIndex | upcase %} 
+{% for category in sortedCategories %} 
+{% if category[0] contains myIndexStr %} 
   <h2>{{ category[0] | join: "/" }}</h2>
   <ul>
   	{% for posts in category %}
@@ -16,4 +19,7 @@ permalink: /old-layout/
       {% endfor %}
     {% endfor %}
   </ul>
+{% break %}
+{% endif %}
+{% endfor %}
 {% endfor %}

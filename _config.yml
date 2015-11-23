@@ -1,8 +1,8 @@
 # Site settings
-title: ASP.NET Web API for OData V4 Docs
+title: OData v4 Web API
 email: odatafeedback@microsoft.com
 description: > # this means to ignore newlines until "baseurl:"
-  Complete documentations for ASP.NET Web API for OData V4
+  Documentations - tutorials, guides - for OData v4 Web API.
 baseurl: "/WebApi" # the subpath of your site, e.g. /blog/
 url: "http://yourdomain.com" # the base hostname & protocol for your site
 

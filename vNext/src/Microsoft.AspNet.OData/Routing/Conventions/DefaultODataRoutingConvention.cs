@@ -45,7 +45,9 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 var operationImportSegment = odataPath.FirstSegment as OperationImportSegment;
                 if (operationImportSegment != null)
                 {
-                    controllerName = operationImportSegment.EntitySet.Name;
+                    // Handling unbound functions without related entity set
+                    controllerName = operationImportSegment.EntitySet != null ?
+                        operationImportSegment.EntitySet.Name : routeContext.HttpContext.Request.ODataProperties().RoutePrefix;
                     var edmOperationImport = operationImportSegment.OperationImports.FirstOrDefault();
                     if (edmOperationImport != null)
                     {
@@ -69,7 +71,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         {
                             keyValue = ((ConstantNode)convertNode.Source).Value;
                         }
-                       
+
                         var newKey = new KeyValuePair<string, object>(keyName, keyValue);
                         keys.Add(newKey);
                     }

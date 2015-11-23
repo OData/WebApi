@@ -8,6 +8,12 @@ url: "http://yourdomain.com" # the base hostname & protocol for your site
 
 github_username:  odata
 
+# Footer settings
+footer:
+  copyright: > #
+    The materials available on this site are licensed
+    as set forth <a href="https://github.com/OData/odata.github.io/blob/master/License.txt">here</a>.
+
 # Build settings
 markdown: kramdown
 highlighter: pygments

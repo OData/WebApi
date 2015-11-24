@@ -6,7 +6,7 @@ namespace Microsoft.AspNet.OData.Extensions
     {
         public static bool IsSuccessStatusCode(this HttpStatusCodeResult response)
         {
-            return response?.StatusCode >= 200 && response.StatusCode < 300;
+            return response == null || (response.StatusCode >= 200 && response.StatusCode < 300);
         }
     }
 }

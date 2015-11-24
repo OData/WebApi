@@ -23,7 +23,10 @@ namespace System.Web.OData.Query
         private static readonly IAssembliesResolver _defaultAssembliesResolver = new DefaultAssembliesResolver();
         private SelectExpandClause _selectExpandClause;
         private ODataQueryOptionParser _queryOptionParser;
-        private int _levelsMaxLiteralExpansionDepth = ODataValidationSettings.DefaultMaxExpansionDepth;
+        // Give _levelsMaxLiteralExpansionDepth a negative value meaning it is uninitialized, and it will be set to:
+        // 1. LevelsMaxLiteralExpansionDepth or
+        // 2. ODataValidationSettings.MaxExpansionDepth
+        private int _levelsMaxLiteralExpansionDepth = -1;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SelectExpandQueryOption"/> class.
@@ -278,7 +281,10 @@ namespace System.Web.OData.Query
         {
             bool levelsEncountered;
             bool isMaxLevel;
-            return ProcessLevels(SelectExpandClause, LevelsMaxLiteralExpansionDepth, out levelsEncountered, out isMaxLevel);
+            return ProcessLevels(SelectExpandClause, 
+                LevelsMaxLiteralExpansionDepth < 0 ? ODataValidationSettings.DefaultMaxExpansionDepth : LevelsMaxLiteralExpansionDepth, 
+                out levelsEncountered, 
+                out isMaxLevel);
         }
 
         // Process $levels in SelectExpandClause.

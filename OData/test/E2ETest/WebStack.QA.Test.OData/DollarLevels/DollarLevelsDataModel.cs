@@ -12,4 +12,11 @@ namespace WebStack.QA.Test.OData.DollarLevels
 
         public IList<DLManager> DirectReports { get; set; }
     }
+
+    public class DLEmployee
+    {
+        public int ID { get; set; }
+
+        public DLEmployee Friend { get; set; }
+    }
 }

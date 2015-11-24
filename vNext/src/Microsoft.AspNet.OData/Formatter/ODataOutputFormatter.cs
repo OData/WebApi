@@ -13,7 +13,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.Framework.Internal;
+using Microsoft.Extensions.Internal;
 using Microsoft.OData.Core;
 using Microsoft.AspNet.Mvc.Formatters;
 
@@ -45,12 +45,12 @@ namespace Microsoft.AspNet.OData.Formatter
             _payloadKinds = payloadKinds;
         }
 
-        public override Task WriteResponseBodyAsync(OutputFormatterContext context)
+        public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
         {
             return Task.Run(() => WriteResponseBody(context));
         }
 
-        private void WriteResponseBody(OutputFormatterContext context)
+        private void WriteResponseBody(OutputFormatterWriteContext context)
         {
             HttpRequest request = context.HttpContext.Request;
             HttpResponse response = context.HttpContext.Response;
@@ -133,7 +133,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     RootElementName = GetRootElementName(path) ?? "root",
                     SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                     Path = path,
-                    MetadataLevel = ODataMediaTypes.GetMetadataLevel(context.SelectedContentType),
+                    MetadataLevel = ODataMediaTypes.GetMetadataLevel(context.ContentType),
                     SelectExpandClause = request.ODataProperties().SelectExpandClause,
                 };
 
@@ -141,7 +141,7 @@ namespace Microsoft.AspNet.OData.Formatter
             }
         }
 
-        public override void WriteResponseHeaders(OutputFormatterContext context)
+        public override void WriteResponseHeaders(OutputFormatterWriteContext context)
         {
             HttpRequest request = context.HttpContext.Request;
             HttpResponse response = context.HttpContext.Response;
@@ -188,7 +188,7 @@ namespace Microsoft.AspNet.OData.Formatter
             base.WriteResponseHeaders(context);
         }
 
-        public override bool CanWriteResult([NotNull]OutputFormatterContext context, MediaTypeHeaderValue contentType)
+        public override bool CanWriteResult([NotNull]OutputFormatterCanWriteContext context)
         {
             Type type = null;
             var pageResult = context.Object as PageResult<object>;
@@ -200,7 +200,9 @@ namespace Microsoft.AspNet.OData.Formatter
             {
                 type = context.Object.GetType();
             }
-            var request = context.HttpContext.Request;
+            HttpRequest request = null;
+            if (context is OutputFormatterWriteContext)
+               request = ((OutputFormatterWriteContext)context).HttpContext.Request;
 
             if (request != null)
             {

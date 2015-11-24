@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.OData
             }
 
             var response = context.Result as HttpStatusCodeResult;
-            if (!response.IsSuccessStatusCode())
+            if (response != null && !response.IsSuccessStatusCode())
             {
                 return;
             }

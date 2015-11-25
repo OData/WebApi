@@ -4,14 +4,19 @@
 [OData Web API](http://odata.github.io/WebApi) (i.e., ASP.NET Web API OData) is a server library built upon [ODataLib](https://github.com/OData/odata.net/) and [Web API](http://www.asp.net/web-api).
 
 ### Project structure
-The **master** branch has the following libraries, and the packages are available from NuGet or MyGet:
- - [OData Web API v4](https://www.nuget.org/packages/Microsoft.AspNet.OData/) (namespace `System.Web.OData`) 
- - [OData Web API v3](https://www.nuget.org/packages/Microsoft.AspNet.WebApi.OData/) (namespace `System.Web.Http.OData`)
- - [vNext](http://odata.github.io/WebApi/#07-07-6-0-0-alpha1) (namespace [`Microsoft.AspNet.OData`](https://github.com/OData/WebApi/tree/master/vNext))
- 
-The **[vNext](https://github.com/OData/WebApi/tree/vNext/vNext)** branch contains the latest code of OData vNext Web API.
+The project has a few branches, such as master, vNext, gh-pages.
 
-The **[gh-pages](https://github.com/OData/WebApi/tree/gh-pages)** branch contains the documenation of the OData Web API.
+#### master
+The master branch has the following libraries, and the packages are available from NuGet or MyGet:
+ - [OData v4 Web API](https://www.nuget.org/packages/Microsoft.AspNet.OData/) (namespace `System.Web.OData`) 
+ - [OData v3 Web API](https://www.nuget.org/packages/Microsoft.AspNet.WebApi.OData/) (namespace `System.Web.Http.OData`)
+ - [vNext](http://odata.github.io/WebApi/#07-07-6-0-0-alpha1) (namespace [`Microsoft.AspNet.OData`](https://github.com/OData/WebApi/tree/master/vNext))
+
+#### vNext 
+The [vNext](https://github.com/OData/WebApi/tree/vNext/vNext) branch contains the latest code of OData vNext Web API.
+
+#### gh-pages
+The [gh-pages](https://github.com/OData/WebApi/tree/gh-pages) branch contains the documenation source - in Markdown format - of the OData Web API.
 
 ### Building
 ```

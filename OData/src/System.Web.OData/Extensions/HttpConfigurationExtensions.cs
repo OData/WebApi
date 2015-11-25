@@ -36,9 +36,11 @@ namespace System.Web.OData.Extensions
 
         private const string NullDynamicPropertyKey = "System.Web.OData.NullDynamicPropertyKey";
 
-        private const string SerializeNullCollectionsAsEmptySettingsKey = "System.Web.OData.SerializeNullCollectionsAsEmptySettingsKey";
+        private const string SerializeNullCollectionsAsEmptySettingsKey =
+            "System.Web.OData.SerializeNullCollectionsAsEmptySettingsKey";
 
-        private const string DoNotSerializeNullCollectionsSettingsKey = "System.Web.OData.DoNotSerializeNullCollectionsSettingsKey";
+        private const string DoNotSerializeNullCollectionsSettingsKey =
+            "System.Web.OData.DoNotSerializeNullCollectionsSettingsKey";
 
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return

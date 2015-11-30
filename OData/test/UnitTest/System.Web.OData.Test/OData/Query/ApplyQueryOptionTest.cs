@@ -101,7 +101,7 @@ namespace System.Web.OData.Test.OData.Query
                         "groupby((Name), aggregate(CustomerId with sum as Total))/filter(Total eq 3)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", "3" } }
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
                         }
                     },
                     {

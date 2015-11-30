@@ -131,7 +131,6 @@
     <Compile Include="OData\Query\Expressions\DynamicTypeWrapper.cs" />
     <Compile Include="OData\Query\Expressions\ExpressionBinderBase.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
-    <Compile Include="OData\Query\Expressions\TypeDefinition.cs" />
     <Compile Include="OData\Query\Expressions\TypeProvider.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
     <Compile Include="OData\Query\NotCountableAttribute.cs" />

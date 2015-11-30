@@ -58,8 +58,12 @@ namespace Microsoft.AspNet.OData
                     {
                         count = Count(result.Value, queryOptions, context.ActionDescriptor);
                     }
-                    var pageResult = new PageResult<object>(items, null, count);
-                    result.Value = pageResult;
+                    // We might be getting a single result, so no paging involved
+                    if (items != null)
+                    {
+                        var pageResult = new PageResult<object>(items, null, count);
+                        result.Value = pageResult;
+                    }
                 }
             }
         }

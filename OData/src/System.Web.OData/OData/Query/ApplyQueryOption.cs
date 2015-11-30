@@ -111,7 +111,6 @@ namespace System.Web.OData.Query
             }
         }
 
-
         /// <summary>
         ///  Gets the raw $apply value.
         /// </summary>

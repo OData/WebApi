@@ -790,4 +790,13 @@
   <data name="InvalidAttributeRoutingTemplateSegment" xml:space="preserve">
     <value>The attribute routing template contains invalid segment '{0}'.</value>
   </data>
+  <data name="AggregationMethodNotSupported" xml:space="preserve">
+    <value>Aggregation method '{0}' is not supported.</value>
+  </data>
+  <data name="AggregationNotSupportedForType" xml:space="preserve">
+    <value>Aggregation '{0}' not supported for property '{1}' of type '{2}'.</value>
+  </data>
+  <data name="NotSupportedTransformationKind" xml:space="preserve">
+    <value>Not supported transformation kind {0}</value>
+  </data>
 </root>

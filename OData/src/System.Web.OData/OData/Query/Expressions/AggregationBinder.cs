@@ -59,7 +59,7 @@ namespace System.Web.OData.Query.Expressions
                     _groupByClrType = TypeProvider.GetResultType<DynamicEntityWrapper>(groupByClause.GroupingItemType, _model, generateTypeNames);
                     break;
                 default:
-                    throw new NotSupportedException(string.Format("Not supported transformation kind {0}", transformation.Kind));
+                    throw new NotSupportedException(string.Format(SRResources.NotSupportedTransformationKind, transformation.Kind));
             }
 
             ResultClrType = TypeProvider.GetResultType<DynamicEntityWrapper>(ResultType, _model, generateTypeNames);
@@ -180,7 +180,7 @@ namespace System.Web.OData.Query.Expressions
                         MethodInfo sumGenericMethod;
                         if (!ExpressionHelperMethods.QueryableSumGenerics.TryGetValue(propertyLambda.Body.Type, out sumGenericMethod))
                         {
-                            throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", statement.WithVerb, statement.Expression, propertyLambda.Body.Type));
+                            throw new ODataException(Error.Format(SRResources.AggregationNotSupportedForType, statement.WithVerb, statement.Expression, propertyLambda.Body.Type));
                         }
                         var sumMethod = sumGenericMethod.MakeGenericMethod(this._elementType);
                         aggregationExpression = Expression.Call(null, sumMethod, asQuerableExpression, propertyLambda);
@@ -191,7 +191,7 @@ namespace System.Web.OData.Query.Expressions
                         MethodInfo averageGenericMethod;
                         if (!ExpressionHelperMethods.QueryableAverageGenerics.TryGetValue(propertyLambda.Body.Type, out averageGenericMethod))
                         {
-                            throw new ODataException(Error.Format("Aggregation '{0}' not supported for property '{1}' of type '{2}'.", statement.WithVerb, statement.Expression, propertyLambda.Body.Type));
+                            throw new ODataException(Error.Format(SRResources.AggregationNotSupportedForType, statement.WithVerb, statement.Expression, propertyLambda.Body.Type));
                         }
                         var averageMethod = averageGenericMethod.MakeGenericMethod(this._elementType);
                         aggregationExpression = Expression.Call(null, averageMethod, asQuerableExpression, propertyLambda);
@@ -213,7 +213,7 @@ namespace System.Web.OData.Query.Expressions
                     }
                     break;
                 default:
-                    throw new ODataException(Error.Format("Aggregation method '{0}' is not supported.", statement.WithVerb));
+                    throw new ODataException(Error.Format(SRResources.AggregationMethodNotSupported, statement.WithVerb));
             }
 
             return aggregationExpression;

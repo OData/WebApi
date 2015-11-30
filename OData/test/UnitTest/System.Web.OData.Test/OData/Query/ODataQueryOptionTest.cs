@@ -59,10 +59,9 @@ namespace System.Web.OData.Query
                      { "$skip", "12" },
 
                      { "$apply", null },
-                     { "$apply", "''" },
                      { "$apply", "" },
                      { "$apply", " " },
-                     { "$apply", "aggregate(xxx mul Name with sum as Name)" },
+                     { "$apply", "aggregate(SharePrice mul CustomerId with sum as Name)" },
                 };
             }
         }

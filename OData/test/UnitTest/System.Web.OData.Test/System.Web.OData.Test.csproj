@@ -184,6 +184,7 @@
     <Compile Include="OData\Query\ApplyQueryOptionTest.cs" />
     <Compile Include="OData\Query\Expressions\AggregationBinderTests.cs" />
     <Compile Include="OData\Query\Expressions\DynamicTypeWrapperTests.cs" />
+    <Compile Include="OData\Query\Expressions\TypeProviderTests.cs" />
     <Compile Include="OData\Query\ODataSingletonQueryOptionTest.cs" />
     <Compile Include="OData\Query\ODataQueryOptionParserExtensionTest.cs" />
     <Compile Include="OData\Query\ParameterAliasNodeTranslatorTest.cs" />

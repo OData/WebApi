@@ -27,12 +27,13 @@ namespace System.Web.OData.Query.Expressions
         /// </summary>
         /// <param name="typeReference"></param>
         /// <param name="model"></param>
+        /// <param name="generateTypeNames"></param>
         /// <returns></returns>
         /// <remarks>
         /// We create new assembly each time, but they will be collected by GC.
         /// Current performance testing results is 0.5ms per type. We should consider caching types, however trade off is between CPU perfomance and memory usage (might be it will we an option for library user)
         /// </remarks>
-        public static Type GetResultType<T>(IEdmTypeReference typeReference, IEdmModel model) where T : DynamicTypeWrapper
+        public static Type GetResultType<T>(IEdmTypeReference typeReference, IEdmModel model, bool generateTypeNames = true) where T : DynamicTypeWrapper
         {
             Contract.Assert(typeReference != null);
             Contract.Assert(model != null);
@@ -49,7 +50,7 @@ namespace System.Web.OData.Query.Expressions
                 return typeof(T);
             }
 
-            TypeBuilder tb = GetTypeBuilder<T>(definition.FullTypeName() + Guid.NewGuid().ToString());
+            TypeBuilder tb = GetTypeBuilder<T>(definition.FullTypeName() + (generateTypeNames? Guid.NewGuid().ToString(): string.Empty));
             ConstructorBuilder constructor = tb.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
 
             foreach (var field in definition.Properties())
@@ -64,7 +65,7 @@ namespace System.Web.OData.Query.Expressions
                     // It's not primitive type
                     // Create new type for the property
                     //TODO: Could we create all types in open model?
-                    CreateProperty(tb, field.Name, GetResultType<DynamicComplexWrapper>(field.Type, model));
+                    CreateProperty(tb, field.Name, GetResultType<DynamicComplexWrapper>(field.Type, model, generateTypeNames));
 
                 }
             }

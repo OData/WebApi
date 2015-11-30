@@ -29,6 +29,11 @@ namespace System.Web.OData.Query.Expressions
         private Type _groupByClrType;
 
         public AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType, IEdmModel model, QueryNode transformation)
+            : this(settings, assembliesResolver, elementType, model, transformation, true)
+        {
+        }
+
+        internal AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType, IEdmModel model, QueryNode transformation, bool generateTypeNames)
             : base(model, assembliesResolver, settings)
         {
             Contract.Assert(elementType != null);
@@ -37,7 +42,7 @@ namespace System.Web.OData.Query.Expressions
             _elementType = elementType;
             _transformation = transformation;
 
-            this._lambdaParameter = Expression.Parameter(this._elementType);
+            this._lambdaParameter = Expression.Parameter(this._elementType, "$it");
 
             switch (transformation.Kind)
             {
@@ -51,13 +56,13 @@ namespace System.Web.OData.Query.Expressions
                     ResultType = groupByClause.ItemType;
                     _groupingProperties = groupByClause.GroupingProperties;
                     _aggregateStatements = groupByClause.Aggregate != null ? groupByClause.Aggregate.Statements : null;
-                    _groupByClrType = TypeProvider.GetResultType<DynamicEntityWrapper>(groupByClause.GroupingItemType, _model);
+                    _groupByClrType = TypeProvider.GetResultType<DynamicEntityWrapper>(groupByClause.GroupingItemType, _model, generateTypeNames);
                     break;
                 default:
                     throw new NotSupportedException(string.Format("Not supported transformation kind {0}", transformation.Kind));
             }
 
-            ResultClrType = TypeProvider.GetResultType<DynamicEntityWrapper>(ResultType, _model);
+            ResultClrType = TypeProvider.GetResultType<DynamicEntityWrapper>(ResultType, _model, generateTypeNames);
 
             _groupByClrType = _groupByClrType ?? typeof(DynamicTypeWrapper);
         }
@@ -99,7 +104,7 @@ namespace System.Web.OData.Query.Expressions
             //                  })
 
             var groupingType = typeof(IGrouping<,>).MakeGenericType(this._groupByClrType, this._elementType);
-            ParameterExpression accum = Expression.Parameter(groupingType);
+            ParameterExpression accum = Expression.Parameter(groupingType, "$it");
 
             List<MemberAssignment> wrapperTypeMemberAssignments = null;
 

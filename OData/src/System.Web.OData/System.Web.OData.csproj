@@ -78,11 +78,15 @@
     <Compile Include="OData\Builder\AutoExpandAttribute.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AutoExpandAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AutoExpandAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\MaxLengthAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\MediaTypeAttributeConvention.cs" />
+    <Compile Include="OData\Builder\DecimalPropertyConfiguration.cs" />
+    <Compile Include="OData\Builder\LengthPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\MediaTypeAttribute.cs" />
     <Compile Include="OData\Builder\CapabilitiesVocabularyConstants.cs" />
     <Compile Include="OData\Builder\CapabilitiesVocabularyExtensionMethods.cs" />
     <Compile Include="OData\Builder\CapabilitiesNavigationType.cs" />
+    <Compile Include="OData\Builder\PrecisionPropertyConfiguration.cs" />
     <Compile Include="OData\ODataSwaggerUtilities.cs" />
     <Compile Include="OData\ODataSwaggerConverter.cs" />
     <Compile Include="OData\EdmEnumObjectCollection.cs" />

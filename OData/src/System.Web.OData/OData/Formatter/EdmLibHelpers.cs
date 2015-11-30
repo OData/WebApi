@@ -464,6 +464,20 @@ namespace System.Web.OData.Formatter
             return results;
         }
 
+        public static bool HasLength(EdmPrimitiveTypeKind primitiveTypeKind)
+        {
+            return (primitiveTypeKind == EdmPrimitiveTypeKind.Binary ||
+                primitiveTypeKind == EdmPrimitiveTypeKind.String);
+        }
+
+        public static bool HasPrecision(EdmPrimitiveTypeKind primitiveTypeKind)
+        {
+            return (primitiveTypeKind == EdmPrimitiveTypeKind.Decimal ||
+                primitiveTypeKind == EdmPrimitiveTypeKind.DateTimeOffset ||
+                primitiveTypeKind == EdmPrimitiveTypeKind.Duration ||
+                primitiveTypeKind == EdmPrimitiveTypeKind.TimeOfDay);
+        }
+
         private static IEdmPrimitiveType GetPrimitiveType(EdmPrimitiveTypeKind primitiveKind)
         {
             return _coreModel.GetPrimitiveType(primitiveKind);

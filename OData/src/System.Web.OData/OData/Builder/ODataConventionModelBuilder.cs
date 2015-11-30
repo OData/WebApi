@@ -46,6 +46,7 @@ namespace System.Web.OData.Builder
             new MediaTypeAttributeConvention(),
             new AutoExpandAttributeEdmPropertyConvention(),
             new AutoExpandAttributeEdmTypeConvention(),
+            new MaxLengthAttributeEdmPropertyConvention(),
 
             // INavigationSourceConvention's
             new SelfLinksGenerationConvention(),

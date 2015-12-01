@@ -4,8 +4,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using Microsoft.OData.Core;
@@ -94,6 +96,16 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(writeContext != null);
             Contract.Assert(writeContext.Model != null);
 
+            bool nullDynamicPropertyEnabled = false;
+            if (writeContext.Request != null)
+            {
+                HttpConfiguration configuration = writeContext.Request.GetConfiguration();
+                if (configuration != null)
+                {
+                    nullDynamicPropertyEnabled = configuration.HasEnabledNullDynamicProperty();
+                }
+            }
+
             PropertyInfo dynamicPropertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(
                 structuredType.StructuredDefinition(), writeContext.Model);
 
@@ -124,9 +136,23 @@ namespace System.Web.OData.Formatter.Serialization
                     x => !selectedDynamicProperties.Any() || selectedDynamicProperties.Contains(x.Key));
             foreach (KeyValuePair<string, object> dynamicProperty in dynamicPropertiesToSelect)
             {
-                if (String.IsNullOrEmpty(dynamicProperty.Key) || dynamicProperty.Value == null)
+                if (String.IsNullOrEmpty(dynamicProperty.Key))
                 {
-                    continue; // skip the null object
+                    continue;
+                }
+
+                if (dynamicProperty.Value == null)
+                {
+                    if (nullDynamicPropertyEnabled)
+                    {
+                        dynamicProperties.Add(new ODataProperty
+                        {
+                            Name = dynamicProperty.Key,
+                            Value = new ODataNullValue()
+                        });
+                    }
+
+                    continue;
                 }
 
                 if (declaredPropertyNameSet.Contains(dynamicProperty.Key))

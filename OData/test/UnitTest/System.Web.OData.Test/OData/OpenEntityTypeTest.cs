@@ -22,12 +22,18 @@ namespace System.Web.OData
     {
         private const string _untypedCustomerRequestRooturl = "http://localhost/odata/UntypedSimpleOpenCustomers";
 
-        [Fact]
-        public void Get_OpenEntityType()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Get_OpenEntityType(bool enableNullDynamicProperty)
         {
             // Arrange
             const string RequestUri = "http://localhost/odata/SimpleOpenCustomers(9)";
             var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
+            if (enableNullDynamicProperty)
+            {
+                configuration.EnableNullDynamicProperty();
+            }
             configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
 
             HttpClient client = new HttpClient(new HttpServer(configuration));
@@ -48,6 +54,15 @@ namespace System.Web.OData
             Assert.Equal(new JArray(new[] { 200, 100, 300, 0, 400 }), result["ListProp"]);
             Assert.Equal("0001-01-01", result["DateList"][0]);
             Assert.Equal("9999-12-31", result["DateList"][1]);
+            if (enableNullDynamicProperty)
+            {
+                Assert.NotNull(result["Receipt"]);
+                Assert.Equal(JValue.CreateNull(), result["Receipt"]);
+            }
+            else
+            {
+                Assert.Null(result["Receipt"]);
+            }
         }
 
         [Theory] 
@@ -515,7 +530,8 @@ namespace System.Web.OData
                 CustomerProperties = new Dictionary<string, object>
                 {
                     { "ListProp", IntValues },
-                    { "DateList", new[] { Date.MinValue, Date.MaxValue } }
+                    { "DateList", new[] { Date.MinValue, Date.MaxValue } },
+                    { "Receipt", null }
                 }
             };
 

@@ -34,6 +34,8 @@ namespace System.Web.OData.Extensions
 
         private const string ContinueOnErrorKey = "System.Web.OData.ContinueOnErrorKey";
 
+        private const string NullDynamicPropertyKey = "System.Web.OData.NullDynamicPropertyKey";
+
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
         /// type. To avoid processing unexpected or malicious queries, use the validation settings on
@@ -263,6 +265,39 @@ namespace System.Web.OData.Extensions
             {
                 return (bool)value;
             }
+            return false;
+        }
+
+        /// <summary>
+        /// Enable the null dynamic property to be serialized.
+        /// </summary>
+        public static void EnableNullDynamicProperty(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            configuration.Properties[NullDynamicPropertyKey] = true;
+        }
+
+        /// <summary>
+        /// Check the null dynamic property is enable or not.
+        /// </summary>
+        /// <returns></returns>
+        internal static bool HasEnabledNullDynamicProperty(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            object value;
+            if (configuration.Properties.TryGetValue(NullDynamicPropertyKey, out value))
+            {
+                return (bool)value;
+            }
+
             return false;
         }
 

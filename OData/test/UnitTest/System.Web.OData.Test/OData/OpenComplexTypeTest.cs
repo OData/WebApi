@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.Remoting;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
@@ -18,12 +19,18 @@ namespace System.Web.OData
 {
     public class OpenComplexTypeTest
     {
-        [Fact]
-        public void OpenComplexType_SimpleSerialization()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void OpenComplexType_SimpleSerialization(bool enableNullDynamicProperty)
         {
             // Arrange
             const string RequestUri = "http://localhost/odata/OpenCustomers(2)/Address";
             var configuration = new[] { typeof(OpenCustomersController) }.GetHttpConfiguration();
+            if (enableNullDynamicProperty)
+            {
+                configuration.EnableNullDynamicProperty();
+            }
             configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
 
             HttpClient client = new HttpClient(new HttpServer(configuration));
@@ -43,6 +50,15 @@ namespace System.Web.OData
             Assert.Equal("My Dynamic Country", result["Country"]);
             Assert.Equal("2c1f450a-a2a7-4fe1-a25d-4d9332fc0694", result["Token"]);
             Assert.Equal("2015-03-02", result["Birthday"]);
+            if (enableNullDynamicProperty)
+            {
+                Assert.NotNull(result["Region"]);
+                Assert.Equal(JValue.CreateNull(), result["Region"]);
+            }
+            else
+            {
+                Assert.Null(result["Region"]);
+            }
         }
 
         [Fact]
@@ -128,6 +144,7 @@ namespace System.Web.OData
             address.DynamicProperties.Add("Country", "My Dynamic Country");
             address.DynamicProperties.Add("Token", new Guid("2C1F450A-A2A7-4FE1-A25D-4D9332FC0694"));
             address.DynamicProperties.Add("Birthday", new Date(2015, 3, 2));
+            address.DynamicProperties.Add("Region", null);
             return Ok(address);
         }
 

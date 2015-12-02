@@ -55,7 +55,18 @@ namespace System.Web.OData.Query.Expressions
                     var groupByClause = this._transformation as GroupByTransformationNode;
                     ResultType = groupByClause.ItemType;
                     _groupingProperties = groupByClause.GroupingProperties;
-                    _aggregateStatements = groupByClause.Aggregate != null ? groupByClause.Aggregate.Statements : null;
+                    if (groupByClause.ChildTransformation != null)
+                    {
+                        if (groupByClause.ChildTransformation.Kind == TransformationNodeKind.Aggregate)
+                        {
+                            _aggregateStatements = ((AggregateTransformationNode)groupByClause.ChildTransformation).Statements;
+                        }
+                        else
+                        {
+                            throw new NotImplementedException();
+                        }
+                    }
+                    
                     _groupByClrType = TypeProvider.GetResultType<DynamicEntityWrapper>(groupByClause.GroupingItemType, _model, generateTypeNames);
                     break;
                 default:

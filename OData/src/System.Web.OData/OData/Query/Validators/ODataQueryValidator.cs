@@ -31,6 +31,12 @@ namespace System.Web.OData.Query.Validators
             }
 
             // Validate each query options
+            if (options.Apply != null)
+            {
+                ValidateQueryOptionAllowed(AllowedQueryOptions.Apply, validationSettings.AllowedQueryOptions);
+                //options.Apply.Validate(validationSettings);
+            }
+
             if (options.Skip != null)
             {
                 ValidateQueryOptionAllowed(AllowedQueryOptions.Skip, validationSettings.AllowedQueryOptions);

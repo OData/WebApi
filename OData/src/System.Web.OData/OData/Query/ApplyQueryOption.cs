@@ -184,16 +184,16 @@ namespace System.Web.OData.Query
             }
 
             foreach (var transformation in applyClause.Transformations) {
-                if (transformation.Kind == QueryNodeKind.Aggregate || transformation.Kind == QueryNodeKind.GroupBy)
+                if (transformation.Kind == TransformationNodeKind.Aggregate || transformation.Kind == TransformationNodeKind.GroupBy)
                 {
-                    var binder = new AggregationBinder(updatedSettings, assembliesResolver, ResultClrType, Context.Model, transformation as QueryNode);
+                    var binder = new AggregationBinder(updatedSettings, assembliesResolver, ResultClrType, Context.Model, transformation as TransformationNode);
                     query = binder.Bind(query);
                     this.ResultClrType = binder.ResultClrType;
                 }
-                else
+                else if (transformation.Kind == TransformationNodeKind.Filter)
                 {
-                    var filterClause = transformation as FilterClause;
-                    Expression filter = FilterBinder.Bind(filterClause, ResultClrType, Context.Model, assembliesResolver, updatedSettings);
+                    var filterTransformation = transformation as FilterTransformationNode;
+                    Expression filter = FilterBinder.Bind(filterTransformation.FilterClause, ResultClrType, Context.Model, assembliesResolver, updatedSettings);
                     query = ExpressionHelpers.Where(query, filter, ResultClrType);
                 }
             }

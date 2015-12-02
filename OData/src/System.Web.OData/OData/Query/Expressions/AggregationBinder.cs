@@ -19,21 +19,21 @@ namespace System.Web.OData.Query.Expressions
     internal class AggregationBinder : ExpressionBinderBase
     {
         private Type _elementType;
-        private QueryNode _transformation;
+        private TransformationNode _transformation;
 
         ParameterExpression _lambdaParameter;
 
-        private IEnumerable<AggregateStatementNode> _aggregateStatements;
+        private IEnumerable<AggregateStatement> _aggregateStatements;
         private IEnumerable<GroupByPropertyNode> _groupingProperties;
 
         private Type _groupByClrType;
 
-        public AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType, IEdmModel model, QueryNode transformation)
+        public AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType, IEdmModel model, TransformationNode transformation)
             : this(settings, assembliesResolver, elementType, model, transformation, true)
         {
         }
 
-        internal AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType, IEdmModel model, QueryNode transformation, bool generateTypeNames)
+        internal AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType, IEdmModel model, TransformationNode transformation, bool generateTypeNames)
             : base(model, assembliesResolver, settings)
         {
             Contract.Assert(elementType != null);
@@ -46,13 +46,13 @@ namespace System.Web.OData.Query.Expressions
 
             switch (transformation.Kind)
             {
-                case QueryNodeKind.Aggregate:
-                    var aggregateClause = this._transformation as AggregateNode;
+                case TransformationNodeKind.Aggregate:
+                    var aggregateClause = this._transformation as AggregateTransformationNode;
                     ResultType = aggregateClause.ItemType;
                     _aggregateStatements = aggregateClause.Statements;
                     break;
-                case QueryNodeKind.GroupBy:
-                    var groupByClause = this._transformation as GroupByNode;
+                case TransformationNodeKind.GroupBy:
+                    var groupByClause = this._transformation as GroupByTransformationNode;
                     ResultType = groupByClause.ItemType;
                     _groupingProperties = groupByClause.GroupingProperties;
                     _aggregateStatements = groupByClause.Aggregate != null ? groupByClause.Aggregate.Statements : null;
@@ -152,7 +152,7 @@ namespace System.Web.OData.Query.Expressions
             return wrapperTypeMemberAssignments;
         }
 
-        private Expression CreateAggregationExpression(ParameterExpression accum, AggregateStatementNode statement)
+        private Expression CreateAggregationExpression(ParameterExpression accum, AggregateStatement statement)
         {
             LambdaExpression propertyLambda = Expression.Lambda(BindAccessor(statement.Expression), this._lambdaParameter);
             // I substitute the element type for all generic arguments.                                                

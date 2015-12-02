@@ -194,16 +194,16 @@ namespace System.Web.OData.Extensions
                 throw Error.ArgumentNull("request");
             }
 
+            if (!request.RequestUri.IsAbsoluteUri)
+            {
+                throw Error.ArgumentUriNotAbsolute("request", request.RequestUri);
+            }
+
             // Reconstruct RequestUri with CreateODataLink to support Uri override scenarios.
             UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
             string odataLink = urlHelper.CreateODataLink(request.ODataProperties().Path.Segments);
 
             Uri requestUri = new Uri(odataLink);
-
-            if (!requestUri.IsAbsoluteUri)
-            {
-                throw Error.ArgumentUriNotAbsolute("request", requestUri);
-            }
 
             return GetNextPageLink(requestUri, request.GetQueryNameValuePairs(), pageSize);
         }

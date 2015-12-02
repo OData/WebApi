@@ -797,6 +797,6 @@
     <value>Aggregation '{0}' not supported for property '{1}' of type '{2}'.</value>
   </data>
   <data name="NotSupportedTransformationKind" xml:space="preserve">
-    <value>Not supported transformation kind {0}</value>
+    <value>Transformation kind {0} is not supported.</value>
   </data>
 </root>

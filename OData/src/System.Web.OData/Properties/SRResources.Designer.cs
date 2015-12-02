@@ -1357,7 +1357,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Not supported transformation kind {0}.
+        ///   Looks up a localized string similar to Transformation kind {0} is not supported..
         /// </summary>
         internal static string NotSupportedTransformationKind {
             get {

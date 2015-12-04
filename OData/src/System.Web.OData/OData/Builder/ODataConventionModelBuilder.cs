@@ -459,6 +459,7 @@ namespace System.Web.OData.Builder
                 StructuralTypes.OfType<EntityTypeConfiguration>()
                     .Where(entity => entity.Keys().Any())
                     .Concat(_explicitlyAddedTypes.OfType<EntityTypeConfiguration>())
+                    .Except(misconfiguredEntityTypes)
                     .ToList();
 
             HashSet<EntityTypeConfiguration> visitedEntityType = new HashSet<EntityTypeConfiguration>();

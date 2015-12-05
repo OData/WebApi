@@ -133,19 +133,33 @@ namespace System.Web.OData.Builder
         /// Established the return type of the Action.
         /// <remarks>Used when the return type is a single Primitive or ComplexType.</remarks>
         /// </summary>
-        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
-        public ActionConfiguration Returns<TReturnType>()
+        public ActionConfiguration Returns(Type clrReturnType)
         {
-            Type returnType = typeof(TReturnType);
-            IEdmTypeConfiguration configuration = ModelBuilder.GetTypeConfigurationOrNull(returnType);
+            if (clrReturnType == null)
+            {
+                throw Error.ArgumentNull("clrReturnType");
+            }
+
+            IEdmTypeConfiguration configuration = ModelBuilder.GetTypeConfigurationOrNull(clrReturnType);
 
             if (configuration is EntityTypeConfiguration)
             {
                 throw Error.InvalidOperation(SRResources.ReturnEntityWithoutEntitySet, configuration.FullName);
             }
 
-            ReturnsImplementation<TReturnType>();
+            ReturnsImplementation(clrReturnType);
             return this;
+        }
+
+        /// <summary>
+        /// Established the return type of the Action.
+        /// <remarks>Used when the return type is a single Primitive or ComplexType.</remarks>
+        /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
+        public ActionConfiguration Returns<TReturnType>()
+        {
+            Type returnType = typeof(TReturnType);
+            return this.Returns(returnType);
         }
 
         /// <summary>

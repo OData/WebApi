@@ -119,11 +119,25 @@ namespace System.Web.OData.Builder
         /// Established the return type of the Function.
         /// <remarks>Used when the return type is a single Primitive or ComplexType.</remarks>
         /// </summary>
+        public FunctionConfiguration Returns(Type clrReturnType)
+        {
+            if (clrReturnType == null)
+            {
+                throw Error.ArgumentNull("clrReturnType");
+            }
+
+            ReturnsImplementation(clrReturnType);
+            return this;
+        }
+
+        /// <summary>
+        /// Established the return type of the Function.
+        /// <remarks>Used when the return type is a single Primitive or ComplexType.</remarks>
+        /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
         public FunctionConfiguration Returns<TReturnType>()
         {
-            ReturnsImplementation<TReturnType>();
-            return this;
+            return this.Returns(typeof(TReturnType));
         }
 
         /// <summary>

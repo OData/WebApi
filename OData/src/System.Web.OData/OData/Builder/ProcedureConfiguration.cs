@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Web.Http;
 using System.Web.OData.Formatter;
 
 namespace System.Web.OData.Builder
@@ -205,12 +206,11 @@ namespace System.Web.OData.Builder
         /// <remarks>Used when the return type is a single Primitive or ComplexType.</remarks>
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
-        internal void ReturnsImplementation<TReturnType>()
+        internal void ReturnsImplementation(Type clrReturnType)
         {
-            Type returnType = typeof(TReturnType);
-            IEdmTypeConfiguration configuration = GetProcedureTypeConfiguration(returnType);
+            IEdmTypeConfiguration configuration = GetProcedureTypeConfiguration(clrReturnType);
             ReturnType = configuration;
-            OptionalReturn = EdmLibHelpers.IsNullable(returnType);
+            OptionalReturn = EdmLibHelpers.IsNullable(clrReturnType);
         }
 
         /// <summary>
@@ -252,11 +252,24 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Adds a new non-binding parameter
         /// </summary>  
+        public ParameterConfiguration Parameter(Type clrParameterType, string name)
+        {
+            if (clrParameterType == null)
+            {
+                throw Error.ArgumentNull("clrParameterType");
+            }
+
+            IEdmTypeConfiguration parameterType = GetProcedureTypeConfiguration(clrParameterType);
+            return AddParameter(name, parameterType);
+        }
+
+        /// <summary>
+        /// Adds a new non-binding parameter
+        /// </summary>  
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
         public ParameterConfiguration Parameter<TParameter>(string name)
         {
-            IEdmTypeConfiguration parameterType = GetProcedureTypeConfiguration(typeof(TParameter));
-            return AddParameter(name, parameterType);
+            return this.Parameter(typeof(TParameter), name);
         }
 
         /// <summary>

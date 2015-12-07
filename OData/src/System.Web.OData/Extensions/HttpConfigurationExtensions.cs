@@ -19,7 +19,7 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData.Extensions
 {
     /// <summary>
-    /// Provides extension methods for the <see cref="HttpConfiguration"/> class.
+    /// Provides extension methods for the <see cref="HttpConfiguration"/> class. 
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpConfigurationExtensions
@@ -35,6 +35,10 @@ namespace System.Web.OData.Extensions
         private const string ContinueOnErrorKey = "System.Web.OData.ContinueOnErrorKey";
 
         private const string NullDynamicPropertyKey = "System.Web.OData.NullDynamicPropertyKey";
+
+        private const string SerializeNullCollectionsAsEmptySettingsKey = "System.Web.OData.SerializeNullCollectionsAsEmptySettingsKey";
+
+        private const string DoNotSerializeNullCollectionsSettingsKey = "System.Web.OData.DoNotSerializeNullCollectionsSettingsKey";
 
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
@@ -495,6 +499,80 @@ namespace System.Web.OData.Extensions
                 handler: defaultHandler);
             routes.Add(routeName, route);
             return route;
+        }
+
+        /// <summary>
+        /// If true, null collection properties will be serialized as empty collections.
+        /// This setting will be overridden by SetSerializeNullCollectionsAsEmpty if that is also set.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="serializeAsEmpty">Whether null collection properties should be serialized as empty collections.</param>
+        public static void SetSerializeNullCollectionsAsEmpty(this HttpConfiguration configuration, bool serializeAsEmpty)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            configuration.Properties[SerializeNullCollectionsAsEmptySettingsKey] = serializeAsEmpty;
+        }
+
+        /// <summary>
+        /// If true, null collection properties will be serialized as empty collections.
+        /// This setting will be overridden by SetSerializeNullCollectionsAsEmpty if that is also set.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        public static bool GetSerializeNullCollectionsAsEmpty(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            object serializeAsEmptyObj;
+            if (!configuration.Properties.TryGetValue(SerializeNullCollectionsAsEmptySettingsKey, out serializeAsEmptyObj))
+            {
+                return false;
+            }
+
+            return (bool)serializeAsEmptyObj;
+        }
+
+        /// <summary>
+        /// If true, null collection properties will not be serialized.
+        /// Overrides SetSerializeNullCollectionsAsEmpty if that is also set.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="doNotSerialize">Whether null collection properties should be omitted from serialization.</param>
+        public static void SetDoNotSerializeNullCollections(this HttpConfiguration configuration, bool doNotSerialize)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            configuration.Properties[DoNotSerializeNullCollectionsSettingsKey] = doNotSerialize;
+        }
+
+        /// <summary>
+        /// If true, null collection properties will not be serialized.
+        /// Overrides SetSerializeNullCollectionsAsEmpty if that is also set.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        public static bool GetDoNotSerializeNullCollections(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            object doNotSerializeObj;
+            if (!configuration.Properties.TryGetValue(DoNotSerializeNullCollectionsSettingsKey, out doNotSerializeObj))
+            {
+                return false;
+            }
+
+            return (bool)doNotSerializeObj;
         }
 
         private static string RemoveTrailingSlash(string routePrefix)

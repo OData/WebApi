@@ -4,7 +4,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Runtime.Serialization;
+using System.Web.Http;
 using System.Web.OData.Formatter.Serialization.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -76,9 +78,12 @@ namespace System.Web.OData.Formatter.Serialization
 
             settings.SetContentType(ODataFormat.Json);
 
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataMessageWriter messageWriter = new ODataMessageWriter(message, settings);
             Mock<ODataCollectionSerializer> serializer = new Mock<ODataCollectionSerializer>(new DefaultODataSerializerProvider());
-            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "CollectionName", Model = _model };
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "CollectionName", Model = _model, Request = request };
             IEnumerable enumerable = new object[0];
             ODataCollectionValue collectionValue = new ODataCollectionValue { TypeName = "NS.Name", Items = new[] { 0, 1, 2 } };
 
@@ -114,9 +119,14 @@ namespace System.Web.OData.Formatter.Serialization
             var serializer = new ODataCollectionSerializer(serializerProvider.Object);
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(It.IsAny<IEdmTypeReference>())).Returns<IEdmTypeReference>(null);
 
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            ODataSerializerContext writeContext = new ODataSerializerContext() { Request = request };
+
             // Act and Assert
             Assert.Throws<SerializationException>(
-                () => serializer.CreateODataValue(graph: nullEnumerable, expectedType: _collectionType, writeContext: new ODataSerializerContext()),
+                () => serializer.CreateODataValue(graph: nullEnumerable, expectedType: _collectionType, writeContext: writeContext),
                 "Null collections cannot be serialized.");
         }
 
@@ -128,8 +138,13 @@ namespace System.Web.OData.Formatter.Serialization
             var serializer = new ODataCollectionSerializer(serializerProvider.Object);
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(It.IsAny<IEdmTypeReference>())).Returns<IEdmTypeReference>(null);
 
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            ODataSerializerContext writeContext = new ODataSerializerContext() { Request = request };
+
             Assert.ThrowsArgument(
-                () => serializer.CreateODataValue(graph: nonEnumerable, expectedType: _collectionType, writeContext: new ODataSerializerContext()),
+                () => serializer.CreateODataValue(graph: nonEnumerable, expectedType: _collectionType, writeContext: writeContext),
                 "graph",
                 "The argument must be of type 'IEnumerable'.");
         }
@@ -154,7 +169,10 @@ namespace System.Web.OData.Formatter.Serialization
             ODataCollectionValue oDataCollectionValue = new ODataCollectionValue();
             var collection = new object[0];
             Mock<ODataCollectionSerializer> serializer = new Mock<ODataCollectionSerializer>(new DefaultODataSerializerProvider());
-            ODataSerializerContext writeContext = new ODataSerializerContext();
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            ODataSerializerContext writeContext = new ODataSerializerContext() { Request = request };
             serializer.CallBase = true;
             serializer
                 .Setup(s => s.CreateODataCollectionValue(collection, _edmIntType, writeContext))

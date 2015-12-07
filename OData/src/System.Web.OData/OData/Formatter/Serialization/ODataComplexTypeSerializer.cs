@@ -4,9 +4,11 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -47,8 +49,16 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmTypeReference edmType = writeContext.GetEdmType(graph, type);
             Contract.Assert(edmType != null);
 
-            ODataProperty property = CreateProperty(graph, edmType, writeContext.RootElementName, writeContext);
-            messageWriter.WriteProperty(property);
+            var config = writeContext.Request.GetConfiguration();
+            bool doNotSerializeIfNull = config.GetDoNotSerializeNullCollections();
+
+            bool skipEntireCollectionSerialization = (edmType.Definition.TypeKind == EdmTypeKind.Collection &&
+                                                      graph == null && doNotSerializeIfNull);
+            if (!skipEntireCollectionSerialization)
+            {
+                ODataProperty property = CreateProperty(graph, edmType, writeContext.RootElementName, writeContext);
+                messageWriter.WriteProperty(property);
+            }
         }
 
         /// <inheitdoc />
@@ -113,15 +123,23 @@ namespace System.Web.OData.Formatter.Serialization
                         }
                     }
 
-                    propertyCollection.Add(
-                        propertySerializer.CreateProperty(propertyValue, propertyType, property.Name, writeContext));
+                    var config = writeContext.Request.GetConfiguration();
+                    bool doNotSerializeIfNull = config.GetDoNotSerializeNullCollections();
+
+                    bool skipEntireCollectionSerialization = (propertyType.Definition.TypeKind == EdmTypeKind.Collection &&
+                                                              propertyValue == null && doNotSerializeIfNull);
+                    if (!skipEntireCollectionSerialization)
+                    {
+                        propertyCollection.Add(
+                            propertySerializer.CreateProperty(propertyValue, propertyType, property.Name, writeContext));
+                    }
                 }
             }
 
             // Try to add the dynamic properties if the complex type is open.
             if (complexType.ComplexDefinition().IsOpen)
             {
-                List<ODataProperty> dynamicProperties = 
+                List<ODataProperty> dynamicProperties =
                     AppendDynamicProperties(complexObject, complexType, writeContext, propertyCollection, new string[0]);
 
                 if (dynamicProperties != null)

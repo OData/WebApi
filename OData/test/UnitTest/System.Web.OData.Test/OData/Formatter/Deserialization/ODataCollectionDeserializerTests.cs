@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
+using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Formatter.Serialization.Models;
@@ -182,9 +183,12 @@ namespace System.Web.OData.Formatter.Deserialization
             {
                 ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/") }
             };
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, _model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model);
-            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = _model };
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = _model, Request = request };
             ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = _model };
 
             serializer.WriteObject(addresses, addresses.GetType(), messageWriter, writeContext);
@@ -208,9 +212,12 @@ namespace System.Web.OData.Formatter.Deserialization
             {
                 ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/") }
             };
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, _model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), _model);
-            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = _model };
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = _model, Request = request };
             ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = _model };
 
             serializer.WriteObject(numbers, numbers.GetType(), messageWriter, writeContext);

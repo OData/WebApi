@@ -465,10 +465,20 @@ namespace System.Web.OData.Formatter.Serialization
             List<ODataProperty> properties = new List<ODataProperty>();
             foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
             {
-                ODataProperty property = CreateStructuralProperty(structuralProperty, entityInstanceContext);
-                if (property != null)
+                ODataSerializerContext writeContext = entityInstanceContext.SerializerContext;
+                object propertyValue = entityInstanceContext.GetPropertyValue(structuralProperty.Name);
+
+                var config = writeContext.Request.GetConfiguration();
+                bool doNotSerializeIfNull = config.GetDoNotSerializeNullCollections();
+
+                bool skipEntireCollectionSerialization = (propertyValue == null && structuralProperty.Type.Definition.TypeKind == EdmTypeKind.Collection && doNotSerializeIfNull);
+                if (!skipEntireCollectionSerialization)
                 {
-                    properties.Add(property);
+                    ODataProperty property = CreateStructuralProperty(structuralProperty, entityInstanceContext);
+                    if (property != null)
+                    {
+                        properties.Add(property);
+                    }
                 }
             }
 

@@ -177,7 +177,7 @@ namespace System.Web.OData
         /// </summary>
         /// <param name="propertyName">The name of the property to get.</param>
         /// <returns>The value of the property if present.</returns>
-        internal object GetPropertyValue(string propertyName)
+        public virtual object GetPropertyValue(string propertyName)
         {
             if (EdmObject == null)
             {

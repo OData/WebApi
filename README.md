@@ -24,7 +24,7 @@ cd OData
 build
 ```
 ### Testing
-Each solution contains some test projects. Test projects use xUnit runner nuget package. Open the project, build it, and then test cases should appear in test explorer. Run all the tests in the test explorer. For running end-to-end tests you must open the solution as *Administrator*. More detail at [this](http://odata.github.io/WebApi/#09-01-unittest-e2etest).
+Each solution contains some test projects. Test projects use xUnit runner nuget package. Open the project, build it, and then test cases should appear in test explorer. If not, this is because the assemblies are delay signed and you're missing the private key so xunit will not load them in Visual Studio. To fix, un-check "Sign the assembly" in all project properties and remove the "PublicKey=" portion of all InternalsVisibleTo assembly attributes (do not check in this temporary workaround). Run all the tests in the test explorer. For running end-to-end tests you must open the solution as *Administrator*. More detail at [this](http://odata.github.io/WebApi/#09-01-unittest-e2etest).
 
 ### Nightly builds
 1.	In your NuGet Package Manager settings add the following package source:

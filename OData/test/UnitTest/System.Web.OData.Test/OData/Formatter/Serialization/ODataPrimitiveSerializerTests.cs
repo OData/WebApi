@@ -112,7 +112,10 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_Calls_CreateODataPrimitiveValue()
         {
-            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = EdmCoreModel.Instance };
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = EdmCoreModel.Instance, Request = request };
             Mock<ODataPrimitiveSerializer> serializer = new Mock<ODataPrimitiveSerializer>();
             serializer.CallBase = true;
             serializer.Setup(s => s.CreateODataPrimitiveValue(
@@ -255,10 +258,14 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataSerializerContext writecontext = new ODataSerializerContext()
             {
                 RootElementName = "PropertyName",
-                Model = EdmCoreModel.Instance
+                Model = EdmCoreModel.Instance,
+                Request = request
             };
 
             ODataMessageWriterSettings settings = new ODataMessageWriterSettings

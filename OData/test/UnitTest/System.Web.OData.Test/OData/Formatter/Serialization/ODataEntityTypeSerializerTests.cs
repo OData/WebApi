@@ -77,8 +77,11 @@ namespace System.Web.OData.Formatter.Serialization
             _specialOrderType = _model.GetEdmTypeReference(typeof(SpecialOrder)).AsEntity();
             _serializer = new ODataEntityTypeSerializer(_serializerProvider);
             _path = new ODataPath(new EntitySetPathSegment(_customerSet));
-            _writeContext = new ODataSerializerContext() { NavigationSource = _customerSet, Model = _model, Path = _path };
-            _entityInstanceContext = new EntityInstanceContext(_writeContext, _customerSet.EntityType().AsReference(), _customer);
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            _writeContext = new ODataSerializerContext() { NavigationSource = _customerSet, Model = _model, Path = _path, Request = request };
+            _entityInstanceContext = new EntityInstanceContext(_writeContext, _customerSet.EntityType().AsReference(), _customer) { Request = request };
         }
 
         [Fact]
@@ -609,20 +612,27 @@ namespace System.Web.OData.Formatter.Serialization
                 SelectedStructuralProperties = { new Mock<IEdmStructuralProperty>().Object, new Mock<IEdmStructuralProperty>().Object }
             };
             ODataProperty[] properties = new ODataProperty[] { new ODataProperty(), new ODataProperty() };
+
+            Mock<EntityInstanceContext> context = new Mock<EntityInstanceContext>(_writeContext, _customerSet.EntityType().AsReference(), _customer);
+            context.Object.Request = _entityInstanceContext.Request;
+            context.CallBase = true;
+            context
+                .Setup(s => s.GetPropertyValue(null))
+                .Returns(string.Empty);
+
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
             serializer.CallBase = true;
-
             serializer
-                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), _entityInstanceContext))
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), context.Object))
                 .Returns(properties[0])
                 .Verifiable();
             serializer
-                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), _entityInstanceContext))
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), context.Object))
                 .Returns(properties[1])
                 .Verifiable();
 
             // Act
-            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, _entityInstanceContext);
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, context.Object);
 
             // Assert
             serializer.Verify();
@@ -638,18 +648,26 @@ namespace System.Web.OData.Formatter.Serialization
                 SelectedStructuralProperties = { new Mock<IEdmStructuralProperty>().Object, new Mock<IEdmStructuralProperty>().Object }
             };
             ODataProperty[] properties = new[] { new ODataProperty(), new ODataProperty() };
+
+            Mock<EntityInstanceContext> context = new Mock<EntityInstanceContext>(_writeContext, _customerSet.EntityType().AsReference(), _customer);
+            context.Object.Request = _entityInstanceContext.Request;
+            context.CallBase = true;
+            context
+                .Setup(s => s.GetPropertyValue(null))
+                .Returns(string.Empty);
+            
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
             serializer.CallBase = true;
 
             serializer
-                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), _entityInstanceContext))
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), context.Object))
                 .Returns(properties[0]);
             serializer
-                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), _entityInstanceContext))
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), context.Object))
                 .Returns(properties[1]);
 
             // Act
-            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, _entityInstanceContext);
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, context.Object);
 
             // Assert
             Assert.Null(entry.ETag);
@@ -668,7 +686,12 @@ namespace System.Web.OData.Formatter.Serialization
             };
 
             _writeContext.NavigationSource = orderSet;
-            _entityInstanceContext = new EntityInstanceContext(_writeContext, orderSet.EntityType().AsReference(), order);
+            Mock<EntityInstanceContext> context = new Mock<EntityInstanceContext>(_writeContext, orderSet.EntityType().AsReference(), order);
+            context.Object.Request = _entityInstanceContext.Request;
+            context.CallBase = true;
+            context
+                .Setup(s => s.GetPropertyValue(null))
+                .Returns(string.Empty);
 
             SelectExpandNode selectExpandNode = new SelectExpandNode
             {
@@ -679,18 +702,18 @@ namespace System.Web.OData.Formatter.Serialization
             serializer.CallBase = true;
 
             serializer
-                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), _entityInstanceContext))
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), context.Object))
                 .Returns(properties[0]);
             serializer
-                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), _entityInstanceContext))
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), context.Object))
                 .Returns(properties[1]);
 
             MockHttpRequestMessage request = new MockHttpRequestMessage();
             request.SetConfiguration(new HttpConfiguration());
-            _entityInstanceContext.Request = request;
+            context.Object.Request = request;
 
             // Act
-            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, _entityInstanceContext);
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, context.Object);
 
             // Assert
             Assert.Null(entry.ETag);
@@ -708,13 +731,21 @@ namespace System.Web.OData.Formatter.Serialization
                 SelectedStructuralProperties = { new Mock<IEdmStructuralProperty>().Object, mockConcurrencyProperty.Object }
             };
             ODataProperty[] properties = new[] { new ODataProperty(), new ODataProperty() };
+           
+            Mock<EntityInstanceContext> context = new Mock<EntityInstanceContext>(_writeContext, _customerSet.EntityType().AsReference(), _customer);
+            context.Object.Request = _entityInstanceContext.Request;
+            context.CallBase = true;
+            context
+                .Setup(s => s.GetPropertyValue(It.IsAny<string>()))
+                .Returns(string.Empty);
+
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
             serializer.CallBase = true;
             serializer
-                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), _entityInstanceContext))
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), context.Object))
                 .Returns(properties[0]);
             serializer
-                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), _entityInstanceContext))
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), context.Object))
                 .Returns(properties[1]);
 
             MockHttpRequestMessage request = new MockHttpRequestMessage();
@@ -725,10 +756,10 @@ namespace System.Web.OData.Formatter.Serialization
             mockETagHandler.Setup(e => e.CreateETag(It.IsAny<IDictionary<string, object>>())).Returns(etagHeaderValue);
             configuration.SetETagHandler(mockETagHandler.Object);
             request.SetConfiguration(configuration);
-            _entityInstanceContext.Request = request;
+            context.Object.Request = request;
 
             // Act
-            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, _entityInstanceContext);
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, context.Object);
 
             // Assert
             Assert.Equal(etagHeaderValue.ToString(), entry.ETag);
@@ -742,15 +773,23 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 SelectedStructuralProperties = { new Mock<IEdmStructuralProperty>().Object }
             };
+
+            Mock<EntityInstanceContext> context = new Mock<EntityInstanceContext>(_writeContext, _customerSet.EntityType().AsReference(), _customer);
+            context.Object.Request = _entityInstanceContext.Request;
+            context.CallBase = true;
+            context
+                .Setup(s => s.GetPropertyValue(null))
+                .Returns(string.Empty);
+
             Mock<ODataEntityTypeSerializer> serializer = new Mock<ODataEntityTypeSerializer>(_serializerProvider);
             serializer.CallBase = true;
 
             serializer
-                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), _entityInstanceContext))
+                .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(0), context.Object))
                 .Returns<ODataProperty>(null);
 
             // Act
-            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, _entityInstanceContext);
+            ODataEntry entry = serializer.Object.CreateEntry(selectExpandNode, context.Object);
 
             // Assert
             serializer.Verify();
@@ -810,10 +849,14 @@ namespace System.Web.OData.Formatter.Serialization
             ODataEntityTypeSerializer serializer = new ODataEntityTypeSerializer(serializerProvider);
 
             SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataSerializerContext writeContext = new ODataSerializerContext
             {
                 Model = model,
-                Path = new ODataPath(new EntitySetPathSegment(customers))
+                Path = new ODataPath(new EntitySetPathSegment(customers)),
+                Request = request
             };
 
             SimpleOpenCustomer customer = new SimpleOpenCustomer()

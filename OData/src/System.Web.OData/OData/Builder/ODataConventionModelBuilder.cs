@@ -726,6 +726,18 @@ namespace System.Web.OData.Builder
                         AddEnumType(elementUnderlyingTypeOrSelf);
                     }
                 }
+                else
+                {
+                    Type elementType;
+                    if (property.PropertyType.IsCollection(out elementType))
+                    {
+                        Type elementUnderlyingTypeOrSelf = TypeHelper.GetUnderlyingTypeOrSelf(elementType);
+                        if (elementUnderlyingTypeOrSelf.IsEnum)
+                        {
+                            AddEnumType(elementUnderlyingTypeOrSelf);
+                        }
+                    }
+                }
 
                 addedEdmProperty = type.AddCollectionProperty(property);
             }

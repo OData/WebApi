@@ -51,7 +51,8 @@ namespace System.Web.OData.Formatter
         }
 
         [Theory]
-        // -- "NormalPass_FromEntity" -- ensure existing behavior has not changed when serializing properties off the base entity
+        // -- "NormalPass_FromEntity" -- ensure existing behavior has not changed when serializing 
+        //                               properties off the base entity
         [InlineData("Array", NullCollectionsTestMode.NormalPass_FromEntity)]
         [InlineData("IEnumerable", NullCollectionsTestMode.NormalPass_FromEntity)]
         [InlineData("ICollection", NullCollectionsTestMode.NormalPass_FromEntity)]
@@ -61,7 +62,8 @@ namespace System.Web.OData.Formatter
         [InlineData("CustomCollection", NullCollectionsTestMode.NormalPass_FromEntity)]
         [InlineData("NullableColors", NullCollectionsTestMode.NormalPass_FromEntity)]
         [InlineData("ComplexCollection", NullCollectionsTestMode.NormalPass_FromEntity)]
-        // -- "NormalFail_FromEntity" -- ensure existing behavior has not changed when serializing properties off the base entity
+        // -- "NormalFail_FromEntity" -- ensure existing behavior has not changed when serializing 
+        //                               properties off the base entity
         [InlineData("Array", NullCollectionsTestMode.NormalFail_FromEntity)]
         [InlineData("IEnumerable", NullCollectionsTestMode.NormalFail_FromEntity)]
         [InlineData("ICollection", NullCollectionsTestMode.NormalFail_FromEntity)]
@@ -71,7 +73,8 @@ namespace System.Web.OData.Formatter
         [InlineData("CustomCollection", NullCollectionsTestMode.NormalFail_FromEntity)]
         [InlineData("NullableColors", NullCollectionsTestMode.NormalFail_FromEntity)]
         [InlineData("ComplexCollection", NullCollectionsTestMode.NormalFail_FromEntity)]
-        // -- "DoNotSerialize_FromEntity" -- ensure null collections are left out of serialization when setting is enabled when serializing properties off the base entity
+        // -- "DoNotSerialize_FromEntity" -- ensure null collections are left out of serialization when 
+        //                                   setting is enabled when serializing properties off the base entity
         [InlineData("Array", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
         [InlineData("IEnumerable", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
         [InlineData("ICollection", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
@@ -81,7 +84,8 @@ namespace System.Web.OData.Formatter
         [InlineData("CustomCollection", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
         [InlineData("NullableColors", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
         [InlineData("ComplexCollection", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
-        // -- "SerializeAsEmpty_FromEntity" -- ensure null collections are serialized as if they were empty collections when serializing properties off the base entity
+        // -- "SerializeAsEmpty_FromEntity" -- ensure null collections are serialized as if they were 
+        //                                     empty collections when serializing properties off the base entity
         [InlineData("Array", NullCollectionsTestMode.SerializeAsEmpty_FromEntity)]
         [InlineData("IEnumerable", NullCollectionsTestMode.SerializeAsEmpty_FromEntity)]
         [InlineData("ICollection", NullCollectionsTestMode.SerializeAsEmpty_FromEntity)]
@@ -91,7 +95,8 @@ namespace System.Web.OData.Formatter
         [InlineData("CustomCollection", NullCollectionsTestMode.SerializeAsEmpty_FromEntity)]
         [InlineData("NullableColors", NullCollectionsTestMode.SerializeAsEmpty_FromEntity)]
         [InlineData("ComplexCollection", NullCollectionsTestMode.SerializeAsEmpty_FromEntity)]
-        // -- "NormalPass_FromParentComplex" -- ensure existing behavior has not changed when serializing properties off a complex attached to the entity
+        // -- "NormalPass_FromParentComplex" -- ensure existing behavior has not changed when serializing 
+        //                                      properties off a complex attached to the entity
         [InlineData("Array", NullCollectionsTestMode.NormalPass_FromParentComplex)]
         [InlineData("IEnumerable", NullCollectionsTestMode.NormalPass_FromParentComplex)]
         [InlineData("ICollection", NullCollectionsTestMode.NormalPass_FromParentComplex)]
@@ -101,7 +106,8 @@ namespace System.Web.OData.Formatter
         [InlineData("CustomCollection", NullCollectionsTestMode.NormalPass_FromParentComplex)]
         [InlineData("NullableColors", NullCollectionsTestMode.NormalPass_FromParentComplex)]
         [InlineData("ComplexCollection", NullCollectionsTestMode.NormalPass_FromParentComplex)]
-        // -- "NormalFail_FromParentComplex" -- ensure existing behavior has not changed when serializing properties off a complex attached to the entity
+        // -- "NormalFail_FromParentComplex" -- ensure existing behavior has not changed when serializing 
+        //                                      properties off a complex attached to the entity
         [InlineData("Array", NullCollectionsTestMode.NormalFail_FromParentComplex)]
         [InlineData("IEnumerable", NullCollectionsTestMode.NormalFail_FromParentComplex)]
         [InlineData("ICollection", NullCollectionsTestMode.NormalFail_FromParentComplex)]
@@ -111,7 +117,9 @@ namespace System.Web.OData.Formatter
         [InlineData("CustomCollection", NullCollectionsTestMode.NormalFail_FromParentComplex)]
         [InlineData("NullableColors", NullCollectionsTestMode.NormalFail_FromParentComplex)]
         [InlineData("ComplexCollection", NullCollectionsTestMode.NormalFail_FromParentComplex)]
-        // -- "DoNotSerialize_FromParentComplex" -- ensure null collections are left out of serialization when setting is enabled when serializing properties off a complex attached to the entity
+        // -- "DoNotSerialize_FromParentComplex" -- ensure null collections are left out of serialization 
+        //                                          when setting is enabled when serializing properties off a complex 
+        //                                          attached to the entity
         [InlineData("Array", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
         [InlineData("IEnumerable", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
         [InlineData("ICollection", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
@@ -121,7 +129,9 @@ namespace System.Web.OData.Formatter
         [InlineData("CustomCollection", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
         [InlineData("NullableColors", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
         [InlineData("ComplexCollection", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
-        // -- "SerializeAsEmpty_FromParentComplex" -- ensure null collections are serialized as if they were empty collections when serializing properties off a complex attached to the entity
+        // -- "SerializeAsEmpty_FromParentComplex" -- ensure null collections are serialized as if they were empty 
+        //                                            collections when serializing properties off a complex attached 
+        //                                            to the entity
         [InlineData("Array", NullCollectionsTestMode.SerializeAsEmpty_FromParentComplex)]
         [InlineData("IEnumerable", NullCollectionsTestMode.SerializeAsEmpty_FromParentComplex)]
         [InlineData("ICollection", NullCollectionsTestMode.SerializeAsEmpty_FromParentComplex)]
@@ -133,7 +143,7 @@ namespace System.Web.OData.Formatter
         [InlineData("ComplexCollection", NullCollectionsTestMode.SerializeAsEmpty_FromParentComplex)]
         public void NullCollectionProperties_Deserialize(string propertyName, NullCollectionsTestMode testMode)
         {
-            // setup
+            // Arrange
             NullCollectionsTestsModel testObject = new NullCollectionsTestsModel();
             switch (testMode)
             {
@@ -153,20 +163,23 @@ namespace System.Web.OData.Formatter
                 case NullCollectionsTestMode.NormalPass_FromParentComplex:
                     break;
                 case NullCollectionsTestMode.NormalFail_FromParentComplex:
-                    testObject.ParentComplex.GetType().GetProperty(propertyName).SetValue(testObject.ParentComplex, null);
+                    testObject.ParentComplex.GetType().GetProperty(propertyName)
+                        .SetValue(testObject.ParentComplex, null);
                     break;
                 case NullCollectionsTestMode.DoNotSerialize_FromParentComplex:
-                    testObject.ParentComplex.GetType().GetProperty(propertyName).SetValue(testObject.ParentComplex, null);
+                    testObject.ParentComplex.GetType().GetProperty(propertyName)
+                        .SetValue(testObject.ParentComplex, null);
                     _config.SetDoNotSerializeNullCollections(true);
                     break;
                 case NullCollectionsTestMode.SerializeAsEmpty_FromParentComplex:
-                    testObject.ParentComplex.GetType().GetProperty(propertyName).SetValue(testObject.ParentComplex, null);
+                    testObject.ParentComplex.GetType().GetProperty(propertyName)
+                        .SetValue(testObject.ParentComplex, null);
                     _config.SetSerializeNullCollectionsAsEmpty(true);
                     break;
             }
             NullCollectionsTestsController.TestObject = testObject;
 
-            // execute
+            // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/NullCollectionsTests/");
             HttpResponseMessage response = null;
             try
@@ -176,7 +189,7 @@ namespace System.Web.OData.Formatter
             }
             catch (Exception e)
             {
-                // validate
+                // Assert
                 if (testMode == NullCollectionsTestMode.NormalFail_FromEntity ||
                     testMode == NullCollectionsTestMode.NormalFail_FromParentComplex)
                 {
@@ -187,16 +200,18 @@ namespace System.Web.OData.Formatter
                     throw;
             }
 
-            // validate
+            // Assert
             string responseJson = response.Content.ReadAsStringAsync().Result;
             dynamic result = JToken.Parse(responseJson);
             switch (testMode)
             {
                 case NullCollectionsTestMode.NormalPass_FromEntity:
                     if (propertyName == "NullableColors")
-                        Assert.Equal(new[] { Color.Red.ToString() }, (IEnumerable<string>)result[propertyName].Values<string>());
+                        Assert.Equal(new[] { Color.Red.ToString() }, (IEnumerable<string>)result[propertyName]
+                            .Values<string>());
                     else if (propertyName == "ComplexCollection")
-                        Assert.Equal(new[] { 42 }, ((IEnumerable<JObject>)result[propertyName].Values<JObject>()).Select(v => (int)v.Property("A")));
+                        Assert.Equal(new[] { 42 }, ((IEnumerable<JObject>)result[propertyName].Values<JObject>())
+                            .Select(v => (int)v.Property("A")));
                     else
                         Assert.Equal(new[] { 42 }, (IEnumerable<int>)result[propertyName].Values<int>());
                     break;
@@ -211,9 +226,11 @@ namespace System.Web.OData.Formatter
                 case NullCollectionsTestMode.NormalPass_FromParentComplex:
                     var parent = result["ParentComplex"];
                     if (propertyName == "NullableColors")
-                        Assert.Equal(new[] { Color.Red.ToString() }, (IEnumerable<string>)parent[propertyName].Values<string>());
+                        Assert.Equal(new[] { Color.Red.ToString() }, (IEnumerable<string>)parent[propertyName]
+                            .Values<string>());
                     else if (propertyName == "ComplexCollection")
-                        Assert.Equal(new[] { 42 }, ((IEnumerable<JObject>)parent[propertyName].Values<JObject>()).Select(v => (int)v.Property("A")));
+                        Assert.Equal(new[] { 42 }, ((IEnumerable<JObject>)parent[propertyName].Values<JObject>())
+                            .Select(v => (int)v.Property("A")));
                     else
                         Assert.Equal(new[] { 42 }, (IEnumerable<int>)parent[propertyName].Values<int>());
                     break;
@@ -280,10 +297,6 @@ namespace System.Web.OData.Formatter
 
         public NullComplexParent ParentComplex { get; set; }
 
-        //public Vehicle[] Vehicles { get; set; }
-
-        //public Vehicle Vehicle { get; set; }
-
         public CustomCollection_NullCollectionsTestsModel<int> CustomCollection { get; set; }
 
         public IEnumerable<Color?> NullableColors { get; set; }
@@ -325,10 +338,6 @@ namespace System.Web.OData.Formatter
         public List<int> List { get; set; }
 
         public IEnumerable<NullComplexChild> ComplexCollection { get; set; }
-
-        //public Vehicle[] Vehicles { get; set; }
-
-        //public Vehicle Vehicle { get; set; }
 
         public CustomCollection_NullCollectionsTestsModel<int> CustomCollection { get; set; }
 

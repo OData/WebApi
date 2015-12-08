@@ -506,8 +506,11 @@ namespace System.Web.OData.Extensions
         /// This setting will be overridden by SetSerializeNullCollectionsAsEmpty if that is also set.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        /// <param name="serializeAsEmpty">Whether null collection properties should be serialized as empty collections.</param>
-        public static void SetSerializeNullCollectionsAsEmpty(this HttpConfiguration configuration, bool serializeAsEmpty)
+        /// <param name="serializeAsEmpty">Whether null collection properties should be serialized as empty 
+        /// collections.</param>
+        public static void SetSerializeNullCollectionsAsEmpty(
+            this HttpConfiguration configuration, 
+            bool serializeAsEmpty)
         {
             if (configuration == null)
             {
@@ -522,7 +525,7 @@ namespace System.Web.OData.Extensions
         /// This setting will be overridden by SetSerializeNullCollectionsAsEmpty if that is also set.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        public static bool GetSerializeNullCollectionsAsEmpty(this HttpConfiguration configuration)
+        internal static bool GetSerializeNullCollectionsAsEmpty(this HttpConfiguration configuration)
         {
             if (configuration == null)
             {
@@ -530,7 +533,9 @@ namespace System.Web.OData.Extensions
             }
 
             object serializeAsEmptyObj;
-            if (!configuration.Properties.TryGetValue(SerializeNullCollectionsAsEmptySettingsKey, out serializeAsEmptyObj))
+            if (!configuration.Properties.TryGetValue(
+                SerializeNullCollectionsAsEmptySettingsKey, 
+                out serializeAsEmptyObj))
             {
                 return false;
             }
@@ -543,8 +548,11 @@ namespace System.Web.OData.Extensions
         /// Overrides SetSerializeNullCollectionsAsEmpty if that is also set.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        /// <param name="doNotSerialize">Whether null collection properties should be omitted from serialization.</param>
-        public static void SetDoNotSerializeNullCollections(this HttpConfiguration configuration, bool doNotSerialize)
+        /// <param name="doNotSerialize">Whether null collection properties should be omitted from serialization.
+        /// </param>
+        public static void SetDoNotSerializeNullCollections(
+            this HttpConfiguration configuration, 
+            bool doNotSerialize)
         {
             if (configuration == null)
             {
@@ -559,7 +567,7 @@ namespace System.Web.OData.Extensions
         /// Overrides SetSerializeNullCollectionsAsEmpty if that is also set.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        public static bool GetDoNotSerializeNullCollections(this HttpConfiguration configuration)
+        internal static bool GetDoNotSerializeNullCollections(this HttpConfiguration configuration)
         {
             if (configuration == null)
             {

@@ -139,7 +139,7 @@ namespace System.Web.OData.Formatter.Serialization
             // Try to add the dynamic properties if the complex type is open.
             if (complexType.ComplexDefinition().IsOpen)
             {
-                List<ODataProperty> dynamicProperties =
+                List<ODataProperty> dynamicProperties = 
                     AppendDynamicProperties(complexObject, complexType, writeContext, propertyCollection, new string[0]);
 
                 if (dynamicProperties != null)

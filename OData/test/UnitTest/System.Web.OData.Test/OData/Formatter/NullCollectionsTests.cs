@@ -133,7 +133,7 @@ namespace System.Web.OData.Formatter
         [InlineData("ComplexCollection", NullCollectionsTestMode.SerializeAsEmpty_FromParentComplex)]
         public void NullCollectionProperties_Deserialize(string propertyName, NullCollectionsTestMode testMode)
         {
-            // Arrange
+            // setup
             NullCollectionsTestsModel testObject = new NullCollectionsTestsModel();
             switch (testMode)
             {
@@ -166,7 +166,7 @@ namespace System.Web.OData.Formatter
             }
             NullCollectionsTestsController.TestObject = testObject;
 
-            // Act
+            // execute
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/NullCollectionsTests/");
             HttpResponseMessage response = null;
             try
@@ -176,7 +176,7 @@ namespace System.Web.OData.Formatter
             }
             catch (Exception e)
             {
-                // Assert
+                // validate
                 if (testMode == NullCollectionsTestMode.NormalFail_FromEntity ||
                     testMode == NullCollectionsTestMode.NormalFail_FromParentComplex)
                 {
@@ -187,7 +187,7 @@ namespace System.Web.OData.Formatter
                     throw;
             }
 
-            // Assert
+            // validate
             string responseJson = response.Content.ReadAsStringAsync().Result;
             dynamic result = JToken.Parse(responseJson);
             switch (testMode)
@@ -280,6 +280,10 @@ namespace System.Web.OData.Formatter
 
         public NullComplexParent ParentComplex { get; set; }
 
+        //public Vehicle[] Vehicles { get; set; }
+
+        //public Vehicle Vehicle { get; set; }
+
         public CustomCollection_NullCollectionsTestsModel<int> CustomCollection { get; set; }
 
         public IEnumerable<Color?> NullableColors { get; set; }
@@ -321,6 +325,10 @@ namespace System.Web.OData.Formatter
         public List<int> List { get; set; }
 
         public IEnumerable<NullComplexChild> ComplexCollection { get; set; }
+
+        //public Vehicle[] Vehicles { get; set; }
+
+        //public Vehicle Vehicle { get; set; }
 
         public CustomCollection_NullCollectionsTestsModel<int> CustomCollection { get; set; }
 

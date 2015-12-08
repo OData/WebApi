@@ -522,7 +522,7 @@ namespace System.Web.OData.Extensions
         /// This setting will be overridden by SetSerializeNullCollectionsAsEmpty if that is also set.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        public static bool GetSerializeNullCollectionsAsEmpty(this HttpConfiguration configuration)
+        internal static bool GetSerializeNullCollectionsAsEmpty(this HttpConfiguration configuration)
         {
             if (configuration == null)
             {
@@ -559,7 +559,7 @@ namespace System.Web.OData.Extensions
         /// Overrides SetSerializeNullCollectionsAsEmpty if that is also set.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        public static bool GetDoNotSerializeNullCollections(this HttpConfiguration configuration)
+        internal static bool GetDoNotSerializeNullCollections(this HttpConfiguration configuration)
         {
             if (configuration == null)
             {
@@ -574,6 +574,8 @@ namespace System.Web.OData.Extensions
 
             return (bool)doNotSerializeObj;
         }
+
+        internal static bool 
 
         private static string RemoveTrailingSlash(string routePrefix)
         {

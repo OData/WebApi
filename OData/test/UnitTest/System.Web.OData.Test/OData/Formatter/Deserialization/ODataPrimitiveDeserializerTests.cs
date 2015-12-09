@@ -138,9 +138,12 @@ namespace System.Web.OData.Formatter.Deserialization
             };
             settings.SetContentType(ODataFormat.Json);
 
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
-            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model, Request = request };
             ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model };
 
             Type type = obj == null ? typeof(int) : obj.GetType();
@@ -169,9 +172,12 @@ namespace System.Web.OData.Formatter.Deserialization
             };
             settings.SetContentType(ODataFormat.Json);
 
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
-            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model, Request = request };
             ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model };
 
             Type type = obj == null ? typeof(int) : expected.GetType();

@@ -36,7 +36,8 @@ namespace System.Web.OData.Formatter.Deserialization
                 Url = new UrlHelper(request),
                 Path = request.ODataProperties().Path,
                 Model = model,
-                NavigationSource = singleton
+                NavigationSource = singleton,
+                Request = request
             };
 
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();

@@ -101,9 +101,12 @@ namespace System.Web.OData.Formatter.Serialization
             };
             settings.SetContentType(ODataFormat.Json);
 
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataMessageWriter messageWriter = new ODataMessageWriter(message, settings);
             Mock<ODataComplexTypeSerializer> serializer = new Mock<ODataComplexTypeSerializer>(new DefaultODataSerializerProvider());
-            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "ComplexPropertyName", Model = _model };
+            ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "ComplexPropertyName", Model = _model, Request = request };
             object graph = new object();
             ODataComplexValue complexValue = new ODataComplexValue
             {
@@ -165,7 +168,11 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void CreateODataComplexValue_WritesAllDeclaredProperties()
         {
-            var odataValue = _serializer.CreateODataComplexValue(_address, _addressTypeRef, new ODataSerializerContext { Model = _model });
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            ODataSerializerContext writeContext = new ODataSerializerContext { Model = _model, Request = request };
+            var odataValue = _serializer.CreateODataComplexValue(_address, _addressTypeRef, writeContext);
 
             ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
 
@@ -191,7 +198,11 @@ namespace System.Web.OData.Formatter.Serialization
             };
 
             // Act
-            var odataValue = _serializer.CreateODataComplexValue(location, _locationTypeRef, new ODataSerializerContext { Model = _model });
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            ODataSerializerContext writeContext = new ODataSerializerContext { Model = _model, Request = request };
+            var odataValue = _serializer.CreateODataComplexValue(location, _locationTypeRef, writeContext);
             ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
 
             // Assert
@@ -235,7 +246,11 @@ namespace System.Web.OData.Formatter.Serialization
             };
 
             // Act
-            var odataValue = _serializer.CreateODataComplexValue(location, _locationTypeRef, new ODataSerializerContext { Model = _model });
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            ODataSerializerContext writeContext = new ODataSerializerContext { Model = _model, Request = request };
+            var odataValue = _serializer.CreateODataComplexValue(location, _locationTypeRef, writeContext);
             ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
 
             // Assert
@@ -272,7 +287,11 @@ namespace System.Web.OData.Formatter.Serialization
             };
 
             // Act
-            var odataValue = _serializer.CreateODataComplexValue(location, _locationTypeRef, new ODataSerializerContext { Model = _model });
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            ODataSerializerContext writeContext = new ODataSerializerContext { Model = _model, Request = request };
+            var odataValue = _serializer.CreateODataComplexValue(location, _locationTypeRef, writeContext);
             ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
 
             // Assert
@@ -305,11 +324,15 @@ namespace System.Web.OData.Formatter.Serialization
 
             IEdmComplexTypeReference addressTypeRef = addressType.ToEdmTypeReference(isNullable: false).AsComplex();
 
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider);
             ODataSerializerContext context = new ODataSerializerContext
             {
-                Model = model
+                Model = model,
+                Request = request
             };
 
             SimpleOpenAddress address = new SimpleOpenAddress()
@@ -376,11 +399,15 @@ namespace System.Web.OData.Formatter.Serialization
 
             IEdmComplexTypeReference addressTypeRef = addressType.ToEdmTypeReference(isNullable: false).AsComplex();
 
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider);
             ODataSerializerContext context = new ODataSerializerContext
             {
-                Model = model
+                Model = model,
+                Request = request
             };
 
             SimpleOpenAddress topAddress = new SimpleOpenAddress()
@@ -464,11 +491,15 @@ namespace System.Web.OData.Formatter.Serialization
 
             IEdmComplexTypeReference addressTypeRef = addressType.ToEdmTypeReference(isNullable: false).AsComplex();
 
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider);
             ODataSerializerContext context = new ODataSerializerContext
             {
-                Model = model
+                Model = model,
+                Request = request
             };
 
             SimpleOpenAddress address = new SimpleOpenAddress()
@@ -515,11 +546,15 @@ namespace System.Web.OData.Formatter.Serialization
 
             IEdmComplexTypeReference addressTypeRef = addressType.ToEdmTypeReference(isNullable: false).AsComplex();
 
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider);
             ODataSerializerContext context = new ODataSerializerContext
             {
-                Model = model
+                Model = model,
+                Request = request
             };
 
             SimpleOpenAddress address = new SimpleOpenAddress()
@@ -627,11 +662,15 @@ namespace System.Web.OData.Formatter.Serialization
 
             IEdmComplexTypeReference addressTypeRef = addressType.ToEdmTypeReference(isNullable: false).AsComplex();
 
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider);
             ODataSerializerContext context = new ODataSerializerContext
             {
-                Model = model
+                Model = model,
+                Request = request
             };
 
             Address address = new CnAddress()
@@ -697,7 +736,10 @@ namespace System.Web.OData.Formatter.Serialization
             complexEdmType.AddStructuralProperty("Property", EdmPrimitiveTypeKind.Int32);
             IEdmComplexTypeReference edmTypeReference = new EdmComplexTypeReference(complexEdmType, isNullable: false);
 
-            ODataSerializerContext context = new ODataSerializerContext();
+            HttpRequestMessage request = new HttpRequestMessage();
+            var config = new HttpConfiguration();
+            request.SetConfiguration(config);
+            ODataSerializerContext context = new ODataSerializerContext() { Request = request };
             TypedEdmComplexObject edmObject = new TypedEdmComplexObject(new { Property = 42 }, edmTypeReference, context.Model);
             ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(new DefaultODataSerializerProvider());
 

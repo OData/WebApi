@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Extensions;
@@ -52,13 +53,17 @@ namespace System.Web.OData.Formatter.Serialization
         public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType,
             ODataSerializerContext writeContext)
         {
-            if (graph == null)
+            var config = writeContext.Request.GetConfiguration();
+            bool doNotSerializeIfNull = config.GetDoNotSerializeNullCollections();
+            bool serializeAsEmptyIfNull = config.GetSerializeNullCollectionsAsEmpty();
+
+            if (graph == null && !(doNotSerializeIfNull || serializeAsEmptyIfNull))
             {
                 throw new SerializationException(Error.Format(SRResources.NullCollectionsCannotBeSerialized));
             }
 
             IEnumerable enumerable = graph as IEnumerable;
-            if (enumerable == null)
+            if (enumerable == null && !(doNotSerializeIfNull || serializeAsEmptyIfNull))
             {
                 throw Error.Argument("graph", SRResources.ArgumentMustBeOfType, typeof(IEnumerable).Name);
             }
@@ -69,6 +74,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             IEdmTypeReference elementType = GetElementType(expectedType);
 
+            // returns empty list if enumerable is null
             return CreateODataCollectionValue(enumerable, elementType, writeContext);
         }
 
@@ -102,18 +108,32 @@ namespace System.Web.OData.Formatter.Serialization
                 }
             }
 
-            writer.WriteStart(collectionStart);
+            var config = writeContext.Request.GetConfiguration();
+            bool doNotSerializeIfNull = config.GetDoNotSerializeNullCollections();
+            bool serializeAsEmptyIfNull = config.GetSerializeNullCollectionsAsEmpty();
 
-            ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
-            if (collectionValue != null)
+            bool skipEntireCollectionSerialization = (collectionType.Definition.TypeKind == EdmTypeKind.Collection &&
+                                                      graph == null && doNotSerializeIfNull);
+            if (!skipEntireCollectionSerialization)
             {
-                foreach (object item in collectionValue.Items)
-                {
-                    writer.WriteItem(item);
-                }
-            }
+                writer.WriteStart(collectionStart);
 
-            writer.WriteEnd();
+                bool skipCollectionContentSerialization = (collectionType.Definition.TypeKind == EdmTypeKind.Collection &&
+                                                           graph == null && serializeAsEmptyIfNull);
+                if (!skipCollectionContentSerialization)
+                {
+                    ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
+                    if (collectionValue != null)
+                    {
+                        foreach (object item in collectionValue.Items)
+                        {
+                            writer.WriteItem(item);
+                        }
+                    }
+                }
+
+                writer.WriteEnd();
+            }
         }
 
         /// <summary>

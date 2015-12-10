@@ -170,6 +170,12 @@ namespace ODataSample.Web.Models
             int count = _customers.RemoveAll(p => p.CustomerId == id);
             return count > 0;
         }
+
+        public bool TestPrimitiveReturnType()
+        {
+            return true;
+        }
+
         #endregion
     }
 }

@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Extensions;
@@ -52,19 +53,36 @@ namespace System.Web.OData.Formatter.Serialization
         public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType,
             ODataSerializerContext writeContext)
         {
-            if (graph == null)
+            bool doNotSerializeIfNull = false;
+            bool serializeAsEmptyIfNull = false;
+
+            if (writeContext.Request != null)
+            {
+                var config = writeContext.Request.GetConfiguration();
+                if (config != null)
+                {
+                    doNotSerializeIfNull = config.GetDoNotSerializeNullCollections();
+                    serializeAsEmptyIfNull = config.GetSerializeNullCollectionsAsEmpty();
+                }
+            }
+            if (graph == null && !(doNotSerializeIfNull || serializeAsEmptyIfNull))
             {
                 throw new SerializationException(Error.Format(SRResources.NullCollectionsCannotBeSerialized));
             }
 
             IEnumerable enumerable = graph as IEnumerable;
-            if (enumerable == null)
+            if (enumerable == null && !(doNotSerializeIfNull || serializeAsEmptyIfNull))
             {
                 throw Error.Argument("graph", SRResources.ArgumentMustBeOfType, typeof(IEnumerable).Name);
             }
             if (expectedType == null)
             {
                 throw Error.ArgumentNull("expectedType");
+            }
+
+            if (enumerable == null && doNotSerializeIfNull)
+            {
+                return null;
             }
 
             IEdmTypeReference elementType = GetElementType(expectedType);
@@ -102,14 +120,34 @@ namespace System.Web.OData.Formatter.Serialization
                 }
             }
 
+            bool doNotSerializeIfNull = false;
+            bool serializeAsEmptyIfNull = false;
+
+            if (writeContext.Request != null)
+            {
+                var config = writeContext.Request.GetConfiguration();
+                if (config != null)
+                {
+                    doNotSerializeIfNull = config.GetDoNotSerializeNullCollections();
+                    serializeAsEmptyIfNull = config.GetSerializeNullCollectionsAsEmpty();
+                }
+            }
+
+            if (graph == null && doNotSerializeIfNull)
+            {
+                return;
+            }
             writer.WriteStart(collectionStart);
 
-            ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
-            if (collectionValue != null)
+            if (graph != null || !serializeAsEmptyIfNull)
             {
-                foreach (object item in collectionValue.Items)
+                ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
+                if (collectionValue != null)
                 {
-                    writer.WriteItem(item);
+                    foreach (object item in collectionValue.Items)
+                    {
+                        writer.WriteItem(item);
+                    }
                 }
             }
 
@@ -187,6 +225,25 @@ namespace System.Web.OData.Formatter.Serialization
 
             AddTypeNameAnnotationAsNeeded(value, writeContext.MetadataLevel);
             return value;
+        }
+
+        internal override ODataProperty CreateProperty(object graph, IEdmTypeReference expectedType, string elementName,
+            ODataSerializerContext writeContext)
+        {
+            Contract.Assert(elementName != null);
+            var property = CreateODataValue(graph, expectedType, writeContext);
+            if (property != null)
+            {
+                return new ODataProperty
+                {
+                    Name = elementName,
+                    Value = property
+                };
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>

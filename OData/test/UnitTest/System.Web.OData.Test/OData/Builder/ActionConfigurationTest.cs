@@ -210,9 +210,9 @@ namespace System.Web.OData.Builder
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
             ActionConfiguration action = builder.Action("MyAction");
-            action.Parameter<string>("p0");
-            action.Parameter<int>("p1");
-            action.Parameter<Address>("p2");
+            action.Parameter(typeof(string), "p0");
+            action.Parameter(typeof(int), "p1");
+            action.Parameter(typeof(Address), "p2");
             ParameterConfiguration[] parameters = action.Parameters.ToArray();
 
             // Assert

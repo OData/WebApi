@@ -182,6 +182,50 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void CanCreateActionWithNonbindingParameters_AddParameterGenericMethod()
+        {
+            // Arrange
+            // Act
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ActionConfiguration action = builder.Action("MyAction");
+            action.Parameter<string>("p0");
+            action.Parameter<int>("p1");
+            action.Parameter<Address>("p2");
+            ParameterConfiguration[] parameters = action.Parameters.ToArray();
+
+            // Assert
+            Assert.Equal(3, parameters.Length);
+            Assert.Equal("p0", parameters[0].Name);
+            Assert.Equal("Edm.String", parameters[0].TypeConfiguration.FullName);
+            Assert.Equal("p1", parameters[1].Name);
+            Assert.Equal("Edm.Int32", parameters[1].TypeConfiguration.FullName);
+            Assert.Equal("p2", parameters[2].Name);
+            Assert.Equal(typeof(Address).FullName, parameters[2].TypeConfiguration.FullName);
+        }
+
+        [Fact]
+        public void CanCreateActionWithNonbindingParameters_AddParameterNonGenericMethod()
+        {
+            // Arrange
+            // Act
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ActionConfiguration action = builder.Action("MyAction");
+            action.Parameter<string>("p0");
+            action.Parameter<int>("p1");
+            action.Parameter<Address>("p2");
+            ParameterConfiguration[] parameters = action.Parameters.ToArray();
+
+            // Assert
+            Assert.Equal(3, parameters.Length);
+            Assert.Equal("p0", parameters[0].Name);
+            Assert.Equal("Edm.String", parameters[0].TypeConfiguration.FullName);
+            Assert.Equal("p1", parameters[1].Name);
+            Assert.Equal("Edm.Int32", parameters[1].TypeConfiguration.FullName);
+            Assert.Equal("p2", parameters[2].Name);
+            Assert.Equal(typeof(Address).FullName, parameters[2].TypeConfiguration.FullName);
+        }
+
+        [Fact]
         public void CanCreateActionWithNonbindingParameters()
         {
             // Arrange

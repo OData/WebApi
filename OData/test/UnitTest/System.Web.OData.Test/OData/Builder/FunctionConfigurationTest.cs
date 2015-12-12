@@ -220,6 +220,50 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void CanCreateFunctionWithNonbindingParameters_AddParameterGenericMethod()
+        {
+            // Arrange
+            // Act
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("MyFunction");
+            function.Parameter<string>("p0");
+            function.Parameter<int>("p1");
+            function.Parameter<Address>("p2");
+            ParameterConfiguration[] parameters = function.Parameters.ToArray();
+
+            // Assert
+            Assert.Equal(3, parameters.Length);
+            Assert.Equal("p0", parameters[0].Name);
+            Assert.Equal("Edm.String", parameters[0].TypeConfiguration.FullName);
+            Assert.Equal("p1", parameters[1].Name);
+            Assert.Equal("Edm.Int32", parameters[1].TypeConfiguration.FullName);
+            Assert.Equal("p2", parameters[2].Name);
+            Assert.Equal(typeof(Address).FullName, parameters[2].TypeConfiguration.FullName);
+        }
+
+        [Fact]
+        public void CanCreateFunctionWithNonbindingParameters_AddParameterNonGenericMethod()
+        {
+            // Arrange
+            // Act
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("MyFunction");
+            function.Parameter(typeof(string), "p0");
+            function.Parameter(typeof(int), "p1");
+            function.Parameter(typeof(Address), "p2");
+            ParameterConfiguration[] parameters = function.Parameters.ToArray();
+
+            // Assert
+            Assert.Equal(3, parameters.Length);
+            Assert.Equal("p0", parameters[0].Name);
+            Assert.Equal("Edm.String", parameters[0].TypeConfiguration.FullName);
+            Assert.Equal("p1", parameters[1].Name);
+            Assert.Equal("Edm.Int32", parameters[1].TypeConfiguration.FullName);
+            Assert.Equal("p2", parameters[2].Name);
+            Assert.Equal(typeof(Address).FullName, parameters[2].TypeConfiguration.FullName);
+        }
+
+        [Fact]
         public void CanCreateFunctionWithNonbindingParameters()
         {
             // Arrange

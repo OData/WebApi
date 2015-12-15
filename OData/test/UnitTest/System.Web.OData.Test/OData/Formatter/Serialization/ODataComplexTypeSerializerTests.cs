@@ -4,7 +4,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Web.Http;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization.Models;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -533,6 +536,83 @@ namespace System.Web.OData.Formatter.Serialization
                 serializer.CreateODataComplexValue(address, addressTypeRef, context),
                 "The name of dynamic property 'Street' was already used as the declared property name " +
                 "of open complex type 'Default.Address'.");
+        }
+
+        [Theory]
+        [InlineData(true, 4)]
+        [InlineData(false, 3)]
+        public void CreateODataComplexValue_WritesNullDynamicProperties_ForOpenComplexType(bool enableNullDynamicProperty, int count)
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue<ClrTypeAnnotation>(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue<ClrTypeAnnotation>(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
+                simpleOpenAddress.GetProperty("Properties")));
+
+            IEdmComplexTypeReference addressTypeRef = addressType.ToEdmTypeReference(isNullable: false).AsComplex();
+
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider);
+            HttpConfiguration config = new HttpConfiguration();
+            if (enableNullDynamicProperty)
+            {
+                config.EnableNullDynamicProperty();
+            }
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetConfiguration(config);
+            ODataSerializerContext context = new ODataSerializerContext
+            {
+                Model = model,
+                Request = request
+            };
+
+            SimpleOpenAddress address = new SimpleOpenAddress()
+            {
+                Street = "My Way",
+                City = "Redmond",
+                Properties = new Dictionary<string, object>()
+            };
+            address.Properties.Add("GuidProperty", new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"));
+            address.Properties.Add("NullProperty", null);
+
+            // Act
+            var odataValue = serializer.CreateODataComplexValue(address, addressTypeRef, context);
+
+            // Assert
+            ODataComplexValue complexValue = Assert.IsType<ODataComplexValue>(odataValue);
+
+            Assert.Equal(complexValue.TypeName, "Default.Address");
+            Assert.Equal(count, complexValue.Properties.Count());
+
+            // Verify the declared properties
+            ODataProperty street = Assert.Single(complexValue.Properties.Where(p => p.Name == "Street"));
+            Assert.Equal("My Way", street.Value);
+
+            ODataProperty city = Assert.Single(complexValue.Properties.Where(p => p.Name == "City"));
+            Assert.Equal("Redmond", city.Value);
+
+            // Verify the dynamic properties
+            ODataProperty guidProperty = Assert.Single(complexValue.Properties.Where(p => p.Name == "GuidProperty"));
+            Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), guidProperty.Value);
+
+            ODataProperty nullProperty = complexValue.Properties.SingleOrDefault(p => p.Name == "NullProperty");
+            if (enableNullDynamicProperty)
+            {
+                Assert.NotNull(nullProperty);
+                Assert.Null(nullProperty.Value);
+            }
+            else
+            {
+                Assert.Null(nullProperty);
+            }
         }
 
         [Fact]

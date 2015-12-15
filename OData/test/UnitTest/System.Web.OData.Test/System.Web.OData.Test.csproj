@@ -128,6 +128,7 @@
     <Compile Include="OData\DateTimeTest.cs" />
     <Compile Include="OData\EdmEnumObjectCollectionTest.cs" />
     <Compile Include="OData\EdmEnumObjectTest.cs" />
+    <Compile Include="OData\Formatter\NullCollectionsTests.cs" />
     <Compile Include="OData\Formatter\ODataFunctionTests.cs" />
     <Compile Include="OData\EdmChangedObjectCollectionTest.cs" />
     <Compile Include="OData\EnableQueryTests.cs" />
@@ -171,6 +172,8 @@
     <Compile Include="OData\ETagMessageHandlerTest.cs" />
     <Compile Include="OData\ODataNullValueMessageHandlerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\SelectExpandNodeTest.cs" />
+    <Compile Include="OData\ODataSwaggerConverterTest.cs" />
+    <Compile Include="OData\ODataSwaggerUtilitiesTest.cs" />
     <Compile Include="OData\ODataUriResolverExtensionTest.cs" />
     <Compile Include="OData\OpenEntityTypeTest.cs" />
     <Compile Include="OData\PerRequestContentNegotiatorTest.cs" />
@@ -315,6 +318,7 @@
     <Compile Include="OData\Query\Validators\FilterQueryValidatorTest.cs" />
     <Compile Include="OData\Query\Validators\TopQueryValidatorTest.cs" />
     <Compile Include="OData\Routing\ODataValueProviderFactoryTest.cs" />
+    <Compile Include="OData\SelectExpandNestedDollarCountTest.cs" />
     <Compile Include="OData\SelectExpandTest.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="TestCommon\CustomersModelWithInheritance.cs" />

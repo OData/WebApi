@@ -456,7 +456,11 @@ namespace System.Web.OData.Builder
         private void ReconfigureEntityTypesAsComplexType(EntityTypeConfiguration[] misconfiguredEntityTypes)
         {
             IList<EntityTypeConfiguration> actualEntityTypes =
-                StructuralTypes.Except(misconfiguredEntityTypes).OfType<EntityTypeConfiguration>().ToList();
+                StructuralTypes.OfType<EntityTypeConfiguration>()
+                    .Where(entity => entity.Keys().Any())
+                    .Concat(_explicitlyAddedTypes.OfType<EntityTypeConfiguration>())
+                    .Except(misconfiguredEntityTypes)
+                    .ToList();
 
             HashSet<EntityTypeConfiguration> visitedEntityType = new HashSet<EntityTypeConfiguration>();
             foreach (EntityTypeConfiguration misconfiguredEntityType in misconfiguredEntityTypes)
@@ -720,6 +724,18 @@ namespace System.Web.OData.Builder
                     if (elementUnderlyingTypeOrSelf.IsEnum)
                     {
                         AddEnumType(elementUnderlyingTypeOrSelf);
+                    }
+                }
+                else
+                {
+                    Type elementType;
+                    if (property.PropertyType.IsCollection(out elementType))
+                    {
+                        Type elementUnderlyingTypeOrSelf = TypeHelper.GetUnderlyingTypeOrSelf(elementType);
+                        if (elementUnderlyingTypeOrSelf.IsEnum)
+                        {
+                            AddEnumType(elementUnderlyingTypeOrSelf);
+                        }
                     }
                 }
 

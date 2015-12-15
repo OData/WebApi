@@ -332,12 +332,12 @@ namespace System.Web.OData.Query
 
             if (IsAvailableODataQueryOption(Count, AllowedQueryOptions.Count))
             {
-                if (Request.ODataProperties().TotalCount == null)
+                if (Request.ODataProperties().TotalCountFunc == null)
                 {
-                    long? count = Count.GetEntityCount(result);
-                    if (count.HasValue)
+                    Func<long> countFunc = Count.GetEntityCountFunc(result);
+                    if (countFunc != null)
                     {
-                        Request.ODataProperties().TotalCount = count.Value;
+                        Request.ODataProperties().TotalCountFunc = countFunc;
                     }
                 }
 

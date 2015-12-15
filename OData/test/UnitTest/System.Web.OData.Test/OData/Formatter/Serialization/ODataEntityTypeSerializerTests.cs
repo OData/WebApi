@@ -878,6 +878,111 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.Equal(new DateTimeOffset(new DateTime(2014, 10, 24)), dateTimeProperty.Value);
         }
 
+        [Theory]
+        [InlineData(true, 5)]
+        [InlineData(false, 4)]
+        public void CreateEntry_Works_ToAppendNullDynamicProperties_ForOpenEntityType(bool enableNullDynamicProperty, int count)
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+
+            IEdmEntityType customerType = model.FindDeclaredType("Default.Customer") as IEdmEntityType;
+            Type simpleOpenCustomer = typeof(SimpleOpenCustomer);
+            model.SetAnnotationValue(customerType, new ClrTypeAnnotation(simpleOpenCustomer));
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(customerType, new DynamicPropertyDictionaryAnnotation(
+                simpleOpenCustomer.GetProperty("CustomerProperties")));
+
+            model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
+                simpleOpenAddress.GetProperty("Properties")));
+
+            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            ODataEntityTypeSerializer serializer = new ODataEntityTypeSerializer(serializerProvider);
+
+            HttpConfiguration config = new HttpConfiguration();
+            if (enableNullDynamicProperty)
+            {
+                config.EnableNullDynamicProperty();
+            }
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetConfiguration(config);
+            SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);
+            ODataSerializerContext writeContext = new ODataSerializerContext
+            {
+                Model = model,
+                Path = new ODataPath(new EntitySetPathSegment(customers)),
+                Request = request
+            };
+
+            SimpleOpenCustomer customer = new SimpleOpenCustomer()
+            {
+                CustomerId = 991,
+                Name = "Name #991",
+                Address = new SimpleOpenAddress
+                {
+                    City = "a city",
+                    Street = "a street",
+                    Properties = new Dictionary<string, object> { { "ArrayProperty", new[] { "15", "14", "13" } } }
+                },
+                CustomerProperties = new Dictionary<string, object>()
+            };
+
+            customer.CustomerProperties.Add("GuidProperty", new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"));
+            customer.CustomerProperties.Add("NullProperty", null);
+
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext,
+                customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
+
+            // Act
+            ODataEntry entry = serializer.CreateEntry(selectExpandNode, entityInstanceContext);
+
+            // Assert
+            Assert.Equal(entry.TypeName, "Default.Customer");
+            Assert.Equal(count, entry.Properties.Count());
+
+            // Verify the declared properties
+            ODataProperty street = Assert.Single(entry.Properties.Where(p => p.Name == "CustomerId"));
+            Assert.Equal(991, street.Value);
+
+            ODataProperty city = Assert.Single(entry.Properties.Where(p => p.Name == "Name"));
+            Assert.Equal("Name #991", city.Value);
+
+            // Verify the nested open complex property
+            ODataProperty address = Assert.Single(entry.Properties.Where(p => p.Name == "Address"));
+            ODataComplexValue addressComplexValue = Assert.IsType<ODataComplexValue>(address.Value);
+            ODataProperty addressDynamicProperty =
+                Assert.Single(addressComplexValue.Properties.Where(p => p.Name == "ArrayProperty"));
+            ODataCollectionValue addressCollectionValue =
+                Assert.IsType<ODataCollectionValue>(addressDynamicProperty.Value);
+            Assert.Equal(new[] { "15", "14", "13" }, addressCollectionValue.Items.OfType<string>().ToList());
+            Assert.Equal("Collection(Edm.String)", addressCollectionValue.TypeName);
+
+            // Verify the dynamic properties
+            ODataProperty guidProperty = Assert.Single(entry.Properties.Where(p => p.Name == "GuidProperty"));
+            Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), guidProperty.Value);
+
+            ODataProperty nullProperty = entry.Properties.SingleOrDefault(p => p.Name == "NullProperty");
+            if (enableNullDynamicProperty)
+            {
+                Assert.NotNull(nullProperty);
+                Assert.Null(nullProperty.Value);
+            }
+            else
+            {
+                Assert.Null(nullProperty);
+            }
+        }
+
         [Fact]
         public void CreateStructuralProperty_ThrowsArgumentNull_StructuralProperty()
         {

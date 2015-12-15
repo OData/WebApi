@@ -107,6 +107,7 @@ namespace System.Web.OData.Extensions
         /// <param name="request">The request.</param>
         /// <param name="entityTagHeaderValue">The entity tag header value.</param>
         /// <returns>The parsed <see cref="ETag"/>.</returns>
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
         public static ETag GetETag(this HttpRequestMessage request, EntityTagHeaderValue entityTagHeaderValue)
         {
             if (request == null)
@@ -138,8 +139,8 @@ namespace System.Web.OData.Extensions
                 IEdmEntitySet entitySet = odataPath.NavigationSource as IEdmEntitySet;
                 if (model != null && entitySet != null)
                 {
-                    IList<string> concurrencyPropertyNames =
-                        model.GetConcurrencyProperties(entitySet).OrderBy(c => c.Name).Select(c => c.Name).AsList();
+                    IList<IEdmStructuralProperty> concurrencyProperties = model.GetConcurrencyProperties(entitySet).ToList();
+                    IList<string> concurrencyPropertyNames = concurrencyProperties.OrderBy(c => c.Name).Select(c => c.Name).AsList();
                     ETag etag = new ETag();
 
                     if (parsedETagValues.Count != concurrencyPropertyNames.Count)
@@ -152,7 +153,23 @@ namespace System.Web.OData.Extensions
                         (name, value) => new KeyValuePair<string, object>(name, value));
                     foreach (var nameValue in nameValues)
                     {
-                        etag[nameValue.Key] = nameValue.Value;
+                        IEdmStructuralProperty property = concurrencyProperties.SingleOrDefault(e => e.Name == nameValue.Key);
+                        Contract.Assert(property != null);
+
+                        Type clrType = EdmLibHelpers.GetClrType(property.Type, model);
+                        Contract.Assert(clrType != null);
+
+                        if (nameValue.Value != null)
+                        {
+                            Type valueType = nameValue.Value.GetType();
+                            etag[nameValue.Key] = valueType != clrType
+                                ? Convert.ChangeType(nameValue.Value, clrType, CultureInfo.InvariantCulture)
+                                : nameValue.Value;
+                        }
+                        else
+                        {
+                            etag[nameValue.Key] = nameValue.Value;
+                        }
                     }
 
                     return etag;

@@ -180,6 +180,12 @@ namespace System.Web.OData.Formatter.Serialization
                 {
                     feed.NextPageLink = GetNestedNextPageLink(writeContext, truncatedCollection.PageSize);
                 }
+
+                ICountOptionCollection countOptionCollection = feedInstance as ICountOptionCollection;
+                if (countOptionCollection != null && countOptionCollection.TotalCount != null)
+                {
+                    feed.Count = countOptionCollection.TotalCount;
+                }
             }
 
             return feed;

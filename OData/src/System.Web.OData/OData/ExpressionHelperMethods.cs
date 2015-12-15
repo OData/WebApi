@@ -68,6 +68,8 @@ namespace System.Web.OData
             { typeof(double?), GenericMethodOf(_ => Queryable.Average<string>(default(IQueryable<string>), default(Expression<Func<string, double?>>))) },
         };
 
+        private static MethodInfo _enumerableCountMethod = GenericMethodOf(_ => Enumerable.LongCount<int>(default(IEnumerable<int>)));
+
         public static MethodInfo QueryableOrderByGeneric
         {
             get { return _orderByMethod; }
@@ -221,6 +223,11 @@ namespace System.Web.OData
         public static IQueryable ToQueryable<T>(T value)
         {
             return (new List<T> { value }).AsQueryable();
+        }
+
+        public static MethodInfo EnumerableCountGeneric
+        {
+            get { return _enumerableCountMethod; }
         }
 
         private static MethodInfo GenericMethodOf<TReturn>(Expression<Func<object, TReturn>> expression)

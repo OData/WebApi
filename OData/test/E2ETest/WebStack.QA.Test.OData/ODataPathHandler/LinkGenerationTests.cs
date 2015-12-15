@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData;
 using System.Web.OData.Builder;
@@ -6,9 +9,11 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
+using Newtonsoft.Json.Linq;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
+using Xunit.Extensions;
 
 namespace WebStack.QA.Test.OData.ODataPathHandler
 {
@@ -16,6 +21,7 @@ namespace WebStack.QA.Test.OData.ODataPathHandler
     {
         public int ID { get; set; }
         public string Name { get; set; }
+        public LinkGeneration_Model_v2 NonContainedNavigationProperty { get; set; }
     }
 
     public class LinkGeneration_Model_v2
@@ -36,6 +42,15 @@ namespace WebStack.QA.Test.OData.ODataPathHandler
                     Name = "One"
                 }
             }.AsQueryable();
+        }
+
+        public LinkGeneration_Model_v2 GetNonContainedNavigationProperty(int key)
+        {
+            return new LinkGeneration_Model_v2
+            {
+                ID = 2,
+                Name = "Test2"
+            };
         }
     }
     public class LinkGeneration_Model2Controller : ODataController
@@ -70,6 +85,7 @@ namespace WebStack.QA.Test.OData.ODataPathHandler
         {
             var mb = new ODataConventionModelBuilder(configuration);
             mb.EntitySet<LinkGeneration_Model_v1>("LinkGeneration_Model1");
+            mb.EntitySet<LinkGeneration_Model_v2>("LinkGeneration_Model2");
             return mb.GetEdmModel();
         }
 
@@ -88,6 +104,20 @@ namespace WebStack.QA.Test.OData.ODataPathHandler
 
             content = this.Client.GetStringAsync(this.BaseAddress + "/v2/LinkGeneration_Model2").Result;
             Assert.DoesNotContain(@"/v1/LinkGeneration_Model2", content);
+        }
+
+        [Theory]
+        [InlineData("/v1/LinkGeneration_Model1(1)/NonContainedNavigationProperty", "/v1/LinkGeneration_Model2(2)")]
+        public void GeneratedLinkTestForNavigationProperty(string requestUrl, string expectLinkUrl)
+        {
+            string AcceptJsonFullMetadata = "application/json;odata.metadata=full";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                this.BaseAddress + requestUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(AcceptJsonFullMetadata));
+            var content = this.Client.SendAsync(request).Result.Content.ReadAsStringAsync().Result;
+            JObject result = JObject.Parse(content);
+            Assert.Equal(result["@odata.editLink"].ToString(), this.BaseAddress + expectLinkUrl, StringComparer.OrdinalIgnoreCase);
+            Assert.Equal(result["@odata.id"].ToString(), this.BaseAddress + expectLinkUrl, StringComparer.OrdinalIgnoreCase);
         }
     }
 }

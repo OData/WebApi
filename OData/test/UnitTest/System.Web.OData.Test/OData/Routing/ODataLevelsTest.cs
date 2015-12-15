@@ -645,11 +645,6 @@ namespace System.Web.OData.Routing
 
             public IHttpActionResult Get(ODataQueryOptions<LevelsEntity> queryOptions)
             {
-                if (queryOptions.SelectExpand != null)
-                {
-                    queryOptions.SelectExpand.LevelsMaxLiteralExpansionDepth = 5;
-                }
-
                 var validationSettings = new ODataValidationSettings { MaxExpansionDepth = 5 };
 
                 try

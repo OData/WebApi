@@ -101,6 +101,21 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
+        public void Function_Works_WithDollarCountInQueryOption()
+        {
+            // Arrange
+            var uri = "DollarCountEntities/Default.BoundFunctionReturnsComplexCollection()?$count=true";
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            Assert.Equal(15, result["@odata.count"]);
+        }
+
+        [Fact]
         public void GetCount_Throws_DollarCountNotAllowed()
         {
             // Arrange

@@ -454,7 +454,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source = Bind(convertNode.Source);
 
             return CreateConvertExpression(convertNode, source);
-        }
+                    }
 
         private LambdaExpression BindExpression(SingleValueNode expression, RangeVariable rangeVariable, Type elementType)
         {
@@ -613,7 +613,7 @@ namespace System.Web.OData.Query.Expressions
                 default:
                     throw new NotImplementedException(Error.Format(SRResources.ODataFunctionNotSupported, node.Name));
             }
-        }
+            }
 
         private Expression BindCastSingleValue(SingleValueFunctionCallNode node)
         {

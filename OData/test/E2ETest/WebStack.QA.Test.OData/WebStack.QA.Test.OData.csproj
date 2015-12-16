@@ -142,6 +142,7 @@
     <Compile Include="DollarLevels\DollarLevelsTest.cs" />
     <Compile Include="QueryComposition\ApplyTests.cs" />
     <Compile Include="QueryComposition\Controllers\ApplyTestsController.cs" />
+    <Compile Include="QueryComposition\Controllers\ApplyContext.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesController.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesModel.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesTest.cs" />

@@ -10,11 +10,6 @@ namespace WebStack.QA.Test.OData.Common.Models.ProductFamilies
         {
         }
 
-        public ProductsContext(string connectionString)
-           : base(connectionString)
-        {
-        }
-
         public DbSet<Product> Products { get; set; }
 
         public DbSet<ProductFamily> ProductFamilies { get; set; }

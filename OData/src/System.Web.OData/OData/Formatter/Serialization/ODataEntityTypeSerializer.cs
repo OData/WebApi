@@ -12,10 +12,12 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
+using System.Web.OData.Query.Expressions;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -82,7 +84,7 @@ namespace System.Web.OData.Formatter.Serialization
             }
             else
             {
-                WriteEntry(graph, writer, writeContext);
+                WriteEntry(graph, writer, writeContext, expectedType);
             }
         }
 
@@ -137,12 +139,59 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
-        private void WriteEntry(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+        private List<ODataProperty> CreateODataPropertiesFromDynamicType(object graph)
+        {
+            List<ODataProperty> properties = new List<ODataProperty>();
+            var dynamicObject = graph as DynamicTypeWrapper;
+            foreach (var prop in graph.GetType().GetProperties())
+            {
+                object value;
+                ODataProperty property = null;
+                if (dynamicObject.TryGetPropertyValue(prop.Name, out value))
+                {
+                    if (value != null && EdmLibHelpers.IsDynamicTypeWrapper(value.GetType()))
+                    {
+                        property = new ODataProperty
+                        {
+                            Name = prop.Name,
+                            Value = new ODataComplexValue
+                            {
+                                Properties = CreateODataPropertiesFromDynamicType(value)
+                            }
+                        };
+                    }
+                    else
+                    {
+                        property = new ODataProperty
+                        {
+                            Name = prop.Name,
+                            Value = value
+                        };
+                    }
+                    properties.Add(property);
+                }
+            }
+            return properties;
+        }
+
+        private void WriteEntry(object graph, ODataWriter writer, ODataSerializerContext writeContext, IEdmTypeReference expectedType)
         {
             Contract.Assert(writeContext != null);
 
+            if (EdmLibHelpers.IsDynamicTypeWrapper(graph.GetType()))
+            {
+                ODataEntry entry = new ODataEntry()
+                {
+                    TypeName = expectedType.FullName(),
+                    Properties = CreateODataPropertiesFromDynamicType(graph)
+                };
+                writer.WriteStart(entry);
+                writer.WriteEnd();
+                return;
+            }
             IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
             EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext, entityType, graph);
+
             SelectExpandNode selectExpandNode = CreateSelectExpandNode(entityInstanceContext);
             if (selectExpandNode != null)
             {
@@ -227,6 +276,8 @@ namespace System.Web.OData.Formatter.Serialization
                     entry.Properties = entry.Properties.Concat(dynamicProperties);
                 }
             }
+
+            // Mark dynamicly generated enities as Transient
 
             IEnumerable<ODataAction> actions = CreateODataActions(selectExpandNode.SelectedActions, entityInstanceContext);
             foreach (ODataAction action in actions)

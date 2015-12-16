@@ -329,6 +329,23 @@ namespace System.Net.Http
         public void GetNextPageLink_GetsNextPageLink(string requestUri, int pageSize, string nextPageUri)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<Customer>("Customers");
+            IEdmModel model = modelBuilder.GetEdmModel();
+
+            request.ODataProperties().Model = model;
+
+            var pathHandler = request.ODataProperties().PathHandler;
+
+            var path = pathHandler.Parse(model, "http://localhost", requestUri);
+            request.ODataProperties().Path = path;
+
+            var configuration = new HttpConfiguration();
+
+            string routeName = "Route";
+            request.ODataProperties().RouteName = routeName;
+            configuration.MapODataServiceRoute(routeName, null, model);
+            request.SetConfiguration(configuration);
 
             Uri nextPageLink = request.GetNextPageLink(pageSize);
 

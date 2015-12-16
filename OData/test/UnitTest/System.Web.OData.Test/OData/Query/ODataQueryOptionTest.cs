@@ -56,7 +56,12 @@ namespace System.Web.OData.Query
                      { "$skip", "''" },
                      { "$skip", "" },
                      { "$skip", " " },
-                     { "$skip", "12" }
+                     { "$skip", "12" },
+
+                     { "$apply", null },
+                     { "$apply", "" },
+                     { "$apply", " " },
+                     { "$apply", "aggregate(SharePrice mul CustomerId with sum as Name)" },
                 };
             }
         }
@@ -444,6 +449,10 @@ namespace System.Web.OData.Query
                 else if (queryName == "$skip")
                 {
                     Assert.Equal(queryValue, queryOptions.RawValues.Skip);
+                }
+                else if (queryName == "$apply")
+                {
+                    Assert.Equal(queryValue, queryOptions.RawValues.Apply);
                 }
             }
         }

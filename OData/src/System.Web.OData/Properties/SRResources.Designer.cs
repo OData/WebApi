@@ -106,6 +106,24 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Aggregation method &apos;{0}&apos; is not supported..
+        /// </summary>
+        internal static string AggregationMethodNotSupported {
+            get {
+                return ResourceManager.GetString("AggregationMethodNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Aggregation &apos;{0}&apos; not supported for property &apos;{1}&apos; of type &apos;{2}&apos;..
+        /// </summary>
+        internal static string AggregationNotSupportedForType {
+            get {
+                return ResourceManager.GetString("AggregationNotSupportedForType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The query option is not bound to any CLR type. &apos;{0}&apos; is only supported with a query option bound to a CLR type..
         /// </summary>
         internal static string ApplyToOnUntypedQueryOption {
@@ -1353,6 +1371,15 @@ namespace System.Web.OData.Properties {
         internal static string NotSortablePropertyUsedInOrderBy {
             get {
                 return ResourceManager.GetString("NotSortablePropertyUsedInOrderBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Transformation kind {0} is not supported..
+        /// </summary>
+        internal static string NotSupportedTransformationKind {
+            get {
+                return ResourceManager.GetString("NotSupportedTransformationKind", resourceCulture);
             }
         }
         

@@ -10,6 +10,8 @@ using System.Web.OData.Properties;
 using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 using SelectExpandClause = Microsoft.OData.Core.UriParser.Semantic.SelectExpandClause;
+using System.Web.OData.Query.Expressions;
+using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -176,7 +178,7 @@ namespace System.Web.OData.Formatter.Serialization
 
                     if (edmType == null)
                     {
-                        throw Error.InvalidOperation(SRResources.ClrTypeNotInModel, type);
+                            throw Error.InvalidOperation(SRResources.ClrTypeNotInModel, type);
                     }
                 }
                 else if (instance != null)

@@ -35,6 +35,7 @@ namespace System.Web.OData.Query.Validators
                     { AllowedQueryOptions.Select, "$select=Name", "Select" },
                     { AllowedQueryOptions.Skip, "$skip=5", "Skip" },
                     { AllowedQueryOptions.Top, "$top=10", "Top" },
+                    { AllowedQueryOptions.Apply, "$apply=groupby((Name))", "Apply" },
                 };
             }
         }

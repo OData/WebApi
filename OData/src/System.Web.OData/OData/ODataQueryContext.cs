@@ -93,7 +93,7 @@ namespace System.Web.OData
         /// <summary>
         /// Gets the <see cref="IEdmType"/> of the element.
         /// </summary>
-        public IEdmType ElementType { get; private set; }
+        public IEdmType ElementType { get; internal set; }
 
         /// <summary>
         /// Gets the <see cref="IEdmNavigationSource"/> that contains the element.
@@ -103,7 +103,7 @@ namespace System.Web.OData
         /// <summary>
         /// Gets the CLR type of the element.
         /// </summary>
-        public Type ElementClrType { get; private set; }
+        public Type ElementClrType { get; internal set; }
 
         /// <summary>
         /// Gets the <see cref="ODataPath"/>.

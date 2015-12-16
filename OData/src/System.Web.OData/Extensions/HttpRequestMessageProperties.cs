@@ -11,6 +11,7 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Extensions.Semantic;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
@@ -32,6 +33,7 @@ namespace System.Web.OData.Extensions
         private const string RoutingConventionsStoreKey = "System.Web.OData.RoutingConventionsStore";
         private const string RoutingConventionsKey = "System.Web.OData.RoutingConventions";
         private const string SelectExpandClauseKey = "System.Web.OData.SelectExpandClause";
+        private const string ApplyClauseKey = "System.Web.OData.ApplyClause";
         private const string TotalCountKey = "System.Web.OData.TotalCount";
         private const string TotalCountFuncKey = "System.Web.OData.TotalCountFunc";
 
@@ -222,6 +224,29 @@ namespace System.Web.OData.Extensions
                 _request.Properties[SelectExpandClauseKey] = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the parsed OData <see cref="ApplyClause"/> of the request. The
+        /// <see cref="ODataMediaTypeFormatter"/> will use this information (if any) while writing the response for
+        /// this request.
+        /// </summary>
+        public ApplyClause ApplyClause
+        {
+            get
+            {
+                return GetValueOrNull<ApplyClause>(ApplyClauseKey);
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.ArgumentNull("value");
+                }
+
+                _request.Properties[ApplyClauseKey] = value;
+            }
+        }
+
 
         /// <summary>
         /// Gets the data store used by <see cref="IODataRoutingConvention"/>s to store any custom route data.

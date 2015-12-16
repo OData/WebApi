@@ -20,6 +20,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
+using System.Web.OData.Query.Expressions;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -519,6 +520,7 @@ namespace System.Web.OData.Formatter
 
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
                 SelectAndExpand = Request.ODataProperties().SelectExpandClause,
+                Apply = Request.ODataProperties().ApplyClause,
                 Path = (path == null || IsOperationPath(path)) ? null : path.ODLPath,
             };
 
@@ -632,7 +634,6 @@ namespace System.Web.OData.Formatter
                     throw new SerializationException(Error.Format(SRResources.EdmTypeCannotBeNull,
                         edmObject.GetType().FullName, typeof(IEdmObject).Name));
                 }
-
                 serializer = serializerProvider.GetEdmTypeSerializer(edmType);
                 if (serializer == null)
                 {
@@ -642,8 +643,12 @@ namespace System.Web.OData.Formatter
             }
             else
             {
+                var applyClause = Request.ODataProperties().ApplyClause;
                 // get the most appropriate serializer given that we support inheritance.
-                type = value == null ? type : value.GetType();
+                if (applyClause == null)
+                {
+                    type = value == null ? type : value.GetType();
+                }
                 serializer = serializerProvider.GetODataPayloadSerializer(model, type, Request);
                 if (serializer == null)
                 {

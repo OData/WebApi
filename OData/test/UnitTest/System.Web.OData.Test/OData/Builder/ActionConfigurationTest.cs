@@ -622,11 +622,9 @@ namespace System.Web.OData.Builder
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
             var actionBuilder = movie.Action("ActionName");
+            actionBuilder.Parameter(paramType, "p1");
 
-            MethodInfo method = typeof(ProcedureConfiguration).GetMethod("Parameter", BindingFlags.Instance | BindingFlags.Public);
-            method.MakeGenericMethod(paramType).Invoke(actionBuilder, new[] { "p1" });
-
-            method = typeof(ProcedureConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
+            MethodInfo method = typeof(ProcedureConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
             method.MakeGenericMethod(paramType).Invoke(actionBuilder, new[] { "p2" });
 
             // Act

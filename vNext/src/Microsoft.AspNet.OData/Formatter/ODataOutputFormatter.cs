@@ -15,6 +15,7 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Framework.Internal;
 using Microsoft.OData.Core;
+using Microsoft.AspNet.Mvc.Formatters;
 
 namespace Microsoft.AspNet.OData.Formatter
 {
@@ -44,15 +45,15 @@ namespace Microsoft.AspNet.OData.Formatter
             _payloadKinds = payloadKinds;
         }
         
-        public override Task WriteResponseBodyAsync(OutputFormatterContext context)
+        public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
         {
             return Task.Run(() => WriteResponseBody(context));
         }
 
-        private void WriteResponseBody(OutputFormatterContext context)
+        private void WriteResponseBody(OutputFormatterWriteContext context)
         {
-            HttpRequest request = context.ActionContext.HttpContext.Request;
-            HttpResponse response = context.ActionContext.HttpContext.Response;
+            HttpRequest request = context.HttpContext.Request;
+            HttpResponse response = context.HttpContext.Response;
 
             IEdmModel model = request.ODataProperties().Model;
             if (model == null)
@@ -64,7 +65,7 @@ namespace Microsoft.AspNet.OData.Formatter
             Type type = value.GetType();
             ODataSerializer serializer = GetSerializer(type, value, model, new DefaultODataSerializerProvider(), request);
 
-            IUrlHelper urlHelper = context.ActionContext.HttpContext.UrlHelper();
+            IUrlHelper urlHelper = context.HttpContext.UrlHelper();
 
             ODataPath path = request.ODataProperties().Path;
             IEdmNavigationSource targetNavigationSource = path == null ? null : path.NavigationSource;
@@ -118,7 +119,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     RootElementName = GetRootElementName(path) ?? "root",
                     SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                     Path = path,
-                    MetadataLevel = ODataMediaTypes.GetMetadataLevel(context.SelectedContentType),
+                    MetadataLevel = ODataMediaTypes.GetMetadataLevel(context.ContentType),
                     SelectExpandClause = request.ODataProperties().SelectExpandClause
                 };
 
@@ -126,10 +127,10 @@ namespace Microsoft.AspNet.OData.Formatter
             }
         }
 
-        public override void WriteResponseHeaders(OutputFormatterContext context)
+        public override void WriteResponseHeaders(OutputFormatterWriteContext context)
         {
-            HttpRequest request = context.ActionContext.HttpContext.Request;
-            HttpResponse response = context.ActionContext.HttpContext.Response;
+            HttpRequest request = context.HttpContext.Request;
+            HttpResponse response = context.HttpContext.Response;
 
             //// When the user asks for application/json we really need to set the content type to
             //// application/json; odata.metadata=minimal. If the user provides the media type and is
@@ -173,34 +174,35 @@ namespace Microsoft.AspNet.OData.Formatter
             base.WriteResponseHeaders(context);
         }
 
-        public override bool CanWriteResult([NotNull]OutputFormatterContext context, MediaTypeHeaderValue contentType)
+        public override bool CanWriteResult([NotNull]OutputFormatterCanWriteContext context)
         {
-            var type = context.Object.GetType();
-            var request = context.ActionContext.HttpContext.Request;
+            //var type = context.Object.GetType();
+            //var request = context.Request;
 
-            if (request != null)
-            {
-                IEdmModel model = request.ODataProperties().Model;
-                if (model != null)
-                {
-                    ODataPayloadKind? payloadKind = null;
+            //if (request != null)
+            //{
+            //    IEdmModel model = request.ODataProperties().Model;
+            //    if (model != null)
+            //    {
+            //        ODataPayloadKind? payloadKind = null;
 
-                    Type elementType;
-                    if (typeof(IEdmObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()) ||
-                        (type.IsCollection(out elementType) && typeof(IEdmObject).GetTypeInfo().IsAssignableFrom(elementType.GetTypeInfo())))
-                    {
-                        payloadKind = GetEdmObjectPayloadKind(type, request);
-                    }
-                    else
-                    {
-                        payloadKind = GetClrObjectResponsePayloadKind(type, model, request);
-                    }
+            //        Type elementType;
+            //        if (typeof(IEdmObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()) ||
+            //            (type.IsCollection(out elementType) && typeof(IEdmObject).GetTypeInfo().IsAssignableFrom(elementType.GetTypeInfo())))
+            //        {
+            //            payloadKind = GetEdmObjectPayloadKind(type, request);
+            //        }
+            //        else
+            //        {
+            //            payloadKind = GetClrObjectResponsePayloadKind(type, model, request);
+            //        }
 
-                    return payloadKind == null ? false : _payloadKinds.Contains(payloadKind.Value);
-                }
-            }
+            //        return payloadKind == null ? false : _payloadKinds.Contains(payloadKind.Value);
+            //    }
+            //}
 
-            return false;
+            //return false;
+            return base.CanWriteResult(context);
         }
 
         private ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider, HttpRequest request)

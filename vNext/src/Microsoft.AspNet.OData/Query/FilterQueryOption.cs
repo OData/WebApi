@@ -6,6 +6,7 @@ using System.Linq;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData.Edm;
+using Microsoft.AspNet.Mvc.Infrastructure;
 
 namespace Microsoft.AspNet.OData.Query
 {

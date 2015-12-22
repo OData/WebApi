@@ -13,6 +13,7 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
+using Microsoft.AspNet.Mvc.Infrastructure;
 
 namespace Microsoft.AspNet.OData.Builder
 {

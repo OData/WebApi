@@ -1,4 +1,5 @@
-﻿using Microsoft.Framework.OptionsModel;
+﻿using Microsoft.Extensions.OptionsModel;
+
 
 namespace Microsoft.AspNet.OData
 {

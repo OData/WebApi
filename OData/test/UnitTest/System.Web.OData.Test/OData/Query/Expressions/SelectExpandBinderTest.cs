@@ -89,6 +89,22 @@ namespace System.Web.OData.Query.Expressions
         }
 
         [Fact]
+        public void Bind_GeneratedExpression_CheckNullObjectWithinChainProjectionByKey()
+        {
+            // Arrange
+            SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(null, "Orders($expand=Customer($select=City))", _context);
+            _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
+
+            // Act
+            IQueryable queryable = SelectExpandBinder.Bind(_queryable, _settings, new DefaultAssembliesResolver(), selectExpand);
+
+            // Assert
+            var unaryExpression = (UnaryExpression)((MethodCallExpression)queryable.Expression).Arguments.Single(a => a is UnaryExpression);
+            var expressionString = unaryExpression.Operand.ToString();
+            Assert.Contains("IsNull = (Convert(Param_1.Customer.ID) == null)", expressionString);
+        }
+
+        [Fact]
         public void ProjectAsWrapper_NonCollection_ContainsRightInstance()
         {
             // Arrange

@@ -391,7 +391,7 @@ namespace System.Web.OData.Query.Expressions
                 Expression propertyName = CreatePropertyNameExpression(elementType, propertyToExpand, source);
                 Expression propertyValue = CreatePropertyValueExpressionWithFilter(elementType, propertyToExpand, source,
                     expandItem.FilterOption);
-                Expression nullCheck = Expression.Equal(propertyValue, Expression.Constant(null));
+                Expression nullCheck = GetNullCheckExpression(propertyToExpand, propertyValue, projection);
 
                 Expression countExpression = CreateTotalCountExpression(propertyValue, expandItem);
 
@@ -459,6 +459,30 @@ namespace System.Web.OData.Query.Expressions
 
             // create a property container that holds all these property names and values.
             return PropertyContainer.CreatePropertyContainer(includedProperties);
+        }
+
+        private Expression GetNullCheckExpression(IEdmNavigationProperty propertyToExpand, Expression propertyValue,
+            SelectExpandClause projection)
+        {
+            if (projection == null || propertyToExpand.Type.IsCollection())
+                return null;
+
+            if (projection.AllSelected || !propertyToExpand.ToEntityType().Key().Any())
+                return Expression.Equal(propertyValue, Expression.Constant(null));
+
+            Expression keysNullCheckExpression = null;
+            foreach (var key in propertyToExpand.ToEntityType().Key())
+            {
+                var keyExpression = Expression.Equal(
+                    CreatePropertyValueExpressionWithFilter(propertyToExpand.ToEntityType(), key, propertyValue, null),
+                    Expression.Constant(null));
+
+                keysNullCheckExpression = keysNullCheckExpression == null
+                    ? keyExpression
+                    : Expression.And(keysNullCheckExpression, keyExpression);
+            }
+
+            return keysNullCheckExpression;
         }
 
         // new CollectionWrapper<ElementType> { Instance = source.Select((ElementType element) => new Wrapper { }) }

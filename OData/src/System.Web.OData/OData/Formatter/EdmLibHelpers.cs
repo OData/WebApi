@@ -134,10 +134,16 @@ namespace System.Web.OData.Formatter
 
                         // IEnumerable<SelectExpandWrapper<T>> is a collection of T.
                         Type entityType;
+                        IEdmType edmType;
                         if (IsSelectExpandWrapper(elementClrType, out entityType))
                         {
                             elementClrType = entityType;
                         }
+                        else if (IsDynamicTypeWrapper(elementClrType, out edmType))
+                        {
+                            return new EdmCollectionType(edmType.ToEdmTypeReference(true));
+                        }
+                      
 
                         IEdmType elementType = GetEdmType(edmModel, elementClrType, testCollections: false);
                         if (elementType != null)
@@ -148,14 +154,18 @@ namespace System.Web.OData.Formatter
                 }
 
                 Type underlyingType = TypeHelper.GetUnderlyingTypeOrSelf(clrType);
-
+                IEdmType returnType;
                 if (underlyingType.IsEnum)
                 {
                     clrType = underlyingType;
                 }
+                else if (IsDynamicTypeWrapper(underlyingType, out returnType))
+                {
+                    return returnType;
+                }
 
                 // search for the ClrTypeAnnotation and return it if present
-                IEdmType returnType =
+                returnType =
                     edmModel
                     .SchemaElements
                     .OfType<IEdmType>()
@@ -490,6 +500,22 @@ namespace System.Web.OData.Formatter
 
             return IsSelectExpandWrapper(type.BaseType, out entityType);
         }
+
+        private static bool IsDynamicTypeWrapper(Type type, out IEdmType edmType)
+        {
+            edmType = null;
+            if (typeof(DynamicEntityWrapper).IsAssignableFrom(type))
+            {
+                edmType = type.GetDynamicEntityType();
+            }
+            else if (typeof(DynamicComplexWrapper).IsAssignableFrom(type))
+            {
+                edmType = type.GetDynamicComplexType();
+            }
+
+            return edmType != null;
+        }
+
 
         private static Type ExtractGenericInterface(Type queryType, Type interfaceType)
         {

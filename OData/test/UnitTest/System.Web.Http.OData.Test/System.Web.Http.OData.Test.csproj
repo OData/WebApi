@@ -379,10 +379,6 @@
     <EmbeddedResource Include="Resources\WorkItemEntryInJsonLight.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\System.Web.Http.OData\System.Web.Http.OData.csproj">
-      <Project>{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}</Project>
-      <Name>System.Web.Http.OData</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Microsoft.TestCommon\Microsoft.TestCommon.csproj">
       <Project>{fccc4cb7-baf7-4a57-9f89-e5766fe536c0}</Project>
       <Name>Microsoft.TestCommon</Name>

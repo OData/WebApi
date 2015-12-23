@@ -133,6 +133,32 @@ namespace System.Web.OData.Query.Expressions
             return node;
         }
 
+        protected override MemberListBinding VisitMemberListBinding(MemberListBinding node)
+        {
+            return base.VisitMemberListBinding(node);
+        }
+
+        protected override MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding node)
+        {
+            return base.VisitMemberMemberBinding(node);
+        }
+
+        protected override Expression VisitMemberInit(MemberInitExpression node)
+        {
+            VisitNew(node.NewExpression);
+            Out(" {");
+            foreach(MemberAssignment memberNode in node.Bindings)
+            {
+                Out(memberNode.Member.Name + " = ");
+
+                Visit(memberNode.Expression);
+                Out(", ");
+            }
+            Out("}");
+
+            return node;
+        }
+
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
             int argindex = 0;

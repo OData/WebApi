@@ -8,6 +8,7 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Query.Expressions;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
+using System.Collections.Generic;
 
 namespace System.Web.OData
 {
@@ -205,6 +206,31 @@ namespace System.Web.OData
             return orderedQuery;
         }
 
+        public static IQueryable GroupBy(IQueryable query, Expression expression, Type type, Type wrapperType)
+        {
+            MethodInfo groupByMethod = ExpressionHelperMethods.QueryableGroupByGeneric.MakeGenericMethod(type, wrapperType);
+            var grp = groupByMethod.Invoke(null, new object[] { query, expression }) as IQueryable;
+
+            return grp;
+        }
+
+        public static IQueryable Select(IQueryable query, LambdaExpression expression, Type type)
+        {
+            MethodInfo selectMethod = ExpressionHelperMethods.QueryableSelectGeneric.MakeGenericMethod(type, expression.Body.Type);
+            return selectMethod.Invoke(null, new object[] { query, expression  }) as IQueryable;
+        }
+
+        public static IQueryable Aggregate(IQueryable query, object init, LambdaExpression sumLambda, Type type, Type wrapperType)
+        {
+            Type returnType = sumLambda.Body.Type;
+            MethodInfo sumMethod = ExpressionHelperMethods.QueryableAggregateGeneric.MakeGenericMethod(type, returnType);
+            var agg = sumMethod.Invoke(null, new object[] { query, init, sumLambda });
+
+            MethodInfo converterMethod = ExpressionHelperMethods.EntityAsQueryable.MakeGenericMethod(wrapperType);
+
+            return converterMethod.Invoke(null, new object[] { agg } ) as IQueryable;
+        }
+
         public static IQueryable Where(IQueryable query, Expression where, Type type)
         {
             MethodInfo whereMethod = ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(type);
@@ -235,7 +261,7 @@ namespace System.Web.OData
             }
         }
 
-        private static LambdaExpression GetPropertyAccessLambda(Type type, string propertyName)
+        public static LambdaExpression GetPropertyAccessLambda(Type type, string propertyName)
         {
             ParameterExpression odataItParameter = Expression.Parameter(type, "$it");
             MemberExpression propertyAccess = Expression.Property(odataItParameter, propertyName);

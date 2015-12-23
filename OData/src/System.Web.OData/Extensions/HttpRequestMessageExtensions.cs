@@ -18,6 +18,7 @@ using System.Web.OData.Properties;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
+using System.Web.Http.Routing;
 
 namespace System.Web.OData.Extensions
 {
@@ -210,12 +211,16 @@ namespace System.Web.OData.Extensions
                 throw Error.ArgumentNull("request");
             }
 
-            Uri requestUri = request.RequestUri;
-
-            if (!requestUri.IsAbsoluteUri)
+            if (!request.RequestUri.IsAbsoluteUri)
             {
-                throw Error.ArgumentUriNotAbsolute("request", requestUri);
+                throw Error.ArgumentUriNotAbsolute("request", request.RequestUri);
             }
+
+            // Reconstruct RequestUri with CreateODataLink to support Uri override scenarios.
+            UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
+            string odataLink = urlHelper.CreateODataLink(request.ODataProperties().Path.Segments);
+
+            Uri requestUri = new Uri(odataLink);
 
             return GetNextPageLink(requestUri, request.GetQueryNameValuePairs(), pageSize);
         }

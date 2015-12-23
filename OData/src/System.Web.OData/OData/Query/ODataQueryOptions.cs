@@ -94,6 +94,27 @@ namespace System.Web.OData.Query
                 _queryOptionParser.Resolver = resolverSettings.CreateResolver(context.Model);
             }
 
+            // Build Apply first
+            BuildApplyQueryOption(queryParameters);
+
+            if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
+            {
+                // We have $apply clause and need to modify context for other clauses
+                this.Context.ElementType = Apply.ApplyClause.TypeReference.Definition;
+
+                // And reconfigure _queryOptionParser
+                var resolver = _queryOptionParser.Resolver;
+                _queryOptionParser = new ODataQueryOptionParser(
+                   context.Model,
+                   context.ElementType,
+                   context.NavigationSource,
+                   queryParameters)
+                {
+                    Resolver = resolver
+                };
+            }
+
+            // Build other query options for modified context
             BuildQueryOptions(queryParameters);
 
             Validator = new ODataQueryValidator();
@@ -120,9 +141,15 @@ namespace System.Web.OData.Query
         public SelectExpandQueryOption SelectExpand { get; private set; }
 
         /// <summary>
+        /// Gets the <see cref="ApplyQueryOption"/>.
+        /// </summary>
+        public ApplyQueryOption Apply { get; private set; }
+
+        /// <summary>
         /// Gets the <see cref="FilterQueryOption"/>.
         /// </summary>
         public FilterQueryOption Filter { get; private set; }
+
 
         /// <summary>
         /// Gets the <see cref="OrderByQueryOption"/>.
@@ -205,7 +232,8 @@ namespace System.Web.OData.Query
                  queryOptionName == "$select" ||
                  queryOptionName == "$format" ||
                  queryOptionName == "$skiptoken" ||
-                 queryOptionName == "$deltatoken";
+                 queryOptionName == "$deltatoken" ||
+                 queryOptionName == "$apply";
         }
 
         /// <summary>
@@ -285,6 +313,16 @@ namespace System.Web.OData.Query
             }
 
             IQueryable result = query;
+
+            // First apply $apply
+            // Section 3.15 of the spec http://docs.oasis-open.org/odata/odata-data-aggregation-ext/v4.0/cs01/odata-data-aggregation-ext-v4.0-cs01.html#_Toc378326311
+            if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
+            {
+                result = Apply.ApplyTo(result, querySettings, _assembliesResolver);
+                Request.ODataProperties().ApplyClause = Apply.ApplyClause;
+                // We know ClrType returned from the $apply clause (it was generated on the fly). Letting other to use it
+                this.Context.ElementClrType = Apply.ResultClrType;
+            }
 
             // Construct the actual query and apply them in the following order: filter, orderby, skip, top
             if (IsAvailableODataQueryOption(Filter, AllowedQueryOptions.Filter))
@@ -591,6 +629,23 @@ namespace System.Web.OData.Query
             }
             return parameters;
         }
+
+        private void BuildApplyQueryOption(IDictionary<string, string> queryParameters)
+        {
+            var applyQuery = queryParameters.Where(kvp => kvp.Key.ToLowerInvariant() == "$apply").Select(kvp => kvp.Value).FirstOrDefault();
+            if (applyQuery != null)
+            {
+                ThrowIfEmpty(applyQuery, "$apply");
+                RawValues.Apply = applyQuery;
+                Apply = new ApplyQueryOption(applyQuery, Context, _queryOptionParser);
+            }
+            else
+            {
+                // We do not have $apply, do nothing
+            }
+
+        }
+
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase",
             Justification = "Need lower case string here.")]

@@ -16,6 +16,7 @@ using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -227,6 +228,9 @@ namespace System.Web.OData.Formatter.Serialization
                     entry.Properties = entry.Properties.Concat(dynamicProperties);
                 }
             }
+
+            // Mark dynamicly generated enities as Transient
+            entry.IsTransient = entityInstanceContext.EntityType is EdmDynamicEntityType;
 
             IEnumerable<ODataAction> actions = CreateODataActions(selectExpandNode.SelectedActions, entityInstanceContext);
             foreach (ODataAction action in actions)

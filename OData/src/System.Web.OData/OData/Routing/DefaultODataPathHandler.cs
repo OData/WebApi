@@ -137,6 +137,8 @@ namespace System.Web.OData.Routing
                 uriParser = new ODataUriParser(model, serviceRootUri, fullUri);
             }
 
+            uriParser.UrlConventions = resolverSettings.UrlConventions;
+
             uriParser.Resolver = resolverSettings.CreateResolver(model);
 
             Semantic.ODataPath path;

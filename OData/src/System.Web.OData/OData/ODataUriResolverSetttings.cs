@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Metadata;
 using Microsoft.OData.Edm;
 
@@ -15,6 +16,8 @@ namespace System.Web.OData
         public bool EnumPrefixFree { get; set; }
 
         public bool AlternateKeys { get; set; }
+
+        public ODataUrlConventions UrlConventions = ODataUrlConventions.Default;
 
         public ODataUriResolver CreateResolver(IEdmModel model)
         {

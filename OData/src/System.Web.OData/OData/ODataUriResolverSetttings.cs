@@ -9,6 +9,8 @@ namespace System.Web.OData
 {
     internal class ODataUriResolverSetttings
     {
+        private ODataUrlConventions _urlConventions = ODataUrlConventions.Default;
+
         public bool CaseInsensitive { get; set; }
 
         public bool UnqualifiedNameCall { get; set; }
@@ -17,7 +19,11 @@ namespace System.Web.OData
 
         public bool AlternateKeys { get; set; }
 
-        public ODataUrlConventions UrlConventions = ODataUrlConventions.Default;
+        public ODataUrlConventions UrlConventions
+        {
+            get { return _urlConventions; }
+            set { _urlConventions = value; }
+        }
 
         public ODataUriResolver CreateResolver(IEdmModel model)
         {

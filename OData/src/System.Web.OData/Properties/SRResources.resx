@@ -282,6 +282,12 @@
   <data name="MustBeEnumProperty" xml:space="preserve">
     <value>The property '{0}' on type '{1}' must be an Enum property.</value>
   </data>
+  <data name="MustBeDateTimeProperty" xml:space="preserve">
+    <value>The property '{0}' on type '{1}' must be a System.DateTime property.</value>
+  </data>
+  <data name="MustBeTimeSpanProperty" xml:space="preserve">
+    <value>The property '{0}' on type '{1}' must be a System.TimeSpan property.</value>
+  </data>
   <data name="MustHaveMatchingMultiplicity" xml:space="preserve">
     <value>The multiplicity of the '{0}' property must be '{1}'.</value>
   </data>
@@ -327,8 +333,11 @@
   <data name="PropertyMustBeString" xml:space="preserve">
     <value>The value must be a string.</value>
   </data>
-  <data name="PropertyMustBeDateTimeOffset" xml:space="preserve">
-    <value>The value must be a DateTimeOffset.</value>
+  <data name="PropertyMustBeDateTimeOffsetOrDate" xml:space="preserve">
+    <value>The value must be a DateTimeOffset or Date.</value>
+  </data>
+  <data name="PropertyMustBeTimeOfDay" xml:space="preserve">
+    <value>The value must be a Edm.TimeOfDay.</value>
   </data>
   <data name="PropertyMustBeStringLengthOne" xml:space="preserve">
     <value>The value must be a string with a length of 1.</value>

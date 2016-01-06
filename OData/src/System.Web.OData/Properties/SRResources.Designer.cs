@@ -1096,6 +1096,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; must be a System.DateTime property..
+        /// </summary>
+        internal static string MustBeDateTimeProperty {
+            get {
+                return ResourceManager.GetString("MustBeDateTimeProperty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; must be an Enum property..
         /// </summary>
         internal static string MustBeEnumProperty {
@@ -1128,6 +1137,15 @@ namespace System.Web.OData.Properties {
         internal static string MustBePrimitiveType {
             get {
                 return ResourceManager.GetString("MustBePrimitiveType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on type &apos;{1}&apos; must be a System.TimeSpan property..
+        /// </summary>
+        internal static string MustBeTimeSpanProperty {
+            get {
+                return ResourceManager.GetString("MustBeTimeSpanProperty", resourceCulture);
             }
         }
         
@@ -1492,11 +1510,11 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The value must be a DateTimeOffset..
+        ///   Looks up a localized string similar to The value must be a DateTimeOffset or Date..
         /// </summary>
-        internal static string PropertyMustBeDateTimeOffset {
+        internal static string PropertyMustBeDateTimeOffsetOrDate {
             get {
-                return ResourceManager.GetString("PropertyMustBeDateTimeOffset", resourceCulture);
+                return ResourceManager.GetString("PropertyMustBeDateTimeOffsetOrDate", resourceCulture);
             }
         }
         
@@ -1533,6 +1551,15 @@ namespace System.Web.OData.Properties {
         internal static string PropertyMustBeStringMaxLengthOne {
             get {
                 return ResourceManager.GetString("PropertyMustBeStringMaxLengthOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The value must be a Edm.TimeOfDay..
+        /// </summary>
+        internal static string PropertyMustBeTimeOfDay {
+            get {
+                return ResourceManager.GetString("PropertyMustBeTimeOfDay", resourceCulture);
             }
         }
         

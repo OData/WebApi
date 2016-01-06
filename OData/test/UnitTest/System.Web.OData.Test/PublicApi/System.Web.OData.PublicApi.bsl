@@ -1088,6 +1088,21 @@ public sealed class System.Web.OData.Builder.ODataConventionModelBuilderExtensio
 	public static ODataConventionModelBuilder EnableLowerCamelCase (ODataConventionModelBuilder builder, NameResolverOptions options)
 }
 
+[
+ExtensionAttribute(),
+]
+public sealed class System.Web.OData.Builder.PrimitivePropertyConfigurationExtensions {
+	[
+	ExtensionAttribute(),
+	]
+	public static PrimitivePropertyConfiguration AsDate (PrimitivePropertyConfiguration property)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static PrimitivePropertyConfiguration AsTimeOfDay (PrimitivePropertyConfiguration property)
+}
+
 public class System.Web.OData.Builder.ActionConfiguration : ProcedureConfiguration {
 	bool IsSideEffecting  { public virtual get; }
 	ProcedureKind Kind  { public virtual get; }
@@ -1453,6 +1468,7 @@ public class System.Web.OData.Builder.PrimitivePropertyConfiguration : Structura
 
 	PropertyKind Kind  { public virtual get; }
 	System.Type RelatedClrType  { public virtual get; }
+	System.Nullable`1[[Microsoft.OData.Edm.EdmPrimitiveTypeKind]] TargetEdmTypeKind  { public get; }
 
 	public PrimitivePropertyConfiguration IsConcurrencyToken ()
 	public PrimitivePropertyConfiguration IsOptional ()

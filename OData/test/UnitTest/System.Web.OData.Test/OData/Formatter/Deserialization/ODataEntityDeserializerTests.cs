@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -450,6 +451,54 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.NotNull(customer.CustomerProperties);
             Assert.Equal(1, customer.CustomerProperties.Count());
             Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), customer.CustomerProperties["GuidProperty"]);
+        }
+
+        public class MyCustomer
+        {
+            public int Id { get; set; }
+
+            [Column(TypeName = "date")]
+            public DateTime Birthday { get; set; }
+
+            [Column(TypeName = "time")]
+            public TimeSpan ReleaseTime { get; set; }
+        }
+
+        [Fact]
+        public void ReadEntry_CanReadDatTimeRelatedProperties()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<MyCustomer>().Namespace = "NS";
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntityTypeReference vipCustomerTypeReference = model.GetEdmTypeReference(typeof(MyCustomer)).AsEntity();
+
+            var deserializerProvider = new DefaultODataDeserializerProvider();
+            var deserializer = new ODataEntityDeserializer(deserializerProvider);
+
+            ODataEntry odataEntry = new ODataEntry
+            {
+                Properties = new[]
+                {
+                    new ODataProperty { Name = "Id", Value = 121 },
+                    new ODataProperty { Name = "Birthday", Value = new Date(2015, 12, 12) },
+                    new ODataProperty { Name = "ReleaseTime", Value = new TimeOfDay(1, 2, 3, 4) },
+                },
+                TypeName = "NS.MyCustomer"
+            };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model };
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(odataEntry);
+
+            // Act
+            var customer = deserializer.ReadEntry(entry, vipCustomerTypeReference, readContext) as MyCustomer;
+
+            // Assert
+            Assert.NotNull(customer);
+            Assert.Equal(121, customer.Id);
+            Assert.Equal(new DateTime(2015, 12, 12), customer.Birthday);
+            Assert.Equal(new TimeSpan(0, 1, 2, 3, 4), customer.ReleaseTime);
         }
 
         [Fact]

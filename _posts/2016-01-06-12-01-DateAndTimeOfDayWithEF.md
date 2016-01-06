@@ -15,7 +15,7 @@ So, this doc describes the solution about how to support __Edm.Date__ type with 
 
 It should support to map the type between __date__ type in Database and __Edm.Date__ type through the CLR `System.DateTime` type. The map is shown in the following figure:
 
-![]({{site.baseurl}}/img/12-01-DateTypeMapping.PNG)
+![]({{site.baseurl}}/img/12-01-DateTypeMapping.png)
 
 So, it should provide the below functionalities for the developer:
 
@@ -101,25 +101,15 @@ namespace Microsoft.OData.Edm.Library
 {% endhighlight %}
 Where, __Edm.TimeOfDay__ is the corresponding primitive type Kind.
 
-
 #### Configure Date & Time in Web API by Fluent API
 
 __By default__, Web API has the following mapping between CLR types and Edm types:
 
-|Property CLR Type |	Property Edm Type|
-|:-----------------|:------|
-|System.DateTime|	Edm.DateTimeOffset|	
-|System.TimeSpan|	Edm.Duration|
-
+![]({{site.baseurl}}/img/12-01-mapping1.png)
 
 We should provide a methodology to map `System.DateTime` to __Edm.Date__ type, and `System.TimeSpan` to __Edm.TimeOfDay__ type as follows:
 
-|Property CLR Type |	Property Edm Type| Methodology|
-|:-----------------|:------|:----:|
-|System.DateTime|	Edm.DateTimeOffset|	by default|
-||	Edm.Date|	New |
-|System.TimeSpan|	Edm.Duration|	by default|
-||	Edm.TimeOfDay|New|
+![]({{site.baseurl}}/img/12-01-mapping2.png)
 
 #### Extension methods
 
@@ -166,7 +156,7 @@ In this class, it will identify the __Column__ attribute applied to `System.Date
 
 After insert the instance of ColumnAttributeEdmPropertyConvention into the conventions in the convention model builder:
 
-![]({{site.baseurl}}/img/12-01-conventions.PNG)
+![]({{site.baseurl}}/img/12-01-conventions.png)
 
 For example, the developer can do as follows to build the Edm model:
 {% highlight csharp %}

@@ -9,7 +9,7 @@ The Transact-SQL has __date (Format: YYYY-MM-DD)__ type, but there isn’t a CLR
 
 OData V4 lib provides a CLR `struct Date` type and the corresponding primitive type kind __Edm.Date__. Web API OData V4 supports it. However, EF doesn’t recognize this CLR type, and it can’t map `struct Date` directly to _date_ type.
 
-So, this doc describes the solution about how to support __Edm.Date__ type with Entity Framework. Meanwhile, this doc also covers the __Edm.TimeOfDay_ type with EF.
+So, this doc describes the solution about how to support __Edm.Date__ type with Entity Framework. Meanwhile, this doc also covers the __Edm.TimeOfDay__ type with EF.
 
 ### Scopes
 
@@ -22,7 +22,7 @@ So, it should provide the below functionalities for the developer:
 1.	Can configure the `System.DateTime`/`System.TimeSpan` property to __Edm.Date__/ __Edm.TimeOfDay__.
 2.	Can serialize the __date__/ __time__ value in the DB as __Edm.Date__ /__Edm.TimeOfDay__ value format.
 3.	Can de-serialize the __Edm.Date__/__Edm.TimeOfDay__ value as __date__/ __time__ value into DB.
-4.	Can do query option on the ___date__/ __time__ value.
+4.	Can do query option on the __date__/ __time__ value.
 
 
 Most important, EF doesn’t support the primitive collection. So, Collection of date is not in the scope. The developer can use navigation property to work around.

@@ -175,5 +175,166 @@ public class Customer
  }
 {% endhighlight %}
 
+Now, the developer can call as follows to build the Edm model:
+{% highlight csharp %}
+ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+
+builder.EntityType<Customer>();
+
+IEdmModel model = builder.GetEdmModel();
+{% endhighlight %}
+
+#### Serialize 
+##### System.DateTime value to Edm.Date
+
+We should modify __ODataEntityTypeSerializer__ and __ODataComplexTypeSerializer__ to identify whether or not the System.DataTime is serialized to Edm.Date. So, we should add a function in __ODataPrimitiveSerializer__:
+{% highlight csharp %}
+internal static object ConvertUnsupportedPrimitives(object value, IEdmPrimitiveTypeReference primitiveType)
+{
+    Type type = value.GetType();
+    if (primitiveType.IsDate() && TypeHelper.IsDateTime(type))
+    {
+         Date dt = (DateTime)value;
+         return dt;
+    }
+    … 
+}
+{% endhighlight %}
+
+##### System.TimeSpan value to Edm.TimeOfDay
+
+Add the following codes into the above function:
+{% highlight csharp %}
+if (primitiveType.IsTimeOfDay() && TypeHelper.IsTimeSpan(type))
+{
+   TimeOfDay tod = (TimeSpan)value;
+   return tod;
+}
+{% endhighlight %}
+
+##### Top level property
+
+If the end user want to query the top level property, for example:
+{% highlight csharp %}
+   ~/Customers(1)/Birthday
+{% endhighlight %} 
+The developer must take responsibility to convert the value into its corresponding type.
 
 
+#### De-serialize
+##### Edm.Date to System.DateTime value
+
+It’s easy to add the following code in __EdmPrimitiveHelpers__ to convert `struct Date` to __System.DateTime__:
+
+{% highlight csharp %}
+if (value is Date)
+{
+    Date dt = (Date)value;
+    return (DateTime)dt;
+}
+{% endhighlight %} 
+
+##### Edm.TimeOfDay to System.TimeSpan value
+Add codes in __EdmPrimitiveHelpers__ to convert `struct TimeOfDay` to __System.TimeSpan__:
+
+{% highlight csharp %}
+else if(type == typeof(TimeSpan))
+{
+   if (value is TimeOfDay)
+   {
+       TimeOfDay tod = (TimeOfDay)value;
+       return (TimeSpan)tod;
+   }
+}
+
+{% endhighlight %} 
+
+#### Query options on Date & Time
+
+We should to support the following scenarios:
+
+{% highlight csharp %}
+• ~/Customers?$filter=Birthday eq 2015-12-14
+• ~/Customers?$filter=year(Birthday) ne 2015
+• ~/Customers?$filter=Publishday eq null
+• ~/Customers?$orderby=Birthday desc
+• ~/Customers?$select=Birthday
+• ~/Customers?$filter=CreatedTime eq 04:03:05.0790000"
+...
+{% endhighlight %} 
+Fortunately, Web API supports the most scenarios already, however, we should make some codes changes in __FilterBinder__ class to make TimeOfDay scenario to work. 
+
+#### Example
+
+We re-use the Customer model in the Scope. We use the Lambda expression to build the Edm Model as:
+
+{% highlight csharp %}
+public IEdmModel GetEdmModel()
+{
+  ODataModelBuilder builder = new ODataModelBuilder();
+  var customer = builder.EntitySet<Customer>(“Customers”).EntityType;
+  customer.HasKey(c => c.Id);
+  customer.Property(c => c.Birthday).AsDate();
+  customer.Property(c => c.PublishDay).AsDate();
+  return builder.GetEdmModel();
+}
+{% endhighlight %} 
+
+Here’s the metadata document:
+{% highlight xml %}
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:DataServices>
+    <Schema Namespace="NS" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="Customer">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Birthday" Type="Edm.Date" Nullable="false" />
+        <Property Name="PublishDay" Type="Edm.Date" />
+      </EntityType>
+    </Schema>
+    <Schema Namespace="Default" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityContainer Name="Container">
+        <EntitySet Name="Customers" EntityType="NS.Customer " />
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
+{% endhighlight %} 
+
+We can query:
+
+__GET ~/Customers__
+
+{% highlight JSON %}
+{
+  "@odata.context": "http://localhost/odata/$metadata#Customers",
+  "value": [
+    {
+      "Id": 1,
+      "Birthday": "2015-12-31",
+      "PublishDay": null
+    },
+    …
+  ]
+}
+
+{% endhighlight %} 
+
+We can do filter:
+
+__~/Customers?$filter=Birthday eq 2017-12-31__
+{% highlight JSON %}
+{
+  "@odata.context": "http://localhost/odata/$metadata#Customers",
+  "value": [
+    {
+      "Id": 2,
+      "Birthday": "2017-12-31",
+      "PublishDay": null
+    }
+  ]
+}
+{% endhighlight %} 

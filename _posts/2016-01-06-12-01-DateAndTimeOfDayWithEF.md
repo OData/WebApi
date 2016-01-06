@@ -32,12 +32,9 @@ Most important, EF doesn’t support the primitive collection. So, Collection of
 
 #### Date & Time type in SQL DB
 
-Below is the date & time type mapping between DB and .NET. 
+Below is the date & time type mapping between DB and .NET:
 
-|MySQL data types |	SSDL|	CSDL|	.NET|
-|:-----------------|:------|:------|:---------|
-|date, datetime, datetime2|	date, datetime, datetime2|	DateTime	|__System.DateTime__|
-|time|	time|	Time|	__System.TimeSpan__|
+![]({{site.baseurl}}/img/12-01-mapping3.png) 
 
 
 So, From .NET view, only `System.DateTime` is used to represent the _date_ value, meanwhile only `System.TimeSpan` is used to represent the __time__ value.
@@ -105,7 +102,7 @@ Where, __Edm.TimeOfDay__ is the corresponding primitive type Kind.
 
 __By default__, Web API has the following mapping between CLR types and Edm types:
 
-![]({{site.baseurl}}/img/12-01-mapping1.png)
+![]({{site.baseurl}}/img/12-01-mapping1.png) 
 
 We should provide a methodology to map `System.DateTime` to __Edm.Date__ type, and `System.TimeSpan` to __Edm.TimeOfDay__ type as follows:
 

@@ -429,7 +429,7 @@ namespace System.Web.OData
         /// </summary>
         /// <param name="edmType">The structure Edm type.</param>
         /// <returns>The <see cref="JObject"/> represents the related structure Edm type.</returns>
-        public static JObject CreateSwaggerDefinitionForStructureType(IEdmStructuredType edmType)
+        public static JObject CreateSwaggerTypeDefinitionForStructuredType(IEdmStructuredType edmType)
         {
             if (edmType == null)
             {

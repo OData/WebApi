@@ -276,16 +276,18 @@ namespace System.Web.OData.Extensions
         }
 
         /// <summary>
-        /// Enable the null dynamic property to be serialized.
+        /// Sets whether or not the null dynamic property to be serialized.
         /// </summary>
-        public static void EnableNullDynamicProperty(this HttpConfiguration configuration)
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="serialize"><c>true</c> to serialize null dynamic property, <c>false</c> otherwise.</param>
+        public static void SetSerializeNullDynamicProperty(this HttpConfiguration configuration, bool serialize)
         {
             if (configuration == null)
             {
                 throw Error.ArgumentNull("configuration");
             }
 
-            configuration.Properties[NullDynamicPropertyKey] = true;
+            configuration.Properties[NullDynamicPropertyKey] = serialize;
         }
 
         /// <summary>

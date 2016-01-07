@@ -53,40 +53,18 @@ namespace System.Web.OData.Formatter.Serialization
         public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType,
             ODataSerializerContext writeContext)
         {
-            bool doNotSerializeIfNull = false;
-            bool serializeAsEmptyIfNull = false;
-
-            if (writeContext.Request != null)
-            {
-                var config = writeContext.Request.GetConfiguration();
-                if (config != null)
-                {
-                    doNotSerializeIfNull = config.GetDoNotSerializeNullCollections();
-                    serializeAsEmptyIfNull = config.GetSerializeNullCollectionsAsEmpty();
-                }
-            }
-            if (graph == null && !(doNotSerializeIfNull || serializeAsEmptyIfNull))
-            {
-                throw new SerializationException(Error.Format(SRResources.NullCollectionsCannotBeSerialized));
-            }
-
             IEnumerable enumerable = graph as IEnumerable;
-            if (enumerable == null && !(doNotSerializeIfNull || serializeAsEmptyIfNull))
+            if (enumerable == null && graph != null)
             {
                 throw Error.Argument("graph", SRResources.ArgumentMustBeOfType, typeof(IEnumerable).Name);
             }
+
             if (expectedType == null)
             {
                 throw Error.ArgumentNull("expectedType");
             }
 
-            if (enumerable == null && doNotSerializeIfNull)
-            {
-                return null;
-            }
-
             IEdmTypeReference elementType = GetElementType(expectedType);
-
             return CreateODataCollectionValue(enumerable, elementType, writeContext);
         }
 
@@ -120,26 +98,8 @@ namespace System.Web.OData.Formatter.Serialization
                 }
             }
 
-            bool doNotSerializeIfNull = false;
-            bool serializeAsEmptyIfNull = false;
-
-            if (writeContext.Request != null)
-            {
-                var config = writeContext.Request.GetConfiguration();
-                if (config != null)
-                {
-                    doNotSerializeIfNull = config.GetDoNotSerializeNullCollections();
-                    serializeAsEmptyIfNull = config.GetSerializeNullCollectionsAsEmpty();
-                }
-            }
-
-            if (graph == null && doNotSerializeIfNull)
-            {
-                return;
-            }
             writer.WriteStart(collectionStart);
-
-            if (graph != null || !serializeAsEmptyIfNull)
+            if (graph != null)
             {
                 ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
                 if (collectionValue != null)

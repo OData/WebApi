@@ -607,9 +607,6 @@
   <data name="ReturnEntityWithoutEntitySet" xml:space="preserve">
     <value>The EDM type '{0}' is already declared as an entity type. Use the method 'ReturnsFromEntitySet' if the return type is an entity.</value>
   </data>
-  <data name="NullCollectionsCannotBeSerialized" xml:space="preserve">
-    <value>Null collections cannot be serialized.</value>
-  </data>
   <data name="UnterminatedStringLiteral" xml:space="preserve">
     <value>Unterminated string literal at {0} in segment '{1}'.</value>
   </data>

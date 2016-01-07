@@ -51,23 +51,6 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Gets the Swagger model.
-        /// </summary>
-        public virtual JObject SwaggerModel
-        {
-            get
-            {
-                if (SwaggerDocument == null)
-                {
-                    ConvertToSwaggerModel();
-                }
-
-                Contract.Assert(SwaggerDocument != null);
-                return SwaggerDocument;
-            }
-        }
-
-        /// <summary>
         /// Gets the document in the Swagger.
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA2227:EnableSetterForProperty", Justification = "Enable setter for virtual property")]
@@ -106,7 +89,8 @@ namespace System.Web.OData
         /// Converts the Edm model to Swagger model.
         /// </summary>
         /// <returns>The <see cref="Newtonsoft.Json.Linq.JObject"/> represents the Swagger model.</returns>
-        public virtual JObject ConvertToSwaggerModel()
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Property is not appropriate, method does work")]
+        public virtual JObject GetSwaggerModel()
         {
             if (SwaggerDocument != null)
             {

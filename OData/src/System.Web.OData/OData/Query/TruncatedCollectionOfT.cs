@@ -108,7 +108,7 @@ namespace System.Web.OData.Query
         }
 
         /// <inheritdoc />
-        public virtual long? TotalCount
+        public long? TotalCount
         {
             get { return _totalCount; }
         }

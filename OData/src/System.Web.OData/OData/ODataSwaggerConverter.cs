@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 namespace System.Web.OData
 {
     /// <summary>
+    /// <para>QualityBand : Preview</para>
     /// Represents an <see cref="ODataSwaggerConverter"/> used to converter an Edm model to Swagger model.
     /// </summary>
     public class ODataSwaggerConverter

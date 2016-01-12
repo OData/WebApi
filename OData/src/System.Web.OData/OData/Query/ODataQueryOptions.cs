@@ -559,7 +559,7 @@ namespace System.Web.OData.Query
             IDictionary<string, string> parameters = request.GetQueryNameValuePairs().ToDictionary(p => p.Key, p => p.Value);
             IEdmEntityType entityType = context.ElementType as IEdmEntityType;
 
-            if (entityType != null && parameters.ContainsKey("$select"))
+            if (entityType != null)
             {
                 var navigationProperties = entityType.NavigationProperties();
                 if (navigationProperties != null)
@@ -580,7 +580,8 @@ namespace System.Web.OData.Query
                     {
                         if (parameters.ContainsKey("$expand"))
                         {
-                            parameters["$expand"] += "," + autoExpandNavigationProperties;
+                            parameters["$expand"] = String.Format(CultureInfo.InvariantCulture, "{0},{1}",
+                                autoExpandNavigationProperties, parameters["$expand"]);
                         }
                         else
                         {

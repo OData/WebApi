@@ -27,7 +27,7 @@ namespace System.Web.OData.Query
 
             // Assert
             Assert.NotNull(model);
-            Assert.Equal(8, model.SchemaElements.Count());
+            Assert.Equal(11, model.SchemaElements.Count());
             Assert.Contains(entityClrType.Name, model.SchemaElements.Select(e => e.Name));
             Assert.Same(model, actionDescriptor.GetEdmModel(entityClrType));
         }
@@ -49,7 +49,7 @@ namespace System.Web.OData.Query
             // Assert
             Assert.NotSame(model1, model2);
             Assert.NotNull(model1);
-            Assert.Equal(8, model1.SchemaElements.Count());
+            Assert.Equal(11, model1.SchemaElements.Count());
             Assert.Contains(type1.Name, model1.SchemaElements.Select(e => e.Name));
 
             Assert.NotNull(model2);

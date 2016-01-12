@@ -6,12 +6,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using ODataPathSegment = Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment;
 
 namespace System.Web.OData.Query
 {
@@ -288,7 +290,7 @@ namespace System.Web.OData.Query
         }
 
         // Process $levels in SelectExpandClause.
-        private static SelectExpandClause ProcessLevels(
+        private SelectExpandClause ProcessLevels(
             SelectExpandClause selectExpandClause,
             int levelsMaxLiteralExpansionDepth,
             out bool levelsEncountered,
@@ -325,7 +327,7 @@ namespace System.Web.OData.Query
         }
 
         // Process $levels in SelectedItems.
-        private static IEnumerable<SelectItem> ProcessLevels(
+        private IEnumerable<SelectItem> ProcessLevels(
             IEnumerable<SelectItem> selectItems,
             int levelsMaxLiteralExpansionDepth,
             out bool levelsEncountered,
@@ -352,7 +354,7 @@ namespace System.Web.OData.Query
                     ExpandedNavigationSelectItem expandItem = ProcessLevels(
                         item,
                         levelsMaxLiteralExpansionDepth,
-                        out levelsEncouteredInExpand, 
+                        out levelsEncouteredInExpand,
                         out isMaxLevelInExpand);
 
                     if (item.LevelsOption != null && item.LevelsOption.Level > 0 && expandItem == null)
@@ -374,12 +376,68 @@ namespace System.Web.OData.Query
                     }
                 }
             }
-
             return items;
         }
 
+        private static IEnumerable<SelectItem> GetAutoExpandedNavigationSelectItems(
+            IEdmEntityType entityType, 
+            IEdmModel model,
+            string alreadyExpandedNavigationSourceName,
+            IEdmNavigationSource navigationSource,
+            bool isAllSelected)
+        {
+            List<SelectItem> expandItems = new List<SelectItem>();
+            if (entityType != null)
+            {
+                var navigationProperties = entityType.NavigationProperties();
+                if (navigationProperties != null)
+                {
+                    foreach (var navigationProperty in navigationProperties)
+                    {
+                        if (!alreadyExpandedNavigationSourceName.Equals(navigationProperty.Name) &&
+                            EdmLibHelpers.IsAutoExpand(navigationProperty, model))
+                        {
+                            IEdmNavigationSource currentEdmNavigationSource =
+                                navigationSource.FindNavigationTarget(navigationProperty);
+
+                            List<ODataPathSegment> pathSegments = new List<ODataPathSegment>()
+                            {
+                                new NavigationPropertySegment(navigationProperty, currentEdmNavigationSource)
+                            };
+
+                            ODataExpandPath expandPath = new ODataExpandPath(pathSegments);
+                            SelectExpandClause selectExpandClause = new SelectExpandClause(new List<SelectItem>(), true);
+                            ExpandedNavigationSelectItem item = new ExpandedNavigationSelectItem(expandPath,
+                                currentEdmNavigationSource, selectExpandClause);
+                            if (!currentEdmNavigationSource.EntityType().Equals(entityType))
+                            {
+                                IEnumerable<SelectItem> nestedSelectItems = GetAutoExpandedNavigationSelectItems(
+                                    currentEdmNavigationSource.EntityType(),
+                                    model,
+                                    alreadyExpandedNavigationSourceName,
+                                    item.NavigationSource,
+                                    true);
+                                selectExpandClause = new SelectExpandClause(nestedSelectItems, true);
+                                item = new ExpandedNavigationSelectItem(expandPath, currentEdmNavigationSource,
+                                    selectExpandClause);
+                            }
+
+                            expandItems.Add(item);
+                            if (!isAllSelected)
+                            {
+                                PathSelectItem pathSelectItem = new PathSelectItem(
+                                    new ODataSelectPath(pathSegments));
+                                expandItems.Add(pathSelectItem);
+                            }
+                        }
+                    }
+                }
+            }
+            return expandItems;
+        }
+
         // Process $levels in ExpandedNavigationSelectItem.
-        private static ExpandedNavigationSelectItem ProcessLevels(
+        private ExpandedNavigationSelectItem ProcessLevels(
             ExpandedNavigationSelectItem expandItem,
             int levelsMaxLiteralExpansionDepth,
             out bool levelsEncounteredInExpand,
@@ -440,17 +498,39 @@ namespace System.Web.OData.Query
             // Correct level value
             level++;
 
+            var entityType = expandItem.NavigationSource.EntityType();
+            string alreadyExpandedNavigationSourceName =
+                (expandItem.PathToNavigationProperty.LastSegment as NavigationPropertySegment).NavigationProperty.Name;
+            IEnumerable<SelectItem> autoExpandNavigationSelectItems = GetAutoExpandedNavigationSelectItems(
+                entityType,
+                Context.Model,
+                alreadyExpandedNavigationSourceName, 
+                expandItem.NavigationSource, 
+                selectExpandClause.AllSelected);
+            bool hasAutoExpandInExpand = (autoExpandNavigationSelectItems.Count() != 0);
+
             while (level > 0)
             {
                 if (item == null)
                 {
-                    currentSelectExpandClause = selectExpandClause;
+                    if (hasAutoExpandInExpand)
+                    {
+                        currentSelectExpandClause = new SelectExpandClause(
+                            new SelectItem[] { }.Concat(selectExpandClause.SelectedItems)
+                                .Concat(autoExpandNavigationSelectItems),
+                            selectExpandClause.AllSelected);
+                    }
+                    else
+                    {
+                        currentSelectExpandClause = selectExpandClause;
+                    }
                 }
                 else if (selectExpandClause.AllSelected)
                 {
                     // Concat the processed items
                     currentSelectExpandClause = new SelectExpandClause(
-                        new SelectItem[] { item }.Concat(selectExpandClause.SelectedItems),
+                        new SelectItem[] { item }.Concat(selectExpandClause.SelectedItems)
+                            .Concat(autoExpandNavigationSelectItems),
                         selectExpandClause.AllSelected);
                 }
                 else
@@ -462,7 +542,9 @@ namespace System.Web.OData.Query
                     // Keep default SelectItems before expanded item to keep consistent with normal SelectExpandClause 
                     SelectItem[] items = new SelectItem[] { item, pathSelectItem };
                     currentSelectExpandClause = new SelectExpandClause(
-                        new SelectItem[] { }.Concat(selectExpandClause.SelectedItems).Concat(items),
+                        new SelectItem[] { }.Concat(selectExpandClause.SelectedItems)
+                            .Concat(items)
+                            .Concat(autoExpandNavigationSelectItems),
                         selectExpandClause.AllSelected);
                 }
 
@@ -485,7 +567,7 @@ namespace System.Web.OData.Query
                 }
             }
 
-            levelsEncounteredInExpand = levelsEncounteredInExpand || levelsEncounteredInInnerExpand;
+            levelsEncounteredInExpand = levelsEncounteredInExpand || levelsEncounteredInInnerExpand || hasAutoExpandInExpand;
             isMaxLevelInExpand = isMaxLevelInExpand || isMaxLevelInInnerExpand;
 
             return item;

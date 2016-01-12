@@ -139,6 +139,10 @@
     <Compile Include="AlternateKeys\AlternateKeysEdmModel.cs" />
     <Compile Include="AlternateKeys\AlternateKeysTest.cs" />
     <Compile Include="AlternateKeys\AlternateKeysController.cs" />
+    <Compile Include="AutoExpand\AutoExpandController.cs" />
+    <Compile Include="AutoExpand\AutoExpandDataModel.cs" />
+    <Compile Include="AutoExpand\AutoExpandEdmModel.cs" />
+    <Compile Include="AutoExpand\AutoExpandTests.cs" />
     <Compile Include="Batch\Client\DefaultBatchGeneratedClient.cs" />
     <Compile Include="Batch\Client\JsonLightContent.cs" />
     <Compile Include="Batch\Client\ODataChangeSet.cs" />

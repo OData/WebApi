@@ -328,6 +328,8 @@
     <Compile Include="OData\Routing\ODataValueProviderFactoryTest.cs" />
     <Compile Include="OData\SelectExpandNestedDollarCountTest.cs" />
     <Compile Include="OData\SelectExpandTest.cs" />
+    <Compile Include="PublicApi\PublicApiHelper.cs" />
+    <Compile Include="PublicApi\PublicApiTest.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="TestCommon\CustomersModelWithInheritance.cs" />
     <Compile Include="TestCommon\SimpleOpenAddress.cs" />
@@ -476,6 +478,7 @@
     <EmbeddedResource Include="Resources\PeopleWithMultipleAnnotations.json" />
     <EmbeddedResource Include="Resources\PeopleWithoutAnnotations.json" />
     <EmbeddedResource Include="Resources\PeopleWithSpecialAnnotations.json" />
+    <EmbeddedResource Include="PublicApi\System.Web.OData.PublicApi.bsl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\System.Web.OData\System.Web.OData.csproj">

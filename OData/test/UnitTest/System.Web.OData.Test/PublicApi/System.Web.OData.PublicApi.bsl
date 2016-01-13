@@ -168,22 +168,6 @@ public sealed class System.Web.OData.EdmTypeExtensions {
 	public static bool IsDeltaFeed (Microsoft.OData.Edm.IEdmType type)
 }
 
-[
-ExtensionAttribute(),
-]
-public sealed class System.Web.OData.ODataSwaggerUtilities {
-	public static Newtonsoft.Json.Linq.JObject CreateSwaggerPathForEntity (Microsoft.OData.Edm.IEdmNavigationSource navigationSource)
-	public static Newtonsoft.Json.Linq.JObject CreateSwaggerPathForEntitySet (Microsoft.OData.Edm.IEdmNavigationSource navigationSource)
-	public static Newtonsoft.Json.Linq.JObject CreateSwaggerPathForOperationImport (Microsoft.OData.Edm.IEdmOperationImport operationImport)
-	public static Newtonsoft.Json.Linq.JObject CreateSwaggerPathForOperationOfEntity (Microsoft.OData.Edm.IEdmOperation operation, Microsoft.OData.Edm.IEdmNavigationSource navigationSource)
-	public static Newtonsoft.Json.Linq.JObject CreateSwaggerPathForOperationOfEntitySet (Microsoft.OData.Edm.IEdmOperation operation, Microsoft.OData.Edm.IEdmNavigationSource navigationSource)
-	public static Newtonsoft.Json.Linq.JObject CreateSwaggerTypeDefinitionForStructuredType (Microsoft.OData.Edm.IEdmStructuredType edmType)
-	public static string GetPathForEntity (Microsoft.OData.Edm.IEdmNavigationSource navigationSource)
-	public static string GetPathForOperationImport (Microsoft.OData.Edm.IEdmOperationImport operationImport)
-	public static string GetPathForOperationOfEntity (Microsoft.OData.Edm.IEdmOperation operation, Microsoft.OData.Edm.IEdmNavigationSource navigationSource)
-	public static string GetPathForOperationOfEntitySet (Microsoft.OData.Edm.IEdmOperation operation, Microsoft.OData.Edm.IEdmNavigationSource navigationSource)
-}
-
 public class System.Web.OData.ClrPropertyInfoAnnotation {
 	public ClrPropertyInfoAnnotation (System.Reflection.PropertyInfo clrPropertyInfo)
 
@@ -478,12 +462,11 @@ public class System.Web.OData.ODataSwaggerConverter {
 	string Host  { public get; public set; }
 	System.Uri MetadataUri  { public get; public set; }
 	Newtonsoft.Json.Linq.JObject SwaggerDocument  { protected virtual get; protected virtual set; }
-	Newtonsoft.Json.Linq.JObject SwaggerModel  { public virtual get; }
 	Newtonsoft.Json.Linq.JObject SwaggerPaths  { protected virtual get; protected virtual set; }
 	Newtonsoft.Json.Linq.JObject SwaggerTypeDefinitions  { protected virtual get; protected virtual set; }
 	System.Version SwaggerVersion  { public virtual get; }
 
-	public virtual Newtonsoft.Json.Linq.JObject ConvertToSwaggerModel ()
+	public virtual Newtonsoft.Json.Linq.JObject GetSwaggerModel ()
 	protected virtual void InitializeContainer ()
 	protected virtual void InitializeDocument ()
 	protected virtual void InitializeEnd ()
@@ -1624,17 +1607,7 @@ public sealed class System.Web.OData.Extensions.HttpConfigurationExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static void SetDoNotSerializeNullCollections (System.Web.Http.HttpConfiguration configuration, bool doNotSerialize)
-
-	[
-	ExtensionAttribute(),
-	]
 	public static void SetETagHandler (System.Web.Http.HttpConfiguration configuration, IETagHandler handler)
-
-	[
-	ExtensionAttribute(),
-	]
-	public static void SetSerializeNullCollectionsAsEmpty (System.Web.Http.HttpConfiguration configuration, bool serializeAsEmpty)
 
 	[
 	ExtensionAttribute(),
@@ -1925,10 +1898,6 @@ public enum System.Web.OData.Query.HandleNullPropagationOption : int {
 	Default = 0
 	False = 2
 	True = 1
-}
-
-public interface System.Web.OData.Query.ICountOptionCollection : IEnumerable {
-	System.Nullable`1[[System.Int64]] TotalCount  { public abstract get; }
 }
 
 public interface System.Web.OData.Query.IPropertyMapper {
@@ -2573,10 +2542,13 @@ public class System.Web.OData.Routing.ODataPathTemplate {
 }
 
 public class System.Web.OData.Routing.ODataRoute : System.Web.Http.Routing.HttpRoute, IHttpRoute {
+	public ODataRoute (string routePrefix, System.Web.Http.Routing.IHttpRouteConstraint routeConstraint)
 	public ODataRoute (string routePrefix, ODataPathRouteConstraint pathConstraint)
+	public ODataRoute (string routePrefix, System.Web.Http.Routing.IHttpRouteConstraint routeConstraint, System.Web.Http.Routing.HttpRouteValueDictionary defaults, System.Web.Http.Routing.HttpRouteValueDictionary constraints, System.Web.Http.Routing.HttpRouteValueDictionary dataTokens, System.Net.Http.HttpMessageHandler handler)
 	public ODataRoute (string routePrefix, ODataPathRouteConstraint pathConstraint, System.Web.Http.Routing.HttpRouteValueDictionary defaults, System.Web.Http.Routing.HttpRouteValueDictionary constraints, System.Web.Http.Routing.HttpRouteValueDictionary dataTokens, System.Net.Http.HttpMessageHandler handler)
 
 	ODataPathRouteConstraint PathRouteConstraint  { public get; }
+	System.Web.Http.Routing.IHttpRouteConstraint RouteConstraint  { public get; }
 	string RoutePrefix  { public get; }
 
 	public virtual System.Web.Http.Routing.IHttpVirtualPathData GetVirtualPath (System.Net.Http.HttpRequestMessage request, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)

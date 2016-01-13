@@ -1006,7 +1006,7 @@ namespace System.Web.OData.PublicApi
 
         public sealed class ObjectTypeCompare : IComparer
         {
-            static public readonly ObjectTypeCompare Default = new ObjectTypeCompare();
+            public static readonly ObjectTypeCompare Default = new ObjectTypeCompare();
             public int Compare(object x, object y)
             {
                 string a = x.GetType().FullName;
@@ -1132,4 +1132,3 @@ namespace System.Web.OData.PublicApi
         }
     }
 }
-

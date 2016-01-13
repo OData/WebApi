@@ -26,8 +26,11 @@ namespace System.Web.OData.Routing
         /// <param name="routePrefix">The route prefix.</param>
         /// <param name="pathConstraint">The OData path constraint.</param>
         public ODataRoute(string routePrefix, ODataPathRouteConstraint pathConstraint)
-            : this(routePrefix, (IHttpRouteConstraint)pathConstraint, defaults: null, constraints: null, dataTokens: null, handler: null)
-        {}
+            : this(
+                routePrefix, (IHttpRouteConstraint)pathConstraint, defaults: null, constraints: null, dataTokens: null,
+                handler: null)
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataRoute" /> class.
@@ -36,7 +39,8 @@ namespace System.Web.OData.Routing
         /// <param name="routeConstraint">The route constraint.</param>
         public ODataRoute(string routePrefix, IHttpRouteConstraint routeConstraint)
             : this(routePrefix, routeConstraint, defaults: null, constraints: null, dataTokens: null, handler: null)
-        {}
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataRoute" /> class.

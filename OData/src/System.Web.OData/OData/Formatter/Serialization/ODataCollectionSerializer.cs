@@ -3,7 +3,6 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
-using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Extensions;
@@ -53,18 +52,23 @@ namespace System.Web.OData.Formatter.Serialization
         public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType,
             ODataSerializerContext writeContext)
         {
+            if (graph == null)
+            {
+                throw new SerializationException(Error.Format(SRResources.NullCollectionsCannotBeSerialized));
+            }
+
             IEnumerable enumerable = graph as IEnumerable;
-            if (enumerable == null && graph != null)
+            if (enumerable == null)
             {
                 throw Error.Argument("graph", SRResources.ArgumentMustBeOfType, typeof(IEnumerable).Name);
             }
-
             if (expectedType == null)
             {
                 throw Error.ArgumentNull("expectedType");
             }
 
             IEdmTypeReference elementType = GetElementType(expectedType);
+
             return CreateODataCollectionValue(enumerable, elementType, writeContext);
         }
 
@@ -99,15 +103,13 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             writer.WriteStart(collectionStart);
-            if (graph != null)
+
+            ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
+            if (collectionValue != null)
             {
-                ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
-                if (collectionValue != null)
+                foreach (object item in collectionValue.Items)
                 {
-                    foreach (object item in collectionValue.Items)
-                    {
-                        writer.WriteItem(item);
-                    }
+                    writer.WriteItem(item);
                 }
             }
 
@@ -185,25 +187,6 @@ namespace System.Web.OData.Formatter.Serialization
 
             AddTypeNameAnnotationAsNeeded(value, writeContext.MetadataLevel);
             return value;
-        }
-
-        internal override ODataProperty CreateProperty(object graph, IEdmTypeReference expectedType, string elementName,
-            ODataSerializerContext writeContext)
-        {
-            Contract.Assert(elementName != null);
-            var property = CreateODataValue(graph, expectedType, writeContext);
-            if (property != null)
-            {
-                return new ODataProperty
-                {
-                    Name = elementName,
-                    Value = property
-                };
-            }
-            else
-            {
-                return null;
-            }
         }
 
         /// <summary>

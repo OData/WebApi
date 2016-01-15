@@ -110,15 +110,6 @@ namespace System.Web.OData.Query.Expressions
             new KeyValuePair<string, PropertyInfo>(MillisecondFunctionName, typeof(TimeOfDay).GetProperty("Milliseconds")),
         }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-        // TimeSpan properties
-        public static readonly Dictionary<string, PropertyInfo> TimeSpanProperties = new[]
-        {
-            new KeyValuePair<string, PropertyInfo>(HourFunctionName, typeof(TimeSpan).GetProperty("Hours")),
-            new KeyValuePair<string, PropertyInfo>(MinuteFunctionName, typeof(TimeSpan).GetProperty("Minutes")),
-            new KeyValuePair<string, PropertyInfo>(SecondFunctionName, typeof(TimeSpan).GetProperty("Seconds")),
-            new KeyValuePair<string, PropertyInfo>(MillisecondFunctionName, typeof(TimeSpan).GetProperty("Milliseconds")),
-        }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
         // String Properties
         public static readonly PropertyInfo Length = typeof(string).GetProperty("Length");
 

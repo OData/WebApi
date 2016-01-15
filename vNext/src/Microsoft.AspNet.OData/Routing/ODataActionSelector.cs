@@ -3,12 +3,14 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Routing;
 using Microsoft.AspNet.Mvc.Core;
-using Microsoft.Framework.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.AspNet.Mvc.Routing;
 using Microsoft.AspNet.Mvc.ActionConstraints;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.Mvc.Infrastructure;
+using Microsoft.AspNet.Mvc.Abstractions;
 
 namespace Microsoft.AspNet.OData.Routing
 {
@@ -23,7 +25,8 @@ namespace Microsoft.AspNet.OData.Routing
             IEnumerable<IActionConstraintProvider> actionConstraintProviders,
             ILoggerFactory loggerFactory)
         {
-            _selector = new DefaultActionSelector(actionDescriptorsCollectionProvider, decisionTreeProvider, actionConstraintProviders, loggerFactory);
+            _selector = new DefaultActionSelector(
+                decisionTreeProvider, actionConstraintProviders, loggerFactory);
             _convention = convention;
         }
 

@@ -35,23 +35,6 @@ namespace System.Web.OData
             return query.Provider.CreateQuery(takeQuery);
         }
 
-        public static Expression Skip(Expression source, int count, Type type, bool parameterize)
-        {
-            MethodInfo skipMethod;
-            if (typeof(IQueryable).IsAssignableFrom(source.Type))
-            {
-                skipMethod = ExpressionHelperMethods.QueryableSkipGeneric.MakeGenericMethod(type);
-            }
-            else
-            {
-                skipMethod = ExpressionHelperMethods.EnumerableSkipGeneric.MakeGenericMethod(type);
-            }
-
-            Expression skipValueExpression = parameterize ? LinqParameterContainer.Parameterize(typeof(int), count) : Expression.Constant(count);
-            Expression skipQuery = Expression.Call(null, skipMethod, new[] { source, skipValueExpression });
-            return skipQuery;
-        }
-
         public static Expression Take(Expression source, int count, Type elementType, bool parameterize)
         {
             MethodInfo takeMethod;
@@ -76,74 +59,33 @@ namespace System.Web.OData
             bool alreadyOrdered = false)
         {
             LambdaExpression orderByLambda = GetPropertyAccessLambda(elementType, propertyName);
-            return OrderBy(source, orderByLambda, elementType, OrderByDirection.Ascending, alreadyOrdered);
-        }
-
-        public static Expression OrderBy(
-            Expression source,
-            LambdaExpression orderByLambda,
-            Type elementType,
-            OrderByDirection direction,
-            bool alreadyOrdered = false)
-        {
             Type returnType = orderByLambda.Body.Type;
             MethodInfo orderByMethod;
+
             if (!alreadyOrdered)
             {
                 if (typeof(IQueryable).IsAssignableFrom(source.Type))
                 {
-                    if (direction == OrderByDirection.Ascending)
-                    {
-                        orderByMethod = ExpressionHelperMethods.QueryableOrderByGeneric.MakeGenericMethod(elementType,
-                            returnType);
-                    }
-                    else
-                    {
-                        orderByMethod = ExpressionHelperMethods.QueryableOrderByDescendingGeneric.MakeGenericMethod(elementType,
-                            returnType);
-                    }
+                    orderByMethod = ExpressionHelperMethods.QueryableOrderByGeneric.MakeGenericMethod(elementType,
+                        returnType);
                 }
                 else
                 {
-                    if (direction == OrderByDirection.Ascending)
-                    {
-                        orderByMethod = ExpressionHelperMethods.EnumerableOrderByGeneric.MakeGenericMethod(elementType,
-                            returnType);
-                    }
-                    else
-                    {
-                        orderByMethod = ExpressionHelperMethods.EnumerableOrderByDescendingGeneric.MakeGenericMethod(elementType,
-                            returnType);
-                    }
+                    orderByMethod = ExpressionHelperMethods.EnumerableOrderByGeneric.MakeGenericMethod(elementType,
+                        returnType);
                 }
             }
             else
             {
                 if (typeof(IQueryable).IsAssignableFrom(source.Type))
                 {
-                    if (direction == OrderByDirection.Ascending)
-                    {
-                        orderByMethod = ExpressionHelperMethods.QueryableThenByGeneric.MakeGenericMethod(elementType,
-                            returnType);
-                    }
-                    else
-                    {
-                        orderByMethod = ExpressionHelperMethods.QueryableThenByDescendingGeneric.MakeGenericMethod(elementType,
-                            returnType);
-                    }
+                    orderByMethod = ExpressionHelperMethods.QueryableThenByGeneric.MakeGenericMethod(elementType,
+                        returnType);
                 }
                 else
                 {
-                    if (direction == OrderByDirection.Ascending)
-                    {
-                        orderByMethod = ExpressionHelperMethods.EnumerableThenByGeneric.MakeGenericMethod(elementType,
-                            returnType);
-                    }
-                    else
-                    {
-                        orderByMethod = ExpressionHelperMethods.EnumerableThenByDescendingGeneric.MakeGenericMethod(elementType,
-                            returnType);
-                    }
+                    orderByMethod = ExpressionHelperMethods.EnumerableThenByGeneric.MakeGenericMethod(elementType,
+                        returnType);
                 }
             }
             return Expression.Call(null, orderByMethod, new[] { source, orderByLambda });

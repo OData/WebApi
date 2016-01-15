@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization.Models;
@@ -145,47 +144,6 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Null(address.Country);
             Assert.Null(address.State);
             Assert.Null(address.ZipCode);
-        }
-
-        public class MyAddress
-        {
-            [Column(TypeName = "date")]
-            public DateTime CreatedDay { get; set; }
-
-            [Column(TypeName = "time")]
-            public TimeSpan EndTime { get; set; }
-        }
-
-        [Fact]
-        public void ReadComplexValue_CanReadDateTimeRelatedProperties()
-        {
-            // Arrange
-            var builder = new ODataConventionModelBuilder();
-            builder.ComplexType<MyAddress>().Namespace = "NS";
-            IEdmModel model = builder.GetEdmModel();
-            var addressEdmType = model.GetEdmTypeReference(typeof(MyAddress)).AsComplex();
-
-            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
-            var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
-
-            ODataComplexValue complexValue = new ODataComplexValue
-            {
-                Properties = new[]
-                { 
-                    new ODataProperty { Name = "CreatedDay", Value = new Date(2015, 12, 12)},
-                    new ODataProperty { Name = "EndTime", Value = new TimeOfDay(1, 2, 3, 4)}
-                },
-                TypeName = "NS.MyAddress"
-            };
-            ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = model };
-
-            // Act
-            var address = deserializer.ReadComplexValue(complexValue, addressEdmType, readContext) as MyAddress;
-
-            // Assert
-            Assert.NotNull(address);
-            Assert.Equal(new DateTime(2015, 12, 12), address.CreatedDay);
-            Assert.Equal(new TimeSpan(0, 1, 2, 3, 4), address.EndTime);
         }
 
         [Fact]

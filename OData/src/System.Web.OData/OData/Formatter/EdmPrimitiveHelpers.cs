@@ -8,7 +8,6 @@ using System.Globalization;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Xml.Linq;
-using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Formatter
 {
@@ -89,23 +88,7 @@ namespace System.Web.OData.Formatter
                         return dateTimeOffsetValue.DateTime;
                     }
 
-                    if (value is Date)
-                    {
-                        Date dt = (Date)value;
-                        return (DateTime)dt;
-                    }
-
-                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeDateTimeOffsetOrDate));
-                }
-                else if (type == typeof(TimeSpan))
-                {
-                    if (value is TimeOfDay)
-                    {
-                        TimeOfDay tod = (TimeOfDay)value;
-                        return (TimeSpan)tod;
-                    }
-
-                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeTimeOfDay));
+                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeDateTimeOffset));
                 }
                 else
                 {

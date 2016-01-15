@@ -3,7 +3,7 @@ using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web
@@ -28,6 +28,15 @@ namespace ODataSample.Web
             //app.UseMvc(builder => {
             //    builder.MapODataRoute<ISampleService>("odata");
             //});
+        }
+        public static void Main(string[] args)
+        {
+            var application = new WebApplicationBuilder()
+                 .UseConfiguration(WebApplicationConfiguration.GetDefault(args))
+                 .UseStartup<Startup>()
+                 .Build();
+
+            application.Run();
         }
     }
 }

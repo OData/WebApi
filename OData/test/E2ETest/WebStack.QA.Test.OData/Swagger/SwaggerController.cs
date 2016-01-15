@@ -18,7 +18,7 @@ namespace WebStack.QA.Test.OData.Swagger
             IEdmModel model = Request.ODataProperties().Model;
             model.SetEdmxVersion(_defaultEdmxVersion);
             ODataSwaggerConverter converter = new ODataSwaggerConverter(model);
-            return converter.GetSwaggerModel();
+            return converter.ConvertToSwaggerModel();
         }
     }
 }

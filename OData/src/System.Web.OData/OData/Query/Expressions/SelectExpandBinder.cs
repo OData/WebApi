@@ -102,13 +102,13 @@ namespace System.Web.OData.Query.Expressions
             return projectionLambdaExpression;
         }
 
-        internal Expression ProjectAsWrapper(Expression source, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet, ExpandedNavigationSelectItem expandedItem = null)
+        internal Expression ProjectAsWrapper(Expression source, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet)
         {
             Type elementType;
             if (source.Type.IsCollection(out elementType))
             {
                 // new CollectionWrapper<ElementType> { Instance = source.Select(s => new Wrapper { ... }) };
-                return ProjectCollection(source, elementType, selectExpandClause, entityType, entitySet, expandedItem);
+                return ProjectCollection(source, elementType, selectExpandClause, entityType, entitySet);
             }
             else
             {
@@ -398,7 +398,7 @@ namespace System.Web.OData.Query.Expressions
                 // projection can be null if the expanded navigation property is not further projected or expanded.
                 if (projection != null)
                 {
-                    propertyValue = ProjectAsWrapper(propertyValue, projection, propertyToExpand.ToEntityType(), expandItem.NavigationSource as IEdmEntitySet, expandItem);
+                    propertyValue = ProjectAsWrapper(propertyValue, projection, propertyToExpand.ToEntityType(), expandItem.NavigationSource as IEdmEntitySet);
                 }
 
                 NamedPropertyExpression propertyExpression = new NamedPropertyExpression(propertyName, propertyValue);
@@ -461,19 +461,8 @@ namespace System.Web.OData.Query.Expressions
             return PropertyContainer.CreatePropertyContainer(includedProperties);
         }
 
-        private Expression AddOrderByQueryForSource(Expression source, OrderByClause orderbyClause, Type elementType)
-        {
-            if (orderbyClause != null)
-            {
-                LambdaExpression orderByExpression =
-                    FilterBinder.Bind(orderbyClause, elementType, _model, _settings);
-                source = ExpressionHelpers.OrderBy(source, orderByExpression, elementType, orderbyClause.Direction);
-            }
-            return source;
-        }
-
         // new CollectionWrapper<ElementType> { Instance = source.Select((ElementType element) => new Wrapper { }) }
-        private Expression ProjectCollection(Expression source, Type elementType, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet, ExpandedNavigationSelectItem expandedItem)
+        private Expression ProjectCollection(Expression source, Type elementType, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet)
         {
             ParameterExpression element = Expression.Parameter(elementType);
 
@@ -485,13 +474,7 @@ namespace System.Web.OData.Query.Expressions
             //      (ElementType element) => new Wrapper { }
             LambdaExpression selector = Expression.Lambda(projection, element);
 
-            if (expandedItem != null)
-            {
-                source = AddOrderByQueryForSource(source, expandedItem.OrderByOption, elementType);
-            }
-
-            if (_settings.PageSize.HasValue || 
-                (expandedItem != null && (expandedItem.TopOption.HasValue || expandedItem.SkipOption.HasValue)))
+            if (_settings.PageSize != null && _settings.PageSize.HasValue)
             {
                 // nested paging. Need to apply order by first, and take one more than page size as we need to know
                 // whether the collection was truncated or not while generating next page links.
@@ -501,40 +484,17 @@ namespace System.Web.OData.Query.Expressions
                         : entityType
                             .StructuralProperties()
                             .Where(property => property.Type.IsPrimitive()).OrderBy(property => property.Name);
-
-                if (expandedItem == null || expandedItem.OrderByOption == null)
+                bool alreadyOrdered = false;
+                foreach (var prop in properties)
                 {
-                    bool alreadyOrdered = false;
-                    foreach (var prop in properties)
+                    source = ExpressionHelpers.OrderByPropertyExpression(source, prop.Name, elementType, alreadyOrdered);
+                    if (!alreadyOrdered)
                     {
-                        source = ExpressionHelpers.OrderByPropertyExpression(source, prop.Name, elementType,
-                            alreadyOrdered);
-                        if (!alreadyOrdered)
-                        {
-                            alreadyOrdered = true;
-                        }
+                        alreadyOrdered = true;
                     }
                 }
 
-                if (expandedItem != null && expandedItem.SkipOption.HasValue)
-                {
-                    Contract.Assert(expandedItem.SkipOption.Value <= Int32.MaxValue);
-                    source = ExpressionHelpers.Skip(source, (int)expandedItem.SkipOption.Value, elementType,
-                        _settings.EnableConstantParameterization);
-                }
-
-                if (expandedItem != null && expandedItem.TopOption.HasValue)
-                {
-                    Contract.Assert(expandedItem.TopOption.Value <= Int32.MaxValue);
-                    source = ExpressionHelpers.Take(source, (int)expandedItem.TopOption.Value, elementType,
-                        _settings.EnableConstantParameterization);
-                }
-
-                if (_settings.PageSize.HasValue)
-                {
-                    source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType,
-                        _settings.EnableConstantParameterization);
-                }
+                source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType, _settings.EnableConstantParameterization);
             }
 
             // expression

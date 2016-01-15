@@ -1,16 +1,20 @@
 ﻿{
   "webroot": "wwwroot",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
 
   "dependencies": {
-    "Microsoft.AspNet.Mvc": "6.0.0-beta4",
-    "Microsoft.AspNet.Server.IIS": "1.0.0-beta4",
-    "Microsoft.AspNet.Server.WebListener": "1.0.0-beta4",
-    "Microsoft.AspNet.StaticFiles": "1.0.0-beta4",
-    "Microsoft.AspNet.OData": "6.0.0-*"
+    "Microsoft.AspNet.Mvc": "6.0.0-rc2-*",
+    "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc2-*",
+    "Microsoft.AspNet.StaticFiles": "1.0.0-rc2-*",
+    "Microsoft.AspNet.OData": "6.0.0-*",
+    "Microsoft.AspNet.Mvc.ViewFeatures": "6.0.0-rc2-*",
+    "Microsoft.AspNet.Mvc.Core": "6.0.0-rc2-*"
   },
 
   "commands": {
-    "web": "Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.WebListener --server.urls http://localhost:5000"
+    "web": "ODataSample.Web"
   },
 
   "frameworks": {

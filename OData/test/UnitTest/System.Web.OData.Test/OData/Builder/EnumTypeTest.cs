@@ -108,34 +108,6 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void CreateArrayOfEnumTypeProperty()
-        {
-            // Arrange
-            var builder = new ODataModelBuilder().Add_Color_EnumType();
-            var complexTypeConfiguration = builder.ComplexType<ArrayEnumTypePropertyTestModel>();
-            complexTypeConfiguration.CollectionProperty(c => c.Colors);
-            complexTypeConfiguration.CollectionProperty(c => c.NullableColors);
-
-            // Act
-            var model = builder.GetEdmModel();
-            var complexType = model.SchemaElements.OfType<IEdmStructuredType>().Single();
-
-            // Assert
-            Assert.Equal(2, complexType.Properties().Count());
-            var colors = complexType.Properties().SingleOrDefault(p => p.Name == "Colors");
-            Assert.NotNull(colors);
-            Assert.True(colors.Type.IsCollection());
-            Assert.False(colors.Type.IsNullable);
-            Assert.True(((IEdmCollectionTypeReference)colors.Type).ElementType().IsEnum());
-
-            var nullablecolors = complexType.Properties().SingleOrDefault(p => p.Name == "NullableColors");
-            Assert.NotNull(nullablecolors);
-            Assert.True(nullablecolors.Type.IsCollection());
-            Assert.True(nullablecolors.Type.IsNullable);
-            Assert.True(((IEdmCollectionTypeReference)nullablecolors.Type).ElementType().IsEnum());
-        }
-
-        [Fact]
         public void CreateEnumTypePropertyInComplexType()
         {
             // Arrange
@@ -705,54 +677,6 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void ODataConventionModelBuilder_CreateArrayEnumTypeCollectionPropertyWithInComplexType()
-        {
-            // Arrange
-            var builder = new ODataConventionModelBuilder();
-            builder.ComplexType<ArrayEnumTypePropertyTestModel>();
-            IEdmModel model = builder.GetEdmModel();
-            IEdmComplexType complexType = model.SchemaElements.OfType<IEdmComplexType>().Single();
-
-            // Act & Assert
-            Assert.Equal(3, complexType.Properties().Count());
-            var colors = complexType.Properties().SingleOrDefault(p => p.Name == "Colors");
-            Assert.NotNull(colors);
-            Assert.True(colors.Type.IsCollection());
-            Assert.False(colors.Type.IsNullable);
-            Assert.True(((IEdmCollectionTypeReference)colors.Type).ElementType().IsEnum());
-
-            var nullableColors = complexType.Properties().SingleOrDefault(p => p.Name == "NullableColors");
-            Assert.NotNull(nullableColors);
-            Assert.True(nullableColors.Type.IsCollection());
-            Assert.True(nullableColors.Type.IsNullable);
-            Assert.True(((IEdmCollectionTypeReference)nullableColors.Type).ElementType().IsEnum());
-        }
-
-        [Fact]
-        public void ODataConventionModelBuilder_CreateArrayEnumTypeCollectionPropertyWithInEntityType()
-        {
-            // Arrange
-            var builder = new ODataConventionModelBuilder();
-            builder.EntityType<ArrayEnumTypePropertyTestModel>();
-            IEdmModel model = builder.GetEdmModel();
-            IEdmEntityType entityType = model.SchemaElements.OfType<IEdmEntityType>().Single();
-
-            // Act & Assert
-            Assert.Equal(3, entityType.Properties().Count());
-            var colors = entityType.Properties().SingleOrDefault(p => p.Name == "Colors");
-            Assert.NotNull(colors);
-            Assert.True(colors.Type.IsCollection());
-            Assert.False(colors.Type.IsNullable);
-            Assert.True(((IEdmCollectionTypeReference)colors.Type).ElementType().IsEnum());
-
-            var nullableColors = entityType.Properties().SingleOrDefault(p => p.Name == "NullableColors");
-            Assert.NotNull(nullableColors);
-            Assert.True(nullableColors.Type.IsCollection());
-            Assert.True(nullableColors.Type.IsNullable);
-            Assert.True(((IEdmCollectionTypeReference)nullableColors.Type).ElementType().IsEnum());
-        }
-
-        [Fact]
         public void ODataConventionModelBuilder_CreateLongEnumTypePropertyInEntityType()
         {
             // Arrange
@@ -1078,15 +1002,6 @@ namespace System.Web.OData.Builder
             IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet("Entities");
             return entitySet.EntityType();
         }
-    }
-
-    public class ArrayEnumTypePropertyTestModel
-    {
-        public int Id { get; set; }
-
-        public Color[] Colors { get; set; }
-
-        public Color?[] NullableColors { get; set; }
     }
 
     public class ComplexTypeWithEnumTypePropertyTestModel

@@ -910,7 +910,10 @@ namespace System.Web.OData.Formatter.Serialization
             ODataEntityTypeSerializer serializer = new ODataEntityTypeSerializer(serializerProvider);
 
             HttpConfiguration config = new HttpConfiguration();
-            config.SetSerializeNullDynamicProperty(enableNullDynamicProperty);
+            if (enableNullDynamicProperty)
+            {
+                config.EnableNullDynamicProperty();
+            }
             HttpRequestMessage request = new HttpRequestMessage();
             request.SetConfiguration(config);
             SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);

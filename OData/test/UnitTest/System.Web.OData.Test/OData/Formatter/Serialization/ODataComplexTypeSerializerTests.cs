@@ -562,7 +562,10 @@ namespace System.Web.OData.Formatter.Serialization
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             ODataComplexTypeSerializer serializer = new ODataComplexTypeSerializer(serializerProvider);
             HttpConfiguration config = new HttpConfiguration();
-            config.SetSerializeNullDynamicProperty(enableNullDynamicProperty);
+            if (enableNullDynamicProperty)
+            {
+                config.EnableNullDynamicProperty();
+            }
             HttpRequestMessage request = new HttpRequestMessage();
             request.SetConfiguration(config);
             ODataSerializerContext context = new ODataSerializerContext

@@ -53,31 +53,31 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
         {
             // Arrange
             string Uri = BaseAddress + "/odata/$metadata";
-            const string Expected = @"<?xml version=""1.0"" encoding=""utf-8""?>
-<edmx:Edmx Version=""4.0"" xmlns:edmx=""http://docs.oasis-open.org/odata/ns/edmx"">
-  <edmx:DataServices>
-    <Schema Namespace=""WebStack.QA.Test.OData.DateAndTimeOfDay"" xmlns=""http://docs.oasis-open.org/odata/ns/edm"">
-      <EntityType Name=""DateAndTimeOfDayModel"">
-        <Key>
-          <PropertyRef Name=""Id"" />
-        </Key>
-        <Property Name=""EndDay"" Type=""Edm.Date"" Nullable=""false"" />
-        <Property Name=""DeliverDay"" Type=""Edm.Date"" />
-        <Property Name=""ResumeTime"" Type=""Edm.TimeOfDay"" Nullable=""false"" />
-        <Property Name=""Id"" Type=""Edm.Int32"" Nullable=""false"" />
-        <Property Name=""Birthday"" Type=""Edm.Date"" Nullable=""false"" />
-        <Property Name=""PublishDay"" Type=""Edm.Date"" />
-        <Property Name=""CreatedTime"" Type=""Edm.TimeOfDay"" Nullable=""false"" />
-        <Property Name=""EndTime"" Type=""Edm.TimeOfDay"" />
-      </EntityType>
-    </Schema>
-    <Schema Namespace=""Default"" xmlns=""http://docs.oasis-open.org/odata/ns/edm"">
-      <EntityContainer Name=""Container"">
-        <EntitySet Name=""DateAndTimeOfDayModels"" EntityType=""WebStack.QA.Test.OData.DateAndTimeOfDay.DateAndTimeOfDayModel"" />
-      </EntityContainer>
-    </Schema>
-  </edmx:DataServices>
-</edmx:Edmx>";
+            const string Expected = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
+"<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">\r\n" +
+"  <edmx:DataServices>\r\n" +
+"    <Schema Namespace=\"WebStack.QA.Test.OData.DateAndTimeOfDay\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">\r\n" +
+"      <EntityType Name=\"DateAndTimeOfDayModel\">\r\n" +
+"        <Key>\r\n" +
+"          <PropertyRef Name=\"Id\" />\r\n" +
+"        </Key>\r\n" +
+"        <Property Name=\"EndDay\" Type=\"Edm.Date\" Nullable=\"false\" />\r\n" +
+"        <Property Name=\"DeliverDay\" Type=\"Edm.Date\" />\r\n" +
+"        <Property Name=\"ResumeTime\" Type=\"Edm.TimeOfDay\" Nullable=\"false\" />\r\n" +
+"        <Property Name=\"Id\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
+"        <Property Name=\"Birthday\" Type=\"Edm.Date\" Nullable=\"false\" />\r\n" +
+"        <Property Name=\"PublishDay\" Type=\"Edm.Date\" />\r\n" +
+"        <Property Name=\"CreatedTime\" Type=\"Edm.TimeOfDay\" Nullable=\"false\" />\r\n" +
+"        <Property Name=\"EndTime\" Type=\"Edm.TimeOfDay\" />\r\n" +
+"      </EntityType>\r\n" +
+"    </Schema>\r\n" +
+"    <Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">\r\n" +
+"      <EntityContainer Name=\"Container\">\r\n" +
+"        <EntitySet Name=\"DateAndTimeOfDayModels\" EntityType=\"WebStack.QA.Test.OData.DateAndTimeOfDay.DateAndTimeOfDayModel\" />\r\n" +
+"      </EntityContainer>\r\n" +
+"    </Schema>\r\n" +
+"  </edmx:DataServices>\r\n" +
+"</edmx:Edmx>";
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, Uri);
 

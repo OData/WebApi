@@ -607,7 +607,7 @@ namespace System.Web.OData
             ODataSwaggerConverter converter = new ODataSwaggerConverter(_model);
 
             // Act
-            JObject obj = converter.GetSwaggerModel();
+            JObject obj = converter.ConvertToSwaggerModel();
 
             // Assert
             Assert.NotNull(obj);

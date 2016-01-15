@@ -146,7 +146,7 @@ namespace System.Web.OData
         public void CreateSwaggerDefinitionForStructureType_ReturnsSwaggerObject()
         {
             // Arrange & Act
-            JObject obj = ODataSwaggerUtilities.CreateSwaggerTypeDefinitionForStructuredType(_customer);
+            JObject obj = ODataSwaggerUtilities.CreateSwaggerDefinitionForStructureType(_customer);
 
             // Assert
             Assert.NotNull(obj);

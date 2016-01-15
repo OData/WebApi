@@ -12,7 +12,8 @@ namespace System.Web.OData
     /// <summary>
     ///  Utility methods used to convert the Swagger model.
     /// </summary>
-    internal static class ODataSwaggerUtilities
+    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "o", Justification = "Utils is spelled correctly.")]
+    public static class ODataSwaggerUtilities
     {
         /// <summary>
         /// Create the Swagger path for the Edm entity set.
@@ -428,7 +429,7 @@ namespace System.Web.OData
         /// </summary>
         /// <param name="edmType">The structure Edm type.</param>
         /// <returns>The <see cref="JObject"/> represents the related structure Edm type.</returns>
-        public static JObject CreateSwaggerTypeDefinitionForStructuredType(IEdmStructuredType edmType)
+        public static JObject CreateSwaggerDefinitionForStructureType(IEdmStructuredType edmType)
         {
             if (edmType == null)
             {

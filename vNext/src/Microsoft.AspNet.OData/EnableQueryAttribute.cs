@@ -7,6 +7,8 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.Mvc.Filters;
+using Microsoft.AspNet.Mvc.Abstractions;
 
 namespace Microsoft.AspNet.OData
 {

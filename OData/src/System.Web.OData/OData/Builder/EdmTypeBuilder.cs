@@ -152,9 +152,8 @@ namespace System.Web.OData.Builder
                 switch (property.Kind)
                 {
                     case PropertyKind.Primitive:
-                        PrimitivePropertyConfiguration primitiveProperty = (PrimitivePropertyConfiguration)property;
-                        EdmPrimitiveTypeKind typeKind = primitiveProperty.TargetEdmTypeKind ??
-                                                        GetTypeKind(primitiveProperty.PropertyInfo.PropertyType);
+                        PrimitivePropertyConfiguration primitiveProperty = property as PrimitivePropertyConfiguration;
+                        EdmPrimitiveTypeKind typeKind = GetTypeKind(primitiveProperty.PropertyInfo.PropertyType);
                         IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance.GetPrimitive(
                             typeKind,
                             primitiveProperty.OptionalProperty);

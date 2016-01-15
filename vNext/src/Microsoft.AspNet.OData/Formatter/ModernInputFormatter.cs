@@ -6,6 +6,7 @@ using Microsoft.AspNet.Mvc;
 using Microsoft.Framework.Internal;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
+using Microsoft.AspNet.Mvc.Formatters;
 
 namespace Microsoft.AspNet.OData.Formatter
 {
@@ -14,8 +15,8 @@ namespace Microsoft.AspNet.OData.Formatter
         /// <summary>
         /// Returns UTF8 Encoding without BOM and throws on invalid bytes.
         /// </summary>
-        public static readonly Encoding UTF8EncodingWithoutBOM
-            = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+        //public static readonly new Encoding UTF8EncodingWithoutBOM
+        //    = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
         private JsonSerializerSettings _serializerSettings;
 
@@ -46,16 +47,16 @@ namespace Microsoft.AspNet.OData.Formatter
         }
 
         /// <inheritdoc />
-        public override Task<object> ReadRequestBodyAsync([NotNull] InputFormatterContext context)
+        public override Task<InputFormatterResult> ReadRequestBodyAsync([NotNull] InputFormatterContext context)
         {
             var type = context.ModelType;
-            var request = context.ActionContext.HttpContext.Request;
+            var request = context.HttpContext.Request;
             MediaTypeHeaderValue requestContentType = null;
             MediaTypeHeaderValue.TryParse(request.ContentType, out requestContentType);
 
             // Get the character encoding for the content
             // Never non-null since SelectCharacterEncoding() throws in error / not found scenarios
-            var effectiveEncoding = SelectCharacterEncoding(requestContentType);
+            var effectiveEncoding = SelectCharacterEncoding(context);
 
             using (var jsonReader = CreateJsonReader(context, request.Body, effectiveEncoding))
             {
@@ -67,7 +68,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 errorHandler = (sender, e) =>
                 {
                     var exception = e.ErrorContext.Error;
-                    context.ActionContext.ModelState.TryAddModelError(e.ErrorContext.Path, e.ErrorContext.Error);
+                    context.ModelState.TryAddModelError(e.ErrorContext.Path, e.ErrorContext.ToString() );
 
                     // Error must always be marked as handled
                     // Failure to do so can cause the exception to be rethrown at every recursive level and
@@ -78,7 +79,11 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 try
                 {
-                    return Task.FromResult(jsonSerializer.Deserialize(jsonReader, type));
+                    return Task.FromResult(
+                        InputFormatterResult.Success(
+                            jsonSerializer.Deserialize(jsonReader, type)
+                        )
+                    );
                 }
                 finally
                 {

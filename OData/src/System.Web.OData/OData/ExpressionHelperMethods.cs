@@ -15,16 +15,13 @@ namespace System.Web.OData
         private static MethodInfo _orderByMethod = GenericMethodOf(_ => Queryable.OrderBy<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _enumerableOrderByMethod = GenericMethodOf(_ => Enumerable.OrderBy<int, int>(default(IEnumerable<int>), default(Func<int, int>)));
         private static MethodInfo _orderByDescendingMethod = GenericMethodOf(_ => Queryable.OrderByDescending<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
-        private static MethodInfo _enumerableOrderByDescendingMethod = GenericMethodOf(_ => Enumerable.OrderByDescending<int, int>(default(IEnumerable<int>), default(Func<int, int>)));
         private static MethodInfo _thenByMethod = GenericMethodOf(_ => Queryable.ThenBy<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _enumerableThenByMethod = GenericMethodOf(_ => Enumerable.ThenBy<int, int>(default(IOrderedEnumerable<int>), default(Func<int, int>)));
         private static MethodInfo _thenByDescendingMethod = GenericMethodOf(_ => Queryable.ThenByDescending<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
-        private static MethodInfo _enumerableThenByDescendingMethod = GenericMethodOf(_ => Enumerable.ThenByDescending<int, int>(default(IOrderedEnumerable<int>), default(Func<int, int>)));
         private static MethodInfo _countMethod = GenericMethodOf(_ => Queryable.LongCount<int>(default(IQueryable<int>)));
         private static MethodInfo _groupByMethod = GenericMethodOf(_ => Queryable.GroupBy<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _aggregateMethod = GenericMethodOf(_ => Queryable.Aggregate<int, int>(default(IQueryable<int>), default(int), default(Expression<Func<int, int, int>>)));
         private static MethodInfo _skipMethod = GenericMethodOf(_ => Queryable.Skip<int>(default(IQueryable<int>), default(int)));
-        private static MethodInfo _enumerableSkipMethod = GenericMethodOf(_ => Enumerable.Skip<int>(default(IEnumerable<int>), default(int)));
         private static MethodInfo _whereMethod = GenericMethodOf(_ => Queryable.Where<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
 
         private static MethodInfo _queryableEmptyAnyMethod = GenericMethodOf(_ => Queryable.Any<int>(default(IQueryable<int>)));
@@ -88,11 +85,6 @@ namespace System.Web.OData
             get { return _orderByDescendingMethod; }
         }
 
-        public static MethodInfo EnumerableOrderByDescendingGeneric
-        {
-            get { return _enumerableOrderByDescendingMethod; }
-        }
-
         public static MethodInfo QueryableThenByGeneric
         {
             get { return _thenByMethod; }
@@ -106,11 +98,6 @@ namespace System.Web.OData
         public static MethodInfo QueryableThenByDescendingGeneric
         {
             get { return _thenByDescendingMethod; }
-        }
-
-        public static MethodInfo EnumerableThenByDescendingGeneric
-        {
-            get { return _enumerableThenByDescendingMethod; }
         }
 
         public static MethodInfo QueryableCountGeneric
@@ -166,11 +153,6 @@ namespace System.Web.OData
         public static MethodInfo QueryableSkipGeneric
         {
             get { return _skipMethod; }
-        }
-
-        public static MethodInfo EnumerableSkipGeneric
-        {
-            get { return _enumerableSkipMethod; }
         }
 
         public static MethodInfo QueryableWhereGeneric

@@ -8,7 +8,6 @@ using System.Web.OData.Properties;
 using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -103,7 +102,7 @@ namespace System.Web.OData.Formatter.Serialization
             });
         }
 
-        internal static ODataPrimitiveValue CreatePrimitive(object value, IEdmPrimitiveTypeReference primitiveType,
+        internal static ODataPrimitiveValue CreatePrimitive(object value, IEdmPrimitiveTypeReference primitveType,
             ODataSerializerContext writeContext)
         {
             if (value == null)
@@ -111,38 +110,15 @@ namespace System.Web.OData.Formatter.Serialization
                 return null;
             }
 
-            object supportedValue = ConvertPrimitiveValue(value, primitiveType);
+            object supportedValue = ConvertUnsupportedPrimitives(value);
             ODataPrimitiveValue primitive = new ODataPrimitiveValue(supportedValue);
 
             if (writeContext != null)
             {
-                AddTypeNameAnnotationAsNeeded(primitive, primitiveType, writeContext.MetadataLevel);
+                AddTypeNameAnnotationAsNeeded(primitive, primitveType, writeContext.MetadataLevel);
             }
 
             return primitive;
-        }
-
-        internal static object ConvertPrimitiveValue(object value, IEdmPrimitiveTypeReference primitiveType)
-        {
-            if (value == null)
-            {
-                return null;
-            }
-
-            Type type = value.GetType();
-            if (primitiveType != null && primitiveType.IsDate() && TypeHelper.IsDateTime(type))
-            {
-                Date dt = (DateTime)value;
-                return dt;
-            }
-
-            if (primitiveType != null && primitiveType.IsTimeOfDay() && TypeHelper.IsTimeSpan(type))
-            {
-                TimeOfDay tod = (TimeSpan)value;
-                return tod;
-            }
-
-            return ConvertUnsupportedPrimitives(value);
         }
 
         internal static object ConvertUnsupportedPrimitives(object value)

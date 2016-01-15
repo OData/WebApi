@@ -2,8 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Data.Linq;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -12,6 +14,7 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
+using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
@@ -25,34 +28,63 @@ namespace System.Web.OData.Query.Expressions
     /// an <see cref="Expression"/> and applies it to an <see cref="IQueryable"/>.
     /// </summary>
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
-    internal class FilterBinder : ExpressionBinderBase
+    internal class FilterBinder
     {
         private const string ODataItParameterName = "$it";
 
         private static readonly string _dictionaryStringObjectIndexerName = typeof(Dictionary<string, object>).GetDefaultMembers()[0].Name;
 
-        private Stack<Dictionary<string, ParameterExpression>> _parametersStack = new Stack<Dictionary<string, ParameterExpression>>();
+        private static readonly MethodInfo _stringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
+
+        private static readonly Expression _nullConstant = Expression.Constant(null);
+        private static readonly Expression _falseConstant = Expression.Constant(false);
+        private static readonly Expression _trueConstant = Expression.Constant(true);
+        private static readonly Expression _zeroConstant = Expression.Constant(0);
+        private static readonly Expression _ordinalStringComparisonConstant = Expression.Constant(StringComparison.Ordinal);
+
+        private static readonly MethodInfo _enumTryParseMethod = typeof(Enum).GetMethods()
+                        .Single(m => m.Name == "TryParse" && m.GetParameters().Length == 2);
+
+        private static Dictionary<BinaryOperatorKind, ExpressionType> _binaryOperatorMapping = new Dictionary<BinaryOperatorKind, ExpressionType>
+        {
+            { BinaryOperatorKind.Add, ExpressionType.Add },
+            { BinaryOperatorKind.And, ExpressionType.AndAlso },
+            { BinaryOperatorKind.Divide, ExpressionType.Divide },
+            { BinaryOperatorKind.Equal, ExpressionType.Equal },
+            { BinaryOperatorKind.GreaterThan, ExpressionType.GreaterThan },
+            { BinaryOperatorKind.GreaterThanOrEqual, ExpressionType.GreaterThanOrEqual },
+            { BinaryOperatorKind.LessThan, ExpressionType.LessThan },
+            { BinaryOperatorKind.LessThanOrEqual, ExpressionType.LessThanOrEqual },
+            { BinaryOperatorKind.Modulo, ExpressionType.Modulo },
+            { BinaryOperatorKind.Multiply, ExpressionType.Multiply },
+            { BinaryOperatorKind.NotEqual, ExpressionType.NotEqual },
+            { BinaryOperatorKind.Or, ExpressionType.OrElse },
+            { BinaryOperatorKind.Subtract, ExpressionType.Subtract },
+        };
+
+        private IEdmModel _model;
+
+        private Stack<Dictionary<string, ParameterExpression>> _parametersStack;
         private Dictionary<string, ParameterExpression> _lambdaParameters;
-        private Type _filterType;
+
+        private ODataQuerySettings _querySettings;
+        private IAssembliesResolver _assembliesResolver;
 
         private FilterBinder(IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
-            : base(model, assembliesResolver, querySettings)
+            : this(model, querySettings)
         {
+            _assembliesResolver = assembliesResolver;
         }
 
         private FilterBinder(IEdmModel model, ODataQuerySettings querySettings)
-            : base(model, querySettings)
         {
-        }
+            Contract.Assert(model != null);
+            Contract.Assert(querySettings != null);
+            Contract.Assert(querySettings.HandleNullPropagation != HandleNullPropagationOption.Default);
 
-        private FilterBinder(
-            IEdmModel model, 
-            IAssembliesResolver assembliesResolver, 
-            ODataQuerySettings querySettings, 
-            Type filterType)
-            : base(model, assembliesResolver, querySettings)
-        {
-            _filterType = filterType;
+            _querySettings = querySettings;
+            _parametersStack = new Stack<Dictionary<string, ParameterExpression>>();
+            _model = model;
         }
 
         public static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterClause filterClause, IEdmModel model,
@@ -81,7 +113,7 @@ namespace System.Web.OData.Query.Expressions
                 throw Error.ArgumentNull("assembliesResolver");
             }
 
-            FilterBinder binder = new FilterBinder(model, assembliesResolver, querySettings, filterType);
+            FilterBinder binder = new FilterBinder(model, assembliesResolver, querySettings);
             LambdaExpression filter = binder.BindExpression(filterClause.Expression, filterClause.RangeVariable, filterType);
             filter = Expression.Lambda(binder.ApplyNullPropagationForFilterBody(filter.Body), filter.Parameters);
 
@@ -204,13 +236,7 @@ namespace System.Web.OData.Query.Expressions
 
         private Expression BindDynamicPropertyAccessQueryNode(SingleValueOpenPropertyAccessNode openNode)
         {
-            if (EdmLibHelpers.IsDynamicTypeWrapper(_filterType))
-            {
-                var property = Expression.Property(Bind(openNode.Source), openNode.Name);
-                return property;
-            }
-            PropertyInfo prop = GetDynamicPropertyContainer(openNode);
-
+            var prop = GetDynamicPropertyContainer(openNode);
             var propertyAccessExpression = BindPropertyAccessExpression(openNode, prop);
             var readDictionaryIndexerExpression = Expression.Property(propertyAccessExpression,
                 _dictionaryStringObjectIndexerName, Expression.Constant(openNode.Name));
@@ -308,7 +334,7 @@ namespace System.Web.OData.Query.Expressions
             else
             {
                 // Cast fails and return null.
-                return NullConstant;
+                return _nullConstant;
             }
         }
 
@@ -413,7 +439,7 @@ namespace System.Web.OData.Query.Expressions
                 right = ToNullable(right);
 
                 bool liftToNull = true;
-                if (left == NullConstant || right == NullConstant)
+                if (left == _nullConstant || right == _nullConstant)
                 {
                     liftToNull = false;
                 }
@@ -434,7 +460,7 @@ namespace System.Web.OData.Query.Expressions
             // no need to parameterize null's as there cannot be multiple values for null.
             if (constantNode.Value == null)
             {
-                return NullConstant;
+                return _nullConstant;
             }
 
             Type constantType = EdmLibHelpers.GetClrType(constantNode.TypeReference, _model, _assembliesResolver);
@@ -448,13 +474,6 @@ namespace System.Web.OData.Query.Expressions
 
                 constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
                 value = Enum.Parse(constantType, strValue);
-            }
-
-            if (constantNode.TypeReference != null &&
-                constantNode.TypeReference.IsNullable &&
-                (constantNode.TypeReference.IsDate() || constantNode.TypeReference.IsTimeOfDay()))
-            {
-                constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
             }
 
             if (_querySettings.EnableConstantParameterization)
@@ -474,7 +493,53 @@ namespace System.Web.OData.Query.Expressions
 
             Expression source = Bind(convertNode.Source);
 
-            return CreateConvertExpression(convertNode, source);
+            Type conversionType = EdmLibHelpers.GetClrType(convertNode.TypeReference, _model, _assembliesResolver);
+
+            if (conversionType == typeof(bool?) && source.Type == typeof(bool))
+            {
+                // we handle null propagation ourselves. So, if converting from bool to Nullable<bool> ignore.
+                return source;
+            }
+            else if (conversionType == typeof(Date?) && 
+                (source.Type == typeof(DateTimeOffset?) || source.Type == typeof(DateTime?)))
+            {
+                return source;
+            }
+            else if (conversionType == typeof(TimeOfDay?) &&
+                (source.Type == typeof(DateTimeOffset?) || source.Type == typeof(DateTime?)))
+            {
+                return source;
+            }
+            else if (source == _nullConstant)
+            {
+                return source;
+            }
+            else
+            {
+                if (TypeHelper.IsEnum(source.Type))
+                {
+                    // we handle enum conversions ourselves
+                    return source;
+                }
+                else
+                {
+                    // if a cast is from Nullable<T> to Non-Nullable<T> we need to check if source is null
+                    if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True
+                        && IsNullable(source.Type) && !IsNullable(conversionType))
+                    {
+                        // source == null ? null : source.Value
+                        return
+                            Expression.Condition(
+                            test: CheckForNull(source),
+                            ifTrue: Expression.Constant(null, ToNullable(conversionType)),
+                            ifFalse: Expression.Convert(ExtractValueFromNullableExpression(source), ToNullable(conversionType)));
+                    }
+                    else
+                    {
+                        return Expression.Convert(source, conversionType);
+                    }
+                }
+            }
         }
 
         private LambdaExpression BindExpression(SingleValueNode expression, RangeVariable rangeVariable, Type elementType)
@@ -537,7 +602,7 @@ namespace System.Web.OData.Query.Expressions
                 Expression ifFalse = ToNullable(ConvertNonStandardPrimitives(propertyAccessExpression));
                 return
                     Expression.Condition(
-                        test: Expression.Equal(source, NullConstant),
+                        test: Expression.Equal(source, _nullConstant),
                         ifTrue: Expression.Constant(null, ifFalse.Type),
                         ifFalse: ifFalse);
             }
@@ -634,7 +699,130 @@ namespace System.Web.OData.Query.Expressions
                 default:
                     throw new NotImplementedException(Error.Format(SRResources.ODataFunctionNotSupported, node.Name));
             }
+        }
+
+        private Expression CreateFunctionCallWithNullPropagation(Expression functionCall, Expression[] arguments)
+        {
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
+            {
+                Expression test = CheckIfArgumentsAreNull(arguments);
+
+                if (test == _falseConstant)
+                {
+                    // none of the arguments are/can be null.
+                    // so no need to do any null propagation
+                    return functionCall;
+                }
+                else
+                {
+                    // if one of the arguments is null, result is null (not defined)
+                    return
+                        Expression.Condition(
+                        test: test,
+                        ifTrue: Expression.Constant(null, ToNullable(functionCall.Type)),
+                        ifFalse: ToNullable(functionCall));
+                }
             }
+            else
+            {
+                return functionCall;
+            }
+        }
+
+        // we don't have to do null checks inside the function for arguments as we do the null checks before calling
+        // the function when null propagation is enabled.
+        // this method converts back "arg == null ? null : convert(arg)" to "arg" 
+        // Also, note that we can do this generically only because none of the odata functions that we support can take null 
+        // as an argument.
+        private Expression RemoveInnerNullPropagation(Expression expression)
+        {
+            Contract.Assert(expression != null);
+
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
+            {
+                // only null propagation generates conditional expressions
+                if (expression.NodeType == ExpressionType.Conditional)
+                {
+                    // make sure to skip the DateTime IFF clause
+                    ConditionalExpression conditionalExpr = (ConditionalExpression)expression;
+                    if (conditionalExpr.Test.NodeType != ExpressionType.OrElse)
+                    {
+                        expression = conditionalExpr.IfFalse;
+                        Contract.Assert(expression != null);
+
+                        if (expression.NodeType == ExpressionType.Convert)
+                        {
+                            UnaryExpression unaryExpression = expression as UnaryExpression;
+                            Contract.Assert(unaryExpression != null);
+
+                            if (Nullable.GetUnderlyingType(unaryExpression.Type) == unaryExpression.Operand.Type)
+                            {
+                                // this is a cast from T to Nullable<T> which is redundant.
+                                expression = unaryExpression.Operand;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return expression;
+        }
+
+        // creates an expression for the corresponding OData function.
+        private Expression MakeFunctionCall(MemberInfo member, params Expression[] arguments)
+        {
+            Contract.Assert(member.MemberType == MemberTypes.Property || member.MemberType == MemberTypes.Method);
+
+            IEnumerable<Expression> functionCallArguments = arguments;
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
+            {
+                // we don't have to check if the argument is null inside the function call as we do it already
+                // before calling the function. So remove the redundant null checks.
+                functionCallArguments = arguments.Select(a => RemoveInnerNullPropagation(a));
+            }
+
+            // if the argument is of type Nullable<T>, then translate the argument to Nullable<T>.Value as none 
+            // of the canonical functions have overloads for Nullable<> arguments.
+            functionCallArguments = ExtractValueFromNullableArguments(functionCallArguments);
+
+            Expression functionCall;
+            if (member.MemberType == MemberTypes.Method)
+            {
+                MethodInfo method = member as MethodInfo;
+                if (method.IsStatic)
+                {
+                    functionCall = Expression.Call(null, method, functionCallArguments);
+                }
+                else
+                {
+                    functionCall = Expression.Call(functionCallArguments.First(), method, functionCallArguments.Skip(1));
+                }
+            }
+            else
+            {
+                // property
+                functionCall = Expression.Property(functionCallArguments.First(), member as PropertyInfo);
+            }
+
+            return CreateFunctionCallWithNullPropagation(functionCall, arguments);
+        }
+
+        private Expression MakePropertyAccess(PropertyInfo propertyInfo, Expression argument)
+        {
+            Expression propertyArgument = argument;
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
+            {
+                // we don't have to check if the argument is null inside the function call as we do it already
+                // before calling the function. So remove the redundant null checks.
+                propertyArgument = RemoveInnerNullPropagation(argument);
+            }
+
+            // if the argument is of type Nullable<T>, then translate the argument to Nullable<T>.Value as none 
+            // of the canonical functions have overloads for Nullable<> arguments.
+            propertyArgument = ExtractValueFromNullableExpression(propertyArgument);
+
+            return Expression.Property(propertyArgument, propertyInfo);
+        }
 
         private Expression BindCastSingleValue(SingleValueFunctionCallNode node)
         {
@@ -653,7 +841,7 @@ namespace System.Web.OData.Query.Expressions
                 IEdmTypeReference targetEdmTypeReference = targetEdmType.ToEdmTypeReference(false);
                 targetClrType = EdmLibHelpers.GetClrType(targetEdmTypeReference, _model);
 
-                if (source != NullConstant)
+                if (source != _nullConstant)
                 {
                     if (source.Type == targetClrType)
                     {
@@ -664,14 +852,14 @@ namespace System.Web.OData.Query.Expressions
                         (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(source.Type) == null && !TypeHelper.IsEnum(source.Type)))
                     {
                         // Cast fails and return null.
-                        return NullConstant;
+                        return _nullConstant;
                     }
                 }
             }
 
-            if (targetClrType == null || source == NullConstant)
+            if (targetClrType == null || source == _nullConstant)
             {
-                return NullConstant;
+                return _nullConstant;
             }
 
             if (targetClrType == typeof(string))
@@ -700,7 +888,7 @@ namespace System.Web.OData.Query.Expressions
                 catch (InvalidOperationException)
                 {
                     // Cast fails and return null.
-                    return NullConstant;
+                    return _nullConstant;
                 }
             }
         }
@@ -750,12 +938,12 @@ namespace System.Web.OData.Query.Expressions
             {
                 // We only support to cast Enumeration type from constant string now,
                 // because LINQ to Entities does not recognize the method Enum.TryParse.
-                return NullConstant;
+                return _nullConstant;
             }
             else
             {
                 object[] parameters = new[] { sourceNode.Value, Enum.ToObject(enumType, 0) };
-                bool isSuccessful = (bool)EnumTryParseMethod.MakeGenericMethod(enumType).Invoke(null, parameters);
+                bool isSuccessful = (bool)_enumTryParseMethod.MakeGenericMethod(enumType).Invoke(null, parameters);
 
                 if (isSuccessful)
                 {
@@ -770,7 +958,7 @@ namespace System.Web.OData.Query.Expressions
                 }
                 else
                 {
-                    return NullConstant;
+                    return _nullConstant;
                 }
             }
         }
@@ -860,13 +1048,10 @@ namespace System.Web.OData.Query.Expressions
             {
                 property = ClrCanonicalFunctions.TimeOfDayProperties[ClrCanonicalFunctions.MillisecondFunctionName];
             }
-            else if (IsDateTime(parameter.Type))
+            else
+            if (IsDateTime(parameter.Type))
             {
                 property = ClrCanonicalFunctions.DateTimeProperties[ClrCanonicalFunctions.MillisecondFunctionName];
-            }
-            else if (IsTimeSpan(parameter.Type))
-            {
-                property = ClrCanonicalFunctions.TimeSpanProperties[ClrCanonicalFunctions.MillisecondFunctionName];
             }
             else
             {
@@ -927,11 +1112,6 @@ namespace System.Web.OData.Query.Expressions
             {
                 Contract.Assert(ClrCanonicalFunctions.DateTimeProperties.ContainsKey(node.Name));
                 property = ClrCanonicalFunctions.DateTimeProperties[node.Name];
-            }
-            else if (IsTimeSpan(parameter.Type))
-            {
-                Contract.Assert(ClrCanonicalFunctions.TimeSpanProperties.ContainsKey(node.Name));
-                property = ClrCanonicalFunctions.TimeSpanProperties[node.Name];
             }
             else
             {
@@ -1100,6 +1280,15 @@ namespace System.Web.OData.Query.Expressions
             return MakeFunctionCall(ClrCanonicalFunctions.EndsWith, arguments);
         }
 
+        private Expression BindHas(Expression left, Expression flag)
+        {
+            Contract.Assert(TypeHelper.IsEnum(left.Type));
+            Contract.Assert(flag.Type == typeof(Enum));
+
+            Expression[] arguments = new[] { left, flag };
+            return MakeFunctionCall(ClrCanonicalFunctions.HasFlag, arguments);
+        }
+
         private Expression[] BindArguments(IEnumerable<QueryNode> nodes)
         {
             return nodes.OfType<SingleValueNode>().Select(n => Bind(n)).ToArray();
@@ -1137,7 +1326,7 @@ namespace System.Web.OData.Query.Expressions
                 // IFF(source == null) null; else Any(body);
                 all = ToNullable(all);
                 return Expression.Condition(
-                    test: Expression.Equal(source, NullConstant),
+                    test: Expression.Equal(source, _nullConstant),
                     ifTrue: Expression.Constant(null, all.Type),
                     ifFalse: all);
             }
@@ -1173,7 +1362,7 @@ namespace System.Web.OData.Query.Expressions
                 // IFF(source == null) null; else Any(body);
                 any = ToNullable(any);
                 return Expression.Condition(
-                    test: Expression.Equal(source, NullConstant),
+                    test: Expression.Equal(source, _nullConstant),
                     ifTrue: Expression.Constant(null, any.Type),
                     ifFalse: any);
             }
@@ -1220,6 +1409,83 @@ namespace System.Web.OData.Query.Expressions
             return lambdaIt;
         }
 
+        // If the expression is of non-standard edm primitive type (like uint), convert the expression to its standard edm type.
+        // Also, note that only expressions generated for ushort, uint and ulong can be understood by linq2sql and EF.
+        // The rest (char, char[], Binary) would cause issues with linq2sql and EF.
+        private Expression ConvertNonStandardPrimitives(Expression source)
+        {
+            bool isNonstandardEdmPrimitive;
+            Type conversionType = EdmLibHelpers.IsNonstandardEdmPrimitive(source.Type, out isNonstandardEdmPrimitive);
+
+            if (isNonstandardEdmPrimitive)
+            {
+                Type sourceType = TypeHelper.GetUnderlyingTypeOrSelf(source.Type);
+
+                Contract.Assert(sourceType != conversionType);
+
+                Expression convertedExpression = null;
+
+                if (sourceType.IsEnum)
+                {
+                    // we handle enum conversions ourselves
+                    convertedExpression = source;
+                }
+                else
+                {
+                    switch (Type.GetTypeCode(sourceType))
+                    {
+                        case TypeCode.UInt16:
+                        case TypeCode.UInt32:
+                        case TypeCode.UInt64:
+                            convertedExpression = Expression.Convert(ExtractValueFromNullableExpression(source), conversionType);
+                            break;
+
+                        case TypeCode.Char:
+                            convertedExpression = Expression.Call(ExtractValueFromNullableExpression(source), "ToString", typeArguments: null, arguments: null);
+                            break;
+
+                        case TypeCode.DateTime:
+                            convertedExpression = source;
+                            break;
+
+                        case TypeCode.Object:
+                            if (sourceType == typeof(char[]))
+                            {
+                                convertedExpression = Expression.New(typeof(string).GetConstructor(new[] { typeof(char[]) }), source);
+                            }
+                            else if (sourceType == typeof(XElement))
+                            {
+                                convertedExpression = Expression.Call(source, "ToString", typeArguments: null, arguments: null);
+                            }
+                            else if (sourceType == typeof(Binary))
+                            {
+                                convertedExpression = Expression.Call(source, "ToArray", typeArguments: null, arguments: null);
+                            }
+                            break;
+
+                        default:
+                            Contract.Assert(false, Error.Format("missing non-standard type support for {0}", sourceType.Name));
+                            break;
+                    }
+                }
+
+                if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type))
+                {
+                    // source == null ? null : source
+                    return Expression.Condition(
+                        CheckForNull(source),
+                        ifTrue: Expression.Constant(null, ToNullable(convertedExpression.Type)),
+                        ifFalse: ToNullable(convertedExpression));
+                }
+                else
+                {
+                    return convertedExpression;
+                }
+            }
+
+            return source;
+        }
+
         private void EnterLambdaScope()
         {
             Contract.Assert(_lambdaParameters != null);
@@ -1235,6 +1501,338 @@ namespace System.Web.OData.Query.Expressions
             else
             {
                 _lambdaParameters = null;
+            }
+        }
+
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "These are simple conversion function and cannot be split up.")]
+        private Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull)
+        {
+            ExpressionType binaryExpressionType;
+
+            // When comparing an enum to a string, parse the string, convert both to the enum underlying type, and compare the values
+            // When comparing an enum to an enum with the same type, convert both to the underlying type, and compare the values
+            Type leftUnderlyingType = Nullable.GetUnderlyingType(left.Type) ?? left.Type;
+            Type rightUnderlyingType = Nullable.GetUnderlyingType(right.Type) ?? right.Type;
+
+            // Convert to integers unless Enum type is required
+            if ((leftUnderlyingType.IsEnum || rightUnderlyingType.IsEnum) && binaryOperator != BinaryOperatorKind.Has)
+            {
+                Type enumType = leftUnderlyingType.IsEnum ? leftUnderlyingType : rightUnderlyingType;
+                Type enumUnderlyingType = Enum.GetUnderlyingType(enumType);
+                left = ConvertToEnumUnderlyingType(left, enumType, enumUnderlyingType);
+                right = ConvertToEnumUnderlyingType(right, enumType, enumUnderlyingType);
+            }
+           
+            if (leftUnderlyingType == typeof(DateTime) && rightUnderlyingType == typeof(DateTimeOffset))
+            {
+                right = DateTimeOffsetToDateTime(right);
+            }
+            else if (rightUnderlyingType == typeof(DateTime) && leftUnderlyingType == typeof(DateTimeOffset))
+            {
+                left = DateTimeOffsetToDateTime(left);
+            }
+
+            if ((IsDateOrOffset(leftUnderlyingType) && IsDate(rightUnderlyingType)) ||
+                (IsDate(leftUnderlyingType) && IsDateOrOffset(rightUnderlyingType)))
+            {
+                left = CreateDateBinaryExpression(left);
+                right = CreateDateBinaryExpression(right);
+            }
+
+            if ((IsDateOrOffset(leftUnderlyingType) && IsTimeOfDay(rightUnderlyingType)) ||
+                (IsTimeOfDay(leftUnderlyingType) && IsDateOrOffset(rightUnderlyingType)))
+            {
+                left = CreateTimeBinaryExpression(left);
+                right = CreateTimeBinaryExpression(right);
+            }
+
+            if (left.Type != right.Type)
+            {
+                // one of them must be nullable and the other is not.
+                left = ToNullable(left);
+                right = ToNullable(right);
+            }
+
+            if (left.Type == typeof(string) || right.Type == typeof(string))
+            {
+                // convert nulls of type object to nulls of type string to make the String.Compare call work
+                left = ConvertNull(left, typeof(string));
+                right = ConvertNull(right, typeof(string));
+
+                // Use string.Compare instead of comparison for gt, ge, lt, le between two strings since direct comparisons are not supported
+                switch (binaryOperator)
+                {
+                    case BinaryOperatorKind.GreaterThan:
+                    case BinaryOperatorKind.GreaterThanOrEqual:
+                    case BinaryOperatorKind.LessThan:
+                    case BinaryOperatorKind.LessThanOrEqual:
+                        left = Expression.Call(_stringCompareMethodInfo, left, right, _ordinalStringComparisonConstant);
+                        right = _zeroConstant;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (_binaryOperatorMapping.TryGetValue(binaryOperator, out binaryExpressionType))
+            {
+                if (left.Type == typeof(byte[]) || right.Type == typeof(byte[]))
+                {
+                    left = ConvertNull(left, typeof(byte[]));
+                    right = ConvertNull(right, typeof(byte[]));
+
+                    switch (binaryExpressionType)
+                    {
+                        case ExpressionType.Equal:
+                            return Expression.MakeBinary(binaryExpressionType, left, right, liftToNull, method: Linq2ObjectsComparisonMethods.AreByteArraysEqualMethodInfo);
+                        case ExpressionType.NotEqual:
+                            return Expression.MakeBinary(binaryExpressionType, left, right, liftToNull, method: Linq2ObjectsComparisonMethods.AreByteArraysNotEqualMethodInfo);
+                        default:
+                            IEdmPrimitiveType binaryType = EdmLibHelpers.GetEdmPrimitiveTypeOrNull(typeof(byte[]));
+                            throw new ODataException(Error.Format(SRResources.BinaryOperatorNotSupported, binaryType.FullName(), binaryType.FullName(), binaryOperator));
+                    }
+                }
+                else
+                {
+                    return Expression.MakeBinary(binaryExpressionType, left, right, liftToNull, method: null);
+                }
+            }
+            else
+            {
+                // Enum has a "has" operator
+                // {(c1, c2) => c1.HasFlag(Convert(c2))}
+                if (TypeHelper.IsEnum(left.Type) && TypeHelper.IsEnum(right.Type) && binaryOperator == BinaryOperatorKind.Has)
+                {
+                    UnaryExpression flag = Expression.Convert(right, typeof(Enum));
+                    return BindHas(left, flag);
+                }
+                else
+                {
+                    throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, binaryOperator, typeof(FilterBinder).Name);
+                }
+            }
+        }
+
+        private static Expression DateTimeOffsetToDateTime(Expression expression)
+        {
+            var unaryExpression = expression as UnaryExpression;
+            if (unaryExpression != null)
+            {
+                if (Nullable.GetUnderlyingType(unaryExpression.Type) == unaryExpression.Operand.Type)
+                {
+                    // this is a cast from T to Nullable<T> which is redundant.
+                    expression = unaryExpression.Operand;
+                }
+            }
+            var parameterizedConstantValue = ExtractParameterizedConstant(expression);
+            var dto = parameterizedConstantValue as DateTimeOffset?;
+            if (dto != null)
+            {
+                expression = Expression.Constant(EdmPrimitiveHelpers.ConvertPrimitiveValue(dto.Value, typeof(DateTime)));
+            }
+            return expression;
+        }
+
+        private Expression GetProperty(Expression source, string propertyName)
+        {
+            if (IsDateOrOffset(source.Type))
+            {
+                if (IsDateTime(source.Type))
+                {
+                    return MakePropertyAccess(ClrCanonicalFunctions.DateTimeProperties[propertyName], source);
+                }
+                else
+                {
+                    return MakePropertyAccess(ClrCanonicalFunctions.DateTimeOffsetProperties[propertyName], source);
+                }
+            }
+            else if (IsDate(source.Type))
+            {
+                return MakePropertyAccess(ClrCanonicalFunctions.DateProperties[propertyName], source);
+            }
+            else if (IsTimeOfDay(source.Type))
+            {
+                return MakePropertyAccess(ClrCanonicalFunctions.TimeOfDayProperties[propertyName], source);
+            }
+
+            return source;
+        }
+
+        private Expression CreateDateBinaryExpression(Expression source)
+        {
+            source = ConvertToDateTimeRelatedConstExpression(source);
+
+            // Year, Month, Day
+            Expression year = GetProperty(source, ClrCanonicalFunctions.YearFunctionName);
+            Expression month = GetProperty(source, ClrCanonicalFunctions.MonthFunctionName);
+            Expression day = GetProperty(source, ClrCanonicalFunctions.DayFunctionName);
+
+            // return (year * 10000 + month * 100 + day)
+            Expression result =
+                Expression.Add(
+                    Expression.Add(Expression.Multiply(year, Expression.Constant(10000)),
+                        Expression.Multiply(month, Expression.Constant(100))), day);
+
+            return CreateFunctionCallWithNullPropagation(result, new[] { source });
+        }
+
+        private Expression CreateTimeBinaryExpression(Expression source)
+        {
+            source = ConvertToDateTimeRelatedConstExpression(source);
+
+            // Hour, Minute, Second, Millisecond
+            Expression hour = GetProperty(source, ClrCanonicalFunctions.HourFunctionName);
+            Expression minute = GetProperty(source, ClrCanonicalFunctions.MinuteFunctionName);
+            Expression second = GetProperty(source, ClrCanonicalFunctions.SecondFunctionName);
+            Expression milliSecond = GetProperty(source, ClrCanonicalFunctions.MillisecondFunctionName);
+
+            Expression hourTicks = Expression.Multiply(Expression.Convert(hour, typeof(long)), Expression.Constant(TimeOfDay.TicksPerHour));
+            Expression minuteTicks = Expression.Multiply(Expression.Convert(minute, typeof(long)), Expression.Constant(TimeOfDay.TicksPerMinute));
+            Expression secondTicks = Expression.Multiply(Expression.Convert(second, typeof(long)), Expression.Constant(TimeOfDay.TicksPerSecond));
+
+            // return (hour * TicksPerHour + minute * TicksPerMinute + second * TicksPerSecond + millisecond)
+            Expression result = Expression.Add(hourTicks, Expression.Add(minuteTicks, Expression.Add(secondTicks, Expression.Convert(milliSecond, typeof(long)))));
+
+            return CreateFunctionCallWithNullPropagation(result, new[] { source });
+        }
+
+        private static Expression ConvertToDateTimeRelatedConstExpression(Expression source)
+        {
+            var parameterizedConstantValue = ExtractParameterizedConstant(source);
+            if (parameterizedConstantValue != null && source.Type.IsNullable())
+            {
+                var dateTimeOffset = parameterizedConstantValue as DateTimeOffset?;
+                if (dateTimeOffset != null)
+                {
+                    return Expression.Constant(dateTimeOffset.Value, typeof(DateTimeOffset));
+                }
+
+                var dateTime = parameterizedConstantValue as DateTime?;
+                if (dateTime != null)
+                {
+                    return Expression.Constant(dateTime.Value, typeof(DateTime));
+                }
+
+                var date = parameterizedConstantValue as Date?;
+                if (date != null)
+                {
+                    return Expression.Constant(date.Value, typeof(Date));
+                }
+
+                var timeOfDay = parameterizedConstantValue as TimeOfDay?;
+                if (timeOfDay != null)
+                {
+                    return Expression.Constant(timeOfDay.Value, typeof(TimeOfDay));
+                }
+            }
+
+            return source;
+        }
+
+        private static Expression ConvertToEnumUnderlyingType(Expression expression, Type enumType, Type enumUnderlyingType)
+        {
+            object parameterizedConstantValue = ExtractParameterizedConstant(expression);
+            if (parameterizedConstantValue != null)
+            {
+                string enumStringValue = parameterizedConstantValue as string;
+                if (enumStringValue != null)
+                {
+                    return Expression.Constant(
+                        Convert.ChangeType(
+                            Enum.Parse(enumType, enumStringValue), enumUnderlyingType, CultureInfo.InvariantCulture));
+                }
+                else
+                {
+                    // enum member value
+                    return Expression.Constant(
+                        Convert.ChangeType(
+                            parameterizedConstantValue, enumUnderlyingType, CultureInfo.InvariantCulture));
+                }
+            }
+            else if (expression.Type == enumType)
+            {
+                return Expression.Convert(expression, enumUnderlyingType);
+            }
+            else if (Nullable.GetUnderlyingType(expression.Type) == enumType)
+            {
+                return Expression.Convert(expression, typeof(Nullable<>).MakeGenericType(enumUnderlyingType));
+            }
+            else if (expression.NodeType == ExpressionType.Constant && ((ConstantExpression)expression).Value == null)
+            {
+                return expression;
+            }
+            else
+            {
+                throw Error.NotSupported(SRResources.ConvertToEnumFailed, enumType, expression.Type);
+            }
+        }
+
+        // Extract the constant that would have been encapsulated into LinqParameterContainer if this
+        // expression represents it else return null.
+        private static object ExtractParameterizedConstant(Expression expression)
+        {
+            if (expression.NodeType == ExpressionType.MemberAccess)
+            {
+                MemberExpression memberAccess = expression as MemberExpression;
+                Contract.Assert(memberAccess != null);
+                if (memberAccess.Expression.NodeType == ExpressionType.Constant)
+                {
+                    ConstantExpression constant = memberAccess.Expression as ConstantExpression;
+                    Contract.Assert(constant != null);
+                    Contract.Assert(constant.Value != null);
+                    LinqParameterContainer value = constant.Value as LinqParameterContainer;
+                    Contract.Assert(value != null, "Constants are already embedded into LinqParameterContainer");
+
+                    return value.Property;
+                }
+            }
+
+            return null;
+        }
+
+        private static IEnumerable<Expression> ExtractValueFromNullableArguments(IEnumerable<Expression> arguments)
+        {
+            return arguments.Select(arg => ExtractValueFromNullableExpression(arg));
+        }
+
+        private static Expression ExtractValueFromNullableExpression(Expression source)
+        {
+            return Nullable.GetUnderlyingType(source.Type) != null ? Expression.Property(source, "Value") : source;
+        }
+
+        private static Expression CheckIfArgumentsAreNull(Expression[] arguments)
+        {
+            if (arguments.Any(arg => arg == _nullConstant))
+            {
+                return _trueConstant;
+            }
+
+            arguments =
+                arguments
+                .Select(arg => CheckForNull(arg))
+                .Where(arg => arg != null)
+                .ToArray();
+
+            if (arguments.Any())
+            {
+                return arguments
+                    .Aggregate((left, right) => Expression.OrElse(left, right));
+            }
+            else
+            {
+                return _falseConstant;
+            }
+        }
+
+        private static Expression CheckForNull(Expression expression)
+        {
+            if (IsNullable(expression.Type) && expression.NodeType != ExpressionType.Constant)
+            {
+                return Expression.Equal(expression, Expression.Constant(null));
+            }
+            else
+            {
+                return null;
             }
         }
 
@@ -1285,6 +1883,101 @@ namespace System.Web.OData.Query.Expressions
             else
             {
                 return Expression.Call(null, ExpressionHelperMethods.EnumerableAllGeneric.MakeGenericMethod(elementType), source, filter);
+            }
+        }
+
+        private static bool IsNullable(Type t)
+        {
+            if (!t.IsValueType || (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static Type ToNullable(Type t)
+        {
+            if (IsNullable(t))
+            {
+                return t;
+            }
+            else
+            {
+                return typeof(Nullable<>).MakeGenericType(t);
+            }
+        }
+
+        private static Expression ToNullable(Expression expression)
+        {
+            if (!IsNullable(expression.Type))
+            {
+                return Expression.Convert(expression, ToNullable(expression.Type));
+            }
+
+            return expression;
+        }
+
+        private static bool IsIQueryable(Type type)
+        {
+            return typeof(IQueryable).IsAssignableFrom(type);
+        }
+
+        private static bool IsDoubleOrDecimal(Type type)
+        {
+            return IsType<double>(type) || IsType<decimal>(type);
+        }
+
+        private static bool IsDateRelated(Type type)
+        {
+            return IsType<Date>(type) || IsType<DateTime>(type) || IsType<DateTimeOffset>(type);
+        }
+
+        private static bool IsTimeRelated(Type type)
+        {
+            return IsType<TimeOfDay>(type) || IsType<DateTime>(type) || IsType<DateTimeOffset>(type);
+        }
+
+        private static bool IsDateOrOffset(Type type)
+        {
+            return IsType<DateTime>(type) || IsType<DateTimeOffset>(type);
+        }
+
+        private static bool IsDateTime(Type type)
+        {
+            return IsType<DateTime>(type);
+        }
+
+        private static bool IsTimeOfDay(Type type)
+        {
+            return IsType<TimeOfDay>(type);
+        }
+
+        private static bool IsDate(Type type)
+        {
+            return IsType<Date>(type);
+        }
+
+        private static bool IsInteger(Type type)
+        {
+            return IsType<short>(type) || IsType<int>(type) || IsType<long>(type);
+        }
+
+        private static bool IsType<T>(Type type) where T : struct
+        {
+            return type == typeof(T) || type == typeof(T?);
+        }
+
+        private static Expression ConvertNull(Expression expression, Type type)
+        {
+            ConstantExpression constantExpression = expression as ConstantExpression;
+            if (constantExpression != null && constantExpression.Value == null)
+            {
+                return Expression.Constant(null, type);
+            }
+            else
+            {
+                return expression;
             }
         }
     }

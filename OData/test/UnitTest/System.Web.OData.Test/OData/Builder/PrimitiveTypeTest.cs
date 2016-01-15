@@ -67,32 +67,6 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void CreateDatePrimitiveProperty_FromDateTime()
-        {
-            // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<File> file = builder.EntityType<File>();
-            file.Property(f => f.Birthday).AsDate();
-            file.Property(f => f.PublishDay).AsDate();
-
-            // Act
-            IEdmModel model = builder.GetServiceModel();
-
-            // Assert
-            IEdmEntityType fileType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
-
-            IEdmProperty birthdayProperty = Assert.Single(fileType.DeclaredProperties.Where(p => p.Name == "Birthday"));
-            Assert.NotNull(birthdayProperty);
-            Assert.False(birthdayProperty.Type.IsNullable);
-            Assert.Equal("Edm.Date", birthdayProperty.Type.FullName());
-
-            IEdmProperty publishDayProperty = Assert.Single(fileType.DeclaredProperties.Where(p => p.Name == "PublishDay"));
-            Assert.NotNull(publishDayProperty);
-            Assert.True(publishDayProperty.Type.IsNullable);
-            Assert.Equal("Edm.Date", publishDayProperty.Type.FullName());
-        }
-
-        [Fact]
         public void CreateTimeOfDayPrimitiveProperty()
         {
             // Arrange
@@ -112,32 +86,6 @@ namespace System.Web.OData.Builder
             Assert.NotNull(property);
             Assert.Equal("Edm.TimeOfDay", property.Type.FullName());
         }
-
-        [Fact]
-        public void CreateTimeOfDayPrimitiveProperty_FromTimeSpan()
-        {
-            // Arrange
-            ODataModelBuilder builder = new ODataModelBuilder();
-            EntityTypeConfiguration<File> file = builder.EntityType<File>();
-            file.Property(f => f.CreatedTime).AsTimeOfDay();
-            file.Property(f => f.EndTime).AsTimeOfDay();
-
-            // Act
-            IEdmModel model = builder.GetServiceModel();
-
-            // Assert
-            IEdmEntityType fileType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
-
-            IEdmProperty createProperty = Assert.Single(fileType.DeclaredProperties.Where(p => p.Name == "CreatedTime"));
-            Assert.NotNull(createProperty);
-            Assert.False(createProperty.Type.IsNullable);
-            Assert.Equal("Edm.TimeOfDay", createProperty.Type.FullName());
-
-            IEdmProperty endProperty = Assert.Single(fileType.DeclaredProperties.Where(p => p.Name == "EndTime"));
-            Assert.NotNull(endProperty);
-            Assert.True(endProperty.Type.IsNullable);
-            Assert.Equal("Edm.TimeOfDay", endProperty.Type.FullName());
-        }
     }
 
     public class File
@@ -149,11 +97,5 @@ namespace System.Web.OData.Builder
         public Date DateProperty { get; set; }
 
         public TimeOfDay TimeOfDayProperty { get; set; }
-
-        public DateTime Birthday { get; set; }
-        public DateTime? PublishDay { get; set; }
-
-        public TimeSpan CreatedTime { get; set; }
-        public TimeSpan? EndTime { get; set; }
     }
 }

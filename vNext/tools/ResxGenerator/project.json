@@ -22,7 +22,7 @@
         "System.Collections": "4.0.10-beta-22816",
         "System.IO.FileSystem": "4.0.0-beta-22816",
         "System.Linq": "4.0.0-beta-22816",
-        "System.Runtime": "4.0.20-beta-22816",
+        "System.Runtime": "4.0.21-rc2-23621",
         "System.Runtime.Extensions": "4.0.10-beta-22816",
         "System.Text.RegularExpressions": "4.0.10-beta-22816",
         "Microsoft.CSharp": "4.0.0-beta-22816"

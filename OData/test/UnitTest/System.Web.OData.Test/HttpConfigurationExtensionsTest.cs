@@ -12,10 +12,7 @@ using System.Web.Http.Services;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Query;
-using System.Web.OData.Routing;
 using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -246,7 +243,7 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void EnableContinueOnError_Sets_ContinueOnErrorKeyFlag()
+        public void EnableAlternateKeys_Sets_ContinueOnErrorKeyFlag()
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
@@ -256,37 +253,6 @@ namespace System.Web.OData
 
             // Assert
             Assert.True(config.HasEnabledContinueOnErrorHeader());
-        }
-
-        [Fact]
-        public void SetUrlConvension_Sets_UrlConvension()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-
-            // Act
-            config.SetUrlConventions(ODataUrlConventions.ODataSimplified);
-            ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
-            var pathHandler = route.PathRouteConstraint.PathHandler as DefaultODataPathHandler;
-
-            // Assert
-            Assert.NotNull(pathHandler);
-            Assert.Equal(pathHandler.ResolverSetttings.UrlConventions, ODataUrlConventions.ODataSimplified);
-        }
-
-        [Fact]
-        public void SetUrlConvension_Sets_DefaultValue()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-
-            // Act
-            ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
-            var pathHandler = route.PathRouteConstraint.PathHandler as DefaultODataPathHandler;
-
-            // Assert
-            Assert.NotNull(pathHandler);
-            Assert.Equal(pathHandler.ResolverSetttings.UrlConventions, ODataUrlConventions.Default);
         }
 
         private static ODataMediaTypeFormatter CreateODataFormatter()

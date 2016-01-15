@@ -27,7 +27,10 @@ namespace System.Web.OData
             // Arrange
             const string RequestUri = "http://localhost/odata/OpenCustomers(2)/Address";
             var configuration = new[] { typeof(OpenCustomersController) }.GetHttpConfiguration();
-            configuration.SetSerializeNullDynamicProperty(enableNullDynamicProperty);
+            if (enableNullDynamicProperty)
+            {
+                configuration.EnableNullDynamicProperty();
+            }
             configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
 
             HttpClient client = new HttpClient(new HttpServer(configuration));

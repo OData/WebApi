@@ -182,50 +182,6 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void CanCreateActionWithNonbindingParameters_AddParameterGenericMethod()
-        {
-            // Arrange
-            // Act
-            ODataModelBuilder builder = new ODataModelBuilder();
-            ActionConfiguration action = builder.Action("MyAction");
-            action.Parameter<string>("p0");
-            action.Parameter<int>("p1");
-            action.Parameter<Address>("p2");
-            ParameterConfiguration[] parameters = action.Parameters.ToArray();
-
-            // Assert
-            Assert.Equal(3, parameters.Length);
-            Assert.Equal("p0", parameters[0].Name);
-            Assert.Equal("Edm.String", parameters[0].TypeConfiguration.FullName);
-            Assert.Equal("p1", parameters[1].Name);
-            Assert.Equal("Edm.Int32", parameters[1].TypeConfiguration.FullName);
-            Assert.Equal("p2", parameters[2].Name);
-            Assert.Equal(typeof(Address).FullName, parameters[2].TypeConfiguration.FullName);
-        }
-
-        [Fact]
-        public void CanCreateActionWithNonbindingParameters_AddParameterNonGenericMethod()
-        {
-            // Arrange
-            // Act
-            ODataModelBuilder builder = new ODataModelBuilder();
-            ActionConfiguration action = builder.Action("MyAction");
-            action.Parameter(typeof(string), "p0");
-            action.Parameter(typeof(int), "p1");
-            action.Parameter(typeof(Address), "p2");
-            ParameterConfiguration[] parameters = action.Parameters.ToArray();
-
-            // Assert
-            Assert.Equal(3, parameters.Length);
-            Assert.Equal("p0", parameters[0].Name);
-            Assert.Equal("Edm.String", parameters[0].TypeConfiguration.FullName);
-            Assert.Equal("p1", parameters[1].Name);
-            Assert.Equal("Edm.Int32", parameters[1].TypeConfiguration.FullName);
-            Assert.Equal("p2", parameters[2].Name);
-            Assert.Equal(typeof(Address).FullName, parameters[2].TypeConfiguration.FullName);
-        }
-
-        [Fact]
         public void CanCreateActionWithNonbindingParameters()
         {
             // Arrange
@@ -622,9 +578,11 @@ namespace System.Web.OData.Builder
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
             var actionBuilder = movie.Action("ActionName");
-            actionBuilder.Parameter(paramType, "p1");
 
-            MethodInfo method = typeof(ProcedureConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
+            MethodInfo method = typeof(ProcedureConfiguration).GetMethod("Parameter", BindingFlags.Instance | BindingFlags.Public);
+            method.MakeGenericMethod(paramType).Invoke(actionBuilder, new[] { "p1" });
+
+            method = typeof(ProcedureConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
             method.MakeGenericMethod(paramType).Invoke(actionBuilder, new[] { "p2" });
 
             // Act

@@ -332,28 +332,6 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
-        public void CanParseKeyAsSegmentUrl()
-        {
-            // Arrange
-            string odataPath = "RoutingCustomers/112";
-            string expectedText = "112";
-            IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
-            var simplifiedParser = new DefaultODataPathHandler();
-            simplifiedParser.ResolverSetttings.UrlConventions = ODataUrlConventions.ODataSimplified;
-
-            // Act
-            ODataPath path = simplifiedParser.Parse(_model, _serviceRoot, odataPath);
-            ODataPathSegment segment = path.Segments.Last();
-
-            // Assert
-            Assert.NotNull(segment);
-            Assert.Equal(expectedText, segment.ToString());
-            Assert.IsType<KeyValuePathSegment>(segment);
-            Assert.Same(expectedSet, path.NavigationSource);
-            Assert.Same(expectedSet.EntityType(), path.EdmType);
-        }
-
-        [Fact]
         public void CanParseCastCollectionSegment()
         {
             // Arrange

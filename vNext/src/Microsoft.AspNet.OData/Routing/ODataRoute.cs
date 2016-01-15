@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Routing;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using System;
@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.Mvc.Infrastructure;
 
 namespace Microsoft.AspNet.OData.Routing
 {
@@ -49,7 +50,7 @@ namespace Microsoft.AspNet.OData.Routing
             context.HttpContext.ODataProperties().IsValidODataRequest = true;
 
             await m.RouteAsync(context);
-            context.IsHandled = true;
+            //context.IsHandled = true;
         }
 
         public VirtualPathData GetVirtualPath(VirtualPathContext context)

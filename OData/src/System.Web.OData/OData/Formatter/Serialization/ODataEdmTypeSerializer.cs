@@ -76,7 +76,7 @@ namespace System.Web.OData.Formatter.Serialization
             throw Error.NotSupported(SRResources.CreateODataValueNotSupported, GetType().Name);
         }
 
-        internal virtual ODataProperty CreateProperty(object graph, IEdmTypeReference expectedType, string elementName,
+        internal ODataProperty CreateProperty(object graph, IEdmTypeReference expectedType, string elementName,
             ODataSerializerContext writeContext)
         {
             Contract.Assert(elementName != null);

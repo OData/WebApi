@@ -112,12 +112,9 @@ namespace System.Web.OData.Formatter.Serialization
                             propertyType = actualType;
                         }
                     }
-                    var odataProperty = propertySerializer.CreateProperty(propertyValue, propertyType, property.Name,
-                        writeContext);
-                    if (odataProperty != null)
-                    {
-                        propertyCollection.Add(odataProperty);
-                    }
+
+                    propertyCollection.Add(
+                        propertySerializer.CreateProperty(propertyValue, propertyType, property.Name, writeContext));
                 }
             }
 

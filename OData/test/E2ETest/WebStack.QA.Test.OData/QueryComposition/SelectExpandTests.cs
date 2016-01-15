@@ -14,13 +14,32 @@ using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Nuwa;
+using WebStack.QA.Common.XUnit;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
+using Xunit.Extensions;
 
 namespace WebStack.QA.Test.OData.QueryComposition
 {
     public class SelectExpandTests : ODataTestBase
     {
+        private const string AutoExpandTestUrl = "{0}/selectexpand/AutoExpandCustomer(1)";
+        
+        public static TheoryDataSet<string, int> AutoExpandTestData
+        {
+            get
+            {
+                return new TheoryDataSet<string, int>
+                {
+                    {AutoExpandTestUrl + "?$select=Stuff", 1},
+                    {AutoExpandTestUrl + "?$select=Id", 2},
+                    {AutoExpandTestUrl + "?$expand=Stuff&$select=Id", 2},
+                    {AutoExpandTestUrl + "?$expand=NormalStuff", 3},
+                    {AutoExpandTestUrl, 2},
+                };
+            }
+        }
+
         [NuwaConfiguration]
         public static void UpdateConfiguration(HttpConfiguration configuration)
         {
@@ -28,6 +47,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                   typeof(IAssembliesResolver),
                   new TestAssemblyResolver(
                       typeof(SelectCustomerController),
+                      typeof(AutoExpandCustomerController),
                       typeof(EFSelectCustomersController)));
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
@@ -42,12 +62,14 @@ namespace WebStack.QA.Test.OData.QueryComposition
             customers.EntityType.Action("CreditRating").Returns<double>();
             customers.EntityType.Collection.Action("PremiumCustomers").ReturnsCollectionFromEntitySet<SelectCustomer>("SelectCustomer");
 
+            builder.EntitySet<AutoExpandCustomer>("AutoExpandCustomer");
             builder.EntitySet<EFSelectCustomer>("EFSelectCustomers");
             builder.EntitySet<EFSelectOrder>("EFSelectOrders");
             builder.EntitySet<SelectOrderDetail>("SelectOrderDetail");
             builder.EntityType<SelectPremiumCustomer>();
             builder.EntitySet<SelectOrder>("SelectOrder");
             builder.EntitySet<SelectBonus>("SelectBonus");
+            builder.EntitySet<AutoExpandStuff>("Stuff");
             builder.Action("ResetDataSource");
 
             IEdmModel model = builder.GetEdmModel();
@@ -322,6 +344,36 @@ namespace WebStack.QA.Test.OData.QueryComposition
             }
         }
 
+        [Theory]
+        [PropertyData("AutoExpandTestData")]
+        public void QueryForAnEntryIncludeTheAutoExpandNavigationProperty(string url, int propCount)
+        {
+            // Arrange
+            string queryUrl = string.Format(url, BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Act
+            response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+
+            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            Assert.Equal(customer.Properties().Count(), propCount);
+
+            JObject stuff = customer["Stuff"] as JObject;
+            Assert.NotNull(stuff);
+
+            JObject bonus = stuff["Bonus"] as JObject;
+            Assert.Equal((int)stuff["Id"], bonus["Id"]);
+            Assert.Equal((int)stuff["Id"] * 1000, bonus["Ammount"]);
+        }
+
         [Fact]
         public void QueryForAnEntryWithExpandNavigationPropertyExceedPageSize()
         {
@@ -458,131 +510,6 @@ namespace WebStack.QA.Test.OData.QueryComposition
             }
         }
 
-        [Fact]
-        public void NestedNestedSkipInDollarExpandWorks()
-        {
-            // Arrange
-            string queryUrl = string.Format("{0}/selectexpand/SelectCustomer?" +
-                    "$expand=SelectOrders($skip=1;$expand=OrderDetails($skip=1))", BaseAddress);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
-            HttpClient client = new HttpClient();
-
-            // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
-
-            // Assert
-            Assert.NotNull(response);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-            Assert.NotNull(response.Content);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Assert.NotNull(result);
-
-            JsonAssert.ArrayLength(10, "value", result);
-            JArray customers = (JArray)result["value"];
-            foreach (JObject customer in (IEnumerable<JToken>)customers)
-            {
-                JArray orders = customer["SelectOrders"] as JArray;
-                Assert.Equal(Math.Max(0, (int)customer["Id"] - 1), orders.Count);
-                foreach (JObject order in (IEnumerable<JToken>)orders)
-                {
-                    JArray orderdetails = order["OrderDetails"] as JArray;
-                    Assert.Equal(Math.Max(0, (int)order["Id"] - 1), orderdetails.Count());
-                }
-            }
-        }
-
-        [Fact]
-        public void NestedNestedTopInDollarExpandWorks()
-        {
-            // Arrange
-            string queryUrl = string.Format("{0}/selectexpand/SelectCustomer?" +
-                    "$skip=2&$expand=SelectOrders($skip=1;$top=1;$expand=OrderDetails($top=1))", BaseAddress);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
-            HttpClient client = new HttpClient();
-
-            // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
-
-            // Assert
-            Assert.NotNull(response);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-            Assert.NotNull(response.Content);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Assert.NotNull(result);
-
-            JsonAssert.ArrayLength(8, "value", result);
-            JArray customers = (JArray)result["value"];
-            foreach (JObject customer in (IEnumerable<JToken>)customers)
-            {
-                JArray orders = customer["SelectOrders"] as JArray;
-                Assert.Equal(1, orders.Count);
-                foreach (JObject order in (IEnumerable<JToken>)orders)
-                {
-                    JArray orderdetails = order["OrderDetails"] as JArray;
-                    Assert.Equal(1, orderdetails.Count());
-                }
-            }
-        }
-
-        [Fact]
-        public void NestedNestedOrderByInDollarExpandWorks()
-        {
-            // Arrange
-            string queryUrl = string.Format("{0}/selectexpand/SelectCustomer?" +
-                    "$expand=SelectOrders($orderby=BillingAddress/ZipCode;$expand=OrderDetails($orderby=Price desc))", BaseAddress);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
-            HttpClient client = new HttpClient();
-
-            // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
-                                                                                                                                                                                                                                                                                                                                                    
-            // Assert
-            Assert.NotNull(response);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-            Assert.NotNull(response.Content);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Assert.NotNull(result);
-
-            JsonAssert.ArrayLength(10, "value", result);
-            JArray customers = (JArray)result["value"];
-            JArray orders = customers[9]["SelectOrders"] as JArray;
-            Assert.Equal(8, orders[0]["Id"]);
-            JArray orderdetails = orders[0]["OrderDetails"] as JArray;
-            Assert.Equal(0, orderdetails[0]["Id"]);
-        }
-
-        [Fact]
-        public void NestedTopSkipOrderByInDollarExpandWorksWithEF()
-        {
-            // Arrange
-            RestoreData();
-            string queryUrl = string.Format("{0}/selectexpand/EFSelectCustomers?$expand=SelectOrders($orderby=Id desc;$skip=1;$top=1)", BaseAddress);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
-            HttpClient client = new HttpClient();
-            HttpResponseMessage response;
-
-            // Act
-            response = client.SendAsync(request).Result;
-
-            // Assert
-            Assert.NotNull(response);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.NotNull(response.Content);
-
-            var responseObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            var result = responseObject["value"] as JArray;
-            var expandProp = result[0]["SelectOrders"] as JArray;
-            Assert.Equal(expandProp.Count, 1);
-            Assert.Equal(expandProp[0]["Id"], 2);
-        }
-
         private void RestoreData()
         {
             string requestUri = BaseAddress + "/selectexpand/ResetDataSource";
@@ -610,7 +537,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                     {
                         FirstLine = string.Format("First line {0}", j),
                         SecondLine = string.Format("Second line {0}", j),
-                        ZipCode = j * -100,
+                        ZipCode = j * 100,
                         City = string.Format("City {0}", j),
                         State = string.Format("State {0}", j),
                         Country = string.Format("Country {0}", j),
@@ -620,8 +547,8 @@ namespace WebStack.QA.Test.OData.QueryComposition
                         Id = k,
                         Ammount = k,
                         Name = string.Format("Name {0}", k),
-                        Price = k * -1000
-                    }).ToList().AsQueryable()
+                        Price = k * 1000
+                    }).ToList()
                 }).ToList()
             }).ToList();
         }
@@ -658,7 +585,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                         State = string.Format("State {0}", j),
                         Country = string.Format("Country {0}", j),
                     },
-                    OrderDetails = new List<SelectOrderDetail>().AsQueryable()
+                    OrderDetails = new List<SelectOrderDetail>()
                 }).ToList(),
 
             }).AsQueryable();
@@ -667,6 +594,58 @@ namespace WebStack.QA.Test.OData.QueryComposition
         public double CreditRating(int key)
         {
             return 0;
+        }
+    }
+
+    public class AutoExpandCustomerController : ODataController
+    {
+        private readonly SampleContext _db = new SampleContext();
+
+        [EnableQuery]
+        public IQueryable<AutoExpandCustomer> Get()
+        {
+            ResetDataSource();
+            return _db.AutoExpandCustomers;
+        }
+
+        [EnableQuery]
+        public AutoExpandCustomer Get(int key)
+        {
+            ResetDataSource();
+            return _db.AutoExpandCustomers.First(c => c.Id == key);
+        }
+
+        public void Generate()
+        {
+            for (int i = 1; i < 10; i++)
+            {
+                var customer = new AutoExpandCustomer
+                {
+                    Id = i,
+                    Stuff = new AutoExpandStuff
+                    {
+                        Id = i,
+                        Bonus = new SelectBonus
+                        {
+                            Id = i,
+                            Ammount = i*1000
+                        }
+                    }
+                };
+                _db.AutoExpandCustomers.Add(customer);
+            }
+            _db.SaveChanges();
+        }
+
+        private void ResetDataSource()
+        {
+            if (_db.Database.Exists())
+            {
+                _db.Database.Delete();
+                _db.Database.Create();
+            }
+
+            Generate();
         }
     }
 
@@ -731,9 +710,26 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
         public DbSet<EFSelectCustomer> Customers { get; set; }
 
-        public DbSet<SelectCustomer> SelectCustomers { get; set; }
+        public DbSet<AutoExpandCustomer> AutoExpandCustomers { get; set; }
     }
 
+    public class AutoExpandCustomer
+    {
+        public int Id { get; set; }
+
+        [AutoExpand]
+        public AutoExpandStuff Stuff { get; set; }
+
+        public AutoExpandStuff NormalStuff { get; set; }
+    }
+
+    public class AutoExpandStuff
+    {
+        public int Id { get; set; }
+
+        [AutoExpand]
+        public SelectBonus Bonus { get; set; }
+    }
     public class EFSelectCustomer
     {
         public int Id { get; set; }
@@ -769,7 +765,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
         public int Id { get; set; }
         public DateTimeOffset Date { get; set; }
         public SelectAddress BillingAddress { get; set; }
-        public virtual IQueryable<SelectOrderDetail> OrderDetails { get; set; }
+        public virtual IList<SelectOrderDetail> OrderDetails { get; set; }
     }
 
     public class SelectAddress

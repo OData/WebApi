@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Formatter;
 using System.Web.OData.Query;
@@ -2867,74 +2868,6 @@ namespace System.Web.OData.Builder.Conventions
             Assert.Equal(EdmTypeKind.Complex, gregorianCalendar.TypeKind);
             Assert.False(gregorianCalendar.IsAbstract);
             Assert.Equal(calendar, gregorianCalendar.BaseType);
-        }
-
-        public class DateTimeRelatedModel
-        {
-            public int Id { get; set; }
-
-            public DateTime NationalDay { get; set; } // by default to Edm.DateTimeOffset
-            public TimeSpan ResumeTime { get; set; }  // by default to Edm.Duration
-
-            [Column(TypeName = "date")]
-            public DateTime Birthday { get; set; }
-
-            [Column(TypeName = "Date")]
-            public DateTime? PublishDay { get; set; }
-
-            [Column(TypeName = "time")]
-            public TimeSpan CreatedTime { get; set; }
-
-            [Column(TypeName = "Time")]
-            public TimeSpan? EndTime { get; set; }
-        }
-
-        [Fact]
-        public void CanConfig_DateTimeRelatedProperties_Correctly()
-        {
-            // Arrange
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
-            builder.EntityType<DateTimeRelatedModel>();
-
-            // Act
-            IEdmModel model = builder.GetEdmModel();
-
-            // Assert
-            Assert.NotNull(model);
-            IEdmEntityType entityType =
-                model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "DateTimeRelatedModel");
-            Assert.NotNull(entityType);
-
-            Assert.Equal(7, entityType.Properties().Count());
-            Assert.Equal(1, entityType.Key().Count());
-
-            // by default is Edm.DateTimeOffset
-            IEdmProperty property = entityType.Properties().Single(p => p.Name == "NationalDay");
-            Assert.False(property.Type.IsNullable);
-            Assert.Equal("Edm.DateTimeOffset", property.Type.FullName());
-
-            // by default is Edm.Duration
-            property = entityType.Properties().Single(p => p.Name == "ResumeTime");
-            Assert.False(property.Type.IsNullable);
-            Assert.Equal("Edm.Duration", property.Type.FullName());
-
-            // mapped to Edm.Date
-            property = entityType.Properties().Single(p => p.Name == "Birthday");
-            Assert.False(property.Type.IsNullable);
-            Assert.Equal("Edm.Date", property.Type.FullName());
-
-            property = entityType.Properties().Single(p => p.Name == "PublishDay");
-            Assert.True(property.Type.IsNullable);
-            Assert.Equal("Edm.Date", property.Type.FullName());
-
-            // mapped to Edm.TimeOfDay
-            property = entityType.Properties().Single(p => p.Name == "CreatedTime");
-            Assert.False(property.Type.IsNullable);
-            Assert.Equal("Edm.TimeOfDay", property.Type.FullName());
-
-            property = entityType.Properties().Single(p => p.Name == "EndTime");
-            Assert.True(property.Type.IsNullable);
-            Assert.Equal("Edm.TimeOfDay", property.Type.FullName());
         }
     }
 

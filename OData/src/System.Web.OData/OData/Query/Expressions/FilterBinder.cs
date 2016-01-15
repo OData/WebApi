@@ -1540,7 +1540,9 @@ namespace System.Web.OData.Query.Expressions
             }
 
             if ((IsDateOrOffset(leftUnderlyingType) && IsTimeOfDay(rightUnderlyingType)) ||
-                (IsTimeOfDay(leftUnderlyingType) && IsDateOrOffset(rightUnderlyingType)))
+                (IsTimeOfDay(leftUnderlyingType) && IsDateOrOffset(rightUnderlyingType)) ||
+                (IsTimeSpan(leftUnderlyingType) && IsTimeOfDay(rightUnderlyingType)) ||
+                (IsTimeOfDay(leftUnderlyingType) && IsTimeSpan(rightUnderlyingType)))
             {
                 left = CreateTimeBinaryExpression(left);
                 right = CreateTimeBinaryExpression(right);
@@ -1653,6 +1655,10 @@ namespace System.Web.OData.Query.Expressions
             else if (IsTimeOfDay(source.Type))
             {
                 return MakePropertyAccess(ClrCanonicalFunctions.TimeOfDayProperties[propertyName], source);
+            }
+            else if (IsTimeSpan(source.Type))
+            {
+                return MakePropertyAccess(ClrCanonicalFunctions.TimeSpanProperties[propertyName], source);
             }
 
             return source;
@@ -1946,6 +1952,11 @@ namespace System.Web.OData.Query.Expressions
         private static bool IsDateTime(Type type)
         {
             return IsType<DateTime>(type);
+        }
+
+        private static bool IsTimeSpan(Type type)
+        {
+            return IsType<TimeSpan>(type);
         }
 
         private static bool IsTimeOfDay(Type type)

@@ -16,17 +16,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.OData.Core, Version=6.13.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\packages\Microsoft.OData.Core.6.13.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Core.dll</HintPath>
+    <Reference Include="Microsoft.OData.Core, Version=6.14.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.OData.Core.6.14.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Core.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.OData.Edm, Version=6.13.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\packages\Microsoft.OData.Edm.6.13.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Edm.dll</HintPath>
+    <Reference Include="Microsoft.OData.Edm, Version=6.14.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.OData.Edm.6.14.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Edm.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Spatial, Version=6.13.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\packages\Microsoft.Spatial.6.13.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
+    <Reference Include="Microsoft.Spatial, Version=6.14.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.Spatial.6.14.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Moq, Version=4.0.10827.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -107,10 +107,12 @@
     <Compile Include="OData\Builder\Conventions\Attributes\ActionOnDeleteAttributeConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ComplexTypeAttributeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConventionTest.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\ColumnAttributeEdmPropertyConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ForeignKeyAttributeConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\TimestampAttributeEdmPropertyConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\ForeignKeyDiscoveryConventionTest.cs" />
     <Compile Include="OData\Builder\DynamicPropertyDictionaryAnnotationTest.cs" />
+    <Compile Include="OData\Builder\PrimitivePropertyConfigurationExtensionsTest.cs" />
     <Compile Include="OData\Builder\PropertyPairSelectorVisitorTest.cs" />
     <Compile Include="OData\Builder\SingletonLinkConfigurationTest.cs" />
     <Compile Include="OData\Builder\SingletonConfigurationTest.cs" />
@@ -137,6 +139,7 @@
     <Compile Include="OData\Builder\TestModels\PropertyAlias.cs" />
     <Compile Include="OData\Builder\TestModels\SpecialOrderLine.cs" />
     <Compile Include="OData\ClrPropertyInfoAnnotationTest.cs" />
+    <Compile Include="OData\DateAndTimeOfDayTest.cs" />
     <Compile Include="OData\DateTimeTest.cs" />
     <Compile Include="OData\EdmEnumObjectCollectionTest.cs" />
     <Compile Include="OData\EdmEnumObjectTest.cs" />
@@ -328,6 +331,8 @@
     <Compile Include="OData\Routing\ODataValueProviderFactoryTest.cs" />
     <Compile Include="OData\SelectExpandNestedDollarCountTest.cs" />
     <Compile Include="OData\SelectExpandTest.cs" />
+    <Compile Include="PublicApi\PublicApiHelper.cs" />
+    <Compile Include="PublicApi\PublicApiTest.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="TestCommon\CustomersModelWithInheritance.cs" />
     <Compile Include="TestCommon\SimpleOpenAddress.cs" />
@@ -476,6 +481,7 @@
     <EmbeddedResource Include="Resources\PeopleWithMultipleAnnotations.json" />
     <EmbeddedResource Include="Resources\PeopleWithoutAnnotations.json" />
     <EmbeddedResource Include="Resources\PeopleWithSpecialAnnotations.json" />
+    <EmbeddedResource Include="PublicApi\System.Web.OData.PublicApi.bsl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\System.Web.OData\System.Web.OData.csproj">

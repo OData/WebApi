@@ -90,70 +90,6 @@ namespace System.Web.OData.Formatter
                 Assert.Equal(new[] {42}, (IEnumerable<int>) result[propertyName].Values<int>());
             }
         }
-    
-        [Theory]
-        // -- "NormalFail_FromEntity" -- ensure existing behavior has not changed when serializing 
-        //                               properties off the base entity
-        [InlineData("Array", NullCollectionsTestMode.NormalFail_FromEntity)]
-        [InlineData("IEnumerable", NullCollectionsTestMode.NormalFail_FromEntity)]
-        [InlineData("ICollection", NullCollectionsTestMode.NormalFail_FromEntity)]
-        [InlineData("IList", NullCollectionsTestMode.NormalFail_FromEntity)]
-        [InlineData("List", NullCollectionsTestMode.NormalFail_FromEntity)]
-        [InlineData("Collection", NullCollectionsTestMode.NormalFail_FromEntity)]
-        [InlineData("CustomCollection", NullCollectionsTestMode.NormalFail_FromEntity)]
-        [InlineData("NullableColors", NullCollectionsTestMode.NormalFail_FromEntity)]
-        [InlineData("ComplexCollection", NullCollectionsTestMode.NormalFail_FromEntity)]
-        public void NullCollectionProperties_NormalFail_FromEntity(string propertyName, NullCollectionsTestMode testMode)
-        {
-            // Arrange
-            NullCollectionsTestsModel testObject = new NullCollectionsTestsModel();
-            testObject.GetType().GetProperty(propertyName).SetValue(testObject, null);
-            NullCollectionsTestsController.TestObject = testObject;
-
-            // Act
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/NullCollectionsTests/");
-            try
-            {
-                HttpResponseMessage response = _client.SendAsync(request).Result;
-                response.EnsureSuccessStatusCode();
-            }
-            catch (Exception e)
-            {
-                // Assert
-                Assert.Equal("Null collections cannot be serialized.", e.InnerException.Message);
-            }
-        }
-
-        [Theory]
-        // -- "DoNotSerialize_FromEntity" -- ensure null collections are left out of serialization when 
-        //                                   setting is enabled when serializing properties off the base entity
-        [InlineData("Array", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
-        [InlineData("IEnumerable", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
-        [InlineData("ICollection", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
-        [InlineData("IList", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
-        [InlineData("List", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
-        [InlineData("Collection", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
-        [InlineData("CustomCollection", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
-        [InlineData("NullableColors", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
-        [InlineData("ComplexCollection", NullCollectionsTestMode.DoNotSerialize_FromEntity)]
-        public void NullCollectionProperties_DoNotSerialize_FromEntity(string propertyName, NullCollectionsTestMode testMode)
-        {
-            // Arrange
-            NullCollectionsTestsModel testObject = new NullCollectionsTestsModel();
-            testObject.GetType().GetProperty(propertyName).SetValue(testObject, null);
-            _config.SetDoNotSerializeNullCollections(true);
-            NullCollectionsTestsController.TestObject = testObject;
-
-            // Act
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/NullCollectionsTests/");
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            
-            // Assert
-            response.EnsureSuccessStatusCode();
-            string responseJson = response.Content.ReadAsStringAsync().Result;
-            dynamic result = JToken.Parse(responseJson);
-            Assert.Null(result[propertyName]);          
-        }
 
         [Theory]
         // -- "SerializeAsEmpty_FromEntity" -- ensure null collections are serialized as if they were 
@@ -172,7 +108,6 @@ namespace System.Web.OData.Formatter
             // Arrange
             NullCollectionsTestsModel testObject = new NullCollectionsTestsModel();
             testObject.GetType().GetProperty(propertyName).SetValue(testObject, null);
-            _config.SetSerializeNullCollectionsAsEmpty(true);
             NullCollectionsTestsController.TestObject = testObject;
 
             // Act
@@ -231,72 +166,6 @@ namespace System.Web.OData.Formatter
         }
 
         [Theory]
-        // -- "NormalFail_FromParentComplex" -- ensure existing behavior has not changed when serializing 
-        //                                      properties off a complex attached to the entity
-        [InlineData("Array", NullCollectionsTestMode.NormalFail_FromParentComplex)]
-        [InlineData("IEnumerable", NullCollectionsTestMode.NormalFail_FromParentComplex)]
-        [InlineData("ICollection", NullCollectionsTestMode.NormalFail_FromParentComplex)]
-        [InlineData("IList", NullCollectionsTestMode.NormalFail_FromParentComplex)]
-        [InlineData("List", NullCollectionsTestMode.NormalFail_FromParentComplex)]
-        [InlineData("Collection", NullCollectionsTestMode.NormalFail_FromParentComplex)]
-        [InlineData("CustomCollection", NullCollectionsTestMode.NormalFail_FromParentComplex)]
-        [InlineData("NullableColors", NullCollectionsTestMode.NormalFail_FromParentComplex)]
-        [InlineData("ComplexCollection", NullCollectionsTestMode.NormalFail_FromParentComplex)]
-        public void NullCollectionProperties_NormalFail_FromParentComplex(string propertyName, NullCollectionsTestMode testMode)
-        {
-            // Arrange
-            NullCollectionsTestsModel testObject = new NullCollectionsTestsModel();
-            testObject.ParentComplex.GetType().GetProperty(propertyName).SetValue(testObject.ParentComplex, null);
-            NullCollectionsTestsController.TestObject = testObject;
-
-            // Act
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/NullCollectionsTests/");
-            try
-            {
-                HttpResponseMessage response = _client.SendAsync(request).Result;
-                response.EnsureSuccessStatusCode();
-            }
-            catch (Exception e)
-            {
-                // Assert
-                Assert.Equal("Null collections cannot be serialized.", e.InnerException.Message);
-            }
-        }
-
-        [Theory]
-        // -- "DoNotSerialize_FromParentComplex" -- ensure null collections are left out of serialization 
-        //                                          when setting is enabled when serializing properties off a complex 
-        //                                          attached to the entity
-        [InlineData("Array", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
-        [InlineData("IEnumerable", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
-        [InlineData("ICollection", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
-        [InlineData("IList", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
-        [InlineData("List", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
-        [InlineData("Collection", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
-        [InlineData("CustomCollection", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
-        [InlineData("NullableColors", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
-        [InlineData("ComplexCollection", NullCollectionsTestMode.DoNotSerialize_FromParentComplex)]
-        public void NullCollectionProperties_DoNotSerialize_FromParentComplex(string propertyName, NullCollectionsTestMode testMode)
-        {
-            // Arrange
-            NullCollectionsTestsModel testObject = new NullCollectionsTestsModel();
-            testObject.ParentComplex.GetType().GetProperty(propertyName).SetValue(testObject.ParentComplex, null);
-            _config.SetDoNotSerializeNullCollections(true);
-            NullCollectionsTestsController.TestObject = testObject;
-
-            // Act
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/NullCollectionsTests/");
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-
-            // Assert
-            response.EnsureSuccessStatusCode();
-            string responseJson = response.Content.ReadAsStringAsync().Result;
-            dynamic result = JToken.Parse(responseJson);
-            var parent2 = result["ParentComplex"];
-            Assert.Null(parent2[propertyName]); 
-        }
-
-        [Theory]
         // -- "SerializeAsEmpty_FromParentComplex" -- ensure null collections are serialized as if they were empty 
         //                                            collections when serializing properties off a complex attached 
         //                                            to the entity
@@ -314,7 +183,6 @@ namespace System.Web.OData.Formatter
             // Arrange
             NullCollectionsTestsModel testObject = new NullCollectionsTestsModel();
             testObject.ParentComplex.GetType().GetProperty(propertyName).SetValue(testObject.ParentComplex, null);
-            _config.SetSerializeNullCollectionsAsEmpty(true);
             NullCollectionsTestsController.TestObject = testObject;
 
             // Act

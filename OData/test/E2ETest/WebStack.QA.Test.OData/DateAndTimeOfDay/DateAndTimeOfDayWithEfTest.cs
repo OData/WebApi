@@ -371,6 +371,13 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
 
     public class EfDateAndTimeOfDayModelContext : DbContext
     {
+        public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=EfDateAndTimeOfDayModelContext";
+
+        public EfDateAndTimeOfDayModelContext()
+            : base(ConnectionString)
+        {
+        }
+
         public DbSet<DateAndTimeOfDayModel> DateTimes { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

@@ -1,4 +1,4 @@
-﻿public enum System.Web.OData.EdmDeltaEntityKind : int {
+public enum System.Web.OData.EdmDeltaEntityKind : int {
 	DeletedEntry = 1
 	DeletedLinkEntry = 2
 	Entry = 0
@@ -166,6 +166,11 @@ public sealed class System.Web.OData.EdmTypeExtensions {
 	ExtensionAttribute(),
 	]
 	public static bool IsDeltaFeed (Microsoft.OData.Edm.IEdmType type)
+}
+
+public sealed class System.Web.OData.ODataUriFunctions {
+	public static void AddUriCustomFunction (string customFunctionName, Microsoft.OData.Core.UriParser.FunctionSignatureWithReturnType functionSignature, System.Reflection.MethodInfo methoInfo)
+	public static bool RemoveCustomUriFunction (string customFunctionName, Microsoft.OData.Core.UriParser.FunctionSignatureWithReturnType functionSignature, System.Reflection.MethodInfo methoInfo)
 }
 
 public class System.Web.OData.ClrPropertyInfoAnnotation {
@@ -3030,6 +3035,11 @@ public class System.Web.OData.Formatter.Serialization.SelectExpandNode {
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] SelectedStructuralProperties  { public get; }
 }
 
+public sealed class System.Web.OData.Query.Expressions.UriFunctionsToClrBinder {
+	public static void BindUriFunctionName (string functionName, System.Reflection.MethodInfo methodInfo)
+	public static bool UnbindUriFunctionName (string functionName, System.Reflection.MethodInfo methodInfo)
+}
+
 public class System.Web.OData.Query.Validators.CountQueryValidator {
 	public CountQueryValidator ()
 
@@ -3185,5 +3195,8 @@ public class System.Web.OData.Routing.Conventions.UnmappedRequestRoutingConventi
 	public UnmappedRequestRoutingConvention ()
 
 	public virtual string SelectAction (ODataPath odataPath, System.Web.Http.Controllers.HttpControllerContext controllerContext, System.Linq.ILookup`2[[System.String],[System.Web.Http.Controllers.HttpActionDescriptor]] actionMap)
+}
+
+)
 }
 

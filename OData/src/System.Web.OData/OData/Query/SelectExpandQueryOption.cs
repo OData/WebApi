@@ -399,35 +399,38 @@ namespace System.Web.OData.Query
                         {
                             IEdmNavigationSource currentEdmNavigationSource =
                                 navigationSource.FindNavigationTarget(navigationProperty);
-
-                            List<ODataPathSegment> pathSegments = new List<ODataPathSegment>()
+                            if (currentEdmNavigationSource != null)
                             {
-                                new NavigationPropertySegment(navigationProperty, currentEdmNavigationSource)
-                            };
+                                List<ODataPathSegment> pathSegments = new List<ODataPathSegment>()
+                                {
+                                    new NavigationPropertySegment(navigationProperty, currentEdmNavigationSource)
+                                };
 
-                            ODataExpandPath expandPath = new ODataExpandPath(pathSegments);
-                            SelectExpandClause selectExpandClause = new SelectExpandClause(new List<SelectItem>(), true);
-                            ExpandedNavigationSelectItem item = new ExpandedNavigationSelectItem(expandPath,
-                                currentEdmNavigationSource, selectExpandClause);
-                            if (!currentEdmNavigationSource.EntityType().Equals(entityType))
-                            {
-                                IEnumerable<SelectItem> nestedSelectItems = GetAutoExpandedNavigationSelectItems(
-                                    currentEdmNavigationSource.EntityType(),
-                                    model,
-                                    alreadyExpandedNavigationSourceName,
-                                    item.NavigationSource,
+                                ODataExpandPath expandPath = new ODataExpandPath(pathSegments);
+                                SelectExpandClause selectExpandClause = new SelectExpandClause(new List<SelectItem>(),
                                     true);
-                                selectExpandClause = new SelectExpandClause(nestedSelectItems, true);
-                                item = new ExpandedNavigationSelectItem(expandPath, currentEdmNavigationSource,
-                                    selectExpandClause);
-                            }
+                                ExpandedNavigationSelectItem item = new ExpandedNavigationSelectItem(expandPath,
+                                    currentEdmNavigationSource, selectExpandClause);
+                                if (!currentEdmNavigationSource.EntityType().Equals(entityType))
+                                {
+                                    IEnumerable<SelectItem> nestedSelectItems = GetAutoExpandedNavigationSelectItems(
+                                        currentEdmNavigationSource.EntityType(),
+                                        model,
+                                        alreadyExpandedNavigationSourceName,
+                                        item.NavigationSource,
+                                        true);
+                                    selectExpandClause = new SelectExpandClause(nestedSelectItems, true);
+                                    item = new ExpandedNavigationSelectItem(expandPath, currentEdmNavigationSource,
+                                        selectExpandClause);
+                                }
 
-                            expandItems.Add(item);
-                            if (!isAllSelected)
-                            {
-                                PathSelectItem pathSelectItem = new PathSelectItem(
-                                    new ODataSelectPath(pathSegments));
-                                expandItems.Add(pathSelectItem);
+                                expandItems.Add(item);
+                                if (!isAllSelected)
+                                {
+                                    PathSelectItem pathSelectItem = new PathSelectItem(
+                                        new ODataSelectPath(pathSegments));
+                                    expandItems.Add(pathSelectItem);
+                                }
                             }
                         }
                     }

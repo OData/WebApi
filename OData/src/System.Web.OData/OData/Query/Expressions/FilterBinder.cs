@@ -1048,10 +1048,13 @@ namespace System.Web.OData.Query.Expressions
             {
                 property = ClrCanonicalFunctions.TimeOfDayProperties[ClrCanonicalFunctions.MillisecondFunctionName];
             }
-            else
-            if (IsDateTime(parameter.Type))
+            else if (IsDateTime(parameter.Type))
             {
                 property = ClrCanonicalFunctions.DateTimeProperties[ClrCanonicalFunctions.MillisecondFunctionName];
+            }
+            else if (IsTimeSpan(parameter.Type))
+            {
+                property = ClrCanonicalFunctions.TimeSpanProperties[ClrCanonicalFunctions.MillisecondFunctionName];
             }
             else
             {
@@ -1112,6 +1115,11 @@ namespace System.Web.OData.Query.Expressions
             {
                 Contract.Assert(ClrCanonicalFunctions.DateTimeProperties.ContainsKey(node.Name));
                 property = ClrCanonicalFunctions.DateTimeProperties[node.Name];
+            }
+            else if (IsTimeSpan(parameter.Type))
+            {
+                Contract.Assert(ClrCanonicalFunctions.TimeSpanProperties.ContainsKey(node.Name));
+                property = ClrCanonicalFunctions.TimeSpanProperties[node.Name];
             }
             else
             {
@@ -1941,7 +1949,7 @@ namespace System.Web.OData.Query.Expressions
 
         private static bool IsTimeRelated(Type type)
         {
-            return IsType<TimeOfDay>(type) || IsType<DateTime>(type) || IsType<DateTimeOffset>(type);
+            return IsType<TimeOfDay>(type) || IsType<DateTime>(type) || IsType<DateTimeOffset>(type) || IsType<TimeSpan>(type);
         }
 
         private static bool IsDateOrOffset(Type type)

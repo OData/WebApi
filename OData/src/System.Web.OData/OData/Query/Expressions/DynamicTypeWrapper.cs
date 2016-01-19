@@ -2,8 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-
 
 namespace System.Web.OData.Query.Expressions
 {
@@ -20,6 +20,7 @@ namespace System.Web.OData.Query.Expressions
         /// <param name="propertyName"></param>
         /// <param name="value"></param>
         /// <returns></returns>
+        [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate", Justification = "Generics not appropriate here")]
         public bool TryGetPropertyValue(string propertyName, out object value)
         {
             return this._values.TryGetValue(propertyName, out value);
@@ -63,7 +64,6 @@ namespace System.Web.OData.Query.Expressions
             return dictionary1.Count() == dictionary2.Count() && !dictionary1.Except(dictionary2).Any();
         }
 
-
         /// <summary>
         /// Gets hashcode.
         /// </summary>
@@ -73,26 +73,10 @@ namespace System.Web.OData.Query.Expressions
             long hash = 1870403278L; //Arbitrary number from Anonymous Type GetHashCode implementation
             foreach (var v in this._values.Values)
             {
-                hash = hash * -1521134295L + (v == null ? 0: v.GetHashCode());
+                hash = (hash * -1521134295L) + (v == null ? 0 : v.GetHashCode());
             }
 
             return (int)hash;
         }
-    }
-
-    /// <summary>
-    /// Wrapper for Entity (top level)
-    /// </summary>
-    public class DynamicEntityWrapper : DynamicTypeWrapper
-    {
-
-    }
-
-    /// <summary>
-    /// Wrapper for Complex (netsed)
-    /// </summary>
-    public class DynamicComplexWrapper : DynamicTypeWrapper
-    {
-
     }
 }

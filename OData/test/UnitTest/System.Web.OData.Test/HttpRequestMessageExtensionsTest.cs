@@ -328,27 +328,13 @@ namespace System.Net.Http
         [InlineData("http://localhost/Customers?testkey%23%2B%3D%3F%26=testvalue%23%2B%3D%3F%26", 10, "http://localhost/Customers?testkey%23%2B%3D%3F%26=testvalue%23%2B%3D%3F%26&$skip=10")]
         public void GetNextPageLink_GetsNextPageLink(string requestUri, int pageSize, string nextPageUri)
         {
+            // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.EntitySet<Customer>("Customers");
-            IEdmModel model = modelBuilder.GetEdmModel();
 
-            request.ODataProperties().Model = model;
-
-            var pathHandler = request.ODataProperties().PathHandler;
-
-            var path = pathHandler.Parse(model, "http://localhost", requestUri);
-            request.ODataProperties().Path = path;
-
-            var configuration = new HttpConfiguration();
-
-            string routeName = "Route";
-            request.ODataProperties().RouteName = routeName;
-            configuration.MapODataServiceRoute(routeName, null, model);
-            request.SetConfiguration(configuration);
-
+            // Act
             Uri nextPageLink = request.GetNextPageLink(pageSize);
 
+            // Assert
             Assert.Equal(nextPageUri, nextPageLink.AbsoluteUri);
         }
 

@@ -1,17 +1,16 @@
-﻿using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
-using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Extensions.Semantic;
+using Microsoft.OData.Edm;
+using Microsoft.TestCommon;
 
 namespace System.Web.OData.Query.Expressions
 {
@@ -209,4 +208,3 @@ namespace System.Web.OData.Query.Expressions
         }
     }
 }
-

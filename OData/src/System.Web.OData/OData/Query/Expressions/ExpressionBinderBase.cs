@@ -1,9 +1,6 @@
-﻿using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.OData.Core.UriParser.TreeNodeKinds;
-using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
 using System.Collections.Generic;
 using System.Data.Linq;
 using System.Diagnostics.CodeAnalysis;
@@ -12,27 +9,30 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Xml.Linq;
+using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Core.UriParser.TreeNodeKinds;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Query.Expressions
 {
     internal abstract class ExpressionBinderBase
     {
-        protected static readonly MethodInfo _stringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
+        protected static readonly MethodInfo StringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
 
-        protected static readonly Expression _nullConstant = Expression.Constant(null);
-        protected static readonly Expression _falseConstant = Expression.Constant(false);
-        protected static readonly Expression _trueConstant = Expression.Constant(true);
-        protected static readonly Expression _zeroConstant = Expression.Constant(0);
-        protected static readonly Expression _ordinalStringComparisonConstant = Expression.Constant(StringComparison.Ordinal);
+        protected static readonly Expression NullConstant = Expression.Constant(null);
+        protected static readonly Expression FalseConstant = Expression.Constant(false);
+        protected static readonly Expression TrueConstant = Expression.Constant(true);
+        protected static readonly Expression ZeroConstant = Expression.Constant(0);
+        protected static readonly Expression OrdinalStringComparisonConstant = Expression.Constant(StringComparison.Ordinal);
 
-        protected static readonly MethodInfo _enumTryParseMethod = typeof(Enum).GetMethods()
+        protected static readonly MethodInfo EnumTryParseMethod = typeof(Enum).GetMethods()
                         .Single(m => m.Name == "TryParse" && m.GetParameters().Length == 2);
 
         protected static Dictionary<BinaryOperatorKind, ExpressionType> _binaryOperatorMapping = new Dictionary<BinaryOperatorKind, ExpressionType>
@@ -137,8 +137,8 @@ namespace System.Web.OData.Query.Expressions
                     case BinaryOperatorKind.GreaterThanOrEqual:
                     case BinaryOperatorKind.LessThan:
                     case BinaryOperatorKind.LessThanOrEqual:
-                        left = Expression.Call(_stringCompareMethodInfo, left, right, _ordinalStringComparisonConstant);
-                        right = _zeroConstant;
+                        left = Expression.Call(StringCompareMethodInfo, left, right, OrdinalStringComparisonConstant);
+                        right = ZeroConstant;
                         break;
                     default:
                         break;
@@ -184,26 +184,6 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
-        private static Expression DateTimeOffsetToDateTime(Expression expression)
-        {
-            var unaryExpression = expression as UnaryExpression;
-            if (unaryExpression != null)
-            {
-                if (Nullable.GetUnderlyingType(unaryExpression.Type) == unaryExpression.Operand.Type)
-                {
-                    // this is a cast from T to Nullable<T> which is redundant.
-                    expression = unaryExpression.Operand;
-                }
-            }
-            var parameterizedConstantValue = ExtractParameterizedConstant(expression);
-            var dto = parameterizedConstantValue as DateTimeOffset?;
-            if (dto != null)
-            {
-                expression = Expression.Constant(EdmPrimitiveHelpers.ConvertPrimitiveValue(dto.Value, typeof(DateTime)));
-            }
-            return expression;
-        }
-
         protected Expression CreateConvertExpression(ConvertNode convertNode, Expression source)
         {
             Type conversionType = EdmLibHelpers.GetClrType(convertNode.TypeReference, _model, _assembliesResolver);
@@ -223,7 +203,7 @@ namespace System.Web.OData.Query.Expressions
             {
                 return source;
             }
-            else if (source == _nullConstant)
+            else if (source == NullConstant)
             {
                 return source;
             }
@@ -254,7 +234,6 @@ namespace System.Web.OData.Query.Expressions
                 }
             }
         }
-
 
         // If the expression is of non-standard edm primitive type (like uint), convert the expression to its standard edm type.
         // Also, note that only expressions generated for ushort, uint and ulong can be understood by linq2sql and EF.
@@ -350,7 +329,6 @@ namespace System.Web.OData.Query.Expressions
             return Expression.Property(propertyArgument, propertyInfo);
         }
 
-
         // creates an expression for the corresponding OData function.
         protected Expression MakeFunctionCall(MemberInfo member, params Expression[] arguments)
         {
@@ -396,7 +374,7 @@ namespace System.Web.OData.Query.Expressions
             {
                 Expression test = CheckIfArgumentsAreNull(arguments);
 
-                if (test == _falseConstant)
+                if (test == FalseConstant)
                 {
                     // none of the arguments are/can be null.
                     // so no need to do any null propagation
@@ -459,9 +437,9 @@ namespace System.Web.OData.Query.Expressions
 
         private static Expression CheckIfArgumentsAreNull(Expression[] arguments)
         {
-            if (arguments.Any(arg => arg == _nullConstant))
+            if (arguments.Any(arg => arg == NullConstant))
             {
-                return _trueConstant;
+                return TrueConstant;
             }
 
             arguments =
@@ -477,7 +455,7 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                return _falseConstant;
+                return FalseConstant;
             }
         }
 
@@ -533,12 +511,18 @@ namespace System.Web.OData.Query.Expressions
             {
                 return MakePropertyAccess(ClrCanonicalFunctions.TimeOfDayProperties[propertyName], source);
             }
+            else if (IsTimeSpan(source.Type))
+            {
+                return MakePropertyAccess(ClrCanonicalFunctions.TimeSpanProperties[propertyName], source);
+            }
 
             return source;
         }
 
         private Expression CreateDateBinaryExpression(Expression source)
         {
+            source = ConvertToDateTimeRelatedConstExpression(source);
+
             // Year, Month, Day
             Expression year = GetProperty(source, ClrCanonicalFunctions.YearFunctionName);
             Expression month = GetProperty(source, ClrCanonicalFunctions.MonthFunctionName);
@@ -555,6 +539,8 @@ namespace System.Web.OData.Query.Expressions
 
         private Expression CreateTimeBinaryExpression(Expression source)
         {
+            source = ConvertToDateTimeRelatedConstExpression(source);
+
             // Hour, Minute, Second, Millisecond
             Expression hour = GetProperty(source, ClrCanonicalFunctions.HourFunctionName);
             Expression minute = GetProperty(source, ClrCanonicalFunctions.MinuteFunctionName);
@@ -569,6 +555,39 @@ namespace System.Web.OData.Query.Expressions
             Expression result = Expression.Add(hourTicks, Expression.Add(minuteTicks, Expression.Add(secondTicks, Expression.Convert(milliSecond, typeof(long)))));
 
             return CreateFunctionCallWithNullPropagation(result, new[] { source });
+        }
+
+        private static Expression ConvertToDateTimeRelatedConstExpression(Expression source)
+        {
+            var parameterizedConstantValue = ExtractParameterizedConstant(source);
+            if (parameterizedConstantValue != null && source.Type.IsNullable())
+            {
+                var dateTimeOffset = parameterizedConstantValue as DateTimeOffset?;
+                if (dateTimeOffset != null)
+                {
+                    return Expression.Constant(dateTimeOffset.Value, typeof(DateTimeOffset));
+                }
+
+                var dateTime = parameterizedConstantValue as DateTime?;
+                if (dateTime != null)
+                {
+                    return Expression.Constant(dateTime.Value, typeof(DateTime));
+                }
+
+                var date = parameterizedConstantValue as Date?;
+                if (date != null)
+                {
+                    return Expression.Constant(date.Value, typeof(Date));
+                }
+
+                var timeOfDay = parameterizedConstantValue as TimeOfDay?;
+                if (timeOfDay != null)
+                {
+                    return Expression.Constant(timeOfDay.Value, typeof(TimeOfDay));
+                }
+            }
+
+            return source;
         }
 
         protected static Expression ConvertToEnumUnderlyingType(Expression expression, Type enumType, Type enumUnderlyingType)
@@ -701,7 +720,7 @@ namespace System.Web.OData.Query.Expressions
 
         protected static bool IsTimeRelated(Type type)
         {
-            return IsType<TimeOfDay>(type) || IsType<DateTime>(type) || IsType<DateTimeOffset>(type);
+            return IsType<TimeOfDay>(type) || IsType<DateTime>(type) || IsType<DateTimeOffset>(type) || IsType<TimeSpan>(type);
         }
 
         protected static bool IsDateOrOffset(Type type)
@@ -712,6 +731,11 @@ namespace System.Web.OData.Query.Expressions
         protected static bool IsDateTime(Type type)
         {
             return IsType<DateTime>(type);
+        }
+
+        protected static bool IsTimeSpan(Type type)
+        {
+            return IsType<TimeSpan>(type);
         }
 
         protected static bool IsTimeOfDay(Type type)

@@ -1,9 +1,6 @@
-﻿using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.OData.Core.UriParser.TreeNodeKinds;
-using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -14,9 +11,13 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
+using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Extensions;
 using Microsoft.OData.Core.UriParser.Extensions.Semantic;
 using Microsoft.OData.Core.UriParser.Extensions.TreeNodeKinds;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Core.UriParser.TreeNodeKinds;
+using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Query.Expressions
 {
@@ -25,7 +26,7 @@ namespace System.Web.OData.Query.Expressions
         private Type _elementType;
         private TransformationNode _transformation;
 
-        ParameterExpression _lambdaParameter;
+        private ParameterExpression _lambdaParameter;
 
         private IEnumerable<AggregateStatement> _aggregateStatements;
         private IEnumerable<GroupByPropertyNode> _groupingProperties;
@@ -48,7 +49,7 @@ namespace System.Web.OData.Query.Expressions
                 case TransformationNodeKind.Aggregate:
                     var aggregateClause = this._transformation as AggregateTransformationNode;
                     _aggregateStatements = aggregateClause.Statements;
-                    ResultClrType = TypeProvider.GetResultType<DynamicEntityWrapper>(_model, null, _aggregateStatements);
+                    ResultClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(_model, null, _aggregateStatements);
                     break;
                 case TransformationNodeKind.GroupBy:
                     var groupByClause = this._transformation as GroupByTransformationNode;
@@ -65,13 +66,12 @@ namespace System.Web.OData.Query.Expressions
                         }
                     }
 
-                    _groupByClrType = TypeProvider.GetResultType<DynamicEntityWrapper>(_model, _groupingProperties, null);
-                    ResultClrType = TypeProvider.GetResultType<DynamicEntityWrapper>(_model, _groupingProperties, _aggregateStatements);
+                    _groupByClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(_model, _groupingProperties, null);
+                    ResultClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(_model, _groupingProperties, _aggregateStatements);
                     break;
                 default:
-                    throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, SRResources.NotSupportedTransformationKind, transformation.Kind));
+                    throw new NotSupportedException(String.Format(CultureInfo.InvariantCulture, SRResources.NotSupportedTransformationKind, transformation.Kind));
             }
-
 
             _groupByClrType = _groupByClrType ?? typeof(DynamicTypeWrapper);
         }
@@ -269,7 +269,7 @@ namespace System.Web.OData.Query.Expressions
                 Expression ifFalse = ToNullable(ConvertNonStandardPrimitives(propertyAccessExpression));
                 return
                     Expression.Condition(
-                        test: Expression.Equal(source, _nullConstant),
+                        test: Expression.Equal(source, NullConstant),
                         ifTrue: Expression.Constant(null, ifFalse.Type),
                         ifFalse: ifFalse);
             }
@@ -299,7 +299,6 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-
                 // We do not have properties to aggregate
                 // .GroupBy($it => new GroupByWrapper())
                 groupLambda = Expression.Lambda(Expression.New(this._groupByClrType), this._lambdaParameter);

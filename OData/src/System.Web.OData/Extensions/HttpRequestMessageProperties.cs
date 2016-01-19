@@ -247,7 +247,6 @@ namespace System.Web.OData.Extensions
             }
         }
 
-
         /// <summary>
         /// Gets the data store used by <see cref="IODataRoutingConvention"/>s to store any custom route data.
         /// </summary>

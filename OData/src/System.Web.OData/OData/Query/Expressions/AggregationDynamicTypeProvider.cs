@@ -1,5 +1,6 @@
-﻿using Microsoft.OData.Edm;
-using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -7,17 +8,17 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Web.OData.Formatter;
 using Microsoft.OData.Core.UriParser.Extensions.Semantic;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Query.Expressions
 {
     /// <summary>
-    /// Factory for dynamic types
+    /// Factory for dynamic types in aggregation result
     /// </summary>
     /// <remarks>
     /// Implemented as "skyhook" so far. Need to look for DI in WebAPI
     /// </remarks>
-    internal class TypeProvider
+    internal class AggregationDynamicTypeProvider
     {
         private static readonly MethodInfo getPropertyValueMethod = typeof(DynamicTypeWrapper).GetMethod("GetPropertyValue");
         private static readonly MethodInfo setPropertyValueMethod = typeof(DynamicTypeWrapper).GetMethod("SetPropertyValue");
@@ -41,7 +42,7 @@ namespace System.Web.OData.Query.Expressions
             Contract.Assert(model != null);
 
             // Do not have properties, just return base class
-            if ((statements == null ||　!statements.Any()) && (propertyNodes == null || !propertyNodes.Any()))
+            if ((statements == null || !statements.Any()) && (propertyNodes == null || !propertyNodes.Any()))
             {
                 return typeof(T);
             }
@@ -58,6 +59,7 @@ namespace System.Web.OData.Query.Expressions
                     }
                 }
             }
+
             if (propertyNodes != null && propertyNodes.Any())
             {
                 foreach (var field in propertyNodes)
@@ -69,7 +71,7 @@ namespace System.Web.OData.Query.Expressions
                     }
                     else
                     {
-                        var complexProp = GetResultType<DynamicComplexWrapper>(model, field.Children);
+                        var complexProp = GetResultType<DynamicTypeWrapper>(model, field.Children);
                         CreateProperty(tb, field.Name, complexProp);
                     }
                 }
@@ -77,7 +79,6 @@ namespace System.Web.OData.Query.Expressions
 
             return tb.CreateType();
         }
-
 
         private static TypeBuilder GetTypeBuilder<T>(string typeSignature) where T : DynamicTypeWrapper
         {
@@ -92,8 +93,8 @@ namespace System.Web.OData.Query.Expressions
                                 TypeAttributes.AutoClass |
                                 TypeAttributes.AnsiClass |
                                 TypeAttributes.BeforeFieldInit |
-                                TypeAttributes.AutoLayout
-                                , typeof(T));
+                                TypeAttributes.AutoLayout,
+                                typeof(T));
             return tb;
         }
 
@@ -123,14 +124,8 @@ namespace System.Web.OData.Query.Expressions
                 // for ref types (type) means cast
                 getIl.Emit(OpCodes.Castclass, propertyType);
             }
+
             getIl.Emit(OpCodes.Ret);
-
-
-            // Property set method
-            // set 
-            // {
-            //  return this.SetPropertyValue("propertyName", value);
-            // }
 
             MethodBuilder setPropMthdBldr =
                 tb.DefineMethod("set_" + propertyName,
@@ -148,6 +143,7 @@ namespace System.Web.OData.Query.Expressions
                 // Boxing value types to store as an object
                 setIl.Emit(OpCodes.Box, propertyType);
             }
+
             setIl.Emit(OpCodes.Callvirt, setPropertyValueMethod);
             setIl.Emit(OpCodes.Ret);
 

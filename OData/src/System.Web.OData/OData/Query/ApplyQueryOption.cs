@@ -1,18 +1,18 @@
-﻿using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.OData.Core.UriParser.TreeNodeKinds;
-using Microsoft.OData.Edm;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Extensions.Semantic;
 using Microsoft.OData.Core.UriParser.Extensions.TreeNodeKinds;
+using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Query
 {
@@ -25,9 +25,8 @@ namespace System.Web.OData.Query
         private ApplyClause _applyClause;
         private ODataQueryOptionParser _queryOptionParser;
 
-
         /// <summary>
-        /// Initialize a new instance of <see cref="ApplyQueryOption"/> based on the raw $filter value and 
+        /// Initialize a new instance of <see cref="ApplyQueryOption"/> based on the raw $apply value and 
         /// an EdmModel from <see cref="ODataQueryContext"/>.
         /// </summary>
         /// <param name="rawValue">The raw value for $filter query. It can be null or empty.</param>
@@ -55,35 +54,7 @@ namespace System.Web.OData.Query
             // TODO: Implement and add validator
             //Validator = new FilterQueryValidator();
             _queryOptionParser = queryOptionParser;
-
             ResultClrType = Context.ElementClrType;
-            ResultType = Context.ElementType;
-        }
-
-        // This constructor is intended for unit testing only.
-        internal ApplyQueryOption(string rawValue, ODataQueryContext context)
-        {
-            if (context == null)
-            {
-                throw Error.ArgumentNull("context");
-            }
-
-            if (String.IsNullOrEmpty(rawValue))
-            {
-                throw Error.ArgumentNullOrEmpty("rawValue");
-            }
-
-            Context = context;
-            RawValue = rawValue;
-            //Validator = new FilterQueryValidator();
-            _queryOptionParser = new ODataQueryOptionParser(
-                context.Model,
-                context.ElementType,
-                context.NavigationSource,
-                new Dictionary<string, string> { { "$apply", rawValue } });
-
-            ResultClrType = Context.ElementClrType;
-            ResultType = Context.ElementType;
         }
 
         /// <summary>
@@ -91,6 +62,10 @@ namespace System.Web.OData.Query
         /// </summary>
         public ODataQueryContext Context { get; private set; }
 
+        /// <summary>
+        /// ClrType for result of transformations
+        /// </summary>
+        public Type ResultClrType { get; private set; }
 
         /// <summary>
         /// Gets the parsed <see cref="ApplyClause"/> for this query option.
@@ -102,11 +77,6 @@ namespace System.Web.OData.Query
                 if (_applyClause == null)
                 {
                     _applyClause = _queryOptionParser.ParseApply();
-                    // TODO: After refactoring to QueryNodes re-thingk do we need that part.
-                    //SingleValueNode filterExpression = _applyClause.Expression.Accept(
-                    //    new ParameterAliasNodeTranslator(_queryOptionParser.ParameterAliasNodes)) as SingleValueNode;
-                    //filterExpression = filterExpression ?? new ConstantNode(null);
-                    //_applyClause = new ApplyClause(filterExpression, _applyClause.RangeVariable);
                 }
 
                 return _applyClause;
@@ -119,22 +89,8 @@ namespace System.Web.OData.Query
         public string RawValue { get; private set; }
 
         /// <summary>
-        /// ClrType for result of transformations
-        /// </summary>
-        public Type ResultClrType { get; private set; }
-
-        /// <summary>
-        /// EdmType for transformation result
-        /// </summary>
-        public IEdmType ResultType { get; private set; }
-
-        /// <summary>
         /// Apply the apply query to the given IQueryable.
         /// </summary>
-        /// <remarks>
-        /// The <see cref="ODataQuerySettings.HandleNullPropagation"/> property specifies
-        /// how this method should handle null propagation.
-        /// </remarks>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
         /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
@@ -142,7 +98,6 @@ namespace System.Web.OData.Query
         {
             return ApplyTo(query, querySettings, _defaultAssembliesResolver);
         }
-
 
         /// <summary>
         /// Apply the apply query to the given IQueryable.
@@ -161,14 +116,17 @@ namespace System.Web.OData.Query
             {
                 throw Error.ArgumentNull("query");
             }
+
             if (querySettings == null)
             {
                 throw Error.ArgumentNull("querySettings");
             }
+
             if (assembliesResolver == null)
             {
                 throw Error.ArgumentNull("assembliesResolver");
             }
+
             if (Context.ElementClrType == null)
             {
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
@@ -185,7 +143,8 @@ namespace System.Web.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
             }
 
-            foreach (var transformation in applyClause.Transformations) {
+            foreach (var transformation in applyClause.Transformations) 
+            {
                 if (transformation.Kind == TransformationNodeKind.Aggregate || transformation.Kind == TransformationNodeKind.GroupBy)
                 {
                     var binder = new AggregationBinder(updatedSettings, assembliesResolver, ResultClrType, Context.Model, transformation as TransformationNode);
@@ -200,10 +159,7 @@ namespace System.Web.OData.Query
                 }
             }
 
-            //ResultType = applyClause.TypeReference.Definition;
-
             return query;
         }
     }
-
 }

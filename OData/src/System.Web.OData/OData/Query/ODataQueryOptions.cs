@@ -95,27 +95,6 @@ namespace System.Web.OData.Query
                 _queryOptionParser.Resolver = resolverSettings.CreateResolver(context.Model);
             }
 
-            // Build Apply first
-            BuildApplyQueryOption(queryParameters);
-
-            if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
-            {
-                // We have $apply clause and need to modify context for other clauses
-                //this.Context.ElementType = Apply.ApplyClause.TypeReference.Definition;
-
-                // And reconfigure _queryOptionParser
-                var resolver = _queryOptionParser.Resolver;
-                _queryOptionParser = new ODataQueryOptionParser(
-                   context.Model,
-                   context.ElementType,
-                   context.NavigationSource,
-                   queryParameters)
-                {
-                    Resolver = resolver
-                };
-            }
-
-            // Build other query options for modified context
             BuildQueryOptions(queryParameters);
 
             Validator = new ODataQueryValidator();
@@ -150,7 +129,6 @@ namespace System.Web.OData.Query
         /// Gets the <see cref="FilterQueryOption"/>.
         /// </summary>
         public FilterQueryOption Filter { get; private set; }
-
 
         /// <summary>
         /// Gets the <see cref="OrderByQueryOption"/>.
@@ -321,7 +299,6 @@ namespace System.Web.OData.Query
             {
                 result = Apply.ApplyTo(result, querySettings, _assembliesResolver);
                 Request.ODataProperties().ApplyClause = Apply.ApplyClause;
-                // We know ClrType returned from the $apply clause (it was generated on the fly). Letting other to use it
                 this.Context.ElementClrType = Apply.ResultClrType;
             }
 
@@ -515,7 +492,7 @@ namespace System.Web.OData.Query
         // This may return a null if there are no available properties.
         private static OrderByQueryOption GenerateDefaultOrderBy(ODataQueryContext context)
         {
-            string orderByRaw = string.Empty;
+            string orderByRaw = String.Empty;
             if (EdmLibHelpers.IsDynamicTypeWrapper(context.ElementClrType))
             {
                 orderByRaw = String.Join(",",
@@ -643,23 +620,6 @@ namespace System.Web.OData.Query
             return parameters;
         }
 
-        private void BuildApplyQueryOption(IDictionary<string, string> queryParameters)
-        {
-            var applyQuery = queryParameters.Where(kvp => kvp.Key.ToUpperInvariant() == "$apply").Select(kvp => kvp.Value).FirstOrDefault();
-            if (applyQuery != null)
-            {
-                ThrowIfEmpty(applyQuery, "$apply");
-                RawValues.Apply = applyQuery;
-                Apply = new ApplyQueryOption(applyQuery, Context, _queryOptionParser);
-            }
-            else
-            {
-                // We do not have $apply, do nothing
-            }
-
-        }
-
-
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase",
             Justification = "Need lower case string here.")]
         private void BuildQueryOptions(IDictionary<string, string> queryParameters)
@@ -707,6 +667,11 @@ namespace System.Web.OData.Query
                         break;
                     case "$deltatoken":
                         RawValues.DeltaToken = kvp.Value;
+                        break;
+                    case "$apply":
+                        ThrowIfEmpty(kvp.Value, "$apply");
+                        RawValues.Apply = kvp.Value;
+                        Apply = new ApplyQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
                     default:
                         // we don't throw if we can't recognize the query

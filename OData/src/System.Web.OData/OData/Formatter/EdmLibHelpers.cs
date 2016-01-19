@@ -139,7 +139,6 @@ namespace System.Web.OData.Formatter
                             elementClrType = entityType;
                         }
                       
-
                         IEdmType elementType = GetEdmType(edmModel, elementClrType, testCollections: false);
                         if (elementType != null)
                         {
@@ -149,14 +148,13 @@ namespace System.Web.OData.Formatter
                 }
 
                 Type underlyingType = TypeHelper.GetUnderlyingTypeOrSelf(clrType);
-                IEdmType returnType;
                 if (underlyingType.IsEnum)
                 {
                     clrType = underlyingType;
                 }
 
                 // search for the ClrTypeAnnotation and return it if present
-                returnType =
+                IEdmType returnType =
                     edmModel
                     .SchemaElements
                     .OfType<IEdmType>()
@@ -496,7 +494,6 @@ namespace System.Web.OData.Formatter
 
             return IsSelectExpandWrapper(type.BaseType, out entityType);
         }
-
 
         private static Type ExtractGenericInterface(Type queryType, Type interfaceType)
         {

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -24,6 +25,7 @@ namespace System.Web.OData.Formatter.Serialization
     /// <summary>
     /// ODataSerializer for serializing instances of <see cref="IEdmEntityType"/>
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
     public class ODataEntityTypeSerializer : ODataEdmTypeSerializer
     {
         private const string Entry = "entry";
@@ -139,9 +141,9 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
-        private List<ODataProperty> CreateODataPropertiesFromDynamicType(object graph)
+        private IEnumerable<ODataProperty> CreateODataPropertiesFromDynamicType(EdmEntityType entityType, object graph, Dictionary<IEdmTypeReference, object> navigationProperties = null)
         {
-            List<ODataProperty> properties = new List<ODataProperty>();
+            var properties = new List<ODataProperty>();
             var dynamicObject = graph as DynamicTypeWrapper;
             foreach (var prop in graph.GetType().GetProperties())
             {
@@ -149,46 +151,90 @@ namespace System.Web.OData.Formatter.Serialization
                 ODataProperty property = null;
                 if (dynamicObject.TryGetPropertyValue(prop.Name, out value))
                 {
-                    if (value != null && EdmLibHelpers.IsDynamicTypeWrapper(value.GetType()))
+                    bool isNavigationProperty = false;
+                    if (navigationProperties != null)
                     {
-                        property = new ODataProperty
+                        if (entityType != null)
                         {
-                            Name = prop.Name,
-                            Value = new ODataComplexValue
+                            var navigationProperty =
+                                entityType.NavigationProperties().FirstOrDefault(p => p.Name.Equals(prop.Name));
+                            if (navigationProperty != null)
                             {
-                                Properties = CreateODataPropertiesFromDynamicType(value)
+                                navigationProperties.Add(navigationProperty.Type, value);
+                                isNavigationProperty = true;
                             }
-                        };
+                        }
                     }
-                    else
+
+                    if (!isNavigationProperty)
                     {
-                        property = new ODataProperty
+                        if (value != null && EdmLibHelpers.IsDynamicTypeWrapper(value.GetType()))
                         {
-                            Name = prop.Name,
-                            Value = value
-                        };
+                            property = new ODataProperty
+                            {
+                                Name = prop.Name,
+                                Value = new ODataComplexValue
+                                {
+                                    Properties = CreateODataPropertiesFromDynamicType(entityType, value)
+                                }
+                            };
+                        }
+                        else
+                        {
+                            property = new ODataProperty
+                            {
+                                Name = prop.Name,
+                                Value = value
+                            };
+                        }
+
+                        properties.Add(property);
                     }
-                    properties.Add(property);
                 }
             }
             return properties;
         }
 
-        private void WriteEntry(object graph, ODataWriter writer, ODataSerializerContext writeContext, IEdmTypeReference expectedType)
+        private void WriteDynamicTypeEntry(object graph, ODataWriter writer, IEdmTypeReference expectedType,
+            ODataSerializerContext writeContext)
+        {
+            var navigationProperties = new Dictionary<IEdmTypeReference, object>();
+            var entityType = expectedType.Definition as EdmEntityType;
+            var entry = new ODataEntry()
+            {
+                TypeName = expectedType.FullName(),
+                Properties = CreateODataPropertiesFromDynamicType(entityType, graph, navigationProperties)
+            };
+
+            entry.IsTransient = true;
+            writer.WriteStart(entry);
+            foreach (IEdmTypeReference type in navigationProperties.Keys)
+            {
+                var entityContext = new EntityInstanceContext(writeContext, expectedType.AsEntity(), graph);
+                var navigationProperty = entityType.NavigationProperties().FirstOrDefault(p => p.Type.Equals(type));
+                var navigationLink = CreateNavigationLink(navigationProperty, entityContext);
+                if (navigationLink != null)
+                {
+                    writer.WriteStart(navigationLink);
+                    WriteDynamicTypeEntry(navigationProperties[type], writer, type, writeContext);
+                    writer.WriteEnd();
+                }
+            }
+
+            writer.WriteEnd();
+        }
+
+        private void WriteEntry(object graph, ODataWriter writer, ODataSerializerContext writeContext,
+            IEdmTypeReference expectedType)
         {
             Contract.Assert(writeContext != null);
 
             if (EdmLibHelpers.IsDynamicTypeWrapper(graph.GetType()))
             {
-                ODataEntry entry = new ODataEntry()
-                {
-                    TypeName = expectedType.FullName(),
-                    Properties = CreateODataPropertiesFromDynamicType(graph)
-                };
-                writer.WriteStart(entry);
-                writer.WriteEnd();
+                WriteDynamicTypeEntry(graph, writer, expectedType, writeContext);
                 return;
             }
+
             IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
             EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext, entityType, graph);
 
@@ -200,7 +246,8 @@ namespace System.Web.OData.Formatter.Serialization
                 {
                     writer.WriteStart(entry);
                     WriteNavigationLinks(selectExpandNode.SelectedNavigationProperties, entityInstanceContext, writer);
-                    WriteExpandedNavigationProperties(selectExpandNode.ExpandedNavigationProperties, entityInstanceContext, writer);
+                    WriteExpandedNavigationProperties(selectExpandNode.ExpandedNavigationProperties,
+                        entityInstanceContext, writer);
                     writer.WriteEnd();
                 }
             }
@@ -276,8 +323,6 @@ namespace System.Web.OData.Formatter.Serialization
                     entry.Properties = entry.Properties.Concat(dynamicProperties);
                 }
             }
-
-            // Mark dynamicly generated enities as Transient
 
             IEnumerable<ODataAction> actions = CreateODataActions(selectExpandNode.SelectedActions, entityInstanceContext);
             foreach (ODataAction action in actions)

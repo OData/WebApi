@@ -147,7 +147,7 @@ namespace System.Web.OData.Query.Expressions
         {
             VisitNew(node.NewExpression);
             Out(" {");
-            foreach(MemberAssignment memberNode in node.Bindings)
+            foreach (MemberAssignment memberNode in node.Bindings)
             {
                 Out(memberNode.Member.Name + " = ");
 

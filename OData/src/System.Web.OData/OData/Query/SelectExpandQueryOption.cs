@@ -215,9 +215,7 @@ namespace System.Web.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(queryable);
             }
 
-            var result = SelectExpandBinder.Bind(queryable, updatedSettings, assembliesResolver, this);
-
-            return result;
+            return SelectExpandBinder.Bind(queryable, updatedSettings, assembliesResolver, this);
         }
 
         /// <summary>

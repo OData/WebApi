@@ -1,4 +1,4 @@
-﻿public enum System.Web.OData.EdmDeltaEntityKind : int {
+public enum System.Web.OData.EdmDeltaEntityKind : int {
 	DeletedEntry = 1
 	DeletedLinkEntry = 2
 	Entry = 0
@@ -1705,6 +1705,7 @@ public sealed class System.Web.OData.Extensions.UrlHelperExtensions {
 }
 
 public class System.Web.OData.Extensions.HttpRequestMessageProperties {
+	Microsoft.OData.Core.UriParser.Extensions.Semantic.ApplyClause ApplyClause  { public get; public set; }
 	Microsoft.OData.Edm.IEdmModel Model  { public get; public set; }
 	System.Uri NextLink  { public get; public set; }
 	ODataPath Path  { public get; public set; }
@@ -1895,7 +1896,8 @@ public enum System.Web.OData.Query.AllowedLogicalOperators : int {
 FlagsAttribute(),
 ]
 public enum System.Web.OData.Query.AllowedQueryOptions : int {
-	All = 1023
+	All = 2047
+	Apply = 1024
 	Count = 64
 	DeltaToken = 512
 	Expand = 2
@@ -1906,7 +1908,7 @@ public enum System.Web.OData.Query.AllowedQueryOptions : int {
 	Select = 4
 	Skip = 32
 	SkipToken = 256
-	Supported = 255
+	Supported = 1279
 	Top = 16
 }
 
@@ -1936,6 +1938,18 @@ public abstract class System.Web.OData.Query.OrderByNode {
 	Microsoft.OData.Core.UriParser.OrderByDirection Direction  { public get; }
 
 	public static System.Collections.Generic.IList`1[[System.Web.OData.Query.OrderByNode]] CreateCollection (Microsoft.OData.Core.UriParser.Semantic.OrderByClause orderByClause)
+}
+
+public class System.Web.OData.Query.ApplyQueryOption {
+	public ApplyQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
+
+	Microsoft.OData.Core.UriParser.Extensions.Semantic.ApplyClause ApplyClause  { public get; }
+	ODataQueryContext Context  { public get; }
+	string RawValue  { public get; }
+	System.Type ResultClrType  { public get; }
+
+	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings)
+	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, System.Web.Http.Dispatcher.IAssembliesResolver assembliesResolver)
 }
 
 public class System.Web.OData.Query.CountQueryOption {
@@ -1969,6 +1983,7 @@ ODataQueryParameterBindingAttribute(),
 public class System.Web.OData.Query.ODataQueryOptions {
 	public ODataQueryOptions (ODataQueryContext context, System.Net.Http.HttpRequestMessage request)
 
+	ApplyQueryOption Apply  { public get; }
 	ODataQueryContext Context  { public get; }
 	CountQueryOption Count  { public get; }
 	FilterQueryOption Filter  { public get; }
@@ -2022,6 +2037,7 @@ public class System.Web.OData.Query.ODataQuerySettings {
 public class System.Web.OData.Query.ODataRawQueryOptions {
 	public ODataRawQueryOptions ()
 
+	string Apply  { public get; }
 	string Count  { public get; }
 	string DeltaToken  { public get; }
 	string Expand  { public get; }
@@ -3028,6 +3044,16 @@ public class System.Web.OData.Formatter.Serialization.SelectExpandNode {
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmFunction]] SelectedFunctions  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmNavigationProperty]] SelectedNavigationProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] SelectedStructuralProperties  { public get; }
+}
+
+public class System.Web.OData.Query.Expressions.DynamicTypeWrapper {
+	public DynamicTypeWrapper ()
+
+	public virtual bool Equals (object obj)
+	public virtual int GetHashCode ()
+	public object GetPropertyValue (string propertyName)
+	public void SetPropertyValue (string propertyName, object value)
+	public bool TryGetPropertyValue (string propertyName, out System.Object& value)
 }
 
 public class System.Web.OData.Query.Validators.CountQueryValidator {

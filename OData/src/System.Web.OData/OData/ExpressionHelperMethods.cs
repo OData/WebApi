@@ -118,7 +118,7 @@ namespace System.Web.OData
             get { return _countMethod; }
         }
 
-        public static Dictionary<Type,MethodInfo> QueryableSumGenerics
+        public static Dictionary<Type, MethodInfo> QueryableSumGenerics
         {
             get { return _sumMethods; }
         }
@@ -263,7 +263,6 @@ namespace System.Web.OData
 
             return (lambdaExpression.Body as MethodCallExpression).Method.GetGenericMethodDefinition();
         }
-
        
         private static Dictionary<Type, MethodInfo> GetQueryableAggregationMethods(string methodName)
         {

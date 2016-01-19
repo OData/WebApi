@@ -3,17 +3,17 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.OData.Builder;
-using System.Web.OData.Builder.TestModels;
-using System.Web.OData.Query.Expressions;
-using Microsoft.TestCommon;
-using Address = System.Web.OData.Builder.TestModels.Address;
-using System.Web.OData.Query;
 using System.Net.Http;
 using System.Web.Http;
-using System.Web.Http.Results;
+using System.Web.OData.Builder;
+using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
-using System.Web.UI.WebControls;
+using System.Web.OData.Query;
+using System.Web.OData.Query.Expressions;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.TestCommon;
+using Newtonsoft.Json.Linq;
+using Address = System.Web.OData.Builder.TestModels.Address;
 
 namespace System.Web.OData.Test.OData.Query
 {
@@ -130,12 +130,11 @@ namespace System.Web.OData.Test.OData.Query
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> { { "Address/City", "redmond"}, { "Address/State", "WA"} },
-                            new Dictionary<string, object> { { "Address/City", "seattle"}, { "Address/State", "WA"}  },
-                            new Dictionary<string, object> { { "Address/City", "hobart"}, { "Address/State", null}  },
-                            new Dictionary<string, object> { { "Address/City", null}, { "Address/State", null}  },
+                            new Dictionary<string, object> { { "Address/City", "seattle"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "Address/City", "hobart"}, { "Address/State", null} },
+                            new Dictionary<string, object> { { "Address/City", null}, { "Address/State", null} },
                         }
                     },
-
                     {
                         "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
@@ -168,22 +167,6 @@ namespace System.Web.OData.Test.OData.Query
             {
                 return new TheoryDataSet<string, List<Dictionary<string, object>>>
                 {
-                    /*{
-                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$filter=Total eq 3",
-                        new List<Dictionary<string, object>>
-                        {
-                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
-                        }
-                    },
-                    {
-                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$orderby=Total",
-                        new List<Dictionary<string, object>>
-                        {
-                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} },
-                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } },
-                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 5} },
-                        }
-                    },*/
                     {
                         "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$orderby=Name",
                         new List<Dictionary<string, object>>
@@ -321,7 +304,12 @@ namespace System.Web.OData.Test.OData.Query
                             .Add_Customers_EntitySet()
                             .GetEdmModel();
             var context = new ODataQueryContext(model, typeof(Customer));
-            var applyOption = new ApplyQueryOption(filter, context);
+            var queryOptionParser = new ODataQueryOptionParser(
+                context.Model,
+                context.ElementType,
+                context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", filter } });
+            var applyOption = new ApplyQueryOption(filter, context, queryOptionParser);
             IEnumerable<Customer> customers = CustomerApplyTestData;
 
             // Act
@@ -344,7 +332,6 @@ namespace System.Web.OData.Test.OData.Query
                     object value = GetValue(agg, key);
                     Assert.Equal(expected[key], value);
                 }
-
             }
         }
 
@@ -387,7 +374,6 @@ namespace System.Web.OData.Test.OData.Query
                     object value = GetValue(agg, key);
                     Assert.Equal(expected[key], value);
                 }
-
             }
         }
 
@@ -404,7 +390,12 @@ namespace System.Web.OData.Test.OData.Query
                             .Add_Customers_EntitySet()
                             .GetEdmModel();
             var context = new ODataQueryContext(model, typeof(Customer));
-            var filterOption = new ApplyQueryOption(string.Format("filter({0})", filter), context);
+            var queryOptionParser = new ODataQueryOptionParser(
+                context.Model,
+                context.ElementType,
+                context.NavigationSource,
+                new Dictionary<string, string> { { "$apply", string.Format("filter({0})", filter) } });
+            var filterOption = new ApplyQueryOption(string.Format("filter({0})", filter), context, queryOptionParser);
             IEnumerable<Customer> customers = CustomerApplyTestData;
 
             // Act
@@ -436,7 +427,7 @@ namespace System.Web.OData.Test.OData.Query
             var client = new HttpClient(new HttpServer(config));
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
-                "http://localhost/odata/Customers?$apply=groupby((Name), aggregate(CustomerId with sum as CustomerId))");
+                "http://localhost/odata/Customers?$apply=groupby((Name), aggregate(CustomerId with sum as TotalId))");
 
             // Act
             HttpResponseMessage response = client.SendAsync(request).Result;
@@ -444,12 +435,21 @@ namespace System.Web.OData.Test.OData.Query
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(response);
+            var result = response.Content.ReadAsAsync<JObject>().Result;
+            var results = result["value"] as JArray;
+            Assert.Equal(3, results.Count);
+            Assert.Equal("5", results[0]["TotalId"].ToString());
+            Assert.Equal("Lowest", results[0]["Name"].ToString());
+            Assert.Equal("2", results[1]["TotalId"].ToString());
+            Assert.Equal("Highest", results[1]["Name"].ToString());
+            Assert.Equal("3", results[2]["TotalId"].ToString());
+            Assert.Equal("Middle", results[2]["Name"].ToString());
         }
 
         private object GetValue(DynamicTypeWrapper wrapper, string path)
         {
             var parts = path.Split('/');
-            foreach(var part in parts)
+            foreach (var part in parts)
             {
                 object value;
                 wrapper.TryGetPropertyValue(part, out value);

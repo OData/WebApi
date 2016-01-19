@@ -311,7 +311,7 @@ namespace System.Web.OData.Query.Expressions
             else
             {
                 // Cast fails and return null.
-                return _nullConstant;
+                return NullConstant;
             }
         }
 
@@ -416,7 +416,7 @@ namespace System.Web.OData.Query.Expressions
                 right = ToNullable(right);
 
                 bool liftToNull = true;
-                if (left == _nullConstant || right == _nullConstant)
+                if (left == NullConstant || right == NullConstant)
                 {
                     liftToNull = false;
                 }
@@ -437,7 +437,7 @@ namespace System.Web.OData.Query.Expressions
             // no need to parameterize null's as there cannot be multiple values for null.
             if (constantNode.Value == null)
             {
-                return _nullConstant;
+                return NullConstant;
             }
 
             Type constantType = EdmLibHelpers.GetClrType(constantNode.TypeReference, _model, _assembliesResolver);
@@ -533,7 +533,7 @@ namespace System.Web.OData.Query.Expressions
                 Expression ifFalse = ToNullable(ConvertNonStandardPrimitives(propertyAccessExpression));
                 return
                     Expression.Condition(
-                        test: Expression.Equal(source, _nullConstant),
+                        test: Expression.Equal(source, NullConstant),
                         ifTrue: Expression.Constant(null, ifFalse.Type),
                         ifFalse: ifFalse);
             }
@@ -649,7 +649,7 @@ namespace System.Web.OData.Query.Expressions
                 IEdmTypeReference targetEdmTypeReference = targetEdmType.ToEdmTypeReference(false);
                 targetClrType = EdmLibHelpers.GetClrType(targetEdmTypeReference, _model);
 
-                if (source != _nullConstant)
+                if (source != NullConstant)
                 {
                     if (source.Type == targetClrType)
                     {
@@ -660,14 +660,14 @@ namespace System.Web.OData.Query.Expressions
                         (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(source.Type) == null && !TypeHelper.IsEnum(source.Type)))
                     {
                         // Cast fails and return null.
-                        return _nullConstant;
+                        return NullConstant;
                     }
                 }
             }
 
-            if (targetClrType == null || source == _nullConstant)
+            if (targetClrType == null || source == NullConstant)
             {
-                return _nullConstant;
+                return NullConstant;
             }
 
             if (targetClrType == typeof(string))
@@ -696,7 +696,7 @@ namespace System.Web.OData.Query.Expressions
                 catch (InvalidOperationException)
                 {
                     // Cast fails and return null.
-                    return _nullConstant;
+                    return NullConstant;
                 }
             }
         }
@@ -746,12 +746,12 @@ namespace System.Web.OData.Query.Expressions
             {
                 // We only support to cast Enumeration type from constant string now,
                 // because LINQ to Entities does not recognize the method Enum.TryParse.
-                return _nullConstant;
+                return NullConstant;
             }
             else
             {
                 object[] parameters = new[] { sourceNode.Value, Enum.ToObject(enumType, 0) };
-                bool isSuccessful = (bool)_enumTryParseMethod.MakeGenericMethod(enumType).Invoke(null, parameters);
+                bool isSuccessful = (bool)EnumTryParseMethod.MakeGenericMethod(enumType).Invoke(null, parameters);
 
                 if (isSuccessful)
                 {
@@ -766,7 +766,7 @@ namespace System.Web.OData.Query.Expressions
                 }
                 else
                 {
-                    return _nullConstant;
+                    return NullConstant;
                 }
             }
         }
@@ -1133,7 +1133,7 @@ namespace System.Web.OData.Query.Expressions
                 // IFF(source == null) null; else Any(body);
                 all = ToNullable(all);
                 return Expression.Condition(
-                    test: Expression.Equal(source, _nullConstant),
+                    test: Expression.Equal(source, NullConstant),
                     ifTrue: Expression.Constant(null, all.Type),
                     ifFalse: all);
             }
@@ -1169,7 +1169,7 @@ namespace System.Web.OData.Query.Expressions
                 // IFF(source == null) null; else Any(body);
                 any = ToNullable(any);
                 return Expression.Condition(
-                    test: Expression.Equal(source, _nullConstant),
+                    test: Expression.Equal(source, NullConstant),
                     ifTrue: Expression.Constant(null, any.Type),
                     ifFalse: any);
             }
@@ -1234,73 +1234,6 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
-        private Expression GetProperty(Expression source, string propertyName)
-        {
-            if (IsDateOrOffset(source.Type))
-            {
-                if (IsDateTime(source.Type))
-                {
-                    return MakePropertyAccess(ClrCanonicalFunctions.DateTimeProperties[propertyName], source);
-                }
-                else
-                {
-                    return MakePropertyAccess(ClrCanonicalFunctions.DateTimeOffsetProperties[propertyName], source);
-                }
-            }
-            else if (IsDate(source.Type))
-            {
-                return MakePropertyAccess(ClrCanonicalFunctions.DateProperties[propertyName], source);
-            }
-            else if (IsTimeOfDay(source.Type))
-            {
-                return MakePropertyAccess(ClrCanonicalFunctions.TimeOfDayProperties[propertyName], source);
-            }
-            else if (IsTimeSpan(source.Type))
-            {
-                return MakePropertyAccess(ClrCanonicalFunctions.TimeSpanProperties[propertyName], source);
-            }
-
-            return source;
-        }
-
-        private Expression CreateDateBinaryExpression(Expression source)
-        {
-            source = ConvertToDateTimeRelatedConstExpression(source);
-
-            // Year, Month, Day
-            Expression year = GetProperty(source, ClrCanonicalFunctions.YearFunctionName);
-            Expression month = GetProperty(source, ClrCanonicalFunctions.MonthFunctionName);
-            Expression day = GetProperty(source, ClrCanonicalFunctions.DayFunctionName);
-
-            // return (year * 10000 + month * 100 + day)
-            Expression result =
-                Expression.Add(
-                    Expression.Add(Expression.Multiply(year, Expression.Constant(10000)),
-                        Expression.Multiply(month, Expression.Constant(100))), day);
-
-            return CreateFunctionCallWithNullPropagation(result, new[] { source });
-        }
-
-        private Expression CreateTimeBinaryExpression(Expression source)
-        {
-            source = ConvertToDateTimeRelatedConstExpression(source);
-
-            // Hour, Minute, Second, Millisecond
-            Expression hour = GetProperty(source, ClrCanonicalFunctions.HourFunctionName);
-            Expression minute = GetProperty(source, ClrCanonicalFunctions.MinuteFunctionName);
-            Expression second = GetProperty(source, ClrCanonicalFunctions.SecondFunctionName);
-            Expression milliSecond = GetProperty(source, ClrCanonicalFunctions.MillisecondFunctionName);
-
-            Expression hourTicks = Expression.Multiply(Expression.Convert(hour, typeof(long)), Expression.Constant(TimeOfDay.TicksPerHour));
-            Expression minuteTicks = Expression.Multiply(Expression.Convert(minute, typeof(long)), Expression.Constant(TimeOfDay.TicksPerMinute));
-            Expression secondTicks = Expression.Multiply(Expression.Convert(second, typeof(long)), Expression.Constant(TimeOfDay.TicksPerSecond));
-
-            // return (hour * TicksPerHour + minute * TicksPerMinute + second * TicksPerSecond + millisecond)
-            Expression result = Expression.Add(hourTicks, Expression.Add(minuteTicks, Expression.Add(secondTicks, Expression.Convert(milliSecond, typeof(long)))));
-
-            return CreateFunctionCallWithNullPropagation(result, new[] { source });
-        }
-
         private static Expression ConvertToDateTimeRelatedConstExpression(Expression source)
         {
             var parameterizedConstantValue = ExtractParameterizedConstant(source);
@@ -1332,35 +1265,6 @@ namespace System.Web.OData.Query.Expressions
             }
 
             return source;
-        }
-
-        private static IEnumerable<Expression> ExtractValueFromNullableArguments(IEnumerable<Expression> arguments)
-        {
-            return arguments.Select(arg => ExtractValueFromNullableExpression(arg));
-        }
-
-        private static Expression CheckIfArgumentsAreNull(Expression[] arguments)
-        {
-            if (arguments.Any(arg => arg == _nullConstant))
-            {
-                return _trueConstant;
-            }
-
-            arguments =
-                arguments
-                .Select(arg => CheckForNull(arg))
-                .Where(arg => arg != null)
-                .ToArray();
-
-            if (arguments.Any())
-            {
-                return arguments
-                    .Aggregate((left, right) => Expression.OrElse(left, right));
-            }
-            else
-            {
-                return _falseConstant;
-            }
         }
 
         private static Expression Any(Expression source, Expression filter)
@@ -1412,108 +1316,5 @@ namespace System.Web.OData.Query.Expressions
                 return Expression.Call(null, ExpressionHelperMethods.EnumerableAllGeneric.MakeGenericMethod(elementType), source, filter);
             }
         }
-<<<<<<< HEAD
-
-        private static bool IsNullable(Type t)
-        {
-            if (!t.IsValueType || (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>)))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private static Type ToNullable(Type t)
-        {
-            if (IsNullable(t))
-            {
-                return t;
-            }
-            else
-            {
-                return typeof(Nullable<>).MakeGenericType(t);
-            }
-        }
-
-        private static Expression ToNullable(Expression expression)
-        {
-            if (!IsNullable(expression.Type))
-            {
-                return Expression.Convert(expression, ToNullable(expression.Type));
-            }
-
-            return expression;
-        }
-
-        private static bool IsIQueryable(Type type)
-        {
-            return typeof(IQueryable).IsAssignableFrom(type);
-        }
-
-        private static bool IsDoubleOrDecimal(Type type)
-        {
-            return IsType<double>(type) || IsType<decimal>(type);
-        }
-
-        private static bool IsDateRelated(Type type)
-        {
-            return IsType<Date>(type) || IsType<DateTime>(type) || IsType<DateTimeOffset>(type);
-        }
-
-        private static bool IsTimeRelated(Type type)
-        {
-            return IsType<TimeOfDay>(type) || IsType<DateTime>(type) || IsType<DateTimeOffset>(type) || IsType<TimeSpan>(type);
-        }
-
-        private static bool IsDateOrOffset(Type type)
-        {
-            return IsType<DateTime>(type) || IsType<DateTimeOffset>(type);
-        }
-
-        private static bool IsDateTime(Type type)
-        {
-            return IsType<DateTime>(type);
-        }
-
-        private static bool IsTimeSpan(Type type)
-        {
-            return IsType<TimeSpan>(type);
-        }
-
-        private static bool IsTimeOfDay(Type type)
-        {
-            return IsType<TimeOfDay>(type);
-        }
-
-        private static bool IsDate(Type type)
-        {
-            return IsType<Date>(type);
-        }
-
-        private static bool IsInteger(Type type)
-        {
-            return IsType<short>(type) || IsType<int>(type) || IsType<long>(type);
-        }
-
-        private static bool IsType<T>(Type type) where T : struct
-        {
-            return type == typeof(T) || type == typeof(T?);
-        }
-
-        private static Expression ConvertNull(Expression expression, Type type)
-        {
-            ConstantExpression constantExpression = expression as ConstantExpression;
-            if (constantExpression != null && constantExpression.Value == null)
-            {
-                return Expression.Constant(null, type);
-            }
-            else
-            {
-                return expression;
-            }
-        }
-=======
->>>>>>> Added basic support for aggregations spec
     }
 }

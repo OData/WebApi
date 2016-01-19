@@ -20,7 +20,6 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
-using System.Web.OData.Query.Expressions;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -634,6 +633,7 @@ namespace System.Web.OData.Formatter
                     throw new SerializationException(Error.Format(SRResources.EdmTypeCannotBeNull,
                         edmObject.GetType().FullName, typeof(IEdmObject).Name));
                 }
+
                 serializer = serializerProvider.GetEdmTypeSerializer(edmType);
                 if (serializer == null)
                 {
@@ -649,6 +649,7 @@ namespace System.Web.OData.Formatter
                 {
                     type = value == null ? type : value.GetType();
                 }
+
                 serializer = serializerProvider.GetODataPayloadSerializer(model, type, Request);
                 if (serializer == null)
                 {

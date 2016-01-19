@@ -13,12 +13,12 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Web.Http;
+using System.Web.Http.Routing;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
-using System.Web.Http.Routing;
 
 namespace System.Web.OData.Extensions
 {
@@ -211,16 +211,12 @@ namespace System.Web.OData.Extensions
                 throw Error.ArgumentNull("request");
             }
 
-            if (!request.RequestUri.IsAbsoluteUri)
+            Uri requestUri = request.RequestUri;
+
+            if (!requestUri.IsAbsoluteUri)
             {
-                throw Error.ArgumentUriNotAbsolute("request", request.RequestUri);
+                throw Error.ArgumentUriNotAbsolute("request", requestUri);
             }
-
-            // Reconstruct RequestUri with CreateODataLink to support Uri override scenarios.
-            UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
-            string odataLink = urlHelper.CreateODataLink(request.ODataProperties().Path.Segments);
-
-            Uri requestUri = new Uri(odataLink);
 
             return GetNextPageLink(requestUri, request.GetQueryNameValuePairs(), pageSize);
         }

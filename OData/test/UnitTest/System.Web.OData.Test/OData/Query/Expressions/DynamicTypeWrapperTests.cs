@@ -1,10 +1,8 @@
-﻿using Microsoft.TestCommon;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
 using System.Web.OData.Query.Expressions;
+using Microsoft.TestCommon;
 
 namespace System.Web.OData.Test.OData.Query.Expressions
 {

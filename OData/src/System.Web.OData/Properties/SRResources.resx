@@ -796,4 +796,7 @@
   <data name="InvalidAttributeRoutingTemplateSegment" xml:space="preserve">
     <value>The attribute routing template contains invalid segment '{0}'.</value>
   </data>
+  <data name="UriFunctionClrBinderAlreadyBinded" xml:space="preserve">
+    <value>The function '{0}' is already binded to another method.</value>
+  </data>
 </root>

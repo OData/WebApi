@@ -181,6 +181,10 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
         [InlineData("?$filter=PublishDay eq null", "1,3,5")]
         [InlineData("?$filter=EndTime ne null", "1,3,5")]
         [InlineData("?$filter=CreatedTime eq 04:03:05.0790000", "4")]
+        [InlineData("?$filter=hour(EndTime) eq 11", "1")]
+        [InlineData("?$filter=minute(EndTime) eq 06", "3")]
+        [InlineData("?$filter=second(EndTime) eq 10", "5")]
+        [InlineData("?$filter=fractionalseconds(EndTime) eq 0.082", "3")]
         public void CanFilter_OnDateAndTimeOfDayProperties(string filter, string expect)
         {
             // Arrange

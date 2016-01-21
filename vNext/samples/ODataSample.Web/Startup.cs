@@ -23,8 +23,8 @@ namespace ODataSample.Web
                 options.AddPolicy("AllowAll",
                     builder =>
                     {
-                        builder.AllowAnyOrigin()
-                               .AllowAnyHeader()
+                        builder//.AllowAnyOrigin()
+                               //.AllowAnyHeader()
                                .AllowAnyMethod()
                                .AllowCredentials();
                     });

@@ -28,6 +28,8 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
         public ActionDescriptor SelectAction(RouteContext routeContext)
         {
+            var preflightFor =
+                routeContext.HttpContext.Request.Headers["Access-Control-Request-Method"].FirstOrDefault();
             var odataPath = routeContext.HttpContext.Request.ODataProperties().NewPath;
             var controllerName = string.Empty;
             var methodName = routeContext.HttpContext.Request.Method;
@@ -69,7 +71,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     odataPath.FirstOrDefault(s => s is NavigationPropertySegment) as NavigationPropertySegment;
                 if (navigationPropertySegment != null)
                 {
-                    routeTemplate += "/" + navigationPropertySegment.NavigationProperty.Name;
+                        routeTemplate += "/" + navigationPropertySegment.NavigationProperty.Name;
                 }
             }
 
@@ -87,10 +89,28 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             var actionDescriptor = provider.ActionDescriptors.Items.SingleOrDefault(d =>
             {
                 var c = d as ControllerActionDescriptor;
-                return c != null && c.ControllerName == controllerName &&
-                    (controllerName == "Metadata" ||
-                        ((HttpMethodConstraint)c.ActionConstraints.First()).HttpMethods.Contains(methodName) &&
-                         c.AttributeRouteInfo.Template.EndsWith(routeTemplate));
+                if (c == null)
+                {
+                    return false;
+                }
+                if (c.ControllerName != controllerName)
+                {
+                    return false;
+                }
+                if (controllerName == "Metadata")
+                {
+                    return true;
+                }
+                if (!c.AttributeRouteInfo.Template.EndsWith(routeTemplate))
+                {
+                    return false;
+                }
+                var httpMethodConstraint = ((HttpMethodConstraint)c.ActionConstraints.First());
+                if (methodName.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+                {
+                    return httpMethodConstraint.HttpMethods.Contains(preflightFor);
+                }
+                return httpMethodConstraint.HttpMethods.Contains(methodName);
             });
 
             if (actionDescriptor == null)

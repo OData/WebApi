@@ -18,6 +18,17 @@ namespace ODataSample.Web
         {
             services.AddMvc();
             services.AddOData();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyHeader()
+                               .AllowAnyMethod()
+                               .AllowCredentials();
+                    });
+            });
 
             services.AddSingleton<SampleContext>();
         }
@@ -25,6 +36,7 @@ namespace ODataSample.Web
         public void Configure(IApplicationBuilder app)
         {
             app.UseOData<ISampleService>("odata");
+            app.UseCors("AllowAll");
             //app.UseMvc(builder => {
             //    builder.MapODataRoute<ISampleService>("odata");
             //});

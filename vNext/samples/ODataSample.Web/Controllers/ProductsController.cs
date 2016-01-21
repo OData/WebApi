@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Cors;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,7 @@ namespace ODataSample.Web.Controllers
 {
     [EnableQuery]
     [Route("odata/Products")]
+    [EnableCors("AllowAll")]
     public class ProductsController : Controller
     {
         private readonly SampleContext _sampleContext;

@@ -147,7 +147,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 routeTemplate = controllerName + "/" + routeTemplate;
             }
 
-            var services = routeContext.HttpContext.ApplicationServices;
+            var services = routeContext.HttpContext.RequestServices;
             var provider = services.GetRequiredService<IActionDescriptorsCollectionProvider>();
 
             var methodDescriptor = new List<ActionDescriptor>();

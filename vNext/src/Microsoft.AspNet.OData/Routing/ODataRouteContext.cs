@@ -17,7 +17,7 @@ namespace Microsoft.AspNet.OData.Routing
         public ODataRouteContext(RouteContext other)
             :this(other.HttpContext)
         {
-            this.IsHandled = other.IsHandled;
+            this.Handler = other.Handler;
             this.RouteData = new RouteData(other.RouteData);
         }
 

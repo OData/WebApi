@@ -2,19 +2,20 @@
   "webroot": "wwwroot",
 
   "dependencies": {
-    "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
-    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
-    "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
-    "Microsoft.AspNet.StaticFiles": "1.0.0-rc1-final",
-    "Microsoft.AspNet.OData": "6.0.0-alpha1-rc1-final"
+    "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc2-16069",
+    "Microsoft.AspNet.Mvc": "6.0.0-rc2-16770",
+    "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc2-16236",
+    "Microsoft.AspNet.StaticFiles": "1.0.0-rc2-16107",
+    "Microsoft.AspNet.OData": "6.0.0-*",
+    "Microsoft.AspNet.Hosting": "1.0.0-rc2-16161"
   },
 
   "commands": {
-    "web": "Microsoft.AspNet.Server.Kestrel"
+    "web": "ODataSample.Web"
   },
 
   "frameworks": {
-    "net451": {},
+    "net451": { },
     "dnx451": { },
     "dnxcore50": {
       "dependencies": {

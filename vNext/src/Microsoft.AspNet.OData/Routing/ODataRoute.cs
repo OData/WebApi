@@ -49,7 +49,7 @@ namespace Microsoft.AspNet.OData.Routing
             context.HttpContext.ODataProperties().IsValidODataRequest = true;
 
             await m.RouteAsync(context);
-            context.IsHandled = true;
+            
         }
 
         public VirtualPathData GetVirtualPath(VirtualPathContext context)

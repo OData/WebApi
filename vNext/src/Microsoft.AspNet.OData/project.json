@@ -1,19 +1,19 @@
 {
-  "version": "6.0.0-alpha1-rc1-final",
+  "version": "6.0.0-alpha1-rc2-16770",
   "description": "Microsoft.AspNet.OData",
 
   "dependencies": {
     "Microsoft.OData.Core": "6.14.0-rc",
     "Microsoft.OData.Edm": "6.14.0-rc",
     "Microsoft.Spatial": "6.14.0-rc",
-    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
-    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc1-final",
-    "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final",
-    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final"
+    "Microsoft.AspNet.Mvc": "6.0.0-rc2-16770",
+    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc2-16770",
+    "Microsoft.Extensions.Options": "1.0.0-rc2-15935",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-15921"
   },
 
   "frameworks": {
-    "net451": {},
+    "net451": { },
     "dnx451": { },
     "dnxcore50": {
       "dependencies": {

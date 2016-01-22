@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNet.Http;
+﻿using Microsoft.AspNet.Builder;
+using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Infrastructure;
+using Microsoft.AspNet.Mvc.Routing;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Routing;
@@ -26,8 +28,10 @@ namespace Microsoft.AspNet.OData.Extensions
             {
                 throw Error.ArgumentNull("httpContext");
             }
-
-            return httpContext.RequestServices.GetRequiredService<IUrlHelper>();
+            var actionContext = new ActionContext {
+                HttpContext = httpContext
+            };
+            return httpContext.RequestServices.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(actionContext);
         }
 
         public static IETagHandler ETagHandler(this HttpContext httpContext)
@@ -37,7 +41,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("httpContext");
             }
 
-            return httpContext.ApplicationServices.GetRequiredService<IETagHandler>();
+            return httpContext.RequestServices.GetRequiredService<IETagHandler>();
         }
 
         public static IODataPathHandler ODataPathHandler(this HttpContext httpContext)
@@ -47,7 +51,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("httpContext");
             }
 
-            return httpContext.ApplicationServices.GetRequiredService<IODataPathHandler>();
+            return httpContext.RequestServices.GetRequiredService<IODataPathHandler>();
         }
 
         public static IAssemblyProvider AssemblyProvider(this HttpContext httpContext)
@@ -57,7 +61,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("httpContext");
             }
 
-            return httpContext.ApplicationServices.GetRequiredService<IAssemblyProvider>();
+            return httpContext.RequestServices.GetRequiredService<IAssemblyProvider>();
         }
     }
 }

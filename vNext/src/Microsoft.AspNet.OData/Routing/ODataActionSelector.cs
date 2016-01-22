@@ -17,12 +17,11 @@ namespace Microsoft.AspNet.OData.Routing
         private readonly IODataRoutingConvention _convention;
 
         public ODataActionSelector(IODataRoutingConvention convention,
-            IActionDescriptorsCollectionProvider actionDescriptorsCollectionProvider,
             IActionSelectorDecisionTreeProvider decisionTreeProvider,
             IEnumerable<IActionConstraintProvider> actionConstraintProviders,
             ILoggerFactory loggerFactory)
         {
-            _selector = new DefaultActionSelector(actionDescriptorsCollectionProvider, decisionTreeProvider, actionConstraintProviders, loggerFactory);
+            _selector = new DefaultActionSelector(decisionTreeProvider, actionConstraintProviders, loggerFactory);
             _convention = convention;
         }
 

@@ -12,19 +12,15 @@
       "commandName": "IISExpress",
       "launchUrl": "api/values",
       "environmentVariables": {
-        "ASPNET_ENV": "Development"
+        "ASPNET_ENVIRONMENT": "Development"
       }
-    },
-    "dev": {
-      "commandName": "dev",
-      "launchUrl": "localhost:5000"
     },
     "web": {
       "commandName": "web",
       "launchBrowser": true,
       "launchUrl": "http://localhost:5000",
       "environmentVariables": {
-        "Hosting:Environment": "Development"
+        "ASPNET_ENVIRONMENT": "Development"
       }
     }
   }

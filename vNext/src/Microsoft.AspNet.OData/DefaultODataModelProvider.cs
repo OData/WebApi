@@ -29,12 +29,21 @@ namespace Microsoft.AspNet.OData
                 {
                     var entityClrType = TypeHelper.GetImplementedIEnumerableType(method.ReturnType) ?? method.ReturnType;
                     ProcedureConfiguration configuration = null;
+                    PrimitiveTypeConfiguration primitiveEntityType = null;
+                    EntityTypeConfiguration entityType = null;
 
-                    var entityType = builder.AddEntityType(entityClrType);
+                    if (entityClrType.GetTypeInfo().IsPrimitive
+                               || entityClrType.GetType() == typeof(decimal)
+                               || entityClrType.GetType() == typeof(string))
+                    {
+                        primitiveEntityType = builder.AddPrimitiveType(entityClrType);
+                    }
+                    else
+                    {
+                        entityType = builder.AddEntityType(entityClrType);
+                    }
 
                     var functionAttribute = method.GetCustomAttribute<ODataFunctionAttribute>();
-                    //method.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ODataFunctionAttribute));
-
                     if (functionAttribute != null)
                     {
                         configuration = builder.Function(method.Name);
@@ -45,7 +54,6 @@ namespace Microsoft.AspNet.OData
                     }
 
                     var actionAttribute = method.GetCustomAttribute<ODataActionAttribute>();
-                    //method.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ODataActionAttribute));
                     if (actionAttribute != null)
                     {
                         configuration = builder.Action(method.Name);
@@ -55,10 +63,17 @@ namespace Microsoft.AspNet.OData
                         }
                     }
 
-
                     if (configuration != null)
                     {
-                        configuration.ReturnType = entityType;
+                        if (primitiveEntityType == null)
+                        {
+                            configuration.ReturnType = entityType;
+                        }
+                        else
+                        {
+                            configuration.ReturnType = primitiveEntityType;
+                        }
+
                         configuration.IsComposable = true;
                         configuration.NavigationSource =
                             builder.NavigationSources.FirstOrDefault(n => n.EntityType == entityType) as NavigationSourceConfiguration;

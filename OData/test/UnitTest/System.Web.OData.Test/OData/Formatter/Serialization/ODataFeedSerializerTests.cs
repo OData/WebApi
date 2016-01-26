@@ -80,15 +80,6 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void WriteObject_ThrowsEntitySetMissingDuringSerialization()
-        {
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
-            Assert.Throws<SerializationException>(
-                () => serializer.WriteObject(graph: null, type: null, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: new ODataSerializerContext()),
-                "The related entity set could not be found from the OData path. The related entity set is required to serialize the payload.");
-        }
-
-        [Fact]
         public void WriteObject_Calls_WriteObjectInline()
         {
             // Arrange

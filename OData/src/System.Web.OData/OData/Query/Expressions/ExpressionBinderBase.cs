@@ -198,8 +198,13 @@ namespace System.Web.OData.Query.Expressions
             {
                 return source;
             }
+            if ((conversionType == typeof(TimeOfDay?) && source.Type == typeof(TimeOfDay)) ||
+                ((conversionType == typeof(Date?) && source.Type == typeof(Date))))
+            {
+                return source;
+            }
             else if (conversionType == typeof(TimeOfDay?) &&
-                (source.Type == typeof(DateTimeOffset?) || source.Type == typeof(DateTime?)))
+                (source.Type == typeof(DateTimeOffset?) || source.Type == typeof(DateTime?) || source.Type == typeof(TimeSpan?)))
             {
                 return source;
             }

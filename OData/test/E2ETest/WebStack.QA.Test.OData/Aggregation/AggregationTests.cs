@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
@@ -7,7 +6,6 @@ using System.Web.Http.Dispatcher;
 using System.Web.OData.Extensions;
 using Newtonsoft.Json.Linq;
 using Nuwa;
-using WebStack.QA.Common.XUnit;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
 using Xunit.Extensions;
@@ -52,9 +50,9 @@ namespace WebStack.QA.Test.OData.Aggregation
             var results = result["value"] as JArray;
             Assert.Equal(2, results.Count);
             Assert.Equal("2000", results[0]["TotalPrice"].ToString());
-            Assert.Equal("Cutomer0", results[0]["Name"].ToString());
+            Assert.Equal("Customer0", results[0]["Name"].ToString());
             Assert.Equal("2500", results[1]["TotalPrice"].ToString());
-            Assert.Equal("Cutomer1", results[1]["Name"].ToString());
+            Assert.Equal("Customer1", results[1]["Name"].ToString());
         }
 
         [Fact]

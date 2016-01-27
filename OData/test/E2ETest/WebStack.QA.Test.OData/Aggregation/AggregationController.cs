@@ -26,13 +26,12 @@ namespace WebStack.QA.Test.OData.Aggregation
 
         public void Generate()
         {
-            Customer previousCustomer = null;
             for (int i = 1; i < 10; i++)
             {
                 var customer = new Customer
                 {
                     Id = i,
-                    Name = "Cutomer" + i % 2,
+                    Name = "Customer" + i % 2,
                     Order = new Order
                     {
                         Id = i,

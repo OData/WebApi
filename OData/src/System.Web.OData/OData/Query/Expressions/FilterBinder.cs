@@ -2,10 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Data.Linq;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -14,7 +12,6 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
-using System.Xml.Linq;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
@@ -451,6 +448,13 @@ namespace System.Web.OData.Query.Expressions
 
                 constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
                 value = Enum.Parse(constantType, strValue);
+            }
+
+            if (constantNode.TypeReference != null &&
+                constantNode.TypeReference.IsNullable &&
+                (constantNode.TypeReference.IsDate() || constantNode.TypeReference.IsTimeOfDay()))
+            {
+                constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
             }
 
             if (_querySettings.EnableConstantParameterization)

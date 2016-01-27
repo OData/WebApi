@@ -341,6 +341,21 @@ namespace System.Web.OData
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to search derived type when finding AutoExpand properties.
+        /// </summary>
+        public bool SearchDerivedTypeWhenAutoExpand
+        {
+            get
+            {
+                return _querySettings.SearchDerivedTypeWhenAutoExpand;
+            }
+            set
+            {
+                _querySettings.SearchDerivedTypeWhenAutoExpand = value;
+            }
+        }
+
+        /// <summary>
         /// Performs the query composition after action is executed. It first tries to retrieve the IQueryable from the
         /// returning response message. It then validates the query from uri based on the validation settings on
         /// <see cref="EnableQueryAttribute"/>. It finally applies the query appropriately, and reset it back on
@@ -695,17 +710,29 @@ namespace System.Web.OData
             {
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
-            IEdmEntityType entityType = model.GetEdmType(elementClrType) as IEdmEntityType;
-            if (entityType != null)
+            IEdmEntityType baseEntityType = model.GetEdmType(elementClrType) as IEdmEntityType;
+            List<IEdmEntityType> entityTypes = new List<IEdmEntityType>();
+            if (baseEntityType != null)
             {
-                var navigationProperties = entityType.NavigationProperties();
-                if (navigationProperties != null)
+                entityTypes.Add(baseEntityType);
+                if (SearchDerivedTypeWhenAutoExpand)
                 {
-                    foreach (var navigationProperty in navigationProperties)
+                    entityTypes.AddRange(EdmLibHelpers.GetAllDerivedEntityTypes(baseEntityType, model));
+                }
+
+                foreach (var entityType in entityTypes)
+                {
+                    var navigationProperties = entityType == baseEntityType
+                        ? entityType.NavigationProperties()
+                        : entityType.DeclaredNavigationProperties();
+                    if (navigationProperties != null)
                     {
-                        if (EdmLibHelpers.IsAutoExpand(navigationProperty, model))
+                        foreach (var navigationProperty in navigationProperties)
                         {
-                            return true;
+                            if (EdmLibHelpers.IsAutoExpand(navigationProperty, model))
+                            {
+                                return true;
+                            }
                         }
                     }
                 }

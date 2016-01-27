@@ -60,5 +60,14 @@ namespace System.Web.OData.Query
                 o => o.EnableConstantParameterization,
                 expectedDefaultValue: true);
         }
+
+        [Fact]
+        public void DiscoverDerivedTypeWhenAutoExpand_Property_RoundTrips()
+        {
+            Assert.Reflection.BooleanProperty<ODataQuerySettings>(
+                new ODataQuerySettings(),
+                o => o.SearchDerivedTypeWhenAutoExpand,
+                expectedDefaultValue: false);
+        }
     }
 }

@@ -350,6 +350,7 @@ public class System.Web.OData.EnableQueryAttribute : System.Web.Http.Filters.Act
 	int MaxSkip  { public get; public set; }
 	int MaxTop  { public get; public set; }
 	int PageSize  { public get; public set; }
+	bool SearchDerivedTypeWhenAutoExpand  { public get; public set; }
 
 	public virtual System.Linq.IQueryable ApplyQuery (System.Linq.IQueryable queryable, ODataQueryOptions queryOptions)
 	public virtual object ApplyQuery (object entity, ODataQueryOptions queryOptions)
@@ -2032,6 +2033,7 @@ public class System.Web.OData.Query.ODataQuerySettings {
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	System.Nullable`1[[System.Int32]] PageSize  { public get; public set; }
+	bool SearchDerivedTypeWhenAutoExpand  { public get; public set; }
 }
 
 public class System.Web.OData.Query.ODataRawQueryOptions {
@@ -2146,6 +2148,7 @@ public class System.Web.OData.Query.SelectExpandQueryOption {
 	int LevelsMaxLiteralExpansionDepth  { public get; public set; }
 	string RawExpand  { public get; }
 	string RawSelect  { public get; }
+	bool SearchDerivedTypeWhenAutoExpand  { public get; public set; }
 	Microsoft.OData.Core.UriParser.Semantic.SelectExpandClause SelectExpandClause  { public get; }
 	SelectExpandQueryValidator Validator  { public get; public set; }
 

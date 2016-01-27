@@ -8,7 +8,7 @@ namespace WebStack.QA.Test.OData.AutoExpand
     {
         private readonly AutoExpandContext _db = new AutoExpandContext();
 
-        [EnableQuery]
+        [EnableQuery(SearchDerivedTypeWhenAutoExpand = true)]
         public IQueryable<Customer> Get()
         {
             ResetDataSource();
@@ -16,7 +16,7 @@ namespace WebStack.QA.Test.OData.AutoExpand
             return db.Customers;
         }
 
-        [EnableQuery]
+        [EnableQuery(SearchDerivedTypeWhenAutoExpand = true)]
         public SingleResult<Customer> Get(int key)
         {
             ResetDataSource();
@@ -38,7 +38,7 @@ namespace WebStack.QA.Test.OData.AutoExpand
                         Choice = new ChoiceOrder
                         {
                             Id = i,
-                            Ammount = i * 1000
+                            Amount = i * 1000
                         }
                     },
                 };
@@ -46,6 +46,49 @@ namespace WebStack.QA.Test.OData.AutoExpand
                 if (i > 1)
                 {
                     customer.Friend = previousCustomer;
+                }
+
+                // For customer whose id is 8 will have SpecialOrder with SpecialChoice.
+                if (i == 8)
+                {
+                    customer.Order = new SpecialOrder
+                    {
+                        Id = i,
+                        Choice = new ChoiceOrder
+                        {
+                            Id = i,
+                            Amount = i * 1000
+                        },
+                        SpecialChoice = new ChoiceOrder()
+                        {
+                            Id = i * 100,
+                            Amount = i * 2000
+                        }
+                    };
+                }
+
+                // For customer whose id is 9 will have VipOrder with SpecialChoice and VipChoice.
+                if (i == 9)
+                {
+                    customer.Order = new VipOrder
+                    {
+                        Id = i,
+                        Choice = new ChoiceOrder
+                        {
+                            Id = i,
+                            Amount = i * 1000
+                        },
+                        SpecialChoice = new ChoiceOrder()
+                        {
+                            Id = i * 100,
+                            Amount = i * 2000
+                        },
+                        VipChoice = new ChoiceOrder()
+                        {
+                            Id = i * 1000,
+                            Amount = i * 3000
+                        }
+                    };
                 }
 
                 _db.Customers.Add(customer);
@@ -93,7 +136,7 @@ namespace WebStack.QA.Test.OData.AutoExpand
                         Choice = new ChoiceOrder
                         {
                             Id = i,
-                            Ammount = i * 1000
+                            Amount = i * 1000
                         }
                     },
                 };
@@ -107,6 +150,53 @@ namespace WebStack.QA.Test.OData.AutoExpand
                 previousPeople = people;
             }
 
+            _db.SaveChanges();
+        }
+
+        private void ResetDataSource()
+        {
+            if (_db.Database.Exists())
+            {
+                _db.Database.Delete();
+                _db.Database.Create();
+            }
+
+            Generate();
+        }
+    }
+
+    public class NormalOrdersController : ODataController
+    {
+        private readonly AutoExpandContext _db = new AutoExpandContext();
+
+        [EnableQuery(SearchDerivedTypeWhenAutoExpand = true)]
+        public IQueryable<NormalOrder> Get()
+        {
+            ResetDataSource();
+            var db = new AutoExpandContext();
+            return db.NormalOrders;
+        }
+
+        [EnableQuery]
+        public SingleResult<NormalOrder> Get(int key)
+        {
+            ResetDataSource();
+            var db = new AutoExpandContext();
+            return SingleResult.Create(db.NormalOrders.Where(o => o.Id == key));
+        }
+
+        public void Generate()
+        {
+            var order = new DerivedOrder
+            {
+                Id = 1,
+                OrderDetail = new OrderDetail
+                {
+                    Id = 1,
+                    Description = "OrderDetail"
+                }
+            };
+            _db.NormalOrders.Add(order);
             _db.SaveChanges();
         }
 

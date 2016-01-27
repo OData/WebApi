@@ -15,6 +15,7 @@ namespace WebStack.QA.Test.OData.AutoExpand
 
         public DbSet<Customer> Customers { get; set; }
         public DbSet<People> People { get; set; }
+        public DbSet<NormalOrder> NormalOrders { get; set; }
     }
 
     public class People
@@ -49,6 +50,36 @@ namespace WebStack.QA.Test.OData.AutoExpand
     {
         public int Id { get; set; }
 
-        public double Ammount { get; set; }
+        public double Amount { get; set; }
+    }
+
+    public class SpecialOrder : Order
+    {
+        [AutoExpand]
+        public ChoiceOrder SpecialChoice { get; set; }
+    }
+
+    public class VipOrder : SpecialOrder
+    {
+        [AutoExpand]
+        public ChoiceOrder VipChoice { get; set; }
+    }
+
+    public class NormalOrder
+    {
+        public int Id { get; set; }
+    }
+
+    public class DerivedOrder : NormalOrder
+    {
+        [AutoExpand]
+        public OrderDetail OrderDetail { get; set; }
+    }
+
+    public class OrderDetail
+    {
+        public int Id { get; set; }
+
+        public string Description { get; set; }
     }
 }

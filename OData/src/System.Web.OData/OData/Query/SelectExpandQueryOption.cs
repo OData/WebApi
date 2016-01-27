@@ -171,6 +171,11 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to search derived type when finding AutoExpand properties.
+        /// </summary>
+        public bool SearchDerivedTypeWhenAutoExpand { get; set; }
+
+        /// <summary>
         /// Applies the $select and $expand query options to the given <see cref="IQueryable"/> using the given
         /// <see cref="ODataQuerySettings"/>.
         /// </summary>
@@ -380,58 +385,56 @@ namespace System.Web.OData.Query
         }
 
         private static IEnumerable<SelectItem> GetAutoExpandedNavigationSelectItems(
-            IEdmEntityType entityType, 
+            IEdmEntityType baseEntityType, 
             IEdmModel model,
             string alreadyExpandedNavigationSourceName,
             IEdmNavigationSource navigationSource,
-            bool isAllSelected)
+            bool isAllSelected,
+            bool searchDerivedTypeWhenAutoExpand)
         {
-            List<SelectItem> expandItems = new List<SelectItem>();
-            if (entityType != null)
+            var expandItems = new List<SelectItem>();
+            var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(baseEntityType, model,
+                searchDerivedTypeWhenAutoExpand);
+            foreach (var navigationProperty in autoExpandNavigationProperties)
             {
-                var navigationProperties = entityType.NavigationProperties();
-                if (navigationProperties != null)
+                if (!alreadyExpandedNavigationSourceName.Equals(navigationProperty.Name))
                 {
-                    foreach (var navigationProperty in navigationProperties)
+                    IEdmEntityType entityType = navigationProperty.DeclaringEntityType();
+                    IEdmNavigationSource currentEdmNavigationSource =
+                        navigationSource.FindNavigationTarget(navigationProperty);
+
+                    if (currentEdmNavigationSource != null)
                     {
-                        if (!alreadyExpandedNavigationSourceName.Equals(navigationProperty.Name) &&
-                            EdmLibHelpers.IsAutoExpand(navigationProperty, model))
+                        List<ODataPathSegment> pathSegments = new List<ODataPathSegment>()
                         {
-                            IEdmNavigationSource currentEdmNavigationSource =
-                                navigationSource.FindNavigationTarget(navigationProperty);
-                            if (currentEdmNavigationSource != null)
-                            {
-                                List<ODataPathSegment> pathSegments = new List<ODataPathSegment>()
-                                {
-                                    new NavigationPropertySegment(navigationProperty, currentEdmNavigationSource)
-                                };
+                            new NavigationPropertySegment(navigationProperty, currentEdmNavigationSource)
+                        };
 
-                                ODataExpandPath expandPath = new ODataExpandPath(pathSegments);
-                                SelectExpandClause selectExpandClause = new SelectExpandClause(new List<SelectItem>(),
-                                    true);
-                                ExpandedNavigationSelectItem item = new ExpandedNavigationSelectItem(expandPath,
-                                    currentEdmNavigationSource, selectExpandClause);
-                                if (!currentEdmNavigationSource.EntityType().Equals(entityType))
-                                {
-                                    IEnumerable<SelectItem> nestedSelectItems = GetAutoExpandedNavigationSelectItems(
-                                        currentEdmNavigationSource.EntityType(),
-                                        model,
-                                        alreadyExpandedNavigationSourceName,
-                                        item.NavigationSource,
-                                        true);
-                                    selectExpandClause = new SelectExpandClause(nestedSelectItems, true);
-                                    item = new ExpandedNavigationSelectItem(expandPath, currentEdmNavigationSource,
-                                        selectExpandClause);
-                                }
+                        ODataExpandPath expandPath = new ODataExpandPath(pathSegments);
+                        SelectExpandClause selectExpandClause = new SelectExpandClause(new List<SelectItem>(),
+                            true);
+                        ExpandedNavigationSelectItem item = new ExpandedNavigationSelectItem(expandPath,
+                            currentEdmNavigationSource, selectExpandClause);
+                        if (!currentEdmNavigationSource.EntityType().Equals(entityType))
+                        {
+                            IEnumerable<SelectItem> nestedSelectItems = GetAutoExpandedNavigationSelectItems(
+                                currentEdmNavigationSource.EntityType(),
+                                model,
+                                alreadyExpandedNavigationSourceName,
+                                item.NavigationSource,
+                                true,
+                                searchDerivedTypeWhenAutoExpand);
+                            selectExpandClause = new SelectExpandClause(nestedSelectItems, true);
+                            item = new ExpandedNavigationSelectItem(expandPath, currentEdmNavigationSource,
+                                selectExpandClause);
+                        }
 
-                                expandItems.Add(item);
-                                if (!isAllSelected)
-                                {
-                                    PathSelectItem pathSelectItem = new PathSelectItem(
-                                        new ODataSelectPath(pathSegments));
-                                    expandItems.Add(pathSelectItem);
-                                }
-                            }
+                        expandItems.Add(item);
+                        if (!isAllSelected)
+                        {
+                            PathSelectItem pathSelectItem = new PathSelectItem(
+                                new ODataSelectPath(pathSegments));
+                            expandItems.Add(pathSelectItem);
                         }
                     }
                 }
@@ -509,7 +512,8 @@ namespace System.Web.OData.Query
                 Context.Model,
                 alreadyExpandedNavigationSourceName, 
                 expandItem.NavigationSource, 
-                selectExpandClause.AllSelected);
+                selectExpandClause.AllSelected,
+                SearchDerivedTypeWhenAutoExpand);
             bool hasAutoExpandInExpand = (autoExpandNavigationSelectItems.Count() != 0);
 
             while (level > 0)

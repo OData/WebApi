@@ -11,7 +11,11 @@ namespace WebStack.QA.Test.OData.AutoExpand
             var builder = new ODataConventionModelBuilder(configuration);
             builder.EntitySet<Customer>("Customers");
             builder.EntitySet<Order>("Orders");
+            builder.EntityType<SpecialOrder>();
+            builder.EntityType<VipOrder>();
             builder.EntitySet<ChoiceOrder>("OrderChoices");
+            builder.EntitySet<NormalOrder>("NormalOrders");
+            builder.EntityType<DerivedOrder>();
             builder.EntitySet<People>("People");
             IEdmModel model = builder.GetEdmModel();
             return model;

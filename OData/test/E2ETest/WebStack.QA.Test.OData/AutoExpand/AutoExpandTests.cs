@@ -37,11 +37,18 @@ namespace WebStack.QA.Test.OData.AutoExpand
         public static void UpdateConfiguration(HttpConfiguration configuration)
         {
             configuration.Services.Replace(
-                  typeof(IAssembliesResolver),
-                  new TestAssemblyResolver(typeof(CustomersController),typeof(PeopleController)));
+                typeof (IAssembliesResolver),
+                new TestAssemblyResolver(
+                    typeof (CustomersController), 
+                    typeof (PeopleController),
+                    typeof (NormalOrdersController)));
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            configuration.MapODataServiceRoute("autoexpand", "autoexpand", AutoExpandEdmModel.GetEdmModel(configuration));
+            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling =
+                Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.MapODataServiceRoute(
+                "autoexpand", 
+                "autoexpand", 
+                AutoExpandEdmModel.GetEdmModel(configuration));
         }
 
         [Theory]
@@ -125,15 +132,109 @@ namespace WebStack.QA.Test.OData.AutoExpand
             Assert.Null(friend["Friend"]);
         }
 
-        private static void VerifyOrderAndChoiceOrder(JObject customer)
+        [Fact]
+        public void QueryForAnEntryIncludeTheDerivedAutoExpandNavigationProperty()
+        {
+            // Arrange
+            string queryUrl = string.Format("{0}/autoexpand/Customers(8)", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Act
+            response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+
+            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            VerifyOrderAndChoiceOrder(customer, special: true);
+
+            // level one
+            JObject friend = customer["Friend"] as JObject;
+            VerifyOrderAndChoiceOrder(friend);
+
+            // level two
+            Assert.Null(friend["Friend"]);
+        }
+
+        [Fact]
+        public void QueryForAnEntryIncludeTheMultiDerivedAutoExpandNavigationProperty()
+        {
+            // Arrange
+            string queryUrl = string.Format("{0}/autoexpand/Customers(9)", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Act
+            response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+
+            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            VerifyOrderAndChoiceOrder(customer, special: true, vip: true);
+
+            // level one
+            JObject friend = customer["Friend"] as JObject;
+            VerifyOrderAndChoiceOrder(friend, special: true);
+
+            // level two
+            Assert.Null(friend["Friend"]);
+        }
+
+        [Theory]
+        [InlineData("{0}/autoexpand/NormalOrders", true)]
+        [InlineData("{0}/autoexpand/NormalOrders(1)", false)]
+        public void DerivedAutoExpandNavigationPropertyTest(string url, bool searchDerivedType)
+        {
+            // Arrange
+            string queryUrl = string.Format(url, BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Act
+            response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            string result = response.Content.ReadAsStringAsync().Result;
+            Assert.Equal(searchDerivedType, result.Contains("OrderDetail"));
+        }
+
+        private static void VerifyOrderAndChoiceOrder(JObject customer, bool special = false, bool vip = false)
         {
             JObject order = customer["Order"] as JObject;
             Assert.NotNull(order);
 
             JObject choice = order["Choice"] as JObject;
             Assert.NotNull(choice);
-            Assert.Equal((int)order["Id"], choice["Id"]);
-            Assert.Equal((int)order["Id"] * 1000, choice["Ammount"]);
+            Assert.Equal((int)order["Id"] * 1000, choice["Amount"]);
+
+            if (special)
+            {
+                choice = order["SpecialChoice"] as JObject;
+                Assert.NotNull(choice);
+                Assert.Equal((int)order["Id"] * 2000, choice["Amount"]);
+            }
+
+            if (vip)
+            {
+                choice = order["VipChoice"] as JObject;
+                Assert.NotNull(choice);
+                Assert.Equal((int)order["Id"] * 3000, choice["Amount"]);
+            }
         }
     }
 }

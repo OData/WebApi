@@ -1238,39 +1238,6 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
-        private static Expression ConvertToDateTimeRelatedConstExpression(Expression source)
-        {
-            var parameterizedConstantValue = ExtractParameterizedConstant(source);
-            if (parameterizedConstantValue != null && source.Type.IsNullable())
-            {
-                var dateTimeOffset = parameterizedConstantValue as DateTimeOffset?;
-                if (dateTimeOffset != null)
-                {
-                    return Expression.Constant(dateTimeOffset.Value, typeof(DateTimeOffset));
-                }
-
-                var dateTime = parameterizedConstantValue as DateTime?;
-                if (dateTime != null)
-                {
-                    return Expression.Constant(dateTime.Value, typeof(DateTime));
-                }
-
-                var date = parameterizedConstantValue as Date?;
-                if (date != null)
-                {
-                    return Expression.Constant(date.Value, typeof(Date));
-                }
-
-                var timeOfDay = parameterizedConstantValue as TimeOfDay?;
-                if (timeOfDay != null)
-                {
-                    return Expression.Constant(timeOfDay.Value, typeof(TimeOfDay));
-                }
-            }
-
-            return source;
-        }
-
         private static Expression Any(Expression source, Expression filter)
         {
             Contract.Assert(source != null);

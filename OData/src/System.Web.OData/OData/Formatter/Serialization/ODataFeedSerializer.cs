@@ -44,10 +44,6 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             IEdmEntitySetBase entitySet = writeContext.NavigationSource as IEdmEntitySetBase;
-            if (entitySet == null)
-            {
-                throw new SerializationException(SRResources.EntitySetMissingDuringSerialization);
-            }
 
             IEdmTypeReference feedType = writeContext.GetEdmType(graph, type);
             Contract.Assert(feedType != null);
@@ -101,6 +97,18 @@ namespace System.Web.OData.Formatter.Serialization
             if (feed == null)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Feed));
+            }
+
+            IEdmEntitySetBase entitySet = writeContext.NavigationSource as IEdmEntitySetBase;
+            if (writeContext.NavigationSource == null || entitySet == null)
+            {
+                feed.SetSerializationInfo(new ODataFeedAndEntrySerializationInfo
+                {
+                    IsFromCollection = true,
+                    NavigationSourceEntityTypeName = elementType.FullName(),
+                    NavigationSourceKind = EdmNavigationSourceKind.UnknownEntitySet,
+                    NavigationSourceName = null
+                });
             }
 
             ODataEdmTypeSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType);

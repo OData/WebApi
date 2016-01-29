@@ -426,6 +426,8 @@ namespace System.Web.OData.Query
                 throw Error.InvalidOperation(SRResources.NonSelectExpandOnSingleEntity);
             }
 
+            AddAutoExpandProperties(querySettings);
+
             if (SelectExpand != null)
             {
                 var result = ApplySelectExpand(entity, querySettings);

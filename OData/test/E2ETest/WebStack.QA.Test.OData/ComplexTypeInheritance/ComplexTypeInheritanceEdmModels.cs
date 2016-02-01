@@ -15,7 +15,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
             EntityTypeConfiguration<Window> windowType = builder.EntityType<Window>();
             windowType.HasKey(a => a.Id);
             windowType.Property(a => a.Name).IsRequired();
-            windowType.ComplexProperty(w => w.CurrentShape);
+            windowType.ComplexProperty(w => w.CurrentShape).IsOptional();
             windowType.CollectionProperty(w => w.OptionalShapes);
             windowType.HasOptional<Window>(w => w.Parent);
 

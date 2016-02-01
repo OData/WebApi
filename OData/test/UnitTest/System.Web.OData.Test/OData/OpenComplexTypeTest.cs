@@ -4,9 +4,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Runtime.Remoting;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
@@ -96,6 +96,82 @@ namespace System.Web.OData
             Assert.Equal("11:12:13.0140000", result["Address"]["BirthTime"]);
         }
 
+        [Fact]
+        public void OpenComplexType_PutComplexTypeProperty()
+        {
+            // Arrange
+            const string payload = "{\"value\":{" +
+              "\"Street\":\"UpdatedStreet\"," +
+              "\"City\":\"UpdatedCity\"," +
+              "\"Publish@odata.type\":\"#Date\"," +
+              "\"Publish\":\"2016-02-02\"" +
+            "}}";
+
+            const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
+
+            HttpConfiguration configuration = new[] { typeof(OpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, requestUri);
+            request.Content = new StringContent(payload);
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        [Fact]
+        public void OpenComplexType_PatchComplexTypeProperty()
+        {
+            // Arrange
+            const string payload = "{\"value\":{" +
+              "\"Street\":\"UpdatedStreet\"," +
+              "\"Token@odata.type\":\"#Guid\"," +
+              "\"Token\":\"2E724E81-8462-4BA0-B920-DC87A61C8EA3\"," +
+              "\"BirthDay@odata.type\":\"#Date\"," +
+              "\"BirthDay\":\"2016-01-29\"" +
+            "}}";
+
+            const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
+
+            HttpConfiguration configuration = new[] { typeof(OpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), requestUri);
+            request.Content = new StringContent(payload);
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        [Fact]
+        public void OpenComplexType_DeleteComplexTypeProperty()
+        {
+            // Arrange
+            const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
+
+            HttpConfiguration configuration = new[] { typeof(OpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
         private static IEdmModel GetEdmModel()
         {
             ODataModelBuilder builder = new ODataConventionModelBuilder();
@@ -129,7 +205,7 @@ namespace System.Web.OData
         public IHttpActionResult GetAddress(int key)
         {
             IList<OpenCustomer> customers = CreateCustomers();
-            OpenCustomer customer = customers.Where(c => c.CustomerId == key).FirstOrDefault();
+            OpenCustomer customer = customers.FirstOrDefault(c => c.CustomerId == key);
             if (customer == null)
             {
                 return NotFound();
@@ -176,6 +252,90 @@ namespace System.Web.OData
             Assert.Equal(new TimeOfDay(11, 12, 13, 14), timeOfDayValue);
 
             return Ok(customer);
+        }
+
+        public IHttpActionResult PutToAddress(int key, Delta<OpenAddress> address)
+        {
+            IList<OpenCustomer> customers = CreateCustomers();
+            OpenCustomer customer = customers.FirstOrDefault(c => c.CustomerId == key);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            // Verify the origin address
+            OpenAddress origin = customer.Address;
+            VerifyOriginAddress(key, origin);
+
+            address.Put(origin); // Do put
+
+            // Verify the put address
+            Assert.Equal("UpdatedStreet", origin.Street);
+            Assert.Equal("UpdatedCity", origin.City);
+
+            Assert.NotNull(origin.DynamicProperties);
+            KeyValuePair<string, object> dynamicProperty = Assert.Single(origin.DynamicProperties); // only one
+            Assert.Equal("Publish", dynamicProperty.Key);
+            Assert.Equal(new Date(2016, 2, 2), dynamicProperty.Value);
+
+            return Updated(customer);
+        }
+
+        public IHttpActionResult PatchToAddress(int key, Delta<OpenAddress> address)
+        {
+            IList<OpenCustomer> customers = CreateCustomers();
+            OpenCustomer customer = customers.FirstOrDefault(c => c.CustomerId == key);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            // Verify the origin address
+            OpenAddress origin = customer.Address;
+            VerifyOriginAddress(key, origin);
+
+            address.Patch(origin); // Do patch
+
+            // Verify the patched address
+            Assert.Equal("UpdatedStreet", origin.Street);
+            Assert.Equal("City " + key, origin.City); // not changed
+            Assert.NotNull(origin.DynamicProperties);
+
+            Assert.Equal(3, origin.DynamicProperties.Count); // include the origin dynamic properties
+
+            KeyValuePair<string, object> dynamicProperty = origin.DynamicProperties.FirstOrDefault(e => e.Key == "Token");
+            Assert.NotNull(dynamicProperty);
+            Assert.Equal(new Guid("2E724E81-8462-4BA0-B920-DC87A61C8EA3"), dynamicProperty.Value);
+
+            dynamicProperty = origin.DynamicProperties.FirstOrDefault(e => e.Key == "BirthDay");
+            Assert.NotNull(dynamicProperty);
+            Assert.Equal(new Date(2016, 1, 29), dynamicProperty.Value);
+
+            return Updated(customer);
+        }
+
+        public IHttpActionResult DeleteToAddress(int key)
+        {
+            IList<OpenCustomer> customers = CreateCustomers();
+            OpenCustomer customer = customers.FirstOrDefault(c => c.CustomerId == key);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            customer.Address = null; // A successful DELETE request to the edit URL for a structural property, ... sets the property to null.
+            return Updated(customer); // On success, the service MUST respond with 204 No Content and an empty body.
+        }
+
+        private static void VerifyOriginAddress(int key, OpenAddress address)
+        {
+            Assert.NotNull(address);
+            Assert.Equal("Street " + key, address.Street);
+            Assert.Equal("City " + key, address.City);
+            Assert.NotNull(address.DynamicProperties);
+            KeyValuePair<string, object> dynamicProperty = Assert.Single(address.DynamicProperties);
+            Assert.Equal("IntProp", dynamicProperty.Key);
+            Assert.Equal(new int[] { 200, 100, 300, 0, 400 }[key], dynamicProperty.Value);
         }
     }
 

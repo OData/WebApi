@@ -5,7 +5,7 @@ namespace System.Web.OData
 {
     /// <summary>
     /// Represents a <see cref="Delta"/> that can be used when a backing CLR type exists for 
-    /// the entity type whose changes are tracked.
+    /// the entity type and complex type whose changes are tracked.
     /// </summary>
     public abstract class TypedDelta : Delta
     {

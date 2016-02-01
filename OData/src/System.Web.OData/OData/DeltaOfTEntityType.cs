@@ -16,7 +16,7 @@ namespace System.Web.OData
     /// <summary>
     /// A class the tracks changes (i.e. the Delta) for a particular <typeparamref name="TEntityType"/>.
     /// </summary>
-    /// <typeparam name="TEntityType">TEntityType is the base type of entity this delta tracks changes for.</typeparam>
+    /// <typeparam name="TEntityType">TEntityType is the base entity type or complex type of entity this delta tracks changes for.</typeparam>
     [NonValidatingParameterBinding]
     public class Delta<TEntityType> : TypedDelta, IDelta where TEntityType : class
     {
@@ -46,7 +46,7 @@ namespace System.Web.OData
         /// <summary>
         /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
         /// </summary>
-        /// <param name="entityType">The derived entity type for which the changes would be tracked.
+        /// <param name="entityType">The derived entity type or complex type for which the changes would be tracked.
         /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.
         /// </param>
         public Delta(Type entityType)
@@ -57,7 +57,7 @@ namespace System.Web.OData
         /// <summary>
         /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
         /// </summary>
-        /// <param name="entityType">The derived entity type for which the changes would be tracked.
+        /// <param name="entityType">The derived entity type or complex type for which the changes would be tracked.
         /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.
         /// </param>
         /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
@@ -70,7 +70,7 @@ namespace System.Web.OData
         /// <summary>
         /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
         /// </summary>
-        /// <param name="entityType">The derived entity type for which the changes would be tracked.
+        /// <param name="entityType">The derived entity type or complex type for which the changes would be tracked.
         /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.
         /// </param>
         /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property

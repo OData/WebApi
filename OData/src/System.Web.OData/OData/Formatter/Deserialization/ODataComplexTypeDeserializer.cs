@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Web.Http;
@@ -27,6 +30,26 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         /// <inheritdoc />
+        public override object Read(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
+        {
+            if (messageReader == null)
+            {
+                throw Error.ArgumentNull("messageReader");
+            }
+
+            IEdmTypeReference edmType = readContext.GetEdmType(type);
+            Contract.Assert(edmType != null);
+
+            if (!edmType.IsComplex())
+            {
+                throw Error.Argument("type", SRResources.ArgumentMustBeOfType, EdmTypeKind.Complex);
+            }
+
+            ODataProperty property = messageReader.ReadProperty();
+            return ReadInline(property, edmType, readContext);
+        }
+
+        /// <inheritdoc />
         public sealed override object ReadInline(object item, IEdmTypeReference edmType, ODataDeserializerContext readContext)
         {
             if (readContext == null)
@@ -37,6 +60,12 @@ namespace System.Web.OData.Formatter.Deserialization
             if (item == null)
             {
                 return null;
+            }
+
+            ODataProperty property = item as ODataProperty;
+            if (property != null)
+            {
+                item = property.Value;
             }
 
             ODataComplexValue complexValue = item as ODataComplexValue;
@@ -135,23 +164,64 @@ namespace System.Web.OData.Formatter.Deserialization
             }
         }
 
-        internal static object CreateResource(IEdmComplexTypeReference edmComplexType, ODataDeserializerContext readContext)
+        internal static object CreateResource(IEdmComplexTypeReference complexType, ODataDeserializerContext readContext)
         {
-            Contract.Assert(edmComplexType != null);
+            if (complexType == null)
+            {
+                throw Error.ArgumentNull("complexType");
+            }
+            if (readContext == null)
+            {
+                throw Error.ArgumentNull("readContext");
+            }
+
+            IEdmModel model = readContext.Model;
+            if (model == null)
+            {
+                throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
+            }
 
             if (readContext.IsUntyped)
             {
-                return new EdmComplexObject(edmComplexType);
+                return new EdmComplexObject(complexType);
             }
             else
             {
-                Type clrType = EdmLibHelpers.GetClrType(edmComplexType, readContext.Model);
+                Type clrType = EdmLibHelpers.GetClrType(complexType, readContext.Model);
                 if (clrType == null)
                 {
-                    throw Error.InvalidOperation(SRResources.MappingDoesNotContainEntityType, edmComplexType.FullName());
+                    throw Error.InvalidOperation(SRResources.MappingDoesNotContainEntityType, complexType.FullName());
                 }
 
-                return Activator.CreateInstance(clrType);
+                if (readContext.IsDeltaOfT)
+                {
+                    Type elementType = readContext.ResourceType.GetGenericArguments()[0];
+                    if (elementType != clrType)
+                    {
+                        // Just create the object for inline complex type
+                        return Activator.CreateInstance(clrType);
+                    }
+
+                    IEnumerable<string> structuralProperties = complexType.StructuralProperties()
+                        .Select(edmProperty => EdmLibHelpers.GetClrPropertyName(edmProperty, model));
+
+                    if (complexType.IsOpen())
+                    {
+                        PropertyInfo dynamicDictionaryPropertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(
+                            complexType.StructuredDefinition(), model);
+
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties,
+                            dynamicDictionaryPropertyInfo);
+                    }
+                    else
+                    {
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties);
+                    }
+                }
+                else
+                {
+                    return Activator.CreateInstance(clrType);
+                }
             }
         }
     }

@@ -2785,6 +2785,7 @@ public class System.Web.OData.Formatter.Deserialization.ODataCollectionDeseriali
 public class System.Web.OData.Formatter.Deserialization.ODataComplexTypeDeserializer : ODataEdmTypeDeserializer {
 	public ODataComplexTypeDeserializer (ODataDeserializerProvider deserializerProvider)
 
+	public virtual object Read (Microsoft.OData.Core.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 	public virtual object ReadComplexValue (Microsoft.OData.Core.ODataComplexValue complexValue, Microsoft.OData.Edm.IEdmComplexTypeReference complexType, ODataDeserializerContext readContext)
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }

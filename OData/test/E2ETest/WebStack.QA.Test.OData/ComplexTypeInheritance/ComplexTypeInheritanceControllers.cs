@@ -4,6 +4,7 @@ using System.Net;
 using System.Web.Http;
 using System.Web.OData;
 using System.Web.OData.Routing;
+using Xunit;
 
 namespace WebStack.QA.Test.OData.ComplexTypeInheritance
 {
@@ -69,12 +70,6 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
         {
             return SingleResult.Create<Window>(_windows.Where(w => w.Id == key).AsQueryable());
         }
-
-        //[EnableQuery]
-        //public IHttpActionResult GetWindow([FromODataUri] int key)
-        //{
-        //    return Ok(_windows.Single(w => w.Id == key));
-        //}
 
         public IHttpActionResult Post(Window window)
         {
@@ -192,7 +187,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
             return Ok(window.OptionalShapes);
         }
 
-        // Defect 2876570:[UriParser] Cast segment following a collection complex type property reports exception.
+        // https://github.com/OData/odata.net/issues/457: [UriParser] Cast segment following a collection complex type property reports exception.
         // [ODataRoute("Windows({key})/OptionalShapes/WebStack.QA.Test.OData.ComplexTypeInheritance.Circle")]
         public IHttpActionResult GetOptionalShapesOfCircle(int key)
         {
@@ -206,29 +201,75 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
         }
 
         [HttpPut]
-        [ODataRoute("Windows({key})/CurrentShape")]
-        public IHttpActionResult ReplaceCurrentShape(int key, Shape shape)
+     //   [ODataRoute("Windows({key})/CurrentShape")]
+        public IHttpActionResult PutToCurrentShapeOfCircle(int key, Delta<Circle> shape)
         {
             Window window = _windows.FirstOrDefault(e => e.Id == key);
             if (window == null)
             {
                 return NotFound();
             }
-            window.CurrentShape = shape;
-            return Ok(shape);
+
+            Circle origin = window.CurrentShape as Circle;
+            if (origin == null)
+            {
+                return NotFound();
+            }
+
+            shape.Put(origin);
+            return Ok(origin);
         }
 
         [HttpPut]
         [ODataRoute("Windows({key})/OptionalShapes")]
-        public IHttpActionResult ReplaceOptionalShapes(int key, List<Shape> shapes)
+        public IHttpActionResult ReplaceOptionalShapes(int key, IEnumerable<Shape> shapes)
         {
             Window window = _windows.FirstOrDefault(e => e.Id == key);
             if (window == null)
             {
                 return NotFound();
             }
-            window.OptionalShapes = shapes;
+
+            Assert.NotNull(shapes);
+            window.OptionalShapes = shapes.ToList();
             return Ok(shapes);
+        }
+
+        [HttpPatch]
+        public IHttpActionResult PatchToOptionalShapes(int key, Delta<Shape> shapes)
+        {
+            return Ok("Not Supported");
+        }
+
+        [HttpPatch]
+        public IHttpActionResult PatchToCurrentShapeOfCircle(int key, Delta<Circle> shape)
+        {
+            Window window = _windows.FirstOrDefault(e => e.Id == key);
+            if (window == null)
+            {
+                return NotFound();
+            }
+
+            Circle origin = window.CurrentShape as Circle;
+            if (origin == null)
+            {
+                return NotFound();
+            }
+
+            shape.Patch(origin);
+            return Ok(origin);
+        }
+
+        public IHttpActionResult DeleteToCurrentShape(int key)
+        {
+            Window window = _windows.FirstOrDefault(e => e.Id == key);
+            if (window == null)
+            {
+                return NotFound();
+            }
+
+            window.CurrentShape = null;
+            return Updated(window);
         }
     }
 }

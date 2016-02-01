@@ -399,6 +399,146 @@
             }
         }
 
+        [Fact]
+        public async Task PatchOpenComplexTypeProperty()
+        {
+            foreach (string routing in Routings)
+            {
+                await ResetDatasource();
+
+                // Get ~/Accounts(1)/Address
+                var requestUri = string.Format(BaseAddress + "/{0}/Accounts(1)/Address", routing);
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                var response = await Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var content = await response.Content.ReadAsAsync<JObject>();
+                Assert.Equal(6, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 dynamic properties
+                Assert.Equal("Redmond", content["City"]);
+                Assert.Equal("1 Microsoft Way", content["Street"]);
+                Assert.Equal("US", content["CountryCode"]);
+                Assert.Equal("US", content["Country"]); // dynamic property
+
+                // Patch ~/Accounts(1)/Address
+                request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+                request.Content = new StringContent(
+                    @"{
+                        '@odata.type':'#WebStack.QA.Test.OData.OpenType.Address',
+                        'City':'NewCity',
+                        'OtherProperty@odata.type':'#Date',
+                        'OtherProperty':'2016-02-01'
+                  }");
+                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+                response = await this.Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+                // Get ~/Accounts(1)/Address
+                request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                response = await Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                content = await response.Content.ReadAsAsync<JObject>();
+                Assert.Equal(7, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 dynamic properties + 1 new dynamic properties
+                Assert.Equal("NewCity", content["City"]); // updated
+                Assert.Equal("1 Microsoft Way", content["Street"]);
+                Assert.Equal("US", content["CountryCode"]);
+                Assert.Equal("US", content["Country"]);
+                Assert.Equal("2016-02-01", content["OtherProperty"]);
+            }
+        }
+
+        [Fact]
+        public async Task PatchOpenDerivedComplexTypeProperty()
+        {
+            foreach (string routing in Routings)
+            {
+                await ResetDatasource();
+
+                // Get ~/Accounts(1)/Address
+                var requestUri = string.Format(BaseAddress + "/{0}/Accounts(1)/Address/WebStack.QA.Test.OData.OpenType.GlobalAddress", routing);
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                var response = await Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var content = await response.Content.ReadAsAsync<JObject>();
+                Assert.Equal(6, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 dynamic properties
+                Assert.Equal("Redmond", content["City"]);
+                Assert.Equal("1 Microsoft Way", content["Street"]);
+                Assert.Equal("US", content["CountryCode"]);
+                Assert.Equal("US", content["Country"]);
+
+                // Patch ~/Accounts(1)/Address/WebStack.QA.Test.OData.OpenType.GlobalAddress
+                request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+                request.Content = new StringContent(
+                    @"{
+                        '@odata.type':'#WebStack.QA.Test.OData.OpenType.GlobalAddress',
+                        'CountryCode':'NewCountryCode',
+                        'Country':'NewCountry'
+                  }");
+                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+                response = await this.Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+                // Get ~/Accounts(1)/Address/WebStack.QA.Test.OData.OpenType.GlobalAddress
+                request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                response = await Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                content = await response.Content.ReadAsAsync<JObject>();
+                Assert.Equal(6, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 dynamic properties
+                Assert.Equal("Redmond", content["City"]);
+                Assert.Equal("1 Microsoft Way", content["Street"]);
+                Assert.Equal("NewCountryCode", content["CountryCode"]); // updated
+                Assert.Equal("NewCountry", content["Country"]);  // updated
+            }
+        }
+
+        [Fact]
+        public async Task PutOpenComplexTypeProperty()
+        {
+            foreach (string routing in Routings)
+            {
+                await ResetDatasource();
+
+                // Get ~/Accounts(1)/Address
+                var requestUri = string.Format(BaseAddress + "/{0}/Accounts(1)/Address", routing);
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                var response = await Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var content = await response.Content.ReadAsAsync<JObject>();
+                Assert.Equal(6, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 dynamic properties
+                Assert.Equal("Redmond", content["City"]);
+                Assert.Equal("1 Microsoft Way", content["Street"]);
+                Assert.Equal("US", content["CountryCode"]);
+                Assert.Equal("US", content["Country"]); // dynamic property
+
+                // Put ~/Accounts(1)/Address
+                request = new HttpRequestMessage(HttpMethod.Put, requestUri);
+                request.Content = new StringContent(
+                    @"{
+                        '@odata.type':'#WebStack.QA.Test.OData.OpenType.Address',
+                        'City':'NewCity',
+                        'Street':'NewStreet',
+                        'OtherProperty@odata.type':'#Date',
+                        'OtherProperty':'2016-02-01'
+                  }");
+                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+                response = await this.Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+                // Get ~/Accounts(1)/Address
+                request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                response = await Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                content = await response.Content.ReadAsAsync<JObject>();
+                Assert.Equal(6, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 new dynamic properties
+                Assert.Equal("NewCity", content["City"]); // updated
+                Assert.Equal("NewStreet", content["Street"]); // updated
+                Assert.Equal("US", content["CountryCode"]);
+                Assert.Null(content["Country"]);
+                Assert.Equal("2016-02-01", content["OtherProperty"]);
+            }
+        }
+
         #endregion
 
         #region Insert
@@ -492,6 +632,39 @@
             }
         }
 
+        [Fact]
+        public async Task DeleteOpenComplexTypeProperty()
+        {
+            foreach (string routing in Routings)
+            {
+                await ResetDatasource();
+
+                // Get ~/Accounts(1)/Address
+                var requestUri = string.Format(BaseAddress + "/{0}/Accounts(1)/Address", routing);
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                var response = await Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var content = await response.Content.ReadAsAsync<JObject>();
+                Assert.Equal(6, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 dynamic properties
+                Assert.Equal("Redmond", content["City"]);
+                Assert.Equal("1 Microsoft Way", content["Street"]);
+                Assert.Equal("US", content["CountryCode"]);
+                Assert.Equal("US", content["Country"]); // dynamic property
+
+                // Delete ~/Accounts(1)/Address
+                request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
+                response = await this.Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+                // Get ~/Accounts(1)/Address
+                request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                response = await Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                content = await response.Content.ReadAsAsync<JObject>();
+                Assert.Equal(2, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 new dynamic properties
+                Assert.Equal("True", content["@odata.null"]);
+            }
+        }
         #endregion
 
         #region Function & Action

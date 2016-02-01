@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization.Models;
 using Microsoft.OData.Core;
@@ -457,6 +459,31 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         [Fact]
+        public void CreateResource_ThrowsArgumentNull_ComplexType()
+        {
+            Assert.ThrowsArgumentNull(
+                () => ODataComplexTypeDeserializer.CreateResource(complexType: null, readContext: new ODataDeserializerContext()),
+                "complexType");
+        }
+
+        [Fact]
+        public void CreateResource_ThrowsArgumentNull_ReadContext()
+        {
+            Assert.ThrowsArgumentNull(
+                () => ODataComplexTypeDeserializer.CreateResource(_addressEdmType, readContext: null),
+                "readContext");
+        }
+
+        [Fact]
+        public void CreateResource_ThrowsArgument_ModelMissingFromReadContext()
+        {
+            Assert.ThrowsArgument(
+                () => ODataComplexTypeDeserializer.CreateResource(_addressEdmType, new ODataDeserializerContext()),
+                "readContext",
+                "The EDM model is missing on the read context. The model is required on the read context to deserialize the payload.");
+        }
+
+        [Fact]
         public void CreateResource_Throws_MappingDoesNotContainEntityType()
         {
             Assert.Throws<InvalidOperationException>(
@@ -468,7 +495,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void CreateResource_CreatesEdmComplexObject_UnTypedMode()
         {
             // Arrange
-            ODataDeserializerContext context = new ODataDeserializerContext { ResourceType = typeof(IEdmObject) };
+            ODataDeserializerContext context = new ODataDeserializerContext { ResourceType = typeof(IEdmObject), Model = _edmModel };
 
             // Act
             var resource = ODataComplexTypeDeserializer.CreateResource(_addressEdmType, context);
@@ -489,6 +516,314 @@ namespace System.Web.OData.Formatter.Deserialization
 
             // Assert
             Assert.IsType<ODataEntityDeserializerTests.Address>(resource);
+        }
+
+        [Fact]
+        public void CreateResource_CreatesDeltaOfT_IfPatchMode()
+        {
+            // Arrange
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = _edmModel,
+                ResourceType = typeof(Delta<ODataEntityDeserializerTests.Address>)
+            };
+
+            // Act & Assert
+            Assert.IsType<Delta<ODataEntityDeserializerTests.Address>>(
+                ODataComplexTypeDeserializer.CreateResource(_addressEdmType, readContext));
+        }
+
+        [Fact]
+        public void CreateResource_CreatesDeltaWith_ExpectedUpdatableProperties()
+        {
+            // Arrange
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = _edmModel,
+                ResourceType = typeof(Delta<ODataEntityDeserializerTests.Address>)
+            };
+            var structuralProperties = _addressEdmType.StructuralProperties().Select(p => p.Name);
+
+            // Act
+            Delta<ODataEntityDeserializerTests.Address> resource =
+                ODataComplexTypeDeserializer.CreateResource(_addressEdmType, readContext) as
+                    Delta<ODataEntityDeserializerTests.Address>;
+
+            // Assert
+            Assert.NotNull(resource);
+            Assert.Equal(structuralProperties, resource.GetUnchangedPropertyNames());
+        }
+
+        [Fact]
+        public void CreateResource_CreateDeltaWith_OpenComplexType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<SimpleOpenAddress>();
+            IEdmModel model = builder.GetEdmModel();
+            IEdmComplexTypeReference addressTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenAddress)).AsComplex();
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = model,
+                ResourceType = typeof(Delta<SimpleOpenAddress>)
+            };
+            var structuralProperties = addressTypeReference.StructuralProperties().Select(p => p.Name);
+
+            // Act
+            Delta<SimpleOpenAddress> resource =
+                ODataComplexTypeDeserializer.CreateResource(addressTypeReference, readContext) as
+                    Delta<SimpleOpenAddress>;
+
+            // Assert
+            Assert.NotNull(resource);
+            Assert.Equal(structuralProperties, resource.GetUnchangedPropertyNames());
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync()
+        {
+            // Arrange
+            const string content = "{\"value\":{" +
+              "\"Street\":\"MyStreet\"," +
+              "\"City\":\"MyCity\"," +
+              "\"State\":\"MyState\"," +
+              "\"ZipCode\":\"160202\"," +
+              "\"Country\":\"MyCountry\"" +
+            "}}";
+
+            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(new DefaultODataDeserializerProvider());
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = _edmModel,
+                ResourceType = typeof(ODataEntityDeserializerTests.Address)
+            };
+
+            // Act
+            object value = deserializer.Read(GetODataMessageReader(GetODataMessage(content), _edmModel),
+                typeof(ODataEntityDeserializerTests.Address), readContext);
+
+            // Assert
+
+            ODataEntityDeserializerTests.Address address = Assert.IsType<ODataEntityDeserializerTests.Address>(value);
+            Assert.NotNull(address);
+
+            Assert.Equal("MyStreet", address.Street);
+            Assert.Equal("MyCity", address.City);
+            Assert.Equal("MyState", address.State);
+            Assert.Equal("160202", address.ZipCode);
+            Assert.Equal("MyCountry", address.Country);
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_ForOpenComplexType()
+        {
+            // Arrange
+            const string content = "{\"value\":{" +
+              "\"Street\":\"MyStreet\"," +
+              "\"City\":\"MyCity\"," +
+              "\"Publish@odata.type\":\"#Date\"," +
+              "\"Publish\":\"2016-02-22\"" +
+            "}}";
+
+            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(new DefaultODataDeserializerProvider());
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<SimpleOpenAddress>();
+            IEdmModel model = builder.GetEdmModel();
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = model,
+                ResourceType = typeof(SimpleOpenAddress)
+            };
+
+            // Act
+            object value = deserializer.Read(GetODataMessageReader(GetODataMessage(content), model), typeof(SimpleOpenAddress), readContext);
+
+            // Assert
+
+            SimpleOpenAddress address = Assert.IsType<SimpleOpenAddress>(value);
+            Assert.NotNull(address);
+
+            Assert.Equal("MyStreet", address.Street);
+            Assert.Equal("MyCity", address.City);
+            Assert.NotNull(address.Properties);
+
+            KeyValuePair<string, object> dynamicProperty = Assert.Single(address.Properties);
+            Assert.Equal("Publish", dynamicProperty.Key);
+            Assert.Equal(new Date(2016, 2, 22), dynamicProperty.Value);
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_ForOpenComplexType_ForPatchModel()
+        {
+            // Arrange
+            const string content = "{\"value\":{" +
+              "\"Street\":\"UpdateStreet\"," +
+              "\"Publish@odata.type\":\"#Date\"," +
+              "\"Publish\":\"2016-02-22\"" +
+            "}}";
+
+            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(new DefaultODataDeserializerProvider());
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<SimpleOpenAddress>();
+            IEdmModel model = builder.GetEdmModel();
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = model,
+                ResourceType = typeof(Delta<SimpleOpenAddress>)
+            };
+
+            // Act
+            object value = deserializer.Read(GetODataMessageReader(GetODataMessage(content), model),
+                typeof(Delta<SimpleOpenAddress>), readContext);
+
+            // Assert
+            Delta<SimpleOpenAddress> address = Assert.IsType<Delta<SimpleOpenAddress>>(value);
+            Assert.NotNull(address);
+            Assert.Equal(new[] { "Street" }, address.GetChangedPropertyNames());
+            Assert.Equal(new[] { "City" }, address.GetUnchangedPropertyNames());
+
+            SimpleOpenAddress origin = new SimpleOpenAddress();
+            Assert.Null(origin.Street); // guard
+            Assert.Null(origin.City); // guard
+            Assert.Null(origin.Properties); // guard
+
+            address.Patch(origin); // DO PATCH
+
+            Assert.Equal("UpdateStreet", origin.Street);
+            Assert.Null(origin.City); // not changed
+            KeyValuePair<string, object> dynamicProperty = Assert.Single(origin.Properties);
+            Assert.Equal("Publish", dynamicProperty.Key);
+            Assert.Equal(new Date(2016, 2, 22), dynamicProperty.Value);
+        }
+
+        public class Region
+        {
+            public string City { get; set; }
+            public Location Location { get; set; }
+            public IDictionary<string, object> Properties { get; set; }
+        }
+
+        public class Location
+        {
+            public double Latitude { get; set; }
+            public double Longitude { get; set; }
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_ForComplexType_WithNestedComplexType()
+        {
+            // Arrange
+            const string content = "{\"value\":{" +
+              "\"City\":\"UpdatedCity\"," +
+              "\"Location\": {" +
+                  "\"Latitude\": 30.6," +
+                  "\"Longitude\": 101.313" +
+                  "}," +
+              "\"SubLocation\": {" + // dynamic property
+                  "\"@odata.type\":\"#System.Web.OData.Formatter.Deserialization.Location\"," +
+                  "\"Latitude\": 15.5," +
+                  "\"Longitude\": 130.88" +
+                  "}" +
+            "}}";
+
+            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(new DefaultODataDeserializerProvider());
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Region>();
+            IEdmModel model = builder.GetEdmModel();
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = model,
+                ResourceType = typeof(Delta<Region>)
+            };
+
+            // Act
+            object value = deserializer.Read(GetODataMessageReader(GetODataMessage(content), model),
+                typeof(Delta<Region>), readContext);
+
+            // Assert
+            Delta<Region> region = Assert.IsType<Delta<Region>>(value);
+            Assert.NotNull(region);
+            Assert.Equal(new[] { "City", "Location" }, region.GetChangedPropertyNames());
+            Assert.Empty(region.GetUnchangedPropertyNames());
+
+            object propertyValue;
+            Assert.True(region.TryGetPropertyValue("City", out propertyValue));
+            string cityValue = Assert.IsType<string>(propertyValue);
+            Assert.Equal("UpdatedCity", cityValue);
+
+            Assert.True(region.TryGetPropertyValue("Location", out propertyValue));
+            Location locationValue = Assert.IsType<Location>(propertyValue);
+            Assert.Equal(30.6, locationValue.Latitude);
+            Assert.Equal(101.313, locationValue.Longitude);
+
+            // dynamic property
+            Assert.True(region.TryGetPropertyValue("SubLocation", out propertyValue));
+            locationValue = Assert.IsType<Location>(propertyValue);
+            Assert.Equal(15.5, locationValue.Latitude);
+            Assert.Equal(130.88, locationValue.Longitude);
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_ForDerivedComplexType()
+        {
+            // Arrange
+            const string content = "{" +
+              "\"@odata.type\":\"System.Web.OData.Formatter.Serialization.Models.CnAddress\"," +
+              "\"Street\":\"StreetValue\"," +
+              "\"City\":\"CityValue\"," +
+              "\"State\":\"MyState\"," +
+              "\"ZipCode\":\"160202\"," +
+              "\"Country\":\"MyCountry\"," +
+              "\"CnProp\":\"8E8375AA-D348-49DD-94A0-46E4FB42973C\"" +
+            "}";
+
+            ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(new DefaultODataDeserializerProvider());
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.ComplexType<Address>();
+            IEdmModel model = builder.GetEdmModel();
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = model,
+                ResourceType = typeof(Address)
+            };
+
+            // Act
+            object value = deserializer.Read(GetODataMessageReader(GetODataMessage(content), model), typeof(Address), readContext);
+
+            // Assert
+            CnAddress address = Assert.IsType<CnAddress>(value);
+            Assert.NotNull(address);
+            Assert.Equal("StreetValue", address.Street);
+            Assert.Equal("CityValue", address.City);
+            Assert.Equal("MyState", address.State);
+            Assert.Equal("160202", address.ZipCode);
+            Assert.Equal("MyCountry", address.Country);
+            Assert.Equal(new Guid("8E8375AA-D348-49DD-94A0-46E4FB42973C"), address.CnProp);
+        }
+
+        private static ODataMessageReader GetODataMessageReader(IODataRequestMessage oDataRequestMessage, IEdmModel edmModel)
+        {
+            return new ODataMessageReader(oDataRequestMessage, new ODataMessageReaderSettings(), edmModel);
+        }
+
+        private static IODataRequestMessage GetODataMessage(string content)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), "http://localhost/OData/Suppliers(1)/Address");
+
+            request.Content = new StringContent(content);
+            request.Headers.Add("OData-Version", "4.0");
+
+            MediaTypeWithQualityHeaderValue mediaType = new MediaTypeWithQualityHeaderValue("application/json");
+            mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "full"));
+            request.Headers.Accept.Add(mediaType);
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            return new HttpRequestODataMessage(request);
         }
     }
 }

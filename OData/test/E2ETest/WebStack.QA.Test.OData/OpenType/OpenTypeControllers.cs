@@ -282,9 +282,22 @@
             return Ok(Accounts.SingleOrDefault(e => e.Id == key).Address);
         }
 
+        // convention routing
+        public IHttpActionResult GetAddress(int key)
+        {
+            return Ok(Accounts.SingleOrDefault(e => e.Id == key).Address);
+        }
+
         [HttpGet]
         [ODataRoute("Accounts({key})/Address/WebStack.QA.Test.OData.OpenType.GlobalAddress")]
         public IHttpActionResult GetGlobalAddress(int key)
+        {
+            Address address = Accounts.SingleOrDefault(e => e.Id == key).Address;
+            return Ok(address as GlobalAddress);
+        }
+
+        [HttpGet]
+        public IHttpActionResult GetAddressOfGlobalAddressFromAccount(int key)
         {
             Address address = Accounts.SingleOrDefault(e => e.Id == key).Address;
             return Ok(address as GlobalAddress);
@@ -440,6 +453,75 @@
             Account account = appliedAccounts.Single();
             Accounts.Remove(account);
             return this.StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [HttpPatch]
+        public IHttpActionResult PatchToAddress(int key, Delta<Address> address)
+        {
+            Account account = Accounts.FirstOrDefault(a => a.Id == key);
+            if (account == null)
+            {
+                return NotFound();
+            }
+
+            if (account.Address == null)
+            {
+                account.Address = new Address();
+            }
+
+            address.Patch(account.Address);
+
+            return Updated(account);
+        }
+
+        [HttpPatch]
+        public IHttpActionResult PatchToAddressOfGlobalAddress(int key, Delta<GlobalAddress> address)
+        {
+            Account account = Accounts.FirstOrDefault(a => a.Id == key);
+            if (account == null)
+            {
+                return NotFound();
+            }
+
+            if (account.Address == null)
+            {
+                account.Address = new GlobalAddress();
+            }
+
+            GlobalAddress globalAddress = account.Address as GlobalAddress;
+            address.Patch(globalAddress);
+            return Updated(account);
+        }
+
+        [HttpPut]
+        public IHttpActionResult PutToAddress(int key, Delta<Address> address)
+        {
+            Account account = Accounts.FirstOrDefault(a => a.Id == key);
+            if (account == null)
+            {
+                return NotFound();
+            }
+
+            if (account.Address == null)
+            {
+                account.Address = new Address();
+            }
+
+            address.Put(account.Address);
+
+            return Updated(account);
+        }
+
+        public IHttpActionResult DeleteToAddress(int key)
+        {
+            Account account = Accounts.FirstOrDefault(a => a.Id == key);
+            if (account == null)
+            {
+                return NotFound();
+            }
+
+            account.Address = null;
+            return Updated(account);
         }
 
         #region Function & Action

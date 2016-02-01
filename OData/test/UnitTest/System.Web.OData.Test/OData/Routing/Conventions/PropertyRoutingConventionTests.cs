@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
+using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -55,17 +56,21 @@ namespace System.Web.OData.Routing.Conventions
                 "actionMap");
         }
 
-        [Fact]
-        public void SelectAction_OnEntitySetPath_ReturnsTheActionName()
+        [Theory]
+        [InlineData("Get", "Get")]
+        [InlineData("Put", "PutTo")]
+        [InlineData("Patch", "PatchTo")]
+        [InlineData("Delete", "DeleteTo")]
+        public void SelectAction_OnEntitySetPath_ReturnsTheActionName(string httpMethod, string prefix)
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(7)/Name");
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "GetNameFromCustomer");
+            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => prefix + "NameFromCustomer");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
             {
-                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
+                Request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/"),
                 RequestContext = requestContext,
                 RouteData = new HttpRouteData(new HttpRoute())
             };
@@ -76,7 +81,36 @@ namespace System.Web.OData.Routing.Conventions
 
             // Assert
             Assert.NotNull(selectedAction);
-            Assert.Equal("GetNameFromCustomer", selectedAction);
+            Assert.Equal(prefix + "NameFromCustomer", selectedAction);
+            Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
+            Assert.Equal("7", controllerContext.Request.GetRouteData().Values["key"]);
+        }
+
+        [Theory]
+        [InlineData("Get", "Get")]
+        [InlineData("Put", "PutTo")]
+        [InlineData("Patch", "PatchTo")]
+        public void SelectAction_OnEntitySetPath_ReturnsTheActionNameOfCast(string httpMethod, string prefix)
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(7)/Account/NS.SpecialAccount");
+            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => prefix + "AccountOfSpecialAccountFromCustomer");
+            HttpRequestContext requestContext = new HttpRequestContext();
+            HttpControllerContext controllerContext = new HttpControllerContext
+            {
+                Request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/"),
+                RequestContext = requestContext,
+                RouteData = new HttpRouteData(new HttpRoute())
+            };
+            controllerContext.Request.SetRequestContext(requestContext);
+
+            // Act
+            string selectedAction = new PropertyRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.NotNull(selectedAction);
+            Assert.Equal(prefix + "AccountOfSpecialAccountFromCustomer", selectedAction);
             Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
             Assert.Equal("7", controllerContext.Request.GetRouteData().Values["key"]);
         }
@@ -109,17 +143,21 @@ namespace System.Web.OData.Routing.Conventions
             Assert.Equal("7", controllerContext.Request.GetRouteData().Values["key"]);
         }
 
-        [Fact]
-        public void SelectAction_OnSingletonPath_ReturnsTheActionName()
+        [Theory]
+        [InlineData("Get", "Get")]
+        [InlineData("Put", "PutTo")]
+        [InlineData("Patch", "PatchTo")]
+        [InlineData("Delete", "DeleteTo")]
+        public void SelectAction_OnSingletonPath_ReturnsTheActionName(string httpMethod, string prefix)
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "VipCustomer/Address");
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "GetAddress");
+            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => prefix + "Address");
             HttpRequestContext requestContext = new HttpRequestContext();
             HttpControllerContext controllerContext = new HttpControllerContext
             {
-                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
+                Request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/"),
                 RequestContext = requestContext,
                 RouteData = new HttpRouteData(new HttpRoute())
             };
@@ -130,7 +168,35 @@ namespace System.Web.OData.Routing.Conventions
 
             // Assert
             Assert.NotNull(selectedAction);
-            Assert.Equal("GetAddress", selectedAction);
+            Assert.Equal(prefix + "Address", selectedAction);
+            Assert.Empty(controllerContext.Request.GetRouteData().Values);
+        }
+
+        [Theory]
+        [InlineData("Get", "Get")]
+        [InlineData("Put", "PutTo")]
+        [InlineData("Patch", "PatchTo")]
+        public void SelectAction_OnSingletonPath_ReturnsTheActionNameWithCast(string httpMethod, string prefix)
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "VipCustomer/Account/NS.SpecialAccount");
+            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => prefix + "AccountOfSpecialAccountFromCustomer");
+            HttpRequestContext requestContext = new HttpRequestContext();
+            HttpControllerContext controllerContext = new HttpControllerContext
+            {
+                Request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/"),
+                RequestContext = requestContext,
+                RouteData = new HttpRouteData(new HttpRoute())
+            };
+            controllerContext.Request.SetRequestContext(requestContext);
+
+            // Act
+            string selectedAction = new PropertyRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+
+            // Assert
+            Assert.NotNull(selectedAction);
+            Assert.Equal(prefix + "AccountOfSpecialAccountFromCustomer", selectedAction);
             Assert.Empty(controllerContext.Request.GetRouteData().Values);
         }
 
@@ -145,6 +211,30 @@ namespace System.Web.OData.Routing.Conventions
             HttpControllerContext controllerContext = new HttpControllerContext
             {
                 Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
+                RequestContext = requestContext,
+                RouteData = new HttpRouteData(new HttpRoute())
+            };
+            controllerContext.Request.SetRequestContext(requestContext);
+
+            // Act
+            string selectedAction = new PropertyRoutingConvention().SelectAction(odataPath, controllerContext, emptyActionMap);
+
+            // Assert
+            Assert.Null(selectedAction);
+            Assert.Empty(controllerContext.Request.GetRouteData().Values);
+        }
+
+        [Fact]
+        public void SelectAction_ReturnsNull_IfPatchToCollectionProperty()
+        {
+            // Arrange
+            IEdmModel model = ODataCountTest.GetEdmModel();
+            ODataPath odataPath = new DefaultODataPathHandler().Parse(model, _serviceRoot, "DollarCountEntities(7)/EnumCollectionProp");
+            ILookup<string, HttpActionDescriptor> emptyActionMap = new HttpActionDescriptor[0].ToLookup(desc => "PatchToEnumCollectionProp");
+            HttpRequestContext requestContext = new HttpRequestContext();
+            HttpControllerContext controllerContext = new HttpControllerContext
+            {
+                Request = new HttpRequestMessage(new HttpMethod("Patch"), "http://localhost/"),
                 RequestContext = requestContext,
                 RouteData = new HttpRouteData(new HttpRoute())
             };

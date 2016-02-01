@@ -13,6 +13,7 @@ using System.Web.OData.Batch;
 using System.Web.OData.Extensions;
 using Newtonsoft.Json.Linq;
 using Nuwa;
+using WebStack.QA.Common.Extensions;
 using WebStack.QA.Common.XUnit;
 using WebStack.QA.Test.OData.Common;
 using WebStack.QA.Test.OData.ComplexTypeInheritance.Proxy;
@@ -338,7 +339,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
                 String.Format("\nExpected that Radius: 2, but actually: {0},\n request uri: {1},\n response payload: {2}", radius, requestUri, contentOfString));
         }
 
-        [Theory(Skip = "[UriParser] Cast segment following a collection complex type property reports exception.")]
+        [Theory(Skip = "https://github.com/OData/odata.net/issues/457 [UriParser] Cast segment following a collection complex type property reports exception.")]
         [InlineData("convention")]
         [InlineData("explicit")]
         // GET ~/Windows(1)/CurrentShape/WebStack.QA.Test.OData.ComplexTypeInheritance.Circle
@@ -426,7 +427,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
                 String.Format("\nExpected that Radius: 2, but actually: {0},\n request uri: {1},\n response payload: {2}", radius, requestUri, contentOfString));
         }
 
-        [Theory(Skip = "Support collection of complex type value as function parameter")]
+        [Theory]
         [InlineData("convention")]
         [InlineData("explicit")]
         // PUT ~/Windows(3)/OptionalShapes
@@ -464,7 +465,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
                     requestUri,
                     contentOfString));
 
-            JArray contentOfJObject = await response.Content.ReadAsAsync<JArray>();
+            JObject contentOfJObject = await response.Content.ReadAsAsync<JObject>();
             Assert.True(2 == contentOfJObject.Count,
                 String.Format("\nExpected count: {0},\n actual: {1},\n request uri: {2},\n response payload: {3}",
                 2,
@@ -473,23 +474,28 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
                 contentOfString));
         }
 
-        [Theory(Skip = "Support deserialize complex type value")]
+        [Theory]
         [InlineData("convention")]
         [InlineData("explicit")]
         // PUT ~/Widnows(1)/CurrentShape
         public async Task PutCurrentShape(string modelMode)
         {
+            // Arrange
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
-            string requestUri = serviceRootUri + "/Windows(3)/CurrentShape";
+            string requestUri = serviceRootUri + "/Windows(1)/CurrentShape/WebStack.QA.Test.OData.ComplexTypeInheritance.Circle";
 
             var content = new StringContent(content: @"
 {
-    '@odata.type':'#WebStack.QA.Test.OData.ComplexTypeInheritance.Circle',  
+    '@odata.type':'#WebStack.QA.Test.OData.ComplexTypeInheritance.Circle',
     'Radius':5,
     'Center':{'X':1,'Y':2},
     'HasBorder':true 
 }", encoding: Encoding.UTF8, mediaType: "application/json");
+
+            // Act
             HttpResponseMessage response = await Client.PutAsync(requestUri, content);
+
+            // Assert
             string contentOfString = await response.Content.ReadAsStringAsync();
             Assert.True(HttpStatusCode.OK == response.StatusCode, String.Format("\nExpected status code: {0},\n actual: {1},\n request uri: {2},\n message: {3}",
                     HttpStatusCode.OK,
@@ -501,6 +507,70 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
             int radius = (int)contentOfJObject["Radius"];
             Assert.True(5 == radius,
                 String.Format("\nExpected that Radius: 5, but actually: {0},\n request uri: {1},\n response payload: {2}", radius, requestUri, contentOfString));
+        }
+
+        [Theory]
+        [InlineData("convention")]
+        [InlineData("explicit")]
+        // PATCH ~/Windows(3)/OptionalShapes
+        public async Task PatchToCollectionComplexTypePropertyNotSupported(string modelMode)
+        {
+            // Arrange
+            string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
+            string requestUri = serviceRootUri + "/Windows(3)/OptionalShapes";
+
+            // Act
+            HttpResponseMessage response = await Client.PatchAsync(new Uri(requestUri), "");
+
+            // Assert
+            Assert.True(HttpStatusCode.NotFound == response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("convention")]
+        [InlineData("explicit")]
+        public async Task PatchToSingleComplexTypeProperty(string modelMode)
+        {
+            // Arrange
+            string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
+            string requestUri = serviceRootUri + "/Windows(1)/CurrentShape/WebStack.QA.Test.OData.ComplexTypeInheritance.Circle";
+
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), requestUri);
+            request.Content = new StringContent(@"
+{
+    '@odata.type':'#WebStack.QA.Test.OData.ComplexTypeInheritance.Circle',
+    'Radius':15,
+    'HasBorder':true
+}");
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+            // Act
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            JObject contentOfJObject = await response.Content.ReadAsAsync<JObject>();
+            int radius = (int)contentOfJObject["Radius"];
+            Assert.Equal(15, radius);
+        }
+
+        [Theory]
+        [InlineData("convention")]
+        [InlineData("explicit")]
+        public async Task DeleteToNullableComplexTypeProperty(string modelMode)
+        {
+            // Arrange
+            string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
+            string requestUri = serviceRootUri + "/Windows(1)/CurrentShape";
+
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Delete"), requestUri);
+
+            // Act
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
         #endregion

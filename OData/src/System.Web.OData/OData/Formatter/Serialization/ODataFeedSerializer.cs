@@ -100,7 +100,7 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             IEdmEntitySetBase entitySet = writeContext.NavigationSource as IEdmEntitySetBase;
-            if (writeContext.NavigationSource == null || entitySet == null)
+            if (entitySet == null)
             {
                 feed.SetSerializationInfo(new ODataFeedAndEntrySerializationInfo
                 {

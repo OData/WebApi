@@ -70,8 +70,10 @@ namespace System.Web.OData.Routing.Conventions
             return null;
         }
 
-        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "These are simple conversion function and cannot be split up.")]
-        private static IEdmProperty GetProperty(ODataPath odataPath, HttpMethod method, out string prefix, out ComplexCastPathSegment cast)
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+            Justification = "These are simple conversion function and cannot be split up.")]
+        private static IEdmProperty GetProperty(ODataPath odataPath, HttpMethod method, out string prefix,
+            out ComplexCastPathSegment cast)
         {
             prefix = String.Empty;
             cast = null;
@@ -82,7 +84,8 @@ namespace System.Web.OData.Routing.Conventions
                 odataPath.PathTemplate == "~/singleton/property" ||
                 odataPath.PathTemplate == "~/singleton/cast/property")
             {
-                PropertyAccessPathSegment tempSegment = (PropertyAccessPathSegment)odataPath.Segments[odataPath.Segments.Count - 1];
+                PropertyAccessPathSegment tempSegment =
+                    (PropertyAccessPathSegment)odataPath.Segments[odataPath.Segments.Count - 1];
 
                 switch (method.Method.ToUpperInvariant())
                 {
@@ -119,7 +122,8 @@ namespace System.Web.OData.Routing.Conventions
                      odataPath.PathTemplate == "~/singleton/property/complexcast" ||
                      odataPath.PathTemplate == "~/singleton/cast/property/complexcast")
             {
-                PropertyAccessPathSegment tempSegment = (PropertyAccessPathSegment)odataPath.Segments[odataPath.Segments.Count - 2];
+                PropertyAccessPathSegment tempSegment =
+                    (PropertyAccessPathSegment)odataPath.Segments[odataPath.Segments.Count - 2];
                 ComplexCastPathSegment tempCast = (ComplexCastPathSegment)odataPath.Segments.Last();
                 switch (method.Method.ToUpperInvariant())
                 {

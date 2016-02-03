@@ -201,7 +201,6 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
         }
 
         [HttpPut]
-     //   [ODataRoute("Windows({key})/CurrentShape")]
         public IHttpActionResult PutToCurrentShapeOfCircle(int key, Delta<Circle> shape)
         {
             Window window = _windows.FirstOrDefault(e => e.Id == key);

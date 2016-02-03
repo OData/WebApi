@@ -480,6 +480,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
         // PUT ~/Widnows(1)/CurrentShape
         public async Task PutCurrentShape(string modelMode)
         {
+            // Arrange
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
             string requestUri = serviceRootUri + "/Windows(1)/CurrentShape/WebStack.QA.Test.OData.ComplexTypeInheritance.Circle";
 
@@ -490,7 +491,11 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
     'Center':{'X':1,'Y':2},
     'HasBorder':true 
 }", encoding: Encoding.UTF8, mediaType: "application/json");
+
+            // Act
             HttpResponseMessage response = await Client.PutAsync(requestUri, content);
+
+            // Assert
             string contentOfString = await response.Content.ReadAsStringAsync();
             Assert.True(HttpStatusCode.OK == response.StatusCode, String.Format("\nExpected status code: {0},\n actual: {1},\n request uri: {2},\n message: {3}",
                     HttpStatusCode.OK,
@@ -510,11 +515,14 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
         // PATCH ~/Windows(3)/OptionalShapes
         public async Task PatchToCollectionComplexTypePropertyNotSupported(string modelMode)
         {
+            // Arrange
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
             string requestUri = serviceRootUri + "/Windows(3)/OptionalShapes";
 
+            // Act
             HttpResponseMessage response = await Client.PatchAsync(new Uri(requestUri), "");
 
+            // Assert
             Assert.True(HttpStatusCode.NotFound == response.StatusCode);
         }
 
@@ -523,6 +531,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
         [InlineData("explicit")]
         public async Task PatchToSingleComplexTypeProperty(string modelMode)
         {
+            // Arrange
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
             string requestUri = serviceRootUri + "/Windows(1)/CurrentShape/WebStack.QA.Test.OData.ComplexTypeInheritance.Circle";
 
@@ -534,8 +543,11 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
     'HasBorder':true
 }");
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+            // Act
             HttpResponseMessage response = await Client.SendAsync(request);
 
+            // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             JObject contentOfJObject = await response.Content.ReadAsAsync<JObject>();
@@ -548,12 +560,16 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
         [InlineData("explicit")]
         public async Task DeleteToNullableComplexTypeProperty(string modelMode)
         {
+            // Arrange
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
             string requestUri = serviceRootUri + "/Windows(1)/CurrentShape";
 
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Delete"), requestUri);
+
+            // Act
             HttpResponseMessage response = await Client.SendAsync(request);
 
+            // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 

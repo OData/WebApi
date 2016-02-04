@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNet.Builder;
+﻿using System;
+using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Infrastructure;
 using Microsoft.AspNet.Mvc.Internal;
 using Microsoft.AspNet.Mvc.Routing;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,12 +21,15 @@ namespace Microsoft.AspNet.OData.Extensions
             return builder;
         }
 
-        public static IApplicationBuilder UseOData<T>([NotNull] this IApplicationBuilder app, string prefix) where T : class
+        public static IApplicationBuilder UseOData<T>(
+            [NotNull] this IApplicationBuilder app, 
+            string prefix,
+            Action<ODataConventionModelBuilder> after = null) where T : class
         {
             var defaultAssemblyProvider = app.ApplicationServices.GetRequiredService<IAssemblyProvider>();
             AssemblyProviderManager.Register(defaultAssemblyProvider);
 
-            return app.UseRouter(new ODataRoute(prefix, DefaultODataModelProvider.BuildEdmModel(typeof(T))));
+            return app.UseRouter(new ODataRoute(prefix, DefaultODataModelProvider.BuildEdmModel(typeof(T), after)));
         }
     }
 }

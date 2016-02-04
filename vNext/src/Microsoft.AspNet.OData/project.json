@@ -1,5 +1,5 @@
 {
-  "version": "6.0.0-alpha1",
+  "version": "6.0.0-jc2-2",
   "description": "Microsoft.AspNet.OData",
 
   "dependencies": {
@@ -19,17 +19,17 @@
     "dnx451": { },
     "dnxcore50": {
       "dependencies": {
-        "Microsoft.CSharp": "4.0.0-beta-*",
-        "System.Collections": "4.0.11-beta-*",
-        "System.Diagnostics.Debug": "4.0.10-beta-*",
-        "System.Diagnostics.Tools": "4.0.0-beta-*",
-        "System.Globalization": "4.0.10-beta-*",
-        "System.Linq": "4.0.0-beta-*",
-        "System.Linq.Queryable": "4.0.0-beta-*",
-        "System.Reflection": "4.1.0-beta-23225",
-        "System.Resources.ResourceManager": "4.0.0-beta-*",
-        "System.Runtime": "4.0.21-rc2-23621",
-        "System.Threading": "4.0.10-beta-*"
+        "Microsoft.CSharp": "4.0.1-rc2-23623",
+        "System.Collections": "4.0.11-rc2-23623",
+        "System.Diagnostics.Debug": "4.0.11-rc2-23623",
+        "System.Diagnostics.Tools": "4.0.1-rc2-23623",
+        "System.Globalization": "4.0.11-rc2-23623",
+        "System.Linq": "4.0.1-rc2-23621",
+        "System.Linq.Queryable": "4.0.1-rc2-23621",
+        "System.Reflection": "4.1.0-rc2-23714",
+        "System.Resources.ResourceManager": "4.0.1-rc2-23623",
+        "System.Runtime": "4.0.21-rc2-23714",
+        "System.Threading": "4.0.11-rc2-23623"
       }
     }
   }

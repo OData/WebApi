@@ -1,4 +1,6 @@
-﻿namespace ODataSample.Web.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ODataSample.Web.Models
 {
     public class Product
     {

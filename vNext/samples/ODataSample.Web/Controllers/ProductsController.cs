@@ -20,11 +20,22 @@ namespace ODataSample.Web.Controllers
             _sampleContext = sampleContext;
         }
 
+        [HttpGet("MostExpensive")]
+        public IActionResult MostExpensive()
+        {
+            var product = _sampleContext.Products.Max(x => x.Price);
+            return Ok(product);
+        }
+
         // GET: api/Products
         [HttpGet]
-        public IEnumerable<Product> Get()
+        public IActionResult Get()
         {
-            return _sampleContext.Products;
+            if (Request.Path.Value.EndsWith(".MostExpensive"))
+            {
+                return MostExpensive();
+            }
+            return Ok(_sampleContext.Products);
         }
 
         // GET api/Products/5
@@ -42,6 +53,18 @@ namespace ODataSample.Web.Controllers
 
         [HttpGet("{id}/Name")]
         public IActionResult GetName(int id)
+        {
+            var product = _sampleContext.FindProduct(id);
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
+
+            return new ObjectResult(product.Name);
+        }
+
+        [HttpGet("{id}/Namex")]
+        public IActionResult GetNamex(int id)
         {
             var product = _sampleContext.FindProduct(id);
             if (product == null)

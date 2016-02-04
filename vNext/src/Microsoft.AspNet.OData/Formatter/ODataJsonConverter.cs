@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 
@@ -54,6 +55,10 @@ namespace Microsoft.AspNet.OData.Formatter
             writer.WriteValue(GenerateIdLinkString(value));
             foreach (var property in GetPublicProperties(value.GetType()))
             {
+                if (property.GetCustomAttribute<NotMappedAttribute>() != null)
+                {
+                    continue;
+                }
                 if (IsValidStructuralPropertyType(property.PropertyType))
                 {
                     writer.WritePropertyName(property.Name);

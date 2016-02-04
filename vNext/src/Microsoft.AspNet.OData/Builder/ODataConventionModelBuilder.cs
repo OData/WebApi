@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -593,6 +594,12 @@ namespace Microsoft.AspNet.OData.Builder
 
                 PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType);
 
+                var notMappedAttribute = property.GetCustomAttribute<NotMappedAttribute>();
+                if (notMappedAttribute != null)
+                {
+                    // Don't map this type if we have a "NotMapped" attribute
+                    continue;
+                }
                 if (propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Enum)
                 {
                     MapStructuralProperty(entity, property, propertyKind, isCollection);

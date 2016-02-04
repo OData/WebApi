@@ -35,9 +35,14 @@ namespace ODataSample.Web
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseOData<ISampleService>("odata");
-            app.UseCors("AllowAll");
-            //app.UseMvc(builder => {
+            app.UseOData<ISampleService>("odata", builder =>
+			    builder.Namespace = "ProductService";
+				builder.EntityType<Product>()
+					.Collection
+					.Function("MostExpensive")
+					.Returns<double>();
+				});
+				//app.UseMvc(builder => {
             //    builder.MapODataRoute<ISampleService>("odata");
             //});
         }

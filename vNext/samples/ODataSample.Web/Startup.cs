@@ -18,6 +18,17 @@ namespace ODataSample.Web
         {
             services.AddMvc();
             services.AddOData();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder =>
+                    {
+                        builder//.AllowAnyOrigin()
+                               //.AllowAnyHeader()
+                               .AllowAnyMethod()
+                               .AllowCredentials();
+                    });
+            });
 
             services.AddSingleton<SampleContext>();
         }

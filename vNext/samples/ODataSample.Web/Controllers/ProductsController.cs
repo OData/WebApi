@@ -22,11 +22,17 @@ namespace ODataSample.Web.Controllers
             _sampleContext = sampleContext;
         }
 
+        // This is needed to prevent action resolution issues
         [HttpGet("MostExpensive")]
         public IActionResult MostExpensive()
         {
             var product = _sampleContext.Products.Max(x => x.Price);
             return Ok(product);
+        }
+
+        public IActionResult ShortName(int id)
+        {
+            return Ok("Short Name");
         }
 
         // GET: api/Products
@@ -37,13 +43,17 @@ namespace ODataSample.Web.Controllers
             {
                 return MostExpensive();
             }
-            return Ok(_sampleContext.Products);
+            return Ok(_sampleContext.Products); 
         }
 
         // GET api/Products/5
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
+            if (Request.Path.Value.EndsWith(".ShortName"))
+            {
+                return ShortName(id);
+            }
             var product = _sampleContext.FindProduct(id);
             if (product == null)
             {

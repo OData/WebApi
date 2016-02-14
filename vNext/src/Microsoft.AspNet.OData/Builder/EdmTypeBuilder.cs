@@ -351,10 +351,21 @@ namespace Microsoft.AspNet.OData.Builder
         private IList<IEdmStructuralProperty> GetDeclaringPropertyInfo(IEnumerable<PropertyInfo> propertyInfos)
         {
             IList<IEdmProperty> edmProperties = new List<IEdmProperty>();
-            foreach (PropertyInfo propInfo in propertyInfos)
+            foreach (PropertyInfo pi in propertyInfos)
             {
+                var propInfo = pi;
+
                 IEdmProperty edmProperty;
-                if (_properties.TryGetValue(propInfo, out edmProperty))
+                if(!_properties.TryGetValue(propInfo, out edmProperty))
+                {
+#if DNX451
+                    if (propInfo.ReflectedType != propInfo.DeclaringType)
+                        propInfo = propInfo.DeclaringType.GetProperty(propInfo.Name);
+                    _properties.TryGetValue(propInfo, out edmProperty);
+#endif
+                }
+
+                if (edmProperty != null)
                 {
                     edmProperties.Add(edmProperty);
                 }

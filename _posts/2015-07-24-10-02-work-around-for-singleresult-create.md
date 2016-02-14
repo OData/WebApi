@@ -69,6 +69,9 @@ public class NullSerializerProvider : DefaultODataSerializerProvider
                 {
                     ((IOwinResponse)state).StatusCode = (int)HttpStatusCode.NotFound;
                 }, response);
+                
+                // in case you are NOT using Owin, uncomment the following and comment everything above
+                // HttpContext.Current.Response.StatusCode = (int)HttpStatusCode.NotFound;
             }
             return _nullEntityTypeSerializer;
         }

@@ -78,7 +78,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
         /// <returns></returns>
         public Attribute[] GetAttributes(Type type)
         {
-            return type.GetTypeInfo().GetCustomAttributes<Attribute>(false).ToArray();
+            return type.GetTypeInfo().GetCustomAttributes<Attribute>(false).OfType<Attribute>().Where(AttributeFilter).ToArray();
         }
     }
 }

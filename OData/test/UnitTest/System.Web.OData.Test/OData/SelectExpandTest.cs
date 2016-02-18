@@ -71,6 +71,27 @@ namespace System.Web.OData
             ValidateCustomer(result["value"][0]);
         }
 
+        [Theory]
+        [InlineData("*")]
+        [InlineData("*,Orders")]
+        [InlineData("*,PreviousCustomer($levels=1)")]
+        public void SelectExpand_Works_WithExpandStar(string expand)
+        {
+            // Arrange
+            string uri = "/odata/SelectExpandTestCustomers?$expand=" + expand;
+
+            // Act
+            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.NotNull(result["value"][0]["ID"]);
+            Assert.NotNull(result["value"][0]["Orders"]);
+            Assert.NotNull(result["value"][0]["PreviousCustomer"]);
+        }
+
         [Fact]
         public void SelectExpand_Works_WithNestedFilter()
         {

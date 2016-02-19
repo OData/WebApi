@@ -34,9 +34,10 @@ namespace ODataSample.Web.Controllers
             return Ok(value * 2);
         }
 
+        [HttpGet("{id}/ShortName")]
         public IActionResult ShortName(int id)
         {
-            return Ok("Short Name");
+            return Ok(_sampleContext.Products.Single(p => p.ProductId == id).Name.Substring(0, 4));
         }
 
         // GET: api/Products

@@ -37,16 +37,22 @@ namespace ODataSample.Web
         {
             app.UseOData<ISampleService>("odata", builder =>
             {
-                //builder.Namespace = "ProductService";
+                builder.Namespace = "Sample";
                 builder.EntityType<Product>()
                     .Collection
                     .Function("MostExpensive")
                     .Returns<double>();
                 builder.EntityType<Product>()
+                    .Collection
+                    .Function("MostExpensive2")
+                    .Returns<double>();
+                builder.EntityType<Product>()
                     .Function("ShortName")
                     .Returns<string>();
             });
-            //app.UseMvc(builder => {
+            app.UseMvcWithDefaultRoute();
+            //app.UseMvc(builder =>
+            //{
             //    builder.MapODataRoute<ISampleService>("odata");
             //});
         }

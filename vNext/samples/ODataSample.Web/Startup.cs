@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Hosting;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.OData;
+﻿//using Microsoft.AspNet.OData.Extensions;
+
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Models;
 
@@ -23,10 +23,10 @@ namespace ODataSample.Web
                 options.AddPolicy("AllowAll",
                     builder =>
                     {
-                        builder//.AllowAnyOrigin()
-                               //.AllowAnyHeader()
-                               .AllowAnyMethod()
-                               .AllowCredentials();
+                        builder //.AllowAnyOrigin()
+                                //.AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials();
                     });
             });
 
@@ -50,18 +50,24 @@ namespace ODataSample.Web
                     .Function("ShortName")
                     .Returns<string>();
             });
-            app.UseMvcWithDefaultRoute();
+            app.UseIISPlatformHandler();
+            app.UseDeveloperExceptionPage();
+            //app.UseMvc();
             //app.UseMvc(builder =>
             //{
             //    builder.MapODataRoute<ISampleService>("odata");
             //});
         }
+
         public static void Main(string[] args)
         {
-            var application = new WebApplicationBuilder()
-                 .UseConfiguration(WebApplicationConfiguration.GetDefault(args))
-                 .UseStartup<Startup>()
-                 .Build();
+            var application = new WebHostBuilder()
+                .UseCaptureStartupErrors(true)
+                .UseDefaultConfiguration(args)
+                .UseIISPlatformHandlerUrl()
+                .UseServer("Microsoft.AspNetCore.Server.Kestrel")
+                .UseStartup<Startup>()
+                .Build();
 
             application.Run();
         }

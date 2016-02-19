@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Mvc.Internal;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
@@ -12,7 +12,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Framework.Internal;
-using Microsoft.AspNet.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.AspNet.OData.Formatter
 {
@@ -31,16 +32,17 @@ namespace Microsoft.AspNet.OData.Formatter
             SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/json"));
             SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/xml"));
 
-            foreach (var mediaType in SupportedMediaTypes)
-            {
-                mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "minimal"));
-            }
+            //foreach (var mediaType in SupportedMediaTypes)
+            //{
+            //    mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "minimal"));
+            //}
         }
 
         public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
         {
             var response = context.HttpContext.Response;
-            var selectedEncoding = context.ContentType.Encoding == null ? Encoding.UTF8 : context.ContentType.Encoding;
+            //var selectedEncoding = context.ContentType.Encoding == null ? Encoding.UTF8 : context.ContentType.Encoding;
+            var selectedEncoding = Encoding.UTF8;
 
             using (var delegatingStream = new NonDisposableStream(response.Body))
             using (var writer = new StreamWriter(delegatingStream, selectedEncoding, 1024, leaveOpen: true))
@@ -55,7 +57,7 @@ namespace Microsoft.AspNet.OData.Formatter
         {
             if (context.Object is IEdmModel)
             {
-                context.ContentType = SupportedMediaTypes[2];
+                context.ContentType = new StringSegment(SupportedMediaTypes[2]);
             }
 
             context.HttpContext.Response.Headers.Add("OData-Version", new[] { "4.0" });

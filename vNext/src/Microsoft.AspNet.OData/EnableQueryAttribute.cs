@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.AspNet.Mvc.Filters;
-using Microsoft.AspNet.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 
 namespace Microsoft.AspNet.OData
 {

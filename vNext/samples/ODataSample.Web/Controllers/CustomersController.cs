@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ODataSample.Web.Models;
 using System.Collections.Generic;
 using System.Linq;

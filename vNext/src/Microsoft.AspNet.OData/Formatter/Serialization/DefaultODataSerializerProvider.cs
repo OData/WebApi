@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Web.Http;
 using System.Web.OData.Formatter.Serialization;
-using Microsoft.AspNet.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.AspNet.OData.Common;

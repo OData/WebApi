@@ -2,11 +2,11 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Framework.Internal;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
-using Microsoft.AspNet.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace Microsoft.AspNet.OData.Formatter
 {
@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData.Formatter
         {
             _serializerSettings = new JsonSerializerSettings();
 
-            SupportedEncodings.Add(UTF8EncodingWithoutBOM);
+            //SupportedEncodings.Add(UTF8EncodingWithoutBOM);
 
             SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/json"));
             SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/json"));
@@ -56,7 +56,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
             // Get the character encoding for the content
             // Never non-null since SelectCharacterEncoding() throws in error / not found scenarios
-            var effectiveEncoding = SelectCharacterEncoding(context);
+            var effectiveEncoding = Encoding.UTF8;// SelectCharacterEncoding(context);
 
             using (var jsonReader = CreateJsonReader(context, request.Body, effectiveEncoding))
             {

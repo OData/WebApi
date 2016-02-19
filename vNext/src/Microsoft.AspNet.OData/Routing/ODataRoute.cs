@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Routing;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
@@ -9,7 +9,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.AspNet.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Internal;
 
 namespace Microsoft.AspNet.OData.Routing
 {
@@ -48,9 +49,8 @@ namespace Microsoft.AspNet.OData.Routing
             context.HttpContext.ODataProperties().Path =
                 context.HttpContext.ODataPathHandler().Parse(_model, "http://service-root/", remaining.ToString());
             context.HttpContext.ODataProperties().IsValidODataRequest = true;
-
+            var ase = context.HttpContext.RequestServices.GetRequiredService<IActionSelector>();
             await m.RouteAsync(context);
-            //context.IsHandled = true;
         }
 
         public VirtualPathData GetVirtualPath(VirtualPathContext context)

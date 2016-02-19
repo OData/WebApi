@@ -1,34 +1,36 @@
 {
-  "version": "6.0.0-jc2-5",
-  "description": "Microsoft.AspNet.OData",
+  "version": "1.0.0-jc-1",
+  "description": "Microsoft.AspNetCore.OData",
 
   "dependencies": {
-    "Microsoft.AspNet.Mvc": "6.0.0-rc2-*",
-    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc2-*",
-    "Microsoft.Extensions.Options": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-17011",
+    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc2-17011",
+    "Microsoft.OData.Core": "6.15.0-beta",
+    "Microsoft.OData.Edm": "6.15.0-beta",
     "Microsoft.Framework.NotNullAttribute.Sources": {
-      "version": "1.0.0-rc1",
+      "version": "1.0.0-rc1-15685",
       "type": "build"
     },
-    "Microsoft.OData.Core": "6.12.0",
-    "Microsoft.OData.Edm": "6.12.0",
-    "Microsoft.Spatial": "6.12.0"
+
+    "Microsoft.Spatial": "6.15.0-beta",
+    "Microsoft.Extensions.Options": "1.0.0-rc2-*"
   },
 
   "frameworks": {
     "dnx451": { },
     "dnxcore50": {
       "dependencies": {
-        "Microsoft.CSharp": "4.0.1-rc2-23623",
-        "System.Collections": "4.0.11-rc2-23623",
-        "System.Diagnostics.Debug": "4.0.11-rc2-23623",
-        "System.Diagnostics.Tools": "4.0.1-rc2-23623",
-        "System.Globalization": "4.0.11-rc2-23623",
-        "System.Linq": "4.0.1-rc2-23621",
-        "System.Linq.Queryable": "4.0.1-rc2-23621",
-        "System.Reflection": "4.1.0-rc2-23714",
-        "System.Resources.ResourceManager": "4.0.1-rc2-23623",
-        "System.Runtime": "4.0.21-rc2-23714",
+        "System.Linq.Queryable": "4.0.1-rc2-23805",
+
+        "Microsoft.CSharp": "4.0.1-rc2-23805",
+        "System.Diagnostics.Debug": "4.0.11-rc2-23805",
+        "System.Diagnostics.Tools": "4.0.1-rc2-23805",
+        "System.Globalization": "4.0.11-rc2-23805",
+        "System.Linq": "4.1.0-rc3-23818",
+        "System.Reflection": "4.1.0-rc2-23805",
+        "System.Resources.ResourceManager": "4.0.1-rc3-23818",
+        "System.Collections": "4.0.11-rc2-23805",
+        "System.Runtime": "4.1.0-rc2-23805",
         "System.Threading": "4.0.11-rc2-23623"
       }
     }

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
-using Microsoft.AspNet.Cors;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNet.OData;
 using ODataSample.Web.Models;
 

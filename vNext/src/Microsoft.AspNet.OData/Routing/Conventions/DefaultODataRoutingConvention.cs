@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.AspNet.Routing;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNet.Mvc.Infrastructure;
-using Microsoft.AspNet.Mvc.Abstractions;
-using Microsoft.AspNet.Mvc.Controllers;
-using Microsoft.AspNet.Mvc.ActionConstraints;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Internal;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
 {
@@ -92,7 +88,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             }
             
             var services = routeContext.HttpContext.RequestServices;
-            var provider = services.GetRequiredService<IActionDescriptorsCollectionProvider>();
+            var provider = services.GetRequiredService<IActionDescriptorCollectionProvider>();
             var actionDescriptor = provider.ActionDescriptors.Items.SingleOrDefault(d =>
             {
                 var c = d as ControllerActionDescriptor;
@@ -117,7 +113,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 {
                     return false;
                 }
-                var httpMethodConstraint = ((HttpMethodConstraint)c.ActionConstraints.First());
+                var httpMethodConstraint = ((HttpMethodActionConstraint)c.ActionConstraints.First());
                 if (methodName.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
                 {
                     return httpMethodConstraint.HttpMethods.Contains(preflightFor);

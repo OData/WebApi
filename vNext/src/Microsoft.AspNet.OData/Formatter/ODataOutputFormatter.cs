@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Edm;
 using System;
@@ -8,14 +8,14 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Framework.Internal;
 using Microsoft.OData.Core;
-using Microsoft.AspNet.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace Microsoft.AspNet.OData.Formatter
 {
@@ -24,11 +24,11 @@ namespace Microsoft.AspNet.OData.Formatter
         private readonly ODataMessageWriterSettings _messageWriterSettings;
         private readonly ODataSerializerProvider _serializerProvider;
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
-        
+
         public ODataOutputFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
             : this(new DefaultODataSerializerProvider(), payloadKinds)
         {
-            
+
         }
 
         public ODataOutputFormatter(ODataSerializerProvider serializerProvider, IEnumerable<ODataPayloadKind> payloadKinds)
@@ -44,7 +44,7 @@ namespace Microsoft.AspNet.OData.Formatter
             _serializerProvider = serializerProvider;
             _payloadKinds = payloadKinds;
         }
-        
+
         public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
         {
             return Task.Run(() => WriteResponseBody(context));
@@ -106,7 +106,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 SelectAndExpand = request.ODataProperties().SelectExpandClause,
                 Path = (path == null || IsOperationPath(path)) ? null : path.ODLPath,
             };
-            
+
             using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, model))
             {
                 ODataSerializerContext writeContext = new ODataSerializerContext()
@@ -119,7 +119,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     RootElementName = GetRootElementName(path) ?? "root",
                     SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                     Path = path,
-                    MetadataLevel = ODataMediaTypes.GetMetadataLevel(context.ContentType),
+                    MetadataLevel = ODataMediaTypes.GetMetadataLevel(new MediaTypeHeaderValue(context.ContentType.Value)),
                     SelectExpandClause = request.ODataProperties().SelectExpandClause
                 };
 

@@ -2,10 +2,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Framework.Internal;
 using System;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.AspNet.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNet.OData.Extensions
@@ -39,6 +39,7 @@ namespace Microsoft.AspNet.OData.Extensions
 
             });
 
+            //services.AddSingleton<IActionSelector, ODataActionSelector>();
             services.AddSingleton<IActionSelector, ODataActionSelector>();
             services.AddSingleton<IODataRoutingConvention, DefaultODataRoutingConvention>();
             services.AddSingleton<IETagHandler, DefaultODataETagHandler>();

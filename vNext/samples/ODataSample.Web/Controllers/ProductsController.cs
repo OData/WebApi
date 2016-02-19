@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Microsoft.AspNet.Cors;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData;
-using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
 {
     [EnableQuery]
     [Route("odata/Products")]
-    [EnableCors("AllowAll")]
+    //[EnableCors("AllowAll")]
     public class ProductsController : Controller
     {
         private readonly SampleContext _sampleContext;
@@ -30,6 +26,14 @@ namespace ODataSample.Web.Controllers
             return Ok(product);
         }
 
+        // This is needed to prevent action resolution issues
+        [HttpGet("MostExpensive2")]
+        public IActionResult MostExpensive2()
+        {
+            var value = _sampleContext.Products.Max(x => x.Price);
+            return Ok(value * 2);
+        }
+
         public IActionResult ShortName(int id)
         {
             return Ok("Short Name");
@@ -39,10 +43,6 @@ namespace ODataSample.Web.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            if (Request.Path.Value.EndsWith(".MostExpensive"))
-            {
-                return MostExpensive();
-            }
             return Ok(_sampleContext.Products); 
         }
 

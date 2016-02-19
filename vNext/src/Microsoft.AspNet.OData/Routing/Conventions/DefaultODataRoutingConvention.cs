@@ -73,6 +73,13 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 {
                         routeTemplate += "/" + navigationPropertySegment.NavigationProperty.Name;
                 }
+
+                var operationSegment =
+                    odataPath.FirstOrDefault(s => s is OperationSegment) as OperationSegment;
+                if (operationSegment != null)
+                {
+                    routeTemplate += "/" + operationSegment.Operations.First().Name;
+                }
             }
 
             if (string.IsNullOrEmpty(routeTemplate))
@@ -81,7 +88,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             }
             else
             {
-                routeTemplate = controllerName + "/" + routeTemplate;
+                routeTemplate = controllerName + "/" + routeTemplate.TrimStart('/');
             }
             
             var services = routeContext.HttpContext.RequestServices;
@@ -102,6 +109,11 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     return true;
                 }
                 if (!c.AttributeRouteInfo.Template.EndsWith(routeTemplate))
+                {
+                    return false;
+                }
+                // If we find no action constraints, this isn't our method
+                if (c.ActionConstraints == null || !c.ActionConstraints.Any())
                 {
                     return false;
                 }

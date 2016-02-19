@@ -10,6 +10,7 @@ namespace ODataSample.Web.Models
         {
             new Product { ProductId = 1, Name = "Apple",  Price = 10 },
             new Product { ProductId = 2, Name = "Orange", Price = 20 },
+            new Product { ProductId = 3, Name = "Peanut butter", Price = 25 },
         };
 
         private readonly List<Customer> _customers = new List<Customer>

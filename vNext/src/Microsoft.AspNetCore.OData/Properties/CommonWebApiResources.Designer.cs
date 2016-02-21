@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.OData.Properties
     internal static class CommonWebApiResources
     {
         private static readonly ResourceManager _resourceManager
-            = new ResourceManager("Microsoft.AspNet.OData.CommonWebApiResources", typeof(CommonWebApiResources).GetTypeInfo().Assembly);
+            = new ResourceManager("Microsoft.AspNetCore.OData.CommonWebApiResources", typeof(CommonWebApiResources).GetTypeInfo().Assembly);
 
         /// <summary>
         /// Value must be greater than or equal to {0}.

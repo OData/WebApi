@@ -19,7 +19,7 @@
     "Microsoft.Extensions.Logging.Debug": "1.0.0-*",
     "Microsoft.NETCore.Platforms": "1.0.1-*",
     "Microsoft.AspNetCore.Cors": "1.0.0-*",
-    "Microsoft.AspNet.OData": "6.0.0-*"
+    "Microsoft.AspNetCore.OData": "1.0.0-*"
   },
 
   "commands": {

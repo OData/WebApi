@@ -7,13 +7,14 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Runtime.Serialization;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 
-namespace Microsoft.AspNet.OData.Formatter.Deserialization
+namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
 {
     internal static class DeserializationHelpers
     {

@@ -2,9 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
+namespace Microsoft.AspNetCore.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Base class for all <see cref="IEdmTypeConvention"/>'s based on a attribute on the type.

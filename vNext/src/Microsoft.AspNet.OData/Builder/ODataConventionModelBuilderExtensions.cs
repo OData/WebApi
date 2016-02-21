@@ -4,7 +4,7 @@
 using System;
 using System.ComponentModel;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// Provides extension methods for the <see cref="ODataConventionModelBuilder"/> class.

@@ -2,14 +2,11 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
 using System.Text;
-using Microsoft.AspNet.OData.Formatter.Deserialization;
-using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.OData.Core;
 
-namespace Microsoft.AspNet.OData.Formatter
+namespace Microsoft.AspNetCore.OData.Formatter
 {
     /// <summary>
     /// <see cref="ODataOutputFormatter"/> classes to handle OData.

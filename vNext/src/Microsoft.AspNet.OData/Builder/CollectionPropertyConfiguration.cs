@@ -3,10 +3,11 @@
 
 using System;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Properties;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// CollectionPropertyConfiguration represents a CollectionProperty on either an EntityType or ComplexType.

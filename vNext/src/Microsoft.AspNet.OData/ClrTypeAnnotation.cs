@@ -4,7 +4,7 @@
 using System;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     /// <summary>
     /// Represents a mapping from an <see cref="IEdmType"/> to a CLR type.

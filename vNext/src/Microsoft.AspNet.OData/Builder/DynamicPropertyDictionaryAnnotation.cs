@@ -3,11 +3,10 @@
 
 using System.Collections.Generic;
 using System.Reflection;
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.OData.Edm;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Properties;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// This annotation indicates the mapping from a <see cref="IEdmStructuredType"/> to a <see cref="PropertyInfo"/>.

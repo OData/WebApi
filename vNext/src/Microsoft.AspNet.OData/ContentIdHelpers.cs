@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using Microsoft.AspNetCore.Http;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     internal static class ContentIdHelpers
     {

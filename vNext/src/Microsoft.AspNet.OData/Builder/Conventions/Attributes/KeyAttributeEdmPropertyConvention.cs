@@ -3,10 +3,10 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
+namespace Microsoft.AspNetCore.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Configures properties that have the <see cref="KeyAttribute"/> as keys in the <see cref="IEdmEntityType"/>.

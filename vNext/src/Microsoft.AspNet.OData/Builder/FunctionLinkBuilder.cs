@@ -2,9 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// FunctionLinkBuilder can be used to annotate an Function.

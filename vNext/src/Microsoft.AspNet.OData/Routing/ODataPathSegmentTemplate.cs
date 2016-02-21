@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.AspNet.OData.Routing
+namespace Microsoft.AspNetCore.OData.Routing
 {
     /// <summary>
     /// Represents a template that could match an <see cref="ODataPathSegment"/>.

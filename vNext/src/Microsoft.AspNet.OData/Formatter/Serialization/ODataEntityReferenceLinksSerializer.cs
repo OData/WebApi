@@ -3,14 +3,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="Microsoft.OData.Core.ODataSerializer"/> for serializing $ref response for a collection navigation property.

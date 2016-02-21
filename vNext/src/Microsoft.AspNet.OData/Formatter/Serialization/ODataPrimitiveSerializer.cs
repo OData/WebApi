@@ -3,14 +3,14 @@
 
 using System;
 using System.Diagnostics.Contracts;
-using System.Reflection;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="ODataSerializer"/> for serializing <see cref="IEdmPrimitiveType" />'s.

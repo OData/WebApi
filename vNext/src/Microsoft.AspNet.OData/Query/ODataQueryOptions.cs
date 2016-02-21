@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 
-namespace Microsoft.AspNet.OData.Query
+namespace Microsoft.AspNetCore.OData.Query
 {
     // TODO: Replace with full version in the future.
     public class ODataQueryOptions

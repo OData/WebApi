@@ -5,14 +5,15 @@ using System;
 using System.Collections;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
-using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNetCore.OData.Builder;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Properties;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Query;
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
     /// OData serializer for serializing a collection of <see cref="IEdmEntityType" />

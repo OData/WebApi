@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
+using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.AspNet.OData.Routing.Conventions
+namespace Microsoft.AspNetCore.OData.Routing.Conventions
 {
     public class DefaultODataRoutingConvention : IODataRoutingConvention
     {

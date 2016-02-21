@@ -2,11 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Properties;
+using System.Linq;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
+namespace Microsoft.AspNetCore.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Base class for all attribute based conventions.

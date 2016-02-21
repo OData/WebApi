@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     /// <summary>
     /// <see cref="IDelta" /> allows and tracks changes to an object.

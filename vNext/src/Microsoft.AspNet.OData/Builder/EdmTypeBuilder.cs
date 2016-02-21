@@ -5,14 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Values;
+using System.Linq;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// <see cref="EdmTypeBuilder"/> builds <see cref="IEdmType"/>'s from <see cref="StructuralTypeConfiguration"/>'s.

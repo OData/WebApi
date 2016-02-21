@@ -2,13 +2,12 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Framework.Internal;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Mvc.Formatters;
 
-namespace Microsoft.AspNet.OData.Formatter
+namespace Microsoft.AspNetCore.OData.Formatter
 {
     public class ModernInputFormatter : InputFormatter
     {

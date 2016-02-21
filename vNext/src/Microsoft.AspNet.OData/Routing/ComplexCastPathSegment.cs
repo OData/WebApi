@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
-using Microsoft.AspNet.OData.Common;
 
-namespace Microsoft.AspNet.OData.Routing
+namespace Microsoft.AspNetCore.OData.Routing
 {
     /// <summary>
     /// An <see cref="ODataPathSegment"/> implementation representing a complex type cast.

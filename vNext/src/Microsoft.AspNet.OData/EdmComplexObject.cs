@@ -4,7 +4,7 @@
 using System;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     /// <summary>
     /// Represents an <see cref="IEdmComplexObject"/> with no backing CLR <see cref="Type"/>.

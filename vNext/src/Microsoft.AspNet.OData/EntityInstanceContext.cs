@@ -4,13 +4,15 @@
 using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Formatter.Deserialization;
+using Microsoft.AspNetCore.OData.Formatter.Serialization;
+using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Formatter.Deserialization;
-using Microsoft.AspNet.OData.Formatter.Serialization;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     /// <summary>
     /// An instance of <see cref="EntityInstanceContext"/> gets passed to the self link (

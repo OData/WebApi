@@ -3,7 +3,7 @@
 
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData.Routing
+namespace Microsoft.AspNetCore.OData.Routing
 {
     /// <summary>
     /// Provides an object representation for an OData path segment with additional information about the EDM type and entity set for the path.

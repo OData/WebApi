@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
+using System.Linq;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions
+namespace Microsoft.AspNetCore.OData.Builder.Conventions
 {
     // Denotes a property convention used to discover foreign key properties if there is no any foreign key configured
     // on the navigation property.

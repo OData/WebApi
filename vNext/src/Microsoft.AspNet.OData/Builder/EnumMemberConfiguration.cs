@@ -3,9 +3,9 @@
 
 using System;
 using System.Diagnostics.Contracts;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// Represents the configuration for an enum member of an enum type.

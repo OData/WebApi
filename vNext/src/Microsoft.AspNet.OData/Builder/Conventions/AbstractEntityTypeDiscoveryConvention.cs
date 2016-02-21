@@ -3,7 +3,7 @@
 
 using System.Reflection;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions
+namespace Microsoft.AspNetCore.OData.Builder.Conventions
 {
     /// <summary>
     /// <see cref="EntityTypeConvention"/> to figure out if an entity is abstract or not.

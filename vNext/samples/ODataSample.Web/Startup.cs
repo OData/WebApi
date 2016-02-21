@@ -1,6 +1,6 @@
 ﻿//using Microsoft.AspNet.OData.Extensions;
 
-using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;

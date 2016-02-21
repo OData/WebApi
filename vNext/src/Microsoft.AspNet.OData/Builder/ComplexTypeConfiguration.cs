@@ -4,7 +4,7 @@
 using System;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// Allows configuration to be performed for a complex type in a model. A <see cref="ComplexTypeConfiguration"/>

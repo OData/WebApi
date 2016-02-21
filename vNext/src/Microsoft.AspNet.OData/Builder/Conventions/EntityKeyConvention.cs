@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.OData.Common;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions
+namespace Microsoft.AspNetCore.OData.Builder.Conventions
 {
     /// <summary>
     /// <see cref="EntityTypeConvention"/> for figuring out the entity keys.

@@ -3,7 +3,7 @@
 
 using System.Reflection;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions
+namespace Microsoft.AspNetCore.OData.Builder.Conventions
 {
     /// <summary>
     /// <see cref="AbstractTypeDiscoveryConvention"/> to figure out if a structural type is abstract or not.

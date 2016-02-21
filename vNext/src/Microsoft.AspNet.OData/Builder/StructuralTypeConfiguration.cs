@@ -5,12 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
+using System.Linq;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// Represents an <see cref="IEdmStructuredType"/> that can be built using <see cref="ODataModelBuilder"/>.

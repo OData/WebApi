@@ -5,7 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData.Formatter
+namespace Microsoft.AspNetCore.OData.Formatter
 {
     internal class ClrTypeCache
     {

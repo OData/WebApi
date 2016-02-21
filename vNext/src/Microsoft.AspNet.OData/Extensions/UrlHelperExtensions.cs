@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.OData.Routing;
 
-namespace Microsoft.AspNet.OData.Extensions
+namespace Microsoft.AspNetCore.OData.Extensions
 {
     /// <summary>
     /// Provides extension methods for the <see cref="UrlHelper"/> class.

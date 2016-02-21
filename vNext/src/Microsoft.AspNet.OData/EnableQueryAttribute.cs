@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNet.OData.Query;
-using Microsoft.AspNet.OData.Routing;
-using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Properties;
+using Microsoft.AspNetCore.OData.Query;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     // TODO: Replace with full version in the future.
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]

@@ -4,10 +4,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     internal static class EdmTypeConfigurationExtensions
     {

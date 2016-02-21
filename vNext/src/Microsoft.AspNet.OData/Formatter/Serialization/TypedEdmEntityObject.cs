@@ -3,7 +3,7 @@
 
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="IEdmEntityObject"/> backed by a CLR object with a one-to-one mapping.

@@ -2,12 +2,11 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Reflection;
 using Microsoft.AspNetCore.Http;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData.Formatter.Deserialization
+namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
 {
     /// <summary>
     /// This class encapsulates the state and settings that get passed to <see cref="ODataDeserializer"/>

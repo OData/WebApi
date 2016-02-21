@@ -4,7 +4,7 @@
 using System;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// Represents an <see cref="Attribute"/> that can be placed on a navigation property to specify the applied

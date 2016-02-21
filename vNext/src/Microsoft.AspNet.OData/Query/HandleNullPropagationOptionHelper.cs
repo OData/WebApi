@@ -3,9 +3,9 @@
 
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Query
+namespace Microsoft.AspNetCore.OData.Query
 {
     internal static class HandleNullPropagationOptionHelper
     {

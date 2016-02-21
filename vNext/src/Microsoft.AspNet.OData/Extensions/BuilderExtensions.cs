@@ -1,17 +1,13 @@
 ﻿using System;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Internal;
-using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNetCore.OData.Builder;
+using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Framework.Internal;
+using Microsoft.Extensions.DependencyInjection;
 
-
-namespace Microsoft.AspNet.OData.Extensions
+namespace Microsoft.AspNetCore.OData.Extensions
 {
     public static class BuilderExtensions
     {

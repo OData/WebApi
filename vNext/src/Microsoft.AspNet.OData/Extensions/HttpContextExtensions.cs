@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Formatter;
-using Microsoft.AspNet.OData.Routing;
-using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Formatter;
+using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.AspNet.OData.Extensions
+namespace Microsoft.AspNetCore.OData.Extensions
 {
     public static class HttpContextExtensions
     {

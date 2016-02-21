@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.OData.Common;
 using System.Linq;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
 
-namespace Microsoft.AspNet.OData.Routing
+namespace Microsoft.AspNetCore.OData.Routing
 {
     /// <summary>
     /// Represents a template that can match a <see cref="UnboundFunctionPathSegment"/>.

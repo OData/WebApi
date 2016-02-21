@@ -3,10 +3,10 @@
 
 using System;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using Microsoft.Net.Http.Headers;
+using System.Linq;
 
-namespace Microsoft.AspNet.OData.Formatter
+namespace Microsoft.AspNetCore.OData.Formatter
 {
     /// <summary>
     /// Contains media types used by the OData formatter.

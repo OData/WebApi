@@ -3,10 +3,10 @@
 
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.OData.Common;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
+namespace Microsoft.AspNetCore.OData.Builder.Conventions.Attributes
 {
     internal class ComplexTypeAttributeConvention : AttributeEdmTypeConvention<EntityTypeConfiguration>
     {

@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNet.OData;
+using Microsoft.AspNetCore.OData;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers

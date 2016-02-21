@@ -3,19 +3,18 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Builder;
 using System.Xml.Linq;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.OData.Builder;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.Spatial;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+using System.Linq;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     internal static class EdmLibHelpers
     {

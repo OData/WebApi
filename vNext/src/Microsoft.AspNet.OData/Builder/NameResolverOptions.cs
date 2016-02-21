@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// Options for resolving names.

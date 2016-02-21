@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Properties;
+using System.Linq;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions
+namespace Microsoft.AspNetCore.OData.Builder.Conventions
 {
     /// <summary>
     /// <see cref="INavigationSourceConvention"/> to configure the EDM association sets for the given entity set.

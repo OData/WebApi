@@ -3,10 +3,11 @@
 
 using System;
 using System.Runtime.Serialization;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
-using Microsoft.AspNet.OData.Common;
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="Microsoft.OData.Core.ODataSerializer"/> for serializing <see cref="ODataServiceDocument" />'s for generating servicedoc's.

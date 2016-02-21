@@ -2,10 +2,11 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
-using Microsoft.AspNet.OData.Common;
 
-namespace Microsoft.AspNet.OData.Formatter.Deserialization
+namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
 {
     /// <summary>
     /// An <see cref="ODataDeserializer"/> is used to read an ODataMessage into a CLR object.

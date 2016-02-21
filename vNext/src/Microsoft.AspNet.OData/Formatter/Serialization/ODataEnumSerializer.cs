@@ -4,11 +4,12 @@
 using System;
 using System.Diagnostics.Contracts;
 using System.Reflection;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="Microsoft.OData.Core.ODataSerializer"/> for serializing <see cref="IEdmEnumType" />'s.

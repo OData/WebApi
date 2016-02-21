@@ -9,7 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Microsoft.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNetCore.OData.Query.Expressions
 {
     internal class ExpressionHelperMethods
     {

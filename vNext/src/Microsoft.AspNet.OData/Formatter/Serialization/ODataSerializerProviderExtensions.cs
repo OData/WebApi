@@ -5,7 +5,7 @@ using System.Diagnostics.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     internal static class ODataSerializerProviderExtensions
     {

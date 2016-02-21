@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.Contracts;
-using System.Linq;
+using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
+using System.Linq;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
+namespace Microsoft.AspNetCore.OData.Builder.Conventions.Attributes
 {
     // Denotes a property used as a foreign key in a relationship. The annotation may be placed on:
     // 1. the foreign key property and specify the associated navigation property name, or

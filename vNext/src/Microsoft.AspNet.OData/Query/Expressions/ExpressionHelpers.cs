@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNetCore.OData.Query.Expressions
 {
     internal static class ExpressionHelpers
     {

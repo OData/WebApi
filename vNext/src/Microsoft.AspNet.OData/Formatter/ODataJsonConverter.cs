@@ -1,12 +1,12 @@
-﻿using Microsoft.OData.Edm;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using System.Reflection;
+using Microsoft.OData.Edm;
+using Newtonsoft.Json;
+using System.Linq;
 
-namespace Microsoft.AspNet.OData.Formatter
+namespace Microsoft.AspNetCore.OData.Formatter
 {
     public class ODataJsonConverter : JsonConverter
     {

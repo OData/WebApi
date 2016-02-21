@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     internal class TimeZoneInfoHelper
     {

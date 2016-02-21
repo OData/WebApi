@@ -1,11 +1,13 @@
 ﻿
-namespace Microsoft.AspNet.OData.Common
+using System;
+using System.ComponentModel;
+using System.Globalization;
+using Microsoft.AspNetCore.OData.Properties;
+
+namespace Microsoft.AspNetCore.OData.Common
 {
-    using System;
-#if !DNXCORE50
-    using System.ComponentModel;
+    #if !DNXCORE50
 #endif
-    using System.Globalization;
 
     /// <summary>
     /// Utility class for creating and unwrapping <see cref="Exception"/> instances.

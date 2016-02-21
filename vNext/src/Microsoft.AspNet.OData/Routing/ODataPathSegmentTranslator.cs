@@ -4,16 +4,16 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.Visitors;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
 using Semantic = Microsoft.OData.Core.UriParser.Semantic;
+using System.Linq;
 
-namespace Microsoft.AspNet.OData.Routing
+namespace Microsoft.AspNetCore.OData.Routing
 {
     /// <summary>
     /// Translator to convert an OData path segment to WebAPI path segment.
@@ -22,7 +22,7 @@ namespace Microsoft.AspNet.OData.Routing
     {
         private readonly IEdmModel _model;
         private readonly bool _enableUriTemplateParsing;
-        private IDictionary<string, SingleValueNode> _parameterAliasValueNodes;
+        private IDictionary<string, Semantic.SingleValueNode> _parameterAliasValueNodes;
 
         /// <summary>
         /// Translates an ODL path to Web API path.
@@ -38,9 +38,9 @@ namespace Microsoft.AspNet.OData.Routing
             Semantic.ODataPath path,
             IEdmModel model,
             UnresolvedPathSegment unresolvedPathSegment,
-            KeySegment id,
+            Semantic.KeySegment id,
             bool enableUriTemplateParsing,
-            IDictionary<string, SingleValueNode> parameterAliasNodes)
+            IDictionary<string, Semantic.SingleValueNode> parameterAliasNodes)
         {
             if (path == null)
             {
@@ -85,7 +85,7 @@ namespace Microsoft.AspNet.OData.Routing
         public ODataPathSegmentTranslator(
             IEdmModel model,
             bool enableUriTemplateParsing,
-            IDictionary<string, SingleValueNode> parameterAliasNodes)
+            IDictionary<string, Semantic.SingleValueNode> parameterAliasNodes)
         {
             if (model == null)
             {
@@ -108,9 +108,9 @@ namespace Microsoft.AspNet.OData.Routing
         /// <param name="node">The node to be translated.</param>
         /// <param name="parameterAliasNodes">The parameter alias node mapping.</param>
         /// <returns>The translated node.</returns>
-        public static SingleValueNode TranslateParameterAlias(
-            SingleValueNode node,
-            IDictionary<string, SingleValueNode> parameterAliasNodes)
+        public static Semantic.SingleValueNode TranslateParameterAlias(
+            Semantic.SingleValueNode node,
+            IDictionary<string, Semantic.SingleValueNode> parameterAliasNodes)
         {
             if (node == null)
             {
@@ -122,19 +122,19 @@ namespace Microsoft.AspNet.OData.Routing
                 throw Error.ArgumentNull("parameterAliasNodes");
             }
 
-            ParameterAliasNode parameterAliasNode = node as ParameterAliasNode;
+            Semantic.ParameterAliasNode parameterAliasNode = node as Semantic.ParameterAliasNode;
 
             if (parameterAliasNode == null)
             {
                 return node;
             }
 
-            SingleValueNode singleValueNode;
+            Semantic.SingleValueNode singleValueNode;
 
             if (parameterAliasNodes.TryGetValue(parameterAliasNode.Alias, out singleValueNode) &&
                 singleValueNode != null)
             {
-                if (singleValueNode is ParameterAliasNode)
+                if (singleValueNode is Semantic.ParameterAliasNode)
                 {
                     singleValueNode = TranslateParameterAlias(singleValueNode, parameterAliasNodes);
                 }
@@ -153,7 +153,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment</returns>
-        public override IEnumerable<ODataPathSegment> Translate(TypeSegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.TypeSegment segment)
         {
             IEdmType elementType = segment.EdmType;
             if (segment.EdmType.TypeKind == EdmTypeKind.Collection)
@@ -176,7 +176,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(NavigationPropertySegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.NavigationPropertySegment segment)
         {
             yield return new NavigationPathSegment(segment.NavigationProperty);
         }
@@ -186,7 +186,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(EntitySetSegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.EntitySetSegment segment)
         {
             yield return new EntitySetPathSegment(segment.EntitySet);
         }
@@ -196,7 +196,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(SingletonSegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.SingletonSegment segment)
         {
             yield return new SingletonPathSegment(segment.Singleton);
         }
@@ -206,7 +206,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(KeySegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.KeySegment segment)
         {
             yield return new KeyValuePathSegment(ConvertKeysToString(segment.Keys, _enableUriTemplateParsing));
         }
@@ -216,7 +216,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(PropertySegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.PropertySegment segment)
         {
             yield return new PropertyAccessPathSegment(segment.Property);
         }
@@ -226,7 +226,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(OperationImportSegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.OperationImportSegment segment)
         {
             IEdmActionImport actionImport = segment.OperationImports.Single() as IEdmActionImport;
 
@@ -253,7 +253,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(OperationSegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.OperationSegment segment)
         {
             IEdmAction action = segment.Operations.Single() as IEdmAction;
 
@@ -278,7 +278,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(OpenPropertySegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.OpenPropertySegment segment)
         {
             yield return new DynamicPropertyPathSegment(segment.PropertyName);
         }
@@ -288,7 +288,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(CountSegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.CountSegment segment)
         {
             yield return new CountPathSegment();
         }
@@ -298,7 +298,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(NavigationPropertyLinkSegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.NavigationPropertyLinkSegment segment)
         {
             yield return new NavigationPathSegment(segment.NavigationProperty);
             yield return new RefPathSegment();
@@ -309,7 +309,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(ValueSegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.ValueSegment segment)
         {
             yield return new ValuePathSegment();
         }
@@ -319,7 +319,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(BatchSegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.BatchSegment segment)
         {
             yield return new BatchPathSegment();
         }
@@ -329,12 +329,12 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(BatchReferenceSegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.BatchReferenceSegment segment)
         {
             throw new ODataException(Error.Format(
                 SRResources.TargetKindNotImplemented,
                 typeof(ODataPathSegment).Name,
-                typeof(BatchReferenceSegment).Name));
+                typeof(Semantic.BatchReferenceSegment).Name));
         }
 
         /// <summary>
@@ -342,7 +342,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(MetadataSegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.MetadataSegment segment)
         {
             yield return new MetadataPathSegment();
         }
@@ -352,7 +352,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated WebApi path segment.</returns>
-        public override IEnumerable<ODataPathSegment> Translate(PathTemplateSegment segment)
+        public override IEnumerable<ODataPathSegment> Translate(Semantic.PathTemplateSegment segment)
         {
             string value = String.Empty;
             switch (TranslatePathTemplateSegment(segment.LiteralText, out value))
@@ -368,7 +368,7 @@ namespace Microsoft.AspNet.OData.Routing
         }
 
         // We need to append the key value path segment from $id.
-        private static void AppendIdForRef(IList<ODataPathSegment> segments, KeySegment id)
+        private static void AppendIdForRef(IList<ODataPathSegment> segments, Semantic.KeySegment id)
         {
             if (id == null || !(segments.Last() is RefPathSegment))
             {
@@ -434,14 +434,14 @@ namespace Microsoft.AspNet.OData.Routing
 
             if (enableUriTemplateParsing)
             {
-                UriTemplateExpression uriTemplateExpression = value as UriTemplateExpression;
+                Semantic.UriTemplateExpression uriTemplateExpression = value as Semantic.UriTemplateExpression;
                 if (uriTemplateExpression != null)
                 {
                     return uriTemplateExpression.LiteralText;
                 }
             }
 
-            ConstantNode constantNode = value as ConstantNode;
+            Semantic.ConstantNode constantNode = value as Semantic.ConstantNode;
             if (constantNode != null)
             {
                 ODataEnumValue enumValue = constantNode.Value as ODataEnumValue;
@@ -489,12 +489,12 @@ namespace Microsoft.AspNet.OData.Routing
                 throw Error.ArgumentNull("node");
             }
 
-            ConstantNode constantNode = node as ConstantNode;
+            Semantic.ConstantNode constantNode = node as Semantic.ConstantNode;
             if (constantNode != null)
             {
                 if (_enableUriTemplateParsing)
                 {
-                    UriTemplateExpression uriTemplateExpression = constantNode.Value as UriTemplateExpression;
+                    Semantic.UriTemplateExpression uriTemplateExpression = constantNode.Value as Semantic.UriTemplateExpression;
                     if (uriTemplateExpression != null)
                     {
                         return uriTemplateExpression.LiteralText;
@@ -511,13 +511,13 @@ namespace Microsoft.AspNet.OData.Routing
                 return constantNode.LiteralText;
             }
 
-            ConvertNode convertNode = node as ConvertNode;
+            Semantic.ConvertNode convertNode = node as Semantic.ConvertNode;
             if (convertNode != null)
             {
                 return TranslateNode(convertNode.Source);
             }
 
-            ParameterAliasNode parameterAliasNode = node as ParameterAliasNode;
+            Semantic.ParameterAliasNode parameterAliasNode = node as Semantic.ParameterAliasNode;
             if (parameterAliasNode != null)
             {
                 return TranslateParameterAlias(parameterAliasNode.Alias);
@@ -537,7 +537,7 @@ namespace Microsoft.AspNet.OData.Routing
                 throw Error.ArgumentNull("alias");
             }
 
-            SingleValueNode singleValueNode;
+            Semantic.SingleValueNode singleValueNode;
 
             if (_parameterAliasValueNodes.TryGetValue(alias, out singleValueNode) && singleValueNode != null)
             {

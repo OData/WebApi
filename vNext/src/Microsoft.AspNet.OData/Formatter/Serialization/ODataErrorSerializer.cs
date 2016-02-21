@@ -4,11 +4,12 @@
 using System;
 using System.Runtime.Serialization;
 using System.Web.Http;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="ODataSerializer"/> to serialize <see cref="ODataError"/>s and <see cref="HttpError"/>s.

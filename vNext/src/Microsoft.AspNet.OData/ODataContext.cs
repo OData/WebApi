@@ -1,7 +1,7 @@
-﻿using Microsoft.OData.Edm;
-using System;
+﻿using System;
+using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     internal class ODataContext
     {

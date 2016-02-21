@@ -1,11 +1,10 @@
 ﻿using System;
-using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.AspNet.OData.Builder;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Builder;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     internal class DefaultODataModelProvider
     {

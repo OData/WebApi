@@ -3,7 +3,7 @@
 
 using System.Reflection;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// Base class for all structural property configurations.

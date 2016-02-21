@@ -8,7 +8,7 @@ using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     internal class UnqualifiedCallAndEnumPrefixFreeResolver : ODataUriResolver
     {

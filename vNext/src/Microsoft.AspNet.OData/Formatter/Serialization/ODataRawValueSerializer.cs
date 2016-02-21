@@ -3,11 +3,11 @@
 
 using System;
 using System.Reflection;
+using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="Microsoft.OData.Core.ODataSerializer"/> for serializing the raw value of an <see cref="IEdmPrimitiveType"/>.

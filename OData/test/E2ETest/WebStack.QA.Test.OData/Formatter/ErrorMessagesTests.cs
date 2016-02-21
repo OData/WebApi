@@ -35,23 +35,6 @@ namespace WebStack.QA.Test.OData.Formatter
             EntitySetConfiguration<ErrorCustomer> customers = builder.EntitySet<ErrorCustomer>("ErrorCustomers");
             return builder.GetEdmModel();
         }
-
-        [Fact]
-        public void ThrowsClearErrorMessageWhenACollectionPropertyIsNull()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/ErrorCustomers");
-
-            // Act
-            HttpResponseMessage response = Client.SendAsync(request).Result;
-
-            // Assert
-            Assert.NotNull(response);
-            Assert.NotNull(response.Content);
-            string result = response.Content.ReadAsStringAsync().Result;
-            Assert.NotNull(result);
-            Assert.Contains("Null collections cannot be serialized.", result);
-        }
     }
 
     public class ErrorCustomersController : ODataController

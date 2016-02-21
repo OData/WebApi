@@ -248,6 +248,40 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.Equal(expect, primitiveValue.Value);
         }
 
+        [Fact]
+        public void CreateODataValue_ReturnsDate_ForDateTime()
+        {
+            // Arrange
+            IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(Date));
+            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
+            DateTime dt = new DateTime(2014, 10, 27);
+
+            // Act
+            ODataValue odataValue = serializer.CreateODataValue(dt, edmPrimitiveType, new ODataSerializerContext());
+
+            // Assert
+            ODataPrimitiveValue primitiveValue = Assert.IsType<ODataPrimitiveValue>(odataValue);
+            Assert.IsType<Date>(primitiveValue.Value);
+            Assert.Equal(new Date(dt.Year, dt.Month, dt.Day), primitiveValue.Value);
+        }
+
+        [Fact]
+        public void CreateODataValue_ReturnsTimeOfDay_ForTimeSpan()
+        {
+            // Arrange
+            IEdmPrimitiveTypeReference edmPrimitiveType = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(TimeOfDay));
+            ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
+            TimeSpan ts = new TimeSpan(0, 10, 11, 12, 13);
+
+            // Act
+            ODataValue odataValue = serializer.CreateODataValue(ts, edmPrimitiveType, new ODataSerializerContext());
+
+            // Assert
+            ODataPrimitiveValue primitiveValue = Assert.IsType<ODataPrimitiveValue>(odataValue);
+            Assert.IsType<TimeOfDay>(primitiveValue.Value);
+            Assert.Equal(new TimeOfDay(ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds), primitiveValue.Value);
+        }
+
         [Theory]
         [PropertyData("EdmPrimitiveData")]
         [PropertyData("NonEdmPrimitiveData")]

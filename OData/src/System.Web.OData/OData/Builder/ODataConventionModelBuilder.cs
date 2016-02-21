@@ -32,6 +32,7 @@ namespace System.Web.OData.Builder
             new RequiredAttributeEdmPropertyConvention(),
             new ConcurrencyCheckAttributeEdmPropertyConvention(),
             new TimestampAttributeEdmPropertyConvention(),
+            new ColumnAttributeEdmPropertyConvention(),
             new KeyAttributeEdmPropertyConvention(), // KeyAttributeEdmPropertyConvention has to run before EntityKeyConvention
             new EntityKeyConvention(),
             new ComplexTypeAttributeConvention(), // This has to run after Key conventions, basically overrules them if there is a ComplexTypeAttribute
@@ -459,6 +460,7 @@ namespace System.Web.OData.Builder
                 StructuralTypes.OfType<EntityTypeConfiguration>()
                     .Where(entity => entity.Keys().Any())
                     .Concat(_explicitlyAddedTypes.OfType<EntityTypeConfiguration>())
+                    .Except(misconfiguredEntityTypes)
                     .ToList();
 
             HashSet<EntityTypeConfiguration> visitedEntityType = new HashSet<EntityTypeConfiguration>();
@@ -723,6 +725,18 @@ namespace System.Web.OData.Builder
                     if (elementUnderlyingTypeOrSelf.IsEnum)
                     {
                         AddEnumType(elementUnderlyingTypeOrSelf);
+                    }
+                }
+                else
+                {
+                    Type elementType;
+                    if (property.PropertyType.IsCollection(out elementType))
+                    {
+                        Type elementUnderlyingTypeOrSelf = TypeHelper.GetUnderlyingTypeOrSelf(elementType);
+                        if (elementUnderlyingTypeOrSelf.IsEnum)
+                        {
+                            AddEnumType(elementUnderlyingTypeOrSelf);
+                        }
                     }
                 }
 

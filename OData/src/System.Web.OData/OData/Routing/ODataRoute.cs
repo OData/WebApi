@@ -26,7 +26,19 @@ namespace System.Web.OData.Routing
         /// <param name="routePrefix">The route prefix.</param>
         /// <param name="pathConstraint">The OData path constraint.</param>
         public ODataRoute(string routePrefix, ODataPathRouteConstraint pathConstraint)
-            : this(routePrefix, pathConstraint, defaults: null, constraints: null, dataTokens: null, handler: null)
+            : this(
+                routePrefix, (IHttpRouteConstraint)pathConstraint, defaults: null, constraints: null, dataTokens: null,
+                handler: null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataRoute" /> class.
+        /// </summary>
+        /// <param name="routePrefix">The route prefix.</param>
+        /// <param name="routeConstraint">The route constraint.</param>
+        public ODataRoute(string routePrefix, IHttpRouteConstraint routeConstraint)
+            : this(routePrefix, routeConstraint, defaults: null, constraints: null, dataTokens: null, handler: null)
         {
         }
 
@@ -46,18 +58,39 @@ namespace System.Web.OData.Routing
             HttpRouteValueDictionary constraints,
             HttpRouteValueDictionary dataTokens,
             HttpMessageHandler handler)
+            : this(routePrefix, (IHttpRouteConstraint)pathConstraint, defaults, constraints, dataTokens, handler)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataRoute" /> class.
+        /// </summary>
+        /// <param name="routePrefix">The route prefix.</param>
+        /// <param name="routeConstraint">The route constraint.</param>
+        /// <param name="defaults">The default values for the route.</param>
+        /// <param name="constraints">The route constraints.</param>
+        /// <param name="dataTokens">The data tokens.</param>
+        /// <param name="handler">The message handler for the route.</param>
+        public ODataRoute(
+            string routePrefix,
+            IHttpRouteConstraint routeConstraint,
+            HttpRouteValueDictionary defaults,
+            HttpRouteValueDictionary constraints,
+            HttpRouteValueDictionary dataTokens,
+            HttpMessageHandler handler)
             : base(GetRouteTemplate(routePrefix), defaults, constraints, dataTokens, handler)
         {
             RoutePrefix = routePrefix;
-            PathRouteConstraint = pathConstraint;
+            PathRouteConstraint = routeConstraint as ODataPathRouteConstraint;
+            RouteConstraint = routeConstraint;
 
             // We can only use our fast-path for link generation if there are no open brackets in the route prefix
             // that need to be replaced. If there are, fall back to the slow path.
             _canGenerateDirectLink = routePrefix == null || routePrefix.IndexOf('{') == -1;
 
-            if (pathConstraint != null)
+            if (routeConstraint != null)
             {
-                Constraints.Add(ODataRouteConstants.ConstraintName, pathConstraint);
+                Constraints.Add(ODataRouteConstants.ConstraintName, routeConstraint);
             }
 
             Constraints.Add(ODataRouteConstants.VersionConstraintName, new ODataVersionConstraint());
@@ -72,6 +105,11 @@ namespace System.Web.OData.Routing
         /// Gets the <see cref="ODataPathRouteConstraint"/> on this route.
         /// </summary>
         public ODataPathRouteConstraint PathRouteConstraint { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="IHttpRouteConstraint"/> on this route.
+        /// </summary>
+        public IHttpRouteConstraint RouteConstraint { get; private set; }
 
         internal bool CanGenerateDirectLink
         {

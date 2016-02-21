@@ -84,6 +84,18 @@ namespace System.Web.OData
             Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
             return underlyingTypeOrSelf.IsEnum;
         }
+        
+        public static bool IsDateTime(Type type)
+        {
+            Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
+            return Type.GetTypeCode(underlyingTypeOrSelf) == TypeCode.DateTime;
+        }
+
+        public static bool IsTimeSpan(Type type)
+        {
+            Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
+            return underlyingTypeOrSelf == typeof(TimeSpan);
+        }
 
         /// <summary>
         /// Determines whether the given type is a primitive type or

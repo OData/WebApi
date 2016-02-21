@@ -106,21 +106,6 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateODataValue_ThrowsArgument_IfGraphIsNull()
-        {
-            // Arrange
-            IEnumerable nullEnumerable = null;
-            var serializerProvider = new Mock<ODataSerializerProvider>();
-            var serializer = new ODataCollectionSerializer(serializerProvider.Object);
-            serializerProvider.Setup(s => s.GetEdmTypeSerializer(It.IsAny<IEdmTypeReference>())).Returns<IEdmTypeReference>(null);
-
-            // Act and Assert
-            Assert.Throws<SerializationException>(
-                () => serializer.CreateODataValue(graph: nullEnumerable, expectedType: _collectionType, writeContext: new ODataSerializerContext()),
-                "Null collections cannot be serialized.");
-        }
-
-        [Fact]
         public void CreateODataValue_ThrowsArgument_IfGraphIsNotEnumerable()
         {
             object nonEnumerable = new object();

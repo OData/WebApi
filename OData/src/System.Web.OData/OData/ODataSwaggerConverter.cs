@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 namespace System.Web.OData
 {
     /// <summary>
+    /// <para>QualityBand : Preview</para>
     /// Represents an <see cref="ODataSwaggerConverter"/> used to converter an Edm model to Swagger model.
     /// </summary>
     public class ODataSwaggerConverter
@@ -51,27 +52,10 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Gets the Swagger model.
-        /// </summary>
-        public virtual JObject SwaggerModel
-        {
-            get
-            {
-                if (SwaggerDoc == null)
-                {
-                    ConvertToSwaggerModel();
-                }
-
-                Contract.Assert(SwaggerDoc != null);
-                return SwaggerDoc;
-            }
-        }
-
-        /// <summary>
         /// Gets the document in the Swagger.
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA2227:EnableSetterForProperty", Justification = "Enable setter for virtual property")]
-        protected virtual JObject SwaggerDoc { get; set; }
+        protected virtual JObject SwaggerDocument { get; set; }
 
         /// <summary>
         /// Gets the paths in the Swagger.
@@ -83,7 +67,7 @@ namespace System.Web.OData
         /// Gets the definitions in the Swagger.
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA2227:EnableSetterForProperty", Justification = "Enable setter for virtual property")]
-        protected virtual JObject SwaggerDefinitions { get; set; }
+        protected virtual JObject SwaggerTypeDefinitions { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSwaggerConverter" /> class.
@@ -106,11 +90,12 @@ namespace System.Web.OData
         /// Converts the Edm model to Swagger model.
         /// </summary>
         /// <returns>The <see cref="Newtonsoft.Json.Linq.JObject"/> represents the Swagger model.</returns>
-        public virtual JObject ConvertToSwaggerModel()
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Property is not appropriate, method does work")]
+        public virtual JObject GetSwaggerModel()
         {
-            if (SwaggerDoc != null)
+            if (SwaggerDocument != null)
             {
-                return SwaggerDoc;
+                return SwaggerDocument;
             }
 
             InitializeStart();
@@ -120,7 +105,7 @@ namespace System.Web.OData
             InitializeOperations();
             InitializeEnd();
 
-            return SwaggerDoc;
+            return SwaggerDocument;
         }
 
         /// <summary>
@@ -128,9 +113,9 @@ namespace System.Web.OData
         /// </summary>
         protected virtual void InitializeStart()
         {
-            SwaggerDoc = null;
+            SwaggerDocument = null;
             SwaggerPaths = null;
-            SwaggerDefinitions = null;
+            SwaggerTypeDefinitions = null;
         }
 
         /// <summary>
@@ -138,7 +123,7 @@ namespace System.Web.OData
         /// </summary>
         protected virtual void InitializeDocument()
         {
-            SwaggerDoc = new JObject()
+            SwaggerDocument = new JObject()
             {
                 { "swagger", SwaggerVersion.ToString() },
                 { "info", new JObject()
@@ -162,11 +147,11 @@ namespace System.Web.OData
         /// </summary>
         protected virtual void InitializeContainer()
         {
-            Contract.Assert(SwaggerDoc != null);
+            Contract.Assert(SwaggerDocument != null);
             Contract.Assert(EdmModel != null);
 
             SwaggerPaths = new JObject();
-            SwaggerDoc.Add("paths", SwaggerPaths);
+            SwaggerDocument.Add("paths", SwaggerPaths);
 
             if (EdmModel.EntityContainer == null)
             {
@@ -193,16 +178,16 @@ namespace System.Web.OData
         /// </summary>
         protected virtual void InitializeTypeDefinitions()
         {
-            Contract.Assert(SwaggerDoc != null);
+            Contract.Assert(SwaggerDocument != null);
             Contract.Assert(EdmModel != null);
 
-            SwaggerDefinitions = new JObject();
-            SwaggerDoc.Add("definitions", SwaggerDefinitions);
+            SwaggerTypeDefinitions = new JObject();
+            SwaggerDocument.Add("definitions", SwaggerTypeDefinitions);
 
             foreach (var type in EdmModel.SchemaElements.OfType<IEdmStructuredType>())
             {
-                SwaggerDefinitions.Add(type.FullTypeName(),
-                    ODataSwaggerUtilities.CreateSwaggerDefinitionForStructureType(type));
+                SwaggerTypeDefinitions.Add(type.FullTypeName(),
+                    ODataSwaggerUtilities.CreateSwaggerTypeDefinitionForStructuredType(type));
             }
         }
 
@@ -211,7 +196,7 @@ namespace System.Web.OData
         /// </summary>
         protected virtual void InitializeOperations()
         {
-            Contract.Assert(SwaggerDoc != null);
+            Contract.Assert(SwaggerDocument != null);
             Contract.Assert(EdmModel != null);
             Contract.Assert(SwaggerPaths != null);
 
@@ -265,9 +250,9 @@ namespace System.Web.OData
         /// </summary>
         protected virtual void InitializeEnd()
         {
-            Contract.Assert(SwaggerDefinitions != null);
+            Contract.Assert(SwaggerTypeDefinitions != null);
 
-            SwaggerDefinitions.Add("_Error", new JObject()
+            SwaggerTypeDefinitions.Add("_Error", new JObject()
             {
                 {
                     "properties", new JObject()
@@ -281,7 +266,7 @@ namespace System.Web.OData
                 }
             });
 
-            SwaggerDefinitions.Add("_InError", new JObject()
+            SwaggerTypeDefinitions.Add("_InError", new JObject()
             {
                 {
                     "properties", new JObject()

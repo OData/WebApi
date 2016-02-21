@@ -220,6 +220,50 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void CanCreateFunctionWithNonbindingParameters_AddParameterGenericMethod()
+        {
+            // Arrange
+            // Act
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("MyFunction");
+            function.Parameter<string>("p0");
+            function.Parameter<int>("p1");
+            function.Parameter<Address>("p2");
+            ParameterConfiguration[] parameters = function.Parameters.ToArray();
+
+            // Assert
+            Assert.Equal(3, parameters.Length);
+            Assert.Equal("p0", parameters[0].Name);
+            Assert.Equal("Edm.String", parameters[0].TypeConfiguration.FullName);
+            Assert.Equal("p1", parameters[1].Name);
+            Assert.Equal("Edm.Int32", parameters[1].TypeConfiguration.FullName);
+            Assert.Equal("p2", parameters[2].Name);
+            Assert.Equal(typeof(Address).FullName, parameters[2].TypeConfiguration.FullName);
+        }
+
+        [Fact]
+        public void CanCreateFunctionWithNonbindingParameters_AddParameterNonGenericMethod()
+        {
+            // Arrange
+            // Act
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("MyFunction");
+            function.Parameter(typeof(string), "p0");
+            function.Parameter(typeof(int), "p1");
+            function.Parameter(typeof(Address), "p2");
+            ParameterConfiguration[] parameters = function.Parameters.ToArray();
+
+            // Assert
+            Assert.Equal(3, parameters.Length);
+            Assert.Equal("p0", parameters[0].Name);
+            Assert.Equal("Edm.String", parameters[0].TypeConfiguration.FullName);
+            Assert.Equal("p1", parameters[1].Name);
+            Assert.Equal("Edm.Int32", parameters[1].TypeConfiguration.FullName);
+            Assert.Equal("p2", parameters[2].Name);
+            Assert.Equal(typeof(Address).FullName, parameters[2].TypeConfiguration.FullName);
+        }
+
+        [Fact]
         public void CanCreateFunctionWithNonbindingParameters()
         {
             // Arrange
@@ -605,11 +649,9 @@ namespace System.Web.OData.Builder
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
             var functionBuilder = movie.Function("FunctionName").Returns<int>();
+            functionBuilder.Parameter(paramType, "p1");
 
-            MethodInfo method = typeof(ProcedureConfiguration).GetMethod("Parameter", BindingFlags.Instance | BindingFlags.Public);
-            method.MakeGenericMethod(paramType).Invoke(functionBuilder, new[] { "p1" });
-
-            method = typeof(ProcedureConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
+            MethodInfo method = typeof(ProcedureConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
             method.MakeGenericMethod(paramType).Invoke(functionBuilder, new[] { "p2" });
 
             // Act

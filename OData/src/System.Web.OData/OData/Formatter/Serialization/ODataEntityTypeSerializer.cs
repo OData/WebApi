@@ -602,10 +602,13 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmTypeReference propertyType = structuralProperty.Type;
             if (propertyValue != null)
             {
-                IEdmTypeReference actualType = writeContext.GetEdmType(propertyValue, propertyValue.GetType());
-                if (propertyType != null && propertyType != actualType)
+                if (!propertyType.IsPrimitive() && !propertyType.IsEnum())
                 {
-                    propertyType = actualType;
+                    IEdmTypeReference actualType = writeContext.GetEdmType(propertyValue, propertyValue.GetType());
+                    if (propertyType != null && propertyType != actualType)
+                    {
+                        propertyType = actualType;
+                    }
                 }
             }
 

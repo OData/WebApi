@@ -96,16 +96,6 @@ namespace System.Web.OData.Routing
             return path.ToString();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public virtual ODataPath HandleUnresolvedODataPath(Semantic.ODataPath path)
-        {
-            return null;
-        }
-
         private static ODataPath Parse(
             IEdmModel model,
             string serviceRoot,
@@ -136,6 +126,8 @@ namespace System.Web.OData.Routing
                 queryString = fullUri.ParseQueryString();
                 uriParser = new ODataUriParser(model, serviceRootUri, fullUri);
             }
+
+            uriParser.UrlConventions = resolverSettings.UrlConventions;
 
             uriParser.Resolver = resolverSettings.CreateResolver(model);
 

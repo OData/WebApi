@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
         public ModernOutputFormatter()
         {
-            // TODO: Restore this
+            // TODO: JC: Restore this
             //SupportedEncodings.Add(UTF8EncodingWithoutBOM);
             SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/json"));
             SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/json"));

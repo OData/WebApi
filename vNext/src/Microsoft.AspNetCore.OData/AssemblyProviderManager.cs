@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Framework.Internal;
 
+namespace Microsoft.Framework.Internal
+{
+}
 namespace Microsoft.AspNetCore.OData
 {
+
     internal class AssemblyProviderManager
     {
         private static IAssemblyProvider _provider;

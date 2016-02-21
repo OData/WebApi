@@ -7,7 +7,7 @@
   <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
     <ProjectGuid>391207f8-d7ed-4233-bad9-abbff700b71c</ProjectGuid>
-    <AssemblyName>Microsoft.AspNet.OData</AssemblyName>
+    <AssemblyName>Microsoft.AspNetCore.OData</AssemblyName>
     <RootNamespace>Microsoft.AspNetCore.OData</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin\$(MSBuildProjectName)\</OutputPath>

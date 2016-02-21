@@ -47,10 +47,10 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
         private static void AddSupportedEncodings(ODataOutputFormatter formatter)
         {
-            formatter.SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false,
-                throwOnInvalidBytes: true));
-            formatter.SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true,
-                throwOnInvalidBytes: true));
+            // TODO: Restore this
+            //formatter.SupportedEncodings.Add(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true));
+            // TODO: Restore this
+            //formatter.SupportedEncodings.Add(new UnicodeEncoding(bigEndian: false, byteOrderMark: true, throwOnInvalidBytes: true));
         }
 
         private static ODataOutputFormatter CreateRawValue(ODataSerializerProvider serializerProvider)

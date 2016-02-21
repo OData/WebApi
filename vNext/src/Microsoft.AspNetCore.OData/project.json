@@ -3,24 +3,30 @@
   "description": "Microsoft.AspNetCore.OData",
 
   "dependencies": {
-    "NETStandard.Library": "1.0.0-*",
     "Microsoft.OData.Core": "6.15.0-beta",
     "Microsoft.OData.Edm": "6.15.0-beta",
     "Microsoft.Spatial": "6.15.0-beta",
-    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-17085",
-    "Microsoft.Extensions.Options": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Mvc": "1.0.0-*",
+    "Microsoft.Extensions.Options": "1.0.0-*",
     "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-*",
-    "System.Linq": "4.1.0-rc3-23819",
-    "System.Linq.Queryable": "4.0.1-rc3-23819",
+    "System.Linq": "4.1.0-*",
+    "System.Linq.Queryable": "4.0.1-*",
     "Microsoft.Framework.NotNullAttribute.Sources": {
-      "version": "1.0.0-rc1-15695",
+      "version": "1.0.0-*",
       "type": "build"
     }
   },
 
   "frameworks": {
+    "dnx451": {
+      "dependencies": {
+      }
+    },
     "dnxcore50": {
-      "imports": "portable-net45+win8"
+      "imports": "portable-net45+win8",
+      "dependencies": {
+        "NETStandard.Library": "1.0.0-*"
+      }
     }
   }
 }

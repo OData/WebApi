@@ -2,7 +2,7 @@
 
 ## This branch of the OData Web API will be maintained to keep the basic vNext sample working with the latest version of ASP.NET Core
 
-## Please do not use this branch if you wish to use a non ASP.NET Core version, see [the master branch](https://github.com/OData/WebApi/issues/628) for that.
+## Please do not use this branch if you wish to use a non ASP.NET Core version, see [the master branch](https://github.com/OData/WebApi/) for that.
 
 ### Introduction
 [OData Web API](http://odata.github.io/WebApi) (i.e., ASP.NET Web API OData) is a server library built upon [ODataLib](https://github.com/OData/odata.net/) and [Web API](http://www.asp.net/web-api).

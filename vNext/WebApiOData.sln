@@ -10,11 +10,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.OData", "src\Microsoft.AspNet.OData\Microsoft.AspNetCore.OData.xproj", "{391207F8-D7ED-4233-BAD9-ABBFF700B71C}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.OData", "src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.xproj", "{391207F8-D7ED-4233-BAD9-ABBFF700B71C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{CB7EBE84-3A72-454A-BDFF-C2A604A98C11}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.OData.Test", "test\Microsoft.AspNet.OData.Test\Microsoft.AspNetCore.OData.Test.xproj", "{0B959ACA-F82B-43C4-946A-39066B4FA8C3}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.OData.Test", "test\Microsoft.AspNetCore.OData.Test\Microsoft.AspNetCore.OData.Test.xproj", "{0B959ACA-F82B-43C4-946A-39066B4FA8C3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{CDB37674-D801-412C-9B1A-2103A114D41B}"
 EndProject

@@ -2,7 +2,7 @@
 layout: post
 title: "4.18 Add NextPageLink and $count for collection property"
 description: ""
-category: "4. OData Features"
+category: "4. OData features"
 ---
 
 In OData WebApi V5.7, it supports to add the NextPageLink and $count for collection property.

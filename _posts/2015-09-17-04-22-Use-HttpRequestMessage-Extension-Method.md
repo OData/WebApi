@@ -2,7 +2,7 @@
 layout: post
 title: "4.22 Use HttpRequestMessage Extension Methods"
 description: ""
-category: "4. OData Features"
+category: "4. OData features"
 ---
 
 HttpRequestMessage provides set of exention methods. For services that don't use LINQ or ODataQueryOptions.ApplyTo(), those extention methods can offer lots of help. 

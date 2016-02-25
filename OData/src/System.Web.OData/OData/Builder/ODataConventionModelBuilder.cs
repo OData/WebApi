@@ -47,6 +47,7 @@ namespace System.Web.OData.Builder
             new MediaTypeAttributeConvention(),
             new AutoExpandAttributeEdmPropertyConvention(),
             new AutoExpandAttributeEdmTypeConvention(),
+            new DataContractAttributeEnumTypeConvention(),
 
             // INavigationSourceConvention's
             new SelfLinksGenerationConvention(),
@@ -227,7 +228,18 @@ namespace System.Web.OData.Builder
 
                 foreach (object member in Enum.GetValues(type))
                 {
-                    enumTypeConfiguration.AddMember((Enum)member);
+                    bool addedExplicitly = enumTypeConfiguration.Members.Any(m => m.Name.Equals(member.ToString()));
+                    EnumMemberConfiguration enumMemberConfiguration = enumTypeConfiguration.AddMember((Enum)member);
+                    enumMemberConfiguration.AddedExplicitly = addedExplicitly;
+                }
+            }
+
+            foreach (IConvention convention in _conventions)
+            {
+                IEdmTypeConvention typeConvention = convention as IEdmTypeConvention;
+                if (typeConvention != null)
+                {
+                    typeConvention.Apply(enumTypeConfiguration, this);
                 }
             }
 

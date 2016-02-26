@@ -4,9 +4,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
+using System.Web.OData.PublicApi;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
@@ -175,6 +177,27 @@ namespace System.Web.OData.Formatter
             Assert.True((bool)result["value"]);
         }
 
+        [Fact]
+        public void Response_Includes_FunctionLinkForFeed_WithAcceptHeader()
+        {
+            // Arrange
+            string editLink = BaseAddress + "odata/FCustomers";
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, editLink);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+
+            // Act
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+            dynamic result = JObject.Parse(responseString);
+            dynamic function = result["#NS.BoundToCollectionFunction"];
+
+            // Assert
+            Assert.NotNull(function);
+            Assert.Equal("http://localhost/odata/FCustomers/NS.BoundToCollectionFunction(p=@p)", (string)function.target);
+            Assert.Equal("BoundToCollectionFunction", (string)function.title);
+        }
+
         private static IEdmModel GetUnTypedEdmModel()
         {
             EdmModel model = new EdmModel();
@@ -256,6 +279,9 @@ namespace System.Web.OData.Formatter
 
             UnboundFunction(container, "UnboundCollectionEntityFunction", "customers", entityCollectionType);
 
+            // bound to collection
+            BoundToCollectionFunction(model, "BoundToCollectionFunction", "p", intType, entityType);
+
             model.SetAnnotationValue<BindableProcedureFinder>(model, new BindableProcedureFinder(model));
             return model;
         }
@@ -270,6 +296,15 @@ namespace System.Web.OData.Formatter
             model.AddElement(boundFunction);
         }
 
+        private static void BoundToCollectionFunction(EdmModel model, string funcName, string paramName, IEdmTypeReference edmType, IEdmEntityTypeReference bindingType)
+        {
+            IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
+            IEdmCollectionTypeReference collectonType = new EdmCollectionTypeReference(new EdmCollectionType(bindingType));
+            EdmFunction boundFunction = new EdmFunction("NS", funcName, returnType, isBound: true, entitySetPathExpression: null, isComposable: false);
+            boundFunction.AddParameter("entityset", collectonType);
+            boundFunction.AddParameter(paramName, edmType);
+            model.AddElement(boundFunction);
+        }
         private static void UnboundFunction(EdmEntityContainer container, string funcName, string paramName, IEdmTypeReference edmType)
         {
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
@@ -283,6 +318,25 @@ namespace System.Web.OData.Formatter
 
     public class FCustomersController : ODataController
     {
+        [EnableQuery]
+        public IHttpActionResult Get()
+        {
+            IEdmModel model = Request.ODataProperties().Model;
+            IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "Customer");
+
+            EdmEntityObject customer = new EdmEntityObject(customerType);
+
+            customer.TrySetPropertyValue("Id", 1);
+            customer.TrySetPropertyValue("Tony", 1);
+
+            EdmEntityObjectCollection customers =
+                new EdmEntityObjectCollection(
+                    new EdmCollectionTypeReference(new EdmCollectionType(customerType.ToEdmTypeReference(false))));
+            customers.Add(customer);
+            return Ok(customers);
+
+        }
+
         [HttpGet]
         [ODataRoute("FCustomers({key})/NS.IntCollectionFunction(intValues={intValues})")]
         [ODataRoute("UnboundIntCollectionFunction(key={key},intValues={intValues})")]

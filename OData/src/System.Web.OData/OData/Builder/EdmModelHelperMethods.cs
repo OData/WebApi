@@ -179,12 +179,12 @@ namespace System.Web.OData.Builder
 
         private static void AddProcedureLinkBuilder(IEdmModel model, IEdmOperation operation, ProcedureConfiguration procedure)
         {
+            ActionConfiguration actionConfiguration = procedure as ActionConfiguration;
+            IEdmAction action = operation as IEdmAction;
+            FunctionConfiguration functionConfiguration = procedure as FunctionConfiguration;
+            IEdmFunction function = operation as IEdmFunction;
             if (procedure.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity)
             {
-                ActionConfiguration actionConfiguration = procedure as ActionConfiguration;
-                IEdmAction action = operation as IEdmAction;
-                FunctionConfiguration functionConfiguration = procedure as FunctionConfiguration;
-                IEdmFunction function = operation as IEdmFunction;
                 if (actionConfiguration != null && actionConfiguration.GetActionLink() != null && action != null)
                 {
                     model.SetActionLinkBuilder(
@@ -196,6 +196,27 @@ namespace System.Web.OData.Builder
                     model.SetFunctionLinkBuilder(
                         function,
                         new FunctionLinkBuilder(functionConfiguration.GetFunctionLink(), functionConfiguration.FollowsConventions));
+                }
+            }
+            else if (procedure.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Collection)
+            {
+                CollectionTypeConfiguration collectionTypeConfiguration =
+                    (CollectionTypeConfiguration)procedure.BindingParameter.TypeConfiguration;
+
+                if (collectionTypeConfiguration.ElementType.Kind == EdmTypeKind.Entity)
+                {
+                    if (actionConfiguration != null && actionConfiguration.GetFeedActionLink() != null && action != null)
+                    {
+                        model.SetActionLinkBuilder(
+                            action,
+                            new ActionLinkBuilder(actionConfiguration.GetFeedActionLink(), actionConfiguration.FollowsConventions));
+                    }
+                    else if (functionConfiguration != null && functionConfiguration.GetFeedFunctionLink() != null && function != null)
+                    {
+                        model.SetFunctionLinkBuilder(
+                            function,
+                            new FunctionLinkBuilder(functionConfiguration.GetFeedFunctionLink(), functionConfiguration.FollowsConventions));
+                    }
                 }
             }
         }
@@ -809,15 +830,20 @@ namespace System.Web.OData.Builder
 
         internal static IEnumerable<IEdmAction> GetAvailableActions(this IEdmModel model, IEdmEntityType entityType)
         {
-            return model.GetAvailableProcedures(entityType).OfType<IEdmAction>();
+            return model.GetAvailableProcedures(entityType, false).OfType<IEdmAction>();
         }
 
         internal static IEnumerable<IEdmFunction> GetAvailableFunctions(this IEdmModel model, IEdmEntityType entityType)
         {
-            return model.GetAvailableProcedures(entityType).OfType<IEdmFunction>();
+            return model.GetAvailableProcedures(entityType, false).OfType<IEdmFunction>();
         }
 
-        internal static IEnumerable<IEdmOperation> GetAvailableProcedures(this IEdmModel model, IEdmEntityType entityType)
+        internal static IEnumerable<IEdmOperation> GetAvailableOperationsBoundToCollection(this IEdmModel model, IEdmEntityType entityType)
+        {
+            return model.GetAvailableProcedures(entityType, true);
+        }
+
+        internal static IEnumerable<IEdmOperation> GetAvailableProcedures(this IEdmModel model, IEdmEntityType entityType, bool boundToCollection = false)
         {
             if (model == null)
             {
@@ -836,7 +862,14 @@ namespace System.Web.OData.Builder
                 model.SetAnnotationValue(model, annotation);
             }
 
-            return annotation.FindProcedures(entityType);
+            if (boundToCollection)
+            {
+                return annotation.FindProceduresBoundToCollection(entityType);
+            }
+            else
+            {
+                return annotation.FindProcedures(entityType);
+            }
         }
     }
 }

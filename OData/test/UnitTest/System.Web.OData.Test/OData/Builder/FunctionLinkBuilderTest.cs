@@ -5,18 +5,18 @@ using Microsoft.TestCommon;
 
 namespace System.Web.OData.Builder
 {
-    public class ActionLinkBuilderTests
+    public class FunctionLinkBuilderTests
     {
         [Fact]
         public void Ctor_ThrowsArgumentNull_EntityLinkFactory()
         {
-            Assert.ThrowsArgumentNull(() => new ActionLinkBuilder((Func<EntityInstanceContext, Uri>)null, true), "linkFactory");
+            Assert.ThrowsArgumentNull(() => new FunctionLinkBuilder((Func<EntityInstanceContext, Uri>)null, true), "linkFactory");
         }
 
         [Fact]
         public void Ctor_ThrowsArgumentNull_FeedLinkFactory()
         {
-            Assert.ThrowsArgumentNull(() => new ActionLinkBuilder((Func<FeedContext, Uri>)null, true), "linkFactory");
+            Assert.ThrowsArgumentNull(() => new FunctionLinkBuilder((Func<FeedContext, Uri>)null, true), "linkFactory");
         }
 
         [Theory]
@@ -25,7 +25,7 @@ namespace System.Web.OData.Builder
         public void FollowsConventions_IsSpecifiedValue(bool value)
         {
             // Arrange
-            ActionLinkBuilder builder = new ActionLinkBuilder((EntityInstanceContext a) => { throw new NotImplementedException(); },
+            FunctionLinkBuilder builder = new FunctionLinkBuilder((EntityInstanceContext a) => { throw new NotImplementedException(); },
                 followsConventions: value);
 
             // Act
@@ -36,17 +36,17 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void BuildActionLink_ForEntity_ReturnsLink()
+        public void BuildFunctionLink_ForEntity_ReturnsLink()
         {
             // Arrange
-            ActionLinkBuilder builder = new ActionLinkBuilder((EntityInstanceContext a) => new Uri("http://localhost:123"),
+            FunctionLinkBuilder builder = new FunctionLinkBuilder((EntityInstanceContext a) => new Uri("http://localhost:123"),
                 followsConventions: true);
             EntityInstanceContext entityContext = new EntityInstanceContext();
             FeedContext feedContext = new FeedContext();
 
             // Act
-            Uri link = builder.BuildActionLink(entityContext);
-            Uri feedLink = builder.BuildActionLink(feedContext);
+            Uri link = builder.BuildFunctionLink(entityContext);
+            Uri feedLink = builder.BuildFunctionLink(feedContext);
 
             // Assert
             Assert.NotNull(link);
@@ -56,17 +56,17 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void BuildActionLink_ForFeed_ReturnsLink()
+        public void BuildFunctionLink_ForFeed_ReturnsLink()
         {
             // Arrange
-            ActionLinkBuilder builder = new ActionLinkBuilder((FeedContext a) => new Uri("http://localhost:456"),
+            FunctionLinkBuilder builder = new FunctionLinkBuilder((FeedContext a) => new Uri("http://localhost:456"),
                 followsConventions: true);
             EntityInstanceContext entityContext = new EntityInstanceContext();
             FeedContext feedContext = new FeedContext();
 
             // Act
-            Uri link = builder.BuildActionLink(entityContext);
-            Uri feedLink = builder.BuildActionLink(feedContext);
+            Uri link = builder.BuildFunctionLink(entityContext);
+            Uri feedLink = builder.BuildFunctionLink(feedContext);
 
             // Assert
             Assert.Null(link);

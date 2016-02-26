@@ -5,6 +5,8 @@ using System.Collections;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
+using System.Web.Http;
+using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization.Models;
@@ -455,6 +457,150 @@ namespace System.Web.OData.Formatter.Serialization
 
             // Assert
             Assert.Equal("http://navigation-link/?$skip=1", feed.NextPageLink.AbsoluteUri);
+        }
+
+        [Fact]
+        public void CreateODataFeed_SetsODataOperations()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            IEdmCollectionTypeReference customersType = new EdmCollectionTypeReference(new EdmCollectionType(model.Customer.AsReference()));
+            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataSerializerContext context = new ODataSerializerContext
+            {
+                NavigationSource = model.Customers,
+                Request = new HttpRequestMessage(),
+                Model = model.Model,
+                MetadataLevel = ODataMetadataLevel.FullMetadata,
+                Url = CreateMetadataLinkFactory("http://IgnoreMetadataPath")
+            };
+
+            var result = new object[0];
+
+            // Act
+            ODataFeed feed = serializer.CreateODataFeed(result, customersType, context);
+
+            // Assert
+            Assert.Equal(1, feed.Actions.Count());
+            Assert.Equal(2, feed.Functions.Count());
+        }
+
+        [Theory]
+        [InlineData(ODataMetadataLevel.MinimalMetadata)]
+        [InlineData(ODataMetadataLevel.NoMetadata)]
+        public void CreateODataOperation_OmitsOperations_WhenNonFullMetadata(ODataMetadataLevel metadataLevel)
+        {
+            // Arrange
+            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+
+            IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
+            IEdmFunction function = new EdmFunction("NS", "Function", returnType, isBound: true, entitySetPathExpression: null, isComposable: false);
+
+            FeedContext feedContext = new FeedContext();
+            ODataSerializerContext serializerContext = new ODataSerializerContext
+            {
+                MetadataLevel = metadataLevel
+            };
+            // Act
+
+            ODataOperation operation = serializer.CreateODataOperation(function, feedContext, serializerContext);
+
+            // Assert
+            Assert.Null(operation);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CreateODataOperations_CreateOperations(bool followConventions)
+        {
+            // Arrange
+            // Arrange
+            string expectedTarget = "aa://Target";
+            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<FeedCustomer>("Customers");
+            var function = builder.EntityType<FeedCustomer>().Collection.Function("MyFunction").Returns<int>();
+            function.HasFeedFunctionLink(a => new Uri(expectedTarget), followConventions);
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+            IEdmFunction edmFunction = model.SchemaElements.OfType<IEdmFunction>().First(f => f.Name == "MyFunction");
+            string expectedMetadataPrefix = "http://Metadata";
+
+            UrlHelper url = CreateMetadataLinkFactory(expectedMetadataPrefix);
+            HttpRequestMessage request = new HttpRequestMessage();
+            FeedContext feedContext = new FeedContext
+            {
+                EntitySetBase = customers,
+                Request = request,
+                Url = url
+            };
+
+            ODataSerializerContext serializerContext = new ODataSerializerContext
+            {
+                NavigationSource = customers,
+                Request = request,
+                Model = model,
+                MetadataLevel = ODataMetadataLevel.FullMetadata,
+                Url = url
+            };
+
+            // Act
+            ODataOperation actualOperation = serializer.CreateODataOperation(edmFunction, feedContext, serializerContext);
+
+            // Assert
+            Assert.NotNull(actualOperation);
+            string expectedMetadata = expectedMetadataPrefix + "#Default.MyFunction";
+            ODataOperation expectedFunction = new ODataFunction
+            {
+                Metadata = new Uri(expectedMetadata),
+                Target = new Uri(expectedTarget),
+                Title = "MyFunction"
+            };
+
+            AssertEqual(expectedFunction, actualOperation);
+        }
+
+        private static void AssertEqual(ODataOperation expected, ODataOperation actual)
+        {
+            if (expected == null)
+            {
+                Assert.Null(actual);
+                return;
+            }
+
+            Assert.NotNull(actual);
+            AssertEqual(expected.Metadata, actual.Metadata);
+            AssertEqual(expected.Target, actual.Target);
+            Assert.Equal(expected.Title, actual.Title);
+        }
+
+        private static void AssertEqual(Uri expected, Uri actual)
+        {
+            if (expected == null)
+            {
+                Assert.Null(actual);
+                return;
+            }
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected.AbsoluteUri, actual.AbsoluteUri);
+        }
+
+        private static UrlHelper CreateMetadataLinkFactory(string metadataPath)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, metadataPath);
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Routes.MapFakeODataRoute();
+            request.SetConfiguration(configuration);
+            request.SetFakeODataRouteName();
+            return new UrlHelper(request);
+        }
+
+        public class FeedCustomer
+        {
+            public int Id { get; set; }
         }
     }
 }

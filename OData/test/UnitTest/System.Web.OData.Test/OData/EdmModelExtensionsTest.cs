@@ -82,13 +82,38 @@ namespace System.Web.OData
         }
 
         [Fact]
+        public void GetActionLinkBuilder_ThrowsArgumentNull_Action()
+        {
+            // Arrange
+            IEdmModel model = new EdmModel();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => model.GetActionLinkBuilder(action: null), "action");
+        }
+
+        [Fact]
         public void GetActionLinkBuilder_After_SetActionLinkBuilder()
         {
             // Arrange
             IEdmModel model = new EdmModel();
-            IEdmEntityContainer container = new EdmEntityContainer("NS", "Container");
             IEdmAction action = new Mock<IEdmAction>().Object;
-            ActionLinkBuilder builder = new ActionLinkBuilder(_=> null, followsConventions: false);
+            ActionLinkBuilder builder = new ActionLinkBuilder((EntityInstanceContext _)=> null, followsConventions: false);
+
+            // Act
+            model.SetActionLinkBuilder(action, builder);
+            var result = model.GetActionLinkBuilder(action);
+
+            // Assert
+            Assert.Same(builder, result);
+        }
+
+        [Fact]
+        public void GetActionLinkBuilderForFeed_After_SetActionLinkBuilder()
+        {
+            // Arrange
+            IEdmModel model = new EdmModel();
+            IEdmAction action = new Mock<IEdmAction>().Object;
+            ActionLinkBuilder builder = new ActionLinkBuilder((FeedContext _) => null, followsConventions: false);
 
             // Act
             model.SetActionLinkBuilder(action, builder);
@@ -103,11 +128,134 @@ namespace System.Web.OData
         {
             // Arrange
             IEdmModel model = new EdmModel();
+            EdmAction action = new EdmAction("NS", "Action", returnType: null);
+            action.AddParameter("entity", new EdmEntityTypeReference(new EdmEntityType("NS", "Customer"), false));
+
+            // Act
+            ActionLinkBuilder builder = model.GetActionLinkBuilder(action);
+
+            // Assert
+            Assert.NotNull(builder);
+            Assert.NotNull(builder.LinkFactory);
+            Assert.IsType<Func<EntityInstanceContext, Uri>>(builder.LinkFactory);
+            Assert.Null(builder.FeedLinkFactory);
+        }
+
+        [Fact]
+        public void GetActionLinkBuilderForFeed_ReturnsDefaultActionLinkBuilder_IfNotSet()
+        {
+            // Arrange
+            IEdmModel model = new EdmModel();
             IEdmEntityContainer container = new EdmEntityContainer("NS", "Container");
-            IEdmAction action = new EdmAction("NS", "Action", returnType: null);
+            EdmAction action = new EdmAction("NS", "Action", returnType: null);
+            action.AddParameter("entityset",
+                new EdmCollectionTypeReference(
+                    new EdmCollectionType(new EdmEntityTypeReference(new EdmEntityType("NS", "Customer"), false))));
+
+            // Act
+            ActionLinkBuilder builder = model.GetActionLinkBuilder(action);
+
+            // Assert
+            Assert.NotNull(builder);
+            Assert.Null(builder.LinkFactory);
+
+            Assert.NotNull(builder.FeedLinkFactory);
+            Assert.IsType<Func<FeedContext, Uri>>(builder.FeedLinkFactory);
+        }
+
+        [Fact]
+        public void GetFunctionLinkBuilder_ThrowsArgumentNull_Model()
+        {
+            // Arrange
+            IEdmModel model = null;
+            IEdmFunction function = new Mock<IEdmFunction>().Object;
 
             // Act & Assert
-            Assert.NotNull(model.GetActionLinkBuilder(action));
+            Assert.ThrowsArgumentNull(() => model.GetFunctionLinkBuilder(function), "model");
+        }
+
+        [Fact]
+        public void GetFunctionLinkBuilder_ThrowsArgumentNull_Function()
+        {
+            // Arrange
+            IEdmModel model = new EdmModel();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => model.GetFunctionLinkBuilder(function: null), "function");
+        }
+
+        [Fact]
+        public void GetFunctionLinkBuilder_After_SetActionLinkBuilder()
+        {
+            // Arrange
+            IEdmModel model = new EdmModel();
+            IEdmFunction function = new Mock<IEdmFunction>().Object;
+            FunctionLinkBuilder builder = new FunctionLinkBuilder((EntityInstanceContext _) => null, followsConventions: false);
+
+            // Act
+            model.SetFunctionLinkBuilder(function, builder);
+            var result = model.GetFunctionLinkBuilder(function);
+
+            // Assert
+            Assert.Same(builder, result);
+        }
+
+        [Fact]
+        public void GetFunctionLinkBuilderForFeed_After_SetActionLinkBuilder()
+        {
+            // Arrange
+            IEdmModel model = new EdmModel();
+            IEdmFunction function = new Mock<IEdmFunction>().Object;
+            FunctionLinkBuilder builder = new FunctionLinkBuilder((FeedContext _) => null, followsConventions: false);
+
+            // Act
+            model.SetFunctionLinkBuilder(function, builder);
+            var result = model.GetFunctionLinkBuilder(function);
+
+            // Assert
+            Assert.Same(builder, result);
+        }
+
+        [Fact]
+        public void GetFunctionLinkBuilder_ReturnsDefaultActionLinkBuilder_IfNotSet()
+        {
+            // Arrange
+            IEdmModel model = new EdmModel();
+            IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
+            EdmFunction function = new EdmFunction("NS", "Function", returnType);
+            function.AddParameter("entity", new EdmEntityTypeReference(new EdmEntityType("NS", "Customer"), false));
+
+            // Act
+            FunctionLinkBuilder builder = model.GetFunctionLinkBuilder(function);
+
+            // Assert
+            Assert.NotNull(builder);
+            Assert.NotNull(builder.LinkFactory);
+            Assert.IsType<Func<EntityInstanceContext, Uri>>(builder.LinkFactory);
+
+            Assert.Null(builder.FeedLinkFactory);
+        }
+
+        [Fact]
+        public void GetFunctionLinkBuilderForFeed_ReturnsDefaultActionLinkBuilder_IfNotSet()
+        {
+            // Arrange
+            IEdmModel model = new EdmModel();
+            IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
+            EdmFunction function = new EdmFunction("NS", "Function", returnType);
+            function.AddParameter("entityset",
+                new EdmCollectionTypeReference(
+                    new EdmCollectionType(new EdmEntityTypeReference(new EdmEntityType("NS", "Customer"), false))));
+
+            // Act
+            FunctionLinkBuilder builder = model.GetFunctionLinkBuilder(function);
+
+            // Assert
+            Assert.NotNull(builder);
+            Assert.Null(builder.LinkFactory);
+
+            Assert.NotNull(builder.FeedLinkFactory);
+            Assert.IsType<Func<FeedContext, Uri>>(builder.FeedLinkFactory);
         }
 
         [Fact]

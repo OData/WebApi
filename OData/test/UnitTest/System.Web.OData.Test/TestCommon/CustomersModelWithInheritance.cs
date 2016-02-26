@@ -148,6 +148,17 @@ namespace System.Web.OData.TestCommon
             specialUpgrade.AddParameter("entity", new EdmEntityTypeReference(specialCustomer, false));
             model.AddElement(specialUpgrade);
 
+            // actions bound to collection
+            EdmAction upgradeAll = new EdmAction("NS", "UpgradeAll", returnType: null, isBound: true, entitySetPathExpression: null);
+            upgradeAll.AddParameter("entityset",
+                new EdmCollectionTypeReference(new EdmCollectionType(new EdmEntityTypeReference(customer, false))));
+            model.AddElement(upgradeAll);
+
+            EdmAction upgradeSpecialAll = new EdmAction("NS", "UpgradeSpecialAll", returnType: null, isBound: true, entitySetPathExpression: null);
+            upgradeSpecialAll.AddParameter("entityset",
+                new EdmCollectionTypeReference(new EdmCollectionType(new EdmEntityTypeReference(specialCustomer, false))));
+            model.AddElement(upgradeSpecialAll);
+
             // functions
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
             IEdmTypeReference stringType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: false);
@@ -269,6 +280,21 @@ namespace System.Web.OData.TestCommon
             getOrder.AddParameter("entity", new EdmEntityTypeReference(customer, false));
             getOrder.AddParameter("orderId", intType);
             model.AddElement(getOrder);
+
+            // functions bound to collection
+            EdmFunction isAllUpgraded = new EdmFunction("NS", "IsAllUpgraded", returnType, isBound: true,
+                entitySetPathExpression: null, isComposable: false);
+            isAllUpgraded.AddParameter("entityset",
+                new EdmCollectionTypeReference(new EdmCollectionType(new EdmEntityTypeReference(customer, false))));
+            isAllUpgraded.AddParameter("param", intType);
+            model.AddElement(isAllUpgraded);
+
+            EdmFunction isSpecialAllUpgraded = new EdmFunction("NS", "IsSpecialAllUpgraded", returnType, isBound: true,
+                entitySetPathExpression: null, isComposable: false);
+            isSpecialAllUpgraded.AddParameter("entityset",
+                new EdmCollectionTypeReference(new EdmCollectionType(new EdmEntityTypeReference(specialCustomer, false))));
+            isSpecialAllUpgraded.AddParameter("param", intType);
+            model.AddElement(isSpecialAllUpgraded);
 
             // navigation properties
             EdmNavigationProperty ordersNavProp = customer.AddUnidirectionalNavigation(

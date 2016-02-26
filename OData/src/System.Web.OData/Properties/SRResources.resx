@@ -411,6 +411,15 @@
   <data name="HasActionLinkRequiresBindToEntity" xml:space="preserve">
     <value>To register an action link factory, actions must be bindable to a single entity. Action '{0}' does not meet this requirement.</value>
   </data>
+  <data name="HasActionLinkRequiresBindToCollectionOfEntity" xml:space="preserve">
+    <value>To register an action link factory, actions must be bindable to the collection of entity. Action '{0}' does not meet this requirement.</value>
+  </data>
+  <data name="HasFunctionLinkRequiresBindToEntity" xml:space="preserve">
+    <value>To register a function link factory, functions must be bindable to a single entity. Function '{0}' does not meet this requirement.</value>
+  </data>
+  <data name="HasFunctionLinkRequiresBindToCollectionOfEntity" xml:space="preserve">
+    <value>To register a function link factory, functions must be bindable to the collection of entity. Function '{0}' does not meet this requirement.</value>
+  </data>
   <data name="NavigationPropertyNotInHierarchy" xml:space="preserve">
     <value>The declaring entity type '{0}' of the given navigation property is not a part of the entity type '{1}' hierarchy of the entity set or singleton '{2}'.</value>
   </data>
@@ -592,6 +601,9 @@
   <data name="ActionNotBoundToEntity" xml:space="preserve">
     <value>The action '{0}' is not bound to an entity. Only actions that are bound to entities can have action links.</value>
   </data>
+  <data name="ActionNotBoundToCollectionOfEntity" xml:space="preserve">
+    <value>The action '{0}' is not bound to the collection of entity. Only actions that are bound to entities can have action links.</value>
+  </data>
   <data name="TypeMustBeEntity" xml:space="preserve">
     <value>{0} is not an entity type. Only entity types are supported.</value>
   </data>
@@ -656,7 +668,10 @@
     <value>The OData route prefix '{0}' on the controller '{1}' starts with a '/'. Route prefixes cannot start with a '/'.</value>
   </data>
   <data name="FunctionNotBoundToEntity" xml:space="preserve">
-    <value>The function '{0}' is not bound to an entity. Only actions that are bound to entities can have function links.</value>
+    <value>The function '{0}' is not bound to an entity. Only functions that are bound to entities can have function links.</value>
+  </data>
+  <data name="FunctionNotBoundToCollectionOfEntity" xml:space="preserve">
+    <value>The function '{0}' is not bound to the collection of entity. Only functions that are bound to entities can have function links.</value>
   </data>
   <data name="MoreThanOneOverloadActionBoundToSameTypeFound" xml:space="preserve">
     <value>Found more than one action with name '{0}' bound to the same type '{1}'. Each bound action must have a different binding type or name.</value>

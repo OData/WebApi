@@ -15,14 +15,31 @@ namespace System.Web.OData.Builder.Conventions
         {
             FunctionConfiguration function = configuration as FunctionConfiguration;
 
+            if (function == null || !function.IsBindable)
+            {
+                return;
+            }
+
             // You only need to create links for bindable functions that bind to a single entity.
-            if (function != null && function.IsBindable && function.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity && function.GetFunctionLink() == null)
+            if (function.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity && function.GetFunctionLink() == null)
             {
                 string bindingParamterType = function.BindingParameter.TypeConfiguration.FullName;
 
                 function.HasFunctionLink(entityContext => 
-                    entityContext.GenerateFunctionLink(bindingParamterType, function.Name, function.Parameters.Select(p => p.Name)), 
+                    entityContext.GenerateFunctionLink(bindingParamterType, function.FullyQualifiedName, function.Parameters.Select(p => p.Name)), 
                     followsConventions: true);
+            }
+            else if (function.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Collection && function.GetFeedFunctionLink() == null)
+            {
+                if (((CollectionTypeConfiguration)function.BindingParameter.TypeConfiguration).ElementType.Kind ==
+                    EdmTypeKind.Entity)
+                {
+                    string bindingParamterType = function.BindingParameter.TypeConfiguration.FullName;
+                    function.HasFeedFunctionLink(
+                        feedContext =>
+                            feedContext.GenerateFunctionLink(bindingParamterType, function.FullyQualifiedName, function.Parameters.Select(p => p.Name)),
+                        followsConventions: true);
+                }
             }
         }
     }

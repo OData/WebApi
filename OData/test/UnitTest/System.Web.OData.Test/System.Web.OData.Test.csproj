@@ -102,8 +102,10 @@
     <Compile Include="OData\Batch\ChangeSetResponseItemTest.cs" />
     <Compile Include="OData\Batch\ChangeSetRequestItemTest.cs" />
     <Compile Include="OData\Batch\DefaultODataBatchHandlerTest.cs" />
+    <Compile Include="OData\Builder\FunctionLinkBuilderTest.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfigurationTest.cs" />
     <Compile Include="OData\Builder\ContainmentPathBuilderTest.cs" />
+    <Compile Include="OData\Builder\Conventions\FunctionLinkGenerationConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ActionOnDeleteAttributeConventionTest.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ComplexTypeAttributeConventionTests.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ConcurrencyCheckAttributeEdmPropertyConventionTest.cs" />
@@ -190,6 +192,7 @@
     <Compile Include="OData\ODataSwaggerConverterTest.cs" />
     <Compile Include="OData\ODataSwaggerUtilitiesTest.cs" />
     <Compile Include="OData\ODataUriResolverExtensionTest.cs" />
+    <Compile Include="OData\FunctionActionAdvertisedTest.cs" />
     <Compile Include="OData\OpenEntityTypeTest.cs" />
     <Compile Include="OData\PerRequestContentNegotiatorTest.cs" />
     <Compile Include="OData\ODataRoutingAttributeTest.cs" />

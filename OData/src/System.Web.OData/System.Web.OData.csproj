@@ -75,6 +75,7 @@
     <Compile Include="Extensions\HttpErrorExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
+    <Compile Include="OData\Builder\ProcedureLinkBuilder.cs" />
     <Compile Include="OData\Builder\AutoExpandAttribute.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AutoExpandAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AutoExpandAttributeEdmPropertyConvention.cs" />
@@ -477,7 +478,6 @@
     <EmbeddedResource Include="Properties\SRResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
-      <LastGenOutput>SRResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Compile Include="..\Common\CommonWebApiResources.Designer.cs">
       <Link>Properties\CommonWebApiResources.Designer.cs</Link>

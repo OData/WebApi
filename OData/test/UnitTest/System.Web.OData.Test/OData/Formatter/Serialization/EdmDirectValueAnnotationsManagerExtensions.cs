@@ -17,6 +17,12 @@ namespace System.Web.OData.Formatter.Serialization
             SetCoreAnnotation<ActionLinkBuilder>(manager, element, value);
         }
 
+        public static void SetFunctionLinkBuilder(this IEdmDirectValueAnnotationsManager manager, IEdmElement element,
+            FunctionLinkBuilder value)
+        {
+            SetCoreAnnotation<FunctionLinkBuilder>(manager, element, value);
+        }
+
         public static void SetIsAlwaysBindable(this IEdmDirectValueAnnotationsManager manager, IEdmOperation operation)
         {
             SetODataAnnotation(manager, operation, "IsAlwaysBindable", "true");

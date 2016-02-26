@@ -162,6 +162,34 @@ namespace System.Web.OData.Builder
             Assert.Equal(value, actionLinkBuilder.FollowsConventions);
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void FunctionLink_PreservesFollowsConventions(bool value)
+        {
+            // Arrange
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            FunctionConfiguration configuration = new FunctionConfiguration(builder, "IgnoreFunction");
+            configuration.Returns<int>();
+            Mock<IEdmTypeConfiguration> bindingParameterTypeMock = new Mock<IEdmTypeConfiguration>();
+            bindingParameterTypeMock.Setup(o => o.Kind).Returns(EdmTypeKind.Entity);
+            Type entityType = typeof(object);
+            bindingParameterTypeMock.Setup(o => o.ClrType).Returns(entityType);
+            configuration.SetBindingParameter("IgnoreParameter", bindingParameterTypeMock.Object);
+            configuration.HasFunctionLink((a) => { throw new NotImplementedException(); }, followsConventions: value);
+            builder.AddProcedure(configuration);
+            builder.AddEntityType(entityType);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            var function = Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
+            FunctionLinkBuilder functionLinkBuilder = model.GetFunctionLinkBuilder(function);
+            Assert.NotNull(functionLinkBuilder);
+            Assert.Equal(value, functionLinkBuilder.FollowsConventions);
+        }
+
         [Fact]
         public void GetEdmModel_PropertyWithETag_IsConcurrencyToken()
         {

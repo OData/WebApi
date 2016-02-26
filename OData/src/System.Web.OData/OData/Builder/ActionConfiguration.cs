@@ -48,11 +48,13 @@ namespace System.Web.OData.Builder
             {
                 throw new ArgumentNullException("actionLinkFactory");
             }
+
             if (!IsBindable || BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Entity)
             {
                 throw Error.InvalidOperation(SRResources.HasActionLinkRequiresBindToEntity, Name);
             }
-            LinkFactory = actionLinkFactory;
+
+            ProcedureLinkBuilder = new ActionLinkBuilder(actionLinkFactory, followsConventions);
             FollowsConventions = followsConventions;
             return this;
         }
@@ -63,7 +65,48 @@ namespace System.Web.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
         public Func<EntityInstanceContext, Uri> GetActionLink()
         {
-            return LinkFactory;
+            if (ProcedureLinkBuilder == null)
+            {
+                return null;
+            }
+
+            return ProcedureLinkBuilder.LinkFactory;
+        }
+
+        /// <summary>
+        /// Register a factory that creates feed actions links.
+        /// </summary>
+        public ActionConfiguration HasFeedActionLink(Func<FeedContext, Uri> actionLinkFactory, bool followsConventions)
+        {
+            if (actionLinkFactory == null)
+            {
+                throw new ArgumentNullException("actionLinkFactory");
+            }
+
+            if (!IsBindable ||
+                BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Collection ||
+                ((CollectionTypeConfiguration)BindingParameter.TypeConfiguration).ElementType.Kind != EdmTypeKind.Entity)
+            {
+                throw Error.InvalidOperation(SRResources.HasActionLinkRequiresBindToCollectionOfEntity, Name);
+            }
+
+            ProcedureLinkBuilder = new ActionLinkBuilder(actionLinkFactory, followsConventions);
+            FollowsConventions = followsConventions;
+            return this;
+        }
+
+        /// <summary>
+        /// Retrieves the currently registered feed action link factory.
+        /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
+        public Func<FeedContext, Uri> GetFeedActionLink()
+        {
+            if (ProcedureLinkBuilder == null)
+            {
+                return null;
+            }
+
+            return ProcedureLinkBuilder.FeedLinkFactory;
         }
 
         /// <summary>

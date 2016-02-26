@@ -14,11 +14,36 @@ namespace System.Web.OData.Builder.Conventions
         {
             ActionConfiguration action = configuration as ActionConfiguration;
 
-            // You only need to create links for bindable actions that bind to a single entity.
-            if (action != null && action.IsBindable && action.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity && action.GetActionLink() == null)
+            if (action == null || !action.IsBindable)
             {
-                string bindingParamterType = action.BindingParameter.TypeConfiguration.FullName;
-                action.HasActionLink(entityContext => entityContext.GenerateActionLink(bindingParamterType, action.FullyQualifiedName), followsConventions: true);
+                return;
+            }
+
+            // You only need to create links for bindable actions that bind to a single entity.
+            if (action.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity && action.GetActionLink() == null)
+            {
+                if (action.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity &&
+                    action.GetActionLink() == null)
+                {
+                    string bindingParameterType = action.BindingParameter.TypeConfiguration.FullName;
+                    action.HasActionLink(
+                        entityContext =>
+                            entityContext.GenerateActionLink(bindingParameterType, action.FullyQualifiedName),
+                        followsConventions: true);
+                }
+            }
+            else if (action.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Collection &&
+                     action.GetFeedActionLink() == null)
+            {
+                if (((CollectionTypeConfiguration)action.BindingParameter.TypeConfiguration).ElementType.Kind ==
+                    EdmTypeKind.Entity)
+                {
+                    string bindingParameterType = action.BindingParameter.TypeConfiguration.FullName;
+                    action.HasFeedActionLink(
+                        feedContext =>
+                            feedContext.GenerateActionLink(bindingParameterType, action.FullyQualifiedName),
+                        followsConventions: true);
+                }
             }
         }
     }

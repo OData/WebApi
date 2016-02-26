@@ -3,8 +3,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
+using System.Web.Http;
+using System.Web.Http.Routing;
 using System.Web.OData.Builder.TestModels;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
@@ -488,6 +492,64 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void HasFunctionLink_ThrowsException_OnNonBindableActions()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("NoBindableFunction");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => function.HasFunctionLink(ctx => new Uri("http://any"), followsConventions: false),
+                "To register a function link factory, functions must be bindable to a single entity. " +
+                "Function 'NoBindableFunction' does not meet this requirement.");
+        }
+
+        [Fact]
+        public void HasFunctionLink_ThrowsException_OnNoBoundToEntityFunctions()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
+            FunctionConfiguration function = customer.Collection.Function("CollectionFunction");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => function.HasFunctionLink(ctx => new Uri("http://any"), followsConventions: false),
+                "To register a function link factory, functions must be bindable to a single entity. " +
+                "Function 'CollectionFunction' does not meet this requirement.");
+        }
+
+        [Fact]
+        public void HasFeedFunctionLink_ThrowsException_OnNonBindableFunctions()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            FunctionConfiguration function = builder.Function("NoBindableFunction");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => function.HasFeedFunctionLink(ctx => new Uri("http://any"), followsConventions: false),
+                "To register a function link factory, functions must be bindable to the collection of entity. " +
+                "Function 'NoBindableFunction' does not meet this requirement.");
+        }
+
+        [Fact]
+        public void HasFeedFunctionLink_ThrowsException_OnNoBoundToCollectionEntityFunctions()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
+            FunctionConfiguration function = customer.Function("NonCollectionFunction");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => function.HasFeedFunctionLink(ctx => new Uri("http://any"), followsConventions: false),
+                "To register a function link factory, functions must be bindable to the collection of entity. " +
+                "Function 'NonCollectionFunction' does not meet this requirement.");
+        }
+
+        [Fact]
         public void CanManuallyConfigureFunctionLinkFactory()
         {
             // Arrange
@@ -513,6 +575,105 @@ namespace System.Web.OData.Builder
 
             //Assert
             Assert.Equal(expectedUri, reward.GetFunctionLink()(context));
+            Assert.NotNull(functionLinkBuilder);
+            Assert.Equal(expectedUri, functionLinkBuilder.BuildFunctionLink(context));
+        }
+
+        [Fact]
+        public void CanManuallyConfigureFeedFunctionLinkFactory()
+        {
+            // Arrange
+            Uri expectedUri = new Uri("http://localhost/service/Customers/Reward");
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.EntitySet<Customer>("Customers").EntityType;
+            customer.HasKey(c => c.CustomerId);
+            customer.Property(c => c.Name);
+            FunctionConfiguration reward = customer.Collection.Function("Reward").Returns<int>();
+            reward.HasFeedFunctionLink(ctx => expectedUri, followsConventions: false);
+            IEdmModel model = builder.GetEdmModel();
+
+            // Act
+            IEdmFunction rewardFuntion = Assert.Single(model.SchemaElements.OfType<IEdmFunction>()); // Guard
+            FunctionLinkBuilder functionLinkBuilder = model.GetAnnotationValue<FunctionLinkBuilder>(rewardFuntion);
+            FeedContext context = new FeedContext();
+
+            //Assert
+            Assert.Equal(expectedUri, reward.GetFeedFunctionLink()(context));
+            Assert.NotNull(functionLinkBuilder);
+            Assert.Equal(expectedUri, functionLinkBuilder.BuildFunctionLink(context));
+        }
+
+        [Fact]
+        public void WhenFunctionLinksNotManuallyConfigured_ConventionBasedBuilderUsesConventions()
+        {
+            // Arrange
+            string uriTemplate = "http://server/Movies({0})/Default.Watch(param=@param)";
+            Uri expectedUri = new Uri(string.Format(uriTemplate, 1));
+            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            FunctionConfiguration watch = movie.Function("Watch").Returns<int>();
+            watch.Parameter<string>("param");
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://server/Movies");
+            HttpConfiguration configuration = new HttpConfiguration();
+            string routeName = "Route";
+            configuration.MapODataServiceRoute(routeName, null, model);
+            request.SetConfiguration(configuration);
+            request.ODataProperties().RouteName = routeName;
+            UrlHelper urlHelper = new UrlHelper(request);
+
+            // Act
+            IEdmEntityType movieType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault();
+            IEdmEntityContainer container = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault();
+            IEdmFunction watchFunction = Assert.Single(model.SchemaElements.OfType<IEdmFunction>()); // Guard
+            IEdmEntitySet entitySet = container.EntitySets().SingleOrDefault();
+            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model, NavigationSource = entitySet, Url = urlHelper };
+
+            EntityInstanceContext context = new EntityInstanceContext(serializerContext, movieType.AsReference(), new Movie { ID = 1, Name = "Avatar" });
+            FunctionLinkBuilder functionLinkBuilder = model.GetAnnotationValue<FunctionLinkBuilder>(watchFunction);
+
+            //Assert
+            Assert.Equal(expectedUri, watch.GetFunctionLink()(context));
+            Assert.NotNull(functionLinkBuilder);
+            Assert.Equal(expectedUri, functionLinkBuilder.BuildFunctionLink(context));
+        }
+
+        [Fact]
+        public void WhenFeedActionLinksNotManuallyConfigured_ConventionBasedBuilderUsesConventions()
+        {
+            // Arrange
+            Uri expectedUri = new Uri("http://server/Movies/Default.Watch(param=@param)");
+            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            FunctionConfiguration watch = movie.Collection.Function("Watch").Returns<int>(); // function bound to collection
+            watch.Parameter<string>("param");
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://server/Movies");
+            HttpConfiguration configuration = new HttpConfiguration();
+            string routeName = "Route";
+            configuration.MapODataServiceRoute(routeName, null, model);
+            request.SetConfiguration(configuration);
+            request.ODataProperties().RouteName = routeName;
+            UrlHelper urlHelper = new UrlHelper(request);
+
+            // Act
+            IEdmEntityContainer container = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault();
+            IEdmFunction watchFunction = Assert.Single(model.SchemaElements.OfType<IEdmFunction>()); // Guard
+            IEdmEntitySet entitySet = container.EntitySets().SingleOrDefault();
+
+            FeedContext context = new FeedContext
+            {
+                EntitySetBase = entitySet,
+                Url = urlHelper,
+                Request = request
+            };
+
+            FunctionLinkBuilder functionLinkBuilder = model.GetAnnotationValue<FunctionLinkBuilder>(watchFunction);
+
+            //Assert
+            Assert.Equal(expectedUri, watch.GetFeedFunctionLink()(context));
             Assert.NotNull(functionLinkBuilder);
             Assert.Equal(expectedUri, functionLinkBuilder.BuildFunctionLink(context));
         }
@@ -686,6 +847,22 @@ namespace System.Web.OData.Builder
 
             // Act
             function.HasFunctionLink((a) => { throw new NotImplementedException(); }, followsConventions: value);
+
+            // Assert
+            Assert.Equal(value, function.FollowsConventions);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void HasFeedFunctionLink_SetsFollowsConventions(bool value)
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var function = builder.EntityType<Customer>().Collection.Function("IgnoreFunction");
+
+            // Act
+            function.HasFeedFunctionLink((a) => { throw new NotImplementedException(); }, followsConventions: value);
 
             // Assert
             Assert.Equal(value, function.FollowsConventions);

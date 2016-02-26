@@ -97,6 +97,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The action &apos;{0}&apos; is not bound to the collection of entity. Only actions that are bound to entities can have action links..
+        /// </summary>
+        internal static string ActionNotBoundToCollectionOfEntity {
+            get {
+                return ResourceManager.GetString("ActionNotBoundToCollectionOfEntity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The action &apos;{0}&apos; is not bound to an entity. Only actions that are bound to entities can have action links..
         /// </summary>
         internal static string ActionNotBoundToEntity {
@@ -700,7 +709,16 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The function &apos;{0}&apos; is not bound to an entity. Only actions that are bound to entities can have function links..
+        ///   Looks up a localized string similar to The function &apos;{0}&apos; is not bound to the collection of entity. Only functions that are bound to entities can have function links..
+        /// </summary>
+        internal static string FunctionNotBoundToCollectionOfEntity {
+            get {
+                return ResourceManager.GetString("FunctionNotBoundToCollectionOfEntity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The function &apos;{0}&apos; is not bound to an entity. Only functions that are bound to entities can have function links..
         /// </summary>
         internal static string FunctionNotBoundToEntity {
             get {
@@ -745,11 +763,38 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To register an action link factory, actions must be bindable to the collection of entity. Action &apos;{0}&apos; does not meet this requirement..
+        /// </summary>
+        internal static string HasActionLinkRequiresBindToCollectionOfEntity {
+            get {
+                return ResourceManager.GetString("HasActionLinkRequiresBindToCollectionOfEntity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to To register an action link factory, actions must be bindable to a single entity. Action &apos;{0}&apos; does not meet this requirement..
         /// </summary>
         internal static string HasActionLinkRequiresBindToEntity {
             get {
                 return ResourceManager.GetString("HasActionLinkRequiresBindToEntity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To register a function link factory, functions must be bindable to the collection of entity. Function &apos;{0}&apos; does not meet this requirement..
+        /// </summary>
+        internal static string HasFunctionLinkRequiresBindToCollectionOfEntity {
+            get {
+                return ResourceManager.GetString("HasFunctionLinkRequiresBindToCollectionOfEntity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To register a function link factory, functions must be bindable to a single entity. Function &apos;{0}&apos; does not meet this requirement..
+        /// </summary>
+        internal static string HasFunctionLinkRequiresBindToEntity {
+            get {
+                return ResourceManager.GetString("HasFunctionLinkRequiresBindToEntity", resourceCulture);
             }
         }
         

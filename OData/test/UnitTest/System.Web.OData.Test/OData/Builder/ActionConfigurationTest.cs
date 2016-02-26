@@ -425,6 +425,64 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void HasActionLink_ThrowsException_OnNonBindableActions()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ActionConfiguration action = builder.Action("NoBindableAction");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => action.HasActionLink(ctx => new Uri("http://any"), followsConventions: false),
+                "To register an action link factory, actions must be bindable to a single entity. " +
+                "Action 'NoBindableAction' does not meet this requirement.");
+        }
+
+        [Fact]
+        public void HasActionLink_ThrowsException_OnNoBoundToEntityActions()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
+            ActionConfiguration action = customer.Collection.Action("CollectionAction");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => action.HasActionLink(ctx => new Uri("http://any"), followsConventions: false),
+                "To register an action link factory, actions must be bindable to a single entity. " +
+                "Action 'CollectionAction' does not meet this requirement.");
+        }
+
+        [Fact]
+        public void HasFeedActionLink_ThrowsException_OnNonBindableActions()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ActionConfiguration action = builder.Action("NoBindableAction");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => action.HasFeedActionLink(ctx => new Uri("http://any"), followsConventions: false),
+                "To register an action link factory, actions must be bindable to the collection of entity. " +
+                "Action 'NoBindableAction' does not meet this requirement.");
+        }
+
+        [Fact]
+        public void HasFeedActionLink_ThrowsException_OnNoBoundToCollectionEntityActions()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.EntityType<Customer>();
+            ActionConfiguration action = customer.Action("NonCollectionAction");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(
+                () => action.HasFeedActionLink(ctx => new Uri("http://any"), followsConventions: false),
+                "To register an action link factory, actions must be bindable to the collection of entity. " +
+                "Action 'NonCollectionAction' does not meet this requirement.");
+        }
+
+        [Fact]
         public void CanManuallyConfigureActionLinkFactory()
         {
             // Arrange
@@ -449,6 +507,30 @@ namespace System.Web.OData.Builder
 
             //Assert
             Assert.Equal(expectedUri, reward.GetActionLink()(context));
+            Assert.NotNull(actionLinkBuilder);
+            Assert.Equal(expectedUri, actionLinkBuilder.BuildActionLink(context));
+        }
+
+        [Fact]
+        public void CanManuallyConfigureFeedActionLinkFactory()
+        {
+            // Arrange
+            Uri expectedUri = new Uri("http://localhost/service/Customers/Reward");
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.EntitySet<Customer>("Customers").EntityType;
+            customer.HasKey(c => c.CustomerId);
+            customer.Property(c => c.Name);
+            ActionConfiguration reward = customer.Collection.Action("Reward");
+            reward.HasFeedActionLink(ctx => expectedUri, followsConventions: false);
+            IEdmModel model = builder.GetEdmModel();
+
+            // Act
+            IEdmAction rewardAction = Assert.Single(model.SchemaElements.OfType<IEdmAction>()); // Guard
+            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(rewardAction);
+            FeedContext context = new FeedContext();
+
+            //Assert
+            Assert.Equal(expectedUri, reward.GetFeedActionLink()(context));
             Assert.NotNull(actionLinkBuilder);
             Assert.Equal(expectedUri, actionLinkBuilder.BuildActionLink(context));
         }
@@ -484,6 +566,44 @@ namespace System.Web.OData.Builder
 
             //Assert
             Assert.Equal(expectedUri, watch.GetActionLink()(context));
+            Assert.NotNull(actionLinkBuilder);
+            Assert.Equal(expectedUri, actionLinkBuilder.BuildActionLink(context));
+        }
+
+        [Fact]
+        public void WhenFeedActionLinksNotManuallyConfigured_ConventionBasedBuilderUsesConventions()
+        {
+            // Arrange
+            Uri expectedUri = new Uri("http://server/Movies/Default.Watch");
+            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            ActionConfiguration watch = movie.Collection.Action("Watch"); // action bound to collection
+            IEdmModel model = builder.GetEdmModel();
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://server/Movies");
+            HttpConfiguration configuration = new HttpConfiguration();
+            string routeName = "Route";
+            configuration.MapODataServiceRoute(routeName, null, model);
+            request.SetConfiguration(configuration);
+            request.ODataProperties().RouteName = routeName;
+            UrlHelper urlHelper = new UrlHelper(request);
+
+            // Act
+            IEdmEntityContainer container = model.SchemaElements.OfType<IEdmEntityContainer>().SingleOrDefault();
+            IEdmAction watchAction = Assert.Single(model.SchemaElements.OfType<IEdmAction>()); // Guard
+            IEdmEntitySet entitySet = container.EntitySets().SingleOrDefault();
+
+            FeedContext context = new FeedContext
+            {
+                EntitySetBase = entitySet,
+                Url = urlHelper,
+                Request = request
+            };
+
+            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(watchAction);
+
+            //Assert
+            Assert.Equal(expectedUri, watch.GetFeedActionLink()(context));
             Assert.NotNull(actionLinkBuilder);
             Assert.Equal(expectedUri, actionLinkBuilder.BuildActionLink(context));
         }
@@ -659,6 +779,22 @@ namespace System.Web.OData.Builder
 
             // Act
             action.HasActionLink((a) => { throw new NotImplementedException(); }, followsConventions: value);
+
+            // Assert
+            Assert.Equal(value, action.FollowsConventions);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void HasFeedActionLink_SetsFollowsConventions(bool value)
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var action = builder.EntityType<Customer>().Collection.Action("IgnoreAction");
+
+            // Act
+            action.HasFeedActionLink((a) => { throw new NotImplementedException(); }, followsConventions: value);
 
             // Assert
             Assert.Equal(value, action.FollowsConventions);

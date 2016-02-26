@@ -1,18 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Web.Http;
-
 namespace System.Web.OData.Builder
 {
     /// <summary>
     /// ActionLinkBuilder can be used to annotate an Action. 
     /// This is how formatters create links to invoke bound actions.
     /// </summary>
-    public class ActionLinkBuilder
+    public class ActionLinkBuilder : ProcedureLinkBuilder
     {
-        private Func<EntityInstanceContext, Uri> _actionLinkFactory;
-
         /// <summary>
         /// Create a new ActionLinkBuilder based on an actionLinkFactory.
         /// <remarks>
@@ -24,20 +20,24 @@ namespace System.Web.OData.Builder
         /// A value indicating whether the action link factory generates links that follow OData conventions.
         /// </param>
         public ActionLinkBuilder(Func<EntityInstanceContext, Uri> actionLinkFactory, bool followsConventions)
+            : base(actionLinkFactory, followsConventions)
         {
-            if (actionLinkFactory == null)
-            {
-                throw Error.ArgumentNull("actionLinkFactory");
-            }
-
-            _actionLinkFactory = actionLinkFactory;
-            FollowsConventions = followsConventions;
         }
 
         /// <summary>
-        /// Gets a boolean indicating whether the link factory follows OData conventions or not.
+        /// Create a new ActionLinkBuilder based on an actionLinkFactory.
+        /// <remarks>
+        /// If the action is not available the actionLinkFactory delegate should return NULL.
+        /// </remarks>
         /// </summary>
-        public bool FollowsConventions { get; private set; }
+        /// <param name="actionLinkFactory">The actionLinkFactory this ActionLinkBuilder should use when building links.</param>
+        /// <param name="followsConventions">
+        /// A value indicating whether the action link factory generates links that follow OData conventions.
+        /// </param>
+        public ActionLinkBuilder(Func<FeedContext, Uri> actionLinkFactory, bool followsConventions)
+            : base(actionLinkFactory, followsConventions)
+        {
+        }
 
         /// <summary>
         /// Builds the action link for the given entity.
@@ -46,7 +46,17 @@ namespace System.Web.OData.Builder
         /// <returns>The generated action link.</returns>
         public virtual Uri BuildActionLink(EntityInstanceContext context)
         {
-            return _actionLinkFactory(context);
+            return BuildLink(context);
+        }
+
+        /// <summary>
+        /// Builds the action link for the given feed.
+        /// </summary>
+        /// <param name="context">An instance context wrapping the feed instance.</param>
+        /// <returns>The generated action link.</returns>
+        public virtual Uri BuildActionLink(FeedContext context)
+        {
+            return BuildLink(context);
         }
 
         /// <summary>
@@ -62,7 +72,7 @@ namespace System.Web.OData.Builder
             {
                 if (ctx.SkipExpensiveAvailabilityChecks)
                 {
-                    // OData says that if it is too expensive to check availability you should advertize actions
+                    // OData says that if it is too expensive to check availability you should advertise actions
                     return baseFactory(ctx);
                 }
                 else if (expensiveAvailabilityCheck(ctx))

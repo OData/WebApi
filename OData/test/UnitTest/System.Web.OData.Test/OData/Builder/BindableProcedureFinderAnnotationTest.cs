@@ -12,7 +12,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void CanBuildBoundProcedureCacheForIEdmModel()
         {
-            // Arrange            
+            // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
             EntityTypeConfiguration<Customer> customer = builder.EntitySet<Customer>("Customers").EntityType;
             customer.HasKey(c => c.ID);
@@ -68,6 +68,80 @@ namespace System.Web.OData.Builder
             Assert.NotNull(blockBusterActions.SingleOrDefault(a => a.Name == "InCache3_MovieAction"));
             Assert.NotNull(blockBusterActions.SingleOrDefault(a => a.Name == "InCache4_MovieAction"));
             Assert.NotNull(blockBusterActions.SingleOrDefault(a => a.Name == "InCache5_BlockbusterAction"));
+        }
+
+        [Fact]
+        public void CanBuildProcedureBoundToCollectionCacheForIEdmModel()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<Customer> customer = builder.EntitySet<Customer>("Customers").EntityType;
+            customer.HasKey(c => c.ID);
+            customer.Property(c => c.Name);
+            customer.ComplexProperty(c => c.Address);
+
+            EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            movie.HasKey(m => m.ID);
+            movie.HasKey(m => m.Name);
+            EntityTypeConfiguration<Blockbuster> blockBuster = builder.EntityType<Blockbuster>().DerivesFrom<Movie>();
+            EntityTypeConfiguration movieConfiguration = builder.StructuralTypes.OfType<EntityTypeConfiguration>().Single(t => t.Name == "Movie");
+
+            // build actions that are bindable to the collection of entity
+            customer.Collection.Action("CollectionCustomerActionInCache1");
+            customer.Collection.Action("CollectionCustomerActionInCache2");
+            movie.Collection.Action("CollectionMovieActionInCache3");
+
+            ActionConfiguration movieActionIncache4 = builder.Action("CollectionMovieActionInCache4");
+            CollectionTypeConfiguration collectionConfiguration = new CollectionTypeConfiguration(movieConfiguration, typeof(Movie));
+            movieActionIncache4.SetBindingParameter("bindingParameter", collectionConfiguration);
+
+            blockBuster.Collection.Action("CollectionBlockbusterActionInCache5");
+
+            // build functions that are bindable to the collection of entity
+            customer.Collection.Function("CollectionCustomerFunctionInCache1").Returns<int>();
+            customer.Collection.Function("CollectionCustomerFunctionInCache2").Returns<int>();
+            movie.Collection.Function("CollectionMovieFunctionInCache3").Returns<int>();
+            blockBuster.Collection.Function("CollectionBlockbusterFunctionInCache5").Returns<int>();
+
+            // build actions that are either: bindable to an entity, have no parameter, have only complex parameter 
+            customer.Action("CustomersActionNotInCache1");
+            customer.Function("CustomersFunctionNotInCache1").Returns<int>();
+            movie.Action("MoviesActionNotInCache2");
+            builder.Action("NoParametersNotInCache3");
+
+            ActionConfiguration addressParameterNotInCache4 = builder.Action("AddressParameterNotInCache4");
+            addressParameterNotInCache4.Parameter<Address>("address");
+
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().Single(e => e.Name == "Customer");
+            IEdmEntityType movieType = model.SchemaElements.OfType<IEdmEntityType>().Single(e => e.Name == "Movie");
+            IEdmEntityType blockBusterType = model.SchemaElements.OfType<IEdmEntityType>().Single(e => e.Name == "Blockbuster");
+
+            // Act
+            BindableProcedureFinder annotation = new BindableProcedureFinder(model);
+            var movieOperations = annotation.FindProceduresBoundToCollection(movieType).ToArray();
+            var customerOperations = annotation.FindProceduresBoundToCollection(customerType).ToArray();
+            var blockBusterOperations = annotation.FindProceduresBoundToCollection(blockBusterType).ToArray();
+
+            // Assert
+            Assert.Equal(3, movieOperations.Length);
+            Assert.Single(movieOperations.Where(a => a.Name == "CollectionMovieActionInCache3"));
+            Assert.Single(movieOperations.Where(a => a.Name == "CollectionMovieActionInCache4"));
+            Assert.Single(movieOperations.Where(a => a.Name == "CollectionMovieFunctionInCache3"));
+
+            Assert.Equal(4, customerOperations.Length);
+            Assert.Single(customerOperations.Where(a => a.Name == "CollectionCustomerActionInCache1"));
+            Assert.Single(customerOperations.Where(a => a.Name == "CollectionCustomerActionInCache2"));
+            Assert.Single(customerOperations.Where(a => a.Name == "CollectionCustomerFunctionInCache1"));
+            Assert.Single(customerOperations.Where(a => a.Name == "CollectionCustomerFunctionInCache2"));
+            
+            Assert.Equal(5, blockBusterOperations.Length);
+            Assert.Single(blockBusterOperations.Where(a => a.Name == "CollectionBlockbusterActionInCache5"));
+            Assert.Single(blockBusterOperations.Where(a => a.Name == "CollectionBlockbusterFunctionInCache5"));
+            Assert.Single(blockBusterOperations.Where(a => a.Name == "CollectionMovieActionInCache3"));
+            Assert.Single(blockBusterOperations.Where(a => a.Name == "CollectionMovieActionInCache4"));
+            Assert.Single(blockBusterOperations.Where(a => a.Name == "CollectionMovieFunctionInCache3"));
         }
 
         public class Movie

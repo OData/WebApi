@@ -155,6 +155,41 @@ namespace System.Web.OData.Formatter
             Assert.Contains("\"target\":\"http://localhost/Customers(4)/org.odata.DoSomething\"", responseString);
         }
 
+        [Fact]
+        public void Response_Includes_ActionLinkForFeed_WithAcceptHeader()
+        {
+            // Arrange
+            string editLink = "http://localhost/Customers";
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, editLink);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+
+            // Act
+            HttpResponseMessage response = _client.SendAsync(request).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+            dynamic result = JObject.Parse(responseString);
+            dynamic action = result["#org.odata.MyAction"];
+
+            // Assert
+            Assert.NotNull(action);
+            Assert.Equal("http://localhost/Customers/org.odata.MyAction", (string)action.target);
+            Assert.Equal("MyAction", (string)action.title);
+        }
+
+        [Fact]
+        public void Response_Includes_ActionLinkForFeed_WithDollarFormat()
+        {
+            // Arrange
+            string requestUri = "http://localhost/Customers?$format=application/json;odata.metadata=full";
+
+            // Act
+            HttpResponseMessage response = _client.GetAsync(requestUri).Result;
+            string responseString = response.Content.ReadAsStringAsync().Result;
+
+            // Assert
+            Assert.Contains("\"target\":\"http://localhost/Customers/org.odata.MyAction\"", responseString);
+        }
+
         private IEdmModel GetModel()
         {
             ODataModelBuilder builder = new ODataConventionModelBuilder();

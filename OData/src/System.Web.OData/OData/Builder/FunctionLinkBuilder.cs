@@ -1,18 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Web.Http;
-
 namespace System.Web.OData.Builder
 {
     /// <summary>
-    /// FunctionLinkBuilder can be used to annotate an Function.
+    /// FunctionLinkBuilder can be used to annotate a Function.
     /// This is how formatters create links to invoke bound functions.
     /// </summary>
-    public class FunctionLinkBuilder
+    public class FunctionLinkBuilder : ProcedureLinkBuilder
     {
-        private Func<EntityInstanceContext, Uri> _functionLinkFactory;
-
         /// <summary>
         /// Create a new FunctionLinkBuilder based on an functionLinkFactory.
         /// <remarks>
@@ -24,20 +20,24 @@ namespace System.Web.OData.Builder
         /// A value indicating whether the function link factory generates links that follow OData conventions.
         /// </param>
         public FunctionLinkBuilder(Func<EntityInstanceContext, Uri> functionLinkFactory, bool followsConventions)
+            : base(functionLinkFactory, followsConventions)
         {
-            if (functionLinkFactory == null)
-            {
-                throw Error.ArgumentNull("functionLinkFactory");
-            }
-
-            _functionLinkFactory = functionLinkFactory;
-            FollowsConventions = followsConventions;
         }
 
         /// <summary>
-        /// Gets a boolean indicating whether the link factory follows OData conventions or not.
+        /// Create a new FunctionLinkBuilder based on an functionLinkFactory.
+        /// <remarks>
+        /// If the function is not available the functionLinkFactory delegate should return NULL.
+        /// </remarks>
         /// </summary>
-        public bool FollowsConventions { get; private set; }
+        /// <param name="functionLinkFactory">The functionLinkFactory this FunctionLinkBuilder should use when building links.</param>
+        /// <param name="followsConventions">
+        /// A value indicating whether the function link factory generates links that follow OData conventions.
+        /// </param>
+        public FunctionLinkBuilder(Func<FeedContext, Uri> functionLinkFactory, bool followsConventions)
+            : base(functionLinkFactory, followsConventions)
+        {
+        }
 
         /// <summary>
         /// Builds the function link for the given entity.
@@ -46,7 +46,17 @@ namespace System.Web.OData.Builder
         /// <returns>The generated function link.</returns>
         public virtual Uri BuildFunctionLink(EntityInstanceContext context)
         {
-            return _functionLinkFactory(context);
+            return BuildLink(context);
+        }
+
+        /// <summary>
+        /// Builds the function link for the given feed.
+        /// </summary>
+        /// <param name="context">An instance context wrapping the feed instance.</param>
+        /// <returns>The generated function link.</returns>
+        public virtual Uri BuildFunctionLink(FeedContext context)
+        {
+            return BuildLink(context);
         }
 
         /// <summary>
@@ -62,7 +72,7 @@ namespace System.Web.OData.Builder
             {
                 if (ctx.SkipExpensiveAvailabilityChecks)
                 {
-                    // OData says that if it is too expensive to check availability you should advertize functions
+                    // OData says that if it is too expensive to check availability you should advertise functions
                     return baseFactory(ctx);
                 }
                 else if (expensiveAvailabilityCheck(ctx))

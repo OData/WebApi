@@ -79,6 +79,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\AutoExpandAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AutoExpandAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ColumnAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\DataContractAttributeEnumTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\MediaTypeAttributeConvention.cs" />
     <Compile Include="OData\Builder\PrimitivePropertyConfigurationExtensions.cs" />
     <Compile Include="OData\Builder\MediaTypeAttribute.cs" />

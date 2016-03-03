@@ -187,6 +187,19 @@ namespace System.Web.OData.Formatter
         public ODataMessageReaderSettings MessageReaderSettings { get; private set; }
 
         /// <summary>
+        /// Delegate type for calculating the base address for a given request.
+        /// </summary>
+        /// <param name="request">The HttpRequestMessage object.</param>
+        /// <returns>A base address uri to be used in the service root of the OData uri.</returns>
+        public delegate Uri GetBaseAddressDelegate(HttpRequestMessage request);
+
+        /// <summary>
+        /// Gets or sets a delegate method that allows consumers to provide an alternate base
+        /// address for OData uris.
+        /// </summary>
+        public GetBaseAddressDelegate GetBaseAddress { get; set; }
+
+        /// <summary>
         /// The request message associated with the per-request formatter instance.
         /// </summary>
         internal HttpRequestMessage Request { get; set; }
@@ -393,7 +406,7 @@ namespace System.Web.OData.Formatter
                 try
                 {
                     ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings(MessageReaderSettings);
-                    oDataReaderSettings.BaseUri = GetBaseAddress(Request);
+                    oDataReaderSettings.BaseUri = GetBaseAddressInternal(Request);
 
                     IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders, Request.GetODataContentIdMapping());
                     ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
@@ -499,7 +512,7 @@ namespace System.Web.OData.Formatter
                 responseMessage.PreferenceAppliedHeader().AnnotationFilter = annotationFilter;
             }
 
-            Uri baseAddress = GetBaseAddress(Request);
+            Uri baseAddress = GetBaseAddressInternal(Request);
             ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings(MessageWriterSettings)
             {
                 PayloadBaseUri = baseAddress,
@@ -733,7 +746,33 @@ namespace System.Web.OData.Formatter
                 (type.IsCollection() && type.AsCollection().ElementType().IsEntity());
         }
 
-        private static Uri GetBaseAddress(HttpRequestMessage request)
+        /// <summary>
+        /// Internal method used for selecting the base address to be used with OData uris.
+        /// If the consumer has provided a delegate for overriding our default implementation,
+        /// we call that, otherwise we default to existing behavior below.
+        /// </summary>
+        /// <param name="request">The HttpRequestMessage object for the given request.</param>
+        /// <returns>The base address to be used as part of the service root; must terminate with a trailing '/'.</returns>
+        private Uri GetBaseAddressInternal(HttpRequestMessage request)
+        {
+            GetBaseAddressDelegate baseAddressDelegate = this.GetBaseAddress;
+
+            if (baseAddressDelegate != null)
+            {
+                return baseAddressDelegate(request);
+            }
+            else
+            {
+                return ODataMediaTypeFormatter.GetDefaultBaseAddress(request);
+            }
+        }
+
+        /// <summary>
+        /// Returns a base address to be used in the service root when reading or writing OData uris.
+        /// </summary>
+        /// <param name="request">The HttpRequestMessage object for the given request.</param>
+        /// <returns>The base address to be used as part of the service root in the OData uri; must terminate with a trailing '/'.</returns>
+        public static Uri GetDefaultBaseAddress(HttpRequestMessage request)
         {
             UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
 

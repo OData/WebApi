@@ -157,6 +157,55 @@ namespace System.Web.OData.Formatter
                 "The ODataMediaTypeFormatter was unable to determine the base URI for the request. The request must be processed by an OData route for the OData formatter to serialize the response.");
         }
 
+        /// <summary>
+        /// Host name used by tests for verifying GetBaseAddress delegate
+        /// </summary>
+        private const string CustomHost = "www.microsoft.com";
+
+        /// <summary>
+        /// Delegate for GetBaseAddress that converts uris to https
+        /// </summary>
+        /// <param name="httpRequestMessage">The HttpRequestMessage representing this request.</param>
+        /// <returns>A custom uri for the base address.</returns>
+        private Uri GetCustomBaseAddress(HttpRequestMessage httpRequestMessage)
+        {
+            Uri baseAddress = ODataMediaTypeFormatter.GetDefaultBaseAddress(httpRequestMessage);
+
+            UriBuilder uriBuilder = new UriBuilder(baseAddress);
+            uriBuilder.Scheme = Uri.UriSchemeHttps;
+            uriBuilder.Port = -1;
+            uriBuilder.Host = CustomHost;
+            baseAddress = uriBuilder.Uri;
+            return baseAddress;
+        }
+
+        [Fact]
+        public void ODataMediaTypeFormatter_AllowsBaseAddressOverride()
+        {
+            string routeName = "Route";
+            string routePrefix = "prefix";
+            string baseUri = "http://localhost/prefix";
+            string newBaseUri = "https://" + CustomHost + "/" + routePrefix + "/";
+            IEdmModel model = new ODataConventionModelBuilder().GetEdmModel();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, baseUri);
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.MapODataServiceRoute(routeName, routePrefix, model);
+            request.SetConfiguration(configuration);
+            request.ODataProperties().Model = model;
+            request.ODataProperties().Path = new ODataPath();
+            request.ODataProperties().RouteName = routeName;
+            HttpRouteData routeData = new HttpRouteData(new HttpRoute());
+            routeData.Values.Add("a", "prefix");
+            request.SetRouteData(routeData);
+
+            ODataMediaTypeFormatter formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.ServiceDocument);
+            formatter.GetBaseAddress = GetCustomBaseAddress;
+            var content = new ObjectContent<ODataServiceDocument>(new ODataServiceDocument(), formatter);
+            string actualContent = content.ReadAsStringAsync().Result;
+
+            Assert.Contains("\"@odata.context\":\"" + newBaseUri, actualContent);
+        }
+
         [Theory]
         [InlineData(null, null, "4.0")]
         [InlineData("1.0", null, "4.0")]

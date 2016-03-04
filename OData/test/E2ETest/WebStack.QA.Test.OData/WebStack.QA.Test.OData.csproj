@@ -175,6 +175,11 @@
     <Compile Include="ODataCountTest\CountDataModel.cs" />
     <Compile Include="ODataCountTest\CountEdmModel.cs" />
     <Compile Include="ODataCountTest\CountTest.cs" />
+    <Compile Include="QueryComposition\IsOf\IsOfController.cs" />
+    <Compile Include="QueryComposition\IsOf\IsofDataSource.cs" />
+    <Compile Include="QueryComposition\IsOf\IsofEdmModel.cs" />
+    <Compile Include="QueryComposition\IsOf\IsofFunctionTests.cs" />
+    <Compile Include="QueryComposition\IsOf\IsOfModels.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesController.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesModel.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesTest.cs" />

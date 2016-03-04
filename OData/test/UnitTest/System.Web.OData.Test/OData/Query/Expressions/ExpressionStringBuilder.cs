@@ -178,6 +178,19 @@ namespace System.Web.OData.Query.Expressions
             return node;
         }
 
+        protected override Expression VisitTypeBinary(TypeBinaryExpression node)
+        {
+            if (node.NodeType == ExpressionType.TypeIs)
+            {
+                Out("(");
+                Visit(node.Expression);
+                Out(" Is ");
+                Out(node.TypeOperand.FullName + ")");
+            }
+
+            return node;
+        }
+
         private void VisitArguments(Expression[] arguments)
         {
             int argindex = 0;

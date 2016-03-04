@@ -428,6 +428,7 @@ namespace System.Web.OData.Test
         [PropertyData("SupportedDateTimeFunctionsTestData")]
         [PropertyData("AnyAndAllFunctionsTestData")]
         [PropertyData("CastFunctionTestData")]
+        [PropertyData("IsOfFunctionTestData")]
         public void EnableQuery_DoesNotBlockQueries_WhenEverythingIsAllowed(string queryString, string unused)
         {
             // Arrange
@@ -483,25 +484,6 @@ namespace System.Web.OData.Test
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Contains("unknown function", errorMessage);
-            Assert.Contains(expectedElement, errorMessage);
-        }
-
-        [Theory]
-        [PropertyData("IsOfFunctionTestData")]
-        public void EnableQuery_ReturnsBadRequest_ForIsOf(string queryString, string expectedElement)
-        {
-            // Arrange
-            string url = "http://localhost/odata/EverythingAllowedCustomers";
-            HttpServer server = CreateServer("EverythingAllowedCustomers");
-            HttpClient client = new HttpClient(server);
-
-            // Act
-            HttpResponseMessage response = client.GetAsync(url + queryString).Result;
-            string errorMessage = response.Content.ReadAsStringAsync().Result;
-
-            // Assert
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Contains("Unknown function", errorMessage);
             Assert.Contains(expectedElement, errorMessage);
         }
 

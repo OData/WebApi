@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0.1-rc2-16553",
+  "version": "1.0.0.1-rc2-16591",
   "description": "Microsoft.AspNetCore.OData",
 
   "dependencies": {
@@ -12,16 +12,6 @@
   },
 
   "frameworks": {
-    "dnx451": { },
-
-    "netstandardapp1.5": {
-      "dependencies": {
-        "NETStandard.Library": "1.0.0-*"
-      },
-      "imports": [
-        "dnxcore50",
-        "portable-net451+win8"
-      ]
-    }
+    "dnx451": { }
   }
 }

@@ -15,6 +15,7 @@ namespace ODataSample.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+            services.AddMvcDnx();
             services.AddOData();
             services.AddCors(options =>
             {
@@ -50,7 +51,7 @@ namespace ODataSample.Web
             });
             app.UseIISPlatformHandler();
             app.UseDeveloperExceptionPage();
-            //app.UseMvc();
+            app.UseMvcWithDefaultRoute();
             //app.UseMvc(builder =>
             //{
             //    builder.MapODataRoute<ISampleService>("odata");

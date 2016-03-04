@@ -30,10 +30,7 @@
     "postpublish": "dotnet publish-iis --publish-folder %publish:OutputPath%"
   },
   "frameworks": {
-    "dnx451": {
-    },
-    "dnxcore50": {
-    }
+    "dnx451": { }
   },
   "exclude": [
     "wwwroot",

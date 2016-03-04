@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.OData.Edm;
+using System;
 
-namespace Microsoft.AspNetCore.OData
+namespace Microsoft.Framework.Internal
 {
-    public class Class1
-    {
-        public Class1()
-        {
-            Dictionary<IEdmEntityType, List<IEdmOperation>> _map = new Dictionary<IEdmEntityType, List<IEdmOperation>>();
-        } 
-    }
+	[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+	internal sealed class NotNullAttribute : Attribute
+	{
+	}
 }

@@ -30,7 +30,7 @@ namespace ODataSample.Web.Controllers
             var customer = _sampleContext.FindCustomer(id);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer);
@@ -42,7 +42,7 @@ namespace ODataSample.Web.Controllers
             var customer = _sampleContext.FindCustomer(id);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer.FirstName);
@@ -54,7 +54,7 @@ namespace ODataSample.Web.Controllers
             var customer = _sampleContext.FindCustomer(id);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer.LastName);
@@ -66,7 +66,7 @@ namespace ODataSample.Web.Controllers
             var customer = _sampleContext.FindCustomer(id);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer.CustomerId);
@@ -78,7 +78,7 @@ namespace ODataSample.Web.Controllers
             var customer = _sampleContext.FindCustomer(id);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer.Products);
@@ -98,7 +98,7 @@ namespace ODataSample.Web.Controllers
         {
             if (!_sampleContext.UpdateCustomer(id, value))
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new NoContentResult();
@@ -110,7 +110,7 @@ namespace ODataSample.Web.Controllers
         {
             if (!_sampleContext.DeleteCustomer(id))
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new NoContentResult();

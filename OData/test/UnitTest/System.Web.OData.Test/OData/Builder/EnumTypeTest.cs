@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Formatter;
 using System.Web.OData.TestCommon;
@@ -1062,6 +1063,48 @@ namespace System.Web.OData.Builder
             Assert.Single(color.Members.Where(m => m.Name == "Blue"));
         }
 
+        [Fact]
+        public void ODataConventionModelBuilder_DataContractAttribute_WorksOnEnumType()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EnumType<Life>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEnumType enumType = model.SchemaElements.OfType<IEdmEnumType>().Single();
+            Assert.NotNull(enumType);
+            Assert.Equal(2, enumType.Members.Count());
+            Assert.Equal("Feelings", enumType.Name);
+            Assert.Equal("Test", enumType.Namespace);
+            Assert.True(enumType.Members.Any(m => m.Name.Equals("happy")));
+            Assert.True(enumType.Members.Any(m => m.Name.Equals("sad")));
+        }
+
+        [Fact]
+        public void ODataConventionModelBuilder_DataContractAttribute_WithAddedExplicitlyMember()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EnumType<Life>();
+            builder.EnumTypes.Single(e => e.Name == "Feelings").AddMember(Life.JustSoSo);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEnumType enumType = model.SchemaElements.OfType<IEdmEnumType>().Single();
+            Assert.NotNull(enumType);
+            Assert.Equal(3, enumType.Members.Count());
+            Assert.Equal("Feelings", enumType.Name);
+            Assert.Equal("Test", enumType.Namespace);
+            Assert.True(enumType.Members.Any(m => m.Name.Equals("happy")));
+            Assert.True(enumType.Members.Any(m => m.Name.Equals("sad")));
+            Assert.True(enumType.Members.Any(m => m.Name.Equals("JustSoSo")));
+        }
+
         private IEdmStructuredType AddComplexTypeWithODataConventionModelBuilder()
         {
             var builder = new ODataConventionModelBuilder();
@@ -1120,5 +1163,15 @@ namespace System.Web.OData.Builder
     public enum ValueOutOfRangeEnum : ulong
     {
         Member = ulong.MaxValue
+    }
+
+    [DataContract(Name = "Feelings", Namespace = "Test")]
+    public enum Life
+    {
+        [EnumMember(Value = "happy")]
+        Happy = 1,
+        [EnumMember(Value = "sad")]
+        Sad = 2,
+        JustSoSo = 3
     }
 }

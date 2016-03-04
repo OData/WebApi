@@ -180,7 +180,7 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void ODataMediaTypeFormatter_AllowsBaseAddressOverride()
+        public void GetBaseAddress_AllowsBaseAddressOverride()
         {
             string routeName = "Route";
             string routePrefix = "prefix";
@@ -204,6 +204,36 @@ namespace System.Web.OData.Formatter
             string actualContent = content.ReadAsStringAsync().Result;
 
             Assert.Contains("\"@odata.context\":\"" + newBaseUri, actualContent);
+        }
+
+        [Fact]
+        public void GetDefaultBaseAddress_ThrowsWhenRequestIsNull()
+        {
+            Assert.ThrowsArgumentNull(() => ODataMediaTypeFormatter.GetDefaultBaseAddress(null), "request");
+        }
+
+        [Fact]
+        public void GetDefaultBaseAddress_ReturnsCorrectBaseAddress()
+        {
+            // Arrange
+            string baseUriText = "http://discovery.contoso.com/";
+            string routePrefix = "api/discovery/v21.0";
+            string expectedBaseAddress = baseUriText + routePrefix + "/";
+            string fullUriText = baseUriText + routePrefix + "/Instances";
+            string routeName = "Route";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, fullUriText);
+            HttpConfiguration configuration = new HttpConfiguration();
+            IEdmModel model = new ODataConventionModelBuilder().GetEdmModel();
+            configuration.MapODataServiceRoute(routeName, routePrefix, model);
+            request.SetConfiguration(configuration);
+            request.ODataProperties().Model = model;
+            request.ODataProperties().RouteName = routeName;
+
+            // Act
+            Uri baseUri = ODataMediaTypeFormatter.GetDefaultBaseAddress(request);
+
+            // Assert
+            Assert.Equal(expectedBaseAddress, baseUri.ToString());
         }
 
         [Theory]

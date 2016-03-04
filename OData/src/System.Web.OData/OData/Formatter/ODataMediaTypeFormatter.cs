@@ -774,6 +774,11 @@ namespace System.Web.OData.Formatter
         /// <returns>The base address to be used as part of the service root in the OData uri; must terminate with a trailing '/'.</returns>
         public static Uri GetDefaultBaseAddress(HttpRequestMessage request)
         {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
             UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
 
             string baseAddress = urlHelper.CreateODataLink();

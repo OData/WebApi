@@ -4,11 +4,8 @@
 
   "dependencies": {
     "Microsoft.OData.Core": "6.15.0-beta",
-    "Microsoft.OData.Edm": "6.15.0-beta",
-    "Microsoft.Spatial": "6.15.0-beta",
-    "Microsoft.AspNetCore.Mvc": "1.0.0-*",
-    "Microsoft.Extensions.Options": "1.0.0-*",
-    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-*"
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-20081",
+    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc2-20081"
   },
 
   "frameworks": {

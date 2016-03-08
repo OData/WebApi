@@ -1789,6 +1789,7 @@ public class System.Web.OData.Formatter.ODataMediaTypeFormatter : System.Net.Htt
 	public ODataMediaTypeFormatter (System.Collections.Generic.IEnumerable`1[[Microsoft.OData.Core.ODataPayloadKind]] payloadKinds)
 	public ODataMediaTypeFormatter (ODataDeserializerProvider deserializerProvider, ODataSerializerProvider serializerProvider, System.Collections.Generic.IEnumerable`1[[Microsoft.OData.Core.ODataPayloadKind]] payloadKinds)
 
+	System.Func`2[[System.Net.Http.HttpRequestMessage],[System.Uri]] BaseAddressFactory  { public get; public set; }
 	ODataDeserializerProvider DeserializerProvider  { public get; }
 	Microsoft.OData.Core.ODataMessageQuotas MessageReaderQuotas  { public get; }
 	Microsoft.OData.Core.ODataMessageReaderSettings MessageReaderSettings  { public get; }
@@ -1798,6 +1799,7 @@ public class System.Web.OData.Formatter.ODataMediaTypeFormatter : System.Net.Htt
 
 	public virtual bool CanReadType (System.Type type)
 	public virtual bool CanWriteType (System.Type type)
+	public static System.Uri GetDefaultBaseAddress (System.Net.Http.HttpRequestMessage request)
 	public virtual System.Net.Http.Formatting.MediaTypeFormatter GetPerRequestFormatterInstance (System.Type type, System.Net.Http.HttpRequestMessage request, System.Net.Http.Headers.MediaTypeHeaderValue mediaType)
 	public virtual System.Threading.Tasks.Task`1[[System.Object]] ReadFromStreamAsync (System.Type type, System.IO.Stream readStream, System.Net.Http.HttpContent content, System.Net.Http.Formatting.IFormatterLogger formatterLogger)
 	public virtual void SetDefaultContentHeaders (System.Type type, System.Net.Http.Headers.HttpContentHeaders headers, System.Net.Http.Headers.MediaTypeHeaderValue mediaType)

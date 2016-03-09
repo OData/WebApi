@@ -12,14 +12,12 @@ namespace Microsoft.AspNetCore.OData.Routing
 {
     public class ODataRoute : IRouter
     {
-        private readonly IODataRoutingConvention _routingConvention;
         private readonly string _routePrefix;
         private readonly IEdmModel _model;
         private readonly IRouter m = new MvcRouteHandler();
 
         public ODataRoute(string routePrefix, IEdmModel model)
         {
-            _routingConvention = new DefaultODataRoutingConvention();
             _routePrefix = routePrefix;
             _model = model;
         }

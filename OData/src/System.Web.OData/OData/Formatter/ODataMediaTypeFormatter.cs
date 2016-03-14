@@ -759,10 +759,10 @@ namespace System.Web.OData.Formatter
         }
 
         /// <summary>
-        /// Returns an OData service root to be used in the service root when reading or writing OData uris.
+        /// Returns an OData service root to be used when reading or writing OData uris.
         /// </summary>
         /// <param name="request">The HttpRequestMessage object for the given request.</param>
-        /// <returns>The service root to be used as part of the service root in the OData uri; must terminate with a trailing '/'.</returns>
+        /// <returns>The service root to be used in OData uris; must terminate with a trailing '/'.</returns>
         public static Uri GetDefaultServiceRoot(HttpRequestMessage request)
         {
             if (request == null)

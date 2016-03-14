@@ -227,9 +227,13 @@ namespace System.Web.OData.Builder
 
                 foreach (object member in Enum.GetValues(type))
                 {
-                    enumTypeConfiguration.AddMember((Enum)member);
+                    bool addedExplicitly = enumTypeConfiguration.Members.Any(m => m.Name.Equals(member.ToString()));
+                    EnumMemberConfiguration enumMemberConfiguration = enumTypeConfiguration.AddMember((Enum)member);
+                    enumMemberConfiguration.AddedExplicitly = addedExplicitly;
                 }
             }
+
+            ApplyEnumTypeConventions(enumTypeConfiguration);
 
             return enumTypeConfiguration;
         }
@@ -1064,6 +1068,12 @@ namespace System.Web.OData.Builder
                     ApplyPropertyConvention(propertyConvention, edmTypeConfiguration);
                 }
             }
+        }
+
+        private void ApplyEnumTypeConventions(EnumTypeConfiguration enumTypeConfiguration)
+        {
+            DataContractAttributeEnumTypeConvention typeConvention = new DataContractAttributeEnumTypeConvention();
+            typeConvention.Apply(enumTypeConfiguration, this);
         }
 
         private void ApplyNavigationSourceConventions(INavigationSourceConfiguration navigationSourceConfiguration)

@@ -187,17 +187,10 @@ namespace System.Web.OData.Formatter
         public ODataMessageReaderSettings MessageReaderSettings { get; private set; }
 
         /// <summary>
-        /// Delegate type for calculating the base address for a given request.
+        /// Gets or sets a method that allows consumers to provide an alternate base
+        /// address for OData Uri.
         /// </summary>
-        /// <param name="request">The HttpRequestMessage object.</param>
-        /// <returns>A base address uri to be used in the service root of the OData uri.</returns>
-        public delegate Uri GetBaseAddressDelegate(HttpRequestMessage request);
-
-        /// <summary>
-        /// Gets or sets a delegate method that allows consumers to provide an alternate base
-        /// address for OData uris.
-        /// </summary>
-        public GetBaseAddressDelegate GetBaseAddress { get; set; }
+        public Func<HttpRequestMessage, Uri> BaseAddressFactory { get; set; }
 
         /// <summary>
         /// The request message associated with the per-request formatter instance.
@@ -755,11 +748,9 @@ namespace System.Web.OData.Formatter
         /// <returns>The base address to be used as part of the service root; must terminate with a trailing '/'.</returns>
         private Uri GetBaseAddressInternal(HttpRequestMessage request)
         {
-            GetBaseAddressDelegate baseAddressDelegate = this.GetBaseAddress;
-
-            if (baseAddressDelegate != null)
+            if (BaseAddressFactory != null)
             {
-                return baseAddressDelegate(request);
+                return BaseAddressFactory(request);
             }
             else
             {

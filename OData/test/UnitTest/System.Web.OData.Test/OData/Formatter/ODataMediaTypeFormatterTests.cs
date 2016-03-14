@@ -182,11 +182,11 @@ namespace System.Web.OData.Formatter
         [Fact]
         public void GetBaseAddress_AllowsBaseAddressOverride()
         {
+            // Arrange
             string routeName = "Route";
             string routePrefix = "prefix";
             string baseUri = "http://localhost/prefix";
-            string newBaseUri = "https://" + CustomHost + "/" + routePrefix + "/";
-            IEdmModel model = new ODataConventionModelBuilder().GetEdmModel();
+            IEdmModel model = new EdmModel();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, baseUri);
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.MapODataServiceRoute(routeName, routePrefix, model);
@@ -198,12 +198,14 @@ namespace System.Web.OData.Formatter
             routeData.Values.Add("a", "prefix");
             request.SetRouteData(routeData);
 
+            // Act
             ODataMediaTypeFormatter formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.ServiceDocument);
-            formatter.GetBaseAddress = GetCustomBaseAddress;
+            formatter.BaseAddressFactory = GetCustomBaseAddress;
             var content = new ObjectContent<ODataServiceDocument>(new ODataServiceDocument(), formatter);
             string actualContent = content.ReadAsStringAsync().Result;
 
-            Assert.Contains("\"@odata.context\":\"" + newBaseUri, actualContent);
+            // Assert
+            Assert.Contains("\"@odata.context\":\"https://" + CustomHost + "/" + routePrefix + "/", actualContent);
         }
 
         [Fact]
@@ -218,12 +220,11 @@ namespace System.Web.OData.Formatter
             // Arrange
             string baseUriText = "http://discovery.contoso.com/";
             string routePrefix = "api/discovery/v21.0";
-            string expectedBaseAddress = baseUriText + routePrefix + "/";
             string fullUriText = baseUriText + routePrefix + "/Instances";
             string routeName = "Route";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, fullUriText);
             HttpConfiguration configuration = new HttpConfiguration();
-            IEdmModel model = new ODataConventionModelBuilder().GetEdmModel();
+            IEdmModel model = new EdmModel();
             configuration.MapODataServiceRoute(routeName, routePrefix, model);
             request.SetConfiguration(configuration);
             request.ODataProperties().Model = model;
@@ -233,7 +234,7 @@ namespace System.Web.OData.Formatter
             Uri baseUri = ODataMediaTypeFormatter.GetDefaultBaseAddress(request);
 
             // Assert
-            Assert.Equal(expectedBaseAddress, baseUri.ToString());
+            Assert.Equal(baseUriText + routePrefix + "/", baseUri.ToString());
         }
 
         [Theory]

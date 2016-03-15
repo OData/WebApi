@@ -39,6 +39,7 @@ namespace System.Web.OData.Query.Expressions
         internal const string FloorFunctionName = "floor";
         internal const string CeilingFunctionName = "ceiling";
         internal const string CastFunctionName = "cast";
+        internal const string IsofFunctionName = "isof";
         internal const string DateFunctionName = "date";
         internal const string TimeFunctionName = "time";
 

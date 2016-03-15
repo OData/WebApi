@@ -100,7 +100,7 @@ namespace WebStack.QA.Test.OData.AlternateKeys
             {
                 dynamic untypedPerson = new EdmEntityObject(personType);
                 untypedPerson.ID = i;
-                untypedPerson.Country = new[] { "England", "China", "United States", "Russia", "Japan" }[i];
+                untypedPerson.Country = new[] { "Great Britain", "China", "United States", "Russia", "Japan" }[i];
                 untypedPerson.Passport = new[] { "1001", "2010", "9999", "3199992", "00001"}[i];
                 untypedPeople[i] = untypedPerson;
             }

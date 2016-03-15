@@ -118,8 +118,8 @@ namespace WebStack.QA.Test.OData.Common.Models
             Person mike = new Person { PersonId = 1, Name = "Mike", Tags = new string[] { "Favorit" }, Age = 45 };
             Person tom = new Person { PersonId = 2, Name = "Tom", Tags = null, Age = 28 };
             Person kevin = new Person { PersonId = 3, Name = "Kevin", Tags = new string[] { "Favorit", "Super Star" }, Age = 30 };
-            Person rose = new Person { PersonId = 4, Name = "Rose", Tags = null, Spouse = kevin, Age = 22 };
-            kevin.Spouse = rose;
+            Person rose = new Person { PersonId = 4, Name = "Rose", Tags = null, Partner = kevin, Age = 22 };
+            kevin.Partner = rose;
             return new Movie[] 
             {
                 new Movie 

@@ -563,7 +563,7 @@
     'Address':
     {
         '@odata.type':'#WebStack.QA.Test.OData.OpenType.GlobalAddress',
-        'City':'London','Street':'Baker street','Country':'UnitedKindom','CountryCode':'UK'
+        'City':'London','Street':'Baker street','Country':'UnitedKindom','CountryCode':'Code'
     },
     'Tags':{'Tag1':'Value 1','Tag2':'Value 2'},
     'AnotherGender@odata.type':'#WebStack.QA.Test.OData.OpenType.Gender',
@@ -585,7 +585,7 @@
                     Assert.Equal("UnitedKindom", country);
 
                     var countryCode = json["Address"]["CountryCode"];
-                    Assert.Equal("UK", countryCode);
+                    Assert.Equal("Code", countryCode);
 
                     var tag1 = json["Tags"]["Tag1"];
                     Assert.Equal("Value 1", tag1);

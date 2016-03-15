@@ -128,7 +128,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                 var data = new TheoryDataSet<string, IEnumerable<Movie>>();
                 //data.Add("Director eq Director", movies.Where(p => p.Director == p.Director)); // 476567
                 data.Add("Actors/any(actor: actor/Name eq 'Kevin')", movies.Where(p => p.Actors.Any(a => a.Name == "Kevin")));
-                data.Add("Actors/any(actor: actor/Spouse/Name eq 'Rose')", movies.Where(p => p.Actors.Any(a => a.Spouse != null && a.Spouse.Name == "Rose")));
+                data.Add("Actors/any(actor: actor/Partner/Name eq 'Rose')", movies.Where(p => p.Actors.Any(a => a.Partner != null && a.Partner.Name == "Rose")));
                 data.Add("Actors/all(actor: actor/Age gt 20)", movies.Where(p => p.Actors.All(a => a.Age > 20)));
                 data.Add("Actors/all(actor: actor/Age gt 30)", movies.Where(p => p.Actors.All(a => a.Age > 30)));
                 data.Add("(Actors/all(actor: actor/Age gt 20) and Actors/all(actor: actor/Age le 30))", movies.Where(p => p.Actors.All(a => a.Age > 20 && a.Age <= 30)));

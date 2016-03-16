@@ -1497,34 +1497,6 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(TestODataMetadataLevel.FullMetadata, true)]
-        [InlineData(TestODataMetadataLevel.MinimalMetadata, false)]
-        [InlineData(TestODataMetadataLevel.NoMetadata, false)]
-        public void CreateODataAction_DoesnotIncludeTarget_IfFollowsODataConvention(TestODataMetadataLevel metadataLevem, bool follows)
-        {
-            // Arrange
-            Uri expectedTarget = new Uri("aa://Target");
-            IEdmAction action = CreateFakeAction("IgnoreAction");
-
-            ActionLinkBuilder linkBuilder = new ActionLinkBuilder((EntityInstanceContext a) => expectedTarget, follows);
-            IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            annotationsManager.SetActionLinkBuilder(action, linkBuilder);
-
-            IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
-
-            EntityInstanceContext context = CreateContext(model, url);
-            context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevem;
-
-            // Act
-            ODataAction actualAction = _serializer.CreateODataAction(action, context);
-
-            // Assert
-            Assert.NotNull(actualAction);
-            Assert.Null(actualAction.Target);
-        }
-
-        [Theory]
         [InlineData(TestODataMetadataLevel.MinimalMetadata)]
         [InlineData(TestODataMetadataLevel.NoMetadata)]
         public void CreateODataAction_OmitsAction_WhenFollowingConventions(TestODataMetadataLevel metadataLevel)
@@ -1666,35 +1638,6 @@ namespace System.Web.OData.Formatter.Serialization
             // Assert
             Assert.NotNull(actualFunction);
             Assert.Equal(expectedTarget, actualFunction.Target);
-        }
-
-        [Theory]
-        [InlineData(TestODataMetadataLevel.FullMetadata, true)]
-        [InlineData(TestODataMetadataLevel.MinimalMetadata, false)]
-        [InlineData(TestODataMetadataLevel.NoMetadata, false)]
-        public void CreateFunctionAction_DoesnotIncludeTarget_IfFollowsODataConvention(TestODataMetadataLevel metadataLevem, bool follows)
-        {
-            // Arrange
-            Uri expectedTarget = new Uri("aa://Target");
-            IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
-            IEdmFunction function = new EdmFunction("NS", "Function", returnType, isBound: true, entitySetPathExpression: null, isComposable: false);
-
-            FunctionLinkBuilder linkBuilder = new FunctionLinkBuilder((EntityInstanceContext a) => expectedTarget, follows);
-            IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            annotationsManager.SetFunctionLinkBuilder(function, linkBuilder);
-
-            IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
-
-            EntityInstanceContext context = CreateContext(model, url);
-            context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevem;
-
-            // Act
-            ODataFunction actualFunction = _serializer.CreateODataFunction(function, context);
-
-            // Assert
-            Assert.NotNull(actualFunction);
-            Assert.Null(actualFunction.Target);
         }
 
         [Theory]

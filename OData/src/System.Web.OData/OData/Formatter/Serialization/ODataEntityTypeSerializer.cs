@@ -755,8 +755,8 @@ namespace System.Web.OData.Formatter.Serialization
                 EmitTitle(model, operation, odataOperation);
             }
 
-            // Set the target only for full metadata and doesn't follow convention
-            if (!builder.FollowsConventions && metadataLevel == ODataMetadataLevel.FullMetadata)
+            // Omit the target in minimal/no metadata modes unless it doesn't follow conventions.
+            if (!builder.FollowsConventions || metadataLevel == ODataMetadataLevel.FullMetadata)
             {
                 odataOperation.Target = target;
             }

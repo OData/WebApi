@@ -29,7 +29,7 @@ HttpConfiguration configuration = new HttpConfiguration();
 configuration.MapODataServiceRoute(routeName:"myRoute", routePrefix:"odata", model: GetEdmModel()));
 {% endhighlight %}
 
-With these codes, we registers an OData route named "myRoute", uses "odata" as prefix and by calling `GetEdmModel()` to set up the Edm model.
+With these codes, we register an OData route named "myRoute", uses "odata" as prefix and by calling `GetEdmModel()` to set up the Edm model.
 
 After registering the Web OData routes, we define an OData route template in the routing table. The route template has the following syntax:
 {% highlight csharp %}

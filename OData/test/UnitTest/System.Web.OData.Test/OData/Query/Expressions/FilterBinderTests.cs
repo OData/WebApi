@@ -2092,12 +2092,114 @@ namespace System.Web.OData.Query.Expressions
         #region 'isof' in query option
 
         [Theory]
+        [InlineData("isof(Edm.Int16)", "$it => IIF(($it Is System.Int16), True, False)")]
+        [InlineData("isof('System.Web.OData.Query.Expressions.Product')", "$it => IIF(($it Is System.Web.OData.Query.Expressions.Product), True, False)")]
+        [InlineData("isof(ProductName,Edm.String)", "$it => IIF(($it.ProductName Is System.String), True, False)")]
+        [InlineData("isof(Category,'System.Web.OData.Query.Expressions.Category')", "$it => IIF(($it.Category Is System.Web.OData.Query.Expressions.Category), True, False)")]
+        [InlineData("isof(Category,'System.Web.OData.Query.Expressions.DerivedCategory')", "$it => IIF(($it.Category Is System.Web.OData.Query.Expressions.DerivedCategory), True, False)")]
+        [InlineData("isof(Ranking, 'Microsoft.TestCommon.Types.SimpleEnum')", "$it => IIF(($it.Ranking Is Microsoft.TestCommon.Types.SimpleEnum), True, False)")]
+        public void IsofMethod_Succeeds(string filter, string expectedResult)
+        {
+            // Arrange & Act & Assert
+            VerifyQueryDeserialization<Product>(
+                filter,
+                expectedResult,
+                NotTesting);
+        }
+
+        [Theory]
+        [InlineData("isof(null)")]
+        [InlineData("isof(ProductName,null)")]
+        public void Isof_WithNullTypeName_ThrowsArgumentNullException(string filter)
+        {
+            // Arrange & Act & Assert
+            Assert.Throws<ArgumentNullException>(() => Bind<Product>(filter),
+                "Value cannot be null.\r\nParameter name: qualifiedName");
+        }
+
+        [Theory]
         [InlineData("isof(NoSuchProperty,Edm.Int32)",
             "Could not find a property named 'NoSuchProperty' on type 'System.Web.OData.Query.Expressions.DataTypes'.")]
         public void IsOfUndefinedSource_ThrowsODataException(string filter, string errorMessage)
         {
             // Arrange & Act & Assert
             Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), errorMessage);
+        }
+
+        [Theory]
+        [InlineData("isof(null,Edm.Binary)")]
+        [InlineData("isof(null,Edm.Boolean)")]
+        [InlineData("isof(null,Edm.Byte)")]
+        [InlineData("isof(null,Edm.DateTimeOffset)")]
+        [InlineData("isof(null,Edm.Decimal)")]
+        [InlineData("isof(null,Edm.Double)")]
+        [InlineData("isof(null,Edm.Duration)")]
+        [InlineData("isof(null,Edm.Guid)")]
+        [InlineData("isof(null,Edm.Int16)")]
+        [InlineData("isof(null,Edm.Int32)")]
+        [InlineData("isof(null,Edm.Int64)")]
+        [InlineData("isof(null,Edm.SByte)")]
+        [InlineData("isof(null,Edm.Single)")]
+        [InlineData("isof(null,Edm.Stream)")]
+        [InlineData("isof(null,Edm.String)")]
+        [InlineData("isof(null,Microsoft.TestCommon.Types.SimpleEnum)")]
+        [InlineData("isof(null,Microsoft.TestCommon.Types.FlagsEnum)")]
+
+        [InlineData("isof(ByteArrayProp,Edm.Binary)")] // ByteArrayProp == null
+        [InlineData("isof(IntProp,Microsoft.TestCommon.Types.SimpleEnum)")]
+        [InlineData("isof(NullableShortProp,'Edm.Int16')")] // NullableShortProp == null
+
+        [InlineData("isof('Edm.Binary')")]
+        [InlineData("isof('Edm.Boolean')")]
+        [InlineData("isof('Edm.Byte')")]
+        [InlineData("isof('Edm.DateTimeOffset')")]
+        [InlineData("isof('Edm.Decimal')")]
+        [InlineData("isof('Edm.Double')")]
+        [InlineData("isof('Edm.Duration')")]
+        [InlineData("isof('Edm.Guid')")]
+        [InlineData("isof('Edm.Int16')")]
+        [InlineData("isof('Edm.Int32')")]
+        [InlineData("isof('Edm.Int64')")]
+        [InlineData("isof('Edm.SByte')")]
+        [InlineData("isof('Edm.Single')")]
+        [InlineData("isof('Edm.Stream')")]
+        [InlineData("isof('Edm.String')")]
+        [InlineData("isof('Microsoft.TestCommon.Types.SimpleEnum')")]
+        [InlineData("isof('Microsoft.TestCommon.Types.FlagsEnum')")]
+
+        [InlineData("isof(23,'Edm.Byte')")]
+        [InlineData("isof(23,'Edm.Decimal')")]
+        [InlineData("isof(23,'Edm.Double')")]
+        [InlineData("isof(23,'Edm.Int16')")]
+        [InlineData("isof(23,'Edm.Int64')")]
+        [InlineData("isof(23,'Edm.SByte')")]
+        [InlineData("isof(23,'Edm.Single')")]
+        [InlineData("isof('hello','Edm.Stream')")]
+        [InlineData("isof(0,'Microsoft.TestCommon.Types.FlagsEnum')")]
+        [InlineData("isof(0,'Microsoft.TestCommon.Types.SimpleEnum')")]
+
+        [InlineData("isof('2001-01-01T12:00:00.000+08:00','Edm.DateTimeOffset')")] // source is string
+        [InlineData("isof('00000000-0000-0000-0000-000000000000','Edm.Guid')")] // source is string
+        [InlineData("isof('23','Edm.Byte')")]
+        [InlineData("isof('23','Edm.Int16')")]
+        [InlineData("isof('23','Edm.Int32')")]
+        [InlineData("isof('false','Edm.Boolean')")]
+        [InlineData("isof('OData','Edm.Binary')")]
+        [InlineData("isof('PT12H','Edm.Duration')")]
+        [InlineData("isof(23,'Edm.String')")]
+        [InlineData("isof('0','Microsoft.TestCommon.Types.FlagsEnum')")]
+        [InlineData("isof('0','Microsoft.TestCommon.Types.SimpleEnum')")]
+        public void IsOfPrimitiveType_Succeeds_WithFalse(string filter)
+        {
+            // Arrange
+            var model = new DataTypes();
+
+            // Act & Assert
+            var filters = VerifyQueryDeserialization<DataTypes>(
+                filter,
+                expectedResult: NotTesting,
+                expectedResultWithNullPropagation: NotTesting);
+            RunFilters(filters, model, expectedValue: new { WithNullPropagation = false, WithoutNullPropagation = false });
         }
 
         public static TheoryDataSet<string, string> IsOfUndefinedTarget
@@ -2161,205 +2263,6 @@ namespace System.Web.OData.Query.Expressions
 
             // Act & Assert
             Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), expectedMessage);
-        }
-
-        public static TheoryDataSet<string> IsOfPrimitiveType
-        {
-            get
-            {
-                return new TheoryDataSet<string>
-                {
-                    { "isof(Edm.Binary)" },
-                    { "isof(Edm.Boolean)" },
-                    { "isof(Edm.Byte)" },
-                    { "isof(Edm.DateTimeOffset)" },
-                    { "isof(Edm.Decimal)" },
-                    { "isof(Edm.Double)" },
-                    { "isof(Edm.Duration)" },
-                    { "isof(Edm.Guid)" },
-                    { "isof(Edm.Int16)" },
-                    { "isof(Edm.Int32)" },
-                    { "isof(Edm.Int64)" },
-                    { "isof(Edm.SByte)" },
-                    { "isof(Edm.Single)" },
-                    { "isof(Edm.Stream)" },
-                    { "isof(Edm.String)" },
-                    { "isof(Microsoft.TestCommon.Types.SimpleEnum)" },
-                    { "isof(Microsoft.TestCommon.Types.FlagsEnum)" },
-
-                    { "isof(null,Edm.Binary)" },
-                    { "isof(null,Edm.Boolean)" },
-                    { "isof(null,Edm.Byte)" },
-                    { "isof(null,Edm.DateTimeOffset)" },
-                    { "isof(null,Edm.Decimal)" },
-                    { "isof(null,Edm.Double)" },
-                    { "isof(null,Edm.Duration)" },
-                    { "isof(null,Edm.Guid)" },
-                    { "isof(null,Edm.Int16)" },
-                    { "isof(null,Edm.Int32)" },
-                    { "isof(null,Edm.Int64)" },
-                    { "isof(null,Edm.SByte)" },
-                    { "isof(null,Edm.Single)" },
-                    { "isof(null,Edm.Stream)" },
-                    { "isof(null,Edm.String)" },
-                    { "isof(null,Microsoft.TestCommon.Types.SimpleEnum)" },
-                    { "isof(null,Microsoft.TestCommon.Types.FlagsEnum)" },
-
-                    { "isof(binary'T0RhdGE=',Edm.Binary)" },
-                    { "isof(false,Edm.Boolean)" },
-                    { "isof(23,Edm.Byte)" },
-                    { "isof(2001-01-01T12:00:00.000+08:00,Edm.DateTimeOffset)" },
-                    { "isof(23,Edm.Decimal)" },
-                    { "isof(23,Edm.Double)" },
-                    { "isof(duration'PT12H',Edm.Duration)" },
-                    { "isof(00000000-0000-0000-0000-000000000000,Edm.Guid)" },
-                    { "isof(23,Edm.Int16)" },
-                    { "isof(23,Edm.Int32)" },
-                    { "isof(23,Edm.Int64)" },
-                    { "isof(23,Edm.SByte)" },
-                    { "isof(23,Edm.Single)" },
-                    { "isof('hello',Edm.Stream)" },
-                    { "isof('hello',Edm.String)" },
-                    { "isof(0,Microsoft.TestCommon.Types.SimpleEnum)" },
-                    { "isof(Microsoft.TestCommon.Types.SimpleEnum'0',Microsoft.TestCommon.Types.SimpleEnum)" },
-                    { "isof(0,Microsoft.TestCommon.Types.FlagsEnum)" },
-                    { "isof(Microsoft.TestCommon.Types.FlagsEnum'0',Microsoft.TestCommon.Types.FlagsEnum)" },
-
-                    { "isof('OData',Edm.Binary)" },
-                    { "isof('false',Edm.Boolean)" },
-                    { "isof('23',Edm.Byte)" },
-                    { "isof('2001-01-01T12:00:00.000+08:00',Edm.DateTimeOffset)" },
-                    { "isof('23',Edm.Decimal)" },
-                    { "isof('23',Edm.Double)" },
-                    { "isof('PT12H',Edm.Duration)" },
-                    { "isof('00000000-0000-0000-0000-000000000000',Edm.Guid)" },
-                    { "isof('23',Edm.Int16)" },
-                    { "isof('23',Edm.Int32)" },
-                    { "isof('23',Edm.Int64)" },
-                    { "isof('23',Edm.SByte)" },
-                    { "isof('23',Edm.Single)" },
-                    { "isof(23,Edm.String)" },
-                    { "isof('0',Microsoft.TestCommon.Types.FlagsEnum)" },
-                    { "isof('0',Microsoft.TestCommon.Types.SimpleEnum)" },
-
-                    { "isof(ByteArrayProp,Edm.Binary)" },
-                    { "isof(BoolProp,'Edm.Boolean')" },
-                    { "isof(DateTimeOffsetProp,Edm.DateTimeOffset)" },
-                    { "isof(DecimalProp,Edm.Decimal)" },
-                    { "isof(DoubleProp,Edm.Double)" },
-                    { "isof(TimeSpanProp,'Edm.Duration')" },
-                    { "isof(GuidProp,Edm.Guid)" },
-                    { "isof(NullableShortProp,Edm.Int16)" },
-                    { "isof(IntProp,Edm.Int32)" },
-                    { "isof(LongProp,Edm.Int64)" },
-                    { "isof(FloatProp,Edm.Single)" },
-                    { "isof(StringProp,Edm.String)" },
-                    { "isof(IntProp,Microsoft.TestCommon.Types.SimpleEnum)" },
-                    { "isof(FlagsEnumProp,Microsoft.TestCommon.Types.FlagsEnum)" },
-                    { "isof(SimpleEnumProp,Microsoft.TestCommon.Types.SimpleEnum)" },
-
-                    { "isof('Edm.Binary')" },
-                    { "isof('Edm.Boolean')" },
-                    { "isof('Edm.Byte')" },
-                    { "isof('Edm.DateTimeOffset')" },
-                    { "isof('Edm.Decimal')" },
-                    { "isof('Edm.Double')" },
-                    { "isof('Edm.Duration')" },
-                    { "isof('Edm.Guid')" },
-                    { "isof('Edm.Int16')" },
-                    { "isof('Edm.Int32')" },
-                    { "isof('Edm.Int64')" },
-                    { "isof('Edm.SByte')" },
-                    { "isof('Edm.Single')" },
-                    { "isof('Edm.Stream')" },
-                    { "isof('Edm.String')" },
-                    { "isof('Microsoft.TestCommon.Types.SimpleEnum')" },
-                    { "isof('Microsoft.TestCommon.Types.FlagsEnum')" },
-
-                    { "isof(null,'Edm.Binary')" },
-                    { "isof(null,'Edm.Boolean')" },
-                    { "isof(null,'Edm.Byte')" },
-                    { "isof(null,'Edm.DateTimeOffset')" },
-                    { "isof(null,'Edm.Decimal')" },
-                    { "isof(null,'Edm.Double')" },
-                    { "isof(null,'Edm.Duration')" },
-                    { "isof(null,'Edm.Guid')" },
-                    { "isof(null,'Edm.Int16')" },
-                    { "isof(null,'Edm.Int32')" },
-                    { "isof(null,'Edm.Int64')" },
-                    { "isof(null,'Edm.SByte')" },
-                    { "isof(null,'Edm.Single')" },
-                    { "isof(null,'Edm.Stream')" },
-                    { "isof(null,'Edm.String')" },
-                    { "isof(null,'Microsoft.TestCommon.Types.SimpleEnum')" },
-                    { "isof(null,'Microsoft.TestCommon.Types.FlagsEnum')" },
-
-                    { "isof(binary'T0RhdGE=','Edm.Binary')" },
-                    { "isof(false,'Edm.Boolean')" },
-                    { "isof(23,'Edm.Byte')" },
-                    { "isof(2001-01-01T12:00:00.000+08:00,'Edm.DateTimeOffset')" },
-                    { "isof(23,'Edm.Decimal')" },
-                    { "isof(23,'Edm.Double')" },
-                    { "isof(duration'PT12H','Edm.Duration')" },
-                    { "isof(00000000-0000-0000-0000-000000000000,'Edm.Guid')" },
-                    { "isof(23,'Edm.Int16')" },
-                    { "isof(23,'Edm.Int32')" },
-                    { "isof(23,'Edm.Int64')" },
-                    { "isof(23,'Edm.SByte')" },
-                    { "isof(23,'Edm.Single')" },
-                    { "isof('hello','Edm.Stream')" },
-                    { "isof('hello','Edm.String')" },
-                    { "isof(0,'Microsoft.TestCommon.Types.FlagsEnum')" },
-                    { "isof(Microsoft.TestCommon.Types.FlagsEnum'0','Microsoft.TestCommon.Types.FlagsEnum')" },
-                    { "isof(0,'Microsoft.TestCommon.Types.SimpleEnum')" },
-                    { "isof(Microsoft.TestCommon.Types.SimpleEnum'0','Microsoft.TestCommon.Types.SimpleEnum')" },
-
-                    { "isof('OData','Edm.Binary')" },
-                    { "isof('false','Edm.Boolean')" },
-                    { "isof('23','Edm.Byte')" },
-                    { "isof('2001-01-01T12:00:00.000+08:00','Edm.DateTimeOffset')" },
-                    { "isof('23','Edm.Decimal')" },
-                    { "isof('23','Edm.Double')" },
-                    { "isof('PT12H','Edm.Duration')" },
-                    { "isof('00000000-0000-0000-0000-000000000000','Edm.Guid')" },
-                    { "isof('23','Edm.Int16')" },
-                    { "isof('23','Edm.Int32')" },
-                    { "isof('23','Edm.Int64')" },
-                    { "isof('23','Edm.SByte')" },
-                    { "isof('23','Edm.Single')" },
-                    { "isof(23,'Edm.String')" },
-                    { "isof('0','Microsoft.TestCommon.Types.FlagsEnum')" },
-                    { "isof('0','Microsoft.TestCommon.Types.SimpleEnum')" },
-
-                    { "isof(ByteArrayProp,'Edm.Binary')" },
-                    { "isof(BoolProp,'Edm.Boolean')" },
-                    { "isof(DateTimeOffsetProp,'Edm.DateTimeOffset')" },
-                    { "isof(DecimalProp,'Edm.Decimal')" },
-                    { "isof(DoubleProp,'Edm.Double')" },
-                    { "isof(TimeSpanProp,'Edm.Duration')" },
-                    { "isof(GuidProp,'Edm.Guid')" },
-                    { "isof(NullableShortProp,'Edm.Int16')" },
-                    { "isof(IntProp,'Edm.Int32')" },
-                    { "isof(LongProp,'Edm.Int64')" },
-                    { "isof(FloatProp,'Edm.Single')" },
-                    { "isof(StringProp,'Edm.String')" },
-                    { "isof(IntProp,'Microsoft.TestCommon.Types.SimpleEnum')" },
-                    { "isof(FlagsEnumProp,'Microsoft.TestCommon.Types.FlagsEnum')" },
-                    { "isof(SimpleEnumProp,'Microsoft.TestCommon.Types.SimpleEnum')" },
-                };
-            }
-        }
-
-        // Demonstrates a missing feature in FilterBinder.
-        [Theory]
-        [PropertyData("IsOfPrimitiveType")]
-        public void IsOfPrimitiveType_ThrowsNotImplemented(string filter)
-        {
-            // Arrange
-            var expectedMessage = "Unknown function 'isof'.";
-
-            // Act & Assert
-            Assert.Throws<NotImplementedException>(() => Bind<DataTypes>(filter), expectedMessage);
         }
 
         public static TheoryDataSet<string> IsOfUnquotedComplexType
@@ -2438,12 +2341,7 @@ namespace System.Web.OData.Query.Expressions
             {
                 return new TheoryDataSet<string>
                 {
-                    { "isof('System.Web.OData.Query.Expressions.Address')" },
                     { "isof('System.Web.OData.Query.Expressions.DerivedProduct')" },
-                    { "isof(null,'System.Web.OData.Query.Expressions.Address')" },
-                    { "isof(null, 'System.Web.OData.Query.Expressions.Address')" },
-                    { "isof(null,'System.Web.OData.Query.Expressions.DerivedCategory')" },
-                    { "isof(null, 'System.Web.OData.Query.Expressions.DerivedCategory')" },
                     { "isof(SupplierAddress,'System.Web.OData.Query.Expressions.Address')" },
                     { "isof(SupplierAddress, 'System.Web.OData.Query.Expressions.Address')" },
                     { "isof(Category,'System.Web.OData.Query.Expressions.DerivedCategory')" },
@@ -2452,16 +2350,45 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
-        // Demonstrates a missing feature in FilterBinder.
         [Theory]
         [PropertyData("IsOfQuotedNonPrimitiveType")]
-        public void IsOfQuotedNonPrimitiveType_ThrowsNotImplemented(string filter)
+        public void IsOfQuotedNonPrimitiveType_Succeeds(string filter)
         {
             // Arrange
-            var expectedMessage = "Unknown function 'isof'.";
+            var model = new DerivedProduct
+            {
+                SupplierAddress = new Address { City = "Redmond", },
+                Category = new DerivedCategory { DerivedCategoryName = "DerivedCategory" }
+            };
 
             // Act & Assert
-            Assert.Throws<NotImplementedException>(() => Bind<Product>(filter), expectedMessage);
+           var filters = VerifyQueryDeserialization<Product>(
+                filter,
+                expectedResult: NotTesting,
+                expectedResultWithNullPropagation: NotTesting);
+            RunFilters<Product>(filters, model, expectedValue: new { WithNullPropagation = true, WithoutNullPropagation = true });
+        }
+
+        [Theory]
+        [InlineData("isof(null,'System.Web.OData.Query.Expressions.Address')")]
+        [InlineData("isof(null, 'System.Web.OData.Query.Expressions.Address')")]
+        [InlineData("isof(null,'System.Web.OData.Query.Expressions.DerivedCategory')")]
+        [InlineData("isof(null, 'System.Web.OData.Query.Expressions.DerivedCategory')")]
+        public void IsOfQuotedNonPrimitiveTypeWithNull_Succeeds_WithFalse(string filter)
+        {
+            // Arrange
+            var model = new DerivedProduct
+            {
+                SupplierAddress = new Address { City = "Redmond", },
+                Category = new DerivedCategory { DerivedCategoryName = "DerivedCategory" }
+            };
+
+            // Act & Assert
+            var filters = VerifyQueryDeserialization<Product>(
+                filter,
+                expectedResult: NotTesting,
+                expectedResultWithNullPropagation: NotTesting);
+            RunFilters<Product>(filters, model, expectedValue: new { WithNullPropagation = false, WithoutNullPropagation = false });
         }
 
         #endregion

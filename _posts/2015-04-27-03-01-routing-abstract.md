@@ -31,7 +31,7 @@ configuration.MapODataServiceRoute(routeName:"myRoute", routePrefix:"odata", mod
 
 With these codes, we registers an OData route named "myRoute", uses "odata" as prefix and by calling `GetEdmModel()` to set up the Edm model.
 
-After registering the Web OData routes, we defines an OData route template in the routing table. The route template has the following syntax:
+After registering the Web OData routes, we define an OData route template in the routing table. The route template has the following syntax:
 {% highlight csharp %}
 ~/odata/~
 {% endhighlight %}

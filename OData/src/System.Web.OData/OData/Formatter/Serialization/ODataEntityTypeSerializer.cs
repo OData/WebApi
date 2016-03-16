@@ -330,6 +330,12 @@ namespace System.Web.OData.Formatter.Serialization
                 entry.AddAction(action);
             }
 
+            IEnumerable<ODataFunction> functions = CreateODataFunctions(selectExpandNode.SelectedFunctions, entityInstanceContext);
+            foreach (ODataFunction function in functions)
+            {
+                entry.AddFunction(function);
+            }
+
             IEdmEntityType pathType = GetODataPathType(entityInstanceContext.SerializerContext);
             AddTypeNameAnnotationAsNeeded(entry, pathType, entityInstanceContext.SerializerContext.MetadataLevel);
 
@@ -631,6 +637,22 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
+        private IEnumerable<ODataFunction> CreateODataFunctions(
+            IEnumerable<IEdmFunction> functions, EntityInstanceContext entityInstanceContext)
+        {
+            Contract.Assert(functions != null);
+            Contract.Assert(entityInstanceContext != null);
+
+            foreach (IEdmFunction function in functions)
+            {
+                ODataFunction oDataFunction = CreateODataFunction(function, entityInstanceContext);
+                if (oDataFunction != null)
+                {
+                    yield return oDataFunction;
+                }
+            }
+        }
+
         /// <summary>
         /// Creates an <see cref="ODataAction" /> to be written for the given action and the entity instance.
         /// </summary>
@@ -650,9 +672,7 @@ namespace System.Web.OData.Formatter.Serialization
                 throw Error.ArgumentNull("entityInstanceContext");
             }
 
-            ODataMetadataLevel metadataLevel = entityInstanceContext.SerializerContext.MetadataLevel;
             IEdmModel model = entityInstanceContext.EdmModel;
-
             ActionLinkBuilder builder = model.GetActionLinkBuilder(action);
 
             if (builder == null)
@@ -660,62 +680,109 @@ namespace System.Web.OData.Formatter.Serialization
                 return null;
             }
 
-            if (ShouldOmitAction(action, builder, metadataLevel))
+            return CreateODataOperation(action, builder, entityInstanceContext) as ODataAction;
+        }
+
+        /// <summary>
+        /// Creates an <see cref="ODataFunction" /> to be written for the given action and the entity instance.
+        /// </summary>
+        /// <param name="function">The OData function.</param>
+        /// <param name="entityInstanceContext">The context for the entity instance being written.</param>
+        /// <returns>The created function or null if the action should not be written.</returns>
+        [SuppressMessage("Microsoft.Usage", "CA2234: Pass System.Uri objects instead of strings",
+            Justification = "This overload is equally good")]
+        [SuppressMessage("Microsoft.Naming", "CA1716: Use function as parameter name", Justification = "Function")]
+        public virtual ODataFunction CreateODataFunction(IEdmFunction function, EntityInstanceContext entityInstanceContext)
+        {
+            if (function == null)
+            {
+                throw Error.ArgumentNull("function");
+            }
+
+            if (entityInstanceContext == null)
+            {
+                throw Error.ArgumentNull("entityInstanceContext");
+            }
+
+            IEdmModel model = entityInstanceContext.EdmModel;
+            FunctionLinkBuilder builder = model.GetFunctionLinkBuilder(function);
+
+            if (builder == null)
             {
                 return null;
             }
 
-            Uri target = builder.BuildActionLink(entityInstanceContext);
+            return CreateODataOperation(function, builder, entityInstanceContext) as ODataFunction;
+        }
 
+        private static ODataOperation CreateODataOperation(IEdmOperation operation, ProcedureLinkBuilder builder, EntityInstanceContext entityInstanceContext)
+        {
+            Contract.Assert(operation != null);
+            Contract.Assert(builder != null);
+            Contract.Assert(entityInstanceContext != null);
+
+            ODataMetadataLevel metadataLevel = entityInstanceContext.SerializerContext.MetadataLevel;
+            IEdmModel model = entityInstanceContext.EdmModel;
+
+            if (ShouldOmitOperation(operation, builder, metadataLevel))
+            {
+                return null;
+            }
+
+            Uri target = builder.BuildLink(entityInstanceContext);
             if (target == null)
             {
                 return null;
             }
 
             Uri baseUri = new Uri(entityInstanceContext.Url.CreateODataLink(new MetadataPathSegment()));
-            Uri metadata = new Uri(baseUri, "#" + CreateMetadataFragment(action));
+            Uri metadata = new Uri(baseUri, "#" + CreateMetadataFragment(operation));
 
-            ODataAction odataAction = new ODataAction
+            ODataOperation odataOperation;
+            if (operation is IEdmAction)
             {
-                Metadata = metadata,
-            };
-
-            bool alwaysIncludeDetails = metadataLevel == ODataMetadataLevel.FullMetadata;
+                odataOperation = new ODataAction();
+            }
+            else
+            {
+                odataOperation = new ODataFunction();
+            }
+            odataOperation.Metadata = metadata;
 
             // Always omit the title in minimal/no metadata modes.
-            if (alwaysIncludeDetails)
+            if (metadataLevel == ODataMetadataLevel.FullMetadata)
             {
-                EmitTitle(model, action, odataAction);
+                EmitTitle(model, operation, odataOperation);
             }
 
-            // Omit the target in minimal/no metadata modes unless it doesn't follow conventions.
-            if (alwaysIncludeDetails || !builder.FollowsConventions)
+            // Set the target only for full metadata and doesn't follow convention
+            if (!builder.FollowsConventions && metadataLevel == ODataMetadataLevel.FullMetadata)
             {
-                odataAction.Target = target;
+                odataOperation.Target = target;
             }
 
-            return odataAction;
+            return odataOperation;
         }
 
-        internal static void EmitTitle(IEdmModel model, IEdmOperation operation, ODataOperation odataAction)
+        internal static void EmitTitle(IEdmModel model, IEdmOperation operation, ODataOperation odataOperation)
         {
             // The title should only be emitted in full metadata.
             OperationTitleAnnotation titleAnnotation = model.GetOperationTitleAnnotation(operation);
             if (titleAnnotation != null)
             {
-                odataAction.Title = titleAnnotation.Title;
+                odataOperation.Title = titleAnnotation.Title;
             }
             else
             {
-                odataAction.Title = operation.Name;
+                odataOperation.Title = operation.Name;
             }
         }
 
-        internal static string CreateMetadataFragment(IEdmAction action)
+        internal static string CreateMetadataFragment(IEdmOperation operation)
         {
             // There can only be one entity container in OData V4.
-            string actionName = action.Name;
-            string fragment = action.Namespace + "." + actionName;
+            string actionName = operation.Name;
+            string fragment = operation.Namespace + "." + actionName;
 
             return fragment;
         }
@@ -770,7 +837,7 @@ namespace System.Web.OData.Formatter.Serialization
             });
         }
 
-        internal static bool ShouldOmitAction(IEdmAction action, ActionLinkBuilder builder,
+        internal static bool ShouldOmitOperation(IEdmOperation operation, ProcedureLinkBuilder builder,
             ODataMetadataLevel metadataLevel)
         {
             Contract.Assert(builder != null);
@@ -779,7 +846,7 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 case ODataMetadataLevel.MinimalMetadata:
                 case ODataMetadataLevel.NoMetadata:
-                    return action.IsBound && builder.FollowsConventions;
+                    return operation.IsBound && builder.FollowsConventions;
 
                 case ODataMetadataLevel.FullMetadata:
                 default: // All values already specified; just keeping the compiler happy.

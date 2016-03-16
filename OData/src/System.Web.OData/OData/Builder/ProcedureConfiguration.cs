@@ -30,9 +30,9 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Gets or sets the currently registered procedure link factory.
+        /// Gets or sets the currently registered procedure link builder.
         /// </summary>
-        protected Func<EntityInstanceContext, Uri> LinkFactory { get; set; }
+        protected ProcedureLinkBuilder ProcedureLinkBuilder { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether procedure links follow OData conventions.

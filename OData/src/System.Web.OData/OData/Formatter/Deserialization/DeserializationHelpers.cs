@@ -394,7 +394,7 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         // The same logic from ODL to get the element type name in a collection.
-        private static string GetCollectionElementTypeName(string typeName, bool isNested)
+        internal static string GetCollectionElementTypeName(string typeName, bool isNested)
         {
             const string CollectionTypeQualifier = "Collection";
             int collectionTypeQualifierLength = CollectionTypeQualifier.Length;

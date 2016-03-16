@@ -4,6 +4,7 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter;
@@ -91,8 +92,20 @@ namespace System.Web.OData
             ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(action);
             if (actionLinkBuilder == null)
             {
-                actionLinkBuilder = new ActionLinkBuilder(
-                    entityInstanceContext => entityInstanceContext.GenerateActionLink(action), followsConventions: true);
+                // Let ODL to process the action link for entity
+                if (action.Parameters != null && action.Parameters.First().Type.IsEntity())
+                {
+                    actionLinkBuilder = new ActionLinkBuilder(
+                        (EntityInstanceContext entityInstanceContext) => entityInstanceContext.GenerateActionLink(action),
+                        followsConventions: true);
+                }
+                else if (action.Parameters != null && action.Parameters.First().Type.IsCollection())
+                {
+                    actionLinkBuilder =
+                        new ActionLinkBuilder((FeedContext feedContext) => feedContext.GenerateActionLink(action),
+                            followsConventions: true);
+                }
+
                 model.SetActionLinkBuilder(action, actionLinkBuilder);
             }
 
@@ -115,6 +128,50 @@ namespace System.Web.OData
             }
 
             model.SetAnnotationValue(action, actionLinkBuilder);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="FunctionLinkBuilder"/> to be used while generating function links for the given function.
+        /// </summary>
+        /// <param name="model">The <see cref="IEdmModel"/> containing the action.</param>
+        /// <param name="function">The function for which the link builder is needed.</param>
+        /// <returns>The <see cref="FunctionLinkBuilder"/> for the given function if one is set; otherwise, a new
+        /// <see cref="FunctionLinkBuilder"/> that generates function links following OData URL conventions.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "IEdmActionImport is more relevant here.")]
+        public static FunctionLinkBuilder GetFunctionLinkBuilder(this IEdmModel model, IEdmFunction function)
+        {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            if (function == null)
+            {
+                throw Error.ArgumentNull("function");
+            }
+
+            FunctionLinkBuilder functionLinkBuilder = model.GetAnnotationValue<FunctionLinkBuilder>(function);
+            if (functionLinkBuilder == null)
+            {
+                if (function.Parameters != null && function.Parameters.First().Type.IsEntity())
+                {
+                    functionLinkBuilder = new FunctionLinkBuilder(
+                        (EntityInstanceContext entityInstanceContext) => entityInstanceContext.GenerateFunctionLink(function),
+                        followsConventions: true);
+                }
+                else if (function.Parameters != null && function.Parameters.First().Type.IsCollection())
+                {
+                    functionLinkBuilder =
+                        new FunctionLinkBuilder(
+                            (FeedContext feedContext) => feedContext.GenerateFunctionLink(function),
+                            followsConventions: true);
+                }
+
+                model.SetFunctionLinkBuilder(function, functionLinkBuilder);
+            }
+
+            return functionLinkBuilder;
         }
 
         /// <summary>

@@ -193,6 +193,108 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void GenerateActionLinkForFeed_ThrowsArgumentNull_FeedContext()
+        {
+            // Arrange
+            FeedContext feedContext = null;
+            IEdmAction action = new Mock<IEdmAction>().Object;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => feedContext.GenerateActionLink(action), "feedContext");
+        }
+
+        [Fact]
+        public void GenerateActionLinkForFeed_ThrowsArgumentNull_Action()
+        {
+            // Arrange
+            FeedContext feedContext = new FeedContext();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => feedContext.GenerateActionLink(action: null), "action");
+        }
+
+        [Fact]
+        public void GenerateActionLinkForFeed_ThrowsActionNotBoundToCollectionOfEntity_IfActionHasNoParameters()
+        {
+            // Arrange
+            FeedContext context = new FeedContext();
+            Mock<IEdmAction> action = new Mock<IEdmAction>();
+            action.Setup(a => a.Parameters).Returns(Enumerable.Empty<IEdmOperationParameter>());
+            action.Setup(a => a.Name).Returns("SomeAction");
+
+            // Act & Assert
+            Assert.ThrowsArgument(
+                () => context.GenerateActionLink(action.Object),
+                "action",
+                "The action 'SomeAction' is not bound to the collection of entity. Only actions that are bound to entities can have action links.");
+        }
+
+        [Fact]
+        public void GenerateActionLinkForFeed_GeneratesLinkWithoutCast_IfEntitySetTypeMatchesActionEntityType()
+        {
+            // Arrange
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            IEdmAction action = _model.Model.SchemaElements.OfType<IEdmAction>().First(a => a.Name == "UpgradeAll");
+            Assert.NotNull(action); // Guard
+
+            var context = new FeedContext
+            {
+                Request = request,
+                EntitySetBase = _model.Customers,
+                Url = request.GetUrlHelper(),
+            };
+
+            // Act
+            Uri link = context.GenerateActionLink(action);
+
+            Assert.Equal("http://localhost/Customers/NS.UpgradeAll", link.AbsoluteUri);
+        }
+
+        [Fact]
+        public void GenerateActionLinkForFeed_GeneratesLinkWithCast_IfEntitySetTypeDoesnotMatchActionEntityType()
+        {
+            // Arrange
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            IEdmAction action = _model.Model.SchemaElements.OfType<IEdmAction>().First(a => a.Name == "UpgradeSpecialAll");
+            Assert.NotNull(action); // Guard
+            var context = new FeedContext
+            {
+                Request = request,
+                EntitySetBase = _model.Customers,
+                Url = request.GetUrlHelper(),
+            };
+
+            // Act
+            Uri link = context.GenerateActionLink(action);
+
+            // Assert
+            Assert.Equal("http://localhost/Customers/NS.SpecialCustomer/NS.UpgradeSpecialAll", link.AbsoluteUri);
+        }
+
+        [Fact]
+        public void GenerateActionLinkForFeed_GeneratesLinkWithDownCast_IfElementTypeDerivesFromBindingParameterType()
+        {
+            // Arrange
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            IEdmAction action = _model.Model.SchemaElements.OfType<IEdmAction>().First(a => a.Name == "UpgradeAll");
+            Assert.NotNull(action); // Guard
+            IEdmEntitySet specialCustomers = new EdmEntitySet(_model.Container, "SpecialCustomers", _model.SpecialCustomer);
+
+            var context = new FeedContext
+            {
+                Request = request,
+                EntitySetBase = specialCustomers,
+                Url = request.GetUrlHelper(),
+            };
+
+            // Act
+            Uri link = context.GenerateActionLink(action);
+
+            // Assert
+            Assert.Equal("http://localhost/SpecialCustomers/NS.Customer/NS.UpgradeAll", link.AbsoluteUri);
+        }
+
+        [Fact]
         public void GenerateActionLink_ThrowsArgumentNull_EntityInstanceContext()
         {
             EntityInstanceContext entityContext = null;
@@ -234,7 +336,7 @@ namespace System.Web.OData.Builder
             // Act
             Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer);
 
-            Assert.Equal("http://localhost/Customers(42)/upgrade", link.AbsoluteUri);
+            Assert.Equal("http://localhost/Customers(42)/NS.upgrade", link.AbsoluteUri);
         }
 
         [Fact]
@@ -249,7 +351,7 @@ namespace System.Web.OData.Builder
             Uri link = entityContext.GenerateActionLink(_model.UpgradeSpecialCustomer);
 
             // Assert
-            Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer/specialUpgrade", link.AbsoluteUri);
+            Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer/NS.specialUpgrade", link.AbsoluteUri);
         }
 
         [Fact]
@@ -265,7 +367,7 @@ namespace System.Web.OData.Builder
             Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer);
 
             // Assert
-            Assert.Equal("http://localhost/SpecialCustomers(42)/NS.Customer/upgrade", link.AbsoluteUri);
+            Assert.Equal("http://localhost/SpecialCustomers(42)/NS.Customer/NS.upgrade", link.AbsoluteUri);
         }
 
         [Fact]
@@ -280,7 +382,7 @@ namespace System.Web.OData.Builder
             Uri link = entityContext.GenerateActionLink(_model.UpgradeSpecialCustomer);
 
             // Assert
-            Assert.Equal("http://localhost/Mary/NS.SpecialCustomer/specialUpgrade", link.AbsoluteUri);
+            Assert.Equal("http://localhost/Mary/NS.SpecialCustomer/NS.specialUpgrade", link.AbsoluteUri);
         }
 
         [Fact]
@@ -296,7 +398,7 @@ namespace System.Web.OData.Builder
             Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer);
 
             // Assert
-            Assert.Equal("http://localhost/Me/NS.Customer/upgrade", link.AbsoluteUri);
+            Assert.Equal("http://localhost/Me/NS.Customer/NS.upgrade", link.AbsoluteUri);
         }
 
         [Fact]
@@ -315,6 +417,108 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void GenerateFunctionLinkForFeed_ThrowsArgumentNull_FeedContext()
+        {
+            // Arrange
+            FeedContext feedContext = null;
+            IEdmFunction function = new Mock<IEdmFunction>().Object;
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => feedContext.GenerateFunctionLink(function), "feedContext");
+        }
+
+        [Fact]
+        public void GenerateFunctionLinkForFeed_ThrowsArgumentNull_Function()
+        {
+            // Arrange
+            FeedContext feedContext = new FeedContext();
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(() => feedContext.GenerateFunctionLink(function: null), "function");
+        }
+
+        [Fact]
+        public void GenerateFunctionLinkForFeed_ThrowsFunctionNotBoundToCollectionOfEntity_IfFunctionHasNoParameters()
+        {
+            // Arrange
+            FeedContext context = new FeedContext();
+            Mock<IEdmFunction> function = new Mock<IEdmFunction>();
+            function.Setup(a => a.Parameters).Returns(Enumerable.Empty<IEdmOperationParameter>());
+            function.Setup(a => a.Name).Returns("SomeFunction");
+
+            // Act & Assert
+            Assert.ThrowsArgument(
+                () => context.GenerateFunctionLink(function.Object),
+                "function",
+                "The function 'SomeFunction' is not bound to the collection of entity. Only functions that are bound to entities can have function links.");
+        }
+
+        [Fact]
+        public void GenerateFunctionLinkForFeed_GeneratesLinkWithoutCast_IfEntitySetTypeMatchesActionEntityType()
+        {
+            // Arrange
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            IEdmFunction function = _model.Model.SchemaElements.OfType<IEdmFunction>().First(a => a.Name == "IsAllUpgraded");
+            Assert.NotNull(function); // Guard
+
+            var context = new FeedContext
+            {
+                Request = request,
+                EntitySetBase = _model.Customers,
+                Url = request.GetUrlHelper(),
+            };
+
+            // Act
+            Uri link = context.GenerateFunctionLink(function);
+
+            Assert.Equal("http://localhost/Customers/NS.IsAllUpgraded(param=@param)", link.AbsoluteUri);
+        }
+
+        [Fact]
+        public void GenerateFunctionLinkForFeed_GeneratesLinkWithCast_IfEntitySetTypeDoesnotMatchActionEntityType()
+        {
+            // Arrange
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            IEdmFunction function = _model.Model.SchemaElements.OfType<IEdmFunction>().First(a => a.Name == "IsSpecialAllUpgraded");
+            Assert.NotNull(function); // Guard
+            var context = new FeedContext
+            {
+                Request = request,
+                EntitySetBase = _model.Customers,
+                Url = request.GetUrlHelper(),
+            };
+
+            // Act
+            Uri link = context.GenerateFunctionLink(function);
+
+            // Assert
+            Assert.Equal("http://localhost/Customers/NS.SpecialCustomer/NS.IsSpecialAllUpgraded(param=@param)", link.AbsoluteUri);
+        }
+
+        [Fact]
+        public void GenerateFunctionLinkForFeed_GeneratesLinkWithDownCast_IfElementTypeDerivesFromBindingParameterType()
+        {
+            // Arrange
+            HttpRequestMessage request = GetODataRequest(_model.Model);
+            IEdmFunction function = _model.Model.SchemaElements.OfType<IEdmFunction>().First(a => a.Name == "IsAllUpgraded");
+            Assert.NotNull(function); // Guard
+            IEdmEntitySet specialCustomers = new EdmEntitySet(_model.Container, "SpecialCustomers", _model.SpecialCustomer);
+
+            var context = new FeedContext
+            {
+                Request = request,
+                EntitySetBase = specialCustomers,
+                Url = request.GetUrlHelper(),
+            };
+
+            // Act
+            Uri link = context.GenerateFunctionLink(function);
+
+            // Assert
+            Assert.Equal("http://localhost/SpecialCustomers/NS.Customer/NS.IsAllUpgraded(param=@param)", link.AbsoluteUri);
+        }
+
+        [Fact]
         public void GenerateFunctionLink_GeneratesLinkWithoutCast_IfEntitySetTypeMatchesActionEntityType()
         {
             // Arrange
@@ -326,7 +530,7 @@ namespace System.Web.OData.Builder
             Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded);
 
             // Assert
-            Assert.Equal("http://localhost/Customers(42)/IsUpgradedWithParam(entity=@entity,city=@city)", link.AbsoluteUri);
+            Assert.Equal("http://localhost/Customers(42)/NS.IsUpgradedWithParam(city=@city)", link.AbsoluteUri);
         }
 
         [Fact]
@@ -341,7 +545,7 @@ namespace System.Web.OData.Builder
             Uri link = entityContext.GenerateFunctionLink(_model.IsSpecialCustomerUpgraded);
 
             // Assert
-            Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer/IsSpecialUpgraded(entity=@entity)", link.AbsoluteUri);
+            Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer/NS.IsSpecialUpgraded()", link.AbsoluteUri);
         }
 
         [Fact]
@@ -357,7 +561,7 @@ namespace System.Web.OData.Builder
             Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded);
 
             // Assert
-            Assert.Equal("http://localhost/SpecialCustomers(42)/NS.Customer/IsUpgradedWithParam(entity=@entity,city=@city)",
+            Assert.Equal("http://localhost/SpecialCustomers(42)/NS.Customer/NS.IsUpgradedWithParam(city=@city)",
                 link.AbsoluteUri);
         }
 
@@ -373,7 +577,7 @@ namespace System.Web.OData.Builder
             Uri link = entityContext.GenerateFunctionLink(_model.IsSpecialCustomerUpgraded);
 
             // Assert
-            Assert.Equal("http://localhost/Mary/NS.SpecialCustomer/IsSpecialUpgraded(entity=@entity)", link.AbsoluteUri);
+            Assert.Equal("http://localhost/Mary/NS.SpecialCustomer/NS.IsSpecialUpgraded()", link.AbsoluteUri);
         }
 
         [Fact]
@@ -389,8 +593,7 @@ namespace System.Web.OData.Builder
             Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded);
 
             // Assert
-            Assert.Equal("http://localhost/Me/NS.Customer/IsUpgradedWithParam(entity=@entity,city=@city)",
-                link.AbsoluteUri);
+            Assert.Equal("http://localhost/Me/NS.Customer/NS.IsUpgradedWithParam(city=@city)", link.AbsoluteUri);
         }
 
         private static HttpRequestMessage GetODataRequest(IEdmModel model)

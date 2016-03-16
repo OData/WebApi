@@ -140,6 +140,11 @@ public sealed class System.Web.OData.EdmModelExtensions {
 	[
 	ExtensionAttribute(),
 	]
+	public static FunctionLinkBuilder GetFunctionLinkBuilder (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Edm.IEdmFunction function)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static NavigationSourceLinkBuilderAnnotation GetNavigationSourceLinkBuilder (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Edm.IEdmNavigationSource navigationSource)
 
 	[
@@ -935,13 +940,13 @@ public abstract class System.Web.OData.Builder.ProcedureConfiguration {
 	bool IsComposable  { public virtual get; }
 	bool IsSideEffecting  { public abstract get; }
 	ProcedureKind Kind  { public abstract get; }
-	System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] LinkFactory  { protected get; protected set; }
 	ODataModelBuilder ModelBuilder  { protected get; protected set; }
 	string Name  { public get; protected set; }
 	string Namespace  { public get; public set; }
 	NavigationSourceConfiguration NavigationSource  { public get; public set; }
 	bool OptionalReturn  { public get; public set; }
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.ParameterConfiguration]] Parameters  { public virtual get; }
+	ProcedureLinkBuilder ProcedureLinkBuilder  { protected get; protected set; }
 	IEdmTypeConfiguration ReturnType  { public get; public set; }
 	string Title  { public get; public set; }
 
@@ -1060,7 +1065,17 @@ public sealed class System.Web.OData.Builder.LinkGenerationHelpers {
 	[
 	ExtensionAttribute(),
 	]
+	public static System.Uri GenerateActionLink (FeedContext feedContext, Microsoft.OData.Edm.IEdmOperation action)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static System.Uri GenerateFunctionLink (EntityInstanceContext entityContext, Microsoft.OData.Edm.IEdmOperation function)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static System.Uri GenerateFunctionLink (FeedContext feedContext, Microsoft.OData.Edm.IEdmOperation function)
 
 	[
 	ExtensionAttribute(),
@@ -1109,7 +1124,9 @@ public class System.Web.OData.Builder.ActionConfiguration : ProcedureConfigurati
 	ProcedureKind Kind  { public virtual get; }
 
 	public System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] GetActionLink ()
+	public System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] GetFeedActionLink ()
 	public ActionConfiguration HasActionLink (System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] actionLinkFactory, bool followsConventions)
+	public ActionConfiguration HasFeedActionLink (System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] actionLinkFactory, bool followsConventions)
 	public ActionConfiguration Returns ()
 	public ActionConfiguration Returns (System.Type clrReturnType)
 	public ActionConfiguration ReturnsCollection ()
@@ -1124,12 +1141,12 @@ public class System.Web.OData.Builder.ActionConfiguration : ProcedureConfigurati
 	public ActionConfiguration SetBindingParameter (string name, IEdmTypeConfiguration bindingParameterType)
 }
 
-public class System.Web.OData.Builder.ActionLinkBuilder {
-	public ActionLinkBuilder (System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] actionLinkFactory, bool followsConventions)
-
-	bool FollowsConventions  { public get; }
+public class System.Web.OData.Builder.ActionLinkBuilder : ProcedureLinkBuilder {
+	public ActionLinkBuilder (System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] linkFactory, bool followsConventions)
+	public ActionLinkBuilder (System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] linkFactory, bool followsConventions)
 
 	public virtual System.Uri BuildActionLink (EntityInstanceContext context)
+	public virtual System.Uri BuildActionLink (FeedContext context)
 	public static System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] CreateActionLinkFactory (System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] baseFactory, System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Boolean]] expensiveAvailabilityCheck)
 }
 
@@ -1321,7 +1338,9 @@ public class System.Web.OData.Builder.FunctionConfiguration : ProcedureConfigura
 	bool SupportedInFilter  { public get; public set; }
 	bool SupportedInOrderBy  { public get; public set; }
 
+	public System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] GetFeedFunctionLink ()
 	public System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] GetFunctionLink ()
+	public FunctionConfiguration HasFeedFunctionLink (System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] functionLinkFactory, bool followsConventions)
 	public FunctionConfiguration HasFunctionLink (System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] functionLinkFactory, bool followsConventions)
 	public FunctionConfiguration Returns ()
 	public FunctionConfiguration Returns (System.Type clrReturnType)
@@ -1335,12 +1354,12 @@ public class System.Web.OData.Builder.FunctionConfiguration : ProcedureConfigura
 	public FunctionConfiguration SetBindingParameter (string name, IEdmTypeConfiguration bindingParameterType)
 }
 
-public class System.Web.OData.Builder.FunctionLinkBuilder {
-	public FunctionLinkBuilder (System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] functionLinkFactory, bool followsConventions)
-
-	bool FollowsConventions  { public get; }
+public class System.Web.OData.Builder.FunctionLinkBuilder : ProcedureLinkBuilder {
+	public FunctionLinkBuilder (System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] linkFactory, bool followsConventions)
+	public FunctionLinkBuilder (System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] linkFactory, bool followsConventions)
 
 	public virtual System.Uri BuildFunctionLink (EntityInstanceContext context)
+	public virtual System.Uri BuildFunctionLink (FeedContext context)
 	public static System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] CreateFunctionLinkFactory (System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] baseFactory, System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Boolean]] expensiveAvailabilityCheck)
 }
 
@@ -1486,6 +1505,18 @@ public class System.Web.OData.Builder.PrimitiveTypeConfiguration : IEdmTypeConfi
 	ODataModelBuilder ModelBuilder  { public virtual get; }
 	string Name  { public virtual get; }
 	string Namespace  { public virtual get; }
+}
+
+public class System.Web.OData.Builder.ProcedureLinkBuilder {
+	public ProcedureLinkBuilder (System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] linkFactory, bool followsConventions)
+	public ProcedureLinkBuilder (System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] linkFactory, bool followsConventions)
+
+	System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] FeedLinkFactory  { public get; }
+	bool FollowsConventions  { public get; }
+	System.Func`2[[System.Web.OData.EntityInstanceContext],[System.Uri]] LinkFactory  { public get; }
+
+	public virtual System.Uri BuildLink (EntityInstanceContext context)
+	public virtual System.Uri BuildLink (FeedContext context)
 }
 
 public class System.Web.OData.Builder.SelfLinkBuilder`1 {
@@ -2964,6 +2995,7 @@ public class System.Web.OData.Formatter.Serialization.ODataEntityTypeSerializer 
 	public virtual string CreateETag (EntityInstanceContext entityInstanceContext)
 	public virtual Microsoft.OData.Core.ODataNavigationLink CreateNavigationLink (Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, EntityInstanceContext entityInstanceContext)
 	public virtual Microsoft.OData.Core.ODataAction CreateODataAction (Microsoft.OData.Edm.IEdmAction action, EntityInstanceContext entityInstanceContext)
+	public virtual Microsoft.OData.Core.ODataFunction CreateODataFunction (Microsoft.OData.Edm.IEdmFunction function, EntityInstanceContext entityInstanceContext)
 	public virtual SelectExpandNode CreateSelectExpandNode (EntityInstanceContext entityInstanceContext)
 	public virtual Microsoft.OData.Core.ODataProperty CreateStructuralProperty (Microsoft.OData.Edm.IEdmStructuralProperty structuralProperty, EntityInstanceContext entityInstanceContext)
 	public virtual void WriteDeltaObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.Core.ODataDeltaWriter writer, ODataSerializerContext writeContext)
@@ -2989,6 +3021,7 @@ public class System.Web.OData.Formatter.Serialization.ODataFeedSerializer : ODat
 	public ODataFeedSerializer (ODataSerializerProvider serializerProvider)
 
 	public virtual Microsoft.OData.Core.ODataFeed CreateODataFeed (System.Collections.IEnumerable feedInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference feedType, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.Core.ODataOperation CreateODataOperation (Microsoft.OData.Edm.IEdmOperation operation, FeedContext feedContext, ODataSerializerContext writeContext)
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.Core.ODataWriter writer, ODataSerializerContext writeContext)
 }

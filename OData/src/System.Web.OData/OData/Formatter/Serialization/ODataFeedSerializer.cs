@@ -2,6 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 using System.Web.Http;
@@ -9,6 +11,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
@@ -160,6 +163,34 @@ namespace System.Web.OData.Formatter.Serialization
         {
             ODataFeed feed = new ODataFeed();
 
+            if (writeContext.NavigationSource != null)
+            {
+                FeedContext feedContext = new FeedContext
+                {
+                    Request = writeContext.Request,
+                    RequestContext = writeContext.RequestContext,
+                    EntitySetBase = writeContext.NavigationSource as IEdmEntitySetBase,
+                    Url = writeContext.Url,
+                    FeedInstance = feedInstance
+                };
+
+                IEdmEntityType entityType = GetEntityType(feedType).Definition as IEdmEntityType;
+                var operations = writeContext.Model.GetAvailableOperationsBoundToCollection(entityType);
+                var odataOperations = CreateODataOperations(operations, feedContext, writeContext);
+                foreach (var odataOperation in odataOperations)
+                {
+                    ODataAction action = odataOperation as ODataAction;
+                    if (action != null)
+                    {
+                        feed.AddAction(action);
+                    }
+                    else
+                    {
+                        feed.AddFunction((ODataFunction)odataOperation);
+                    }
+                }
+            }
+
             if (writeContext.ExpandedEntity == null)
             {
                 // If we have more OData format specific information apply it now, only if we are the root feed.
@@ -197,6 +228,103 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             return feed;
+        }
+
+        private IEnumerable<ODataOperation> CreateODataOperations(IEnumerable<IEdmOperation> operations, FeedContext feedContext, ODataSerializerContext writeContext)
+        {
+            Contract.Assert(operations != null);
+            Contract.Assert(feedContext != null);
+            Contract.Assert(writeContext != null);
+
+            foreach (IEdmOperation operation in operations)
+            {
+                ODataOperation oDataOperation = CreateODataOperation(operation, feedContext, writeContext);
+                if (oDataOperation != null)
+                {
+                    yield return oDataOperation;
+                }
+            }
+        }
+
+        /// <summary>
+        ///  Creates an <see cref="ODataOperation" /> to be written for the given operation and the feed instance.
+        /// </summary>
+        /// <param name="operation">The OData operation.</param>
+        /// <param name="feedContext">The context for the feed instance being written.</param>
+        /// <param name="writeContext">The serializer context.</param>
+        /// <returns>The created operation or null if the operation should not be written.</returns>
+        [SuppressMessage("Microsoft.Usage", "CA2234: Pass System.Uri objects instead of strings", Justification = "This overload is equally good")]
+        public virtual ODataOperation CreateODataOperation(IEdmOperation operation, FeedContext feedContext, ODataSerializerContext writeContext)
+        {
+            if (operation == null)
+            {
+                throw Error.ArgumentNull("operation");
+            }
+
+            if (feedContext == null)
+            {
+                throw Error.ArgumentNull("feedContext");
+            }
+
+            if (writeContext == null)
+            {
+                throw Error.ArgumentNull("writeContext");
+            }
+
+            ODataMetadataLevel metadataLevel = writeContext.MetadataLevel;
+            IEdmModel model = writeContext.Model;
+
+            if (metadataLevel != ODataMetadataLevel.FullMetadata)
+            {
+                return null;
+            }
+
+            ProcedureLinkBuilder builder;
+            IEdmAction action = operation as IEdmAction;
+            if (action != null)
+            {
+                builder = model.GetActionLinkBuilder(action);
+            }
+            else
+            {
+                builder = model.GetFunctionLinkBuilder((IEdmFunction)operation);
+            }
+
+            if (builder == null)
+            {
+                return null;
+            }
+
+            Uri target = builder.BuildLink(feedContext);
+            if (target == null)
+            {
+                return null;
+            }
+
+            Uri baseUri = new Uri(writeContext.Url.CreateODataLink(new MetadataPathSegment()));
+            Uri metadata = new Uri(baseUri, "#" + operation.FullName());
+
+            ODataOperation odataOperation;
+            if (action != null)
+            {
+                odataOperation = new ODataAction();
+            }
+            else
+            {
+                odataOperation = new ODataFunction();
+            }
+            odataOperation.Metadata = metadata;
+
+            // Always omit the title in minimal/no metadata modes.
+            ODataEntityTypeSerializer.EmitTitle(model, operation, odataOperation);
+
+            // Omit the target in minimal/no metadata modes unless it doesn't follow conventions.
+            if (metadataLevel == ODataMetadataLevel.FullMetadata || !builder.FollowsConventions)
+            {
+                odataOperation.Target = target;
+            }
+
+            return odataOperation;
         }
 
         private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize)

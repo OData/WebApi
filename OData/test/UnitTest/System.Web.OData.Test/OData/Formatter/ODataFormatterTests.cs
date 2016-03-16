@@ -754,10 +754,24 @@ namespace System.Web.OData.Formatter
 
             main.Action("DoAlways").ReturnsCollectionFromEntitySet<MainEntity>("MainEntity").HasActionLink((c) =>
                 CreateAbsoluteUri("/MainEntity/DoAlways/" + c.GetPropertyValue("Id")),
-                followsConventions: true);
+                followsConventions: false);
             main.Action("DoSometimes").ReturnsCollectionFromEntitySet<MainEntity>(
                 "MainEntity").HasActionLink((c) =>
                     CreateAbsoluteUri("/MainEntity/DoSometimes/" + c.GetPropertyValue("Id")),
+                    followsConventions: false);
+
+            main.Function("IsAlways").ReturnsCollectionFromEntitySet<MainEntity>("MainEntity").HasFunctionLink(c =>
+                CreateAbsoluteUri(String.Format(
+                    "/MainEntity({0})/Default.IsAlways()", c.GetPropertyValue("Id"))),
+                followsConventions: false);
+
+            // action and function bound to collection
+            main.Collection.Action("DoAllAction")
+                .HasFeedActionLink(c => CreateAbsoluteUri("/MainEntity/Default.DoAllAction"), followsConventions: false);
+
+            main.Collection.Function("DoAllFunction").Returns<int>()
+                .HasFeedFunctionLink(
+                    c => CreateAbsoluteUri("/MainEntity/Default.DoAllFunction()"),
                     followsConventions: false);
 
             mainSet.HasNavigationPropertyLink(mainToRelated, (c, p) => new Uri("/MainEntity/RelatedEntity/" +

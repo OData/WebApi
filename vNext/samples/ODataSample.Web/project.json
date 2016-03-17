@@ -1,40 +1,39 @@
-{
-  "webroot": "wwwroot",
-
+﻿{
   "dependencies": {
-    "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc2-16069",
-    "Microsoft.AspNet.Mvc": "6.0.0-rc2-16770",
-    "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc2-16236",
-    "Microsoft.AspNet.StaticFiles": "1.0.0-rc2-16107",
-    "Microsoft.AspNet.OData": "6.0.0-*",
-    "Microsoft.AspNet.Hosting": "1.0.0-rc2-16161"
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.OData": "6.0.0-alpha1-rc2-20100",
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-final",
+    "Microsoft.Extensions.Logging": "1.0.0-rc2-final",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-final"
   },
 
-  "commands": {
-    "web": "ODataSample.Web"
-  },
-
-  "frameworks": {
-    "net451": { },
-    "dnx451": { },
-    "dnxcore50": {
-      "dependencies": {
-        "System.Reflection.Primitives": "4.0.1-beta-*",
-        "System.Xml.XmlDocument": "4.0.1-beta-*"
-      }
+  "tools": {
+    "Microsoft.AspNetCore.Server.IISIntegration.Tools": {
+      "version": "1.0.0-preview1-final",
+      "imports": "portable-net45+win8+dnxcore50"
     }
   },
 
-  "exclude": [
-    "wwwroot",
-    "node_modules",
-    "bower_components"
-  ],
-  "publishExclude": [
-    "node_modules",
-    "bower_components",
-    "**.xproj",
-    "**.user",
-    "**.vspscc"
-  ]
+  "frameworks": {
+    "net452": { }
+  },
+
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "preserveCompilationContext": true
+  },
+
+  "publishOptions": {
+    "include": [
+      "wwwroot",
+      "Views",
+      "appsettings.json",
+      "web.config"
+    ]
+  },
+
+  "scripts": {
+    "postpublish": [ "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%" ]
+  }
 }

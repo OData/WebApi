@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Hosting;
+using Microsoft.AspNetCore.Hosting;
 
 namespace ODataSample.Web
 {
@@ -11,10 +11,8 @@ namespace ODataSample.Web
     {
         public static void Main(string[] args)
         {
-            var hostingConfiguration = WebApplicationConfiguration.GetDefault(args);
- 
-            var application = new WebApplicationBuilder()
-                .UseConfiguration(hostingConfiguration)
+            var application = new WebHostBuilder()
+                .UseDefaultConfiguration(args)
                 .UseStartup<Startup>()
                 .Build();
  

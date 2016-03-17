@@ -3,11 +3,11 @@
 
 using System.Reflection;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     using System;
 
-    using Microsoft.AspNet.OData.Builder;
+    using Microsoft.AspNetCore.OData.Builder;
 
     /// <summary>
     /// Represents the configuration for a complex property of a structural type (an entity type or a complex type).

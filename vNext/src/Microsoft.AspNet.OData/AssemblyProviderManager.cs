@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNet.Mvc.Infrastructure;
-using Microsoft.AspNet.OData.Common;
+﻿using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     internal class AssemblyProviderManager
     {

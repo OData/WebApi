@@ -12,10 +12,10 @@ using Microsoft.OData.Edm.Expressions;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.OData.Edm.Validation;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     internal static class EdmModelHelperMethods
     {

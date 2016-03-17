@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-namespace Microsoft.AspNet.OData.Formatter
+namespace Microsoft.AspNetCore.OData.Formatter
 {
-    using Microsoft.AspNet.Mvc;
+    using Microsoft.AspNetCore.Mvc;
     using Mvc.Infrastructure;
-    using Microsoft.AspNet.OData.Builder;
-    using Microsoft.AspNet.OData.Common;
-    using Microsoft.AspNet.OData.Query.Expressions;
+    using Microsoft.AspNetCore.OData.Builder;
+    using Microsoft.AspNetCore.OData.Common;
+    using Microsoft.AspNetCore.OData.Query.Expressions;
     using Microsoft.OData.Edm;
     using Microsoft.OData.Edm.Annotations;
     using Microsoft.OData.Edm.Expressions;
@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.OData.Formatter
     using System.Linq;
     using System.Reflection;
     using System.Xml.Linq;
-    using TypeHelper = Microsoft.AspNet.OData.TypeHelper;
+    using TypeHelper = Microsoft.AspNetCore.OData.TypeHelper;
 
     internal static class EdmLibHelpers
     {

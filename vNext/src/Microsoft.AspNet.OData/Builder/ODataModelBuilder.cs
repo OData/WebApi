@@ -6,13 +6,13 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
-    using Microsoft.AspNet.OData.Formatter;
+    using Microsoft.AspNetCore.OData.Formatter;
 
     /// <summary>
     /// <see cref="ODataModelBuilder"/> is used to map CLR classes to an EDM model.

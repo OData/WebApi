@@ -1,14 +1,14 @@
 ﻿using System;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 using System.Linq;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.OData.Query.Expressions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query.Expressions;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
-namespace Microsoft.AspNet.OData.Query
+namespace Microsoft.AspNetCore.OData.Query
 {
     // TODO: Replace with full version in the future.
     /// <summary>

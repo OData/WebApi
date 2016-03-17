@@ -4,11 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions
+namespace Microsoft.AspNetCore.OData.Builder.Conventions
 {
-    using Microsoft.AspNet.OData.Formatter;
+    using Microsoft.AspNetCore.OData.Formatter;
 
     /// <summary>
     /// <see cref="EntityTypeConvention"/> for figuring out the entity keys.

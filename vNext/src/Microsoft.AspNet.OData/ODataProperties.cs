@@ -2,9 +2,9 @@
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
-using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+using ODataPath = Microsoft.AspNetCore.OData.Routing.ODataPath;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     public class ODataProperties
     {

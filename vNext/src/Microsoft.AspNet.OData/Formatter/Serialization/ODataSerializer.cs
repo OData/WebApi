@@ -3,9 +3,9 @@
 
 using System;
 using Microsoft.OData.Core;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
     /// An ODataSerializer is used to write a CLR object to an ODataMessage.

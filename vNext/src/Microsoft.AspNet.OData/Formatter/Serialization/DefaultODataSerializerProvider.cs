@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     using System;
     using System.Collections.Generic;
     using System.Reflection;
     using System.Web.Http;
 
-    using Microsoft.AspNet.Http;
-    using Microsoft.AspNet.OData.Common;
-    using Microsoft.AspNet.OData.Extensions;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.OData.Common;
+    using Microsoft.AspNetCore.OData.Extensions;
     using Microsoft.OData.Core;
     using Microsoft.OData.Edm;
 

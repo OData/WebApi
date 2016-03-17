@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     // TODO: add support for FK properties
     // CUT: support for bi-directional properties

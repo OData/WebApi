@@ -3,9 +3,9 @@
 
 using System;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
+namespace Microsoft.AspNetCore.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Ignores properties with the NotMappedAttribute from <see cref="IEdmStructuredType"/>.

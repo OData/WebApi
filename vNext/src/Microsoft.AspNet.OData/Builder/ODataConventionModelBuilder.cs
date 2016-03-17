@@ -7,17 +7,17 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Builder.Conventions;
-using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.OData.Builder.Conventions;
+using Microsoft.AspNetCore.OData.Builder.Conventions.Attributes;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     using Mvc.Infrastructure;
-    using Microsoft.AspNet.OData.Formatter;
+    using Microsoft.AspNetCore.OData.Formatter;
 
     /// <summary>
     /// <see cref="ODataConventionModelBuilder"/> is used to automatically map CLR classes to an EDM model based on a set of <see cref="IConvention"/>.

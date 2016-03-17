@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
     /// EntitySelfLinks contains the Id, Edit and Read links for an entity.

@@ -4,7 +4,7 @@
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
-namespace Microsoft.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNetCore.OData.Query.Expressions
 {
     /// <summary>
     /// Represents a container that captures a named property that is a part of the select expand query.

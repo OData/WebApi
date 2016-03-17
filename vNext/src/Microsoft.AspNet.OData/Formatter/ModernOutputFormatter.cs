@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Mvc.Internal;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
@@ -12,11 +12,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Extensions.Internal;
-using Microsoft.AspNet.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Primitives;
 
-namespace Microsoft.AspNet.OData.Formatter
+namespace Microsoft.AspNetCore.OData.Formatter
 {
-    public class ModernOutputFormatter : OutputFormatter
+    public class ModernOutputFormatter : TextOutputFormatter
     {
         /// <summary>
         /// Returns UTF8 Encoding without BOM and throws on invalid bytes.
@@ -27,20 +28,24 @@ namespace Microsoft.AspNet.OData.Formatter
         public ModernOutputFormatter()
         {
             SupportedEncodings.Add(UTF8EncodingWithoutBOM);
-            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/json"));
-            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/json"));
-            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/xml"));
-
-            foreach (var mediaType in SupportedMediaTypes)
+            var mediaTypes = new[]
             {
-                mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "minimal"));
+                "application/json",
+                "text/json",
+                "application/xml",
+            };
+
+            foreach (var mediaType in mediaTypes)
+            {
+                var mediaTypeHeaderValue = MediaTypeHeaderValue.Parse("application/json");
+                mediaTypeHeaderValue.Parameters.Add(new NameValueHeaderValue("odata.metadata", "minimal"));
+                SupportedMediaTypes.Add(mediaTypeHeaderValue);
             }
         }
 
-        public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
+        public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
         {
             var response = context.HttpContext.Response;
-            var selectedEncoding = context.ContentType.Encoding;
 
             using (var delegatingStream = new NonDisposableStream(response.Body))
             using (var writer = new StreamWriter(delegatingStream, selectedEncoding, 1024, leaveOpen: true))
@@ -55,7 +60,7 @@ namespace Microsoft.AspNet.OData.Formatter
         {
             if (context.Object is IEdmModel)
             {
-                context.ContentType = SupportedMediaTypes[2];
+                context.ContentType = new StringSegment(SupportedMediaTypes[2]);
             }
 
             context.HttpContext.Response.Headers.Add("OData-Version", new[] { "4.0" });

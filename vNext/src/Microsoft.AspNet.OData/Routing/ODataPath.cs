@@ -7,9 +7,9 @@ using System.Diagnostics.Contracts;
 using System.Text;
 using Microsoft.OData.Edm;
 using Semantic = Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Routing
+namespace Microsoft.AspNetCore.OData.Routing
 {
     /// <summary>
     /// Provides an object representation for an OData path with additional information about the EDM type and entity set for the path.

@@ -10,11 +10,11 @@ using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using Semantic = Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Routing
+namespace Microsoft.AspNetCore.OData.Routing
 {
-    using Microsoft.AspNet.OData.Formatter;
+    using Microsoft.AspNetCore.OData.Formatter;
 
     /// <summary>
     /// Parses an OData path as an <see cref="ODataPath"/> and converts an <see cref="ODataPath"/> into an OData link.

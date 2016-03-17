@@ -2,12 +2,12 @@
   "webroot": "wwwroot",
 
   "dependencies": {
-    "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc2-16069",
-    "Microsoft.AspNet.Mvc": "6.0.0-rc2-16770",
-    "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc2-16236",
-    "Microsoft.AspNet.StaticFiles": "1.0.0-rc2-16107",
+    "Microsoft.AspNetCore.IISPlatformHandler": "1.0.0-rc2-20100",
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-20100",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20100",
+    "Microsoft.AspNetCore.StaticFiles": "1.0.0-rc2-16242",
     "Microsoft.AspNet.OData": "6.0.0-*",
-    "Microsoft.AspNet.Hosting": "1.0.0-rc2-16161"
+    "Microsoft.AspNetCore.Hosting": "1.0.0-rc2-20100"
   },
 
   "commands": {
@@ -15,14 +15,7 @@
   },
 
   "frameworks": {
-    "net451": { },
-    "dnx451": { },
-    "dnxcore50": {
-      "dependencies": {
-        "System.Reflection.Primitives": "4.0.1-beta-*",
-        "System.Xml.XmlDocument": "4.0.1-beta-*"
-      }
-    }
+    "dnx451": { }
   },
 
   "exclude": [

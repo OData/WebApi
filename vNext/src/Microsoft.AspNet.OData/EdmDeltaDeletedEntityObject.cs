@@ -6,7 +6,7 @@ using System.Diagnostics.Contracts;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     /// <summary>
     /// Represents an <see cref="IEdmDeltaDeletedEntityObject"/> with no backing CLR <see cref="Type"/>.

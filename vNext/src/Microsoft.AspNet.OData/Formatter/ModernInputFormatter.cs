@@ -3,13 +3,13 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Net.Http.Headers;
-using Microsoft.AspNet.Mvc.Formatters;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.OData.Common;
 using Newtonsoft.Json;
 
-namespace Microsoft.AspNet.OData.Formatter
+namespace Microsoft.AspNetCore.OData.Formatter
 {
-    public class ModernInputFormatter : InputFormatter
+    public class ModernInputFormatter : TextInputFormatter
     {
         private JsonSerializerSettings _serializerSettings;
 
@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Formatter
         }
 
         /// <inheritdoc />
-        public override Task<InputFormatterResult> ReadRequestBodyAsync([NotNull] InputFormatterContext context)
+        public override Task<InputFormatterResult> ReadRequestBodyAsync([NotNull] InputFormatterContext context, Encoding selectedEncoding)
         {
             var type = context.ModelType;
             var request = context.HttpContext.Request;

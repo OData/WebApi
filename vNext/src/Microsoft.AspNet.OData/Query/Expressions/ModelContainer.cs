@@ -4,7 +4,7 @@
 using System.Collections.Concurrent;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNetCore.OData.Query.Expressions
 {
     using System;
 

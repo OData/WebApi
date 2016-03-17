@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// Allows configuration to be performed for a singleton in a model.

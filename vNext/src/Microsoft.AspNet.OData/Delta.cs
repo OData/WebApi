@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     /// <summary>
     /// A class the tracks changes (i.e. the Delta) for an entity.

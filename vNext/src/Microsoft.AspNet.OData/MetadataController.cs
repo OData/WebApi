@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.OData.Common;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     [ApiExplorerSettings(IgnoreApi = true)]
     // [Route("odata/$metadata")]

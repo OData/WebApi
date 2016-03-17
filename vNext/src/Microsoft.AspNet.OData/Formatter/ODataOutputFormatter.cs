@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Edm;
 using System;
@@ -8,18 +8,18 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Formatter.Serialization;
-using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Formatter.Serialization;
+using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.Extensions.Internal;
 using Microsoft.OData.Core;
-using Microsoft.AspNet.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
-namespace Microsoft.AspNet.OData.Formatter
+namespace Microsoft.AspNetCore.OData.Formatter
 {
-    public class ODataOutputFormatter : OutputFormatter
+    public class ODataOutputFormatter : TextOutputFormatter
     {
         private readonly ODataMessageWriterSettings _messageWriterSettings;
         private readonly ODataSerializerProvider _serializerProvider;
@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.OData.Formatter
             _payloadKinds = payloadKinds;
         }
 
-        public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
+        public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
         {
             return Task.Run(() => WriteResponseBody(context));
         }
@@ -133,7 +133,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     RootElementName = GetRootElementName(path) ?? "root",
                     SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                     Path = path,
-                    MetadataLevel = ODataMediaTypes.GetMetadataLevel(context.ContentType),
+                    MetadataLevel = ODataMediaTypes.GetMetadataLevel(new MediaTypeHeaderValue(context.ContentType.Value)),
                     SelectExpandClause = request.ODataProperties().SelectExpandClause,
                 };
 

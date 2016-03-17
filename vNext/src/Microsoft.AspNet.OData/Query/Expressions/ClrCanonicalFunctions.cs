@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.OData.Edm.Library;
 
-namespace Microsoft.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNetCore.OData.Query.Expressions
 {
     internal class ClrCanonicalFunctions
     {

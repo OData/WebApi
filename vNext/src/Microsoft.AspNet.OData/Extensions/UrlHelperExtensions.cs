@@ -4,13 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Routing;
 using System.Diagnostics.Contracts;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Extensions
+namespace Microsoft.AspNetCore.OData.Extensions
 {
     /// <summary>
     /// Provides extension methods for the <see cref="UrlHelper"/> class.

@@ -3,9 +3,9 @@
 
 using System;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// This annotation indicates the mapping from an <see cref="IEdmOperation"/> to a <see cref="string"/>.

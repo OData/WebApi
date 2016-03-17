@@ -7,11 +7,11 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
-    using Microsoft.AspNet.OData.Formatter;
+    using Microsoft.AspNetCore.OData.Formatter;
 
     /// <summary>
     /// Represents an <see cref="IEdmStructuredObject"/> with no backing CLR <see cref="Type"/>.

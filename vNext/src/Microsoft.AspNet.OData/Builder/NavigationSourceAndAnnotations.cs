@@ -3,7 +3,7 @@
 
 using Microsoft.OData.Edm.Library;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// This class is used in internal as a helper class to build the Edm model.

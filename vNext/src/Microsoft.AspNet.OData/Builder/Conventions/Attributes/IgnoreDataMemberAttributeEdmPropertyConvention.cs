@@ -5,9 +5,9 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
+namespace Microsoft.AspNetCore.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Removes properties that have <see cref="IgnoreDataMemberAttribute"/> from their edm type.

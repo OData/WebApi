@@ -3,9 +3,9 @@
 
 using System;
 using Microsoft.OData.Core;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="Microsoft.OData.Core.ODataSerializer"/> for serializing $metadata. 

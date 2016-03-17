@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNet.Mvc.Abstractions;
-using Microsoft.AspNet.Mvc.Controllers;
-using Microsoft.AspNet.Mvc.Infrastructure;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.Routing;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Core.UriParser.Semantic;
 
-namespace Microsoft.AspNet.OData.Routing.Conventions
+namespace Microsoft.AspNetCore.OData.Routing.Conventions
 {
     public class DefaultODataRoutingConvention : IODataRoutingConvention
     {
@@ -148,7 +148,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             }
 
             var services = routeContext.HttpContext.RequestServices;
-            var provider = services.GetRequiredService<IActionDescriptorsCollectionProvider>();
+            var provider = services.GetRequiredService<IActionDescriptorCollectionProvider>();
 
             var methodDescriptor = new List<ActionDescriptor>();
             ActionDescriptor actionDescriptor = null;

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNetCore.OData.Builder;
 
 namespace ODataSample.Web.Models
 {

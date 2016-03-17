@@ -4,9 +4,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
+namespace Microsoft.AspNetCore.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Marks properties that have <see cref="RequiredAttribute"/> as non-optional on their edm type.

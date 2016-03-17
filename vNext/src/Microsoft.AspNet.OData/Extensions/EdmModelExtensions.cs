@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNet.OData.Common;
+﻿using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Edm;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNetCore.OData.Builder;
+using Microsoft.AspNetCore.OData.Formatter;
 
-namespace Microsoft.AspNet.OData.Extensions
+namespace Microsoft.AspNetCore.OData.Extensions
 {
     public static class EdmModelExtensions
     {

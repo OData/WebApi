@@ -3,9 +3,9 @@
 
 using System.Collections.Generic;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Routing
+namespace Microsoft.AspNetCore.OData.Routing
 {
     /// <summary>
     /// An <see cref="ODataPathSegment"/> implementation representing a navigation.

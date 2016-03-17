@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc.Abstractions;
-using Microsoft.AspNet.Mvc.ActionConstraints;
-using Microsoft.AspNet.Mvc.Infrastructure;
-using Microsoft.AspNet.Mvc.Routing;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.AspNet.Routing;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Routing.Conventions;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.AspNet.OData.Routing
+namespace Microsoft.AspNetCore.OData.Routing
 {
     public class ODataActionSelector : IActionSelector
     {
@@ -18,10 +18,10 @@ namespace Microsoft.AspNet.OData.Routing
 
         public ODataActionSelector(IODataRoutingConvention convention,
             IActionSelectorDecisionTreeProvider decisionTreeProvider,
-            IEnumerable<IActionConstraintProvider> actionConstraintProviders,
+            ActionConstraintCache actionConstraintProviders,
             ILoggerFactory loggerFactory)
         {
-            _selector = new DefaultActionSelector(decisionTreeProvider, actionConstraintProviders, loggerFactory);
+            _selector = new ActionSelector(decisionTreeProvider, actionConstraintProviders, loggerFactory);
             _convention = convention;
         }
 
@@ -30,14 +30,14 @@ namespace Microsoft.AspNet.OData.Routing
             return true;
         }
 
-        public async Task<ActionDescriptor> SelectAsync(RouteContext context)
+        public ActionDescriptor Select(RouteContext context)
         {
             if (context.HttpContext.ODataProperties().IsValidODataRequest)
             {
-                return await Task.FromResult(_convention.SelectAction(context));
+                return _convention.SelectAction(context);
             }
 
-            return await _selector.SelectAsync(context);
+            return _selector.Select(context);
         }
     }
 }

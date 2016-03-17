@@ -3,7 +3,7 @@
 
 using System.Collections;
 
-namespace Microsoft.AspNet.OData.Query
+namespace Microsoft.AspNetCore.OData.Query
 {
     /// <summary>
     /// Represents a collection that is truncated to a given page size.

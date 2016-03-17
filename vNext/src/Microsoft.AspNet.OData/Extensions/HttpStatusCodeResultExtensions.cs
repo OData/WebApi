@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNet.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Microsoft.AspNet.OData.Extensions
+namespace Microsoft.AspNetCore.OData.Extensions
 {
     public static class HttpStatusCodeResultExtensions
     {
-        public static bool IsSuccessStatusCode(this HttpStatusCodeResult response)
+        public static bool IsSuccessStatusCode(this StatusCodeResult response)
         {
             return response?.StatusCode >= 200 && response.StatusCode < 300;
         }

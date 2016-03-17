@@ -3,9 +3,9 @@
 
 using System;
 using System.Runtime.Serialization;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     /// <summary>
     /// Represents a feed of entities that includes additional information that OData formats support.

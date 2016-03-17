@@ -1,19 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-namespace Microsoft.AspNet.OData.Query
+namespace Microsoft.AspNetCore.OData.Query
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
-    using Microsoft.AspNet.Http;
-    using Microsoft.AspNet.Mvc;
-    using Microsoft.AspNet.OData.Common;
-    using Microsoft.AspNet.OData.Extensions;
-    using Microsoft.AspNet.OData.Query.Expressions;
-    using Microsoft.AspNet.OData.Query.Validators;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.OData.Common;
+    using Microsoft.AspNetCore.OData.Extensions;
+    using Microsoft.AspNetCore.OData.Query.Expressions;
+    using Microsoft.AspNetCore.OData.Query.Validators;
     using Microsoft.OData.Core.UriParser;
     using Microsoft.OData.Core.UriParser.Semantic;
     using Microsoft.OData.Edm;

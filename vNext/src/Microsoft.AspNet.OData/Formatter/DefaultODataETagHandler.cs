@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Net.Http.Headers;
 using System.Text;
-using Microsoft.AspNet.OData.Builder.Conventions;
+using Microsoft.AspNetCore.OData.Builder.Conventions;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Formatter
+namespace Microsoft.AspNetCore.OData.Formatter
 {
     internal class DefaultODataETagHandler : IETagHandler
     {

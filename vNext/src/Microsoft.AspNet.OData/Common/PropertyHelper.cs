@@ -9,7 +9,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 
-namespace Microsoft.AspNet.OData.Common
+namespace Microsoft.AspNetCore.OData.Common
 {
     internal class PropertyHelper
     {

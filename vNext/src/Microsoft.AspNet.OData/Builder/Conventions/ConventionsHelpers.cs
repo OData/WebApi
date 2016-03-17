@@ -10,14 +10,14 @@ using System.Reflection;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Formatter.Serialization;
 
-namespace Microsoft.AspNet.OData.Builder.Conventions
+namespace Microsoft.AspNetCore.OData.Builder.Conventions
 {
-    using Microsoft.AspNet.OData.Formatter;
+    using Microsoft.AspNetCore.OData.Formatter;
 
-    using TypeExtensions = Microsoft.AspNet.OData.Extensions.TypeExtensions;
+    using TypeExtensions = Microsoft.AspNetCore.OData.Extensions.TypeExtensions;
 
     internal static class ConventionsHelpers
     {

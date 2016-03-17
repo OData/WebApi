@@ -6,9 +6,9 @@ using System.ComponentModel;
 using System.Text;
 using System.Web.Http;
 using Microsoft.OData.Core;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Extensions
+namespace Microsoft.AspNetCore.OData.Extensions
 {
     /// <summary>
     /// Provides extension methods for the <see cref="HttpError"/> class.

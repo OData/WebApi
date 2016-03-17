@@ -3,7 +3,7 @@
 
 using Microsoft.OData.Core.UriParser.Metadata;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     internal class ODataUriResolverSetttings
     {

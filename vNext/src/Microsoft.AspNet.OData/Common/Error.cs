@@ -1,5 +1,5 @@
 ﻿
-namespace Microsoft.AspNet.OData.Common
+namespace Microsoft.AspNetCore.OData.Common
 {
     using System;
 #if !DNXCORE50

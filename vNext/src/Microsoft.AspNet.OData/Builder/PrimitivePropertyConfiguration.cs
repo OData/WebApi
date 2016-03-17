@@ -4,7 +4,7 @@
 using System;
 using System.Reflection;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
     /// Used to configure a primitive property of an entity type or complex type.

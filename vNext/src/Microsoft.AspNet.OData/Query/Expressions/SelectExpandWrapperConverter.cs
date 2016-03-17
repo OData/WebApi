@@ -6,9 +6,9 @@ using Newtonsoft.Json;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNetCore.OData.Query.Expressions
 {
     using System;
 

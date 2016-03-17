@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Mvc.Abstractions;
-using Microsoft.AspNet.Mvc.Filters;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Query;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Query;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     // TODO: Replace with full version in the future.
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
@@ -22,7 +22,7 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("context");
             }
 
-            var response = context.Result as HttpStatusCodeResult;
+            var response = context.Result as StatusCodeResult;
             if (response != null && !response.IsSuccessStatusCode())
             {
                 return;

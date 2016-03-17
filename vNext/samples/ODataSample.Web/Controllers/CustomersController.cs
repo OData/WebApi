@@ -1,8 +1,8 @@
 ﻿namespace ODataSample.Web.Controllers
 {
     using System.Collections.Generic;
-    using Microsoft.AspNet.Mvc;
-    using Microsoft.AspNet.OData;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.OData;
     using ODataSample.Web.Models;
 
     [EnableQuery]
@@ -30,7 +30,7 @@
             var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer);
@@ -43,7 +43,7 @@
             var customer = _sampleContext.FindCustomersWithProduct(productId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer);
@@ -56,7 +56,7 @@
             var customer = _sampleContext.AddCustomerProduct(customerId, productId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer);
@@ -69,7 +69,7 @@
             var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             foreach (var productId in products)
@@ -87,7 +87,7 @@
             var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer.FirstName);
@@ -100,7 +100,7 @@
             var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer.LastName);
@@ -113,7 +113,7 @@
             var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer.CustomerId);
@@ -126,7 +126,7 @@
             var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer.Products);
@@ -146,7 +146,7 @@
         {
             if (!_sampleContext.UpdateCustomer(customerId, value))
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new NoContentResult();
@@ -158,7 +158,7 @@
         {
             if (!_sampleContext.DeleteCustomer(customerId))
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new NoContentResult();

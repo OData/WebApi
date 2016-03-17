@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
-namespace Microsoft.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNetCore.OData.Query.Expressions
 {
     using System;
 
-    using Microsoft.AspNet.OData;
-    using Microsoft.AspNet.OData.Common;
+    using Microsoft.AspNetCore.OData;
+    using Microsoft.AspNetCore.OData.Common;
     using System.Reflection;
 
     /// <summary>

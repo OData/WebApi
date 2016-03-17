@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Microsoft.AspNet.OData.Common
+namespace Microsoft.AspNetCore.OData.Common
 {
     [AttributeUsage(
         AttributeTargets.Method | AttributeTargets.Parameter |

@@ -533,7 +533,7 @@
   </data>
   <data name="EdmTypeCannotBeNull" xml:space="preserve">
     <value>The EDM type of the object of type '{0}' is null. The EDM type of an {1} cannot be null.</value>
-    <comment>{1} may be Microsoft.AspNet.OData.IEdmObject which does not scan. https://aspnetwebstack.codeplex.com/workitem/1558</comment>
+    <comment>{1} may be Microsoft.AspNetCore.OData.IEdmObject which does not scan. https://aspnetwebstack.codeplex.com/workitem/1558</comment>
   </data>
   <data name="EdmObjectNull" xml:space="preserve">
     <value>The property 'EdmObject' of {0} cannot be null.</value>

@@ -3,7 +3,7 @@
 
 using Microsoft.OData.Core;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     /// <summary>
     /// Represents an instance of an <see cref="IEdmChangedObject"/>.

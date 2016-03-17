@@ -4,12 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Validation;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData.Routing
+namespace Microsoft.AspNetCore.OData.Routing
 {
     /// <summary>
     /// An <see cref="ODataPathSegment"/> implementation representing a bound action invocation.

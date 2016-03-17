@@ -3,9 +3,9 @@
 
 using System.Reflection;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.OData.Common;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
     /// <summary>
     /// Represents a mapping from an <see cref="IEdmProperty"/> to a CLR property info.

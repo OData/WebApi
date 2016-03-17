@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Mvc.Infrastructure;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Formatter;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.AspNet.OData.Extensions
+namespace Microsoft.AspNetCore.OData.Extensions
 {
     public static class HttpRequestExtensions
     {

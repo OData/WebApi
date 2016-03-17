@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Microsoft.OData.Edm;
 
 
-namespace Microsoft.AspNet.OData.Query
+namespace Microsoft.AspNetCore.OData.Query
 {
 
     /// <summary>

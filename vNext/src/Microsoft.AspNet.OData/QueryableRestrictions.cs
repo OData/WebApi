@@ -2,9 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNetCore.OData
 {
-    using Microsoft.AspNet.OData.Builder;
+    using Microsoft.AspNetCore.OData.Builder;
 
     /// <summary>
     /// Represents a queryable restriction on an EDM property, including not filterable, not sortable,

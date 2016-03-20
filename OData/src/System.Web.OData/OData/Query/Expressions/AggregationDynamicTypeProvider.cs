@@ -48,7 +48,7 @@ namespace System.Web.OData.Query.Expressions
                 return typeof(T);
             }
 
-            TypeBuilder tb = GetTypeBuilder<T>(DynamicTypeName + typeSuffix ?? string.Empty);
+            TypeBuilder tb = GetTypeBuilder<T>(DynamicTypeName + typeSuffix ?? String.Empty);
             if (statements != null && statements.Any())
             {
                 foreach (var field in statements)

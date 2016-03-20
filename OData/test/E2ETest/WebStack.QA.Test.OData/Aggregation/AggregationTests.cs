@@ -112,6 +112,34 @@ namespace WebStack.QA.Test.OData.Aggregation
         }
 
         [Fact]
+        public void GroupByMultipleNestedPropertiesWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + "?$apply=groupby((Order/Name, Address/Street), aggregate(Id with sum as TotalId))",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var result = response.Content.ReadAsAsync<JObject>().Result;
+            var results = result["value"] as JArray;
+            Assert.Equal(2, results.Count);
+            Assert.Equal("20", results[0]["TotalId"].ToString());
+            Assert.Equal("25", results[1]["TotalId"].ToString());
+            var order0 = results[0]["Order"] as JObject;
+            var order1 = results[1]["Order"] as JObject;
+            Assert.Equal("Order0", order0["Name"].ToString());
+            Assert.Equal("Order1", order1["Name"].ToString());
+        }
+
+        [Fact]
         public void AggregateAggregatedPropertyWorks()
         {
             // Arrange

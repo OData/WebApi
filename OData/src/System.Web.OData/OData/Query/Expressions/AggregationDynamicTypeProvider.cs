@@ -32,12 +32,13 @@ namespace System.Web.OData.Query.Expressions
         /// <param name="model"></param>
         /// <param name="propertyNodes"></param>
         /// <param name="statements"></param>
+        /// <param name="typeSuffix"></param>
         /// <returns></returns>
         /// <remarks>
         /// We create new assembly each time, but they will be collected by GC.
         /// Current performance testing results is 0.5ms per type. We should consider caching types, however trade off is between CPU perfomance and memory usage (might be it will we an option for library user)
         /// </remarks>
-        public static Type GetResultType<T>(IEdmModel model, IEnumerable<GroupByPropertyNode> propertyNodes = null, IEnumerable<AggregateStatement> statements = null) where T : DynamicTypeWrapper
+        public static Type GetResultType<T>(IEdmModel model, IEnumerable<GroupByPropertyNode> propertyNodes = null, IEnumerable<AggregateStatement> statements = null, string typeSuffix = null) where T : DynamicTypeWrapper
         {
             Contract.Assert(model != null);
 
@@ -47,7 +48,7 @@ namespace System.Web.OData.Query.Expressions
                 return typeof(T);
             }
 
-            TypeBuilder tb = GetTypeBuilder<T>(DynamicTypeName);
+            TypeBuilder tb = GetTypeBuilder<T>(DynamicTypeName + typeSuffix ?? string.Empty);
             if (statements != null && statements.Any())
             {
                 foreach (var field in statements)
@@ -71,7 +72,7 @@ namespace System.Web.OData.Query.Expressions
                     }
                     else
                     {
-                        var complexProp = GetResultType<DynamicTypeWrapper>(model, field.Children);
+                        var complexProp = GetResultType<DynamicTypeWrapper>(model, field.Children, typeSuffix: field.Name);
                         CreateProperty(tb, field.Name, complexProp);
                     }
                 }

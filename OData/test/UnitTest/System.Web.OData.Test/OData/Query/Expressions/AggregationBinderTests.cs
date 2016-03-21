@@ -43,9 +43,19 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "groupby((Category/CategoryName))",
-                ".GroupBy($it => new DynamicTypeWrapper() {Category = new DynamicTypeWrapper() {CategoryName = $it.Category.CategoryName, }, })"
-                + ".Select($it => new DynamicTypeWrapper() {Category = new DynamicTypeWrapper() {CategoryName = $it.Key.Category.CategoryName, }, })");
+                ".GroupBy($it => new DynamicTypeWrapper() {Category = new DynamicTypeWrapperCategory() {CategoryName = $it.Category.CategoryName, }, })"
+                + ".Select($it => new DynamicTypeWrapper() {Category = new DynamicTypeWrapperCategory() {CategoryName = $it.Key.Category.CategoryName, }, })");
         }
+
+        [Fact]
+        public void NavigationMultipleGroupBy()
+        {
+            var filters = VerifyQueryDeserialization(
+                "groupby((Category/CategoryName, SupplierAddress/State))",
+                ".GroupBy($it => new DynamicTypeWrapper() {Category = new DynamicTypeWrapperCategory() {CategoryName = $it.Category.CategoryName, }, SupplierAddress = new DynamicTypeWrapperSupplierAddress() {State = $it.SupplierAddress.State, }, })"
+                + ".Select($it => new DynamicTypeWrapper() {Category = new DynamicTypeWrapperCategory() {CategoryName = $it.Key.Category.CategoryName, }, SupplierAddress = new DynamicTypeWrapperSupplierAddress() {State = $it.Key.SupplierAddress.State, }, })");
+        }
+
 
         [Fact]
         public void SingleSum()

@@ -270,7 +270,7 @@ namespace System.Web.OData.Builder
                 }
 
                 EdmOperation operation = (EdmOperation)operationImport.Operation;
-                if (procedure.IsBindable && procedure.Title != null & procedure.Title != procedure.Name)
+                if (procedure.IsBindable && procedure.Title != null && procedure.Title != procedure.Name)
                 {
                     model.SetOperationTitleAnnotation(operation, new OperationTitleAnnotation(procedure.Title));
                 }

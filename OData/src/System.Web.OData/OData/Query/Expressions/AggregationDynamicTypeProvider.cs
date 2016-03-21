@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Web.OData.Formatter;
-using Microsoft.OData.Core.UriParser.Extensions.Semantic;
+using Microsoft.OData.Core.UriParser.Aggregation;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Query.Expressions
@@ -34,25 +34,25 @@ namespace System.Web.OData.Query.Expressions
         /// Current performance testing results is 0.5ms per type. We should consider caching types, however trade off is between CPU perfomance and memory usage (might be it will we an option for library user)
         /// </remarks>
         public static Type GetResultType<T>(IEdmModel model, IEnumerable<GroupByPropertyNode> propertyNodes = null,
-            IEnumerable<AggregateStatement> statements = null, string typeSuffix = null) where T : DynamicTypeWrapper
+            IEnumerable<AggregateExpression> expressions = null, string typeSuffix = null) where T : DynamicTypeWrapper
         {
             Contract.Assert(model != null);
 
             // Do not have properties, just return base class
-            if ((statements == null || !statements.Any()) && (propertyNodes == null || !propertyNodes.Any()))
+            if ((expressions == null || !expressions.Any()) && (propertyNodes == null || !propertyNodes.Any()))
             {
                 return typeof(T);
             }
 
             TypeBuilder tb = GetTypeBuilder<T>(DynamicTypeName + typeSuffix ?? String.Empty);
-            if (statements != null && statements.Any())
+            if (expressions != null && expressions.Any())
             {
-                foreach (var field in statements)
+                foreach (var field in expressions)
                 {
                     if (field.TypeReference.Definition.TypeKind == EdmTypeKind.Primitive)
                     {
                         var primitiveType = EdmLibHelpers.GetClrType(field.TypeReference, model);
-                        CreateProperty(tb, field.AsAlias, primitiveType);
+                        CreateProperty(tb, field.Alias, primitiveType);
                     }
                 }
             }
@@ -61,14 +61,14 @@ namespace System.Web.OData.Query.Expressions
             {
                 foreach (var field in propertyNodes)
                 {
-                    if (field.Accessor != null && field.TypeReference.Definition.TypeKind == EdmTypeKind.Primitive)
+                    if (field.Expression != null && field.TypeReference.Definition.TypeKind == EdmTypeKind.Primitive)
                     {
                         var primitiveType = EdmLibHelpers.GetClrType(field.TypeReference, model);
                         CreateProperty(tb, field.Name, primitiveType);
                     }
                     else
                     {
-                        var complexProp = GetResultType<DynamicTypeWrapper>(model, field.Children,
+                        var complexProp = GetResultType<DynamicTypeWrapper>(model, field.ChildTransformations,
                             typeSuffix: field.Name);
                         CreateProperty(tb, field.Name, complexProp);
                     }

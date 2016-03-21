@@ -11,7 +11,7 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Extensions.Semantic;
+using Microsoft.OData.Core.UriParser.Aggregation;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 

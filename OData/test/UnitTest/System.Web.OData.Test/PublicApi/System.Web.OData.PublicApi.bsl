@@ -1738,7 +1738,7 @@ public sealed class System.Web.OData.Extensions.UrlHelperExtensions {
 }
 
 public class System.Web.OData.Extensions.HttpRequestMessageProperties {
-	Microsoft.OData.Core.UriParser.Extensions.Semantic.ApplyClause ApplyClause  { public get; public set; }
+	Microsoft.OData.Core.UriParser.Aggregation.ApplyClause ApplyClause  { public get; public set; }
 	Microsoft.OData.Edm.IEdmModel Model  { public get; public set; }
 	System.Uri NextLink  { public get; public set; }
 	ODataPath Path  { public get; public set; }
@@ -1978,7 +1978,7 @@ public abstract class System.Web.OData.Query.OrderByNode {
 public class System.Web.OData.Query.ApplyQueryOption {
 	public ApplyQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
 
-	Microsoft.OData.Core.UriParser.Extensions.Semantic.ApplyClause ApplyClause  { public get; }
+	Microsoft.OData.Core.UriParser.Aggregation.ApplyClause ApplyClause  { public get; }
 	ODataQueryContext Context  { public get; }
 	string RawValue  { public get; }
 	System.Type ResultClrType  { public get; }

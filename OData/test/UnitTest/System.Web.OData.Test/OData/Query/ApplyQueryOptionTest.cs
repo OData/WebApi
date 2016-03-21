@@ -168,44 +168,60 @@ namespace System.Web.OData.Test.OData.Query
                 return new TheoryDataSet<string, List<Dictionary<string, object>>>
                 {
                     {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$filter=Total eq 3",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}}
+                        }
+                    },
+                    {
                         "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$orderby=Name",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} },
-                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 5} },
-                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } },
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$orderby=Total",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
                         }
                     },
                     {
                         "$apply=groupby((Address/City))&$orderby=Address/City",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Address/City", null} },
-                            new Dictionary<string, object> { { "Address/City", "hobart"} },
-                            new Dictionary<string, object> { { "Address/City", "redmond"} },
-                            new Dictionary<string, object> { { "Address/City", "seattle"} },
+                            new Dictionary<string, object> {{"Address/City", null}},
+                            new Dictionary<string, object> {{"Address/City", "hobart"}},
+                            new Dictionary<string, object> {{"Address/City", "redmond"}},
+                            new Dictionary<string, object> {{"Address/City", "seattle"}},
                         }
                     },
                     {
                         "$apply=groupby((Address/City))&$filter=Address/City eq 'redmond'",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Address/City", "redmond"} },
+                            new Dictionary<string, object> {{"Address/City", "redmond"}},
                         }
                     },
                     {
                         "$apply=groupby((Name))&$top=1",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Name", "Highest"} },
+                            new Dictionary<string, object> {{"Name", "Highest"}},
                         }
                     },
                     {
                         "$apply=groupby((Name))&$skip=1",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Name", "Lowest"} },
-                            new Dictionary<string, object> { { "Name", "Middle"} },
+                            new Dictionary<string, object> {{"Name", "Lowest"}},
+                            new Dictionary<string, object> {{"Name", "Middle"}},
                         }
                     },
                 };

@@ -35,14 +35,10 @@ namespace System.Web.OData.Query.Expressions
         private Dictionary<string, ParameterExpression> _lambdaParameters;
         private Type _filterType;
 
-        private FilterBinder(IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
-            : base(model, assembliesResolver, querySettings)
-        {
-        }
-
-        private FilterBinder(IEdmModel model, ODataQuerySettings querySettings)
+        private FilterBinder(IEdmModel model, ODataQuerySettings querySettings, Type filterType)
             : base(model, querySettings)
         {
+            _filterType = filterType;
         }
 
         private FilterBinder(
@@ -102,7 +98,7 @@ namespace System.Web.OData.Query.Expressions
             Contract.Assert(model != null);
             Contract.Assert(querySettings != null);
 
-            FilterBinder binder = new FilterBinder(model, querySettings);
+            FilterBinder binder = new FilterBinder(model, querySettings, elementType);
             LambdaExpression orderByLambda = binder.BindExpression(orderBy.Expression, orderBy.RangeVariable, elementType);
             return orderByLambda;
         }

@@ -820,4 +820,7 @@
   <data name="NotSupportedTransformationKind" xml:space="preserve">
     <value>Transformation kind {0} is not supported.</value>
   </data>
+  <data name="UriFunctionClrBinderAlreadyBound" xml:space="preserve">
+    <value>The function '{0}' is already bound to another method.</value>
+  </data>
 </root>

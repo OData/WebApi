@@ -2113,6 +2113,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The function &apos;{0}&apos; is already bound to another method..
+        /// </summary>
+        internal static string UriFunctionClrBinderAlreadyBound {
+            get {
+                return ResourceManager.GetString("UriFunctionClrBinderAlreadyBound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The query specified in the URI is not valid. {0}.
         /// </summary>
         internal static string UriQueryStringInvalid {

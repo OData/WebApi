@@ -631,6 +631,13 @@ namespace System.Web.OData.Query.Expressions
                     return BindTime(node);
 
                 default:
+                    // Get Expression of custom binded method.
+                    Expression expression = BindCustomMethodExpressionOrNull(node);
+                    if (expression != null)
+                    {
+                        return expression;
+                    }
+
                     throw new NotImplementedException(Error.Format(SRResources.ODataFunctionNotSupported, node.Name));
             }
             }
@@ -1230,6 +1237,21 @@ namespace System.Web.OData.Query.Expressions
             {
                 return any;
             }
+        }
+
+        private Expression BindCustomMethodExpressionOrNull(SingleValueFunctionCallNode node)
+        {
+            Expression[] arguments = BindArguments(node.Parameters);
+            IEnumerable<Type> methodArgumentsType = arguments.Select(argument => argument.Type);
+
+            // Search for custom method info that are binded to the node name
+            MethodInfo methodInfo;
+            if (UriFunctionsBinder.TryGetMethodInfo(node.Name, methodArgumentsType, out methodInfo))
+            {
+                return MakeFunctionCall(methodInfo, arguments);
+            }
+
+            return null;
         }
 
         private ParameterExpression HandleLambdaParameters(IEnumerable<RangeVariable> rangeVariables)

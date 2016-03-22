@@ -173,6 +173,11 @@ public sealed class System.Web.OData.EdmTypeExtensions {
 	public static bool IsDeltaFeed (Microsoft.OData.Edm.IEdmType type)
 }
 
+public sealed class System.Web.OData.ODataUriFunctions {
+	public static void AddUriCustomFunction (string functionName, Microsoft.OData.Core.UriParser.FunctionSignatureWithReturnType functionSignature, System.Reflection.MethodInfo methodInfo)
+	public static bool RemoveCustomUriFunction (string functionName, Microsoft.OData.Core.UriParser.FunctionSignatureWithReturnType functionSignature, System.Reflection.MethodInfo methodInfo)
+}
+
 public class System.Web.OData.ClrPropertyInfoAnnotation {
 	public ClrPropertyInfoAnnotation (System.Reflection.PropertyInfo clrPropertyInfo)
 

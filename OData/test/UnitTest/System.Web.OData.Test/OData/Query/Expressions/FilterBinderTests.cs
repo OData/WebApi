@@ -14,6 +14,7 @@ using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Query.Expressions
@@ -1373,6 +1374,181 @@ namespace System.Web.OData.Query.Expressions
             var filters = VerifyQueryDeserialization<DataTypes>(filter);
             RunFilters(filters, new DataTypes(), new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
+        #endregion
+
+        #region Custom Functions
+
+        [Fact]
+        public void CustomMethod_InstanceMethodOfDeclaringType()
+        {
+            FunctionSignatureWithReturnType padrightStringEdmFunction =
+                    new FunctionSignatureWithReturnType(
+                    EdmCoreModel.Instance.GetString(true),
+                     EdmCoreModel.Instance.GetString(true),
+                    EdmCoreModel.Instance.GetInt32(false));
+
+            MethodInfo padRightStringMethodInfo = typeof(string).GetMethod("PadRight", new Type[] { typeof(int) });
+            const string padrightMethodName = "padright";
+            try
+            {
+                const string productName = "Abcd";
+                const int totalWidth = 5;
+                const string expectedProductName = "Abcd ";
+
+                // Add the custom function
+                CustomUriFunctions.AddCustomUriFunction(padrightMethodName, padrightStringEdmFunction);
+                UriFunctionsBinder.BindUriFunctionName(padrightMethodName, padRightStringMethodInfo);
+
+                string filter = String.Format("padright(ProductName, {0}) eq '{1}'", totalWidth, expectedProductName);
+                var filters = VerifyQueryDeserialization(filter);
+
+                RunFilters(filters,
+                  new Product { ProductName = productName },
+                  new { WithNullPropagation = true, WithoutNullPropagation = true });
+            }
+            finally
+            {
+                Assert.True(CustomUriFunctions.RemoveCustomUriFunction(padrightMethodName));
+                Assert.True(UriFunctionsBinder.UnbindUriFunctionName(padrightMethodName, padRightStringMethodInfo));
+            }
+        }
+
+        [Fact]
+        public void CustomMethod_InstanceMethodNotOfDeclaringType()
+        {
+            FunctionSignatureWithReturnType padrightStringEdmFunction = new FunctionSignatureWithReturnType(
+                        EdmCoreModel.Instance.GetString(true),
+                        EdmCoreModel.Instance.GetString(true),
+                        EdmCoreModel.Instance.GetInt32(false));
+
+            MethodInfo padRightStringMethodInfo = typeof(FilterBinderTests).GetMethod("PadRightInstance", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            const string padrightMethodName = "padright";
+            try
+            {
+                const int totalWidth = 5;
+                const string expectedProductName = "Abcd ";
+
+                // Add the custom function
+                CustomUriFunctions.AddCustomUriFunction(padrightMethodName, padrightStringEdmFunction);
+                UriFunctionsBinder.BindUriFunctionName(padrightMethodName, padRightStringMethodInfo);
+
+                string filter = String.Format("padright(ProductName, {0}) eq '{1}'", totalWidth, expectedProductName);
+
+                Action filterToExpression = () => VerifyQueryDeserialization(filter);
+                Assert.Throws(typeof(NotImplementedException),filterToExpression);
+            }
+            finally
+            {
+                Assert.True(CustomUriFunctions.RemoveCustomUriFunction(padrightMethodName));
+                Assert.True(UriFunctionsBinder.UnbindUriFunctionName(padrightMethodName, padRightStringMethodInfo));
+            }
+        }
+
+        [Fact]
+        public void CustomMethod_StaticExtensionMethod()
+        {
+            FunctionSignatureWithReturnType padrightStringEdmFunction = new FunctionSignatureWithReturnType(
+                    EdmCoreModel.Instance.GetString(true),
+                    EdmCoreModel.Instance.GetString(true),
+                    EdmCoreModel.Instance.GetInt32(false));
+
+            MethodInfo padRightStringMethodInfo = typeof(StringExtender).GetMethod("PadRightExStatic", BindingFlags.Public | BindingFlags.Static);
+
+            const string padrightMethodName = "padright";
+            try
+            {
+                const string productName = "Abcd";
+                const int totalWidth = 5;
+                const string expectedProductName = "Abcd ";
+
+                // Add the custom function
+                CustomUriFunctions.AddCustomUriFunction(padrightMethodName, padrightStringEdmFunction);
+                UriFunctionsBinder.BindUriFunctionName(padrightMethodName, padRightStringMethodInfo);
+
+                string filter = String.Format("padright(ProductName, {0}) eq '{1}'", totalWidth, expectedProductName);
+                var filters = VerifyQueryDeserialization(filter);
+
+                RunFilters(filters,
+                  new Product { ProductName = productName },
+                  new { WithNullPropagation = true, WithoutNullPropagation = true });
+            }
+            finally
+            {
+                Assert.True(CustomUriFunctions.RemoveCustomUriFunction(padrightMethodName));
+                Assert.True(UriFunctionsBinder.UnbindUriFunctionName(padrightMethodName, padRightStringMethodInfo));
+            }
+        }
+
+        [Fact]
+        public void CustomMethod_StaticMethodNotOfDeclaringType()
+        {
+            FunctionSignatureWithReturnType padrightStringEdmFunction = new FunctionSignatureWithReturnType(
+                EdmCoreModel.Instance.GetString(true),
+                EdmCoreModel.Instance.GetString(true),
+                EdmCoreModel.Instance.GetInt32(false));
+
+            MethodInfo padRightStringMethodInfo = typeof(FilterBinderTests).GetMethod("PadRightStatic", BindingFlags.NonPublic | BindingFlags.Static);
+
+            const string padrightMethodName = "padright";
+            try
+            {
+                const string productName = "Abcd";
+                const int totalWidth = 5;
+                const string expectedProductName = "Abcd ";
+
+                // Add the custom function
+                CustomUriFunctions.AddCustomUriFunction(padrightMethodName, padrightStringEdmFunction);
+                UriFunctionsBinder.BindUriFunctionName(padrightMethodName, padRightStringMethodInfo);
+
+                string filter = String.Format("padright(ProductName, {0}) eq '{1}'", totalWidth, expectedProductName);
+                var filters = VerifyQueryDeserialization(filter);
+
+                RunFilters(filters,
+                  new Product { ProductName = productName },
+                  new { WithNullPropagation = true, WithoutNullPropagation = true });
+            }
+            finally
+            {
+                Assert.True(CustomUriFunctions.RemoveCustomUriFunction(padrightMethodName));
+                Assert.True(UriFunctionsBinder.UnbindUriFunctionName(padrightMethodName, padRightStringMethodInfo));
+            }
+        }
+
+        [Fact]
+        public void CustomMethod_AddSignatureAndBindFunctionWithShortcut()
+        {
+            FunctionSignatureWithReturnType padrightStringEdmFunction =
+                    new FunctionSignatureWithReturnType(
+                    EdmCoreModel.Instance.GetString(true),
+                     EdmCoreModel.Instance.GetString(true),
+                    EdmCoreModel.Instance.GetInt32(false));
+
+            MethodInfo padRightStringMethodInfo = typeof(string).GetMethod("PadRight", new Type[] { typeof(int) });
+            const string padrightMethodName = "padright";
+            try
+            {
+                const string productName = "Abcd";
+                const int totalWidth = 5;
+                const string expectedProductName = "Abcd ";
+
+                // Add the custom function
+                ODataUriFunctions.AddUriCustomFunction(padrightMethodName, padrightStringEdmFunction, padRightStringMethodInfo);
+
+                string filter = String.Format("padright(ProductName, {0}) eq '{1}'", totalWidth, expectedProductName);
+                var filters = VerifyQueryDeserialization(filter);
+
+                RunFilters(filters,
+                  new Product { ProductName = productName },
+                  new { WithNullPropagation = true, WithoutNullPropagation = true });
+            }
+            finally
+            {
+                Assert.True(CustomUriFunctions.RemoveCustomUriFunction(padrightMethodName));
+                Assert.True(UriFunctionsBinder.UnbindUriFunctionName(padrightMethodName, padRightStringMethodInfo));
+            }
+        }
+
         #endregion
 
         #region Data Types
@@ -2818,6 +2994,18 @@ namespace System.Web.OData.Query.Expressions
             return value == null ? null : (T?)Convert.ChangeType(value, typeof(T));
         }
 
+        // Used by Custom Method binder tests - by reflection
+        private string PadRightInstance(string str, int number)
+        {
+            return str.PadRight(number);
+        }
+
+        // Used by Custom Method binder tests - by reflection
+        private static string PadRightStatic(string str, int number)
+        {
+            return str.PadRight(number);
+        }
+
         private class NoAssembliesResolver : IAssembliesResolver
         {
             public ICollection<Assembly> GetAssemblies()
@@ -2825,5 +3013,16 @@ namespace System.Web.OData.Query.Expressions
                 return new Assembly[0];
             }
         }
+
     }
+
+    // Used by Custom Method binder tests - by reflection
+    public static class StringExtender
+    {
+        public static string PadRightExStatic(this string str, int width)
+        {
+            return str.PadRight(width);
+        }
+    }
+
 }

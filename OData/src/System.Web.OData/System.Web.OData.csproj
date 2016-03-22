@@ -148,6 +148,8 @@
     <Compile Include="OData\Query\ApplyQueryOption.cs" />
     <Compile Include="OData\Query\Expressions\DynamicTypeWrapper.cs" />
     <Compile Include="OData\Query\Expressions\ExpressionBinderBase.cs" />
+    <Compile Include="OData\ODataUriFunctions.cs" />
+    <Compile Include="OData\Query\Expressions\UriFunctionsBinder.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
     <Compile Include="OData\Query\Expressions\AggregationDynamicTypeProvider.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
@@ -478,6 +480,7 @@
     <EmbeddedResource Include="Properties\SRResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
+      <LastGenOutput>SRResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Compile Include="..\Common\CommonWebApiResources.Designer.cs">
       <Link>Properties\CommonWebApiResources.Designer.cs</Link>

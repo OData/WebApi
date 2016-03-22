@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using Microsoft.OData.Edm;
-using System;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Framework.Internal
 {
 	[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]

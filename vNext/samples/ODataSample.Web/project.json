@@ -5,11 +5,10 @@
     "preserveCompilationContext": true
   },
   "dependencies": {
-    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-20081",
-    "Microsoft.AspNetCore.Mvc.Dnx": "1.0.0-rc2-20081",
-    "Microsoft.AspNetCore.Diagnostics": "1.0.0-rc2-20081",
-    "Microsoft.AspNetCore.IISPlatformHandler": "1.0.0-rc2-20081",
-    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20081",
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-20266",
+    "Microsoft.AspNetCore.Diagnostics": "1.0.0-rc2-20266",
+    "Microsoft.AspNetCore.IISPlatformHandler": "1.0.0-rc2-20266",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20266",
     "Microsoft.AspNetCore.OData": "1.0.0.1-*"
   },
   "commands": {

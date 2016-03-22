@@ -1,14 +1,23 @@
 {
-  "version": "1.0.0.1-rc2-16591",
+  "version": "1.0.0.1-rc2-16591c",
   "description": "Microsoft.AspNetCore.OData",
 
   "dependencies": {
-    "Microsoft.OData.Core": "6.15.0-beta",
-    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-20093",
-    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc2-20093"
+    "Microsoft.OData.Core": "6.15.0",
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-20266",
+    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc2-20266",
+    "Microsoft.EntityFrameworkCore": "1.0.0-rc2-20266"
   },
 
   "frameworks": {
-    "dnx451": { }
+    "dnxcore50": {
+      "dependencies": {
+        "System.Linq.Queryable": "4.0.1-rc2-23826"
+      },
+      "imports": [
+        "dotnet5.4",
+        "portable-net452+win81"
+      ]
+    }
   }
 }

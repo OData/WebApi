@@ -11,7 +11,7 @@ namespace System.Web.OData.Test.OData.Query.Expressions
     /// <summary>
     /// Tests to UriFunctions binder.
     /// </summary>
-    public class UriFunctionClrBinderTests
+    public class UriFunctionBinderTests
     {
         #region BindUriFunctionName
 
@@ -90,7 +90,7 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         public void BindUriFunctionName_CannotBindIfAlreadyBinded()
         {
             const string FUNCTION_NAME = "addtwice";
-            MethodInfo addStrTwiceStaticMethodInfo = typeof(UriFunctionClrBinderTests).GetMethod("AddStringTwiceStatic", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo addStrTwiceStaticMethodInfo = typeof(UriFunctionBinderTests).GetMethod("AddStringTwiceStatic", BindingFlags.NonPublic | BindingFlags.Static);
 
             try
             {
@@ -113,7 +113,7 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         public void BindUriFunctionName_CanBindStaticMethod()
         {
             const string FUNCTION_NAME = "addtwice";
-            MethodInfo addStrTwiceStaticMethodInfo = typeof(UriFunctionClrBinderTests).GetMethod("AddStringTwiceStatic", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo addStrTwiceStaticMethodInfo = typeof(UriFunctionBinderTests).GetMethod("AddStringTwiceStatic", BindingFlags.NonPublic | BindingFlags.Static);
 
             try
             {
@@ -179,7 +179,7 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         {
             const string FUNCTION_NAME = "addtwice";
             MethodInfo addTwiceInstanceThisDelcaringTypeMethodInfo =
-                typeof(UriFunctionClrBinderTests).GetMethod("AddStringTwiceInstance", BindingFlags.NonPublic | BindingFlags.Instance);
+                typeof(UriFunctionBinderTests).GetMethod("AddStringTwiceInstance", BindingFlags.NonPublic | BindingFlags.Instance);
 
             try
             {
@@ -203,7 +203,7 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         public void BindUriFunctionName_CannotBindStaticAndInstanceMethodWithSameArguments()
         {
             const string FUNCTION_NAME = "padright";
-            MethodInfo padRightStaticMethodInfo = typeof(UriFunctionClrBinderTests).GetMethod("PadRightStatic", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo padRightStaticMethodInfo = typeof(UriFunctionBinderTests).GetMethod("PadRightStatic", BindingFlags.NonPublic | BindingFlags.Static);
             MethodInfo padRightInstanceMethodInfo = typeof(string).GetMethod("PadRight", new Type[] { typeof(int) });
 
             try
@@ -224,8 +224,8 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         public void BindUriFunctionName_CanBindStaticAndInstanceOfDifferentDeclerationType()
         {
             const string FUNCTION_NAME = "addtwice";
-            MethodInfo addTwiceStaticMethodInfo = typeof(UriFunctionClrBinderTests).GetMethod("AddStringTwiceStatic", BindingFlags.NonPublic | BindingFlags.Static);
-            MethodInfo addTwiceInstanceMethodInfo = typeof(UriFunctionClrBinderTests).GetMethod("AddStringTwiceInstance", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo addTwiceStaticMethodInfo = typeof(UriFunctionBinderTests).GetMethod("AddStringTwiceStatic", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo addTwiceInstanceMethodInfo = typeof(UriFunctionBinderTests).GetMethod("AddStringTwiceInstance", BindingFlags.NonPublic | BindingFlags.Instance);
 
             try
             {
@@ -238,7 +238,7 @@ namespace System.Web.OData.Test.OData.Query.Expressions
                 Assert.Equal(addTwiceStaticMethodInfo, resultMethoInfoStatic);
 
                 MethodInfo resultMethoInfoInstance;
-                UriFunctionsBinder.TryGetMethodInfo(FUNCTION_NAME, new Type[] { typeof(UriFunctionClrBinderTests), typeof(string) }, out resultMethoInfoInstance);
+                UriFunctionsBinder.TryGetMethodInfo(FUNCTION_NAME, new Type[] { typeof(UriFunctionBinderTests), typeof(string) }, out resultMethoInfoInstance);
 
                 Assert.Equal(addTwiceInstanceMethodInfo, resultMethoInfoInstance);
             }
@@ -343,7 +343,7 @@ namespace System.Web.OData.Test.OData.Query.Expressions
             {
                 UriFunctionsBinder.BindUriFunctionName(FUNCTION_NAME, padRightStringMethodInfo);
 
-                MethodInfo differentMethodInfo = typeof(UriFunctionClrBinderTests).GetMethod("AddStringTwiceInstance", BindingFlags.NonPublic | BindingFlags.Instance);
+                MethodInfo differentMethodInfo = typeof(UriFunctionBinderTests).GetMethod("AddStringTwiceInstance", BindingFlags.NonPublic | BindingFlags.Instance);
 
                 Assert.False(UriFunctionsBinder.UnbindUriFunctionName(FUNCTION_NAME, differentMethodInfo));
             }
@@ -374,7 +374,7 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         public void UnbindUriFunctionName_CanUnbindStaticMethod()
         {
             const string FUNCTION_NAME = "addtwice";
-            MethodInfo addStrTwiceStaticMethodInfo = typeof(UriFunctionClrBinderTests).GetMethod("AddStringTwiceStatic", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo addStrTwiceStaticMethodInfo = typeof(UriFunctionBinderTests).GetMethod("AddStringTwiceStatic", BindingFlags.NonPublic | BindingFlags.Static);
 
             UriFunctionsBinder.BindUriFunctionName(FUNCTION_NAME, addStrTwiceStaticMethodInfo);
 
@@ -414,7 +414,7 @@ namespace System.Web.OData.Test.OData.Query.Expressions
             {
                 UriFunctionsBinder.BindUriFunctionName(FUNCTION_NAME, padRightStringMethodInfo);
 
-                MethodInfo addStrTwiceStaticMethodInfo = typeof(UriFunctionClrBinderTests).GetMethod("AddStringTwiceStatic", BindingFlags.NonPublic | BindingFlags.Static);
+                MethodInfo addStrTwiceStaticMethodInfo = typeof(UriFunctionBinderTests).GetMethod("AddStringTwiceStatic", BindingFlags.NonPublic | BindingFlags.Static);
 
                 Assert.False(UriFunctionsBinder.UnbindUriFunctionName(FUNCTION_NAME, addStrTwiceStaticMethodInfo));
             }

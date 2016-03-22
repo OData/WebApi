@@ -1533,7 +1533,7 @@ namespace System.Web.OData.Query.Expressions
                 const string expectedProductName = "Abcd ";
 
                 // Add the custom function
-                ODataUriFunctions.AddUriCustomFunction(padrightMethodName, padrightStringEdmFunction, padRightStringMethodInfo);
+                ODataUriFunctions.AddCustomUriFunction(padrightMethodName, padrightStringEdmFunction, padRightStringMethodInfo);
 
                 string filter = String.Format("padright(ProductName, {0}) eq '{1}'", totalWidth, expectedProductName);
                 var filters = VerifyQueryDeserialization(filter);

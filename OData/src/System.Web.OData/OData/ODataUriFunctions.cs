@@ -14,15 +14,15 @@ namespace System.Web.OData
     {
         /// <summary>
         /// This is a shortcut of adding the custom FunctionSignature through 'CustomUriFunctions' class and
-        /// binding the function name to it's MethodInfo through 'UriFunctionsToClrBinder' class.
+        /// binding the function name to it's MethodInfo through 'UriFunctionsBinder' class.
         /// See these classes documentations.
         /// In case of an excpetion, both operations(adding the signature and binding the function) will be undone.
         /// </summary>
         /// <param name="functionName">The uri function name that appears in the OData request uri.</param>
         /// <param name="functionSignature">The new custom function signature.</param>
         /// <param name="methodInfo">The MethodInfo to bind the given function name.</param>
-        /// <exception cref="Exception">Any exception thrown by 'CustomUriFunctions.AddCustomUriFunction' and 'UriFunctionsToClrBinder.BindUriFunctionName' methods.</exception>
-        public static void AddUriCustomFunction(string functionName,
+        /// <exception cref="Exception">Any exception thrown by 'CustomUriFunctions.AddCustomUriFunction' and 'UriFunctionBinder.BindUriFunctionName' methods.</exception>
+        public static void AddCustomUriFunction(string functionName,
             FunctionSignatureWithReturnType functionSignature, MethodInfo methodInfo)
         {
             try
@@ -43,13 +43,13 @@ namespace System.Web.OData
 
         /// <summary>
         /// This is a shortcut of removing the FunctionSignature through 'CustomUriFunctions' class and
-        /// unbinding the function name from it's MethodInfo through 'UriFunctionsToClrBinder' class.
+        /// unbinding the function name from it's MethodInfo through 'UriFunctionsBinder' class.
         /// See these classes documentations.
         /// </summary>
         /// <param name="functionName">The uri function name that appears in the OData request uri.</param>
         /// <param name="functionSignature">The new custom function signature.</param>
         /// <param name="methodInfo">The MethodInfo to bind the given function name.</param>
-        /// <exception cref="Exception">Any exception thrown by 'CustomUriFunctions.RemoveCustomUriFunction' and 'UriFunctionsToClrBinder.UnbindUriFunctionName' methods.</exception>
+        /// <exception cref="Exception">Any exception thrown by 'CustomUriFunctions.RemoveCustomUriFunction' and 'UriFunctionsBinder.UnbindUriFunctionName' methods.</exception>
         /// <returns>'True' if the fucntion signature has successfully removed and unbinded. 'False' otherwise.</returns>
         public static bool RemoveCustomUriFunction(string functionName,
             FunctionSignatureWithReturnType functionSignature, MethodInfo methodInfo)

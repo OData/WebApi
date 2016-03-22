@@ -1,6 +1,6 @@
 ﻿{
   "dependencies": {
-    "Microsoft.AspNetCore.OData": "1.0.0-*",
+    "Microsoft.AspNetCore.OData": "1.0.0.1-*",
     "xunit.runner.dnx": "2.1.0-*",
     "System.Linq": "4.1.0-*",
     "System.Linq.Queryable": "4.0.1-*",
@@ -15,6 +15,14 @@
   },
 
   "frameworks": {
-    "dnx451": { }
+    "dnxcore50": {
+      "dependencies": {
+        "System.Linq.Queryable": "4.0.1-rc2-23826"
+      },
+      "imports": [
+        "dotnet5.4",
+        "portable-net452+win81"
+      ]
+    }
   }
 }

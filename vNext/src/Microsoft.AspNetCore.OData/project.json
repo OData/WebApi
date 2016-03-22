@@ -1,12 +1,12 @@
 {
-  "version": "1.0.0.1-rc2-16591c",
+  "version": "1.0.0.1-rc2-16591d",
   "description": "Microsoft.AspNetCore.OData",
 
   "dependencies": {
     "Microsoft.OData.Core": "6.15.0",
-    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-20266",
-    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc2-20266",
-    "Microsoft.EntityFrameworkCore": "1.0.0-rc2-20266"
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-20270",
+    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc2-20270",
+    "Microsoft.EntityFrameworkCore": "1.0.0-rc2-20270"
   },
 
   "frameworks": {

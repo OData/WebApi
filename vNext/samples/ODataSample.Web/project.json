@@ -5,10 +5,11 @@
     "preserveCompilationContext": true
   },
   "dependencies": {
-    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-20266",
-    "Microsoft.AspNetCore.Diagnostics": "1.0.0-rc2-20266",
-    "Microsoft.AspNetCore.IISPlatformHandler": "1.0.0-rc2-20266",
-    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20266",
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-20270",
+    "Microsoft.AspNetCore.Mvc.Dnx": "1.0.0-rc2-20270",
+    "Microsoft.AspNetCore.Diagnostics": "1.0.0-rc2-20270",
+    "Microsoft.AspNetCore.IISPlatformHandler": "1.0.0-rc2-20270",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20270",
     "Microsoft.AspNetCore.OData": "1.0.0.1-*"
   },
   "commands": {
@@ -21,7 +22,15 @@
     "postpublish": "dotnet publish-iis --publish-folder %publish:OutputPath%"
   },
   "frameworks": {
-    "dnx451": { }
+    "dnxcore50": {
+      "dependencies": {
+        "System.Linq.Queryable": "4.0.1-rc2-23826"
+      },
+      "imports": [
+        "dotnet5.4",
+        "portable-net452+win81"
+      ]
+    }
   },
   "exclude": [
     "wwwroot",

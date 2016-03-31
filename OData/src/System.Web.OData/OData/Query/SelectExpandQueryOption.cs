@@ -171,11 +171,6 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to search derived type when finding AutoExpand properties.
-        /// </summary>
-        public bool SearchDerivedTypeWhenAutoExpand { get; set; }
-
-        /// <summary>
         /// Applies the $select and $expand query options to the given <see cref="IQueryable"/> using the given
         /// <see cref="ODataQuerySettings"/>.
         /// </summary>
@@ -389,12 +384,10 @@ namespace System.Web.OData.Query
             IEdmModel model,
             string alreadyExpandedNavigationSourceName,
             IEdmNavigationSource navigationSource,
-            bool isAllSelected,
-            bool searchDerivedTypeWhenAutoExpand)
+            bool isAllSelected)
         {
             var expandItems = new List<SelectItem>();
-            var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(baseEntityType, model,
-                searchDerivedTypeWhenAutoExpand);
+            var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(baseEntityType, model);
             foreach (var navigationProperty in autoExpandNavigationProperties)
             {
                 if (!alreadyExpandedNavigationSourceName.Equals(navigationProperty.Name))
@@ -422,8 +415,7 @@ namespace System.Web.OData.Query
                                 model,
                                 alreadyExpandedNavigationSourceName,
                                 item.NavigationSource,
-                                true,
-                                searchDerivedTypeWhenAutoExpand);
+                                true);
                             selectExpandClause = new SelectExpandClause(nestedSelectItems, true);
                             item = new ExpandedNavigationSelectItem(expandPath, currentEdmNavigationSource,
                                 selectExpandClause);
@@ -512,8 +504,7 @@ namespace System.Web.OData.Query
                 Context.Model,
                 alreadyExpandedNavigationSourceName, 
                 expandItem.NavigationSource, 
-                selectExpandClause.AllSelected,
-                SearchDerivedTypeWhenAutoExpand);
+                selectExpandClause.AllSelected);
             bool hasAutoExpandInExpand = (autoExpandNavigationSelectItems.Count() != 0);
 
             while (level > 0)

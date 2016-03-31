@@ -315,62 +315,25 @@ namespace System.Web.OData.Formatter
             return annotation == null ? false : annotation.Restrictions.AutoExpand;
         }
 
-        public static IEnumerable<IEdmEntityType> GetAllDerivedEntityTypes(
+        public static IEnumerable<IEdmNavigationProperty> GetAutoExpandNavigationProperties(
             IEdmEntityType entityType, IEdmModel edmModel)
         {
-            List<IEdmEntityType> derivedEntityTypes = new List<IEdmEntityType>();
+            List<IEdmNavigationProperty> autoExpandNavigationProperties = new List<IEdmNavigationProperty>();
             if (entityType != null)
             {
-                List<IEdmStructuredType> typeList = new List<IEdmStructuredType>();
-                typeList.Add(entityType);
-                while (typeList.Count > 0)
+                var navigationProperties = entityType.NavigationProperties();
+                if (navigationProperties != null)
                 {
-                    var head = typeList[0];
-                    derivedEntityTypes.Add(head as IEdmEntityType);
-                    var derivedTypes = edmModel.FindDirectlyDerivedTypes(head);
-                    if (derivedTypes != null)
+                    foreach (var navigationProperty in navigationProperties)
                     {
-                        typeList.AddRange(derivedTypes);
-                    }
-
-                    typeList.RemoveAt(0);
-                }
-            }
-
-            derivedEntityTypes.RemoveAt(0);
-            return derivedEntityTypes;
-        }
-
-        public static IEnumerable<IEdmNavigationProperty> GetAutoExpandNavigationProperties(
-            IEdmEntityType baseEntityType, IEdmModel edmModel, bool searchDerivedTypeWhenAutoExpand)
-        {
-            List<IEdmNavigationProperty> autoExpandNavigationProperties = new List<IEdmNavigationProperty>();
-            List<IEdmEntityType> entityTypes = new List<IEdmEntityType>();
-            if (baseEntityType != null)
-            {
-                entityTypes.Add(baseEntityType);
-                if (searchDerivedTypeWhenAutoExpand)
-                {
-                    entityTypes.AddRange(GetAllDerivedEntityTypes(baseEntityType, edmModel));
-                }
-
-                foreach (var entityType in entityTypes)
-                {
-                    var navigationProperties = entityType == baseEntityType
-                        ? entityType.NavigationProperties()
-                        : entityType.DeclaredNavigationProperties();
-                    if (navigationProperties != null)
-                    {
-                        foreach (var navigationProperty in navigationProperties)
+                        if (IsAutoExpand(navigationProperty, edmModel))
                         {
-                            if (IsAutoExpand(navigationProperty, edmModel))
-                            {
-                                autoExpandNavigationProperties.Add(navigationProperty);
-                            }
+                            autoExpandNavigationProperties.Add(navigationProperty);
                         }
                     }
                 }
             }
+
             return autoExpandNavigationProperties;
         }
 

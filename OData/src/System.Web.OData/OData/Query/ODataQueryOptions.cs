@@ -362,7 +362,7 @@ namespace System.Web.OData.Query
                 result = Top.ApplyTo(result, querySettings);
             }
 
-            AddAutoExpandProperties(querySettings);
+            AddAutoExpandProperties();
 
             if (SelectExpand != null)
             {
@@ -426,7 +426,7 @@ namespace System.Web.OData.Query
                 throw Error.InvalidOperation(SRResources.NonSelectExpandOnSingleEntity);
             }
 
-            AddAutoExpandProperties(querySettings);
+            AddAutoExpandProperties();
 
             if (SelectExpand != null)
             {
@@ -586,9 +586,9 @@ namespace System.Web.OData.Query
             return Request.GetETag(etagHeaderValue);
         }
 
-        internal void AddAutoExpandProperties(ODataQuerySettings querySettings)
+        internal void AddAutoExpandProperties()
         {
-            var autoExpandRawValue = GetAutoExpandRawValue(querySettings.SearchDerivedTypeWhenAutoExpand);
+            var autoExpandRawValue = GetAutoExpandRawValue();
             if (autoExpandRawValue != null && !autoExpandRawValue.Equals(RawValues.Expand))
             {
                 IDictionary<string, string> queryParameters =
@@ -609,13 +609,13 @@ namespace System.Web.OData.Query
             }
         }
 
-        private string GetAutoExpandRawValue(bool discoverDerivedTypeWhenAutoExpand)
+        private string GetAutoExpandRawValue()
         {
             var expandRawValue = RawValues.Expand;
             IEdmEntityType baseEntityType = Context.ElementType as IEdmEntityType;
             var autoExpandRawValue = String.Empty;
             var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(baseEntityType,
-                Context.Model, discoverDerivedTypeWhenAutoExpand);
+                Context.Model);
 
             foreach (var property in autoExpandNavigationProperties)
             {
@@ -746,7 +746,7 @@ namespace System.Web.OData.Query
                         expandAvailable ? RawValues.Expand : null,
                         SelectExpand.Context);
                 }
-                SelectExpand.SearchDerivedTypeWhenAutoExpand = querySettings.SearchDerivedTypeWhenAutoExpand;
+
                 SelectExpandClause processedClause = SelectExpand.ProcessLevels();
                 SelectExpandQueryOption newSelectExpand = new SelectExpandQueryOption(
                     SelectExpand.RawSelect,

@@ -96,10 +96,5 @@ namespace System.Web.OData.Query
                 _pageSize = value;
             }
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to search derived type when finding AutoExpand properties.
-        /// </summary>
-        public bool SearchDerivedTypeWhenAutoExpand { get; set; }
     }
 }

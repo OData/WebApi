@@ -8,7 +8,7 @@ namespace WebStack.QA.Test.OData.AutoExpand
     {
         private readonly AutoExpandContext _db = new AutoExpandContext();
 
-        [EnableQuery(SearchDerivedTypeWhenAutoExpand = true)]
+        [EnableQuery]
         public IQueryable<Customer> Get()
         {
             ResetDataSource();
@@ -16,7 +16,7 @@ namespace WebStack.QA.Test.OData.AutoExpand
             return db.Customers;
         }
 
-        [EnableQuery(SearchDerivedTypeWhenAutoExpand = true)]
+        [EnableQuery]
         public SingleResult<Customer> Get(int key)
         {
             ResetDataSource();
@@ -169,7 +169,7 @@ namespace WebStack.QA.Test.OData.AutoExpand
     {
         private readonly AutoExpandContext _db = new AutoExpandContext();
 
-        [EnableQuery(SearchDerivedTypeWhenAutoExpand = true)]
+        [EnableQuery]
         public IQueryable<NormalOrder> Get()
         {
             ResetDataSource();

@@ -445,7 +445,8 @@ namespace System.Web.OData
         /// <param name="request">The incoming request</param>
         /// <param name="actionDescriptor"></param>
         /// <returns></returns>
-        protected virtual bool ShouldApplyQuery(ObjectContent responseContent, HttpRequestMessage request, HttpActionDescriptor actionDescriptor) {
+        protected virtual bool ShouldApplyQuery(ObjectContent responseContent, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
+        {
             bool shouldApplyQuery = responseContent.Value != null &&
                     request.RequestUri != null &&
                     (!String.IsNullOrWhiteSpace(request.RequestUri.Query) ||
@@ -547,7 +548,8 @@ namespace System.Web.OData
         /// <param name="model"></param>
         /// <param name="elementClrType"></param>
         /// <returns></returns>
-        protected virtual ODataQueryContext CreateODataQueryContext(HttpRequestMessage request, IEdmModel model, Type elementClrType) {
+        protected virtual ODataQueryContext CreateODataQueryContext(HttpRequestMessage request, IEdmModel model, Type elementClrType)
+        {
             return new ODataQueryContext(
                 model,
                 elementClrType,
@@ -560,7 +562,8 @@ namespace System.Web.OData
         /// <param name="queryContext"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        protected virtual ODataQueryOptions CreateODataQueryOptions(ODataQueryContext queryContext, HttpRequestMessage request) {
+        protected virtual ODataQueryOptions CreateODataQueryOptions(ODataQueryContext queryContext, HttpRequestMessage request)
+        {
             return new ODataQueryOptions(queryContext, request);
         }
 
@@ -571,7 +574,8 @@ namespace System.Web.OData
             Type elementClrType = GetElementType(response, actionDescriptor);
 
             IEdmModel model = GetModel(elementClrType, request, actionDescriptor);
-            if (model == null) {
+            if (model == null)
+            {
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 

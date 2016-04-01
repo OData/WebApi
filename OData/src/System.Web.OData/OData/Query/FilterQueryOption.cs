@@ -12,6 +12,7 @@ using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Core.UriParser.Visitors;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Query
@@ -114,7 +115,7 @@ namespace System.Web.OData.Query
         /// </summary>
         /// <param name="queryOptionsParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option</param>
         /// <returns>A new visitor instance</returns>
-        protected virtual Microsoft.OData.Core.UriParser.Visitors.QueryNodeVisitor<QueryNode> GetVisitor(ODataQueryOptionParser queryOptionsParser) {
+        protected virtual QueryNodeVisitor<QueryNode> GetVisitor(ODataQueryOptionParser queryOptionsParser) {
             return new ParameterAliasNodeTranslator(_queryOptionParser.ParameterAliasNodes);
         }
 

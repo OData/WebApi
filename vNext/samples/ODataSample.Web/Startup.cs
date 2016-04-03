@@ -57,18 +57,5 @@ namespace ODataSample.Web
             //    builder.MapODataRoute<ISampleService>("odata");
             //});
         }
-
-        public static void Main(string[] args)
-        {
-            var application = new WebHostBuilder()
-                .UseCaptureStartupErrors(true)
-                .UseDefaultConfiguration(args)
-                .UseIISPlatformHandlerUrl()
-                .UseServer("Microsoft.AspNetCore.Server.Kestrel")
-                .UseStartup<Startup>()
-                .Build();
-
-            application.Run();
-        }
     }
 }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.AspNetCore.Mvc.Internal;
 
 namespace Microsoft.AspNetCore.OData.Common
 {
@@ -34,12 +36,14 @@ namespace Microsoft.AspNetCore.OData.Common
             return null;
         }
 
-        internal static IEnumerable<Type> GetLoadedTypes(IAssemblyProvider assemblyProvider)
+        internal static IEnumerable<Type> GetLoadedTypes(string assemblyName)
         {
             List<Type> result = new List<Type>();
 
             // Go through all assemblies referenced by the application and search for types matching a predicate
-            IEnumerable<Assembly> assemblies = assemblyProvider.CandidateAssemblies;
+	        IEnumerable<Assembly> assemblies =
+		        DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(assemblyName)
+			        .Select(s => (s as AssemblyPart).Assembly);
             foreach (Assembly assembly in assemblies)
             {
                 Type[] exportedTypes = null;

@@ -64,7 +64,8 @@ namespace Microsoft.AspNetCore.OData.Builder.Conventions
             }
 
             return type
-                .ClrType
+				.ClrType
+                //.Properties
                 .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                 .Where(p => p.IsValidStructuralProperty() && !type.IgnoredProperties().Any(p1 => p1.Name == p.Name)
                     && (includeReadOnly || p.GetSetMethod() != null || p.PropertyType.IsCollection()));

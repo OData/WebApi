@@ -15,8 +15,8 @@ namespace Microsoft.AspNetCore.OData
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityInstanceContext{TEntityType}"/> class.
         /// </summary>
-        public EntityInstanceContext()
-            : base()
+        public EntityInstanceContext(string assemblyName)
+            : base(assemblyName)
         {
         }
 

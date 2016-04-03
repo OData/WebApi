@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using System.Reflection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -40,12 +41,12 @@ namespace Microsoft.AspNetCore.OData
 
                 if (result.Value != null)
                 {
-                    result.Value = ApplyQueryOptions(result.Value, request, context.ActionDescriptor);
+                    result.Value = ApplyQueryOptions(result.Value, request, context.ActionDescriptor, context.Controller.GetType().GetTypeInfo().Assembly.FullName);
                 }
             }
         }
 
-        public virtual object ApplyQueryOptions(object value, HttpRequest request, ActionDescriptor descriptor)
+        public virtual object ApplyQueryOptions(object value, HttpRequest request, ActionDescriptor descriptor, string assemblyName)
         {
             var elementClrType = value is IEnumerable 
 				? TypeHelper.GetImplementedIEnumerableType(value.GetType())
@@ -62,7 +63,7 @@ namespace Microsoft.AspNetCore.OData
                 elementClrType,
                 request.ODataProperties().Path);
 
-            var queryOptions = new ODataQueryOptions(queryContext, request);
+            var queryOptions = new ODataQueryOptions(queryContext, request, assemblyName);
 
             var enumerable = value as IEnumerable;
             if (enumerable == null)

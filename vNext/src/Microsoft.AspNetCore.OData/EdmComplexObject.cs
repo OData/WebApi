@@ -16,8 +16,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
         /// </summary>
         /// <param name="edmType">The <see cref="IEdmStructuredType"/> of this object.</param>
-        public EdmComplexObject(IEdmComplexType edmType)
-            : this(edmType, isNullable: false)
+        public EdmComplexObject(IEdmComplexType edmType, string assemblyName)
+            : this(edmType, assemblyName, isNullable: false)
         {
         }
 
@@ -25,8 +25,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
         /// </summary>
         /// <param name="edmType">The <see cref="IEdmComplexTypeReference"/> of this object.</param>
-        public EdmComplexObject(IEdmComplexTypeReference edmType)
-            : this(edmType.ComplexDefinition(), edmType.IsNullable)
+        public EdmComplexObject(IEdmComplexTypeReference edmType, string assemblyName)
+            : this(edmType.ComplexDefinition(), assemblyName, edmType.IsNullable)
         {
         }
 
@@ -35,8 +35,8 @@ namespace Microsoft.AspNetCore.OData
         /// </summary>
         /// <param name="edmType">The <see cref="IEdmComplexType"/> of this object.</param>
         /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
-        public EdmComplexObject(IEdmComplexType edmType, bool isNullable)
-            : base(edmType, isNullable)
+        public EdmComplexObject(IEdmComplexType edmType, string assemblyName, bool isNullable)
+            : base(edmType, assemblyName, isNullable)
         {
         }
     }

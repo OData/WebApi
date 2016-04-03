@@ -15,14 +15,10 @@
   },
 
   "frameworks": {
-    "dnxcore50": {
+    "net451": {
       "dependencies": {
-        "System.Linq.Queryable": "4.0.1-rc2-23826"
-      },
-      "imports": [
-        "dotnet5.4",
-        "portable-net452+win81"
-      ]
+        "System.Xml.ReaderWriter": "4.0.11-rc2-23818"
+      }
     }
   }
 }

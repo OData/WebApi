@@ -16,8 +16,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
         /// </summary>
         /// <param name="edmType">The <see cref="IEdmEntityType"/> of this object.</param>
-        public EdmEntityObject(IEdmEntityType edmType)
-            : this(edmType, isNullable: false)
+        public EdmEntityObject(IEdmEntityType edmType, string assemblyName)
+            : this(edmType, assemblyName, isNullable: false)
         {
         }
 
@@ -25,8 +25,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
         /// </summary>
         /// <param name="edmType">The <see cref="IEdmEntityTypeReference"/> of this object.</param>
-        public EdmEntityObject(IEdmEntityTypeReference edmType)
-            : this(edmType.EntityDefinition(), edmType.IsNullable)
+        public EdmEntityObject(IEdmEntityTypeReference edmType, string assemblyName)
+            : this(edmType.EntityDefinition(), assemblyName, edmType.IsNullable)
         {
         }
 
@@ -35,8 +35,8 @@ namespace Microsoft.AspNetCore.OData
         /// </summary>
         /// <param name="edmType">The <see cref="IEdmEntityType"/> of this object.</param>
         /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
-        public EdmEntityObject(IEdmEntityType edmType, bool isNullable)
-            : base(edmType, isNullable)
+        public EdmEntityObject(IEdmEntityType edmType, string assemblyName, bool isNullable)
+            : base(edmType, assemblyName, isNullable)
         {
         }
     }

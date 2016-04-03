@@ -22,10 +22,15 @@ namespace Microsoft.AspNetCore.OData.Extensions
             string prefix,
             Action<ODataConventionModelBuilder> after = null) where T : class
         {
-            var defaultAssemblyProvider = app.ApplicationServices.GetRequiredService<IAssemblyProvider>();
-            AssemblyProviderManager.Register(defaultAssemblyProvider);
+            //var defaultAssemblyProvider = app.ApplicationServices.GetRequiredService<IAssemblyProvider>();
+            //AssemblyProviderManager.Register(defaultAssemblyProvider);
+	        var type = typeof (T);
 
-            return app.UseRouter(new ODataRoute(prefix, DefaultODataModelProvider.BuildEdmModel(typeof(T), after)));
+			var model = DefaultODataModelProvider.BuildEdmModel(type, after);
+
+			var router = new ODataRoute(prefix, model);
+
+			return app.UseRouter(router);
         }
     }
 }

@@ -1,6 +1,6 @@
 {
-  "projects": [ "src", "test" ],
+  "projects": [ "src", "test", "../../../BrandlessConsulting/Projects/Hazception/Code/Web/App/src", "../../../SendGrid-netcore/Code/src", "../../../System.Net.Mail/Code/src" ],
   "sdk": {
-    "version": "1.0.0-rc2-16595"
+  "version": "1.0.0-rc2-20222"
   }
 }

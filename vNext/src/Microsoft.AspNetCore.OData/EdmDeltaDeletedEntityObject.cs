@@ -23,8 +23,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmDeltaDeletedEntityObject"/> class.
         /// </summary>
         /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaDeletedEntityObject.</param>
-        public EdmDeltaDeletedEntityObject(IEdmEntityType entityType)
-            : this(entityType, isNullable: false)
+        public EdmDeltaDeletedEntityObject(IEdmEntityType entityType, string assemblyName)
+            : this(entityType, assemblyName, isNullable: false)
         {
         }
 
@@ -32,8 +32,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmDeltaDeletedEntityObject"/> class.
         /// </summary>
         /// <param name="entityTypeReference">The <see cref="IEdmEntityTypeReference"/> of this DeltaDeletedEntityObject.</param>
-        public EdmDeltaDeletedEntityObject(IEdmEntityTypeReference entityTypeReference)
-            : this(entityTypeReference.EntityDefinition(), entityTypeReference.IsNullable)
+        public EdmDeltaDeletedEntityObject(IEdmEntityTypeReference entityTypeReference, string assemblyName)
+            : this(entityTypeReference.EntityDefinition(), assemblyName, entityTypeReference.IsNullable)
         {
         }
 
@@ -42,8 +42,8 @@ namespace Microsoft.AspNetCore.OData
         /// </summary>
         /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaDeletedEntityObject.</param>
         /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
-        public EdmDeltaDeletedEntityObject(IEdmEntityType entityType, bool isNullable)
-            : base(entityType, isNullable)
+        public EdmDeltaDeletedEntityObject(IEdmEntityType entityType, string assemblyName, bool isNullable)
+            : base(entityType, assemblyName, isNullable)
         {
             _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.DeletedEntry);
         }

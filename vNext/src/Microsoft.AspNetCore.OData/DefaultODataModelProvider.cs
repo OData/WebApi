@@ -10,7 +10,9 @@ namespace Microsoft.AspNetCore.OData
     {
         public static IEdmModel BuildEdmModel(Type apiContextType, Action<ODataConventionModelBuilder> after = null)
         {
-            var builder = new ODataConventionModelBuilder
+            var builder = new ODataConventionModelBuilder(
+				apiContextType.GetTypeInfo().Assembly.FullName
+				)
             {
                 Namespace = apiContextType.Namespace
             };

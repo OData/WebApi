@@ -699,7 +699,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
         private static EntityInstanceContext<TEntityType> UpCastEntityInstanceContext(EntityInstanceContext context)
         {
-            return new EntityInstanceContext<TEntityType>
+            return new EntityInstanceContext<TEntityType>(context.AssemblyName)
             {
                 SerializerContext = context.SerializerContext,
                 EdmObject = context.EdmObject,

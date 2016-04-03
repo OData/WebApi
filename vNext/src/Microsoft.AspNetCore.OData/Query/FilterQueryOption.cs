@@ -85,16 +85,16 @@ namespace Microsoft.AspNetCore.OData.Query
         /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
         /// <param name="assemblyProvider">The <see cref="IAssemblyProvider"/> to use.</param>
         /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, IAssemblyProvider assemblyProvider)
+        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, string assemblyName)
         {
             if (query == null)
             {
                 throw Error.ArgumentNull("query");
             }
             
-            if (assemblyProvider == null)
+            if (assemblyName == null)
             {
-                throw Error.ArgumentNull("assemblyProvider");
+                throw Error.ArgumentNull("assemblyName");
             }
 
             if (Context.ElementClrType == null)
@@ -102,7 +102,7 @@ namespace Microsoft.AspNetCore.OData.Query
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
             
-            var filter = FilterBinder.Bind(FilterClause, Context.ElementClrType, Context.Model, assemblyProvider, querySettings);
+            var filter = FilterBinder.Bind(FilterClause, Context.ElementClrType, Context.Model, assemblyName, querySettings);
             return ExpressionHelpers.Where(query, filter, Context.ElementClrType);
         }
     }

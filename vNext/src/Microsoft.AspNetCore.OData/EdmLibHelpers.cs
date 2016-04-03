@@ -115,30 +115,30 @@ namespace Microsoft.AspNetCore.OData
             return new EdmCollectionType(new EdmEntityTypeReference(entityType, isNullable: false));
         }
 
-        public static Type GetClrType(IEdmType edmType, IEdmModel edmModel)
-        {
-            return GetClrType(edmType, edmModel, AssemblyProviderManager.Instance());
-        }
+        //public static Type GetClrType(IEdmType edmType, IEdmModel edmModel)
+        //{
+        //    return GetClrType(edmType, edmModel, AssemblyProviderManager.Instance());
+        //}
 
-        public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, IAssemblyProvider assemblyProvider)
+        public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, string assemblyName)
         {
             IEdmSchemaType edmSchemaType = edmType as IEdmSchemaType;
 
             Contract.Assert(edmSchemaType != null);
 
             string typeName = edmSchemaType.FullName();
-            IEnumerable<Type> matchingTypes = GetMatchingTypes(typeName, assemblyProvider);
+            IEnumerable<Type> matchingTypes = GetMatchingTypes(typeName, assemblyName);
 
-            return matchingTypes.FirstOrDefault();
+			return matchingTypes.FirstOrDefault();
         }
 
-        public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel)
-        {
-            return GetClrType(edmTypeReference, edmModel, AssemblyProviderManager.Instance());
-        }
+        //public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel, string assemblyName)
+        //{
+        //    return GetClrType(edmTypeReference, edmModel, assemblyName);
+        //}
 
         public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel,
-            IAssemblyProvider assemblyProvider)
+            string assemblyName)
         {
             if (edmTypeReference == null)
             {
@@ -159,7 +159,7 @@ namespace Microsoft.AspNetCore.OData
             }
             else
             {
-                return GetClrType(edmTypeReference.Definition, edmModel, assemblyProvider);
+                return GetClrType(edmTypeReference.Definition, edmModel, assemblyName);
             }
         }
 
@@ -279,15 +279,15 @@ namespace Microsoft.AspNetCore.OData
                 : null;
         }
         
-        public static Type IsNonstandardEdmPrimitive(Type type, out bool isNonstandardEdmPrimitive)
+        public static Type IsNonstandardEdmPrimitive(Type type, string assemblyName, out bool isNonstandardEdmPrimitive)
         {
-            return IsNonstandardEdmPrimitive(type, out isNonstandardEdmPrimitive, AssemblyProviderManager.Instance());
+            return IsNonstandardEdmPrimitive(type, out isNonstandardEdmPrimitive, assemblyName);
         }
 
         // figures out if the given clr type is nonstandard edm primitive like uint, ushort, char[] etc.
         // and returns the corresponding clr type to which we map like uint => long.
         public static Type IsNonstandardEdmPrimitive(Type type, out bool isNonstandardEdmPrimitive,
-            IAssemblyProvider assemblyProvider)
+			string assemblyName)
         {
             IEdmPrimitiveTypeReference edmType = GetEdmPrimitiveTypeReferenceOrNull(type);
             if (edmType == null)
@@ -296,7 +296,7 @@ namespace Microsoft.AspNetCore.OData
                 return type;
             }
 
-            Type reverseLookupClrType = GetClrType(edmType, EdmCoreModel.Instance, assemblyProvider);
+            Type reverseLookupClrType = GetClrType(edmType, EdmCoreModel.Instance, assemblyName);
             isNonstandardEdmPrimitive = (type != reverseLookupClrType);
 
             return reverseLookupClrType;
@@ -318,10 +318,10 @@ namespace Microsoft.AspNetCore.OData
             return edmModel.GetAnnotationValue<QueryableRestrictionsAnnotation>(edmProperty);
         }
 
-        private static IEnumerable<Type> GetMatchingTypes(string edmFullName, IAssemblyProvider assemblyProvider)
+        private static IEnumerable<Type> GetMatchingTypes(string edmFullName, string assemblyName)
         {
             return
-                TypeHelper.GetLoadedTypes(assemblyProvider)
+                TypeHelper.GetLoadedTypes(assemblyName)
                     .Where(t => t.GetTypeInfo().IsPublic && t.EdmFullName() == edmFullName);
         }
 

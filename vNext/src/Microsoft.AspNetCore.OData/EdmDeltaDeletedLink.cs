@@ -23,8 +23,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmDeltaDeletedLink"/> class.
         /// </summary>
         /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaDeletedLink.</param>
-        public EdmDeltaDeletedLink(IEdmEntityType entityType)
-            : this(entityType, isNullable: false)
+        public EdmDeltaDeletedLink(IEdmEntityType entityType, string assemblyName)
+            : this(entityType, assemblyName, isNullable: false)
         {
         }
 
@@ -32,8 +32,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmDeltaDeletedLink"/> class.
         /// </summary>
         /// <param name="entityTypeReference">The <see cref="IEdmEntityTypeReference"/> of this DeltaDeletedLink.</param>
-        public EdmDeltaDeletedLink(IEdmEntityTypeReference entityTypeReference)
-            : this(entityTypeReference.EntityDefinition(), entityTypeReference.IsNullable)
+        public EdmDeltaDeletedLink(IEdmEntityTypeReference entityTypeReference, string assemblyName)
+            : this(entityTypeReference.EntityDefinition(), assemblyName, entityTypeReference.IsNullable)
         {
         }
 
@@ -42,8 +42,8 @@ namespace Microsoft.AspNetCore.OData
         /// </summary>
         /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaDeletedLink.</param>
         /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
-        public EdmDeltaDeletedLink(IEdmEntityType entityType, bool isNullable)
-            : base(entityType, isNullable)
+        public EdmDeltaDeletedLink(IEdmEntityType entityType, string assemblyName, bool isNullable)
+            : base(entityType, assemblyName, isNullable)
         {
             _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.DeletedLinkEntry);
         }

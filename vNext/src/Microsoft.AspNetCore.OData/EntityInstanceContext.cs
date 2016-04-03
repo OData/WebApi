@@ -26,17 +26,19 @@ namespace Microsoft.AspNetCore.OData
     /// </summary>
     public class EntityInstanceContext
     {
-        private object _entityInstance;
+	    internal readonly string AssemblyName;
+	    private object _entityInstance;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityInstanceContext"/> class.
         /// </summary>
-        public EntityInstanceContext()
+        public EntityInstanceContext(string assemblyName)
         {
-            SerializerContext = new ODataSerializerContext();
+	        AssemblyName = assemblyName;
+	        SerializerContext = new ODataSerializerContext();
         }
 
-        /// <summary>
+	    /// <summary>
         /// Initializes a new instance of the <see cref="EntityInstanceContext"/> class.
         /// </summary>
         /// <param name="serializerContext">The backing <see cref="ODataSerializerContext"/>.</param>
@@ -218,7 +220,7 @@ namespace Microsoft.AspNetCore.OData
                 return edmEntityObject.Instance;
             }
 
-            Type clrType = EdmLibHelpers.GetClrType(EntityType, EdmModel);
+            Type clrType = EdmLibHelpers.GetClrType(EntityType, EdmModel, AssemblyName);
             if (clrType == null)
             {
                 throw new InvalidOperationException(Error.Format(SRResources.MappingDoesNotContainEntityType, EntityType.FullName()));
@@ -232,7 +234,7 @@ namespace Microsoft.AspNetCore.OData
                 {
                     if (value.GetType().IsCollection())
                     {
-                        DeserializationHelpers.SetCollectionProperty(resource, property, value, property.Name);
+                        DeserializationHelpers.SetCollectionProperty(resource, property, value, property.Name, AssemblyName);
                     }
                     else
                     {

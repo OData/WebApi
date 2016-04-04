@@ -441,9 +441,9 @@ namespace System.Web.OData
         /// <summary>
         /// Returns true if the query should be applied
         /// </summary>
-        /// <param name="responseContent"></param>
+        /// <param name="responseContent">The response content</param>
         /// <param name="request">The incoming request</param>
-        /// <param name="actionDescriptor"></param>
+        /// <param name="actionDescriptor">>The action descriptor for the action being queried on.</param>
         /// <returns></returns>
         protected virtual bool ShouldApplyQuery(ObjectContent responseContent, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
         {
@@ -544,10 +544,10 @@ namespace System.Web.OData
         /// <summary>
         /// Create ODataQueryContext instance
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="model"></param>
-        /// <param name="elementClrType"></param>
-        /// <returns></returns>
+        /// <param name="request">The incoming request.</param>
+        /// <param name="model">The EDM model for the given type and request.</param>
+        /// <param name="elementClrType">The CLR type required to create the related ODataQueryContext.</param>
+        /// <returns>The new ODataQuery context instance for given request, specified EDM model and type</returns>
         protected virtual ODataQueryContext CreateODataQueryContext(HttpRequestMessage request, IEdmModel model, Type elementClrType)
         {
             return new ODataQueryContext(
@@ -559,9 +559,9 @@ namespace System.Web.OData
         /// <summary>
         /// Create ODataQueryOptions
         /// </summary>
-        /// <param name="queryContext"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
+        /// <param name="queryContext">The query context used to create the query options.</param>
+        /// <param name="request">The incoming request.</param>
+        /// <returns>The new ODataQueryOptions from the specified ODataQueryContext and request</returns>
         protected virtual ODataQueryOptions CreateODataQueryOptions(ODataQueryContext queryContext, HttpRequestMessage request)
         {
             return new ODataQueryOptions(queryContext, request);
@@ -581,11 +581,6 @@ namespace System.Web.OData
 
             ODataQueryContext queryContext = CreateODataQueryContext(request, model, elementClrType);
             ODataQueryOptions queryOptions = CreateODataQueryOptions(queryContext, request);
-
-            if (queryOptions.SelectExpand != null)
-            {
-                queryOptions.SelectExpand.LevelsMaxLiteralExpansionDepth = _validationSettings.MaxExpansionDepth;
-            }
 
             if (queryOptions.SelectExpand != null)
             {

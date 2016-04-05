@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.OData.Common;
-using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
@@ -16,7 +13,7 @@ namespace Microsoft.AspNetCore.OData.Query
 	public class ODataQueryOptions
 	{
 		private readonly ODataQueryOptionParser _queryOptionParser;
-		private string _assemblyName;
+		private readonly string _assemblyName;
 		private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
 
 		/// <summary>
@@ -93,10 +90,15 @@ namespace Microsoft.AspNetCore.OData.Query
 			{
 				query = Filter.ApplyTo(query, querySettings, _assemblyName);
 			}
+			if (IsAvailableODataQueryOption(Skip, AllowedQueryOptions.Skip))
+			{
+				query = Skip.ApplyTo(query, querySettings);
+			}
 			if (IsAvailableODataQueryOption(Top, AllowedQueryOptions.Top))
 			{
 				query = Top.ApplyTo(query, querySettings);
 			}
+
 
 			return query;
 		}
@@ -128,6 +130,7 @@ namespace Microsoft.AspNetCore.OData.Query
 					case "$skip":
 						ThrowIfEmpty(kvp.Value, "$skip");
 						RawValues.Skip = kvp.Value;
+						Skip = new SkipQueryOption(kvp.Value, Context, _queryOptionParser);
 						break;
 					case "$select":
 						RawValues.Select = kvp.Value;
@@ -150,6 +153,7 @@ namespace Microsoft.AspNetCore.OData.Query
 		}
 
 		public TopQueryOption Top { get; set; }
+		public SkipQueryOption Skip { get; set; }
 
 		private static void ThrowIfEmpty(string queryValue, string queryName)
 		{

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.OData.Core.UriParser.Semantic;
 using System.Linq;
+using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.OData.Routing.Conventions
@@ -24,114 +25,144 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 
         public ActionDescriptor SelectAction(RouteContext routeContext)
         {
-            var preflightFor =
-                routeContext.HttpContext.Request.Headers["Access-Control-Request-Method"].FirstOrDefault();
-            var odataPath = routeContext.HttpContext.Request.ODataProperties().NewPath;
-            var controllerName = string.Empty;
-            var methodName = routeContext.HttpContext.Request.Method;
-            var routeTemplate = string.Empty;
-            var keys = new List<KeyValuePair<string, object>>();
+	        Func<ActionDescriptor> a = () =>
+	        {
+				var preflightFor =
+					routeContext.HttpContext.Request.Headers["Access-Control-Request-Method"].FirstOrDefault();
+				var odataPath = routeContext.HttpContext.Request.ODataProperties().NewPath;
+				var controllerName = string.Empty;
+				var methodName = routeContext.HttpContext.Request.Method;
+				var routeTemplate = string.Empty;
+				var keys = new List<KeyValuePair<string, object>>();
 
-            if (odataPath.FirstSegment is MetadataSegment)
-            {
-                controllerName = "Metadata";
-            }
-            else
-            {
-                // TODO: we should use attribute routing to determine controller and action.
-                var entitySetSegment = odataPath.FirstSegment as EntitySetSegment;
-                if (entitySetSegment != null)
-                {
-                    controllerName = entitySetSegment.EntitySet.Name;
-                }
+				if (odataPath.FirstSegment is MetadataSegment)
+				{
+					controllerName = "Metadata";
+				}
+				else
+				{
+					// TODO: we should use attribute routing to determine controller and action.
+					var entitySetSegment = odataPath.FirstSegment as EntitySetSegment;
+					if (entitySetSegment != null)
+					{
+						controllerName = entitySetSegment.EntitySet.Name;
+					}
 
-                var keySegment = odataPath.FirstOrDefault(s => s is KeySegment) as KeySegment;
-                if (keySegment != null)
-                {
-                    keys.AddRange(keySegment.Keys);
-                }
+					// TODO: Move all these out into separate processor classes for each type
+					var keySegment = odataPath.FirstOrDefault(s => s is KeySegment) as KeySegment;
+					if (keySegment != null)
+					{
+						keys.AddRange(keySegment.Keys);
+					}
 
-                if (keys.Count == 1)
-                {
-                    routeTemplate = "{id}";
-                }
+					if (keys.Count == 1)
+					{
+						routeTemplate = "{id}";
+					}
 
-                var structuralPropertySegment =
-                    odataPath.FirstOrDefault((s => s is PropertySegment)) as PropertySegment;
-                if (structuralPropertySegment != null)
-                {
-                    routeTemplate += "/" + structuralPropertySegment.Property.Name;
-                }
+					var structuralPropertySegment =
+						odataPath.FirstOrDefault((s => s is PropertySegment)) as PropertySegment;
+					if (structuralPropertySegment != null)
+					{
+						routeTemplate += "/" + structuralPropertySegment.Property.Name;
+					}
 
-                var navigationPropertySegment =
-                    odataPath.FirstOrDefault(s => s is NavigationPropertySegment) as NavigationPropertySegment;
-                if (navigationPropertySegment != null)
-                {
-                        routeTemplate += "/" + navigationPropertySegment.NavigationProperty.Name;
-                }
+					var navigationPropertySegment =
+						odataPath.FirstOrDefault(s => s is NavigationPropertySegment) as NavigationPropertySegment;
+					if (navigationPropertySegment != null)
+					{
+						routeTemplate += "/" + navigationPropertySegment.NavigationProperty.Name;
+					}
 
-                var operationSegment =
-                    odataPath.FirstOrDefault(s => s is OperationSegment) as OperationSegment;
-                if (operationSegment != null)
-                {
-                    routeTemplate += "/" + operationSegment.Operations.First().Name;
-                }
-            }
+					var operationSegment =
+						odataPath.FirstOrDefault(s => s is OperationSegment) as OperationSegment;
+					if (operationSegment != null)
+					{
+						routeTemplate += "/" + operationSegment.Operations.First().Name;
+					}
 
-            if (string.IsNullOrEmpty(routeTemplate))
-            {
-                routeTemplate = controllerName;
-            }
-            else
-            {
-                routeTemplate = controllerName + "/" + routeTemplate.TrimStart('/');
-            }
-            
-            var services = routeContext.HttpContext.RequestServices;
-            var provider = services.GetRequiredService<IActionDescriptorCollectionProvider>();
-            var actionDescriptor = provider.ActionDescriptors.Items.SingleOrDefault(d =>
-            {
-                var c = d as ControllerActionDescriptor;
-                if (c == null)
-                {
-                    return false;
-                }
-                if (c.ControllerName != controllerName)
-                {
-                    return false;
-                }
-                if (controllerName == "Metadata")
-                {
-                    return true;
-                }
-                if (!c.AttributeRouteInfo.Template.EndsWith(routeTemplate))
-                {
-                    return false;
-                }
-                // If we find no action constraints, this isn't our method
-                if (c.ActionConstraints == null || !c.ActionConstraints.Any())
-                {
-                    return false;
-                }
-                var httpMethodConstraint = ((HttpMethodActionConstraint)c.ActionConstraints.First());
-                if (methodName.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
-                {
-                    return httpMethodConstraint.HttpMethods.Contains(preflightFor);
-                }
-                return httpMethodConstraint.HttpMethods.Contains(methodName);
-            });
+					var operationImportSegment =
+						odataPath.FirstOrDefault(s => s is OperationImportSegment) as OperationImportSegment;
+					if (operationImportSegment != null)
+					{
+						controllerName = "*";
+						routeTemplate = "/" + operationImportSegment.OperationImports.First().Name;
+						var parameters = new List<string>();
+						if (operationImportSegment.Parameters.Any())
+						{
+							foreach (var param in operationImportSegment.Parameters)
+							{
+								parameters.Add(string.Format("{0}={{{0}}}", param.Name));
+								keys.Add(new KeyValuePair<string, object>(param.Name, (param.Value as ConstantNode).Value));
+							}
+							routeTemplate += "(" + string.Join(",", parameters) + ")";
+						}
+					}
+				}
 
-            if (actionDescriptor == null)
-            {
-                throw new NotSupportedException(string.Format("No action match template '{0}' in '{1}Controller'", routeTemplate, controllerName));
-            }
+				if (string.IsNullOrEmpty(routeTemplate))
+				{
+					routeTemplate = controllerName;
+				}
+				else
+				{
+					routeTemplate = controllerName + "/" + routeTemplate.TrimStart('/');
+				}
 
-            if (keys.Any())
-            {
-                WriteRouteData(routeContext, actionDescriptor.Parameters, keys);
-            }
+				routeTemplate = routeTemplate.TrimStart('*');
 
-            return actionDescriptor;
+				var services = routeContext.HttpContext.RequestServices;
+				var provider = services.GetRequiredService<IActionDescriptorCollectionProvider>();
+				var actionDescriptor = provider.ActionDescriptors.Items.SingleOrDefault(d =>
+				{
+					var c = d as ControllerActionDescriptor;
+					if (c == null)
+					{
+						return false;
+					}
+					if (c.ControllerName != controllerName && controllerName != "*")
+					{
+						return false;
+					}
+					if (controllerName == "Metadata")
+					{
+						return true;
+					}
+					if (c.AttributeRouteInfo == null)
+					{
+						return false;
+					}
+					if (!c.AttributeRouteInfo.Template.EndsWith(routeTemplate))
+					{
+						return false;
+					}
+					// If we find no action constraints, this isn't our method
+					if (c.ActionConstraints == null || !c.ActionConstraints.Any())
+					{
+						return false;
+					}
+					// TODO: If this is a OperationSegment or an OperationImportSegment then check the return types match
+					var httpMethodConstraint = ((HttpMethodActionConstraint)c.ActionConstraints.First());
+					if (methodName.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+					{
+						return httpMethodConstraint.HttpMethods.Contains(preflightFor);
+					}
+					return httpMethodConstraint.HttpMethods.Contains(methodName);
+				});
+
+				if (actionDescriptor == null)
+				{
+					throw new NotSupportedException($"No action match template '{routeTemplate}' in '{controllerName}Controller'");
+				}
+
+				if (keys.Any())
+				{
+					WriteRouteData(routeContext, actionDescriptor.Parameters, keys);
+				}
+
+				return actionDescriptor;
+			};
+	        return a();
         }
 
         private void WriteRouteData(RouteContext context, IList<ParameterDescriptor> parameters, IList<KeyValuePair<string, object>> keys)

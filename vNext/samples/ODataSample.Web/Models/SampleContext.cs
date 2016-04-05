@@ -5,12 +5,28 @@ namespace ODataSample.Web.Models
 {
     public class SampleContext : ISampleService
     {
+	    private static int _productId;
         #region In-memory data
         private readonly List<Product> _products = new List<Product>
         {
-            new Product { ProductId = 1, Name = "Apple",  Price = 10 },
-            new Product { ProductId = 2, Name = "Orange", Price = 20 },
-            new Product { ProductId = 3, Name = "Peanut butter", Price = 25 },
+            new Product { ProductId = ++_productId, Name = "Apple",  Price = 10 },
+            new Product { ProductId = ++_productId, Name = "Orange", Price = 20 },
+            new Product { ProductId = ++_productId, Name = "Peanut butter", Price = 25 },
+            new Product { ProductId = ++_productId, Name = "Apple 2",  Price = 10 },
+            new Product { ProductId = ++_productId, Name = "Orange 2", Price = 20 },
+            new Product { ProductId = ++_productId, Name = "Peanut butter 2", Price = 25 },
+            new Product { ProductId = ++_productId, Name = "Apple 3",  Price = 10 },
+            new Product { ProductId = ++_productId, Name = "Orange 3", Price = 20 },
+            new Product { ProductId = ++_productId, Name = "Peanut butter 3", Price = 25 },
+            new Product { ProductId = ++_productId, Name = "Apple 4",  Price = 10 },
+            new Product { ProductId = ++_productId, Name = "Orange 4", Price = 20 },
+            new Product { ProductId = ++_productId, Name = "Peanut butter 4", Price = 25 },
+            new Product { ProductId = ++_productId, Name = "Apple 5",  Price = 10 },
+            new Product { ProductId = ++_productId, Name = "Orange 5", Price = 20 },
+            new Product { ProductId = ++_productId, Name = "Peanut butter 5", Price = 25 },
+            new Product { ProductId = ++_productId, Name = "Apple 6",  Price = 10 },
+            new Product { ProductId = ++_productId, Name = "Orange 6", Price = 20 },
+            new Product { ProductId = ++_productId, Name = "Peanut butter 6", Price = 25 },
         };
 
         private readonly List<Customer> _customers = new List<Customer>

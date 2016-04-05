@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using ODataSample.Web.Models;
@@ -44,7 +43,7 @@ namespace ODataSample.Web.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(_sampleContext.Products); 
+	        return Ok(_sampleContext.Products);
         }
 
         // GET api/Products/5

@@ -17,6 +17,7 @@ namespace Microsoft.AspNetCore.OData.Query
 	{
 		private readonly ODataQueryOptionParser _queryOptionParser;
 		private string _assemblyName;
+		private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
@@ -77,9 +78,11 @@ namespace Microsoft.AspNetCore.OData.Query
 		/// </summary>
 		/// <param name="query">The original <see cref="IQueryable"/>.</param>
 		/// <param name="querySettings">The settings to use in query composition.</param>
+		/// <param name="ignoreQueryOptions">The query parameters that are already applied in queries.</param>
 		/// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
-		public virtual IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
+		public virtual IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)
 		{
+			_ignoreQueryOptions = ignoreQueryOptions;
 			if (query == null)
 			{
 				throw Error.ArgumentNull("query");
@@ -90,8 +93,16 @@ namespace Microsoft.AspNetCore.OData.Query
 			{
 				query = Filter.ApplyTo(query, querySettings, _assemblyName);
 			}
+			if (IsAvailableODataQueryOption(Top, AllowedQueryOptions.Top))
+			{
+				query = Top.ApplyTo(query, querySettings);
+			}
 
 			return query;
+		}
+		private bool IsAvailableODataQueryOption(object queryOption, AllowedQueryOptions queryOptionFlag)
+		{
+			return ((queryOption != null) && ((_ignoreQueryOptions & queryOptionFlag) == AllowedQueryOptions.None));
 		}
 
 		private void BuildQueryOptions(IDictionary<string, string> queryParameters)
@@ -112,6 +123,7 @@ namespace Microsoft.AspNetCore.OData.Query
 					case "$top":
 						ThrowIfEmpty(kvp.Value, "$top");
 						RawValues.Top = kvp.Value;
+						Top = new TopQueryOption(kvp.Value, Context, _queryOptionParser);
 						break;
 					case "$skip":
 						ThrowIfEmpty(kvp.Value, "$skip");
@@ -136,6 +148,8 @@ namespace Microsoft.AspNetCore.OData.Query
 				}
 			}
 		}
+
+		public TopQueryOption Top { get; set; }
 
 		private static void ThrowIfEmpty(string queryValue, string queryName)
 		{

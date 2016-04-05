@@ -78,7 +78,8 @@ namespace Microsoft.AspNetCore.OData
                 new ODataQuerySettings
                 {
                     HandleNullPropagation = HandleNullPropagationOption.True
-                });
+                },
+				AllowedQueryOptions.None);
         }
     }
 }

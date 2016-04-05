@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.OData.Extensions
 {
-    public static class HttpContextExtensions
+	public static class HttpContextExtensions
     {
         public static ODataProperties ODataProperties(this HttpContext httpContext)
         {

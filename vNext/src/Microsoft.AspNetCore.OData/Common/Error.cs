@@ -77,14 +77,25 @@ namespace Microsoft.AspNetCore.OData.Common
             return Error.Argument(parameterName, CommonWebApiResources.ArgumentNullOrEmpty, parameterName);
         }
 
-        /// <summary>
-        /// Creates an <see cref="ArgumentOutOfRangeException"/> with a message saying that the argument must be greater than or equal to <paramref name="minValue"/>.
-        /// </summary>
-        /// <param name="parameterName">The name of the parameter that caused the current exception.</param>
-        /// <param name="actualValue">The value of the argument that causes this exception.</param>
-        /// <param name="minValue">The minimum size of the argument.</param>
-        /// <returns>The logged <see cref="Exception"/>.</returns>
-        internal static ArgumentOutOfRangeException ArgumentMustBeGreaterThanOrEqualTo(string parameterName, object actualValue, object minValue)
+		/// <summary>
+		/// Creates an <see cref="ArgumentException"/> with a message saying that the argument must be an absolute URI.
+		/// </summary>
+		/// <param name="parameterName">The name of the parameter that caused the current exception.</param>
+		/// <param name="actualValue">The value of the argument that causes this exception.</param>
+		/// <returns>The logged <see cref="Exception"/>.</returns>
+		internal static ArgumentException ArgumentUriNotAbsolute(string parameterName, Uri actualValue)
+		{
+			return new ArgumentException(Error.Format(CommonWebApiResources.ArgumentInvalidAbsoluteUri, actualValue), parameterName);
+		}
+
+		/// <summary>
+		/// Creates an <see cref="ArgumentOutOfRangeException"/> with a message saying that the argument must be greater than or equal to <paramref name="minValue"/>.
+		/// </summary>
+		/// <param name="parameterName">The name of the parameter that caused the current exception.</param>
+		/// <param name="actualValue">The value of the argument that causes this exception.</param>
+		/// <param name="minValue">The minimum size of the argument.</param>
+		/// <returns>The logged <see cref="Exception"/>.</returns>
+		internal static ArgumentOutOfRangeException ArgumentMustBeGreaterThanOrEqualTo(string parameterName, object actualValue, object minValue)
         {
             return new ArgumentOutOfRangeException(parameterName, actualValue, Error.Format(CommonWebApiResources.ArgumentMustBeGreaterThanOrEqualTo, minValue));
         }

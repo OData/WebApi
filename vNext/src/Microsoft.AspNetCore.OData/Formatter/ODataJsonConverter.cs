@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Net.Http;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
@@ -30,6 +31,11 @@ namespace Microsoft.AspNetCore.OData.Formatter
 		    {
 				writer.WritePropertyName("@odata.count");
 				writer.WriteValue(_odataProperties.TotalCount.Value);
+			}
+		    if (_odataProperties.NextLink != null)
+		    {
+				writer.WritePropertyName("@odata.nextLink");
+				writer.WriteValue(_odataProperties.NextLink);
 			}
 			if (!singleEntity)
             {

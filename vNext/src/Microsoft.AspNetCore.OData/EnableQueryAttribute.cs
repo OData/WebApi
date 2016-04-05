@@ -6,6 +6,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
@@ -34,8 +35,10 @@ namespace Microsoft.AspNetCore.OData
             }
             
             var request = context.HttpContext.Request;
+	        
             if (request.HasQueryOptions() || 
-				ODataCountMediaTypeMapping.IsCountRequest(request))
+				ODataCountMediaTypeMapping.IsCountRequest(request) ||
+				context.ActionDescriptor.HasQueryOption())
             {
                 var result = context.Result as ObjectResult;
                 if (result == null)
@@ -50,7 +53,7 @@ namespace Microsoft.AspNetCore.OData
             }
         }
 
-        public virtual object ApplyQueryOptions(object value, HttpRequest request, ActionDescriptor descriptor, string assemblyName)
+        public virtual object ApplyQueryOptions(object value, HttpRequest request, ActionDescriptor actionDescriptor, string assemblyName)
         {
             var elementClrType = value is IEnumerable 
 				? TypeHelper.GetImplementedIEnumerableType(value.GetType())
@@ -80,11 +83,13 @@ namespace Microsoft.AspNetCore.OData
 
             // response is a collection.
             var query = (value as IQueryable) ?? enumerable.AsQueryable();
-            query = queryOptions.ApplyTo(query,
+
+	        query = queryOptions.ApplyTo(query,
                 new ODataQuerySettings
                 {
-                    HandleNullPropagation = HandleNullPropagationOption.True
-                },
+                    HandleNullPropagation = HandleNullPropagationOption.True,
+					PageSize = actionDescriptor.PageSize()
+				},
 				AllowedQueryOptions.None);
 
 			if (ODataCountMediaTypeMapping.IsCountRequest(request))

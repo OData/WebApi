@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter;
@@ -157,8 +159,50 @@ namespace Microsoft.AspNetCore.OData.Query
 				query = Top.ApplyTo(query, querySettings);
 			}
 
+			if (querySettings.PageSize.HasValue)
+			{
+				bool resultsLimited = true;
+				query = LimitResults(query, querySettings.PageSize.Value, out resultsLimited);
+				var uriString = Request.GetDisplayUrl();
+				if (!string.IsNullOrWhiteSpace(uriString))
+				{
+					var uri = new Uri(uriString);
+					if (resultsLimited && uri != null && uri.IsAbsoluteUri && Request.ODataProperties().NextLink == null)
+					{
+						Uri nextPageLink = Request.GetNextPageLink(querySettings.PageSize.Value);
+						Request.ODataProperties().NextLink = nextPageLink;
+					}
+				}
+			}
 
 			return query;
+		}
+
+
+		/// <summary>
+		/// Limits the query results to a maximum number of results.
+		/// </summary>
+		/// <typeparam name="T">The entity CLR type</typeparam>
+		/// <param name="queryable">The queryable to limit.</param>
+		/// <param name="limit">The query result limit.</param>
+		/// <param name="resultsLimited"><c>true</c> if the query results were limited; <c>false</c> otherwise</param>
+		/// <returns>The limited query results.</returns>
+		[SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", Justification = "Not intended for public use, only public to enable invokation without security issues.")]
+		public static IQueryable<T> LimitResults<T>(IQueryable<T> queryable, int limit, out bool resultsLimited)
+		{
+			TruncatedCollection<T> truncatedCollection = new TruncatedCollection<T>(queryable, limit);
+			resultsLimited = truncatedCollection.IsTruncated;
+			return truncatedCollection.AsQueryable();
+		}
+
+		private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
+		internal static IQueryable LimitResults(IQueryable queryable, int limit, out bool resultsLimited)
+		{
+			MethodInfo genericMethod = _limitResultsGenericMethod.MakeGenericMethod(queryable.ElementType);
+			object[] args = new object[] { queryable, limit, null };
+			IQueryable results = genericMethod.Invoke(null, args) as IQueryable;
+			resultsLimited = (bool)args[2];
+			return results;
 		}
 
 		/// <summary>

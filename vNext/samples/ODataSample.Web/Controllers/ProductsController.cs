@@ -1,6 +1,8 @@
 ﻿using System.Linq;
+using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Query;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
@@ -41,6 +43,7 @@ namespace ODataSample.Web.Controllers
 
         // GET: api/Products
         [HttpGet]
+		[PageSize(5)]
         public IActionResult Get()
         {
 	        return Ok(_sampleContext.Products);

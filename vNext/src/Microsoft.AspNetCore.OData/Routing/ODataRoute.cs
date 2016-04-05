@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.OData.Routing
         {
             var request = context.HttpContext.Request;
 
-            Uri uri;
+			Uri uri;
             PathString remaining;
             if (!request.Path.StartsWithSegments(PathString.FromUriComponent("/" + _routePrefix), out remaining))
             {

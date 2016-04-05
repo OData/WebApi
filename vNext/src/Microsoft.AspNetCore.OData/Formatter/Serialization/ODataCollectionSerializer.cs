@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -83,34 +84,50 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         public void WriteCollection(ODataCollectionWriter writer, object graph, IEdmTypeReference collectionType,
             ODataSerializerContext writeContext)
         {
-            if (writer == null)
-            {
-                throw Error.ArgumentNull("writer");
-            }
+			if (writer == null)
+			{
+				throw Error.ArgumentNull("writer");
+			}
 
-            ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
+			ODataCollectionStart collectionStart = new ODataCollectionStart { Name = writeContext.RootElementName };
 
-            writer.WriteStart(new ODataCollectionStart { Name = writeContext.RootElementName });
+			if (writeContext.Request != null)
+			{
+				if (writeContext.Request.ODataProperties().NextLink != null)
+				{
+					collectionStart.NextPageLink = writeContext.Request.ODataProperties().NextLink;
+				}
 
-            if (collectionValue != null)
-            {
-                foreach (object item in collectionValue.Items)
-                {
-                    writer.WriteItem(item);
-                }
-            }
+				if (writeContext.Request.ODataProperties().TotalCount != null)
+				{
+					collectionStart.Count = writeContext.Request.ODataProperties().TotalCount;
+				}
+			}
 
-            writer.WriteEnd();
-        }
+			writer.WriteStart(collectionStart);
+			if (graph != null)
+			{
+				ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
+				if (collectionValue != null)
+				{
+					foreach (object item in collectionValue.Items)
+					{
+						writer.WriteItem(item);
+					}
+				}
+			}
 
-        /// <summary>
-        /// Creates an <see cref="ODataCollectionValue"/> for the enumerable represented by <paramref name="enumerable"/>.
-        /// </summary>
-        /// <param name="enumerable">The value of the collection to be created.</param>
-        /// <param name="elementType">The element EDM type of the collection.</param>
-        /// <param name="writeContext">The serializer context to be used while creating the collection.</param>
-        /// <returns>The created <see cref="ODataCollectionValue"/>.</returns>
-        public virtual ODataCollectionValue CreateODataCollectionValue(IEnumerable enumerable, IEdmTypeReference elementType,
+			writer.WriteEnd();
+		}
+
+		/// <summary>
+		/// Creates an <see cref="ODataCollectionValue"/> for the enumerable represented by <paramref name="enumerable"/>.
+		/// </summary>
+		/// <param name="enumerable">The value of the collection to be created.</param>
+		/// <param name="elementType">The element EDM type of the collection.</param>
+		/// <param name="writeContext">The serializer context to be used while creating the collection.</param>
+		/// <returns>The created <see cref="ODataCollectionValue"/>.</returns>
+		public virtual ODataCollectionValue CreateODataCollectionValue(IEnumerable enumerable, IEdmTypeReference elementType,
             ODataSerializerContext writeContext)
         {
             if (writeContext == null)

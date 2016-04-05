@@ -9,7 +9,8 @@ namespace ODataSample.Web
     {
 	    public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvc()
+				.AddWebApiConventions();
             services.AddMvcDnx();
             services.AddOData();
             services.AddCors(options =>
@@ -29,6 +30,7 @@ namespace ODataSample.Web
 
 		public void Configure(IApplicationBuilder app)
 		{
+			//mvc.AddWebApiConventions();
 			app.UseDeveloperExceptionPage();
 
 			app.UseOData<ISampleService>("odata", builder =>

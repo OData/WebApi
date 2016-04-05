@@ -356,8 +356,14 @@ namespace Microsoft.AspNetCore.OData
 
 		public static bool IsNotSortable(IEdmProperty edmProperty, IEdmModel edmModel)
 		{
-			QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(edmProperty, edmModel);
-			return annotation == null ? false : annotation.Restrictions.NotSortable;
+			var annotation = GetPropertyRestrictions(edmProperty, edmModel);
+			return annotation?.Restrictions.NotSortable ?? false;
+		}
+
+		public static bool IsNotCountable(IEdmProperty edmProperty, IEdmModel edmModel)
+		{
+			var annotation = GetPropertyRestrictions(edmProperty, edmModel);
+			return annotation?.Restrictions.NotCountable ?? false;
 		}
 	}
 }

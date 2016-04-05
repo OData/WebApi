@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Net.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.WebApiCompatShim;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Routing;
@@ -12,12 +14,14 @@ namespace Microsoft.AspNetCore.OData.Extensions
     {
         public static ODataProperties ODataProperties(this HttpContext httpContext)
         {
-            if (httpContext == null)
+			if (httpContext == null)
             {
                 throw Error.ArgumentNull("httpContext");
             }
 
-            return httpContext.RequestServices.GetRequiredService<ODataProperties>();
+	        var oDataProperties = httpContext.RequestServices.GetRequiredService<ODataProperties>();
+			oDataProperties.Configure(httpContext);
+	        return oDataProperties;
         }
 
         public static IUrlHelper UrlHelper(this HttpContext httpContext)

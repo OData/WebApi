@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
                 throw Error.ArgumentNull("request");
             }
 
-            return request.HttpContext.RequestServices.GetRequiredService<ODataProperties>();
+	        return request.HttpContext.ODataProperties();
         }
 
         public static IETagHandler ETagHandler(this HttpRequest request)
@@ -34,16 +34,6 @@ namespace Microsoft.AspNetCore.OData.Extensions
             }
 
             return request.HttpContext.ETagHandler();
-        }
-
-        public static IAssemblyProvider AssemblyProvider(this HttpRequest request)
-        {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
-            return request.HttpContext.AssemblyProvider();
         }
 
         public static bool HasQueryOptions(this HttpRequest request)

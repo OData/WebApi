@@ -10,7 +10,14 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
 {
     internal static class ExpressionHelpers
     {
-        public static long Count(IQueryable query, Type type)
+		public static Func<long> CountFunc(IQueryable query, Type type)
+		{
+			MethodInfo countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(type);
+			Func<long> func = () => (long)countMethod.Invoke(null, new object[] { query });
+			return func;
+		}
+
+		public static long Count(IQueryable query, Type type)
         {
             MethodInfo countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(type);
             return (long)countMethod.Invoke(null, new object[] { query });

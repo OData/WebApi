@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
@@ -24,6 +26,7 @@ namespace Microsoft.AspNetCore.OData.Query
 		/// </summary>
 		/// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information.</param>
 		/// <param name="request">The incoming request message.</param>
+		/// <param name="assemblyName"></param>
 		public ODataQueryOptions(ODataQueryContext context, HttpRequest request, string assemblyName)
 		{
 			if (context == null)
@@ -78,6 +81,11 @@ namespace Microsoft.AspNetCore.OData.Query
 		public OrderByQueryOption OrderBy { get; private set; }
 
 		/// <summary>
+		/// Gets the <see cref="CountQueryOption"/>.
+		/// </summary>
+		public CountQueryOption Count { get; private set; }
+
+		/// <summary>
 		/// Apply the individual query to the given IQueryable in the right order.
 		/// </summary>
 		/// <param name="query">The original <see cref="IQueryable"/>.</param>
@@ -96,6 +104,23 @@ namespace Microsoft.AspNetCore.OData.Query
 			if (Filter != null)
 			{
 				query = Filter.ApplyTo(query, querySettings, _assemblyName);
+			}
+
+			if (IsAvailableODataQueryOption(Count, AllowedQueryOptions.Count))
+			{
+				if (Request.ODataProperties().TotalCountFunc == null)
+				{
+					Func<long> countFunc = Count.GetEntityCountFunc(query);
+					if (countFunc != null)
+					{
+						Request.ODataProperties().TotalCountFunc = countFunc;
+					}
+				}
+
+				if (ODataCountMediaTypeMapping.IsCountRequest(Request))
+				{
+					return query;
+				}
 			}
 
 			OrderByQueryOption orderBy = OrderBy;
@@ -263,6 +288,7 @@ namespace Microsoft.AspNetCore.OData.Query
 					case "$count":
 						ThrowIfEmpty(kvp.Value, "$count");
 						RawValues.Count = kvp.Value;
+						Count = new CountQueryOption(kvp.Value, Context, _queryOptionParser);
 						break;
 					case "$expand":
 						RawValues.Expand = kvp.Value;
@@ -274,6 +300,18 @@ namespace Microsoft.AspNetCore.OData.Query
 						RawValues.SkipToken = kvp.Value;
 						break;
 				}
+			}
+
+			if (ODataCountMediaTypeMapping.IsCountRequest(Request))
+			{
+				Count = new CountQueryOption(
+					"true",
+					Context,
+					new ODataQueryOptionParser(
+						Context.Model,
+						Context.ElementType,
+						Context.NavigationSource,
+						new Dictionary<string, string> { { "$count", "true" } }));
 			}
 		}
 

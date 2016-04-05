@@ -11,8 +11,8 @@ namespace Microsoft.AspNetCore.OData.Formatter
     /// <summary>
     /// Media type mapping that associates requests with $count.
     /// </summary>
-    public class ODataCountMediaTypeMapping
-    {
+    public class ODataCountMediaTypeMapping // : MediaTypeMapping
+	{
         ///// <summary>
         ///// Initializes a new instance of the <see cref="ODataCountMediaTypeMapping"/> class.
         ///// </summary>

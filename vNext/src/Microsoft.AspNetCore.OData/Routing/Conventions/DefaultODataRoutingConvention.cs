@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.OData.Core.UriParser.Semantic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,7 +23,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             {"PUT", "Put"},
             {"DELETE", "Delete"}
         };
-
+		
         public ActionDescriptor SelectAction(RouteContext routeContext)
         {
 	        Func<ActionDescriptor> a = () =>

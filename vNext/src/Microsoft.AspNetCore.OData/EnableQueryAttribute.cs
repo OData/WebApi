@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,8 +9,10 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.AspNetCore.OData.Query;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.OData
 {
@@ -31,7 +34,8 @@ namespace Microsoft.AspNetCore.OData
             }
             
             var request = context.HttpContext.Request;
-            if (request.HasQueryOptions())
+            if (request.HasQueryOptions() || 
+				ODataCountMediaTypeMapping.IsCountRequest(request))
             {
                 var result = context.Result as ObjectResult;
                 if (result == null)
@@ -76,12 +80,24 @@ namespace Microsoft.AspNetCore.OData
 
             // response is a collection.
             var query = (value as IQueryable) ?? enumerable.AsQueryable();
-            return queryOptions.ApplyTo(query,
+            query = queryOptions.ApplyTo(query,
                 new ODataQuerySettings
                 {
                     HandleNullPropagation = HandleNullPropagationOption.True
                 },
 				AllowedQueryOptions.None);
-        }
-    }
+
+			if (ODataCountMediaTypeMapping.IsCountRequest(request))
+			{
+				long? count = request.ODataProperties().TotalCount;
+
+				if (count.HasValue)
+				{
+					// Return the count value if it is a $count request.
+					return count.Value;
+				}
+			}
+			return query;
+		}
+	}
 }

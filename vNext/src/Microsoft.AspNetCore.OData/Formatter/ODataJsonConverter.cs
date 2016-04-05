@@ -11,20 +11,27 @@ namespace Microsoft.AspNetCore.OData.Formatter
     public class ODataJsonConverter : JsonConverter
     {
         private Uri _serviceRoot;
+	    private readonly ODataProperties _odataProperties;
 
-        public ODataJsonConverter(Uri serviceRoot)
-        {
-            _serviceRoot = serviceRoot;
-        }
+	    public ODataJsonConverter(Uri serviceRoot, ODataProperties odataProperties)
+	    {
+		    _serviceRoot = serviceRoot;
+		    _odataProperties = odataProperties;
+	    }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+	    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             // value should be an entity or a collection of entities.
             var singleEntity = !(value is IEnumerable);
             writer.WriteStartObject();
             writer.WritePropertyName("@odata.context");
-            writer.WriteValue(GenerateContextUrlString(value, singleEntity));
-            if (!singleEntity)
+			writer.WriteValue(GenerateContextUrlString(value, singleEntity));
+			if (_odataProperties.TotalCount.HasValue)
+		    {
+				writer.WritePropertyName("@odata.count");
+				writer.WriteValue(_odataProperties.TotalCount.Value);
+			}
+			if (!singleEntity)
             {
                 writer.WritePropertyName("value");
                 writer.WriteStartArray();

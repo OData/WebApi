@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Edm;
@@ -46,7 +47,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             using (var delegatingStream = new NonDisposableStream(response.Body))
             using (var writer = new StreamWriter(delegatingStream, selectedEncoding, 1024, leaveOpen: true))
             {
-                WriteObject(writer, context.Object);
+                WriteObject(writer, context);
             }
 
             return Task.FromResult(true);
@@ -65,8 +66,9 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
         // In the future, should convert to ODataEntry and use ODL to write out.
         // Or use ODL to build a JObject and use Json.NET to write out.
-        public void WriteObject(TextWriter writer, object value)
+        public void WriteObject(TextWriter writer, OutputFormatterWriteContext context)
         {
+	        var value = context.Object;
             if (value is IEdmModel)
             {
                 WriteMetadata(writer, (IEdmModel)value);
@@ -75,14 +77,15 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
             using (var jsonWriter = CreateJsonWriter(writer))
             {
-                var jsonSerializer = CreateJsonSerializer();
+                var jsonSerializer = CreateJsonSerializer(context.HttpContext.ODataProperties());
                 jsonSerializer.Serialize(jsonWriter, value);
             }
         }
-        private JsonSerializer CreateJsonSerializer()
+        private JsonSerializer CreateJsonSerializer(ODataProperties properties)
         {
             var serializerSettings = new JsonSerializerSettings();
-            serializerSettings.Converters.Add(new ODataJsonConverter(new Uri("http://localhost:58888/")));
+            serializerSettings.Converters.Add(new ODataJsonConverter(
+				new Uri("http://localhost:58888/"), properties));
             var jsonSerializer = JsonSerializer.Create(serializerSettings);
             return jsonSerializer;
         }

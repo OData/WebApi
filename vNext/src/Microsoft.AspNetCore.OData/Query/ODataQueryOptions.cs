@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Core;
@@ -71,6 +73,11 @@ namespace Microsoft.AspNetCore.OData.Query
 		public FilterQueryOption Filter { get; private set; }
 
 		/// <summary>
+		/// Gets the <see cref="OrderByQueryOption"/>.
+		/// </summary>
+		public OrderByQueryOption OrderBy { get; private set; }
+
+		/// <summary>
 		/// Apply the individual query to the given IQueryable in the right order.
 		/// </summary>
 		/// <param name="query">The original <see cref="IQueryable"/>.</param>
@@ -90,6 +97,32 @@ namespace Microsoft.AspNetCore.OData.Query
 			{
 				query = Filter.ApplyTo(query, querySettings, _assemblyName);
 			}
+
+			OrderByQueryOption orderBy = OrderBy;
+
+			// $skip or $top require a stable sort for predictable results.
+			// Result limits require a stable sort to be able to generate a next page link.
+			// If either is present in the query and we have permission,
+			// generate an $orderby that will produce a stable sort.
+			if (querySettings.EnsureStableOrdering &&
+				(IsAvailableODataQueryOption(Skip, AllowedQueryOptions.Skip) ||
+				 IsAvailableODataQueryOption(Top, AllowedQueryOptions.Top) ||
+				 querySettings.PageSize.HasValue))
+			{
+				// If there is no OrderBy present, we manufacture a default.
+				// If an OrderBy is already present, we add any missing
+				// properties necessary to make a stable sort.
+				// Instead of failing early here if we cannot generate the OrderBy,
+				// let the IQueryable backend fail (if it has to).
+				orderBy = orderBy == null
+							? GenerateDefaultOrderBy(Context)
+							: EnsureStableSortOrderBy(orderBy, Context);
+			}
+
+			if (IsAvailableODataQueryOption(orderBy, AllowedQueryOptions.OrderBy))
+			{
+				query = orderBy.ApplyTo(query, querySettings);
+			}
 			if (IsAvailableODataQueryOption(Skip, AllowedQueryOptions.Skip))
 			{
 				query = Skip.ApplyTo(query, querySettings);
@@ -102,6 +135,97 @@ namespace Microsoft.AspNetCore.OData.Query
 
 			return query;
 		}
+
+		/// <summary>
+		/// Ensures the given <see cref="OrderByQueryOption"/> will produce a stable sort.
+		/// If it will, the input <paramref name="orderBy"/> will be returned
+		/// unmodified.  If the given <see cref="OrderByQueryOption"/> will not produce a
+		/// stable sort, a new <see cref="OrderByQueryOption"/> instance will be created
+		/// and returned.
+		/// </summary>
+		/// <param name="orderBy">The <see cref="OrderByQueryOption"/> to evaluate.</param>
+		/// <param name="context">The <see cref="ODataQueryContext"/>.</param>
+		/// <returns>An <see cref="OrderByQueryOption"/> that will produce a stable sort.</returns>
+		private static OrderByQueryOption EnsureStableSortOrderBy(OrderByQueryOption orderBy, ODataQueryContext context)
+		{
+			Contract.Assert(orderBy != null);
+			Contract.Assert(context != null);
+
+			// Strategy: create a hash of all properties already used in the given OrderBy
+			// and remove them from the list of properties we need to add to make the sort stable.
+			HashSet<string> usedPropertyNames =
+				new HashSet<string>(orderBy.OrderByNodes.OfType<OrderByPropertyNode>().Select(node => node.Property.Name));
+
+			IEnumerable<IEdmStructuralProperty> propertiesToAdd = GetAvailableOrderByProperties(context).Where(prop => !usedPropertyNames.Contains(prop.Name));
+
+			if (propertiesToAdd.Any())
+			{
+				// The existing query options has too few properties to create a stable sort.
+				// Clone the given one and add the remaining properties to end, thereby making
+				// the sort stable but preserving the user's original intent for the major
+				// sort order.
+				orderBy = new OrderByQueryOption(orderBy);
+
+				foreach (IEdmStructuralProperty property in propertiesToAdd)
+				{
+					orderBy.OrderByNodes.Add(new OrderByPropertyNode(property, OrderByDirection.Ascending));
+				}
+			}
+
+			return orderBy;
+		}
+		// Generates the OrderByQueryOption to use by default for $skip or $top
+		// when no other $orderby is available.  It will produce a stable sort.
+		// This may return a null if there are no available properties.
+		private static OrderByQueryOption GenerateDefaultOrderBy(ODataQueryContext context)
+		{
+			string orderByRaw = String.Empty;
+			if (EdmLibHelpers.IsDynamicTypeWrapper(context.ElementClrType))
+			{
+				orderByRaw = String.Join(",",
+					context.ElementClrType.GetTypeInfo().GetProperties()
+						.Where(property => EdmLibHelpers.GetEdmPrimitiveTypeOrNull(property.PropertyType) != null)
+						.Select(property => property.Name));
+			}
+			else
+			{
+				orderByRaw = String.Join(",",
+					GetAvailableOrderByProperties(context)
+						.Select(property => property.Name));
+			}
+
+			return String.IsNullOrEmpty(orderByRaw)
+					? null
+					: new OrderByQueryOption(orderByRaw, context);
+		}
+
+
+		// Returns a sorted list of all properties that may legally appear
+		// in an OrderBy.  If the entity type has keys, all are returned.
+		// Otherwise, when no keys are present, all primitive properties are returned.
+		private static IEnumerable<IEdmStructuralProperty> GetAvailableOrderByProperties(ODataQueryContext context)
+		{
+			Contract.Assert(context != null);
+
+			IEdmEntityType entityType = context.ElementType as IEdmEntityType;
+			if (entityType != null)
+			{
+				IEnumerable<IEdmStructuralProperty> properties =
+					entityType.Key().Any()
+						? entityType.Key()
+						: entityType
+							.StructuralProperties()
+							.Where(property => property.Type.IsPrimitive());
+
+				// Sort properties alphabetically for stable sort
+				return properties.OrderBy(property => property.Name);
+			}
+			else
+			{
+				return Enumerable.Empty<IEdmStructuralProperty>();
+			}
+		}
+
 		private bool IsAvailableODataQueryOption(object queryOption, AllowedQueryOptions queryOptionFlag)
 		{
 			return ((queryOption != null) && ((_ignoreQueryOptions & queryOptionFlag) == AllowedQueryOptions.None));
@@ -121,6 +245,7 @@ namespace Microsoft.AspNetCore.OData.Query
 					case "$orderby":
 						ThrowIfEmpty(kvp.Value, "$orderby");
 						RawValues.OrderBy = kvp.Value;
+						OrderBy = new OrderByQueryOption(kvp.Value, Context, _queryOptionParser);
 						break;
 					case "$top":
 						ThrowIfEmpty(kvp.Value, "$top");

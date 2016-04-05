@@ -13,6 +13,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.Spatial;
 using System.Linq;
+using Microsoft.AspNetCore.OData.Query.Expressions;
 
 namespace Microsoft.AspNetCore.OData
 {
@@ -347,5 +348,16 @@ namespace Microsoft.AspNetCore.OData
                     String.Join("_", type.GetGenericArguments().Select(t => MangleClrTypeName(t))));
             }
         }
-    }
+
+		public static bool IsDynamicTypeWrapper(Type type)
+		{
+			return (type != null && typeof(DynamicTypeWrapper).IsAssignableFrom(type));
+		}
+
+		public static bool IsNotSortable(IEdmProperty edmProperty, IEdmModel edmModel)
+		{
+			QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(edmProperty, edmModel);
+			return annotation == null ? false : annotation.Restrictions.NotSortable;
+		}
+	}
 }

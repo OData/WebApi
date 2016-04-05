@@ -18,15 +18,16 @@ namespace Microsoft.AspNetCore.OData
     /// </summary>
     public class ODataQueryContext
     {
-        /// <summary>
-        /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" />, element CLR type,
-        /// and <see cref="ODataPath" />.
-        /// </summary>
-        /// <param name="model">The EdmModel that includes the <see cref="IEdmType"/> corresponding to
-        /// the given <paramref name="elementClrType"/>.</param>
-        /// <param name="elementClrType">The CLR type of the element of the collection being queried.</param>
-        /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
-        public ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path)
+	    /// <summary>
+	    /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" />, element CLR type,
+	    /// and <see cref="ODataPath" />.
+	    /// </summary>
+	    /// <param name="model">The EdmModel that includes the <see cref="IEdmType"/> corresponding to
+	    /// the given <paramref name="elementClrType"/>.</param>
+	    /// <param name="elementClrType">The CLR type of the element of the collection being queried.</param>
+	    /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
+	    /// <param name="assemblyName"></param>
+	    public ODataQueryContext(IEdmModel model, Type elementClrType, string assemblyName, ODataPath path)
         {
             if (model == null)
             {
@@ -48,7 +49,8 @@ namespace Microsoft.AspNetCore.OData
             ElementClrType = elementClrType;
             Model = model;
             Path = path;
-            NavigationSource = GetNavigationSource(Model, ElementType, path);
+	        AssemblyName = assemblyName;
+	        NavigationSource = GetNavigationSource(Model, ElementType, path);
         }
 
         /// <summary>
@@ -75,15 +77,15 @@ namespace Microsoft.AspNetCore.OData
             NavigationSource = GetNavigationSource(Model, ElementType, path);
         }
 
-        internal ODataQueryContext(IEdmModel model, Type elementClrType)
-            : this(model, elementClrType, path: null)
-        {
-        }
+        //internal ODataQueryContext(IEdmModel model, Type elementClrType, string assemblyName)
+        //    : this(model, elementClrType, assemblyName, path: null)
+        //{
+        //}
 
-        internal ODataQueryContext(IEdmModel model, IEdmType elementType)
-            : this(model, elementType, path: null)
-        {
-        }
+        //internal ODataQueryContext(IEdmModel model, IEdmType elementType, string assemblyName)
+        //    : this(model, elementType, assemblyName, path: null)
+        //{
+        //}
 
         /// <summary>
         /// Gets the given <see cref="IEdmModel"/> that contains the EntitySet.
@@ -110,7 +112,9 @@ namespace Microsoft.AspNetCore.OData
         /// </summary>
         public ODataPath Path { get; private set; }
 
-        private static IEdmNavigationSource GetNavigationSource(IEdmModel model, IEdmType elementType, ODataPath odataPath)
+	    public string AssemblyName { get; set; }
+
+	    private static IEdmNavigationSource GetNavigationSource(IEdmModel model, IEdmType elementType, ODataPath odataPath)
         {
             Contract.Assert(model != null);
             Contract.Assert(elementType != null);

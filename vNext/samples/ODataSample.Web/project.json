@@ -18,9 +18,6 @@
   "tools": {
     "dotnet-publish-iis": "1.0.0-*"
   },
-  "scripts": {
-    "postpublish": "dotnet publish-iis --publish-folder %publish:OutputPath%"
-  },
   "frameworks": {
     "net451": {
       "frameworkAssemblies": {

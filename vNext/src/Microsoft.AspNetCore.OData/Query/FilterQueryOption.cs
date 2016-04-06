@@ -74,18 +74,18 @@ namespace Microsoft.AspNetCore.OData.Query
         /// </summary>
         public string RawValue { get; private set; }
 
-        /// <summary>
-        /// Apply the filter query to the given IQueryable.
-        /// </summary>
-        /// <remarks>
-        /// The <see cref="ODataQuerySettings.HandleNullPropagation"/> property specifies
-        /// how this method should handle null propagation.
-        /// </remarks>
-        /// <param name="query">The original <see cref="IQueryable"/>.</param>
-        /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
-        /// <param name="assemblyProvider">The <see cref="IAssemblyProvider"/> to use.</param>
-        /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, string assemblyName)
+	    /// <summary>
+	    /// Apply the filter query to the given IQueryable.
+	    /// </summary>
+	    /// <remarks>
+	    /// The <see cref="ODataQuerySettings.HandleNullPropagation"/> property specifies
+	    /// how this method should handle null propagation.
+	    /// </remarks>
+	    /// <param name="query">The original <see cref="IQueryable"/>.</param>
+	    /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
+	    /// <param name="assemblyName">The assembly to use.</param>
+	    /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
+	    public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, string assemblyName)
         {
             if (query == null)
             {

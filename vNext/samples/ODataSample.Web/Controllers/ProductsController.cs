@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
@@ -37,11 +38,17 @@ namespace ODataSample.Web.Controllers
             return Ok(_sampleService.Products.Single(p => p.ProductId == id).Name.Substring(0, 4));
         }
 
-        [HttpGet("{id}/PrintName(prefix={prefix})")]
-        public IActionResult PrintName(int id, string prefix)
+        [HttpGet("{id}/GetName(prefix={prefix})")]
+        public IActionResult GetName(int id, string prefix)
         {
             return Ok($"{prefix}: {_sampleService.Products.Single(p => p.ProductId == id).Name}");
         }
+
+		[HttpPost("{id}/PostName")]
+        public IActionResult PostName(int id, [FromBody]JToken prefix)
+		{
+			return GetName(id, prefix["prefix"].Value<string>());
+		}
 
 		// GET: api/Products
 		[PageSize(5)]

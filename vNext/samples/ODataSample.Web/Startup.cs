@@ -64,13 +64,20 @@ namespace ODataSample.Web
                     .Collection
                     .Function("MostExpensive")
                     .Returns<double>();
-	            var printProductNameFunction =
+	            var getProductNameFunction =
 		            builder
 			            .EntityType<Product>()
-			            .Function("PrintName")
+			            .Function("GetName")
 			            .Returns<string>();
-	            printProductNameFunction
-		            .Parameter<string>("prefix");
+				getProductNameFunction
+					.Parameter<string>("prefix");
+	            var postProductNameFunction =
+		            builder
+			            .EntityType<Product>()
+			            .Action("PostName")
+			            .Returns<string>();
+				postProductNameFunction
+					.Parameter<string>("prefix");
 	            builder
 					.EntityType<Product>()
                     .Collection

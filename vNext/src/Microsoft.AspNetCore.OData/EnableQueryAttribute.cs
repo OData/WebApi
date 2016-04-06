@@ -83,7 +83,10 @@ namespace Microsoft.AspNetCore.OData
 			query = queryOptions.ApplyTo(query,
 				new ODataQuerySettings
 				{
-					HandleNullPropagation = HandleNullPropagationOption.True,
+					// TODO: If we are using SQL, set this to false
+					// otherwise if it is entities in code then
+					// set it to true
+					HandleNullPropagation = HandleNullPropagationOption.False,
 					PageSize = actionDescriptor.PageSize()
 				},
 				AllowedQueryOptions.None);

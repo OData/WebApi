@@ -108,10 +108,10 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 			{
 				var c = d as ControllerActionDescriptor;
 				var isUs = false;
-				if (d.DisplayName == "ODataSample.Web.Controllers.ProductsController.PrintName (ODataSample.Web)")
-				{
-					isUs = true;
-				}
+				//if (d.DisplayName == "ODataSample.Web.Controllers.ProductsController.PostName (ODataSample.Web)")
+				//{
+				//	isUs = true;
+				//}
 				if (c == null)
 				{
 					return false;
@@ -130,10 +130,10 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 				}
 				if (!c.AttributeRouteInfo.Template.EndsWith(routeTemplate))
 				{
-					if (isUs)
-					{
-						throw new Exception(c.AttributeRouteInfo.Template);
-					}
+					//if (isUs)
+					//{
+					//	throw new Exception(c.AttributeRouteInfo.Template);
+					//}
 					return false;
 				}
 				// If we find no action constraints, this isn't our method

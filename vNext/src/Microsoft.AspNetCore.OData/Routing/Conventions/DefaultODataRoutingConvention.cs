@@ -78,6 +78,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 				if (operationSegment != null)
 				{
 					routeTemplate += "/" + operationSegment.Operations.First().Name;
+					routeTemplate = ApplyParameters(operationSegment.Parameters, keys, routeTemplate);
 				}
 
 				var operationImportSegment =
@@ -86,16 +87,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 				{
 					controllerName = "*";
 					routeTemplate = "/" + operationImportSegment.OperationImports.First().Name;
-					var parameters = new List<string>();
-					if (operationImportSegment.Parameters.Any())
-					{
-						foreach (var param in operationImportSegment.Parameters)
-						{
-							parameters.Add(string.Format("{0}={{{0}}}", param.Name));
-							keys.Add(new KeyValuePair<string, object>(param.Name, (param.Value as ConstantNode).Value));
-						}
-						routeTemplate += "(" + string.Join(",", parameters) + ")";
-					}
+					routeTemplate = ApplyParameters(operationImportSegment.Parameters, keys, routeTemplate);
 				}
 			}
 
@@ -115,6 +107,11 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 			var actionDescriptor = provider.ActionDescriptors.Items.SingleOrDefault(d =>
 			{
 				var c = d as ControllerActionDescriptor;
+				var isUs = false;
+				if (d.DisplayName == "ODataSample.Web.Controllers.ProductsController.PrintName (ODataSample.Web)")
+				{
+					isUs = true;
+				}
 				if (c == null)
 				{
 					return false;
@@ -133,6 +130,10 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 				}
 				if (!c.AttributeRouteInfo.Template.EndsWith(routeTemplate))
 				{
+					if (isUs)
+					{
+						throw new Exception(c.AttributeRouteInfo.Template);
+					}
 					return false;
 				}
 				// If we find no action constraints, this isn't our method
@@ -161,6 +162,37 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 
 			return actionDescriptor;
 		}
+
+	    private static string ApplyParameters(IEnumerable<OperationSegmentParameter> segmentParameters, List<KeyValuePair<string, object>> keys, string routeTemplate)
+	    {
+		    var parameters = new List<string>();
+		    if (segmentParameters != null && segmentParameters.Any())
+		    {
+			    foreach (var param in segmentParameters)
+			    {
+				    parameters.Add(string.Format("{0}={{{0}}}", param.Name));
+					var value = ResolveValue(param.Value as SingleValueNode);
+					keys.Add(new KeyValuePair<string, object>(param.Name, value));
+			    }
+			    routeTemplate += "(" + string.Join(",", parameters) + ")";
+		    }
+		    return routeTemplate;
+	    }
+
+	    private static object ResolveValue(SingleValueNode node)
+	    {
+			var constantNode = node as ConstantNode;
+			if (constantNode != null)
+			{
+				return constantNode.Value;
+			}
+			var convertNode = node as ConvertNode;
+			if (convertNode != null)
+			{
+				return ResolveValue(convertNode.Source);
+			}
+		    return null;
+	    }
 
 		private void WriteRouteData(RouteContext context, IList<ParameterDescriptor> parameters, IList<KeyValuePair<string, object>> keys)
         {

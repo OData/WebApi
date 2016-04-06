@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Models;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -63,7 +64,14 @@ namespace ODataSample.Web
                     .Collection
                     .Function("MostExpensive")
                     .Returns<double>();
-                builder
+	            var printProductNameFunction =
+		            builder
+			            .EntityType<Product>()
+			            .Function("PrintName")
+			            .Returns<string>();
+	            printProductNameFunction
+		            .Parameter<string>("prefix");
+	            builder
 					.EntityType<Product>()
                     .Collection
                     .Function("MostExpensive2")

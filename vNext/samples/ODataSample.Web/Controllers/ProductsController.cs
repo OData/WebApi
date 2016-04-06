@@ -37,6 +37,12 @@ namespace ODataSample.Web.Controllers
             return Ok(_sampleService.Products.Single(p => p.ProductId == id).Name.Substring(0, 4));
         }
 
+        [HttpGet("{id}/PrintName(prefix={prefix})")]
+        public IActionResult PrintName(int id, string prefix)
+        {
+            return Ok($"{prefix}: {_sampleService.Products.Single(p => p.ProductId == id).Name}");
+        }
+
 		// GET: api/Products
 		[PageSize(5)]
 		public override async Task<IQueryable<Product>> Get()

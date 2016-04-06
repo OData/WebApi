@@ -1,5 +1,8 @@
 ﻿Main spec:
 http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html
 ----
+Best tutorial:
+http://www.odata.org/getting-started/basic-tutorial/
+----
 http://www.strathweb.com/2014/02/getting-started-odata-v4-asp-net-web-api/
 http://damienbod.com/2014/06/13/web-api-and-odata-v4-queries-functions-and-attribute-routing-part-2/

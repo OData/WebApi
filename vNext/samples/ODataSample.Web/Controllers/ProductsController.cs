@@ -39,9 +39,9 @@ namespace ODataSample.Web.Controllers
 
 		// GET: api/Products
 		[PageSize(5)]
-		public override Task<IQueryable<Product>> Get()
-	    {
-		    return base.Get();
+		public override async Task<IQueryable<Product>> Get()
+		{
+			return await base.Get();
 	    }
 
         [HttpGet("{id}/Name")]

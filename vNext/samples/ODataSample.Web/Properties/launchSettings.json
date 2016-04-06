@@ -11,7 +11,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "odata/Products(1)/Sample.PrintName(prefix='abc')",
+      "launchUrl": "odata/Products(1)/Sample.GetName(prefix='abc')",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

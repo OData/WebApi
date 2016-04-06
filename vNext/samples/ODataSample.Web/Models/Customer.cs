@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ODataSample.Web.Models
 {
     public class Customer
     {
-        public int CustomerId { get; set; }
+		[DatabaseGenerated(DatabaseGeneratedOption.None)]
+		public int CustomerId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public IEnumerable<Product> Products { get; set; }
+        public List<Product> Products { get; set; }
     }
 }

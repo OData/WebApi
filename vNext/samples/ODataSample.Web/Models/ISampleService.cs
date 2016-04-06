@@ -7,7 +7,7 @@ namespace ODataSample.Web.Models
 {
     public interface ISampleService
     {
-        IEnumerable<Product> Products { get; }
-        IEnumerable<Customer> Customers { get; }
+        IQueryable<Product> Products { get; }
+		IQueryable<Customer> Customers { get; }
     }
 }

@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.OData.Extensions;
+﻿using System;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Models;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace ODataSample.Web
 {
@@ -9,7 +12,10 @@ namespace ODataSample.Web
     {
 	    public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc()
+			services.AddEntityFramework()
+				.AddDbContext<ApplicationDbContext>();
+			services.AddEntityFrameworkSqlServer();
+			services.AddMvc()
 				.AddWebApiConventions();
             services.AddMvcDnx();
             services.AddOData();
@@ -25,11 +31,13 @@ namespace ODataSample.Web
                     });
             });
 
-            services.AddSingleton<SampleContext>();
+            services.AddSingleton<ISampleService, ApplicationDbContext>();
         }
 
 		public void Configure(IApplicationBuilder app)
 		{
+			MigrateDatabase(app);
+			Seeder.EnsureDatabase(app);
 			//mvc.AddWebApiConventions();
 			app.UseDeveloperExceptionPage();
 
@@ -69,6 +77,30 @@ namespace ODataSample.Web
 			app.UseIISPlatformHandler();
 
 			app.UseMvcWithDefaultRoute();
+		}
+
+		private static void MigrateDatabase(IApplicationBuilder app)
+		{
+			try
+			{
+				using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
+					.CreateScope())
+				{
+					var context = serviceScope.ServiceProvider.GetService<ApplicationDbContext>();
+					if (context != null)
+					{
+						context.Database.Migrate();
+					}
+					else
+					{
+						throw new Exception("Unable to resolve database context");
+					}
+				}
+			}
+			catch
+			{
+				throw;
+			}
 		}
 	}
 }

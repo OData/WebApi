@@ -10,6 +10,7 @@
     "Microsoft.AspNetCore.Diagnostics": "1.0.0-rc2-*",
     "Microsoft.AspNetCore.IISPlatformHandler": "1.0.0-rc2-*",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-*",
+    "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0-rc2-*",
     "Microsoft.AspNetCore.OData": "1.0.0.1-*"
   },
   "commands": {
@@ -27,6 +28,15 @@
         "System.Xml.ReaderWriter": "4.0.0.0",
         "System.IO": "4.0.0.0"
       }
+    },
+    "netstandardapp1.5": {
+      "dependencies": {
+        "NETStandard.Library": "1.5.0-*"
+      },
+      "imports": [
+        "dnxcore50",
+        "portable-net451+win8"
+      ]
     }
   },
   "exclude": [

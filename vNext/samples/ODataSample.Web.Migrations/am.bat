@@ -1,0 +1,1 @@
+"C:\Users\Josh Comley\.dnx\runtimes\dnx-clr-win-x86.1.0.0-rc1-update1\bin\dnx.exe" ef migrations add %1

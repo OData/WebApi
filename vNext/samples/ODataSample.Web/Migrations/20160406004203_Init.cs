@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DBForksODataWebApivNextsamples.Migrations
+namespace ODataSample.Web.Migrations
 {
     public partial class Init : Migration
     {

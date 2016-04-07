@@ -3,13 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.AspNetCore.OData.Common;
-using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Edm;
 using System.Linq;
+using Microsoft.AspNetCore.OData.Extensions;
 
 namespace Microsoft.AspNetCore.OData.Builder
 {
@@ -32,7 +31,6 @@ namespace Microsoft.AspNetCore.OData.Builder
         protected StructuralTypeConfiguration()
         {
             ExplicitProperties = new Dictionary<PropertyInfo, PropertyConfiguration>();
-            RemovedProperties = new List<PropertyInfo>();
         }
 
         /// <summary>
@@ -178,11 +176,6 @@ namespace Microsoft.AspNetCore.OData.Builder
         public virtual ODataModelBuilder ModelBuilder { get; private set; }
 
         /// <summary>
-        /// Gets the collection of explicitly removed properties.
-        /// </summary>
-        protected internal IList<PropertyInfo> RemovedProperties { get; private set; }
-
-        /// <summary>
         /// Gets the collection of explicitly added properties.
         /// </summary>
         protected internal IDictionary<PropertyInfo, PropertyConfiguration> ExplicitProperties { get; private set; }
@@ -256,14 +249,9 @@ namespace Microsoft.AspNetCore.OData.Builder
             ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
-            // Remove from the ignored properties
-            if (RemovedProperties.Contains(propertyInfo))
-            {
-                RemovedProperties.Remove(propertyInfo);
-            }
-
-            PrimitivePropertyConfiguration propertyConfiguration = null;
-            if (ExplicitProperties.ContainsKey(propertyInfo))
+            PrimitivePropertyConfiguration propertyConfiguration;
+			
+            if (!propertyInfo.IsIgnored(this))
             {
                 propertyConfiguration = ExplicitProperties[propertyInfo] as PrimitivePropertyConfiguration;
                 if (propertyConfiguration == null)
@@ -305,14 +293,8 @@ namespace Microsoft.AspNetCore.OData.Builder
             ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
-            // Remove from the ignored properties
-            if (RemovedProperties.Contains(propertyInfo))
-            {
-                RemovedProperties.Remove(propertyInfo);
-            }
-
             EnumPropertyConfiguration propertyConfiguration;
-            if (ExplicitProperties.ContainsKey(propertyInfo))
+            if (!propertyInfo.IsIgnored(this))
             {
                 propertyConfiguration = ExplicitProperties[propertyInfo] as EnumPropertyConfiguration;
                 if (propertyConfiguration == null)
@@ -341,10 +323,6 @@ namespace Microsoft.AspNetCore.OData.Builder
             {
                 throw Error.ArgumentNull("propertyInfo");
             }
-			if (propertyInfo.Name == "SomeSecretFieldThatShouldNotBeReturned")
-			{
-				int a = 0;
-			}
 
 			if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
             {
@@ -359,14 +337,8 @@ namespace Microsoft.AspNetCore.OData.Builder
             ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
-            // Remove from the ignored properties
-            if (RemovedProperties.Contains(propertyInfo))
-            {
-                RemovedProperties.Remove(propertyInfo);
-            }
-
-            ComplexPropertyConfiguration propertyConfiguration = null;
-            if (ExplicitProperties.ContainsKey(propertyInfo))
+            ComplexPropertyConfiguration propertyConfiguration;
+            if (!propertyInfo.IsIgnored(this))
             {
                 propertyConfiguration = ExplicitProperties[propertyInfo] as ComplexPropertyConfiguration;
                 if (propertyConfiguration == null)
@@ -407,7 +379,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
             CollectionPropertyConfiguration propertyConfiguration;
-            if (!ExplicitProperties[propertyInfo].IsIgnored)
+            if (!propertyInfo.IsIgnored(this))
             {
                 propertyConfiguration = ExplicitProperties[propertyInfo] as CollectionPropertyConfiguration;
                 if (propertyConfiguration == null)
@@ -507,12 +479,10 @@ namespace Microsoft.AspNetCore.OData.Builder
 				ExplicitProperties[propertyInfo].Ignored(true);
 			}
 
-			if (!RemovedProperties.Contains(propertyInfo))
-			{
-				RemovedProperties.Add(propertyInfo);
-			}
+		    var propertyConfiguration = Properties.Single(p => Equals(p.PropertyInfo, propertyInfo));
+		    propertyConfiguration.Ignored(true);
 
-			if (_dynamicPropertyDictionary == propertyInfo)
+			if (Equals(_dynamicPropertyDictionary, propertyInfo))
 			{
 				_dynamicPropertyDictionary = null;
 			}

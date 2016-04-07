@@ -463,7 +463,6 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <param name="propertyInfo">The property being removed.</param>
         public virtual void RemoveProperty(PropertyInfo propertyInfo)
         {
-			//this.AddProperty(propertyInfo).Ignored(true);
 			if (propertyInfo == null)
 			{
 				throw Error.ArgumentNull("propertyInfo");
@@ -479,8 +478,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 				ExplicitProperties[propertyInfo].Ignored(true);
 			}
 
-		    var propertyConfiguration = Properties.Single(p => Equals(p.PropertyInfo, propertyInfo));
-		    propertyConfiguration.Ignored(true);
+		    AddProperty(propertyInfo).Ignored(true);
 
 			if (Equals(_dynamicPropertyDictionary, propertyInfo))
 			{

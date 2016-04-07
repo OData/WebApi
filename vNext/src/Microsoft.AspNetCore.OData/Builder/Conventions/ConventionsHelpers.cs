@@ -109,16 +109,13 @@ namespace Microsoft.AspNetCore.OData.Builder.Conventions
 			{
 				return Enumerable.Empty<PropertyInfo>();
 			}
-
-			EntityTypeConfiguration entityType = structuralType as EntityTypeConfiguration;
+			var ignoredProperties = structuralType.Properties.IgnoredPropertyInfos();
+			var entityType = structuralType as EntityTypeConfiguration;
 			if (entityType != null)
 			{
-				return entityType.Properties.IgnoredPropertyInfos().Concat(entityType.BaseType.IgnoredProperties());
+				ignoredProperties = ignoredProperties.Concat(entityType.BaseType.IgnoredProperties());
 			}
-			else
-			{
-				return structuralType.Properties.IgnoredPropertyInfos();
-			}
+			return ignoredProperties;
 		}
 
 		public static bool IsValidStructuralPropertyType(this Type type)

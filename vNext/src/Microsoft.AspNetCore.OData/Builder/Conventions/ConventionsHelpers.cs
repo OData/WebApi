@@ -10,179 +10,183 @@ using System.Reflection;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
-using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNetCore.OData.Builder.Conventions
 {
-    internal static class ConventionsHelpers
-    {
-        public static string GetEntityKeyValue(EntityInstanceContext entityContext)
-        {
-            Contract.Assert(entityContext != null);
-            Contract.Assert(entityContext.EntityType != null);
-            Contract.Assert(entityContext.EdmObject != null);
+	internal static class ConventionsHelpers
+	{
+		public static string GetEntityKeyValue(EntityInstanceContext entityContext)
+		{
+			Contract.Assert(entityContext != null);
+			Contract.Assert(entityContext.EntityType != null);
+			Contract.Assert(entityContext.EdmObject != null);
 
-            IEnumerable<IEdmProperty> keys = entityContext.EntityType.Key();
+			IEnumerable<IEdmProperty> keys = entityContext.EntityType.Key();
 
-            if (keys.Count() == 1)
-            {
-                return GetUriRepresentationForKeyValue(keys.First(), entityContext);
-            }
-            else
-            {
-                IEnumerable<string> keyValues =
-                    keys.Select(key => String.Format(
-                        CultureInfo.InvariantCulture, "{0}={1}", key.Name, GetUriRepresentationForKeyValue(key, entityContext)));
-                return String.Join(",", keyValues);
-            }
-        }
+			if (keys.Count() == 1)
+			{
+				return GetUriRepresentationForKeyValue(keys.First(), entityContext);
+			}
+			else
+			{
+				IEnumerable<string> keyValues =
+					keys.Select(key => String.Format(
+						CultureInfo.InvariantCulture, "{0}={1}", key.Name, GetUriRepresentationForKeyValue(key, entityContext)));
+				return String.Join(",", keyValues);
+			}
+		}
 
-        // Get properties of this entity type that are not already declared in the base entity type and are not already ignored.
-        public static IEnumerable<PropertyInfo> GetProperties(EntityTypeConfiguration entity, bool includeReadOnly)
-        {
-            IEnumerable<PropertyInfo> allProperties = GetAllProperties(entity as StructuralTypeConfiguration, includeReadOnly);
-            if (entity.BaseType != null)
-            {
-                IEnumerable<PropertyInfo> baseTypeProperties = GetAllProperties(entity.BaseType as StructuralTypeConfiguration, includeReadOnly);
-                return allProperties.Except(baseTypeProperties, PropertyEqualityComparer.Instance);
-            }
-            else
-            {
-                return allProperties;
-            }
-        }
+		// Get properties of this entity type that are not already declared in the base entity type and are not already ignored.
+		public static IEnumerable<PropertyInfo> GetProperties(EntityTypeConfiguration entity, bool includeReadOnly)
+		{
+			IEnumerable<PropertyInfo> allProperties = GetAllProperties(entity as StructuralTypeConfiguration, includeReadOnly);
+			if (entity.BaseType != null)
+			{
+				IEnumerable<PropertyInfo> baseTypeProperties = GetAllProperties(entity.BaseType as StructuralTypeConfiguration, includeReadOnly);
+				return allProperties.Except(baseTypeProperties, PropertyEqualityComparer.Instance);
+			}
+			else
+			{
+				return allProperties;
+			}
+		}
 
-        // Get all properties of this type (that are not already ignored).
-        public static IEnumerable<PropertyInfo> GetAllProperties(StructuralTypeConfiguration type, bool includeReadOnly)
-        {
-            if (type == null)
-            {
-                throw Error.ArgumentNull("type");
-            }
+		// Get all properties of this type (that are not already ignored).
+		public static IEnumerable<PropertyInfo> GetAllProperties(StructuralTypeConfiguration type, bool includeReadOnly)
+		{
+			if (type == null)
+			{
+				throw Error.ArgumentNull("type");
+			}
 
 			return type
-		        .ClrType
-		        //.Properties
-		        .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-		        .Where(p =>
-			        p.IsValidStructuralProperty() &&
-			        type.IgnoredProperties().All(p1 => p1.Name != p.Name)
-			        && (includeReadOnly || p.GetSetMethod() != null || p.PropertyType.IsCollection()));
-        }
+				.ClrType
+				//.Properties
+				.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+				.Where(p =>
+					p.IsValidStructuralProperty() &&
+					type.IgnoredProperties().All(p1 => p1.Name != p.Name)
+					&& (includeReadOnly || p.GetSetMethod() != null || p.PropertyType.IsCollection()));
+		}
 
-        public static bool IsValidStructuralProperty(this PropertyInfo propertyInfo)
-        {
-            if (propertyInfo == null)
-            {
-                throw Error.ArgumentNull("propertyInfo");
-            }
+		public static bool IsValidStructuralProperty(this PropertyInfo propertyInfo)
+		{
+			if (propertyInfo == null)
+			{
+				throw Error.ArgumentNull("propertyInfo");
+			}
 
-            // ignore any indexer properties.
-            if (propertyInfo.GetIndexParameters().Any())
-            {
-                return false;
-            }
+			// ignore any indexer properties.
+			if (propertyInfo.GetIndexParameters().Any())
+			{
+				return false;
+			}
 
-            if (propertyInfo.CanRead)
-            {
-                // non-public getters are not valid properties
-                MethodInfo publicGetter = propertyInfo.GetGetMethod();
-                if (publicGetter != null && propertyInfo.PropertyType.IsValidStructuralPropertyType())
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+			if (propertyInfo.CanRead)
+			{
+				// non-public getters are not valid properties
+				var publicGetter = propertyInfo.GetGetMethod();
+				if (publicGetter != null && propertyInfo.PropertyType.IsValidStructuralPropertyType())
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 
-        // Gets the ignored properties from this type and the base types.
-        public static IEnumerable<PropertyInfo> IgnoredProperties(this StructuralTypeConfiguration structuralType)
-        {
-            if (structuralType == null)
-            {
-                return Enumerable.Empty<PropertyInfo>();
-            }
+		public static IEnumerable<PropertyInfo> IgnoredPropertyInfos(this IEnumerable<PropertyConfiguration> properties)
+		{
+			return properties.Where(p => p.IsIgnored).Select(p => p.PropertyInfo);
+		}
 
-            EntityTypeConfiguration entityType = structuralType as EntityTypeConfiguration;
-            if (entityType != null)
-            {
-                return entityType.IgnoredProperties.Concat(entityType.BaseType.IgnoredProperties());
-            }
-            else
-            {
-                return structuralType.IgnoredProperties;
-            }
-        }
+		// Gets the ignored properties from this type and the base types.
+		public static IEnumerable<PropertyInfo> IgnoredProperties(this StructuralTypeConfiguration structuralType)
+		{
+			if (structuralType == null)
+			{
+				return Enumerable.Empty<PropertyInfo>();
+			}
 
-        public static bool IsValidStructuralPropertyType(this Type type)
-        {
-            if (type == null)
-            {
-                throw Error.ArgumentNull("type");
-            }
+			EntityTypeConfiguration entityType = structuralType as EntityTypeConfiguration;
+			if (entityType != null)
+			{
+				return entityType.Properties.IgnoredPropertyInfos().Concat(entityType.BaseType.IgnoredProperties());
+			}
+			else
+			{
+				return structuralType.Properties.IgnoredPropertyInfos();
+			}
+		}
 
-            Type elementType;
+		public static bool IsValidStructuralPropertyType(this Type type)
+		{
+			if (type == null)
+			{
+				throw Error.ArgumentNull("type");
+			}
 
-            return !(type.GetTypeInfo().IsGenericTypeDefinition
-                     || type.IsPointer
-                     || type == typeof(object)
-                     || (type.IsCollection(out elementType) && elementType == typeof(object)));
-        }
+			Type elementType;
 
-        // gets the primitive odata uri representation.
-        public static string GetUriRepresentationForValue(object value)
-        {
-            Contract.Assert(value != null);
+			return !(type.GetTypeInfo().IsGenericTypeDefinition
+					 || type.IsPointer
+					 || type == typeof(object)
+					 || (type.IsCollection(out elementType) && elementType == typeof(object)));
+		}
 
-            Type type = value.GetType();
-            if (type.GetTypeInfo().IsEnum)
-            {
-                value = new ODataEnumValue(value.ToString(), type.EdmFullName());
-            }
-            else
-            {
-                Contract.Assert(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(type) != null);
-                value = ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(value);
-            }
+		// gets the primitive odata uri representation.
+		public static string GetUriRepresentationForValue(object value)
+		{
+			Contract.Assert(value != null);
 
-            return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4);
-        }
+			Type type = value.GetType();
+			if (type.GetTypeInfo().IsEnum)
+			{
+				value = new ODataEnumValue(value.ToString(), type.EdmFullName());
+			}
+			else
+			{
+				Contract.Assert(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(type) != null);
+				value = ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(value);
+			}
 
-        private static string GetUriRepresentationForKeyValue(IEdmProperty key, EntityInstanceContext entityInstanceContext)
-        {
-            Contract.Assert(key != null);
-            Contract.Assert(entityInstanceContext != null);
+			return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4);
+		}
 
-            object value = entityInstanceContext.GetPropertyValue(key.Name);
-            if (value == null)
-            {
-                IEdmTypeReference edmType = entityInstanceContext.EdmObject.GetEdmType();
-                throw Error.InvalidOperation(SRResources.KeyValueCannotBeNull, key.Name, edmType.Definition);
-            }
+		private static string GetUriRepresentationForKeyValue(IEdmProperty key, EntityInstanceContext entityInstanceContext)
+		{
+			Contract.Assert(key != null);
+			Contract.Assert(entityInstanceContext != null);
 
-            return GetUriRepresentationForValue(value);
-        }
+			object value = entityInstanceContext.GetPropertyValue(key.Name);
+			if (value == null)
+			{
+				IEdmTypeReference edmType = entityInstanceContext.EdmObject.GetEdmType();
+				throw Error.InvalidOperation(SRResources.KeyValueCannotBeNull, key.Name, edmType.Definition);
+			}
 
-        private class PropertyEqualityComparer : IEqualityComparer<PropertyInfo>
-        {
-            public static PropertyEqualityComparer Instance = new PropertyEqualityComparer();
+			return GetUriRepresentationForValue(value);
+		}
 
-            public bool Equals(PropertyInfo x, PropertyInfo y)
-            {
-                Contract.Assert(x != null);
-                Contract.Assert(y != null);
+		private class PropertyEqualityComparer : IEqualityComparer<PropertyInfo>
+		{
+			public static PropertyEqualityComparer Instance = new PropertyEqualityComparer();
 
-                return x.Name == y.Name;
-            }
+			public bool Equals(PropertyInfo x, PropertyInfo y)
+			{
+				Contract.Assert(x != null);
+				Contract.Assert(y != null);
 
-            public int GetHashCode(PropertyInfo obj)
-            {
-                Contract.Assert(obj != null);
-                return obj.Name.GetHashCode();
-            }
-        }
-    }
+				return x.Name == y.Name;
+			}
+
+			public int GetHashCode(PropertyInfo obj)
+			{
+				Contract.Assert(obj != null);
+				return obj.Name.GetHashCode();
+			}
+		}
+	}
 }

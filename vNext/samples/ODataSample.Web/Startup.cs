@@ -51,7 +51,7 @@ namespace ODataSample.Web
 					//.RemoveAllProperties()
 					.AddProperty(p => p.Name)
 					.AddProperty(p => p.Price)
-					//.RemoveProperty(p => p.Price)
+					.RemoveProperty(p => p.Price)
 					;
 				builder.EntityType<Product>()
 		            .HasKey(p => p.ProductId);

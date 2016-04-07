@@ -275,12 +275,9 @@ namespace Microsoft.AspNetCore.OData.Builder
                 ApplyProcedureConventions(procedure);
             }
 
-            if (OnModelCreating != null)
-            {
-                OnModelCreating(this);
-            }
+	        OnModelCreating?.Invoke(this);
 
-            return base.GetEdmModel();
+	        return base.GetEdmModel();
         }
 
         internal bool IsIgnoredType(Type type)

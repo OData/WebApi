@@ -166,22 +166,11 @@ namespace Microsoft.AspNetCore.OData.Builder
             }
         }
 
-        /// <summary>
-        /// Gets the properties from the backing CLR type that are to be ignored on this edm type.
-        /// </summary>
-        public ReadOnlyCollection<PropertyInfo> IgnoredProperties
-        {
-            get
-            {
-                return new ReadOnlyCollection<PropertyInfo>(RemovedProperties);
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets a value that is <c>true</c> if the type's name or namespace was set by the user; <c>false</c> if it was inferred through conventions.
-        /// </summary>
-        /// <remarks>The default value is <c>false</c>.</remarks>
-        public bool AddedExplicitly { get; set; }
+		/// <summary>
+		/// Gets or sets a value that is <c>true</c> if the type's name or namespace was set by the user; <c>false</c> if it was inferred through conventions.
+		/// </summary>
+		/// <remarks>The default value is <c>false</c>.</remarks>
+		public bool AddedExplicitly { get; set; }
 
         /// <summary>
         /// The <see cref="ODataModelBuilder"/>.
@@ -417,12 +406,6 @@ namespace Microsoft.AspNetCore.OData.Builder
             ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
-            // Remove from the ignored properties
-            if (IgnoredProperties.Contains(propertyInfo))
-            {
-                RemovedProperties.Remove(propertyInfo);
-            }
-
             CollectionPropertyConfiguration propertyConfiguration;
             if (!ExplicitProperties[propertyInfo].IsIgnored)
             {
@@ -481,12 +464,6 @@ namespace Microsoft.AspNetCore.OData.Builder
             if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
             {
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
-            }
-
-            // Remove from the ignored properties
-            if (IgnoredProperties.Contains(propertyInfo))
-            {
-                RemovedProperties.Remove(propertyInfo);
             }
 
             if (_dynamicPropertyDictionary != null)

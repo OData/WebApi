@@ -135,6 +135,10 @@ namespace Microsoft.AspNetCore.OData.Builder
             {
                 foreach (NavigationPropertyConfiguration navigationProperty in entityType.NavigationProperties)
                 {
+	                if (navigationProperty.IsIgnored)
+	                {
+						continue;
+	                }
                     NavigationPropertyBindingConfiguration binding = configuration.FindBinding(navigationProperty);
                     bool isContained = navigationProperty.ContainsTarget;
                     if (binding != null || isContained)

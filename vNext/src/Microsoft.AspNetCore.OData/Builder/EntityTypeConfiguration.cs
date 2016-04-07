@@ -243,7 +243,6 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             PropertyConfiguration propertyConfig;
             NavigationPropertyConfiguration navigationPropertyConfig;
-
             if (ExplicitProperties.ContainsKey(navigationProperty))
             {
                 propertyConfig = ExplicitProperties[navigationProperty];

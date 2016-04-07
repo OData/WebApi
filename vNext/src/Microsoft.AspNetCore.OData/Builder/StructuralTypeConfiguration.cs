@@ -286,9 +286,9 @@ namespace Microsoft.AspNetCore.OData.Builder
             {
                 propertyConfiguration = new PrimitivePropertyConfiguration(propertyInfo, this);
                 ExplicitProperties[propertyInfo] = propertyConfiguration;
-            }
+			}
 
-            return propertyConfiguration;
+			return propertyConfiguration;
         }
 
         /// <summary>
@@ -352,8 +352,12 @@ namespace Microsoft.AspNetCore.OData.Builder
             {
                 throw Error.ArgumentNull("propertyInfo");
             }
+			if (propertyInfo.Name == "SomeSecretFieldThatShouldNotBeReturned")
+			{
+				int a = 0;
+			}
 
-            if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
+			if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
             {
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
@@ -493,37 +497,49 @@ namespace Microsoft.AspNetCore.OData.Builder
             _dynamicPropertyDictionary = propertyInfo;
         }
 
-        /// <summary>
+	    /// <summary>
+	    /// Removes all properties.
+	    /// </summary>
+	    public virtual void RemoveAllProperties()
+	    {
+		    foreach (var property in ClrType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+		    {
+			    RemoveProperty(property);
+		    }
+	    }
+
+	    /// <summary>
         /// Removes the given property.
         /// </summary>
         /// <param name="propertyInfo">The property being removed.</param>
         public virtual void RemoveProperty(PropertyInfo propertyInfo)
         {
-            if (propertyInfo == null)
-            {
-                throw Error.ArgumentNull("propertyInfo");
-            }
+			//this.AddProperty(propertyInfo).Ignored(true);
+			if (propertyInfo == null)
+			{
+				throw Error.ArgumentNull("propertyInfo");
+			}
 
-            if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
-            {
-                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
-            }
+			if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
+			{
+				throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
+			}
 
-            if (ExplicitProperties.ContainsKey(propertyInfo))
-            {
-                ExplicitProperties.Remove(propertyInfo);
-            }
+			if (ExplicitProperties.ContainsKey(propertyInfo))
+			{
+				ExplicitProperties[propertyInfo].Ignored(true);
+			}
 
-            if (!RemovedProperties.Contains(propertyInfo))
-            {
-                RemovedProperties.Add(propertyInfo);
-            }
+			if (!RemovedProperties.Contains(propertyInfo))
+			{
+				RemovedProperties.Add(propertyInfo);
+			}
 
-            if (_dynamicPropertyDictionary == propertyInfo)
-            {
-                _dynamicPropertyDictionary = null;
-            }
-        }
+			if (_dynamicPropertyDictionary == propertyInfo)
+			{
+				_dynamicPropertyDictionary = null;
+			}
+		}
 
         internal void ValidatePropertyNotAlreadyDefinedInBaseTypes(PropertyInfo propertyInfo)
         {

@@ -116,6 +116,9 @@ namespace Microsoft.AspNetCore.OData.Builder
             ICollection<PropertyInfo> properties = PropertySelectorVisitor.GetSelectedProperties(keyDefinitionExpression);
             foreach (PropertyInfo property in properties)
             {
+				//_configuration.RemoveProperty();
+				//_configuration.AddProperty(property);
+	            Property(property).Ignored(false);
                 _configuration.HasKey(property);
             }
             return this;

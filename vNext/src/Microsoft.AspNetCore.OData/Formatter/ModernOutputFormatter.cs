@@ -81,11 +81,14 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 jsonSerializer.Serialize(jsonWriter, value);
             }
         }
+
         private JsonSerializer CreateJsonSerializer(ODataProperties properties)
         {
             var serializerSettings = new JsonSerializerSettings();
-            serializerSettings.Converters.Add(new ODataJsonConverter(
-				new Uri("http://localhost:58888/"), properties));
+	        serializerSettings.Converters.Add(
+		        new ODataJsonConverter(
+			        new Uri("http://localhost:58888/"),
+			        properties));
             var jsonSerializer = JsonSerializer.Create(serializerSettings);
             return jsonSerializer;
         }

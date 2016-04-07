@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.AspNetCore.OData.Builder.Conventions;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Edm;
 
@@ -102,32 +103,90 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
         /// <remarks>This method is used to exclude properties from the type that would have been added by convention during model discovery.</remarks>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
-        public virtual void Ignore<TProperty>(Expression<Func<TStructuralType, TProperty>> propertyExpression)
+        public virtual StructuralTypeConfiguration<TStructuralType> RemoveProperty<TProperty>(Expression<Func<TStructuralType, TProperty>> propertyExpression)
         {
             PropertyInfo ignoredProperty = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
             _configuration.RemoveProperty(ignoredProperty);
+			return this;
         }
 
         /// <summary>
-        /// Adds a string property to the EDM type.
+        /// Excludes all properties from the type.
         /// </summary>
-        /// <param name="propertyExpression">A lambda expression representing the navigation property for the relationship.
-        /// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
-        /// <returns>A configuration object that can be used to further configure the property.</returns>
+        /// <remarks>This method is used to exclude all properties from the type that would have been added by convention during model discovery.</remarks>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
+        public virtual StructuralTypeConfiguration<TStructuralType> RemoveAllProperties()
+        {
+	        foreach (var property in ConventionsHelpers.GetAllProperties(_configuration, true))
+	        {
+		        TryRemoveProperty(property);
+			}
+            //_configuration.RemoveAllProperties();
+			return this;
+        }
+
+	    private void TryRemoveProperty(PropertyInfo property)
+	    {
+		    var typeInfo = property.PropertyType.GetTypeInfo();
+		    if (!typeInfo.IsClass ||
+		        typeInfo.IsPrimitive ||
+		        property.PropertyType == typeof (string))
+		    {
+			    Property(property).Ignored(true);
+		    }
+	    }
+
+	    /// <summary>
+		/// Adds an optional primitive property to the EDM type.
+		/// </summary>
+		/// <param name="propertyExpression">A lambda expression representing the navigation property for the relationship.
+		/// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
+		/// <param name="configure">Optional action to configure property</param>
+		/// <returns>A configuration object that can be used to further configure the property.</returns>
+		[SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific expression type is clearer")]
+        public PrimitivePropertyConfiguration Property(PropertyInfo property)
+		{
+			return _configuration.AddProperty(property);
+        }
+
+		/// <summary>
+		/// Adds an optional primitive property to the EDM type.
+		/// </summary>
+		/// <param name="propertyExpression">A lambda expression representing the navigation property for the relationship.
+		/// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
+		/// <param name="configure">Optional action to configure property</param>
+		/// <returns>A configuration object that can be used to further configure the property.</returns>
+		[SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific expression type is clearer")]
+        public StructuralTypeConfiguration<TStructuralType> AddProperty<T>(Expression<Func<TStructuralType, T>> propertyExpression, Action<PrimitivePropertyConfiguration> configure = null)
+        {
+	        var config = GetPrimitivePropertyConfiguration(propertyExpression, optional: true);
+			config.Ignored(false);
+	        configure?.Invoke(config);
+	        return this;
+        }
+
+	    /// <summary>
+	    /// Adds a string property to the EDM type.
+	    /// </summary>
+	    /// <param name="propertyExpression">A lambda expression representing the navigation property for the relationship.
+	    /// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
+	    /// <returns>A configuration object that can be used to further configure the property.</returns>
+	    [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific expression type is clearer")]
         public PrimitivePropertyConfiguration Property(Expression<Func<TStructuralType, string>> propertyExpression)
         {
-            return GetPrimitivePropertyConfiguration(propertyExpression, optional: true);
-        }
+			return GetPrimitivePropertyConfiguration(propertyExpression, optional: true);
+		}
 
-        /// <summary>
-        /// Adds a binary property to the EDM type.
-        /// </summary>
-        /// <param name="propertyExpression">A lambda expression representing the navigation property for the relationship.
-        /// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
-        /// <returns>A configuration object that can be used to further configure the property.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
+		/// <summary>
+		/// Adds a binary property to the EDM type.
+		/// </summary>
+		/// <param name="propertyExpression">A lambda expression representing the navigation property for the relationship.
+		/// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
+		/// <returns>A configuration object that can be used to further configure the property.</returns>
+		[SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific expression type is clearer")]
         public PrimitivePropertyConfiguration Property(Expression<Func<TStructuralType, byte[]>> propertyExpression)
         {

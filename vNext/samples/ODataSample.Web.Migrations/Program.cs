@@ -9,7 +9,7 @@ namespace ODataSample.Web.Migrations
 		{
 			const string projectPath = @"D:\B\Forks\OData-WebApi\vNext\samples\ODataSample.Web";
 			var mig = new CodeFirstMigrations<ApplicationDbContext>(projectPath);
-			mig.Add("AddDateCreatedToProducts");
+			mig.Add("AddSecretFieldToProduct");
 		}
 	}
 }

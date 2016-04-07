@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Models;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace ODataSample.Web
 {
@@ -46,7 +47,16 @@ namespace ODataSample.Web
             {
                 builder.Namespace = "Sample";
 	            builder
-		            .Function("HelloWorld")
+		            .EntityType<Product>()
+					.RemoveAllProperties()
+					.AddProperty(p => p.Name)
+					.AddProperty(p => p.Price)
+					;
+				builder.EntityType<Product>()
+		            .HasKey(p => p.ProductId);
+
+				builder
+					.Function("HelloWorld")
 					.Returns<string>();
 	            builder
 		            .Function("HelloComplexWorld")

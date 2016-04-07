@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.Mvc.WebApiCompatShim;
 using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.OData.Core.UriParser;
@@ -19,7 +20,7 @@ namespace Microsoft.AspNetCore.OData.Routing
         private readonly IEdmModel _model;
         private readonly IRouter m = new MvcRouteHandler();
 
-        public ODataRoute(string routePrefix, IEdmModel model)
+		public ODataRoute(string routePrefix, IEdmModel model)
         {
             _routingConvention = new DefaultODataRoutingConvention();
             _routePrefix = routePrefix;
@@ -29,7 +30,6 @@ namespace Microsoft.AspNetCore.OData.Routing
         public async Task RouteAsync(RouteContext context)
         {
             var request = context.HttpContext.Request;
-
 			Uri uri;
             PathString remaining;
             if (!request.Path.StartsWithSegments(PathString.FromUriComponent("/" + _routePrefix), out remaining))

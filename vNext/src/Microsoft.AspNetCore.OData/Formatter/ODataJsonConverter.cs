@@ -6,6 +6,8 @@ using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 using System.Linq;
 using System.Net.Http;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.OData.Edm.Library;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
@@ -66,17 +68,34 @@ namespace Microsoft.AspNetCore.OData.Formatter
 		{
 			writer.WritePropertyName("@odata.id");
 			writer.WriteValue(GenerateIdLinkString(value));
-			foreach (var property in GetPublicProperties(value.GetType()))
+			var edmType = _odataProperties.Model.GetEdmType(value.GetType()) as EdmEntityType;
+			var properties = GetPublicProperties(value.GetType()).ToDictionary(
+				p => p.Name);
+			foreach (var property in edmType.DeclaredProperties)
 			{
-				if (property.GetCustomAttribute<NotMappedAttribute>() != null)
+				var propertyInfo = properties[property.Name];
+				if (propertyInfo.GetCustomAttribute<NotMappedAttribute>() != null)
 				{
 					continue;
 				}
-				if (IsValidStructuralPropertyType(property.PropertyType))
-				{
-					writer.WritePropertyName(property.Name);
-					writer.WriteValue(property.GetValue(value));
-				}
+				WriteProperty(writer, value, propertyInfo, property, edmType);
+			}
+		}
+
+		/// <summary>
+		/// Hack just to get variables to show up in debug in VS
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="value"></param>
+		/// <param name="property"></param>
+		/// <param name="edmProperty"></param>
+		/// <param name="type"></param>
+		private void WriteProperty(JsonWriter writer, object value, PropertyInfo property, IEdmProperty edmProperty, IEdmType type)
+		{
+			if (IsValidStructuralPropertyType(property.PropertyType))
+			{
+				writer.WritePropertyName(property.Name);
+				writer.WriteValue(property.GetValue(value));
 			}
 		}
 

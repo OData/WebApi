@@ -63,12 +63,14 @@ namespace Microsoft.AspNetCore.OData.Builder.Conventions
                 throw Error.ArgumentNull("type");
             }
 
-            return type
-				.ClrType
-                //.Properties
-                .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                .Where(p => p.IsValidStructuralProperty() && !type.IgnoredProperties().Any(p1 => p1.Name == p.Name)
-                    && (includeReadOnly || p.GetSetMethod() != null || p.PropertyType.IsCollection()));
+			return type
+		        .ClrType
+		        //.Properties
+		        .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+		        .Where(p =>
+			        p.IsValidStructuralProperty() &&
+			        type.IgnoredProperties().All(p1 => p1.Name != p.Name)
+			        && (includeReadOnly || p.GetSetMethod() != null || p.PropertyType.IsCollection()));
         }
 
         public static bool IsValidStructuralProperty(this PropertyInfo propertyInfo)

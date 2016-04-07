@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ODataSample.Web.Models
 {
@@ -9,5 +10,6 @@ namespace ODataSample.Web.Models
 		public int CustomerId { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
+		public DateTime? DateCreated { get; set; }
     }
 }

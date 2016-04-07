@@ -8,9 +8,10 @@ using ODataSample.Web.Models;
 namespace ODataSample.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20160407050508_AddDateCreatedToProducts")]
+    partial class AddDateCreatedToProducts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.0.0-rc2-20465")

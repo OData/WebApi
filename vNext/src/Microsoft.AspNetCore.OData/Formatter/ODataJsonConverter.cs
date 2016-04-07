@@ -9,127 +9,128 @@ using System.Net.Http;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
-    public class ODataJsonConverter : JsonConverter
-    {
-        private Uri _serviceRoot;
-	    private readonly ODataProperties _odataProperties;
+	public class ODataJsonConverter : JsonConverter
+	{
+		private Uri _serviceRoot;
+		private readonly ODataProperties _odataProperties;
 
-	    public ODataJsonConverter(Uri serviceRoot, ODataProperties odataProperties)
-	    {
-		    _serviceRoot = serviceRoot;
-		    _odataProperties = odataProperties;
-	    }
+		public ODataJsonConverter(Uri serviceRoot, ODataProperties odataProperties)
+		{
+			_serviceRoot = serviceRoot;
+			_odataProperties = odataProperties;
+		}
 
-	    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            // value should be an entity or a collection of entities.
-            var singleEntity = !(value is IEnumerable);
-            writer.WriteStartObject();
-            writer.WritePropertyName("@odata.context");
+		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+		{
+			// value should be an entity or a collection of entities.
+			var singleEntity = !(value is IEnumerable);
+			writer.WriteStartObject();
+			writer.WritePropertyName("@odata.context");
 			writer.WriteValue(GenerateContextUrlString(value, singleEntity));
 			if (_odataProperties.TotalCount.HasValue)
-		    {
+			{
 				writer.WritePropertyName("@odata.count");
 				writer.WriteValue(_odataProperties.TotalCount.Value);
 			}
-		    if (_odataProperties.NextLink != null)
-		    {
+			if (_odataProperties.NextLink != null)
+			{
 				writer.WritePropertyName("@odata.nextLink");
 				writer.WriteValue(_odataProperties.NextLink);
 			}
 			if (!singleEntity)
-            {
-                writer.WritePropertyName("value");
-                writer.WriteStartArray();
-            }
-            if (singleEntity)
-            {
-                WriteEntity(writer, value);
-            }
-            else
-            {
-                foreach (var o in (IEnumerable)value)
-                {
-                    writer.WriteStartObject();
-                    WriteEntity(writer, o);
-                    writer.WriteEndObject();
-                }
-            }
-            if (!singleEntity)
-            {
-                writer.WriteEndArray();
-            }
-            writer.WriteEndObject();
-        }
+			{
+				writer.WritePropertyName("value");
+				writer.WriteStartArray();
+			}
+			if (singleEntity)
+			{
+				WriteEntity(writer, value);
+			}
+			else
+			{
+				foreach (var o in (IEnumerable)value)
+				{
+					writer.WriteStartObject();
+					WriteEntity(writer, o);
+					writer.WriteEndObject();
+				}
+			}
+			if (!singleEntity)
+			{
+				writer.WriteEndArray();
+			}
+			writer.WriteEndObject();
+		}
 
-        private void WriteEntity(JsonWriter writer, object value)
-        {
-            writer.WritePropertyName("@odata.id");
-            writer.WriteValue(GenerateIdLinkString(value));
-            foreach (var property in GetPublicProperties(value.GetType()))
-            {
-                if (property.GetCustomAttribute<NotMappedAttribute>() != null)
-                {
-                    continue;
-                }
-                if (IsValidStructuralPropertyType(property.PropertyType))
-                {
-                    writer.WritePropertyName(property.Name);
-                    writer.WriteValue(property.GetValue(value));
-                }
-            }
-        }
+		private void WriteEntity(JsonWriter writer, object value)
+		{
+			writer.WritePropertyName("@odata.id");
+			writer.WriteValue(GenerateIdLinkString(value));
+			foreach (var property in GetPublicProperties(value.GetType()))
+			{
+				if (property.GetCustomAttribute<NotMappedAttribute>() != null)
+				{
+					continue;
+				}
+				if (IsValidStructuralPropertyType(property.PropertyType))
+				{
+					writer.WritePropertyName(property.Name);
+					writer.WriteValue(property.GetValue(value));
+				}
+			}
+		}
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            throw new NotImplementedException();
-        }
+		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+		{
+			throw new NotImplementedException();
+		}
 
-        public override bool CanConvert(Type objectType)
-        {
-            return !IsValidStructuralPropertyType(objectType);
-        }
+		public override bool CanConvert(Type objectType)
+		{
+			return !IsValidStructuralPropertyType(objectType);
+		}
 
-        private static bool IsValidStructuralPropertyType(Type propertyType)
-        {
-            return propertyType.Namespace == "System" && !propertyType.GetTypeInfo().IsGenericType;
-        }
+		private static bool IsValidStructuralPropertyType(Type propertyType)
+		{
+			return propertyType.Namespace == "System" &&
+			       (!propertyType.GetTypeInfo().IsGenericType || propertyType.Name == "Nullable`1");
+		}
 
-        private string GenerateContextUrlString(object value, bool singleEntity)
-        {
-            return "$metadata#";
-            //var valueType = value.GetType();
-            //var entityClrType = singleEntity ? valueType : TypeHelper.GetImplementedIEnumerableType(valueType);
-            //var entitySet = GetEntitySet(entityClrType);
-            //return string.Format("{0}$metadata#{1}{2}", _serviceRoot, entitySet.Name, singleEntity ? "/$entity" : string.Empty);
-        }
+		private string GenerateContextUrlString(object value, bool singleEntity)
+		{
+			return "$metadata#";
+			//var valueType = value.GetType();
+			//var entityClrType = singleEntity ? valueType : TypeHelper.GetImplementedIEnumerableType(valueType);
+			//var entitySet = GetEntitySet(entityClrType);
+			//return string.Format("{0}$metadata#{1}{2}", _serviceRoot, entitySet.Name, singleEntity ? "/$entity" : string.Empty);
+		}
 
-        private string GenerateIdLinkString(object value)
-        {
-            return "someid";
-            //var valueType = value.GetType();
-            //var entitySet = GetEntitySet(valueType);
-            //var keyName = entitySet?.EntityType().Key().SingleOrDefault()?.Name;
-            //var keyProperty = keyName!=null? GetPublicProperty(valueType, keyName):null;
-            //var keyValue = keyProperty?.GetValue(value);
-            //return string.Format("{0}{1}({2})", _serviceRoot, entitySet.Name, keyValue);
-        }
+		private string GenerateIdLinkString(object value)
+		{
+			return "someid";
+			//var valueType = value.GetType();
+			//var entitySet = GetEntitySet(valueType);
+			//var keyName = entitySet?.EntityType().Key().SingleOrDefault()?.Name;
+			//var keyProperty = keyName!=null? GetPublicProperty(valueType, keyName):null;
+			//var keyValue = keyProperty?.GetValue(value);
+			//return string.Format("{0}{1}({2})", _serviceRoot, entitySet.Name, keyValue);
+		}
 
-        private IEdmEntitySet GetEntitySet(Type clrType)
-        {
-            //var edmTypeName = clrType.EdmFullName();
-            //return _model.EntityContainer.EntitySets().Single(e => e.EntityType().FullTypeName() == edmTypeName);
-            return null;
-        }
+		private IEdmEntitySet GetEntitySet(Type clrType)
+		{
+			//var edmTypeName = clrType.EdmFullName();
+			//return _model.EntityContainer.EntitySets().Single(e => e.EntityType().FullTypeName() == edmTypeName);
+			return null;
+		}
 
-        private PropertyInfo[] GetPublicProperties(Type type)
-        {
-            return type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        }
+		private PropertyInfo[] GetPublicProperties(Type type)
+		{
+			return type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+		}
 
-        private PropertyInfo GetPublicProperty(Type type, string name)
-        {
-            return GetPublicProperties(type).Single(p => p.Name == name);
-        }
-    }
+		private PropertyInfo GetPublicProperty(Type type, string name)
+		{
+			return GetPublicProperties(type).Single(p => p.Name == name);
+		}
+	}
 }

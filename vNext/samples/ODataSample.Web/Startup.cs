@@ -48,14 +48,19 @@ namespace ODataSample.Web
                 builder.Namespace = "Sample";
 	            builder
 		            .EntityType<Product>()
-					//.RemoveAllProperties()
+					.RemoveAllProperties()
 					.AddProperty(p => p.Name)
 					.AddProperty(p => p.Price)
 					.RemoveProperty(p => p.Price)
 					;
 				builder.EntityType<Product>()
 		            .HasKey(p => p.ProductId);
-
+	            builder.EntityType<ApplicationUser>()
+		            .RemoveAllProperties()
+		            .AddProperty(p => p.UserName)
+		            .AddProperty(p => p.Email);
+	            builder.EntityType<ApplicationUser>()
+		            .HasKey(p => p.Id);
 				builder
 					.Function("HelloWorld")
 					.Returns<string>();

@@ -11,7 +11,8 @@
     "Microsoft.AspNetCore.IISPlatformHandler": "1.0.0-rc2-*",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-*",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0-rc2-*",
-    "Microsoft.AspNetCore.OData": "1.0.0.1-*"
+    "Microsoft.AspNetCore.OData": "1.0.0.1-*",
+    "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.0.0-rc2-*"
   },
   "commands": {
     "web": "ODataSample.Web"

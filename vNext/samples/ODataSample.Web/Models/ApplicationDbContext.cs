@@ -1,13 +1,15 @@
 ﻿using System.Linq;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ODataSample.Web.Models
 {
-	public class ApplicationDbContext : DbContext, ISampleService
+	public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>, ISampleService
 	{
 		public DbSet<Product> Products { get; set; }
 		public DbSet<Customer> Customers { get; set; }
 
+		IQueryable<ApplicationUser> ISampleService.Users => Users;
 		IQueryable<Product> ISampleService.Products => Products;
 		IQueryable<Customer> ISampleService.Customers => Customers;
 

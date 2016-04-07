@@ -119,7 +119,8 @@ namespace Microsoft.AspNetCore.OData.Builder
         {
 	        foreach (var property in ConventionsHelpers.GetAllProperties(_configuration, true))
 	        {
-		        TryRemoveProperty(property);
+		        _configuration.RemoveProperty(property);
+		        //TryRemoveProperty(property);
 			}
             //_configuration.RemoveAllProperties();
 			return this;

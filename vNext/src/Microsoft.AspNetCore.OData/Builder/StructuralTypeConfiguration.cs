@@ -424,7 +424,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             }
 
             CollectionPropertyConfiguration propertyConfiguration;
-            if (ExplicitProperties.ContainsKey(propertyInfo))
+            if (!ExplicitProperties[propertyInfo].IsIgnored)
             {
                 propertyConfiguration = ExplicitProperties[propertyInfo] as CollectionPropertyConfiguration;
                 if (propertyConfiguration == null)

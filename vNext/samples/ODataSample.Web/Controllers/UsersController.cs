@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
+using Microsoft.OData.Edm;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
@@ -9,7 +10,8 @@ namespace ODataSample.Web.Controllers
 	//[EnableCors("AllowAll")]
 	public class UsersController : ODataCrudController<ApplicationUser, string>
 	{
-		public UsersController(ApplicationDbContext context) : base(new CrudBase<ApplicationUser, string>(context, context.Users, u => u.Id))
+		public UsersController(IEdmModel model, ApplicationDbContext context) : base(
+			model, new CrudBase<ApplicationUser, string>(context, context.Users, u => u.Id))
 		{
 		}
 	}

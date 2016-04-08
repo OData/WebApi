@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using ODataSample.Web.Models;
 
@@ -105,8 +106,8 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(product.ProductId);
         }
 
-	    public ProductsController(ISampleService sampleService) : base(
-			new CrudBase<Product, int>(sampleService as DbContext, (sampleService as ApplicationDbContext).Products, product => product.ProductId)
+	    public ProductsController(IEdmModel model, ISampleService sampleService) : base(
+			model, new CrudBase<Product, int>(sampleService as DbContext, (sampleService as ApplicationDbContext).Products, product => product.ProductId)
 			)
 	    {
 		    _sampleService = sampleService;

@@ -2,6 +2,7 @@
 using ODataSample.Web.Models;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OData.Edm;
 
 namespace ODataSample.Web.Controllers
 {
@@ -59,8 +60,11 @@ namespace ODataSample.Web.Controllers
             return new ObjectResult(customer.Products);
         }
 
-	    public CustomersController(ISampleService sampleService) : base(
-			new CrudBase<Customer, int>(sampleService as DbContext, (sampleService as ApplicationDbContext).Customers, customer => customer.CustomerId))
+	    public CustomersController(IEdmModel model, ISampleService sampleService) : base(
+			model,
+			new CrudBase<Customer, int>(sampleService as DbContext, 
+				(sampleService as ApplicationDbContext).Customers, 
+				customer => customer.CustomerId))
 	    {
 		    _sampleService = sampleService;
 	    }

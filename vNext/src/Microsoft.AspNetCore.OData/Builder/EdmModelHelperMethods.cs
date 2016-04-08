@@ -8,7 +8,6 @@ using System.Diagnostics.Contracts;
 using System.Reflection;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
 using Microsoft.OData.Edm.Library;
@@ -31,7 +30,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             EdmEntityContainer container = new EdmEntityContainer(builder.Namespace, builder.ContainerName);
 
             // add types and sets, building an index on the way.
-            Dictionary<Type, IEdmType> edmTypeMap = model.AddTypes(builder.StructuralTypes, builder.EnumTypes);
+	        Dictionary<Type, IEdmType> edmTypeMap = model.AddTypes(builder.StructuralTypes, builder.EnumTypes);
 
             // Add EntitySets and build the mapping between the EdmEntitySet and the NavigationSourceConfiguration
             NavigationSourceAndAnnotations[] entitySets = container.AddEntitySetAndAnnotations(builder, edmTypeMap);
@@ -367,14 +366,13 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         private static Dictionary<Type, IEdmType> AddTypes(this EdmModel model, IEnumerable<StructuralTypeConfiguration> types,
-            IEnumerable<EnumTypeConfiguration> enumTypes)
+            IEnumerable<EnumTypeConfiguration> enumTypes
+			)
         {
             IEnumerable<IEdmTypeConfiguration> configTypes = types.Concat<IEdmTypeConfiguration>(enumTypes);
-
             // build types
             EdmTypeMap edmTypeMap = EdmTypeBuilder.GetTypesAndProperties(configTypes);
             Dictionary<Type, IEdmType> edmTypes = edmTypeMap.EdmTypes;
-
             // Add an annotate types
             model.AddTypes(edmTypes);
             model.AddClrTypeAnnotations(edmTypes);

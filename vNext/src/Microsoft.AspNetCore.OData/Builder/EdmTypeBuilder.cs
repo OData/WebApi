@@ -374,7 +374,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 				{
 					Contract.Assert(propInfo.DeclaringType != null);
 					var baseType = propInfo.DeclaringType.GetTypeInfo().BaseType;
-					if (propInfo.GetConfiguration(_configurations.ToArray()).IsIgnored)
+					if (propInfo.GetConfiguration(_configurations).IsIgnored)
 					{
 						continue;
 					}
@@ -448,7 +448,8 @@ namespace Microsoft.AspNetCore.OData.Builder
 			}
 
 			EdmTypeBuilder builder = new EdmTypeBuilder(configurations);
-			return new EdmTypeMap(builder.GetEdmTypes(),
+			return new EdmTypeMap(
+				builder.GetEdmTypes(),
 				builder._properties,
 				builder._propertiesRestrictions,
 				builder._members,

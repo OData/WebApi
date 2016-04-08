@@ -20,7 +20,8 @@ namespace Microsoft.AspNetCore.OData.Extensions
 	    public static IServiceCollection AddOData<T>([NotNull] this IServiceCollection services,
 			Action<ODataConventionModelBuilder> after = null)
 			where T : class
-		{
+	    {
+		    services.AddOData();
 			var type = typeof(T);
 			var model = DefaultODataModelProvider.BuildEdmModel(type, after);
 		    services.AddSingleton(model);
@@ -34,11 +35,10 @@ namespace Microsoft.AspNetCore.OData.Extensions
         {
             //var defaultAssemblyProvider = app.ApplicationServices.GetRequiredService<IAssemblyProvider>();
             //AssemblyProviderManager.Register(defaultAssemblyProvider);
-			
 			var router = new ODataRoute(
 				prefix,
 				app.ApplicationServices.GetService<IEdmModel>());
-
+			
 			return app.UseRouter(router);
         }
     }

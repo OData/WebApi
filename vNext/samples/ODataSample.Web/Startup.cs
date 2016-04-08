@@ -18,7 +18,6 @@ namespace ODataSample.Web
 			services.AddMvc()
 				.AddWebApiConventions();
             services.AddMvcDnx();
-            services.AddOData();
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll",

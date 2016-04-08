@@ -12,7 +12,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
 {
     public static class ODataServiceCollectionExtensions
     {
-        public static ODataServiceBuilder AddOData(
+        internal static ODataServiceBuilder AddOData(
             [NotNull] this IServiceCollection services)
         {
             services.AddScoped<ODataProperties>();

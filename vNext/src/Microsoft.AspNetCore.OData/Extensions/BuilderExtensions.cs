@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Framework.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNetCore.OData.Extensions
 {
@@ -17,18 +17,27 @@ namespace Microsoft.AspNetCore.OData.Extensions
             return builder;
         }
 
-        public static IApplicationBuilder UseOData<T>(
+	    public static IServiceCollection AddOData<T>([NotNull] this IServiceCollection services,
+			Action<ODataConventionModelBuilder> after = null)
+			where T : class
+		{
+			var type = typeof(T);
+			var model = DefaultODataModelProvider.BuildEdmModel(type, after);
+		    services.AddSingleton(model);
+		    return services;
+	    }
+
+	    public static IApplicationBuilder UseOData(
             [NotNull] this IApplicationBuilder app, 
-            string prefix,
-            Action<ODataConventionModelBuilder> after = null) where T : class
+            string prefix
+            ) 
         {
             //var defaultAssemblyProvider = app.ApplicationServices.GetRequiredService<IAssemblyProvider>();
             //AssemblyProviderManager.Register(defaultAssemblyProvider);
-	        var type = typeof (T);
-
-			var model = DefaultODataModelProvider.BuildEdmModel(type, after);
-
-			var router = new ODataRoute(prefix, model);
+			
+			var router = new ODataRoute(
+				prefix,
+				app.ApplicationServices.GetService<IEdmModel>());
 
 			return app.UseRouter(router);
         }

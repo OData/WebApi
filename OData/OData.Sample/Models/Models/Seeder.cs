@@ -1,4 +1,6 @@
 using System;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using ODataSample.Web.Controllers;
 
 namespace ODataSample.Web.Models
@@ -7,8 +9,27 @@ namespace ODataSample.Web.Models
 	{
 		public static void EnsureDatabase(ApplicationDbContext context)
 		{
-			//context.Database.EnsureCreated();
-			// Add Mvc.Client to the known applications.
+			EnsureUsers(context);
+			EnsureEntities(context);
+		}
+
+		private static void EnsureUsers(ApplicationDbContext context)
+		{
+			var userManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(context));
+			var user = userManager.FindById("1");
+			if (user == null)
+			{
+				userManager.Create(new ApplicationUser()
+				{
+					Id = "1",
+					UserName = "test@example.com",
+					Email = "test@example.com"
+				});
+			}
+		}
+
+		private static void EnsureEntities(ApplicationDbContext context)
+		{
 			var productsCrud = new CrudBase<Product, int>(
 				context, context.Products, p => p.ProductId);
 			var customersCrud = new CrudBase<Customer, int>(

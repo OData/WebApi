@@ -45,9 +45,14 @@ namespace Microsoft.AspNetCore.OData.Builder
             }
 
             PropertyInfo pinfo = node.Member as PropertyInfo;
-
+	        if (pinfo.DeclaringType != node.Expression.Type &&
+				node.Expression.Type.GetTypeInfo().IsSubclassOfRawGeneric(pinfo.DeclaringType.GetTypeInfo()))
+				//&& node.Expression.Type.GetTypeInfo().IsInstanceOfType(pinfo.DeclaringType))
+	        {
+		        pinfo = node.Expression.Type.GetProperty(pinfo.Name);
+	        }
             if (pinfo == null)
-            {
+            {				
                 throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties, node.Member.DeclaringType.FullName, node.Member.Name);
             }
 

@@ -109,7 +109,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             }
             if (property.NullCheck != null)
             {
-                //memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("IsNull"), property.NullCheck));
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("IsNull"), property.NullCheck));
             }
 
             return Expression.MemberInit(Expression.New(namedPropertyType), memberBindings);

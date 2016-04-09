@@ -16,6 +16,7 @@ using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using System.Linq;
+using Microsoft.AspNetCore.OData.Query.Expressions;
 using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
@@ -149,16 +150,24 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             {
                 ODataEntry entry = CreateEntry(selectExpandNode, entityInstanceContext);
                 if (entry != null)
-                {
-                    writer.WriteStart(entry);
-                    WriteNavigationLinks(selectExpandNode.SelectedNavigationProperties, entityInstanceContext, writer);
-                    WriteExpandedNavigationProperties(selectExpandNode.ExpandedNavigationProperties, entityInstanceContext, writer);
-                    writer.WriteEnd();
+                {					
+                    WriteNode(writer, entry, selectExpandNode, entityInstanceContext);
                 }
             }
         }
 
-        /// <summary>
+	    private void WriteNode(ODataWriter writer, ODataEntry entry, SelectExpandNode selectExpandNode,
+		    EntityInstanceContext entityInstanceContext)
+	    {
+			
+			//(entityInstanceContext.EdmModel as ISelectExpandWrapper<string>)
+		    writer.WriteStart(entry);
+		    WriteNavigationLinks(selectExpandNode.SelectedNavigationProperties, entityInstanceContext, writer);
+		    WriteExpandedNavigationProperties(selectExpandNode.ExpandedNavigationProperties, entityInstanceContext, writer);
+		    writer.WriteEnd();
+	    }
+
+	    /// <summary>
         /// Creates the <see cref="SelectExpandNode"/> that describes the set of properties and actions to select and expand while writing this entity.
         /// </summary>
         /// <param name="entityInstanceContext">Contains the entity instance being written and the context.</param>

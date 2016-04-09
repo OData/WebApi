@@ -7,7 +7,7 @@ namespace ODataSample.Web.Models
 {
 	public static class SampleServiceExtensions
 	{
-		public static IProduct FindProduct(this ISampleService service, int id)
+		public static Product FindProduct(this ISampleService service, int id)
 		{
 			return service.Products.SingleOrDefault(p => p.ProductId == id);
 		}

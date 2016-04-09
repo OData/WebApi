@@ -8,7 +8,7 @@ namespace ODataSample.Web.Models
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public int ProductId { get; set; }
 		public Customer Customer { get; set; }
-		public int CustomerId { get; set; }
+		public int? CustomerId { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
 		public DateTime? DateCreated { get; set; }

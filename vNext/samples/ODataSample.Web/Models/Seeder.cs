@@ -19,7 +19,7 @@ namespace ODataSample.Web.Models
 					context, context.Customers, p => p.CustomerId);
 
 				var productId = 0;
-				Action<string, double, int, DateTime?> prod = (name, price, customerId, dateCreated) =>
+				Action<string, double, int?, DateTime?> prod = (name, price, customerId, dateCreated) =>
 				{
 					productsCrud.EnsureEntity(
 						++productId, product =>
@@ -44,9 +44,9 @@ namespace ODataSample.Web.Models
 				cust("Harry", "Whitburn");
 				cust("Nick", "Lawden");
 				context.SaveChanges();
+				prod("Apple number1", 10, null, null);
 				prod("Apple number1", 10, 1, null);
-				prod("Apple number1", 10, 1, null);
-				prod("Orange number1", 20, 2, new DateTime(2015, 12, 1));
+				prod("Orange number1", 20, null, new DateTime(2015, 12, 1));
 				prod("Peanut butter number1", 25, 2, null);
 				prod("xApple number2", 10, 1, null);
 				prod("xOrange number2", 20, 2, null);

@@ -12,6 +12,7 @@ namespace ODataSample.Web.Models
 	{
 		private CrudBase<Product, int> _productsCrud;
 		private int _productId;
+		private CrudBase<Order, string> _ordersCrud;
 
 		public async Task EnsureDatabase(IApplicationBuilder app, UserManager<ApplicationUser> userManager)
 		{
@@ -37,6 +38,8 @@ namespace ODataSample.Web.Models
 				// Add Mvc.Client to the known applications.
 				_productsCrud = new CrudBase<Product, int>(
 					context, context.Products, p => p.ProductId);
+				_ordersCrud = new CrudBase<Order, string>(
+					context, context.Orders, p => p.Id);
 				var customersCrud = new CrudBase<Customer, int>(
 					context, context.Customers, p => p.CustomerId);
 
@@ -57,6 +60,7 @@ namespace ODataSample.Web.Models
 
 				cust("Harry", "Whitburn");
 				cust("Nick", "Lawden");
+				cust("Emil", "Roijer");
 				context.SaveChanges();
 				Prod("Apple number1", 10, null, null);
 				Prod("Apple number1", 10, 1, null, "1");
@@ -87,6 +91,10 @@ namespace ODataSample.Web.Models
 				Prod("Orange number6", 20, 2, null);
 				Prod("Peanut butter number6", 25, 2, null);
 				context.SaveChanges();
+				Order("1", "First order", 1);
+				Order("2", "Second order", 2);
+				Order("3", "Third order", 1);
+				context.SaveChanges();
 			}
 		}
 
@@ -103,6 +111,17 @@ namespace ODataSample.Web.Models
 					product.CreatedByUserId = cratedByUserId;
 				});
 			return _productId;
+		}
+
+		private void Order(string id, string title, int customerId)
+		{
+			_ordersCrud.EnsureEntity(
+				id, entity =>
+				{
+					entity.Id = id;
+					entity.Title = title;
+					entity.CustomerId = customerId;
+				});
 		}
 	}
 }

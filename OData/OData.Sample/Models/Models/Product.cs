@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ODataSample.Web.Models
 {
-    public class Product
+	public class Product
 	{
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public int ProductId { get; set; }

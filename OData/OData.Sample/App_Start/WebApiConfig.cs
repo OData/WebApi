@@ -17,6 +17,7 @@ namespace OData.Sample
         {
 			ODataModelBuilder builder = new ODataConventionModelBuilder();
 			builder.EntitySet<Product>("Products");
+			builder.EntitySet<Customer>("Customers");
 			builder.EntitySet<ApplicationUser>("Users");
 
 			config.MapODataServiceRoute(

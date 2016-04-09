@@ -7,6 +7,7 @@ namespace ODataSample.Web.Models
 	public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>, ISampleService
 	{
 		public DbSet<Product> Products { get; set; }
+		public DbSet<Order> Orders { get; set; }
 		public DbSet<Customer> Customers { get; set; }
 
 		public ApplicationDbContext()

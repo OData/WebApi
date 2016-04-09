@@ -245,8 +245,10 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\CustomersController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ODataCrudController.cs" />
+    <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
@@ -260,6 +262,7 @@
     <Compile Include="Models\Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Models\Customer.cs" />
     <Compile Include="Models\Models\ISampleService.cs" />
+    <Compile Include="Models\Models\Order.cs" />
     <Compile Include="Models\Models\Permissions.cs" />
     <Compile Include="Models\Models\Product.cs" />
     <Compile Include="Models\Models\SampleServiceExtensions.cs" />

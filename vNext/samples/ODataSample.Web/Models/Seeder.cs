@@ -1,5 +1,8 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Controllers;
 
@@ -7,29 +10,40 @@ namespace ODataSample.Web.Models
 {
 	public class Seeder
 	{
-		public static void EnsureDatabase(IApplicationBuilder app)
+		private CrudBase<Product, int> _productsCrud;
+		private int _productId;
+
+		public async Task EnsureDatabase(IApplicationBuilder app, UserManager<ApplicationUser> userManager)
 		{
+			var user = await userManager.FindByIdAsync("1");
+			if (user == null)
+			{
+				await userManager.CreateAsync(new ApplicationUser()
+				{
+					Id = "1",
+					UserName = "test@example.com",
+					Email = "test@example.com"
+				});
+			}
 			using (var context = app.ApplicationServices.GetRequiredService<ApplicationDbContext>())
 			{
+				var us = app.ServerFeatures.Get<UserManager<ApplicationUser>>();
+				;
+				//var userStore = new UserStore<ApplicationUser>(context);
+				////var roleManager = new RoleManager<IdentityRole>();
+				//var userManager = new UserManager<ApplicationUser>(
+				//	, );
 				context.Database.EnsureCreated();
 				// Add Mvc.Client to the known applications.
-				var productsCrud = new CrudBase<Product, int>(
+				_productsCrud = new CrudBase<Product, int>(
 					context, context.Products, p => p.ProductId);
 				var customersCrud = new CrudBase<Customer, int>(
 					context, context.Customers, p => p.CustomerId);
 
-				var productId = 0;
-				Action<string, double, int?, DateTime?> prod = (name, price, customerId, dateCreated) =>
-				{
-					productsCrud.EnsureEntity(
-						++productId, product =>
-						{
-							product.Name = name;
-							product.Price = price;
-							product.CustomerId = customerId;
-							product.DateCreated = dateCreated;
-						});
-				};
+				//Action<string, double, int?, DateTime?, string> prod = (name, price, customerId, dateCreated, cratedByUserId) =>
+				//{
+				//	productId = Prod(productsCrud, productId, name, price, customerId, dateCreated, cratedByUserId);
+				//};
 				var currentCustomerId = 0;
 				Action<string, string> cust = (firstName, lastName) =>
 				{
@@ -44,36 +58,51 @@ namespace ODataSample.Web.Models
 				cust("Harry", "Whitburn");
 				cust("Nick", "Lawden");
 				context.SaveChanges();
-				prod("Apple number1", 10, null, null);
-				prod("Apple number1", 10, 1, null);
-				prod("Orange number1", 20, null, new DateTime(2015, 12, 1));
-				prod("Peanut butter number1", 25, 2, null);
-				prod("xApple number2", 10, 1, null);
-				prod("xOrange number2", 20, 2, null);
-				prod("xPeanut butter number2", 25, 2, null);
-				prod("xApple number2", 10, 1, null);
-				prod("xOrange number2", 20, 2, null);
-				prod("xPeanut butter number2", 25, 2, null);
-				prod("xApple number2", 10, 1, null);
-				prod("xOrange number2", 20, 2, null);
-				prod("xPeanut butter number2", 25, 2, null);
-				prod("xApple number2", 10, 1, null);
-				prod("xOrange number2", 20, 2, null);
-				prod("xPeanut butter number2", 25, 2, null);
-				prod("Apple number3", 10, 1, null);
-				prod("Orange number3", 20, 2, null);
-				prod("Peanut butter number3", 25, 2, null);
-				prod("Apple number4", 10, 1, null);
-				prod("Orange number4", 20, 2, null);
-				prod("Peanut butter number4", 25, 2, null);
-				prod("Apple number5", 10, 1, null);
-				prod("Orange number5", 20, 2, null);
-				prod("Peanut butter number5", 25, 2, null);
-				prod("Apple number6", 10, 1, null);
-				prod("Orange number6", 20, 2, null);
-				prod("Peanut butter number6", 25, 2, null);
+				Prod("Apple number1", 10, null, null);
+				Prod("Apple number1", 10, 1, null, "1");
+				Prod("Orange number1", 20, null, new DateTime(2015, 12, 1));
+				Prod("Peanut butter number1", 25, 2, null);
+				Prod("xApple number2", 10, 1, null);
+				Prod("xOrange number2", 20, 2, null);
+				Prod("xPeanut butter number2", 25, 2, null);
+				Prod("xApple number2", 10, 1, null);
+				Prod("xOrange number2", 20, 2, null);
+				Prod("xPeanut butter number2", 25, 2, null);
+				Prod("xApple number2", 10, 1, null);
+				Prod("xOrange number2", 20, 2, null);
+				Prod("xPeanut butter number2", 25, 2, null);
+				Prod("xApple number2", 10, 1, null);
+				Prod("xOrange number2", 20, 2, null);
+				Prod("xPeanut butter number2", 25, 2, null);
+				Prod("Apple number3", 10, 1, null);
+				Prod("Orange number3", 20, 2, null);
+				Prod("Peanut butter number3", 25, 2, null);
+				Prod("Apple number4", 10, 1, null);
+				Prod("Orange number4", 20, 2, null);
+				Prod("Peanut butter number4", 25, 2, null);
+				Prod("Apple number5", 10, 1, null);
+				Prod("Orange number5", 20, 2, null);
+				Prod("Peanut butter number5", 25, 2, null);
+				Prod("Apple number6", 10, 1, null);
+				Prod("Orange number6", 20, 2, null);
+				Prod("Peanut butter number6", 25, 2, null);
 				context.SaveChanges();
 			}
+		}
+
+		private int Prod(string name, double price, int? customerId,
+			DateTime? dateCreated, string cratedByUserId = null)
+		{
+			_productsCrud.EnsureEntity(
+				++_productId, product =>
+				{
+					product.Name = name;
+					product.Price = price;
+					product.CustomerId = customerId;
+					product.DateCreated = dateCreated;
+					product.CreatedByUserId = cratedByUserId;
+				});
+			return _productId;
 		}
 	}
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Models;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -8,36 +10,46 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ODataSample.Web
 {
-    public class Startup
-    {
-	    public void ConfigureServices(IServiceCollection services)
-        {
+	public class Startup
+	{
+		public void ConfigureServices(IServiceCollection services)
+		{
 			services.AddEntityFramework()
 				.AddDbContext<ApplicationDbContext>();
 			services.AddEntityFrameworkSqlServer();
 			services.AddMvc()
 				.AddWebApiConventions();
-            services.AddMvcDnx();
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll",
-                    builder =>
-                    {
-                        builder //.AllowAnyOrigin()
-                                //.AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowCredentials();
-                    });
-            });
-			
-            services.AddSingleton<ISampleService, ApplicationDbContext>();
-		    services.AddOData<ISampleService>(builder =>
+			services.AddMvcDnx();
+			services.AddCors(options =>
+			{
+				options.AddPolicy("AllowAll",
+					builder =>
+					{
+						builder //.AllowAnyOrigin()
+								//.AllowAnyHeader()
+							.AllowAnyMethod()
+							.AllowCredentials();
+					});
+			});
+			services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+			{
+				// Control password strength requirements here
+				options.Password.RequireDigit = true;
+				//options.Tokens.
+			})
+				.AddEntityFrameworkStores<ApplicationDbContext>()
+				.AddDefaultTokenProviders();
+
+
+			services.AddSingleton<ISampleService, ApplicationDbContext>();
+			services.AddOData<ISampleService>(builder =>
 			{
 				builder.Namespace = "Sample";
 				builder
 					.EntityType<Customer>()
 					.Property(p => p.CustomerId)
-					.IsOptional();
+					//.IsOptional()
+					;
 				builder
 					.EntityType<Product>()
 					//.RemoveAllProperties()
@@ -49,9 +61,13 @@ namespace ODataSample.Web
 				builder.EntityType<Product>()
 					.HasKey(p => p.ProductId);
 				builder.EntityType<ApplicationUser>()
-					.RemoveAllProperties()
-					.AddProperty(p => p.UserName)
-					.AddProperty(p => p.Email);
+					.RemoveProperty(p => p.Roles)
+					.RemoveProperty(p => p.Claims)
+					.RemoveProperty(p => p.Logins)
+					//.RemoveAllProperties()
+					//.AddProperty(p => p.UserName)
+					//.AddProperty(p => p.Email)
+					;
 				builder.EntityType<ApplicationUser>()
 					.HasKey(p => p.Id);
 				builder
@@ -97,12 +113,12 @@ namespace ODataSample.Web
 					.Function("ShortName")
 					.Returns<string>();
 			});
-        }
+		}
 
-		public void Configure(IApplicationBuilder app)
+		public void Configure(IApplicationBuilder app, UserManager<ApplicationUser> userManager)
 		{
 			MigrateDatabase(app);
-			Seeder.EnsureDatabase(app);
+			//await new Seeder().EnsureDatabase(app, userManager);
 			//mvc.AddWebApiConventions();
 			app.UseDeveloperExceptionPage();
 

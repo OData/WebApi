@@ -16,14 +16,16 @@ namespace Microsoft.AspNetCore.OData.Routing
     public class ODataRoute : IRouter
     {
         private readonly IODataRoutingConvention _routingConvention;
-        private readonly string _routePrefix;
+        public readonly string RoutePrefix;
         private readonly IEdmModel _model;
         private readonly IRouter m = new MvcRouteHandler();
+
+		public static ODataRoute Instance { get; internal set; }
 
 		public ODataRoute(string routePrefix, IEdmModel model)
         {
             _routingConvention = new DefaultODataRoutingConvention();
-            _routePrefix = routePrefix;
+            RoutePrefix = routePrefix;
             _model = model;
         }
 
@@ -32,7 +34,7 @@ namespace Microsoft.AspNetCore.OData.Routing
             var request = context.HttpContext.Request;
 			Uri uri;
             PathString remaining;
-            if (!request.Path.StartsWithSegments(PathString.FromUriComponent("/" + _routePrefix), out remaining))
+            if (!request.Path.StartsWithSegments(PathString.FromUriComponent("/" + RoutePrefix), out remaining))
             {
                 // Fallback to other routes.
                 return;

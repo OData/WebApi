@@ -38,7 +38,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
 			var router = new ODataRoute(
 				prefix,
 				app.ApplicationServices.GetService<IEdmModel>());
-			
+		    ODataRoute.Instance = router;
 			return app.UseRouter(router);
         }
     }

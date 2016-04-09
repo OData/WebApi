@@ -3,13 +3,16 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.OData.Routing;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -51,7 +54,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 			type = _context.ObjectType;
 			ODataSerializer serializer = GetSerializer(type, value, model, DefaultODataSerializerProvider.Instance);
 
-			var urlHelper = UrlHelper();
+			var urlHelper = UrlHelper(_context.HttpContext);
 			ODataPath path = Request.ODataProperties().Path;
 			IEdmNavigationSource targetNavigationSource = path == null ? null : path.NavigationSource;
 
@@ -85,13 +88,6 @@ namespace Microsoft.AspNetCore.OData.Formatter
 				PayloadBaseUri = baseAddress,
 				Version = _version,
 			};
-
-			string metadataLink = urlHelper.CreateODataLink(new MetadataPathSegment());
-
-			if (metadataLink == null)
-			{
-				throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
-			}
 
 			writerSettings.ODataUri = new ODataUri
 			{
@@ -132,9 +128,10 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
 		}
 
-		private static UrlHelper UrlHelper()
+		private IUrlHelper UrlHelper(HttpContext httpContext)
 		{
-			return new UrlHelper(new ActionContext());
+			//return httpContext.UrlHelper();
+			return new UrlHelper(new ActionContext(httpContext,new RouteData(), new ActionDescriptor()));
 		}
 
 		private static bool IsOperationPath(ODataPath path)
@@ -183,14 +180,12 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
 		private Uri GetBaseAddress()
 		{
-			var urlHelper = UrlHelper();
+			//var urlHelper = UrlHelper(_context.HttpContext);
 
-			string baseAddress = urlHelper.CreateODataLink();
-			if (baseAddress == null)
-			{
-				return new Uri("http://localhost:58888/");
-				throw new SerializationException(SRResources.UnableToDetermineBaseUrl);
-			}
+			var uri = 
+				new Uri(_context.HttpContext.Request.GetDisplayUrl());
+			var baseAddress =
+				uri.Scheme + "://" + uri.Host + (uri.Port == 80 ? "" : ":" + uri.Port) + "/" + ODataRoute.Instance.RoutePrefix;
 
 			return baseAddress[baseAddress.Length - 1] != '/' ? new Uri(baseAddress + '/') : new Uri(baseAddress);
 		}

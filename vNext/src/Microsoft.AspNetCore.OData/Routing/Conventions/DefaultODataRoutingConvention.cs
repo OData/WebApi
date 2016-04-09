@@ -37,6 +37,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 			if (odataPath.FirstSegment is MetadataSegment)
 			{
 				controllerName = "Metadata";
+				routeTemplate = "$metadata";
 			}
 			else
 			{
@@ -89,15 +90,14 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 					routeTemplate = "/" + operationImportSegment.OperationImports.First().Name;
 					routeTemplate = ApplyParameters(operationImportSegment.Parameters, keys, routeTemplate);
 				}
-			}
-
-			if (string.IsNullOrEmpty(routeTemplate))
-			{
-				routeTemplate = controllerName;
-			}
-			else
-			{
-				routeTemplate = controllerName + "/" + routeTemplate.TrimStart('/');
+				if (string.IsNullOrEmpty(routeTemplate))
+				{
+					routeTemplate = controllerName;
+				}
+				else
+				{
+					routeTemplate = controllerName + "/" + routeTemplate.TrimStart('/');
+				}
 			}
 
 			routeTemplate = routeTemplate.TrimStart('*');
@@ -113,6 +113,10 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 			{
 				var c = d as ControllerActionDescriptor;
 				var isUs = false;
+				if (c.ControllerName == "Metadata")
+				{
+					int a = 0;
+				}
 				//if (d.DisplayName == "ODataSample.Web.Controllers.ProductsController.PostName (ODataSample.Web)")
 				//{
 				//	isUs = true;
@@ -129,7 +133,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 				{
 					return false;
 				}
-				if (c.AttributeRouteInfo == null)
+				if (c.AttributeRouteInfo == null && actionName == null)
 				{
 					return false;
 				}
@@ -137,7 +141,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 				{
 					return false;
 				}
-				if (!c.AttributeRouteInfo.Template.EndsWith(routeTemplate))
+				if (c.AttributeRouteInfo != null && !c.AttributeRouteInfo.Template.EndsWith(routeTemplate))
 				{
 					//if (isUs)
 					//{

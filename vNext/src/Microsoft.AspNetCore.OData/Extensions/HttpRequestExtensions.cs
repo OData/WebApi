@@ -50,6 +50,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
 
             return request?.Query != null && request.Query.Count > 0;
         }
+
 		/// <summary>
 		/// Creates a link for the next page of results; To be used as the value of @odata.nextLink.
 		/// </summary>

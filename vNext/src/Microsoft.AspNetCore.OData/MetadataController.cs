@@ -11,7 +11,7 @@ using System.Linq;
 namespace Microsoft.AspNetCore.OData
 {
 	[ApiExplorerSettings(IgnoreApi = true)]
-	[Route("odata/$metadata")]
+	//[Route("odata")]
 	public class MetadataController : Controller
 	{
 		private readonly IEdmModel _model;
@@ -22,6 +22,7 @@ namespace Microsoft.AspNetCore.OData
 		}
 
 		// not work: public IEdmModel Get => this._model;
+		[HttpGet("$metadata")]
 		public IEdmModel Get()
 		{
 			return _model;

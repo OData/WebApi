@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 				routeContext.HttpContext.Request.Headers["Access-Control-Request-Method"].FirstOrDefault();
 			var odataPath = routeContext.HttpContext.Request.ODataProperties().NewPath;
 			var controllerName = string.Empty;
-			var methodName = routeContext.HttpContext.Request.Method;
+			var httpMethodName = routeContext.HttpContext.Request.Method;
 			var routeTemplate = string.Empty;
 			var keys = new List<KeyValuePair<string, object>>();
 
@@ -101,7 +101,12 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 			}
 
 			routeTemplate = routeTemplate.TrimStart('*');
-
+	        string actionName = null;
+	        if (string.IsNullOrWhiteSpace(routeTemplate))
+	        {
+		        controllerName = "Metadata";
+		        actionName = "GetServiceDocument";
+	        }
 			var services = routeContext.HttpContext.RequestServices;
 			var provider = services.GetRequiredService<IActionDescriptorCollectionProvider>();
 			var actionDescriptor = provider.ActionDescriptors.Items.SingleOrDefault(d =>
@@ -120,11 +125,15 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 				{
 					return false;
 				}
-				if (controllerName == "Metadata")
+				if (controllerName != null && c.ControllerName != controllerName)
 				{
-					return true;
+					return false;
 				}
 				if (c.AttributeRouteInfo == null)
+				{
+					return false;
+				}
+				if (actionName != null && actionName != c.Name)
 				{
 					return false;
 				}
@@ -142,12 +151,19 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 					return false;
 				}
 				// TODO: If this is a OperationSegment or an OperationImportSegment then check the return types match
-				var httpMethodConstraint = ((HttpMethodActionConstraint)c.ActionConstraints.First());
-				if (methodName.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+				foreach (HttpMethodActionConstraint httpMethodConstraint in c.ActionConstraints)
 				{
-					return httpMethodConstraint.HttpMethods.Contains(preflightFor);
+					if (httpMethodName.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+					{
+						return httpMethodConstraint.HttpMethods.Contains(preflightFor);
+					}
+					var contains = httpMethodConstraint.HttpMethods.Contains(httpMethodName);
+					if (contains)
+					{
+						return true;
+					}
 				}
-				return httpMethodConstraint.HttpMethods.Contains(methodName);
+				return false;
 			});
 
 			if (actionDescriptor == null)

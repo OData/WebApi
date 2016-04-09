@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.OData.Edm;
 using System.Linq;
+using Microsoft.AspNetCore.OData.Formatter;
 
 namespace Microsoft.AspNetCore.OData.Query.Validators
 {

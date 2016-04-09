@@ -2,15 +2,14 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.AspNetCore.OData.Common;
-using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
-using System.Linq;
 
-namespace Microsoft.AspNetCore.OData.Query
+namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
     /// Describes the set of structural properties and navigation properties and actions to select and navigation properties to expand while 
@@ -30,6 +29,18 @@ namespace Microsoft.AspNetCore.OData.Query
             SelectedActions = new HashSet<IEdmAction>();
             SelectedFunctions = new HashSet<IEdmFunction>();
             SelectedDynamicProperties = new HashSet<string>();
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="SelectExpandNode"/> class describing the set of structural properties,
+        /// navigation properties, and actions to select and expand for the given <paramref name="writeContext"/>.
+        /// </summary>
+        /// <param name="entityType">The entity type of the entry that would be written.</param>
+        /// <param name="writeContext">The serializer context to be used while creating the collection.</param>
+        /// <remarks>The default constructor is for unit testing only.</remarks>
+        public SelectExpandNode(IEdmEntityType entityType, ODataSerializerContext writeContext)
+            : this(writeContext.SelectExpandClause, entityType, writeContext.Model)
+        {
         }
 
         /// <summary>

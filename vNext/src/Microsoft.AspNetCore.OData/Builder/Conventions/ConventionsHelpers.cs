@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;

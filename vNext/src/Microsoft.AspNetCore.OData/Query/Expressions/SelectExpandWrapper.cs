@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Web.OData.Query.Expressions;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;

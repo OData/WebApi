@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Edm;
 using System.Linq;
 using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Formatter;
 
 namespace Microsoft.AspNetCore.OData.Builder
 {

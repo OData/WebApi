@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNetCore.OData.Routing

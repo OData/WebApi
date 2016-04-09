@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Edm;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.OData.Formatter;
 
 namespace Microsoft.AspNetCore.OData.Builder
 {

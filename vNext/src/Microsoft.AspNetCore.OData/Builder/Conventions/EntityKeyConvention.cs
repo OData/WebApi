@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.OData.Common;
 using System.Linq;
+using Microsoft.AspNetCore.OData.Formatter;
 
 namespace Microsoft.AspNetCore.OData.Builder.Conventions
 {

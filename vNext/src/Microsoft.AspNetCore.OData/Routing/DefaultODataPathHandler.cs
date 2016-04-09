@@ -12,6 +12,7 @@ using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using Semantic = Microsoft.OData.Core.UriParser.Semantic;
 using System.Linq;
+using Microsoft.AspNetCore.OData.Formatter;
 
 namespace Microsoft.AspNetCore.OData.Routing
 {

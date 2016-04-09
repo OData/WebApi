@@ -13,6 +13,7 @@ using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Values;
 using System.Linq;
 using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Formatter;
 
 namespace Microsoft.AspNetCore.OData.Builder
 {

@@ -12,6 +12,8 @@ using System.Reflection;
 using System.Web.OData.Query.Expressions;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Formatter;
+using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;

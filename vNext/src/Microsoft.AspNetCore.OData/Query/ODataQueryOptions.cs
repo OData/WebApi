@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNetCore.OData.Query
@@ -18,7 +20,7 @@ namespace Microsoft.AspNetCore.OData.Query
 	// TODO: Replace with full version in the future.
 	public class ODataQueryOptions
 	{
-		private readonly ODataQueryOptionParser _queryOptionParser;
+		private ODataQueryOptionParser _queryOptionParser;
 		private readonly string _assemblyName;
 		private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
 
@@ -71,6 +73,11 @@ namespace Microsoft.AspNetCore.OData.Query
 		/// Gets the raw string of all the OData query options
 		/// </summary>
 		public ODataRawQueryOptions RawValues { get; }
+
+		/// <summary>
+		/// Gets the <see cref="SelectExpandQueryOption"/>.
+		/// </summary>
+		public SelectExpandQueryOption SelectExpand { get; private set; }
 
 		/// <summary>
 		/// Gets the <see cref="FilterQueryOption"/>.
@@ -159,6 +166,17 @@ namespace Microsoft.AspNetCore.OData.Query
 				query = Top.ApplyTo(query, querySettings);
 			}
 
+			AddAutoExpandProperties(querySettings);
+
+			if (SelectExpand != null)
+			{
+				var tempResult = ApplySelectExpand(query, querySettings);
+				if (tempResult != default(IQueryable))
+				{
+					query = tempResult;
+				}
+			}
+
 			if (querySettings.PageSize.HasValue)
 			{
 				bool resultsLimited = true;
@@ -178,6 +196,67 @@ namespace Microsoft.AspNetCore.OData.Query
 			return query;
 		}
 
+
+		internal void AddAutoExpandProperties(ODataQuerySettings querySettings)
+		{
+			var autoExpandRawValue = GetAutoExpandRawValue(querySettings.SearchDerivedTypeWhenAutoExpand);
+			if (autoExpandRawValue != null && !autoExpandRawValue.Equals(RawValues.Expand))
+			{
+				var queryParameters = Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString());
+				queryParameters["$expand"] = autoExpandRawValue;
+				_queryOptionParser = new ODataQueryOptionParser(
+					Context.Model,
+					Context.ElementType,
+					Context.NavigationSource,
+					queryParameters);
+				var originalSelectExpand = SelectExpand;
+				SelectExpand = new SelectExpandQueryOption(RawValues.Select, autoExpandRawValue, Context,
+					_queryOptionParser);
+				if (originalSelectExpand != null && originalSelectExpand.LevelsMaxLiteralExpansionDepth > 0)
+				{
+					SelectExpand.LevelsMaxLiteralExpansionDepth = originalSelectExpand.LevelsMaxLiteralExpansionDepth;
+				}
+			}
+		}
+
+		private string GetAutoExpandRawValue(bool discoverDerivedTypeWhenAutoExpand)
+		{
+			var expandRawValue = RawValues.Expand;
+			IEdmEntityType baseEntityType = Context.ElementType as IEdmEntityType;
+			var autoExpandRawValue = String.Empty;
+			var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(baseEntityType,
+				Context.Model, discoverDerivedTypeWhenAutoExpand);
+
+			foreach (var property in autoExpandNavigationProperties)
+			{
+				if (!String.IsNullOrEmpty(autoExpandRawValue))
+				{
+					autoExpandRawValue += ",";
+				}
+
+				if (property.DeclaringEntityType() != baseEntityType)
+				{
+					autoExpandRawValue += String.Format(CultureInfo.InvariantCulture, "{0}/",
+						property.DeclaringEntityType().FullTypeName());
+				}
+
+				autoExpandRawValue += property.Name;
+			}
+
+			if (!String.IsNullOrEmpty(autoExpandRawValue))
+			{
+				if (!String.IsNullOrEmpty(expandRawValue))
+				{
+					expandRawValue = String.Format(CultureInfo.InvariantCulture, "{0},{1}",
+						autoExpandRawValue, expandRawValue);
+				}
+				else
+				{
+					expandRawValue = autoExpandRawValue;
+				}
+			}
+			return expandRawValue;
+		}
 
 		/// <summary>
 		/// Limits the query results to a maximum number of results.
@@ -344,6 +423,11 @@ namespace Microsoft.AspNetCore.OData.Query
 						RawValues.SkipToken = kvp.Value;
 						break;
 				}
+
+				if (RawValues.Select != null || RawValues.Expand != null)
+				{
+					SelectExpand = new SelectExpandQueryOption(RawValues.Select, RawValues.Expand, Context);
+				}
 			}
 
 			if (ODataCountMediaTypeMapping.IsCountRequest(Request))
@@ -368,6 +452,44 @@ namespace Microsoft.AspNetCore.OData.Query
 			{
 				throw new ODataException(Error.Format("Query '{0}' cannot be empty", queryName));
 			}
+		}
+
+		private T ApplySelectExpand<T>(T entity, ODataQuerySettings querySettings)
+		{
+			var result = default(T);
+			bool selectAvailable = IsAvailableODataQueryOption(SelectExpand.RawSelect, AllowedQueryOptions.Select);
+			bool expandAvailable = IsAvailableODataQueryOption(SelectExpand.RawExpand, AllowedQueryOptions.Expand);
+			if (selectAvailable || expandAvailable)
+			{
+				if ((!selectAvailable && SelectExpand.RawSelect != null) ||
+					(!expandAvailable && SelectExpand.RawExpand != null))
+				{
+					SelectExpand = new SelectExpandQueryOption(
+						selectAvailable ? RawValues.Select : null,
+						expandAvailable ? RawValues.Expand : null,
+						SelectExpand.Context);
+				}
+				SelectExpand.SearchDerivedTypeWhenAutoExpand = querySettings.SearchDerivedTypeWhenAutoExpand;
+				SelectExpandClause processedClause = SelectExpand.ProcessLevels();
+				SelectExpandQueryOption newSelectExpand = new SelectExpandQueryOption(
+					SelectExpand.RawSelect,
+					SelectExpand.RawExpand,
+					SelectExpand.Context,
+					processedClause);
+
+				Request.ODataProperties().SelectExpandClause = processedClause;
+
+				var type = typeof(T);
+				if (type == typeof(IQueryable))
+				{
+					result = (T)newSelectExpand.ApplyTo((IQueryable)entity, querySettings, _assemblyName);
+				}
+				else if (type == typeof(object))
+				{
+					result = (T)newSelectExpand.ApplyTo(entity, querySettings, _assemblyName);
+				}
+			}
+			return result;
 		}
 	}
 }

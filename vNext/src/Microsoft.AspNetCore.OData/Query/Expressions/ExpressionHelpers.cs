@@ -23,7 +23,24 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             return (long)countMethod.Invoke(null, new object[] { query });
         }
 
-        public static IQueryable Skip(IQueryable query, int count, Type type, bool parameterize)
+		public static Expression Skip(Expression source, int count, Type type, bool parameterize)
+		{
+			MethodInfo skipMethod;
+			if (typeof(IQueryable).IsAssignableFrom(source.Type))
+			{
+				skipMethod = ExpressionHelperMethods.QueryableSkipGeneric.MakeGenericMethod(type);
+			}
+			else
+			{
+				skipMethod = ExpressionHelperMethods.EnumerableSkipGeneric.MakeGenericMethod(type);
+			}
+
+			Expression skipValueExpression = parameterize ? LinqParameterContainer.Parameterize(typeof(int), count) : Expression.Constant(count);
+			Expression skipQuery = Expression.Call(null, skipMethod, new[] { source, skipValueExpression });
+			return skipQuery;
+		}
+
+		public static IQueryable Skip(IQueryable query, int count, Type type, bool parameterize)
         {
             MethodInfo skipMethod = ExpressionHelperMethods.QueryableSkipGeneric.MakeGenericMethod(type);
             Expression skipValueExpression = parameterize ? LinqParameterContainer.Parameterize(typeof(int), count) : Expression.Constant(count);
@@ -70,7 +87,77 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             return OrderBy(query, orderByLambda, direction, type, alreadyOrdered);
         }
 
-        public static IQueryable OrderBy(IQueryable query, LambdaExpression orderByLambda, OrderByDirection direction, Type type, bool alreadyOrdered = false)
+		public static Expression OrderBy(
+			Expression source,
+			LambdaExpression orderByLambda,
+			Type elementType,
+			OrderByDirection direction,
+			bool alreadyOrdered = false)
+		{
+			Type returnType = orderByLambda.Body.Type;
+			MethodInfo orderByMethod;
+			if (!alreadyOrdered)
+			{
+				if (typeof(IQueryable).IsAssignableFrom(source.Type))
+				{
+					if (direction == OrderByDirection.Ascending)
+					{
+						orderByMethod = ExpressionHelperMethods.QueryableOrderByGeneric.MakeGenericMethod(elementType,
+							returnType);
+					}
+					else
+					{
+						orderByMethod = ExpressionHelperMethods.QueryableOrderByDescendingGeneric.MakeGenericMethod(elementType,
+							returnType);
+					}
+				}
+				else
+				{
+					if (direction == OrderByDirection.Ascending)
+					{
+						orderByMethod = ExpressionHelperMethods.EnumerableOrderByGeneric.MakeGenericMethod(elementType,
+							returnType);
+					}
+					else
+					{
+						orderByMethod = ExpressionHelperMethods.EnumerableOrderByDescendingGeneric.MakeGenericMethod(elementType,
+							returnType);
+					}
+				}
+			}
+			else
+			{
+				if (typeof(IQueryable).IsAssignableFrom(source.Type))
+				{
+					if (direction == OrderByDirection.Ascending)
+					{
+						orderByMethod = ExpressionHelperMethods.QueryableThenByGeneric.MakeGenericMethod(elementType,
+							returnType);
+					}
+					else
+					{
+						orderByMethod = ExpressionHelperMethods.QueryableThenByDescendingGeneric.MakeGenericMethod(elementType,
+							returnType);
+					}
+				}
+				else
+				{
+					if (direction == OrderByDirection.Ascending)
+					{
+						orderByMethod = ExpressionHelperMethods.EnumerableThenByGeneric.MakeGenericMethod(elementType,
+							returnType);
+					}
+					else
+					{
+						orderByMethod = ExpressionHelperMethods.EnumerableThenByDescendingGeneric.MakeGenericMethod(elementType,
+							returnType);
+					}
+				}
+			}
+			return Expression.Call(null, orderByMethod, new[] { source, orderByLambda });
+		}
+
+		public static IQueryable OrderBy(IQueryable query, LambdaExpression orderByLambda, OrderByDirection direction, Type type, bool alreadyOrdered = false)
         {
             Type returnType = orderByLambda.Body.Type;
 
@@ -147,5 +234,15 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             MemberExpression propertyAccess = Expression.Property(odataItParameter, propertyName);
             return Expression.Lambda(propertyAccess, odataItParameter);
         }
-    }
+
+		public static Expression OrderByPropertyExpression(
+		   Expression source,
+		   string propertyName,
+		   Type elementType,
+		   bool alreadyOrdered = false)
+		{
+			LambdaExpression orderByLambda = GetPropertyAccessLambda(elementType, propertyName);
+			return OrderBy(source, orderByLambda, elementType, OrderByDirection.Ascending, alreadyOrdered);
+		}
+	}
 }

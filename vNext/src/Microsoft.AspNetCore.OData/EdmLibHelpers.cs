@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -14,6 +15,9 @@ using Microsoft.OData.Edm.Library;
 using Microsoft.Spatial;
 using System.Linq;
 using Microsoft.AspNetCore.OData.Query.Expressions;
+using Microsoft.OData.Edm.Annotations;
+using Microsoft.OData.Edm.Expressions;
+using Microsoft.OData.Edm.Vocabularies.V1;
 
 namespace Microsoft.AspNetCore.OData
 {
@@ -116,12 +120,126 @@ namespace Microsoft.AspNetCore.OData
             return new EdmCollectionType(new EdmEntityTypeReference(entityType, isNullable: false));
         }
 
-        //public static Type GetClrType(IEdmType edmType, IEdmModel edmModel)
-        //{
-        //    return GetClrType(edmType, edmModel, AssemblyProviderManager.Instance());
-        //}
+		//public static Type GetClrType(IEdmType edmType, IEdmModel edmModel)
+		//{
+		//    return GetClrType(edmType, edmModel, AssemblyProviderManager.Instance());
+		//}
 
-        public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, string assemblyName)
+		public static IEnumerable<IEdmNavigationProperty> GetAutoExpandNavigationProperties(
+			IEdmEntityType baseEntityType, IEdmModel edmModel, bool searchDerivedTypeWhenAutoExpand)
+		{
+			List<IEdmNavigationProperty> autoExpandNavigationProperties = new List<IEdmNavigationProperty>();
+			List<IEdmEntityType> entityTypes = new List<IEdmEntityType>();
+			if (baseEntityType != null)
+			{
+				entityTypes.Add(baseEntityType);
+				if (searchDerivedTypeWhenAutoExpand)
+				{
+					entityTypes.AddRange(GetAllDerivedEntityTypes(baseEntityType, edmModel));
+				}
+
+				foreach (var entityType in entityTypes)
+				{
+					var navigationProperties = entityType == baseEntityType
+						? entityType.NavigationProperties()
+						: entityType.DeclaredNavigationProperties();
+					if (navigationProperties != null)
+					{
+						foreach (var navigationProperty in navigationProperties)
+						{
+							if (IsAutoExpand(navigationProperty, edmModel))
+							{
+								autoExpandNavigationProperties.Add(navigationProperty);
+							}
+						}
+					}
+				}
+			}
+			return autoExpandNavigationProperties;
+		}
+
+		public static bool IsAutoExpand(IEdmProperty edmProperty, IEdmModel edmModel)
+		{
+			QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(edmProperty, edmModel);
+			return annotation == null ? false : annotation.Restrictions.AutoExpand;
+		}
+
+		public static IEnumerable<IEdmEntityType> GetAllDerivedEntityTypes(
+			IEdmEntityType entityType, IEdmModel edmModel)
+		{
+			List<IEdmEntityType> derivedEntityTypes = new List<IEdmEntityType>();
+			if (entityType != null)
+			{
+				List<IEdmStructuredType> typeList = new List<IEdmStructuredType>();
+				typeList.Add(entityType);
+				while (typeList.Count > 0)
+				{
+					var head = typeList[0];
+					derivedEntityTypes.Add(head as IEdmEntityType);
+					var derivedTypes = edmModel.FindDirectlyDerivedTypes(head);
+					if (derivedTypes != null)
+					{
+						typeList.AddRange(derivedTypes);
+					}
+
+					typeList.RemoveAt(0);
+				}
+			}
+
+			derivedEntityTypes.RemoveAt(0);
+			return derivedEntityTypes;
+		}
+
+		private static ConcurrentDictionary<IEdmEntitySet, IEnumerable<IEdmStructuralProperty>> _concurrencyProperties;
+		public static IEnumerable<IEdmStructuralProperty> GetConcurrencyProperties(this IEdmModel model, IEdmEntitySet entitySet)
+		{
+			Contract.Assert(model != null);
+			Contract.Assert(entitySet != null);
+
+			IEnumerable<IEdmStructuralProperty> cachedProperties;
+			if (_concurrencyProperties != null && _concurrencyProperties.TryGetValue(entitySet, out cachedProperties))
+			{
+				return cachedProperties;
+			}
+
+			IList<IEdmStructuralProperty> results = new List<IEdmStructuralProperty>();
+			IEdmEntityType entityType = entitySet.EntityType();
+			var annotations = model.FindVocabularyAnnotations<IEdmValueAnnotation>(entitySet, CoreVocabularyModel.ConcurrencyTerm);
+			IEdmValueAnnotation annotation = annotations.FirstOrDefault();
+			if (annotation != null)
+			{
+				IEdmCollectionExpression properties = annotation.Value as IEdmCollectionExpression;
+				if (properties != null)
+				{
+					foreach (var property in properties.Elements)
+					{
+						IEdmPathExpression pathExpression = property as IEdmPathExpression;
+						if (pathExpression != null)
+						{
+							// So far, we only consider the single path, because only the direct properties from declaring type are used.
+							// However we have an issue tracking on: https://github.com/OData/WebApi/issues/472
+							string propertyName = pathExpression.Path.Single();
+							IEdmProperty edmProperty = entityType.FindProperty(propertyName);
+							IEdmStructuralProperty structuralProperty = edmProperty as IEdmStructuralProperty;
+							if (structuralProperty != null)
+							{
+								results.Add(structuralProperty);
+							}
+						}
+					}
+				}
+			}
+
+			if (_concurrencyProperties == null)
+			{
+				_concurrencyProperties = new ConcurrentDictionary<IEdmEntitySet, IEnumerable<IEdmStructuralProperty>>();
+			}
+
+			_concurrencyProperties[entitySet] = results;
+			return results;
+		}
+
+		public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, string assemblyName)
         {
             IEdmSchemaType edmSchemaType = edmType as IEdmSchemaType;
 
@@ -364,6 +482,12 @@ namespace Microsoft.AspNetCore.OData
 		{
 			var annotation = GetPropertyRestrictions(edmProperty, edmModel);
 			return annotation?.Restrictions.NotCountable ?? false;
+		}
+
+		public static bool IsNotExpandable(IEdmProperty edmProperty, IEdmModel edmModel)
+		{
+			QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(edmProperty, edmModel);
+			return annotation == null ? false : annotation.Restrictions.NotExpandable;
 		}
 	}
 }

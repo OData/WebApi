@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Reflection;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.OData.Extensions;
 
 namespace Microsoft.AspNetCore.OData.Common
 {
@@ -38,13 +39,13 @@ namespace Microsoft.AspNetCore.OData.Common
 
         internal static IEnumerable<Type> GetLoadedTypes(string assemblyName)
         {
-            List<Type> result = new List<Type>();
+            var result = new List<Type>();
 
             // Go through all assemblies referenced by the application and search for types matching a predicate
-	        IEnumerable<Assembly> assemblies =
+	        var assemblies =
 		        DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(assemblyName)
 			        .Select(s => (s as AssemblyPart).Assembly);
-            foreach (Assembly assembly in assemblies)
+            foreach (var assembly in assemblies)
             {
                 Type[] exportedTypes = null;
                 if (assembly == null || assembly.IsDynamic)
@@ -85,5 +86,14 @@ namespace Microsoft.AspNetCore.OData.Common
             Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
             return underlyingTypeOrSelf.GetTypeInfo().IsEnum;
         }
-    }
+
+		public static Type GetInnerElementType(this Type type)
+		{
+			Type elementType;
+			type.IsCollection(out elementType);
+			Contract.Assert(elementType != null);
+
+			return elementType;
+		}
+	}
 }

@@ -576,7 +576,7 @@ namespace System.Web.OData.Query
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", Justification = "Not intended for public use, only public to enable invokation without security issues.")]
         public static IQueryable<T> LimitResults<T>(IQueryable<T> queryable, int limit, out bool resultsLimited)
         {
-            TruncatedCollection<T> truncatedCollection = new TruncatedCollection<T>(queryable, limit);
+            var truncatedCollection = new TruncatedCollection<T>(queryable, limit);
             resultsLimited = truncatedCollection.IsTruncated;
             return truncatedCollection.AsQueryable();
         }

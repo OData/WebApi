@@ -35,11 +35,15 @@ namespace ODataSample.Web
 			{
 				builder.Namespace = "Sample";
 				builder
+					.EntityType<Customer>()
+					.RemoveAllProperties();
+				builder
 					.EntityType<Product>()
-					.RemoveAllProperties()
-					.AddProperty(p => p.Name)
-					.AddProperty(p => p.Price)
-					.RemoveProperty(p => p.Price)
+					//.RemoveAllProperties()
+					//.AddProperty(p => p.Name)
+					//.AddProperty(p => p.Price)
+					//.AddProperty(p =>)
+					//.RemoveProperty(p => p.Price)
 					;
 				builder.EntityType<Product>()
 					.HasKey(p => p.ProductId);

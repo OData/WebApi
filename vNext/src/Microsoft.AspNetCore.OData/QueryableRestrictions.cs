@@ -11,10 +11,12 @@ namespace Microsoft.AspNetCore.OData
     /// </summary>
     public class QueryableRestrictions
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="QueryableRestrictions"/> class.
-        /// </summary>
-        public QueryableRestrictions()
+		private bool _autoExpand;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="QueryableRestrictions"/> class.
+		/// </summary>
+		public QueryableRestrictions()
         {
         }
 
@@ -73,5 +75,14 @@ namespace Microsoft.AspNetCore.OData
         /// Gets or sets whether the property is not countable. default is false.
         /// </summary>
         public bool NotCountable { get; set; }
-    }
+
+		/// <summary>
+		/// Gets or sets whether the property is automatically expanded. default is false.
+		/// </summary>
+		public bool AutoExpand
+		{
+			get { return !NotExpandable && _autoExpand; }
+			set { _autoExpand = value; }
+		}
+	}
 }

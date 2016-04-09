@@ -8,12 +8,18 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 
 namespace Microsoft.AspNetCore.OData.Query.Expressions
 {
     internal class ExpressionHelperMethods
     {
-        private static MethodInfo _orderByMethod = GenericMethodOf(_ => Queryable.OrderBy<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
+	    internal class IncludeClass
+	    {
+		    public int DummyProperty { get; set; }
+	    }
+		private static MethodInfo _enumerableCountMethod = GenericMethodOf(_ => Enumerable.LongCount<int>(default(IEnumerable<int>)));
+		private static MethodInfo _orderByMethod = GenericMethodOf(_ => Queryable.OrderBy<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _orderByDescendingMethod = GenericMethodOf(_ => Queryable.OrderByDescending<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _thenByMethod = GenericMethodOf(_ => Queryable.ThenBy<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _thenByDescendingMethod = GenericMethodOf(_ => Queryable.ThenByDescending<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
@@ -34,18 +40,49 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
 
         private static MethodInfo _enumerableSelectMethod = GenericMethodOf(_ => Enumerable.Select<int, int>(default(IEnumerable<int>), i => i));
         private static MethodInfo _queryableSelectMethod = GenericMethodOf(_ => Queryable.Select<int, int>(default(IQueryable<int>), i => i));
+        private static MethodInfo _queryableIncludeMethod = GenericMethodOf(_ => EntityFrameworkQueryableExtensions.Include<IncludeClass, int>(default(IQueryable<IncludeClass>), i => i.DummyProperty));
 
         private static MethodInfo _queryableTakeMethod = GenericMethodOf(_ => Queryable.Take<int>(default(IQueryable<int>), default(int)));
         private static MethodInfo _enumerableTakeMethod = GenericMethodOf(_ => Enumerable.Take<int>(default(IEnumerable<int>), default(int)));
+		private static MethodInfo _enumerableThenByDescendingMethod = GenericMethodOf(_ => Enumerable.ThenByDescending<int, int>(default(IOrderedEnumerable<int>), default(Func<int, int>)));
 
-        private static MethodInfo _queryableAsQueryableMethod = GenericMethodOf(_ => Queryable.AsQueryable<int>(default(IEnumerable<int>)));
+		private static MethodInfo _enumerableThenByMethod = GenericMethodOf(_ => Enumerable.ThenBy<int, int>(default(IOrderedEnumerable<int>), default(Func<int, int>)));
+		private static MethodInfo _queryableAsQueryableMethod = GenericMethodOf(_ => Queryable.AsQueryable<int>(default(IEnumerable<int>)));
+		private static MethodInfo _enumerableOrderByDescendingMethod = GenericMethodOf(_ => Enumerable.OrderByDescending<int, int>(default(IEnumerable<int>), default(Func<int, int>)));
+		private static MethodInfo _enumerableOrderByMethod = GenericMethodOf(_ => Enumerable.OrderBy<int, int>(default(IEnumerable<int>), default(Func<int, int>)));
+		private static MethodInfo _enumerableSkipMethod = GenericMethodOf(_ => Enumerable.Skip<int>(default(IEnumerable<int>), default(int)));
 
-        public static MethodInfo QueryableOrderByGeneric
+		public static MethodInfo EnumerableSkipGeneric
+		{
+			get { return _enumerableSkipMethod; }
+		}
+
+		public static MethodInfo EnumerableOrderByGeneric
+		{
+			get { return _enumerableOrderByMethod; }
+		}
+
+		public static MethodInfo EnumerableOrderByDescendingGeneric
+		{
+			get { return _enumerableOrderByDescendingMethod; }
+		}
+
+		public static MethodInfo QueryableOrderByGeneric
         {
             get { return _orderByMethod; }
         }
 
-        public static MethodInfo QueryableOrderByDescendingGeneric
+		public static MethodInfo EnumerableThenByGeneric
+		{
+			get { return _enumerableThenByMethod; }
+		}
+
+		public static MethodInfo EnumerableThenByDescendingGeneric
+		{
+			get { return _enumerableThenByDescendingMethod; }
+		}
+
+		public static MethodInfo QueryableOrderByDescendingGeneric
         {
             get { return _orderByDescendingMethod; }
         }
@@ -88,6 +125,11 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
         public static MethodInfo QueryableSelectGeneric
         {
             get { return _queryableSelectMethod; }
+        }
+
+        public static MethodInfo QueryableIncludeGeneric
+        {
+            get { return _queryableIncludeMethod; }
         }
 
         public static MethodInfo EnumerableSelectGeneric
@@ -140,7 +182,12 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             get { return _queryableAsQueryableMethod; }
         }
 
-        private static MethodInfo GenericMethodOf<TReturn>(Expression<Func<object, TReturn>> expression)
+		public static MethodInfo EnumerableCountGeneric
+		{
+			get { return _enumerableCountMethod; }
+		}
+
+		private static MethodInfo GenericMethodOf<TReturn>(Expression<Func<object, TReturn>> expression)
         {
             return GenericMethodOf(expression as Expression);
         }

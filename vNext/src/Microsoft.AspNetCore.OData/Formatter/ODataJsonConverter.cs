@@ -5,7 +5,6 @@ using System.Reflection;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 using System.Linq;
-using System.Net.Http;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.OData.Edm.Library;
 
@@ -50,7 +49,8 @@ namespace Microsoft.AspNetCore.OData.Formatter
 			}
 			else
 			{
-				foreach (var o in (IEnumerable)value)
+				//var a = db.Products.Include(p => p.Customer);
+				foreach (var o in (IQueryable)value)
 				{
 					writer.WriteStartObject();
 					WriteEntity(writer, o);
@@ -69,6 +69,10 @@ namespace Microsoft.AspNetCore.OData.Formatter
 			writer.WritePropertyName("@odata.id");
 			writer.WriteValue(GenerateIdLinkString(value));
 			var edmType = _odataProperties.Model.GetEdmType(value.GetType()) as EdmEntityType;
+			if (edmType == null)
+			{
+				return;
+			}
 			var properties = GetPublicProperties(value.GetType()).ToDictionary(
 				p => p.Name);
 			foreach (var property in edmType.DeclaredProperties)

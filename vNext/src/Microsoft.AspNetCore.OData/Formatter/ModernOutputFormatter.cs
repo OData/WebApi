@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Internal;
-using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Edm;
@@ -38,17 +37,29 @@ namespace Microsoft.AspNetCore.OData.Formatter
             //}
         }
 
-        public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
+		public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
         {
             var response = context.HttpContext.Response;
             //var selectedEncoding = context.ContentType.Encoding == null ? Encoding.UTF8 : context.ContentType.Encoding;
             var selectedEncoding = Encoding.UTF8;
 
-            using (var delegatingStream = new NonDisposableStream(response.Body))
-            using (var writer = new StreamWriter(delegatingStream, selectedEncoding, 1024, leaveOpen: true))
+			var value = context.Object;
+			if (value is IEdmModel)
+			{
+				using (var delegatingStream = new NonDisposableStream(response.Body))
+				using (var writer = new StreamWriter(delegatingStream, selectedEncoding, 1024, leaveOpen: true))
+				{
+					WriteMetadata(writer, (IEdmModel)value);
+					WriteObject(delegatingStream, context);
+				}
+			}
+			else {
+				using (var delegatingStream = new NonDisposableStream(response.Body))
+            //using (var writer = new StreamWriter(delegatingStream, selectedEncoding, 1024, leaveOpen: true))
             {
-                WriteObject(writer, context);
+                WriteObject(delegatingStream, context);
             }
+			}
 
             return Task.FromResult(true);
         }
@@ -66,29 +77,23 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
         // In the future, should convert to ODataEntry and use ODL to write out.
         // Or use ODL to build a JObject and use Json.NET to write out.
-        public void WriteObject(TextWriter writer, OutputFormatterWriteContext context)
+        public void WriteObject(Stream stream, OutputFormatterWriteContext context)
         {
-	        var value = context.Object;
-            if (value is IEdmModel)
-            {
-                WriteMetadata(writer, (IEdmModel)value);
-                return;
-            }
-
-            using (var jsonWriter = CreateJsonWriter(writer))
-            {
-                var jsonSerializer = CreateJsonSerializer(context.HttpContext.ODataProperties());
-                jsonSerializer.Serialize(jsonWriter, value);
-            }
+			new ODataJsonSerializer(context).WriteJson(context.Object, stream);
+            //using (var jsonWriter = CreateJsonWriter(writer))
+            //{
+            //    var jsonSerializer = CreateJsonSerializer(context);
+            //    jsonSerializer.Serialize(jsonWriter, value);
+            //}
         }
 
-        private JsonSerializer CreateJsonSerializer(ODataProperties properties)
+        private JsonSerializer CreateJsonSerializer(OutputFormatterWriteContext context)
         {
             var serializerSettings = new JsonSerializerSettings();
 	        serializerSettings.Converters.Add(
 		        new ODataJsonConverter(
 			        new Uri("http://localhost:58888/"),
-			        properties));
+					context));
             var jsonSerializer = JsonSerializer.Create(serializerSettings);
             return jsonSerializer;
         }

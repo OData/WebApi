@@ -183,7 +183,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 }
                 else if (instance != null)
                 {
-                    IEdmTypeReference actualType = _typeMappingCache.GetEdmType(instance.GetType(), Model);
+                    IEdmTypeReference actualType = _typeMappingCache.GetEdmType(type, Model);
                     if (actualType != null && actualType != edmType)
                     {
                         edmType = actualType;

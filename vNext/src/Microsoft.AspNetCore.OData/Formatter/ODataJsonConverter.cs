@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 using System.Reflection;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Net.Http;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.WebApiCompatShim;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Formatter.Serialization;
+using Microsoft.OData.Core;
 using Microsoft.OData.Edm.Library;
 
 namespace Microsoft.AspNetCore.OData.Formatter
@@ -14,18 +21,24 @@ namespace Microsoft.AspNetCore.OData.Formatter
 	public class ODataJsonConverter : JsonConverter
 	{
 		private Uri _serviceRoot;
+		private readonly OutputFormatterWriteContext _context;
 		private readonly ODataProperties _odataProperties;
+		private readonly ODataVersion _version;
+		private HttpRequest Request => _context.HttpContext.Request;
+		private HttpResponse Response => _context.HttpContext.Response;
 
-		public ODataJsonConverter(Uri serviceRoot, ODataProperties odataProperties)
+		public ODataJsonConverter(Uri serviceRoot, OutputFormatterWriteContext context)
 		{
 			_serviceRoot = serviceRoot;
-			_odataProperties = odataProperties;
+			_context = context;
+			_odataProperties = context.HttpContext.ODataProperties();
 		}
 
 		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
 		{
-			var s = DefaultODataSerializerProvider.Instance;
-			var x = s.GetEdmTypeSerializer(null);
+			//ODataFeedSerializer f = new ODataFeedSerializer(DefaultODataSerializerProvider.Instance);
+			//f.WriteObject(value, value.GetType(), new ODataMessageWriter(), );
+			//f.WriteObject(value, value.GetType(), writer);
 			//x.WriteObjectInline();
 			// value should be an entity or a collection of entities.
 			var singleEntity = !(value is IEnumerable);

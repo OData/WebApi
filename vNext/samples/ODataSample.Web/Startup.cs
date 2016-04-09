@@ -35,8 +35,7 @@ namespace ODataSample.Web
 			{
 				builder.Namespace = "Sample";
 				builder
-					.EntityType<Customer>()
-					.RemoveAllProperties();
+					.EntityType<Customer>();
 				builder
 					.EntityType<Product>()
 					//.RemoveAllProperties()

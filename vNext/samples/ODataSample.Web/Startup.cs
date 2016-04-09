@@ -46,6 +46,9 @@ namespace ODataSample.Web
 			{
 				builder.Namespace = "Sample";
 				builder
+					.EntityType<Order>()
+					.HasKey(o => o.Id);
+				builder
 					.EntityType<Customer>()
 					.Property(p => p.CustomerId)
 					//.IsOptional()
@@ -64,12 +67,13 @@ namespace ODataSample.Web
 					.RemoveProperty(p => p.Roles)
 					.RemoveProperty(p => p.Claims)
 					.RemoveProperty(p => p.Logins)
+					//.RemoveProperty(p => p.Id)
 					//.RemoveAllProperties()
 					//.AddProperty(p => p.UserName)
 					//.AddProperty(p => p.Email)
 					;
-				//builder.EntityType<ApplicationUser>()
-				//	.HasKey(p => p.Id);
+				builder.EntityType<ApplicationUser>()
+					.HasKey(p => p.Id);
 				builder
 					.Function("HelloWorld")
 					.Returns<string>();

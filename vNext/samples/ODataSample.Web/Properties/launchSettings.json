@@ -11,7 +11,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "odata/Products?$expand=Customer",
+      "launchUrl": "odata/Products(3)?$expand=Customer",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

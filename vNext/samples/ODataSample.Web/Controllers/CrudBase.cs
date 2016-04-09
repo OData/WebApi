@@ -55,6 +55,10 @@ namespace ODataSample.Web.Controllers
 		{
 			return _entities.SingleOrDefault(KeyEqualsExpression(id));
 		}
+		public IQueryable<T> FindQuery(TKey id)
+		{
+			return _entities.Where(KeyEqualsExpression(id));
+		}
 
 		private Expression<Func<T, bool>> KeyEqualsExpression(TKey key)
 		{

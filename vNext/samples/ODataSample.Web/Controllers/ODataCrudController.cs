@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -31,15 +32,15 @@ namespace ODataSample.Web.Controllers
 		}
 
 		[HttpGet("{id}")]
-		public virtual async Task<IActionResult> Get(TKey id)
+		public virtual async Task<IQueryable<T>> Get(TKey id)
 		{
-			var entity = Crud.Find(id);
+			var entity = Crud.FindQuery(id);
 			if (entity == null)
 			{
-				return NotFound();
+				return new EnumerableQuery<T>(new List<T>());
 			}
 
-			return new ObjectResult(entity);
+			return entity;
 		}
 
 		// POST api/[Entities]

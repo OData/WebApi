@@ -68,8 +68,8 @@ namespace ODataSample.Web
 					//.AddProperty(p => p.UserName)
 					//.AddProperty(p => p.Email)
 					;
-				builder.EntityType<ApplicationUser>()
-					.HasKey(p => p.Id);
+				//builder.EntityType<ApplicationUser>()
+				//	.HasKey(p => p.Id);
 				builder
 					.Function("HelloWorld")
 					.Returns<string>();
@@ -118,7 +118,7 @@ namespace ODataSample.Web
 		public void Configure(IApplicationBuilder app, UserManager<ApplicationUser> userManager)
 		{
 			MigrateDatabase(app);
-			//await new Seeder().EnsureDatabase(app, userManager);
+			new Seeder().EnsureDatabase(app, userManager);
 			//mvc.AddWebApiConventions();
 			app.UseDeveloperExceptionPage();
 

@@ -91,7 +91,12 @@ namespace Microsoft.AspNetCore.OData
 					SearchDerivedTypeWhenAutoExpand = true
 				},
 				AllowedQueryOptions.None);
-
+			// Determine if this result should be a single entity
+			
+			if (ShouldBeSingleEntity(queryOptions))
+			{
+				return SingleOrDefault(query, actionDescriptor);
+			}
 			if (ODataCountMediaTypeMapping.IsCountRequest(request))
 			{
 				long? count = request.ODataProperties().TotalCount;
@@ -103,6 +108,39 @@ namespace Microsoft.AspNetCore.OData
 				}
 			}
 			return query;
+		}
+
+		private bool ShouldBeSingleEntity(ODataQueryOptions queryOptions)
+		{
+			return queryOptions.Context.Path.PathTemplate == "~/entityset/key";
+		}
+
+		internal static object SingleOrDefault(IQueryable queryable, ActionDescriptor actionDescriptor)
+		{
+			var enumerator = queryable.GetEnumerator();
+			try
+			{
+				var result = enumerator.MoveNext() ? enumerator.Current : null;
+
+				if (enumerator.MoveNext())
+				{
+					throw new InvalidOperationException(Error.Format(
+						SRResources.SingleResultHasMoreThanOneEntity));
+				}
+
+				return result;
+			}
+			finally
+			{
+				// Fix for Issue #2097
+				// Ensure any active/open database objects that were created
+				// iterating over the IQueryable object are properly closed.
+				var disposable = enumerator as IDisposable;
+				if (disposable != null)
+				{
+					disposable.Dispose();
+				}
+			}
 		}
 	}
 }

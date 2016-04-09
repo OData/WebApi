@@ -9,6 +9,7 @@ namespace Microsoft.AspNetCore.OData.Query
 {
     internal static class HandleNullPropagationOptionHelper
     {
+        private const string MicrosoftEntityFrameworkCoreQueryInternalNamespace = "Microsoft.EntityFrameworkCore.Query.Internal";
         private const string EntityFrameworkQueryProviderNamespace = "System.Data.Entity.Internal.Linq";
 
         private const string ObjectContextQueryProviderNamespaceEF5 = "System.Data.Objects.ELinq";
@@ -39,22 +40,30 @@ namespace Microsoft.AspNetCore.OData.Query
             HandleNullPropagationOption options;
 
             string queryProviderNamespace = query.Provider.GetType().Namespace;
-            switch (queryProviderNamespace)
-            {
-                case EntityFrameworkQueryProviderNamespace:
-                case Linq2SqlQueryProviderNamespace:
-                case ObjectContextQueryProviderNamespaceEF5:
-                case ObjectContextQueryProviderNamespaceEF6:
-                    options = HandleNullPropagationOption.False;
-                    break;
-
-                case Linq2ObjectsQueryProviderNamespace:
-                default:
-                    options = HandleNullPropagationOption.True;
-                    break;
-            }
+            options = ResolveHandleNullPropagationOption(queryProviderNamespace);
 
             return options;
         }
+
+	    private static HandleNullPropagationOption ResolveHandleNullPropagationOption(string queryProviderNamespace)
+	    {
+		    HandleNullPropagationOption options;
+		    switch (queryProviderNamespace)
+		    {
+				case MicrosoftEntityFrameworkCoreQueryInternalNamespace:
+				case EntityFrameworkQueryProviderNamespace:
+			    case Linq2SqlQueryProviderNamespace:
+			    case ObjectContextQueryProviderNamespaceEF5:
+			    case ObjectContextQueryProviderNamespaceEF6:
+				    options = Query.HandleNullPropagationOption.False;
+				    break;
+
+			    case Linq2ObjectsQueryProviderNamespace:
+			    default:
+				    options = Query.HandleNullPropagationOption.True;
+				    break;
+		    }
+		    return options;
+	    }
     }
 }

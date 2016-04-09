@@ -86,7 +86,7 @@ namespace Microsoft.AspNetCore.OData
 					// TODO: If we are using SQL, set this to false
 					// otherwise if it is entities in code then
 					// set it to true
-					HandleNullPropagation = HandleNullPropagationOption.True,
+					HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query),
 					PageSize = actionDescriptor.PageSize(),
 					SearchDerivedTypeWhenAutoExpand = true
 				},

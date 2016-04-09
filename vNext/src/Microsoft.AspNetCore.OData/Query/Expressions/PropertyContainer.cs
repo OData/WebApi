@@ -109,10 +109,15 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             }
             if (property.NullCheck != null)
             {
-                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("IsNull"), property.NullCheck));
-            }
+				// Microsoft.EntityFrameworkCore.Query.Internal 
+				// provider cannot handle the null check, resulting 
+				// in a "must be reducible node" error, so null
+				// checking has been moved locally into the IsNull 
+				// property
+				//memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("IsNull"), property.NullCheck));
+			}
 
-            return Expression.MemberInit(Expression.New(namedPropertyType), memberBindings);
+			return Expression.MemberInit(Expression.New(namedPropertyType), memberBindings);
         }
 
         private static Type GetNamedPropertyType(NamedPropertyExpression property, Expression next)
@@ -205,9 +210,23 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
 
         internal class SingleExpandedProperty<T> : NamedProperty<T>
         {
-            public bool IsNull { get; set; }
+	        private bool _isNull;
 
-            public override object GetValue()
+	        public bool IsNull
+	        {
+		        get
+		        {
+			        var selectExpandWrapper = Value as ISelectExpandWrapper;
+			        if (selectExpandWrapper != null)
+			        {
+				        return selectExpandWrapper.Instance == null;
+			        }
+					return _isNull;
+		        }
+		        set { _isNull = value; }
+	        }
+
+	        public override object GetValue()
             {
                 return IsNull ? (object)null : Value;
             }

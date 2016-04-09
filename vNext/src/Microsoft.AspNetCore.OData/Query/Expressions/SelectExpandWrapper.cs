@@ -33,10 +33,12 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
         /// </summary>
         public TElement Instance { get; set; }
 
-        /// <summary>
-        /// An ID to uniquely identify the model in the <see cref="ModelContainer"/>.
-        /// </summary>
-        public string ModelID { get; set; }
+	    object ISelectExpandWrapper.Instance => Instance;
+
+		/// <summary>
+		/// An ID to uniquely identify the model in the <see cref="ModelContainer"/>.
+		/// </summary>
+		public string ModelID { get; set; }
 
         /// <summary>
         /// Gets or sets the EDM type name of the element being selected and expanded. 

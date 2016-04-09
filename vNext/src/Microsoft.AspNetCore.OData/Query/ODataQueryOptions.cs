@@ -110,7 +110,7 @@ namespace Microsoft.AspNetCore.OData.Query
 			}
 
 			// Construct the actual query and apply them in the following order: filter
-			if (Filter != null)
+			if (IsAvailableODataQueryOption(Filter, AllowedQueryOptions.Filter))
 			{
 				query = Filter.ApplyTo(query, querySettings, _assemblyName);
 			}

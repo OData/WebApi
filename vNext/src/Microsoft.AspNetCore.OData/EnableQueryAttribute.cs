@@ -87,7 +87,8 @@ namespace Microsoft.AspNetCore.OData
 					// otherwise if it is entities in code then
 					// set it to true
 					HandleNullPropagation = HandleNullPropagationOption.False,
-					PageSize = actionDescriptor.PageSize()
+					PageSize = actionDescriptor.PageSize(),
+					SearchDerivedTypeWhenAutoExpand = true
 				},
 				AllowedQueryOptions.None);
 

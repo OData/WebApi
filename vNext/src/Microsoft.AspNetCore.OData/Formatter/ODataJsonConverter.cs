@@ -6,6 +6,7 @@ using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 using System.Linq;
 using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.OData.Edm.Library;
 
 namespace Microsoft.AspNetCore.OData.Formatter
@@ -23,6 +24,9 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
 		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
 		{
+			var s = DefaultODataSerializerProvider.Instance;
+			var x = s.GetEdmTypeSerializer(null);
+			//x.WriteObjectInline();
 			// value should be an entity or a collection of entities.
 			var singleEntity = !(value is IEnumerable);
 			writer.WriteStartObject();

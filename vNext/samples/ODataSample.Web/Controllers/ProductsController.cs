@@ -64,24 +64,24 @@ namespace ODataSample.Web.Controllers
 		//[PageSize(5)]
 		public override async Task<IQueryable<Product>> Get()
 		{
-			//var db = _sampleService as ApplicationDbContext;
-			//var query = db.Products.Select(var1 => new SelectExpandBinder.SelectAllAndExpand<Product>()
-			//{
-			//	ModelID = "788080e9-dd2b-4531-940f-da126125c157",
-			//	Instance = var1
-			//	,
-			//	Container = new PropertyContainer.SingleExpandedProperty<SelectExpandBinder.SelectAll<Customer>>()
-			//	{
-			//		Name = "Customer",
-			//		Value = new SelectExpandBinder.SelectAll<Customer>()
-			//		{
-			//			ModelID = "788080e9-dd2b-4531-940f-da126125c157",
-			//			Instance = var1.Customer
-			//		},
-			//		IsNull = false//var1.Customer == null
-			//	}
-			//});
-			//var elms = query.ToList();
+			var db = _sampleService as ApplicationDbContext;
+			var query = db.Products.Select(var1 => new SelectExpandBinder.SelectAllAndExpand<Product>()
+			{
+				ModelID = "788080e9-dd2b-4531-940f-da126125c157",
+				Instance = var1
+				,
+				Container = new PropertyContainer.SingleExpandedProperty<SelectExpandBinder.SelectAll<Customer>>()
+				{
+					Name = "Customer",
+					Value = new SelectExpandBinder.SelectAll<Customer>()
+					{
+						ModelID = "788080e9-dd2b-4531-940f-da126125c157",
+						Instance = var1.Customer
+					},
+					IsNull = false,//var1.Customer == null
+				}
+			});
+			var elms = query.ToList();
 			//IQueryable<Product> pp;
 			//pp.SelectAndExpand()
 			return await base.Get();

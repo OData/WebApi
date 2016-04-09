@@ -194,6 +194,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
 			return baseAddress[baseAddress.Length - 1] != '/' ? new Uri(baseAddress + '/') : new Uri(baseAddress);
 		}
+
 		private ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider)
 		{
 			ODataSerializer serializer;
@@ -211,7 +212,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 				serializer = serializerProvider.GetEdmTypeSerializer(edmType);
 				if (serializer == null)
 				{
-					string message = Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString(), typeof(ODataJsonConverter).Name);
+					string message = Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString(), typeof(ODataJsonSerializer).Name);
 					throw new SerializationException(message);
 				}
 			}
@@ -229,7 +230,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 				serializer = serializerProvider.GetODataPayloadSerializer(model, type, Request);
 				if (serializer == null)
 				{
-					string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataJsonConverter).Name);
+					string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataJsonSerializer).Name);
 					throw new SerializationException(message);
 				}
 			}

@@ -196,7 +196,6 @@ namespace Microsoft.AspNetCore.OData.Query
 			return query;
 		}
 
-
 		internal void AddAutoExpandProperties(ODataQuerySettings querySettings)
 		{
 			var autoExpandRawValue = GetAutoExpandRawValue(querySettings.SearchDerivedTypeWhenAutoExpand);

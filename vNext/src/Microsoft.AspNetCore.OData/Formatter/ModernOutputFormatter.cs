@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Edm;
@@ -44,12 +45,21 @@ namespace Microsoft.AspNetCore.OData.Formatter
 			var selectedEncoding = Encoding.UTF8;
 
 			var value = context.Object;
-			if (value is IEdmModel)
+			if (value is IEdmModel || context.HttpContext.ODataProperties().Model == null)
 			{
 				using (var delegatingStream = new NonDisposableStream(response.Body))
 				using (var writer = new StreamWriter(delegatingStream, selectedEncoding, 1024, leaveOpen: true))
 				{
-					WriteMetadata(writer, (IEdmModel)value);
+					if (value is IEdmModel)
+					{
+						WriteMetadata(writer, (IEdmModel)value);
+					}
+
+					using (var jsonWriter = CreateJsonWriter(writer))
+					{
+						var jsonSerializer = CreateJsonSerializer();
+						jsonSerializer.Serialize(jsonWriter, value);
+					}
 				}
 			}
 			else
@@ -61,6 +71,22 @@ namespace Microsoft.AspNetCore.OData.Formatter
 			}
 
 			return Task.FromResult(true);
+		}
+
+		private JsonWriter CreateJsonWriter(TextWriter writer)
+		{
+			var jsonWriter = new JsonTextWriter(writer);
+			jsonWriter.CloseOutput = false;
+
+			return jsonWriter;
+		}
+
+		private JsonSerializer CreateJsonSerializer()
+		{
+			var serializerSettings = new JsonSerializerSettings();
+			serializerSettings.Converters.Add(new ODataJsonConverter(new Uri("http://localhost:58888/")));
+			var jsonSerializer = JsonSerializer.Create(serializerSettings);
+			return jsonSerializer;
 		}
 
 		public override void WriteResponseHeaders(OutputFormatterWriteContext context)

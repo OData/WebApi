@@ -49,8 +49,10 @@ namespace Microsoft.AspNetCore.OData.Builder
 				node.Expression.Type.GetTypeInfo().IsSubclassOfRawGeneric(pinfo.DeclaringType.GetTypeInfo()))
 				//&& node.Expression.Type.GetTypeInfo().IsInstanceOfType(pinfo.DeclaringType))
 	        {
-		        pinfo = node.Expression.Type.GetProperty(pinfo.Name);
-	        }
+				// Get first in case of ambiguity
+				// TODO: JC: Add ambiguity resolution via fluid API
+				pinfo = node.Expression.Type.GetProperties().First(p => p.Name == pinfo.Name);
+			}
             if (pinfo == null)
             {				
                 throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties, node.Member.DeclaringType.FullName, node.Member.Name);

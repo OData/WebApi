@@ -119,14 +119,12 @@ namespace Microsoft.AspNetCore.OData.Builder
         {
 	        foreach (var property in ConventionsHelpers.GetAllProperties(_configuration, true))
 	        {
-		        _configuration.RemoveProperty(property);
-		        //TryRemoveProperty(property);
+		        RemovePropertyIfOfPrimitiveType(property);
 			}
-            //_configuration.RemoveAllProperties();
 			return this;
         }
 
-	    private void TryRemoveProperty(PropertyInfo property)
+	    private void RemovePropertyIfOfPrimitiveType(PropertyInfo property)
 	    {
 		    var typeInfo = property.PropertyType.GetTypeInfo();
 		    if (!typeInfo.IsClass ||

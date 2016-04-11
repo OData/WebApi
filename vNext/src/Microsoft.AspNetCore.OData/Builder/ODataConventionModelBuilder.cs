@@ -541,7 +541,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         {
             foreach (StructuralTypeConfiguration edmType in _explicitlyAddedTypes)
             {
-	            if (edmType.Properties.Any(p => !p.IsIgnored))
+	            if (edmType.IsInUse())
 	            {
 					MapType(edmType);
 				}
@@ -559,7 +559,13 @@ namespace Microsoft.AspNetCore.OData.Builder
             ActionOnDeleteAttributeConvention actionOnDeleteConvention = new ActionOnDeleteAttributeConvention();
             foreach (EntityTypeConfiguration edmType in StructuralTypes.OfType<EntityTypeConfiguration>())
             {
-                foreach (PropertyConfiguration property in edmType.Properties)
+	            if (!edmType.IsInUse())
+	            {
+					continue;
+	            }
+	            var list = edmType.Properties.ToList();
+
+				foreach (PropertyConfiguration property in list)
                 {
                     // ForeignKeyDiscoveryConvention has to run after ForeignKeyAttributeConvention
                     foreignKeyAttributeConvention.Apply(property, edmType, this);

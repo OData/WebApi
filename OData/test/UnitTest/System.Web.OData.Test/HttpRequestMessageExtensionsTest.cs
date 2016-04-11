@@ -20,7 +20,6 @@ using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 using ODataPath = System.Web.OData.Routing.ODataPath;
-using ODataPathSegment = System.Web.OData.Routing.ODataPathSegment;
 
 namespace System.Net.Http
 {
@@ -270,10 +269,7 @@ namespace System.Net.Http
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
 
-            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
-            mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.Customer);
-            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns((IEdmNavigationSource)model.Customers);
-            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers));
             request.ODataProperties().Path = odataPath;
             request.ODataProperties().Model = model.Model;
 
@@ -298,10 +294,7 @@ namespace System.Net.Http
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
 
-            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
-            mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.Customer);
-            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns((IEdmNavigationSource)model.Customers);
-            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers));
             request.ODataProperties().Path = odataPath;
             request.ODataProperties().Model = model.Model;
 
@@ -382,12 +375,8 @@ namespace System.Net.Http
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<MyEtagCustomer>("Customers");
             IEdmModel model = builder.GetEdmModel();
-            IEdmEntityType customer = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "MyEtagCustomer");
             IEdmEntitySet customers = model.FindDeclaredEntitySet("Customers");
-            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
-            mockSegment.Setup(s => s.GetEdmType(null)).Returns(customer);
-            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns(customers);
-            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(customers));
 
             HttpRequestMessage request = new HttpRequestMessage();
             HttpConfiguration cofiguration = new HttpConfiguration();
@@ -441,13 +430,8 @@ namespace System.Net.Http
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<MyEtagOrder>("Orders");
             IEdmModel model = builder.GetEdmModel();
-            IEdmEntityType order = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "MyEtagOrder");
             IEdmEntitySet orders = model.FindDeclaredEntitySet("Orders");
-            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
-            mockSegment.Setup(s => s.GetEdmType(null)).Returns(order);
-            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns(orders);
-            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
-
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(orders));
             HttpRequestMessage request = new HttpRequestMessage();
             HttpConfiguration cofiguration = new HttpConfiguration();
             request.SetConfiguration(cofiguration);

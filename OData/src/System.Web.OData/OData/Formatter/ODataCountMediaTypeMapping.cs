@@ -6,7 +6,8 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http;
 using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter
 {
@@ -37,7 +38,7 @@ namespace System.Web.OData.Formatter
         internal static bool IsCountRequest(HttpRequestMessage request)
         {
             ODataPath path = request.ODataProperties().Path;
-            return path != null && path.Segments.LastOrDefault() is CountPathSegment;
+            return path != null && path.Segments.LastOrDefault() is CountSegment;
         }
     }
 }

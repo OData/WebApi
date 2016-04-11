@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing.Conventions
@@ -50,8 +51,8 @@ namespace System.Web.OData.Routing.Conventions
                 odataPath.PathTemplate == "~/singleton/navigation/$ref" ||
                 odataPath.PathTemplate == "~/singleton/cast/navigation/$ref")
             {
-                NavigationPathSegment navigationSegment = (NavigationPathSegment)odataPath.Segments[odataPath.Segments.Count - 2];
-                IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
+                NavigationPropertyLinkSegment navigationLinkSegment = (NavigationPropertyLinkSegment)odataPath.Segments.Last();
+                IEdmNavigationProperty navigationProperty = navigationLinkSegment.NavigationProperty;
                 IEdmEntityType declaringType = navigationProperty.DeclaringEntityType();
 
                 string refActionName = FindRefActionName(actionMap, navigationProperty, declaringType, requestMethod);
@@ -59,10 +60,10 @@ namespace System.Web.OData.Routing.Conventions
                 {
                     if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
                     {
-                        routeData.Values[ODataRouteConstants.Key] = ((KeyValuePathSegment)odataPath.Segments[1]).Value;
+                        controllerContext.AddKeyValueToRouteData((KeySegment)odataPath.Segments[1]);
                     }
 
-                    routeData.Values[ODataRouteConstants.NavigationProperty] = navigationSegment.NavigationProperty.Name;
+                    routeData.Values[ODataRouteConstants.NavigationProperty] = navigationLinkSegment.NavigationProperty.Name;
                     return refActionName;
                 }
             }
@@ -72,8 +73,10 @@ namespace System.Web.OData.Routing.Conventions
                 odataPath.PathTemplate == "~/singleton/navigation/key/$ref" ||
                 odataPath.PathTemplate == "~/singleton/cast/navigation/key/$ref"))
             {
-                NavigationPathSegment navigationSegment = (NavigationPathSegment)odataPath.Segments[odataPath.Segments.Count - 3];
-                IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
+                // the second key segment is the last segment in the path.
+                // So the previous of last segment is the navigation property link segment.
+                NavigationPropertyLinkSegment navigationLinkSegment = (NavigationPropertyLinkSegment)odataPath.Segments[odataPath.Segments.Count - 2];
+                IEdmNavigationProperty navigationProperty = navigationLinkSegment.NavigationProperty;
                 IEdmEntityType declaringType = navigationProperty.DeclaringEntityType();
 
                 string refActionName = FindRefActionName(actionMap, navigationProperty, declaringType, requestMethod);
@@ -81,11 +84,11 @@ namespace System.Web.OData.Routing.Conventions
                 {
                     if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
                     {
-                        routeData.Values[ODataRouteConstants.Key] = ((KeyValuePathSegment)odataPath.Segments[1]).Value;
+                        controllerContext.AddKeyValueToRouteData((KeySegment)odataPath.Segments[1]);
                     }
 
-                    routeData.Values[ODataRouteConstants.NavigationProperty] = navigationSegment.NavigationProperty.Name;
-                    routeData.Values[ODataRouteConstants.RelatedKey] = ((KeyValuePathSegment)odataPath.Segments[odataPath.Segments.Count - 2]).Value;
+                    routeData.Values[ODataRouteConstants.NavigationProperty] = navigationLinkSegment.NavigationProperty.Name;
+                    controllerContext.AddKeyValueToRouteData((KeySegment)odataPath.Segments.Last(e => e is KeySegment), ODataRouteConstants.RelatedKey);
                     return refActionName;
                 }
             }

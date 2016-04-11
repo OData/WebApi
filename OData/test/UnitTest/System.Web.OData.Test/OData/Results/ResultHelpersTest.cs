@@ -6,11 +6,12 @@ using System.Net;
 using System.Net.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Results
 {
@@ -27,7 +28,7 @@ namespace System.Web.OData.Results
             var model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
-            var path = new ODataPath(new EntitySetPathSegment(model.Customers));
+            var path = new ODataPath(new EntitySetSegment(model.Customers));
             var request = new HttpRequestMessage();
             request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;

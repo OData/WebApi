@@ -13,10 +13,12 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Results
 {
@@ -231,7 +233,7 @@ namespace System.Web.OData.Results
         public void GenerateLocationHeader_ThrowsEntityTypeNotInModel_IfContentTypeIsNotThereInModel()
         {
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
+            ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
@@ -246,7 +248,7 @@ namespace System.Web.OData.Results
         public void GenerateLocationHeader_ThrowsTypeMustBeEntity_IfMappingTypeIsNotEntity()
         {
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
+            ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
@@ -272,7 +274,7 @@ namespace System.Web.OData.Results
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
-            ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
+            ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
@@ -321,7 +323,7 @@ namespace System.Web.OData.Results
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
-            ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
+            ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
@@ -344,7 +346,7 @@ namespace System.Web.OData.Results
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
-            ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
+            ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
@@ -372,7 +374,7 @@ namespace System.Web.OData.Results
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
-            ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
+            ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
@@ -401,7 +403,7 @@ namespace System.Web.OData.Results
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
-            ODataPath path = new ODataPath(new EntitySetPathSegment(model.Customers));
+            ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;

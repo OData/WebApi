@@ -102,7 +102,7 @@ namespace System.Web.OData.Query
             IEdmEntityType entityType =
                 model.SchemaElements.OfType<IEdmEntityType>().Single(e => e.Name == "RoutingCustomer");
 
-            ODataPath path = new ODataPath(new[] { new EntitySetPathSegment(entityset) });
+            ODataPath path = new ODataPath(new[] { new EntitySetSegment(entityset) });
             ODataQueryContext context = new ODataQueryContext(model, entityType, path);
             return new ODataQueryOptions(context, request);
         }

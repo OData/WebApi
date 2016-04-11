@@ -7,15 +7,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization.Models;
-using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
-using Moq;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter
 {
@@ -226,10 +225,7 @@ namespace System.Web.OData.Formatter
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType customer = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "MyEtagCustomer");
             IEdmEntitySet customers = model.FindDeclaredEntitySet("Customers");
-            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
-            mockSegment.Setup(s => s.GetEdmType(null)).Returns(customer);
-            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns(customers);
-            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+            ODataPath odataPath = new ODataPath(new[] { new EntitySetSegment(customers) });
             request.ODataProperties().Path = odataPath;
             request.ODataProperties().Model = model;
 
@@ -319,12 +315,8 @@ namespace System.Web.OData.Formatter
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<MyETagOrder>("Orders");
             IEdmModel model = builder.GetEdmModel();
-            IEdmEntityType order = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "MyETagOrder");
             IEdmEntitySet orders = model.FindDeclaredEntitySet("Orders");
-            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
-            mockSegment.Setup(s => s.GetEdmType(null)).Returns(order);
-            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns(orders);
-            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+            ODataPath odataPath = new ODataPath(new[] {new EntitySetSegment(orders) });
             request.ODataProperties().Path = odataPath;
             request.ODataProperties().Model = model;
 

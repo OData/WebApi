@@ -13,9 +13,11 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter
 {
@@ -245,8 +247,9 @@ namespace System.Web.OData.Formatter
                 .OperationImports()
                 .Single(f => f.Name == "PostMotorcycle_When_Expecting_Car") as IEdmActionImport;
             Assert.NotNull(action);
-
-            context.Path = new ODataPath(new UnboundActionPathSegment(action));
+            IEdmEntitySet actionEntitySet;
+            action.TryGetStaticEntitySet(out actionEntitySet);
+            context.Path = new ODataPath(new OperationImportSegment(new[] { action }, actionEntitySet, null));
 
             // Act & Assert
             Assert.Throws<ODataException>(

@@ -6,8 +6,10 @@ using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using System.Web.OData.TestCommon;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
-using Moq;
 
 namespace System.Web.OData.Routing.Conventions
 {
@@ -37,8 +39,11 @@ namespace System.Web.OData.Routing.Conventions
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers),
-                new CastPathSegment(model.SpecialCustomer));
+
+            IEdmCollectionType collection = new EdmCollectionType(new EdmEntityTypeReference(model.SpecialCustomer, isNullable: false));
+
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers),
+                new TypeSegment(collection, model.Customers));
 
             var controllerContext = new HttpControllerContext()
             {
@@ -62,7 +67,7 @@ namespace System.Web.OData.Routing.Conventions
         {
             // Arrange
             var model = new CustomersModelWithInheritance();
-            var odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new CountPathSegment());
+            var odataPath = new ODataPath(new EntitySetSegment(model.Customers), CountSegment.Instance);
 
             HttpControllerContext controllerContext = new HttpControllerContext()
             {
@@ -88,7 +93,7 @@ namespace System.Web.OData.Routing.Conventions
         {
             // Arrange
             var model = new CustomersModelWithInheritance();
-            var odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new CountPathSegment());
+            var odataPath = new ODataPath(new EntitySetSegment(model.Customers), CountSegment.Instance);
 
             HttpControllerContext controllerContext = new HttpControllerContext()
             {

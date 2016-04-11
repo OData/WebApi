@@ -734,8 +734,8 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 return null;
             }
-
-            Uri baseUri = new Uri(entityInstanceContext.Url.CreateODataLink(new MetadataPathSegment()));
+            
+            Uri baseUri = new Uri(entityInstanceContext.Url.CreateODataLink(MetadataSegment.Instance));
             Uri metadata = new Uri(baseUri, "#" + CreateMetadataFragment(operation));
 
             ODataOperation odataOperation;

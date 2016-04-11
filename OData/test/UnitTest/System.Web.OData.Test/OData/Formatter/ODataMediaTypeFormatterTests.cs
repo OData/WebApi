@@ -96,7 +96,8 @@ namespace System.Web.OData.Formatter
             request.SetConfiguration(configuration);
             request.ODataProperties().Model = model;
             IEdmEntitySet entitySet = model.EntityContainer.EntitySets().Single();
-            request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment(entitySet), new KeyValuePathSegment("10"));
+            request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet),
+                new KeySegment(new[] {new KeyValuePair<string, object>("ID", 10)}, entitySet.EntityType(), entitySet));
             request.ODataProperties().RouteName = routeName;
 
             ODataMediaTypeFormatter formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.Entry);
@@ -578,10 +579,15 @@ namespace System.Web.OData.Formatter
             get
             {
                 CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-                EntitySetPathSegment entitySetSegment = new EntitySetPathSegment(model.Customers);
-                KeyValuePathSegment keyValueSegment = new KeyValuePathSegment("42");
-                NavigationPathSegment navSegment = new NavigationPathSegment(model.Customer.FindProperty("Orders") as IEdmNavigationProperty);
-                PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment(model.Customer.FindProperty("Address") as IEdmStructuralProperty);
+                EntitySetSegment entitySetSegment = new EntitySetSegment(model.Customers);
+
+                var keys = new[] { new KeyValuePair<string, object>("ID", 42) };
+                KeySegment keyValueSegment = new KeySegment(keys, model.Customer, model.Customers);
+
+                NavigationPropertySegment navSegment =
+                    new NavigationPropertySegment(model.Customer.FindProperty("Orders") as IEdmNavigationProperty,
+                        model.Orders);
+                PropertySegment propertySegment = new PropertySegment(model.Customer.FindProperty("Address") as IEdmStructuralProperty);
 
                 return new TheoryDataSet<ODataPath, ODataPayloadKind>
                 {
@@ -884,7 +890,7 @@ namespace System.Web.OData.Formatter
             configuration.Routes.MapFakeODataRoute();
             request.SetConfiguration(configuration);
             request.ODataProperties().Path =
-                new ODataPath(new EntitySetPathSegment(model.EntityContainer.EntitySets().Single()));
+                new ODataPath(new EntitySetSegment(model.EntityContainer.EntitySets().Single()));
             request.SetFakeODataRouteName();
             return request;
         }

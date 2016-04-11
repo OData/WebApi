@@ -4,7 +4,8 @@
 using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder.Conventions
 {
@@ -23,7 +24,7 @@ namespace System.Web.OData.Builder.Conventions
             {
                 entitySet.HasFeedSelfLink(feedContext =>
                 {
-                    string selfLink = feedContext.Url.CreateODataLink(new EntitySetPathSegment(feedContext.EntitySetBase));
+                    string selfLink = feedContext.Url.CreateODataLink(new EntitySetSegment(feedContext.EntitySetBase as IEdmEntitySet));
 
                     if (selfLink == null)
                     {

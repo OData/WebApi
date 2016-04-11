@@ -14,9 +14,9 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
-using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData
 {
@@ -166,7 +166,7 @@ namespace System.Web.OData
 
             // Skip a possible sequence of casts at the end of the path.
             while (currentSegmentIndex >= 0 &&
-                path.Segments[currentSegmentIndex].SegmentKind == ODataSegmentKinds._Cast)
+                path.Segments[currentSegmentIndex] is TypeSegment)
             {
                 currentSegmentIndex--;
             }
@@ -176,23 +176,22 @@ namespace System.Web.OData
             }
 
             ODataPathSegment currentSegment = path.Segments[currentSegmentIndex];
-            switch (currentSegment.SegmentKind)
-            {
-                case ODataSegmentKinds._Singleton:
-                case ODataSegmentKinds._Key:
-                    return (IEdmEntityType)path.EdmType;
 
-                case ODataSegmentKinds._Navigation:
-                    NavigationPathSegment navigation = (NavigationPathSegment)currentSegment;
-                    if (navigation.NavigationProperty.TargetMultiplicity() == EdmMultiplicity.ZeroOrOne ||
-                        navigation.NavigationProperty.TargetMultiplicity() == EdmMultiplicity.One)
-                    {
-                        return (IEdmEntityType)path.EdmType;
-                    }
-                    break;
-                default:
-                    break;
+            if (currentSegment is SingletonSegment || currentSegment is KeySegment)
+            {
+                return (IEdmEntityType)path.EdmType;
             }
+
+            NavigationPropertySegment navigationPropertySegment = currentSegment as NavigationPropertySegment;
+            if (navigationPropertySegment != null)
+            {
+                if (navigationPropertySegment.NavigationProperty.TargetMultiplicity() == EdmMultiplicity.ZeroOrOne ||
+                    navigationPropertySegment.NavigationProperty.TargetMultiplicity() == EdmMultiplicity.One)
+                {
+                    return (IEdmEntityType)path.EdmType;
+                }
+            }
+
             return null;
         }
     }

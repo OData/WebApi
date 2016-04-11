@@ -1,13 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter
 {
@@ -38,8 +41,19 @@ namespace System.Web.OData.Formatter
         public void TryMatchMediaTypeWithPrimitiveRawValueMatchesRequest()
         {
             IEdmModel model = ODataTestUtil.GetEdmModel();
-            PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment((model.GetEdmType(typeof(FormatterPerson)) as IEdmEntityType).FindProperty("Age"));
-            ODataPath path = new ODataPath(new EntitySetPathSegment("People"), new KeyValuePathSegment("1"), propertySegment, new ValuePathSegment());
+            IEdmEntitySet people = model.EntityContainer.FindEntitySet("People");
+            IEdmEntityType personType =
+                model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "FormatterPerson");
+
+            IEdmStructuralProperty ageProperty = personType.FindProperty("Age") as IEdmStructuralProperty;
+            Assert.NotNull(ageProperty); // Guard
+            PropertySegment propertySegment = new PropertySegment(ageProperty);
+
+            var keys = new[] { new KeyValuePair<string, object>("PerId", 1) };
+            KeySegment keySegment = new KeySegment(keys, personType, people);
+            ODataPath path = new ODataPath(new EntitySetSegment(people), keySegment,
+                propertySegment, new ValueSegment(ageProperty.Type.Definition));
+
             ODataPrimitiveValueMediaTypeMapping mapping = new ODataPrimitiveValueMediaTypeMapping();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/People(1)/Age/$value");
             request.ODataProperties().Model = model;
@@ -68,8 +82,18 @@ namespace System.Web.OData.Formatter
         public void TryMatchMediaType_WithNonRawvalueRequest_DoesntMatchRequest()
         {
             IEdmModel model = ODataTestUtil.GetEdmModel();
-            PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment((model.GetEdmType(typeof(FormatterPerson)) as IEdmEntityType).FindProperty("Age"));
-            ODataPath path = new ODataPath(new EntitySetPathSegment("People"), new KeyValuePathSegment("1"), propertySegment);
+            IEdmEntitySet people = model.EntityContainer.FindEntitySet("People");
+            IEdmEntityType personType =
+                model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "FormatterPerson");
+
+            IEdmStructuralProperty ageProperty = personType.FindProperty("Age") as IEdmStructuralProperty;
+            Assert.NotNull(ageProperty); // Guard
+            PropertySegment propertySegment = new PropertySegment(ageProperty);
+
+            var keys = new[] { new KeyValuePair<string, object>("PerId", 1) };
+            KeySegment keySegment = new KeySegment(keys, personType, people);
+
+            ODataPath path = new ODataPath(new EntitySetSegment(people), keySegment, propertySegment);
             ODataPrimitiveValueMediaTypeMapping mapping = new ODataPrimitiveValueMediaTypeMapping();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/People(1)/Age/");
             request.ODataProperties().Model = model;
@@ -85,9 +109,17 @@ namespace System.Web.OData.Formatter
         {
             // Arrange
             IEdmModel model = ODataTestUtil.GetEdmModel();
-            PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment(
-                (model.GetEdmType(typeof(FormatterPerson)) as IEdmEntityType).FindProperty("Age"));
-            ODataPath path = new ODataPath(new SingletonPathSegment("President"), propertySegment);
+            IEdmSingleton president = model.EntityContainer.FindSingleton("President");
+                model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "FormatterPerson");
+
+            IEdmEntityType personType =
+                model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "FormatterPerson");
+
+            IEdmStructuralProperty ageProperty = personType.FindProperty("Age") as IEdmStructuralProperty;
+            Assert.NotNull(ageProperty); // Guard
+            PropertySegment propertySegment = new PropertySegment(ageProperty);
+
+            ODataPath path = new ODataPath(new SingletonSegment(president), propertySegment);
             ODataPrimitiveValueMediaTypeMapping mapping = new ODataPrimitiveValueMediaTypeMapping();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/President/Age/");
             request.ODataProperties().Model = model;
@@ -105,8 +137,19 @@ namespace System.Web.OData.Formatter
         {
             // Arrange
             IEdmModel model = GetEnumModel();
-            PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment((model.GetEdmType(typeof(EnumEntity)) as IEdmEntityType).FindProperty("EnumProperty"));
-            ODataPath path = new ODataPath(new EntitySetPathSegment("EnumEntity"), new KeyValuePathSegment("1"), propertySegment, new ValuePathSegment());
+
+            IEdmEntitySet enumEntity = model.EntityContainer.FindEntitySet("EnumEntity");
+            IEdmEntityType enumEntityType =
+                model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "EnumEntity");
+
+            IEdmStructuralProperty property = enumEntityType.FindProperty("EnumProperty") as IEdmStructuralProperty;
+            Assert.NotNull(property); // Guard
+            PropertySegment propertySegment = new PropertySegment(property);
+
+            var keys = new[] { new KeyValuePair<string, object>("Id", 1) };
+            KeySegment keySegment = new KeySegment(keys, enumEntityType, enumEntity);
+
+            ODataPath path = new ODataPath(new EntitySetSegment(enumEntity), keySegment, propertySegment, new ValueSegment(propertySegment.EdmType));
             ODataEnumValueMediaTypeMapping mapping = new ODataEnumValueMediaTypeMapping();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/EnumEntity(1)/EnumProperty/$value");
             request.ODataProperties().Model = model;
@@ -124,8 +167,18 @@ namespace System.Web.OData.Formatter
         {
             // Arrange
             IEdmModel model = GetEnumModel();
-            PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment((model.GetEdmType(typeof(EnumEntity)) as IEdmEntityType).FindProperty("EnumProperty"));
-            ODataPath path = new ODataPath(new EntitySetPathSegment("EnumEntity"), new KeyValuePathSegment("1"), propertySegment);
+            IEdmEntitySet enumEntity = model.EntityContainer.FindEntitySet("EnumEntity");
+            IEdmEntityType enumEntityType =
+                model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "EnumEntity");
+
+            IEdmStructuralProperty property = enumEntityType.FindProperty("EnumProperty") as IEdmStructuralProperty;
+            Assert.NotNull(property); // Guard
+            PropertySegment propertySegment = new PropertySegment(property);
+
+            var keys = new[] { new KeyValuePair<string, object>("Id", 1) };
+            KeySegment keySegment = new KeySegment(keys, enumEntityType, enumEntity);
+
+            ODataPath path = new ODataPath(new EntitySetSegment(enumEntity), keySegment, propertySegment);
             ODataEnumValueMediaTypeMapping mapping = new ODataEnumValueMediaTypeMapping();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/EnumEntity(1)/EnumProperty/");
             request.ODataProperties().Model = model;
@@ -142,8 +195,19 @@ namespace System.Web.OData.Formatter
         public void TryMatchMediaTypeWithBinaryRawValueMatchesRequest()
         {
             IEdmModel model = GetBinaryModel();
-            PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment((model.GetEdmType(typeof(RawValueEntity)) as IEdmEntityType).FindProperty("BinaryProperty"));
-            ODataPath path = new ODataPath(new EntitySetPathSegment("RawValue"), new KeyValuePathSegment("1"), propertySegment, new ValuePathSegment());
+
+            IEdmEntitySet rawValues = model.EntityContainer.FindEntitySet("RawValue");
+            IEdmEntityType rawValueEntity =
+                model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "RawValueEntity");
+
+            IEdmStructuralProperty property = rawValueEntity.FindProperty("BinaryProperty") as IEdmStructuralProperty;
+            Assert.NotNull(property); // Guard
+            PropertySegment propertySegment = new PropertySegment(property);
+
+            var keys = new[] { new KeyValuePair<string, object>("Id", 1) };
+            KeySegment keySegment = new KeySegment(keys, rawValueEntity, rawValues);
+
+            ODataPath path = new ODataPath(new EntitySetSegment(rawValues), keySegment, propertySegment, new ValueSegment(propertySegment.EdmType));
             ODataBinaryValueMediaTypeMapping mapping = new ODataBinaryValueMediaTypeMapping();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/RawValue(1)/BinaryProperty/$value");
             request.ODataProperties().Model = model;
@@ -159,9 +223,16 @@ namespace System.Web.OData.Formatter
         {
             // Arrange
             IEdmModel model = GetBinaryModel();
-            PropertyAccessPathSegment propertySegment = new PropertyAccessPathSegment(
-                (model.GetEdmType(typeof(RawValueEntity)) as IEdmEntityType).FindProperty("BinaryProperty"));
-            ODataPath path = new ODataPath(new SingletonPathSegment("RawSingletonValue"), propertySegment, new ValuePathSegment());
+
+            IEdmSingleton rawSingletonValue = model.EntityContainer.FindSingleton("RawSingletonValue");
+            IEdmEntityType rawValueEntity =
+                model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "RawValueEntity");
+
+            IEdmStructuralProperty property = rawValueEntity.FindProperty("BinaryProperty") as IEdmStructuralProperty;
+            Assert.NotNull(property); // Guard
+            PropertySegment propertySegment = new PropertySegment(property);
+
+            ODataPath path = new ODataPath(new SingletonSegment(rawSingletonValue), propertySegment, new ValueSegment(propertySegment.EdmType));
             ODataBinaryValueMediaTypeMapping mapping = new ODataBinaryValueMediaTypeMapping();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/RawSingletonValue/BinaryProperty/$value");
             request.ODataProperties().Model = model;

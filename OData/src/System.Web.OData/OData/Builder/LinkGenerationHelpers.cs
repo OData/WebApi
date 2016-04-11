@@ -8,10 +8,13 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Builder.Conventions;
 using System.Web.OData.Extensions;
+using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Properties;
-using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Builder
 {
@@ -33,6 +36,7 @@ namespace System.Web.OData.Builder
             {
                 throw Error.ArgumentNull("entityContext");
             }
+
             if (entityContext.Url == null)
             {
                 throw Error.Argument("entityContext", SRResources.UrlHelperNull, typeof(EntityInstanceContext).Name);
@@ -43,7 +47,7 @@ namespace System.Web.OData.Builder
             bool isSameType = entityContext.EntityType == entityContext.NavigationSource.EntityType();
             if (includeCast && !isSameType)
             {
-                idLinkPathSegments.Add(new CastPathSegment(entityContext.EntityType));
+                idLinkPathSegments.Add(new TypeSegment(entityContext.EntityType, navigationSource: null));
             }
 
             string idLink = entityContext.Url.CreateODataLink(idLinkPathSegments);
@@ -78,10 +82,10 @@ namespace System.Web.OData.Builder
 
             if (includeCast)
             {
-                navigationPathSegments.Add(new CastPathSegment(entityContext.EntityType));
+                navigationPathSegments.Add(new TypeSegment(entityContext.EntityType, navigationSource: null));
             }
 
-            navigationPathSegments.Add(new NavigationPathSegment(navigationProperty));
+            navigationPathSegments.Add(new NavigationPropertySegment(navigationProperty, navigationSource: null));
 
             string link = entityContext.Url.CreateODataLink(navigationPathSegments);
             if (link == null)
@@ -119,7 +123,7 @@ namespace System.Web.OData.Builder
                 throw Error.Argument("action", SRResources.ActionNotBoundToCollectionOfEntity, action.Name);
             }
 
-            return GenerateActionLink(feedContext, bindingParameter.Type.FullName(), action.FullName());
+            return GenerateActionLink(feedContext, bindingParameter.Type, action);
         }
 
         internal static Uri GenerateActionLink(this FeedContext feedContext, string bindingParameterType,
@@ -132,18 +136,43 @@ namespace System.Web.OData.Builder
                 return null;
             }
 
+            if (feedContext.EdmModel == null)
+            {
+                return null;
+            }
+
+            IEdmModel model = feedContext.EdmModel;
+            string elementType = DeserializationHelpers.GetCollectionElementTypeName(bindingParameterType, isNested: false);
+            Contract.Assert(elementType != null);
+
+            IEdmTypeReference typeReference = model.FindDeclaredType(elementType).ToEdmTypeReference(true);
+            IEdmTypeReference collection = new EdmCollectionTypeReference(new EdmCollectionType(typeReference));
+
+            IEdmOperation operation = model.FindDeclaredOperations(actionName).First();
+            return feedContext.GenerateActionLink(collection, operation);
+        }
+
+        internal static Uri GenerateActionLink(this FeedContext feedContext, IEdmTypeReference bindingParameterType,
+            IEdmOperation action)
+        {
+            Contract.Assert(feedContext != null);
+
+            if (feedContext.EntitySetBase is IEdmContainedEntitySet)
+            {
+                return null;
+            }
+
             IList<ODataPathSegment> actionPathSegments = new List<ODataPathSegment>();
             feedContext.GenerateBaseODataPathSegmentsForFeed(actionPathSegments);
 
             // generate link with cast if the navigation source doesn't match the type the action is bound to.
-            if (feedContext.EntitySetBase.Type.FullTypeName() != bindingParameterType)
+            if (feedContext.EntitySetBase.Type.FullTypeName() != bindingParameterType.FullName())
             {
-                string elementType = DeserializationHelpers.GetCollectionElementTypeName(bindingParameterType, isNested: false);
-                Contract.Assert(elementType != null);
-                actionPathSegments.Add(new CastPathSegment(elementType));
+                actionPathSegments.Add(new TypeSegment(bindingParameterType.Definition, feedContext.EntitySetBase));
             }
 
-            actionPathSegments.Add(new BoundActionPathSegment(actionName));
+            OperationSegment operationSegment = new OperationSegment(action, entitySet: null);
+            actionPathSegments.Add(operationSegment);
 
             string actionLink = feedContext.Url.CreateODataLink(actionPathSegments);
             return actionLink == null ? null : new Uri(actionLink);
@@ -176,12 +205,12 @@ namespace System.Web.OData.Builder
                 throw Error.Argument("function", SRResources.FunctionNotBoundToCollectionOfEntity, function.Name);
             }
 
-            return GenerateFunctionLink(feedContext, bindingParameter.Type.FullName(), function.FullName(),
+            return GenerateFunctionLink(feedContext, bindingParameter.Type, function,
                 function.Parameters.Select(p => p.Name));
         }
 
-        internal static Uri GenerateFunctionLink(this FeedContext feedContext, string bindingParameterType,
-            string functionName, IEnumerable<string> parameterNames)
+        internal static Uri GenerateFunctionLink(this FeedContext feedContext, IEdmTypeReference bindingParameterType,
+            IEdmOperation functionImport, IEnumerable<string> parameterNames)
         {
             Contract.Assert(feedContext != null);
 
@@ -194,24 +223,50 @@ namespace System.Web.OData.Builder
             feedContext.GenerateBaseODataPathSegmentsForFeed(functionPathSegments);
 
             // generate link with cast if the navigation source type doesn't match the entity type the function is bound to.
-            if (feedContext.EntitySetBase.Type.FullTypeName() != bindingParameterType)
+            if (feedContext.EntitySetBase.Type.FullTypeName() != bindingParameterType.Definition.FullTypeName())
             {
-                string elementType = DeserializationHelpers.GetCollectionElementTypeName(bindingParameterType, isNested: false);
-                Contract.Assert(elementType != null);
-                functionPathSegments.Add(new CastPathSegment(elementType));
+                functionPathSegments.Add(new TypeSegment(bindingParameterType.Definition, null));
             }
 
-            Dictionary<string, string> parametersDictionary = new Dictionary<string, string>();
+            IList<OperationSegmentParameter> parameters = new List<OperationSegmentParameter>();
             // skip the binding parameter
             foreach (string param in parameterNames.Skip(1))
             {
-                parametersDictionary.Add(param, "@" + param);
+                string value = "@" + param;
+                parameters.Add(new OperationSegmentParameter(param, new ConstantNode(value, value)));
             }
 
-            functionPathSegments.Add(new BoundFunctionPathSegment(functionName, parametersDictionary));
+            OperationSegment segment = new OperationSegment(new[] { functionImport }, parameters, null);
+            functionPathSegments.Add(segment);
 
             string functionLink = feedContext.Url.CreateODataLink(functionPathSegments);
             return functionLink == null ? null : new Uri(functionLink);
+        }
+
+        internal static Uri GenerateFunctionLink(this FeedContext feedContext, string bindingParameterType,
+            string functionName, IEnumerable<string> parameterNames)
+        {
+            Contract.Assert(feedContext != null);
+
+            if (feedContext.EntitySetBase is IEdmContainedEntitySet)
+            {
+                return null;
+            }
+
+            if (feedContext.EdmModel == null)
+            {
+                return null;
+            }
+
+            IEdmModel model = feedContext.EdmModel;
+
+            string elementType = DeserializationHelpers.GetCollectionElementTypeName(bindingParameterType, isNested: false);
+            Contract.Assert(elementType != null);
+
+            IEdmTypeReference typeReference = model.FindDeclaredType(elementType).ToEdmTypeReference(true);
+            IEdmTypeReference collection = new EdmCollectionTypeReference(new EdmCollectionType(typeReference));
+            IEdmOperation operation = model.FindDeclaredOperations(functionName).First();
+            return feedContext.GenerateFunctionLink(collection, operation, parameterNames);
         }
 
         /// <summary>
@@ -238,10 +293,10 @@ namespace System.Web.OData.Builder
                 throw Error.Argument("action", SRResources.ActionNotBoundToEntity, action.Name);
             }
 
-            return GenerateActionLink(entityContext, bindingParameter.Type.FullName(), action.FullName());
+            return GenerateActionLink(entityContext, bindingParameter.Type, action);
         }
 
-        internal static Uri GenerateActionLink(this EntityInstanceContext entityContext, string bindingParameterType, string actionName)
+        internal static Uri GenerateActionLink(this EntityInstanceContext entityContext, IEdmTypeReference bindingParameterType, IEdmOperation action)
         {
             Contract.Assert(entityContext != null);
             if (entityContext.NavigationSource is IEdmContainedEntitySet)
@@ -252,15 +307,35 @@ namespace System.Web.OData.Builder
             IList<ODataPathSegment> actionPathSegments = entityContext.GenerateBaseODataPathSegments();
 
             // generate link with cast if the navigation source doesn't match the entity type the action is bound to.
-            if (entityContext.NavigationSource.EntityType().FullName() != bindingParameterType)
+            if (entityContext.NavigationSource.EntityType() != bindingParameterType.Definition)
             {
-                actionPathSegments.Add(new CastPathSegment(bindingParameterType));
+                actionPathSegments.Add(new TypeSegment((IEdmEntityType)bindingParameterType.Definition, null)); // entity set can be null
             }
 
-            actionPathSegments.Add(new BoundActionPathSegment(actionName));
+            OperationSegment operationSegment = new OperationSegment(new[] { action }, null);
+            actionPathSegments.Add(operationSegment);
 
             string actionLink = entityContext.Url.CreateODataLink(actionPathSegments);
             return actionLink == null ? null : new Uri(actionLink);
+        }
+
+        internal static Uri GenerateActionLink(this EntityInstanceContext entityContext, string bindingParameterType, string actionName)
+        {
+            Contract.Assert(entityContext != null);
+            if (entityContext.NavigationSource is IEdmContainedEntitySet)
+            {
+                return null;
+            }
+
+            if (entityContext.EdmModel == null)
+            {
+                return null;
+            }
+
+            IEdmModel model = entityContext.EdmModel;
+            IEdmTypeReference typeReference = model.FindDeclaredType(bindingParameterType).ToEdmTypeReference(true);
+            IEdmOperation operation = model.FindDeclaredOperations(actionName).First();
+            return entityContext.GenerateActionLink(typeReference, operation);
         }
 
         /// <summary>
@@ -290,27 +365,45 @@ namespace System.Web.OData.Builder
             return GenerateFunctionLink(entityContext, bindingParameter.Type.FullName(), function.FullName(), function.Parameters.Select(p => p.Name));
         }
 
-        internal static Uri GenerateFunctionLink(this EntityInstanceContext entityContext, string bindingParameterType, string functionName, IEnumerable<string> parameterNames)
+        internal static Uri GenerateFunctionLink(this EntityInstanceContext entityContext, IEdmTypeReference bindingParameterType, IEdmOperation function,
+            IEnumerable<string> parameterNames)
         {
             IList<ODataPathSegment> functionPathSegments = entityContext.GenerateBaseODataPathSegments();
 
             // generate link with cast if the navigation source type doesn't match the entity type the function is bound to.
-            if (entityContext.NavigationSource.EntityType().FullName() != bindingParameterType)
+            if (entityContext.NavigationSource.EntityType() != bindingParameterType.Definition)
             {
-                functionPathSegments.Add(new CastPathSegment(bindingParameterType));
+                functionPathSegments.Add(new TypeSegment(bindingParameterType.Definition, null));
             }
 
-            Dictionary<string, string> parametersDictionary = new Dictionary<string, string>();
+            IList<OperationSegmentParameter> parameters = new List<OperationSegmentParameter>();
             // skip the binding parameter
             foreach (string param in parameterNames.Skip(1))
             {
-                parametersDictionary.Add(param, "@" + param);
+                string value = "@" + param;
+                parameters.Add(new OperationSegmentParameter(param, new ConstantNode(value, value)));
             }
 
-            functionPathSegments.Add(new BoundFunctionPathSegment(functionName, parametersDictionary));
+            OperationSegment segment = new OperationSegment(new[] { function }, parameters, null);
+            functionPathSegments.Add(segment);
 
             string functionLink = entityContext.Url.CreateODataLink(functionPathSegments);
             return functionLink == null ? null : new Uri(functionLink);
+        }
+
+        internal static Uri GenerateFunctionLink(this EntityInstanceContext entityContext, string bindingParameterType, string functionName, IEnumerable<string> parameterNames)
+        {
+            Contract.Assert(entityContext.EdmModel != null);
+
+            if (entityContext.EdmModel == null)
+            {
+                return null;
+            }
+
+            IEdmModel model = entityContext.EdmModel;
+            IEdmTypeReference typeReference = model.FindDeclaredType(bindingParameterType).ToEdmTypeReference(true);
+            IEdmOperation operation = model.FindDeclaredOperations(functionName).First();
+            return entityContext.GenerateFunctionLink(typeReference, operation, parameterNames);
         }
 
         internal static IList<ODataPathSegment> GenerateBaseODataPathSegments(this EntityInstanceContext entityContext)
@@ -321,7 +414,7 @@ namespace System.Web.OData.Builder
             {
                 // Per the OData V4 specification, a singleton is expected to be a child of the entity container, and
                 // as a result we can make the assumption that it is the only segment in the generated path.
-                odataPath.Add(new SingletonPathSegment((IEdmSingleton)entityContext.NavigationSource));
+                odataPath.Add(new SingletonSegment((IEdmSingleton)entityContext.NavigationSource));
             }
             else
             {
@@ -342,7 +435,6 @@ namespace System.Web.OData.Builder
             bool containedFound = false;
             if (path != null)
             {
-                IEdmNavigationSource previousNavigationSource = null;
                 var segments = path.Segments;
                 int length = segments.Count;
                 int previousNavigationPathIndex = -1;
@@ -351,16 +443,16 @@ namespace System.Web.OData.Builder
                     ODataPathSegment pathSegment = segments[i];
                     IEdmNavigationSource currentNavigationSource = null;
 
-                    var entitySetPathSegment = pathSegment as EntitySetPathSegment;
+                    var entitySetPathSegment = pathSegment as EntitySetSegment;
                     if (entitySetPathSegment != null)
                     {
-                        currentNavigationSource = entitySetPathSegment.EntitySetBase;
+                        currentNavigationSource = entitySetPathSegment.EntitySet;
                     }
 
-                    var navigationPathSegment = pathSegment as NavigationPathSegment;
+                    var navigationPathSegment = pathSegment as NavigationPropertySegment;
                     if (navigationPathSegment != null)
                     {
-                        currentNavigationSource = navigationPathSegment.GetNavigationSource(previousNavigationSource);
+                        currentNavigationSource = navigationPathSegment.NavigationSource;
                     }
                     if (containedFound)
                     {
@@ -387,7 +479,6 @@ namespace System.Web.OData.Builder
                     // segments up to the navigation and we can ignore the remaining segments.
                     if (currentNavigationSource != null)
                     {
-                        previousNavigationSource = currentNavigationSource;
                         previousNavigationPathIndex = i;
                         if (currentNavigationSource == navigationSource)
                         {
@@ -404,7 +495,19 @@ namespace System.Web.OData.Builder
                 // would suggest a scenario other than directly accessing an entity set, so we must assume that's
                 // the case.
                 odataPath.Clear();
-                odataPath.Add(new EntitySetPathSegment((IEdmEntitySetBase)navigationSource));
+
+                IEdmContainedEntitySet containmnent = navigationSource as IEdmContainedEntitySet;
+                if (containmnent != null)
+                {
+                    EdmEntityContainer container = new EdmEntityContainer("NS", "Default");
+                    IEdmEntitySet entitySet = new EdmEntitySet(container, navigationSource.Name,
+                        navigationSource.EntityType());
+                    odataPath.Add(new EntitySetSegment(entitySet));
+                }
+                else
+                {
+                    odataPath.Add(new EntitySetSegment((IEdmEntitySet)navigationSource));
+                }
             }
         }
 
@@ -414,10 +517,11 @@ namespace System.Web.OData.Builder
         {
             // If the navigation is not a singleton we need to walk all of the path segments to generate a
             // contextually accurate URI.
-            GenerateBaseODataPathSegmentsForNonSingletons(entityContext.SerializerContext.Path,
-                entityContext.NavigationSource,
-                odataPath);
-            odataPath.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext)));
+            GenerateBaseODataPathSegmentsForNonSingletons(
+                entityContext.SerializerContext.Path, entityContext.NavigationSource, odataPath);
+
+            odataPath.Add(new KeySegment(ConventionsHelpers.GetEntityKey(entityContext), entityContext.EntityType,
+                null));
         }
 
         private static void GenerateBaseODataPathSegmentsForFeed(

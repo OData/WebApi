@@ -136,7 +136,7 @@ namespace System.Web.OData.Routing.Conventions
             Assert.Equal("GetDynamicPropertyFromAccount", selectedAction);
             var test = controllerContext.Request.GetRouteData();
             Assert.Equal(3, controllerContext.Request.GetRouteData().Values.Count);
-            Assert.Equal("7", controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Equal(7, controllerContext.Request.GetRouteData().Values["key"]);
             Assert.Equal("Amount", controllerContext.Request.GetRouteData().Values["dynamicProperty"]);
             Assert.Equal("Amount", (controllerContext.Request.GetRouteData().Values[ODataParameterValue.ParameterValuePrefix + "dynamicProperty"] as ODataParameterValue).Value);
         }
@@ -198,7 +198,7 @@ namespace System.Web.OData.Routing.Conventions
             Assert.NotNull(selectedAction);
             Assert.Equal("GetDynamicProperty", selectedAction);
             Assert.Equal(3, controllerContext.Request.GetRouteData().Values.Count);
-            Assert.Equal("7", controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Equal(7, controllerContext.Request.GetRouteData().Values["key"]);
             Assert.Equal("DynamicPropertyA", controllerContext.Request.GetRouteData().Values["dynamicProperty"]);
             Assert.Equal("DynamicPropertyA", (controllerContext.Request.GetRouteData().Values[ODataParameterValue.ParameterValuePrefix + "dynamicProperty"] as ODataParameterValue).Value);
         }

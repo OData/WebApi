@@ -6,8 +6,9 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
-using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Query.Validators
 {
@@ -40,7 +41,7 @@ namespace System.Web.OData.Query.Validators
             {
                 ODataPathSegment lastSegment = path.Segments.Last();
 
-                if (lastSegment is CountPathSegment && path.Segments.Count > 1)
+                if (lastSegment is CountSegment && path.Segments.Count > 1)
                 {
                     ValidateCount(path.Segments[path.Segments.Count - 2], countQueryOption.Context.Model);
                 }
@@ -56,26 +57,26 @@ namespace System.Web.OData.Query.Validators
             Contract.Assert(segment != null);
             Contract.Assert(model != null);
 
-            NavigationPathSegment navigationPathSegment = segment as NavigationPathSegment;
+            NavigationPropertySegment navigationPathSegment = segment as NavigationPropertySegment;
             if (navigationPathSegment != null)
             {
                 if (EdmLibHelpers.IsNotCountable(navigationPathSegment.NavigationProperty, model))
                 {
                     throw new InvalidOperationException(Error.Format(
                         SRResources.NotCountablePropertyUsedForCount,
-                        navigationPathSegment.NavigationPropertyName));
+                        navigationPathSegment.NavigationProperty.Name));
                 }
                 return;
             }
 
-            PropertyAccessPathSegment propertyAccessPathSegment = segment as PropertyAccessPathSegment;
+            PropertySegment propertyAccessPathSegment = segment as PropertySegment;
             if (propertyAccessPathSegment != null)
             {
                 if (EdmLibHelpers.IsNotCountable(propertyAccessPathSegment.Property, model))
                 {
                     throw new InvalidOperationException(Error.Format(
                         SRResources.NotCountablePropertyUsedForCount,
-                        propertyAccessPathSegment.PropertyName));
+                        propertyAccessPathSegment.Property.Name));
                 }
             }
         }

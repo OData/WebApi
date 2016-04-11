@@ -15,9 +15,10 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
-using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
-using ODL = Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm.Library;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Results
 {
@@ -92,26 +93,27 @@ namespace System.Web.OData.Results
                 throw Error.InvalidOperation(SRResources.ODataPathMissing);
             }
 
-            ODL.ODataPath odlPath = path.ODLPath;
-            odlPath = new ContainmentPathBuilder().TryComputeCanonicalContainingPath(odlPath);
-            path = ODataPathSegmentTranslator.TranslateODataLibPathToWebApiPath(
-                odlPath,
-                entityContext.EdmModel,
-                unresolvedPathSegment: null,
-                id: null,
-                enableUriTemplateParsing: false,
-                parameterAliasNodes: new Dictionary<string, ODL.SingleValueNode>());
+            path = new ContainmentPathBuilder().TryComputeCanonicalContainingPath(path);
 
             List<ODataPathSegment> odataPath = path.Segments.ToList();
-            odataPath.Add(new EntitySetPathSegment((IEdmEntitySetBase)entityContext.NavigationSource));
-            odataPath.Add(new KeyValuePathSegment(ConventionsHelpers.GetEntityKeyValue(entityContext)));
+
+            // create a template entity set if it's contained entity set
+            IEdmEntitySet entitySet = entityContext.NavigationSource as IEdmEntitySet;
+            if (entitySet == null)
+            {
+                EdmEntityContainer container = new EdmEntityContainer("NS", "Default");
+                entitySet = new EdmEntitySet(container, entityContext.NavigationSource.Name, entityContext.NavigationSource.EntityType());
+            }
+
+            odataPath.Add(new EntitySetSegment(entitySet));
+            odataPath.Add(new KeySegment(ConventionsHelpers.GetEntityKey(entityContext), entityContext.EntityType, entityContext.NavigationSource));
 
             if (!isEntityId)
             {
                 bool isSameType = entityContext.EntityType == entityContext.NavigationSource.EntityType();
                 if (!isSameType)
                 {
-                    odataPath.Add(new CastPathSegment(entityContext.EntityType));
+                    odataPath.Add(new TypeSegment(entityContext.EntityType, entityContext.NavigationSource));
                 }
             }
 

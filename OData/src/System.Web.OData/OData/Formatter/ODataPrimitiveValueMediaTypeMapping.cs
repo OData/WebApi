@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Formatter
@@ -21,7 +21,7 @@ namespace System.Web.OData.Formatter
         }
 
         /// <inheritdoc/>
-        protected override bool IsMatch(PropertyAccessPathSegment propertySegment)
+        protected override bool IsMatch(PropertySegment propertySegment)
         {
             return propertySegment != null &&
                    propertySegment.Property.Type.IsPrimitive() &&

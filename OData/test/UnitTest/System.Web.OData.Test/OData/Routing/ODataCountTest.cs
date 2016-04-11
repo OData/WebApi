@@ -10,6 +10,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.Query;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -257,7 +258,7 @@ namespace System.Web.OData.Routing
                     result = options.Filter.ApplyTo(result, new ODataQuerySettings()).Cast<string>();
                 }
 
-                if (Request.ODataProperties().Path.Segments.OfType<CountPathSegment>().Any())
+                if (Request.ODataProperties().Path.Segments.OfType<CountSegment>().Any())
                 {
                     return Ok(result.Count());
                 }

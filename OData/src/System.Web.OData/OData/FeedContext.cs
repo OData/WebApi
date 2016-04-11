@@ -4,6 +4,7 @@
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
+using System.Web.OData.Extensions;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData
@@ -38,5 +39,20 @@ namespace System.Web.OData
         /// Gets the value of this feed instance.
         /// </summary>
         public object FeedInstance { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IEdmModel"/> to which this instance belongs.
+        /// </summary>
+        public IEdmModel EdmModel
+        {
+            get
+            {
+                return Request.ODataProperties().Model;
+            }
+            set
+            {
+                Request.ODataProperties().Model = value;
+            }
+        }
     }
 }

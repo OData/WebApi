@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
@@ -8,6 +9,7 @@ using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.TestCommon;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
@@ -31,11 +33,11 @@ namespace System.Web.OData.Routing.Conventions
             string expectedSelectedAction)
         {
             // Arrange
-            const string key = "42";
+            var keys = new[] {new KeyValuePair<string, object>("ID", 42)};
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var ordersProperty = model.Customer.FindProperty("Orders") as IEdmNavigationProperty;
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
-                new NavigationPathSegment(ordersProperty));
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers), new KeySegment(keys, model.Customer, model.Customers),
+                new NavigationPropertySegment(ordersProperty, model.Orders));
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap(methodsInController);
 
@@ -51,7 +53,7 @@ namespace System.Web.OData.Routing.Conventions
             else
             {
                 Assert.Equal(1, controllerContext.RouteData.Values.Count);
-                Assert.Equal(key, controllerContext.RouteData.Values["key"]);
+                Assert.Equal(42, controllerContext.RouteData.Values["key"]);
             }
         }
 
@@ -72,8 +74,8 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var ordersProperty = model.Customer.FindProperty("Orders") as IEdmNavigationProperty;
-            ODataPath odataPath = new ODataPath(new SingletonPathSegment(model.VipCustomer),
-                new NavigationPathSegment(ordersProperty));
+            ODataPath odataPath = new ODataPath(new SingletonSegment(model.VipCustomer),
+                new NavigationPropertySegment(ordersProperty, model.Orders));
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap(methodsInController);
 
@@ -100,12 +102,12 @@ namespace System.Web.OData.Routing.Conventions
             string expectedSelectedAction)
         {
             // Arrange
-            const string key = "42";
+            var keys = new[] {new KeyValuePair<string, object>("ID", 42)};
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
 
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
-                new CastPathSegment(model.SpecialCustomer), new NavigationPathSegment(specialOrdersProperty));
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers), new KeySegment(keys, model.Customer, model.Customers),
+                new TypeSegment(model.SpecialCustomer, model.Customers), new NavigationPropertySegment(specialOrdersProperty, model.Orders));
 
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap(methodsInController);
@@ -122,7 +124,7 @@ namespace System.Web.OData.Routing.Conventions
             else
             {
                 Assert.Equal(1, controllerContext.RouteData.Values.Count);
-                Assert.Equal(key, controllerContext.RouteData.Values["key"]);
+                Assert.Equal(42, controllerContext.RouteData.Values["key"]);
             }
         }
 
@@ -144,8 +146,8 @@ namespace System.Web.OData.Routing.Conventions
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
 
-            ODataPath odataPath = new ODataPath(new SingletonPathSegment(model.VipCustomer), new CastPathSegment(model.SpecialCustomer),
-                new NavigationPathSegment(specialOrdersProperty));
+            ODataPath odataPath = new ODataPath(new SingletonSegment(model.VipCustomer), new TypeSegment(model.SpecialCustomer, model.Customers),
+                new NavigationPropertySegment(specialOrdersProperty, model.Orders));
 
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap(methodsInController);
@@ -192,8 +194,9 @@ namespace System.Web.OData.Routing.Conventions
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var ordersProperty = model.Customer.FindProperty("Orders") as IEdmNavigationProperty;
 
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment("1"),
-                new NavigationPathSegment(ordersProperty));
+            var keys = new[] { new KeyValuePair<string, object>("ID", 42) };
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers), new KeySegment(keys, model.Customer, model.Customers),
+                new NavigationPropertySegment(ordersProperty, model.Orders));
 
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap();
@@ -215,8 +218,9 @@ namespace System.Web.OData.Routing.Conventions
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var customerProperty = model.Order.FindProperty("Customer") as IEdmNavigationProperty;
 
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Orders), new KeyValuePathSegment("1"),
-                new NavigationPathSegment(customerProperty));
+            var keys = new[] { new KeyValuePair<string, object>("ID", 1) };
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Orders), new KeySegment(keys, model.Order, model.Orders),
+                new NavigationPropertySegment(customerProperty, model.Customers));
 
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap(methodsInController);
@@ -226,7 +230,7 @@ namespace System.Web.OData.Routing.Conventions
 
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
-            Assert.Equal("1", controllerContext.RouteData.Values["key"]);
+            Assert.Equal(1, controllerContext.RouteData.Values["key"]);
         }
 
         [Theory]
@@ -237,11 +241,11 @@ namespace System.Web.OData.Routing.Conventions
             string expectedSelectedAction)
         {
             // Arrange
-            const string key = "42";
+            var keys = new[] { new KeyValuePair<string, object>("ID", 42) };
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var ordersProperty = model.Customer.FindProperty("Orders") as IEdmNavigationProperty;
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
-                new NavigationPathSegment(ordersProperty), new CountPathSegment());
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers), new KeySegment(keys, model.Customer, model.Customers),
+                new NavigationPropertySegment(ordersProperty, model.Orders), CountSegment.Instance);
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap(methodsInController);
 
@@ -251,7 +255,7 @@ namespace System.Web.OData.Routing.Conventions
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
             Assert.Equal(1, controllerContext.RouteData.Values.Count);
-            Assert.Equal(key, controllerContext.RouteData.Values["key"]);
+            Assert.Equal(42, controllerContext.RouteData.Values["key"]);
         }
 
         [Theory]
@@ -262,12 +266,15 @@ namespace System.Web.OData.Routing.Conventions
             string expectedSelectedAction)
         {
             // Arrange
-            const string key = "42";
+            var keys = new[] { new KeyValuePair<string, object>("ID", 42) };
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
 
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
-                new CastPathSegment(model.SpecialCustomer), new NavigationPathSegment(specialOrdersProperty), new CountPathSegment());
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers),
+                new KeySegment(keys, model.Customer, model.Customers),
+                new TypeSegment(model.SpecialCustomer, model.Customers),
+                new NavigationPropertySegment(specialOrdersProperty, model.Orders),
+                CountSegment.Instance);
 
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap(methodsInController);
@@ -278,7 +285,7 @@ namespace System.Web.OData.Routing.Conventions
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
             Assert.Equal(1, controllerContext.RouteData.Values.Count);
-            Assert.Equal(key, controllerContext.RouteData.Values["key"]);
+            Assert.Equal(42, controllerContext.RouteData.Values["key"]);
         }
 
         [Theory]
@@ -288,12 +295,14 @@ namespace System.Web.OData.Routing.Conventions
         public void SelectAction_ReturnsNull_NotSupportedMethodForDollarCount(string method, string[] methodsInController)
         {
             // Arrange
-            const string key = "42";
+            var keys = new[] { new KeyValuePair<string, object>("ID", 42) };
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
 
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
-                new CastPathSegment(model.SpecialCustomer), new NavigationPathSegment(specialOrdersProperty), new CountPathSegment());
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers), new KeySegment(keys, model.Customer, model.Customers),
+                new TypeSegment(model.SpecialCustomer, model.Customers),
+                new NavigationPropertySegment(specialOrdersProperty, model.Orders),
+                CountSegment.Instance);
 
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap(methodsInController);

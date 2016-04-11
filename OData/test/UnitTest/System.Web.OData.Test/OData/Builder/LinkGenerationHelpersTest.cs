@@ -1,17 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization;
-using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Builder
 {
@@ -104,15 +106,28 @@ namespace System.Web.OData.Builder
             IEdmEntityType myOrder = (IEdmEntityType)_model.Model.FindDeclaredType("NS.MyOrder");
             IEdmNavigationProperty orderLinesProperty = myOrder.NavigationProperties().Single(x => x.ContainsTarget);
 
+            IEdmEntitySet entitySet = _model.Model.FindDeclaredEntitySet(("MyOrders"));
+            IDictionary<string, object> parameters = new Dictionary<string, object>
+            {
+                {"ID", 42}
+            };
+
+            IDictionary<string, object> parameters2 = new Dictionary<string, object>
+            {
+                {"ID", 21}
+            };
+
             var serializerContext = new ODataSerializerContext
             {
                 Model = _model.Model,
+
                 NavigationSource = _model.OrderLines,
                 Path = new ODataPath(
-                    new EntitySetPathSegment(_model.Model.FindDeclaredEntitySet("MyOrders")),
-                    new KeyValuePathSegment("42"),
-                    new NavigationPathSegment(orderLinesProperty),
-                    new KeyValuePathSegment("21")),
+                    new EntitySetSegment(entitySet),
+                    new KeySegment(parameters.ToArray(), myOrder, entitySet),
+                    new NavigationPropertySegment(orderLinesProperty, _model.OrderLines),
+                    new KeySegment(parameters2.ToArray(),  _model.OrderLine, _model.OrderLines)),
+
                 Url = GetODataRequest(_model.Model).GetUrlHelper(),
             };
             var entityContext = new EntityInstanceContext(serializerContext, _model.OrderLine.AsReference(), new { ID = 21 });
@@ -131,17 +146,31 @@ namespace System.Web.OData.Builder
             IEdmEntityType myOrder = (IEdmEntityType)_model.Model.FindDeclaredType("NS.MyOrder");
             IEdmNavigationProperty orderLinesProperty = myOrder.NavigationProperties().Single(x => x.Name.Equals("NonContainedOrderLines"));
 
+            IEdmEntitySet entitySet = _model.Model.FindDeclaredEntitySet(("MyOrders"));
+            IDictionary<string, object> parameters = new Dictionary<string, object>
+            {
+                {"ID", 42}
+            };
+
+            IDictionary<string, object> parameters2 = new Dictionary<string, object>
+            {
+                {"ID", 21}
+            };
+
             var serializerContext = new ODataSerializerContext
             {
                 Model = _model.Model,
+
                 NavigationSource = _model.OrderLines,
                 Path = new ODataPath(
-                    new EntitySetPathSegment(_model.Model.FindDeclaredEntitySet("MyOrders")),
-                    new KeyValuePathSegment("42"),
-                    new NavigationPathSegment(orderLinesProperty),
-                    new KeyValuePathSegment("21")),
+                    new EntitySetSegment(entitySet),
+                    new KeySegment(parameters.ToArray(), myOrder, entitySet),
+                    new NavigationPropertySegment(orderLinesProperty, _model.NonContainedOrderLines),
+                    new KeySegment(parameters2.ToArray(), _model.OrderLine, _model.NonContainedOrderLines)),
+
                 Url = GetODataRequest(_model.Model).GetUrlHelper(),
             };
+
             var entityContext = new EntityInstanceContext(serializerContext, _model.OrderLine.AsReference(), new { ID = 21 });
 
             // Act
@@ -605,6 +634,7 @@ namespace System.Web.OData.Builder
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
             request.ODataProperties().RouteName = routeName;
+            request.ODataProperties().Model = model;
             return request;
         }
     }

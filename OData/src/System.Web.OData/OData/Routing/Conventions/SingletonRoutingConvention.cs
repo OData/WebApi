@@ -1,12 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.OData.Properties;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing.Conventions
@@ -37,7 +36,7 @@ namespace System.Web.OData.Routing.Conventions
 
             if (odataPath.PathTemplate == "~/singleton")
             {
-                SingletonPathSegment singletonSegment = (SingletonPathSegment)odataPath.Segments[0];
+                SingletonSegment singletonSegment = (SingletonSegment)odataPath.Segments[0];
                 string httpMethodName = GetActionNamePrefix(controllerContext.Request.Method);
 
                 if (httpMethodName != null)
@@ -50,7 +49,7 @@ namespace System.Web.OData.Routing.Conventions
             }
             else if (odataPath.PathTemplate == "~/singleton/cast")
             {
-                SingletonPathSegment singletonSegment = (SingletonPathSegment)odataPath.Segments[0];
+                SingletonSegment singletonSegment = (SingletonSegment)odataPath.Segments[0];
                 IEdmEntityType entityType = (IEdmEntityType)odataPath.EdmType;
                 string httpMethodName = GetActionNamePrefix(controllerContext.Request.Method);
 

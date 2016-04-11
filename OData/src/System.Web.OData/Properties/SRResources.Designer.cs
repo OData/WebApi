@@ -556,6 +556,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Key template value &apos;{0}&apos; for key segment &apos;{1}&apos; is empty..
+        /// </summary>
+        internal static string EmptyKeyTemplate {
+            get {
+                return ResourceManager.GetString("EmptyKeyTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Parameter alias &apos;{0}&apos; in segment &apos;{1}&apos; is empty..
         /// </summary>
         internal static string EmptyParameterAlias {
@@ -948,6 +957,15 @@ namespace System.Web.OData.Properties {
         internal static string InvalidTimeZoneInfo {
             get {
                 return ResourceManager.GetString("InvalidTimeZoneInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Key template value &apos;{0}&apos; for key segment &apos;{1}&apos; does not start with &apos;{{&apos; or ends with &apos;}}&apos;..
+        /// </summary>
+        internal static string KeyTemplateMustBeInCurlyBraces {
+            get {
+                return ResourceManager.GetString("KeyTemplateMustBeInCurlyBraces", resourceCulture);
             }
         }
         
@@ -1488,6 +1506,24 @@ namespace System.Web.OData.Properties {
         internal static string ODataPathNotFound {
             get {
                 return ResourceManager.GetString("ODataPathNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The operation import segment must be a function import segment..
+        /// </summary>
+        internal static string OperationImportSegmentMustBeFunction {
+            get {
+                return ResourceManager.GetString("OperationImportSegmentMustBeFunction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The operation segment must be a function segment..
+        /// </summary>
+        internal static string OperationSegmentMustBeFunction {
+            get {
+                return ResourceManager.GetString("OperationSegmentMustBeFunction", resourceCulture);
             }
         }
         

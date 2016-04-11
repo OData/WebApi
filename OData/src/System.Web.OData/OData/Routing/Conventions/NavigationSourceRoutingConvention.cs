@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using Microsoft.OData.Core.UriParser.Semantic;
 
 namespace System.Web.OData.Routing.Conventions
 {
@@ -35,17 +36,17 @@ namespace System.Web.OData.Routing.Conventions
             }
 
             // entity set
-            EntitySetPathSegment entitySetSegment = odataPath.Segments.FirstOrDefault() as EntitySetPathSegment;
+            EntitySetSegment entitySetSegment = odataPath.Segments.FirstOrDefault() as EntitySetSegment;
             if (entitySetSegment != null)
             {
-                return entitySetSegment.EntitySetName;
+                return entitySetSegment.EntitySet.Name;
             }
 
             // singleton
-            SingletonPathSegment singletonSegment = odataPath.Segments.FirstOrDefault() as SingletonPathSegment;
+            SingletonSegment singletonSegment = odataPath.Segments.FirstOrDefault() as SingletonSegment;
             if (singletonSegment != null)
             {
-                return singletonSegment.SingletonName;
+                return singletonSegment.Singleton.Name;
             }
 
             return null;

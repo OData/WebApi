@@ -9,6 +9,7 @@ using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Builder
 {
@@ -230,12 +231,12 @@ namespace System.Web.OData.Builder
         private ODataPath CreatePathFromUri(Uri requestUri)
         {
             var parser = new ODataUriParser(GetModel(), _serviceRoot, requestUri);
-            return parser.ParsePath();
+            return new ODataPath(parser.ParsePath());
         }
 
         private Uri CreateUriFromPath(ODataPath path)
         {
-            var segments = path;
+            var segments = path.Segments;
             var computedUri = _serviceRoot;
 
             // Append each segment to base uri

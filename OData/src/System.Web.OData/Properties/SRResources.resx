@@ -655,6 +655,12 @@
   <data name="ParameterAliasMustBeInCurlyBraces" xml:space="preserve">
     <value>Parameter alias '{0}' in segment '{1}' does not start with '{{' or ends with '}}'.</value>
   </data>
+  <data name="EmptyKeyTemplate" xml:space="preserve">
+    <value>Key template value '{0}' for key segment '{1}' is empty.</value>
+  </data>
+  <data name="KeyTemplateMustBeInCurlyBraces" xml:space="preserve">
+    <value>Key template value '{0}' for key segment '{1}' does not start with '{{' or ends with '}}'.</value>
+  </data>
   <data name="UnresolvedPathSegmentInTemplate" xml:space="preserve">
     <value>Found an unresolved path segment '{0}' in the OData path template '{1}'.</value>
   </data>
@@ -684,6 +690,12 @@
   </data>
   <data name="FunctionParameterNotFound" xml:space="preserve">
     <value>The function parameter '{0}' cannot be found.</value>
+  </data>
+  <data name="OperationSegmentMustBeFunction" xml:space="preserve">
+    <value>The operation segment must be a function segment.</value>
+  </data>
+  <data name="OperationImportSegmentMustBeFunction" xml:space="preserve">
+    <value>The operation import segment must be a function import segment.</value>
   </data>
   <data name="InvalidETagHandler" xml:space="preserve">
     <value>The ETag handler set in the configuration property is of type '{0}', which does not implement IETagHandler.</value>

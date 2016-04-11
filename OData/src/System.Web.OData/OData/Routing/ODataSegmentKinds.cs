@@ -4,124 +4,103 @@
 namespace System.Web.OData.Routing
 {
     /// <summary>
-    /// Provides the values of segment kinds for implementations of <see cref="ODataPathSegment" />.
+    /// Provides the values of segment kinds for implementations of odata path template.
     /// </summary>
     public static class ODataSegmentKinds
     {
-        // need these as consts for using them in switch/case blocks.
-        internal const string _ServiceBase = "~";
-        internal const string _Batch = "$batch";
-        internal const string _Ref = "$ref";
-        internal const string _Metadata = "$metadata";
-        internal const string _Value = "$value";
-        internal const string _Count = "$count";
-        internal const string _Action = "action";
-        internal const string _Function = "function";
-        internal const string _UnboundAction = "unboundaction";
-        internal const string _UnboundFunction = "unboundfunction";
-        internal const string _Cast = "cast";
-        internal const string _ComplexCast = "complexcast";
-        internal const string _EntitySet = "entityset";
-        internal const string _Singleton = "singleton";
-        internal const string _Key = "key";
-        internal const string _Navigation = "navigation";
-        internal const string _Property = "property";
-        internal const string _DynamicProperty = "dynamicproperty";
-        internal const string _Unresolved = "unresolved";
-
         /// <summary>
         /// Represents the service root segment (for OData service document).
         /// </summary>
-        public static readonly string ServiceBase = _ServiceBase;
+        public const string ServiceBase = "~";
 
         /// <summary>
         /// Represents the OData $batch segment.
         /// </summary>
-        public static readonly string Batch = _Batch;
+        public const string Batch = "$batch";
 
         /// <summary>
         /// Represents the OData $ref segment.
         /// </summary>
-        public static readonly string Ref = _Ref;
+        public const string Ref = "$ref";
 
         /// <summary>
         /// Represents the OData $metadata segment.
         /// </summary>
-        public static readonly string Metadata = _Metadata;
+        public const string Metadata = "$metadata";
 
         /// <summary>
         /// Represents the OData $value segment.
         /// </summary>
-        public static readonly string Value = _Value;
+        public const string Value = "$value";
 
         /// <summary>
         /// Represents the OData $count segment.
         /// </summary>
-        public static readonly string Count = _Count;
+        public const string Count = "$count";
 
         /// <summary>
         /// Represents a segment indicating a bound OData action.
         /// </summary>
-        public static readonly string Action = _Action;
+        public const string Action = "action";
 
         /// <summary>
         /// Represents a segment indicating a bound OData function.
         /// </summary>
-        public static readonly string Function = _Function;
+        public const string Function = "function";
 
         /// <summary>
         /// Represents a segment indicating an unbound OData action.
         /// </summary>
-        public static readonly string UnboundAction = _UnboundAction;
+        public const string UnboundAction = "unboundaction";
 
         /// <summary>
         /// Represents a segment indicating an unbound OData function.
         /// </summary>
-        public static readonly string UnboundFunction = _UnboundFunction;
+        public const string UnboundFunction = "unboundfunction";
 
         /// <summary>
         /// Represents a segment indicating a type cast.
         /// </summary>
-        public static readonly string Cast = _Cast;
-
-        /// <summary>
-        /// Represents a segment indicating a complex type cast.
-        /// </summary>
-        public static readonly string ComplexCast = _ComplexCast;
+        public const string Cast = "cast";
 
         /// <summary>
         /// Represents a segment indicating an entity set.
         /// </summary>
-        public static readonly string EntitySet = _EntitySet;
+        public const string EntitySet = "entityset";
 
         /// <summary>
         /// Represents a segment indicating a singleton.
         /// </summary>
-        public static readonly string Singleton = _Singleton;
+        public const string Singleton = "singleton";
 
         /// <summary>
         /// Represents a segment indicating an index by key operation.
         /// </summary>
-        public static readonly string Key = _Key;
+        public const string Key = "key";
 
         /// <summary>
         /// Represents a segment indicating a navigation.
         /// </summary>
-        public static readonly string Navigation = _Navigation;
+        public const string Navigation = "navigation";
+
+        /// <summary>
+        /// Represents a segment indicating a navigation link.
+        /// </summary>
+        public const string PathTemplate = "template";
 
         /// <summary>
         /// Represents a segment indicating a property access.
         /// </summary>
-        public static readonly string Property = _Property;
+        public const string Property = "property";
 
         /// <summary>
         /// Represents a segment indicating an dynamic property access.
         /// </summary>
-        public static readonly string DynamicProperty = _DynamicProperty;
+        public const string DynamicProperty = "dynamicproperty";
 
         /// <summary>
         /// Represents a segment that is not understood.
         /// </summary>
-        public static readonly string Unresolved = _Unresolved;
+        public const string Unresolved = "unresolved";
     }
 }

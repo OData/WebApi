@@ -9,11 +9,13 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Values;
 using Microsoft.TestCommon;
 using Moq;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -101,7 +103,8 @@ namespace System.Web.OData.Formatter.Serialization
         {
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Path = new ODataPath(new ValuePathSegment());
+            request.ODataProperties().Path =
+                new ODataPath(new ValueSegment(EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32)));
 
             var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, type, request);
 
@@ -126,7 +129,8 @@ namespace System.Web.OData.Formatter.Serialization
         {
             ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Path = new ODataPath(new ValuePathSegment());
+            request.ODataProperties().Path =
+                new ODataPath(new ValueSegment(EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32)));
 
             var serializer = serializerProvider.GetODataPayloadSerializer(GetEnumModel(), typeof(TestEnum), request);
 

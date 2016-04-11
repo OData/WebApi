@@ -4,11 +4,12 @@
 using System.Linq;
 using System.Net.Http;
 using System.Web.OData.Builder;
-using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter.Deserialization
 {
@@ -64,7 +65,7 @@ namespace System.Web.OData.Formatter.Deserialization
             ODataDeserializerContext context = new ODataDeserializerContext
             {
                 Request = new HttpRequestMessage(),
-                Path = new ODataPath(new NavigationPathSegment(GetNavigationProperty(model)))
+                Path = new ODataPath(new NavigationPropertySegment(GetNavigationProperty(model), navigationSource: null))
             };
 
             // Act
@@ -94,7 +95,7 @@ namespace System.Web.OData.Formatter.Deserialization
             ODataDeserializerContext context = new ODataDeserializerContext
             {
                 Request = new HttpRequestMessage(),
-                Path = new ODataPath(new NavigationPathSegment(navigationProperty))
+                Path = new ODataPath(new NavigationPropertySegment(navigationProperty, navigationSource: null))
             };
 
             // Act

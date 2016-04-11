@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing.Conventions
@@ -42,8 +43,8 @@ namespace System.Web.OData.Routing.Conventions
 
             if (odataPath.PathTemplate == "~/entityset")
             {
-                EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)odataPath.Segments[0];
-                IEdmEntitySetBase entitySet = entitySetSegment.EntitySetBase;
+                EntitySetSegment entitySetSegment = (EntitySetSegment)odataPath.Segments[0];
+                IEdmEntitySetBase entitySet = entitySetSegment.EntitySet;
                 HttpMethod httpMethod = controllerContext.Request.Method;
 
                 if (httpMethod == HttpMethod.Get)
@@ -64,8 +65,8 @@ namespace System.Web.OData.Routing.Conventions
             else if (odataPath.PathTemplate == "~/entityset/$count" &&
                 controllerContext.Request.Method == HttpMethod.Get)
             {
-                EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)odataPath.Segments[0];
-                IEdmEntitySetBase entitySet = entitySetSegment.EntitySetBase;
+                EntitySetSegment entitySetSegment = (EntitySetSegment)odataPath.Segments[0];
+                IEdmEntitySetBase entitySet = entitySetSegment.EntitySet;
 
                 // e.g. Try GetCustomers first, then fall back to Get action name
                 return actionMap.FindMatchingAction(
@@ -74,8 +75,8 @@ namespace System.Web.OData.Routing.Conventions
             }
             else if (odataPath.PathTemplate == "~/entityset/cast")
             {
-                EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)odataPath.Segments[0];
-                IEdmEntitySetBase entitySet = entitySetSegment.EntitySetBase;
+                EntitySetSegment entitySetSegment = (EntitySetSegment)odataPath.Segments[0];
+                IEdmEntitySetBase entitySet = entitySetSegment.EntitySet;
                 IEdmCollectionType collectionType = (IEdmCollectionType)odataPath.EdmType;
                 IEdmEntityType entityType = (IEdmEntityType)collectionType.ElementType.Definition;
                 HttpMethod httpMethod = controllerContext.Request.Method;
@@ -98,10 +99,9 @@ namespace System.Web.OData.Routing.Conventions
             else if (odataPath.PathTemplate == "~/entityset/cast/$count" &&
                 controllerContext.Request.Method == HttpMethod.Get)
             {
-                EntitySetPathSegment entitySetSegment = (EntitySetPathSegment)odataPath.Segments[0];
-                IEdmEntitySetBase entitySet = entitySetSegment.EntitySetBase;
-                IEdmCollectionType collectionType = (IEdmCollectionType)odataPath.Segments[1].GetEdmType(
-                    entitySetSegment.GetEdmType(previousEdmType: null));
+                EntitySetSegment entitySetSegment = (EntitySetSegment)odataPath.Segments[0];
+                IEdmEntitySetBase entitySet = entitySetSegment.EntitySet;
+                IEdmCollectionType collectionType = (IEdmCollectionType)odataPath.Segments[1].EdmType;
                 IEdmEntityType entityType = (IEdmEntityType)collectionType.ElementType.Definition;
 
                 // e.g. Try GetCustomersFromSpecialCustomer first, then fall back to GetFromSpecialCustomer

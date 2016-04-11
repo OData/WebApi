@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing.Conventions
@@ -48,9 +49,9 @@ namespace System.Web.OData.Routing.Conventions
                 odataPath.PathTemplate == "~/singleton/cast/navigation" ||
                 odataPath.PathTemplate == "~/singleton/cast/navigation/$count")
             {
-                NavigationPathSegment navigationSegment =
-                    (odataPath.Segments.Last() as NavigationPathSegment) ??
-                    odataPath.Segments[odataPath.Segments.Count - 2] as NavigationPathSegment;
+                NavigationPropertySegment navigationSegment =
+                    (odataPath.Segments.Last() as NavigationPropertySegment) ??
+                    odataPath.Segments[odataPath.Segments.Count - 2] as NavigationPropertySegment;
                 IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
                 IEdmEntityType declaringType = navigationProperty.DeclaringType as IEdmEntityType;
 
@@ -69,7 +70,7 @@ namespace System.Web.OData.Routing.Conventions
                 }
 
                 // *Get* is the only supported method for $count request.
-                if (odataPath.Segments.Last() is CountPathSegment && method != HttpMethod.Get)
+                if (odataPath.Segments.Last() is CountSegment && method != HttpMethod.Get)
                 {
                     return null;
                 }
@@ -85,8 +86,8 @@ namespace System.Web.OData.Routing.Conventions
                     {
                         if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
                         {
-                            KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                            controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                            KeySegment keyValueSegment = (KeySegment)odataPath.Segments[1];
+                            controllerContext.AddKeyValueToRouteData(keyValueSegment);
                         }
 
                         return actionName;

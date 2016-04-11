@@ -5,11 +5,11 @@ using System.IO;
 using System.Net.Http;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
-using System.Xml;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.TestCommon;
 using Moq;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -119,7 +119,7 @@ namespace System.Web.OData.Formatter.Serialization
             mockRequest.Setup(r => r.GetStream()).Returns(stream);
             var messageWriter = new ODataMessageWriter(mockRequest.Object);
             var request = new HttpRequestMessage();
-            request.ODataProperties().Path = new ODataPath(new CountPathSegment());
+            request.ODataProperties().Path = new ODataPath(CountSegment.Instance);
             var context = new ODataSerializerContext { Request = request };
 
             // Act

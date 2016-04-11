@@ -3,11 +3,12 @@
 
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.OData.Routing;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter.Deserialization
 {
@@ -46,7 +47,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             _readContext = new ODataDeserializerContext
             {
-                Path = new ODataPath(new SingletonPathSegment(_singleton)),
+                Path = new ODataPath(new SingletonSegment(_singleton)),
                 Model = _edmModel,
                 ResourceType = typeof(EmployeeModel)
             }; 

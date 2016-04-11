@@ -11,8 +11,8 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
-using System.Web.OData.Routing;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Formatter.Serialization
@@ -285,7 +285,7 @@ namespace System.Web.OData.Formatter.Serialization
                 return null;
             }
 
-            Uri baseUri = new Uri(writeContext.Url.CreateODataLink(new MetadataPathSegment()));
+            Uri baseUri = new Uri(writeContext.Url.CreateODataLink(MetadataSegment.Instance));
             Uri metadata = new Uri(baseUri, "#" + operation.FullName());
 
             ODataOperation odataOperation;

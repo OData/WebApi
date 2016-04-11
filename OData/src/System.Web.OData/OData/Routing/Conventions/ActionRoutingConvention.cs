@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing.Conventions
@@ -41,7 +42,8 @@ namespace System.Web.OData.Routing.Conventions
                         string actionName = GetAction(odataPath).SelectAction(actionMap, isCollection: false);
                         if (actionName != null)
                         {
-                            controllerContext.AddKeyValueToRouteData(odataPath);
+                            KeySegment keySegment = (KeySegment)odataPath.Segments[1];
+                            controllerContext.AddKeyValueToRouteData(keySegment);
                         }
                         return actionName;
                     case "~/entityset/cast/action":
@@ -60,10 +62,10 @@ namespace System.Web.OData.Routing.Conventions
         {
             ODataPathSegment odataSegment = odataPath.Segments.Last();
             IEdmAction action = null;
-            BoundActionPathSegment actionSegment = odataSegment as BoundActionPathSegment;
+            OperationSegment actionSegment = odataSegment as OperationSegment;
             if (actionSegment != null)
             {
-                action = actionSegment.Action;
+                action = actionSegment.Operations.First() as IEdmAction;
             }
 
             return action;

@@ -405,6 +405,7 @@ public class System.Web.OData.ETagMessageHandler : System.Net.Http.DelegatingHan
 public class System.Web.OData.FeedContext {
 	public FeedContext ()
 
+	Microsoft.OData.Edm.IEdmModel EdmModel  { public get; public set; }
 	Microsoft.OData.Edm.IEdmEntitySetBase EntitySetBase  { public get; public set; }
 	object FeedInstance  { public get; public set; }
 	System.Net.Http.HttpRequestMessage Request  { public get; public set; }
@@ -1728,17 +1729,17 @@ public sealed class System.Web.OData.Extensions.UrlHelperExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static string CreateODataLink (System.Web.Http.Routing.UrlHelper urlHelper, System.Collections.Generic.IList`1[[System.Web.OData.Routing.ODataPathSegment]] segments)
+	public static string CreateODataLink (System.Web.Http.Routing.UrlHelper urlHelper, Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment[] segments)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static string CreateODataLink (System.Web.Http.Routing.UrlHelper urlHelper, ODataPathSegment[] segments)
+	public static string CreateODataLink (System.Web.Http.Routing.UrlHelper urlHelper, System.Collections.Generic.IList`1[[Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment]] segments)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static string CreateODataLink (System.Web.Http.Routing.UrlHelper urlHelper, string routeName, IODataPathHandler pathHandler, System.Collections.Generic.IList`1[[System.Web.OData.Routing.ODataPathSegment]] segments)
+	public static string CreateODataLink (System.Web.Http.Routing.UrlHelper urlHelper, string routeName, IODataPathHandler pathHandler, System.Collections.Generic.IList`1[[Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment]] segments)
 }
 
 public class System.Web.OData.Extensions.HttpRequestMessageProperties {
@@ -1768,7 +1769,7 @@ public interface System.Web.OData.Formatter.IETagHandler {
 public abstract class System.Web.OData.Formatter.ODataRawValueMediaTypeMapping : System.Net.Http.Formatting.MediaTypeMapping {
 	protected ODataRawValueMediaTypeMapping (string mediaType)
 
-	protected abstract bool IsMatch (PropertyAccessPathSegment propertySegment)
+	protected abstract bool IsMatch (Microsoft.OData.Core.UriParser.Semantic.PropertySegment propertySegment)
 	public virtual double TryMatchMediaType (System.Net.Http.HttpRequestMessage request)
 }
 
@@ -1806,7 +1807,7 @@ public class System.Web.OData.Formatter.ETag`1 : ETag, IDynamicMetaObjectProvide
 public class System.Web.OData.Formatter.ODataBinaryValueMediaTypeMapping : ODataRawValueMediaTypeMapping {
 	public ODataBinaryValueMediaTypeMapping ()
 
-	protected virtual bool IsMatch (PropertyAccessPathSegment propertySegment)
+	protected virtual bool IsMatch (Microsoft.OData.Core.UriParser.Semantic.PropertySegment propertySegment)
 }
 
 public class System.Web.OData.Formatter.ODataCountMediaTypeMapping : System.Net.Http.Formatting.MediaTypeMapping {
@@ -1818,7 +1819,7 @@ public class System.Web.OData.Formatter.ODataCountMediaTypeMapping : System.Net.
 public class System.Web.OData.Formatter.ODataEnumValueMediaTypeMapping : ODataRawValueMediaTypeMapping {
 	public ODataEnumValueMediaTypeMapping ()
 
-	protected virtual bool IsMatch (PropertyAccessPathSegment propertySegment)
+	protected virtual bool IsMatch (Microsoft.OData.Core.UriParser.Semantic.PropertySegment propertySegment)
 }
 
 public class System.Web.OData.Formatter.ODataMediaTypeFormatter : System.Net.Http.Formatting.MediaTypeFormatter {
@@ -1851,7 +1852,7 @@ public class System.Web.OData.Formatter.ODataModelBinderProvider : System.Web.Ht
 public class System.Web.OData.Formatter.ODataPrimitiveValueMediaTypeMapping : ODataRawValueMediaTypeMapping {
 	public ODataPrimitiveValueMediaTypeMapping ()
 
-	protected virtual bool IsMatch (PropertyAccessPathSegment propertySegment)
+	protected virtual bool IsMatch (Microsoft.OData.Core.UriParser.Semantic.PropertySegment propertySegment)
 }
 
 public class System.Web.OData.Formatter.QueryStringMediaTypeMapping : System.Net.Http.Formatting.MediaTypeMapping {
@@ -2323,19 +2324,29 @@ public interface System.Web.OData.Routing.IODataPathTemplateHandler {
 	ODataPathTemplate ParseTemplate (Microsoft.OData.Edm.IEdmModel model, string odataPathTemplate)
 }
 
-public abstract class System.Web.OData.Routing.ODataPathSegment : ODataPathSegmentTemplate {
-	protected ODataPathSegment ()
+[
+ExtensionAttribute(),
+]
+public sealed class System.Web.OData.Routing.ODataParameterHelper {
+	[
+	ExtensionAttribute(),
+	]
+	public static object GetParameterValue (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment, string parameterName)
 
-	string SegmentKind  { public abstract get; }
+	[
+	ExtensionAttribute(),
+	]
+	public static object GetParameterValue (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment, string parameterName)
 
-	public abstract Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public abstract Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-}
+	[
+	ExtensionAttribute(),
+	]
+	public static bool TryGetParameterValue (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment, string parameterName, out System.Object& parameterValue)
 
-public abstract class System.Web.OData.Routing.ODataPathSegmentTemplate {
-	protected ODataPathSegmentTemplate ()
-
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	[
+	ExtensionAttribute(),
+	]
+	public static bool TryGetParameterValue (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment, string parameterName, out System.Object& parameterValue)
 }
 
 public sealed class System.Web.OData.Routing.ODataRouteConstants {
@@ -2353,111 +2364,25 @@ public sealed class System.Web.OData.Routing.ODataRouteConstants {
 }
 
 public sealed class System.Web.OData.Routing.ODataSegmentKinds {
-	public static readonly string Action = "action"
-	public static readonly string Batch = "$batch"
-	public static readonly string Cast = "cast"
-	public static readonly string ComplexCast = "complexcast"
-	public static readonly string Count = "$count"
-	public static readonly string DynamicProperty = "dynamicproperty"
-	public static readonly string EntitySet = "entityset"
-	public static readonly string Function = "function"
-	public static readonly string Key = "key"
-	public static readonly string Metadata = "$metadata"
-	public static readonly string Navigation = "navigation"
-	public static readonly string Property = "property"
-	public static readonly string Ref = "$ref"
-	public static readonly string ServiceBase = "~"
-	public static readonly string Singleton = "singleton"
-	public static readonly string UnboundAction = "unboundaction"
-	public static readonly string UnboundFunction = "unboundfunction"
-	public static readonly string Unresolved = "unresolved"
-	public static readonly string Value = "$value"
-}
-
-public class System.Web.OData.Routing.BatchPathSegment : ODataPathSegment {
-	public BatchPathSegment ()
-
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.BoundActionPathSegment : ODataPathSegment {
-	public BoundActionPathSegment (Microsoft.OData.Edm.IEdmAction action, Microsoft.OData.Edm.IEdmModel model)
-
-	Microsoft.OData.Edm.IEdmAction Action  { public get; }
-	string ActionName  { public get; }
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.BoundFunctionPathSegment : ODataPathSegment {
-	public BoundFunctionPathSegment (Microsoft.OData.Edm.IEdmFunction function, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IDictionary`2[[System.String],[System.String]] parameterValues)
-
-	Microsoft.OData.Edm.IEdmFunction Function  { public get; }
-	string FunctionName  { public get; }
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public object GetParameterValue (string parameterName)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.BoundFunctionPathSegmentTemplate : ODataPathSegmentTemplate {
-	public BoundFunctionPathSegmentTemplate (BoundFunctionPathSegment function)
-
-	string FunctionName  { public get; }
-	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ParameterMappings  { public get; }
-
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.CastPathSegment : ODataPathSegment {
-	public CastPathSegment (Microsoft.OData.Edm.IEdmEntityType castType)
-	public CastPathSegment (string castTypeName)
-
-	Microsoft.OData.Edm.IEdmEntityType CastType  { public get; }
-	string CastTypeName  { public get; }
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.ComplexCastPathSegment : ODataPathSegment {
-	public ComplexCastPathSegment (Microsoft.OData.Edm.IEdmComplexType castType)
-	public ComplexCastPathSegment (string castTypeName)
-
-	Microsoft.OData.Edm.IEdmComplexType CastType  { public get; }
-	string CastTypeName  { public get; }
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.CountPathSegment : ODataPathSegment {
-	public CountPathSegment ()
-
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public static string Action = "action"
+	public static string Batch = "$batch"
+	public static string Cast = "cast"
+	public static string Count = "$count"
+	public static string DynamicProperty = "dynamicproperty"
+	public static string EntitySet = "entityset"
+	public static string Function = "function"
+	public static string Key = "key"
+	public static string Metadata = "$metadata"
+	public static string Navigation = "navigation"
+	public static string PathTemplate = "template"
+	public static string Property = "property"
+	public static string Ref = "$ref"
+	public static string ServiceBase = "~"
+	public static string Singleton = "singleton"
+	public static string UnboundAction = "unboundaction"
+	public static string UnboundFunction = "unboundfunction"
+	public static string Unresolved = "unresolved"
+	public static string Value = "$value"
 }
 
 public class System.Web.OData.Routing.DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler {
@@ -2468,83 +2393,25 @@ public class System.Web.OData.Routing.DefaultODataPathHandler : IODataPathHandle
 	public virtual ODataPathTemplate ParseTemplate (Microsoft.OData.Edm.IEdmModel model, string odataPathTemplate)
 }
 
-public class System.Web.OData.Routing.DynamicPropertyPathSegment : ODataPathSegment {
-	public DynamicPropertyPathSegment (string propertyName)
+public class System.Web.OData.Routing.DefaultODataPathValidator : Microsoft.OData.Core.UriParser.Visitors.PathSegmentHandler {
+	public DefaultODataPathValidator (Microsoft.OData.Edm.IEdmModel model)
 
-	string PropertyName  { public get; }
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.DynamicPropertyPathSegmentTemplate : ODataPathSegmentTemplate {
-	public DynamicPropertyPathSegmentTemplate (DynamicPropertyPathSegment dynamicPropertyPathSegment)
-
-	string PropertyName  { public get; }
-
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.EntitySetPathSegment : ODataPathSegment {
-	public EntitySetPathSegment (Microsoft.OData.Edm.IEdmEntitySetBase entitySet)
-	public EntitySetPathSegment (string entitySetName)
-
-	Microsoft.OData.Edm.IEdmEntitySetBase EntitySetBase  { public get; }
-	string EntitySetName  { public get; }
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.KeyValuePathSegment : ODataPathSegment {
-	public KeyValuePathSegment (string value)
-
-	string SegmentKind  { public virtual get; }
-	string Value  { public get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.KeyValuePathSegmentTemplate : ODataPathSegmentTemplate {
-	public KeyValuePathSegmentTemplate (KeyValuePathSegment keyValueSegment)
-
-	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ParameterMappings  { public get; }
-
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.MetadataPathSegment : ODataPathSegment {
-	public MetadataPathSegment ()
-
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.NavigationPathSegment : ODataPathSegment {
-	public NavigationPathSegment (Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty)
-	public NavigationPathSegment (string navigationPropertyName)
-
-	Microsoft.OData.Edm.IEdmNavigationProperty NavigationProperty  { public get; }
-	string NavigationPropertyName  { public get; }
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.BatchSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.CountSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.MetadataSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.PropertySegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.SingletonSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.TypeSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.ValueSegment segment)
+	public virtual void Handle (UnresolvedPathSegment segment)
 }
 
 public class System.Web.OData.Routing.ODataActionSelector : IHttpActionSelector {
@@ -2558,13 +2425,13 @@ public class System.Web.OData.Routing.ODataActionSelector : IHttpActionSelector 
 ODataPathParameterBindingAttribute(),
 ]
 public class System.Web.OData.Routing.ODataPath {
-	public ODataPath (System.Collections.Generic.IList`1[[System.Web.OData.Routing.ODataPathSegment]] segments)
-	public ODataPath (ODataPathSegment[] segments)
+	public ODataPath (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment[] segments)
+	public ODataPath (System.Collections.Generic.IEnumerable`1[[Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment]] segments)
 
 	Microsoft.OData.Edm.IEdmType EdmType  { public get; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; }
-	string PathTemplate  { public get; }
-	System.Collections.ObjectModel.ReadOnlyCollection`1[[System.Web.OData.Routing.ODataPathSegment]] Segments  { public get; }
+	string PathTemplate  { public virtual get; }
+	System.Collections.ObjectModel.ReadOnlyCollection`1[[Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment]] Segments  { public get; }
 
 	public virtual string ToString ()
 }
@@ -2581,35 +2448,50 @@ public class System.Web.OData.Routing.ODataPathRouteConstraint : IHttpRouteConst
 	protected virtual string SelectControllerName (ODataPath path, System.Net.Http.HttpRequestMessage request)
 }
 
-public class System.Web.OData.Routing.ODataPathSegmentTranslator : Microsoft.OData.Core.UriParser.Visitors.PathSegmentTranslator`1[[System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]]]] {
-	public ODataPathSegmentTranslator (Microsoft.OData.Edm.IEdmModel model, bool enableUriTemplateParsing, System.Collections.Generic.IDictionary`2[[System.String],[Microsoft.OData.Core.UriParser.Semantic.SingleValueNode]] parameterAliasNodes)
+public class System.Web.OData.Routing.ODataPathSegmentHandler : Microsoft.OData.Core.UriParser.Visitors.PathSegmentHandler {
+	public ODataPathSegmentHandler ()
 
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.BatchReferenceSegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.BatchSegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.CountSegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.MetadataSegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.PropertySegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.SingletonSegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.TypeSegment segment)
-	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.ValueSegment segment)
-	public static ODataPath TranslateODataLibPathToWebApiPath (Microsoft.OData.Core.UriParser.Semantic.ODataPath path, Microsoft.OData.Edm.IEdmModel model, UnresolvedPathSegment unresolvedPathSegment, Microsoft.OData.Core.UriParser.Semantic.KeySegment id, bool enableUriTemplateParsing, System.Collections.Generic.IDictionary`2[[System.String],[Microsoft.OData.Core.UriParser.Semantic.SingleValueNode]] parameterAliasNodes)
+	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; }
+	string PathLiteral  { public get; }
+	string PathTemplate  { public get; }
+
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.BatchSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.CountSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.MetadataSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.PropertySegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.SingletonSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.TypeSegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.ValueSegment segment)
+	public virtual void Handle (UnresolvedPathSegment segment)
 }
 
-public class System.Web.OData.Routing.ODataPathTemplate {
-	public ODataPathTemplate (System.Collections.Generic.IList`1[[System.Web.OData.Routing.ODataPathSegmentTemplate]] segments)
-	public ODataPathTemplate (ODataPathSegmentTemplate[] segments)
+public class System.Web.OData.Routing.ODataPathSegmentTranslator : Microsoft.OData.Core.UriParser.Visitors.PathSegmentTranslator`1[[Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment]] {
+	public ODataPathSegmentTranslator (Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IDictionary`2[[System.String],[Microsoft.OData.Core.UriParser.Semantic.SingleValueNode]] parameterAliasNodes)
 
-	System.Collections.ObjectModel.ReadOnlyCollection`1[[System.Web.OData.Routing.ODataPathSegmentTemplate]] Segments  { public get; }
-
-	public bool TryMatch (ODataPath path, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.BatchSegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.CountSegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.MetadataSegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.PropertySegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.SingletonSegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.TypeSegment segment)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.ValueSegment segment)
+	public static System.Collections.Generic.IEnumerable`1[[Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment]] Translate (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Core.UriParser.Semantic.ODataPath path, System.Collections.Generic.IDictionary`2[[System.String],[Microsoft.OData.Core.UriParser.Semantic.SingleValueNode]] parameterAliasNodes)
 }
 
 public class System.Web.OData.Routing.ODataRoute : System.Web.Http.Routing.HttpRoute, IHttpRoute {
@@ -2638,101 +2520,16 @@ public class System.Web.OData.Routing.ODataVersionConstraint : IHttpRouteConstra
 	public virtual bool Match (System.Net.Http.HttpRequestMessage request, System.Web.Http.Routing.IHttpRoute route, string parameterName, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values, System.Web.Http.Routing.HttpRouteDirection routeDirection)
 }
 
-public class System.Web.OData.Routing.PropertyAccessPathSegment : ODataPathSegment {
-	public PropertyAccessPathSegment (Microsoft.OData.Edm.IEdmProperty property)
-	public PropertyAccessPathSegment (string propertyName)
-
-	Microsoft.OData.Edm.IEdmProperty Property  { public get; }
-	string PropertyName  { public get; }
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.RefPathSegment : ODataPathSegment {
-	public RefPathSegment ()
-
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.SingletonPathSegment : ODataPathSegment {
-	public SingletonPathSegment (Microsoft.OData.Edm.IEdmSingleton singleton)
-	public SingletonPathSegment (string singletonName)
-
-	string SegmentKind  { public virtual get; }
-	Microsoft.OData.Edm.IEdmSingleton Singleton  { public get; }
-	string SingletonName  { public get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.UnboundActionPathSegment : ODataPathSegment {
-	public UnboundActionPathSegment (Microsoft.OData.Edm.IEdmActionImport action)
-
-	Microsoft.OData.Edm.IEdmActionImport Action  { public get; }
-	string ActionName  { public get; }
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.UnboundFunctionPathSegment : ODataPathSegment {
-	public UnboundFunctionPathSegment (Microsoft.OData.Edm.IEdmFunctionImport function, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IDictionary`2[[System.String],[System.String]] parameterValues)
-
-	Microsoft.OData.Edm.IEdmFunctionImport Function  { public get; }
-	string FunctionName  { public get; }
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public object GetParameterValue (string parameterName)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.UnboundFunctionPathSegmentTemplate : ODataPathSegmentTemplate {
-	public UnboundFunctionPathSegmentTemplate (UnboundFunctionPathSegment function)
-
-	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ParameterMappings  { public get; }
-
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.UnresolvedPathSegment : ODataPathSegment {
+public class System.Web.OData.Routing.UnresolvedPathSegment : Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment {
 	public UnresolvedPathSegment (string segmentValue)
 
+	Microsoft.OData.Edm.IEdmType EdmType  { public virtual get; }
 	string SegmentKind  { public virtual get; }
 	string SegmentValue  { public get; }
 
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
+	public virtual void HandleWith (Microsoft.OData.Core.UriParser.Visitors.PathSegmentHandler handler)
 	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
-}
-
-public class System.Web.OData.Routing.ValuePathSegment : ODataPathSegment {
-	public ValuePathSegment ()
-
-	string SegmentKind  { public virtual get; }
-
-	public virtual Microsoft.OData.Edm.IEdmType GetEdmType (Microsoft.OData.Edm.IEdmType previousEdmType)
-	public virtual Microsoft.OData.Edm.IEdmNavigationSource GetNavigationSource (Microsoft.OData.Edm.IEdmNavigationSource previousNavigationSource)
-	public virtual string ToString ()
-	public virtual bool TryMatch (ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual T TranslateWith (PathSegmentTranslator`1 translator)
 }
 
 [
@@ -3253,5 +3050,141 @@ public class System.Web.OData.Routing.Conventions.UnmappedRequestRoutingConventi
 	public UnmappedRequestRoutingConvention ()
 
 	public virtual string SelectAction (ODataPath odataPath, System.Web.Http.Controllers.HttpControllerContext controllerContext, System.Linq.ILookup`2[[System.String],[System.Web.Http.Controllers.HttpActionDescriptor]] actionMap)
+}
+
+public abstract class System.Web.OData.Routing.Template.ODataPathSegmentTemplate {
+	protected ODataPathSegmentTemplate ()
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.EntitySetSegmentTemplate : ODataPathSegmentTemplate {
+	public EntitySetSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment segment)
+
+	Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment Segment  { public get; }
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.KeySegmentTemplate : ODataPathSegmentTemplate {
+	public KeySegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
+
+	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ParameterMappings  { public get; }
+	Microsoft.OData.Core.UriParser.Semantic.KeySegment Segment  { public get; public set; }
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.NavigationPropertyLinkSegmentTemplate : ODataPathSegmentTemplate {
+	public NavigationPropertyLinkSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
+
+	Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment Segment  { public get; }
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.NavigationPropertySegmentTemplate : ODataPathSegmentTemplate {
+	public NavigationPropertySegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
+
+	Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment Segment  { public get; }
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.ODataPathSegmentTemplate`1 : ODataPathSegmentTemplate {
+	public ODataPathSegmentTemplate`1 ()
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.ODataPathSegmentTemplateTranslator : Microsoft.OData.Core.UriParser.Visitors.PathSegmentTranslator`1[[System.Web.OData.Routing.Template.ODataPathSegmentTemplate]] {
+	public ODataPathSegmentTemplateTranslator ()
+
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.BatchReferenceSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.BatchSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.CountSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.MetadataSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.PropertySegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.SingletonSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.TypeSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.ValueSegment segment)
+}
+
+public class System.Web.OData.Routing.Template.ODataPathTemplate {
+	public ODataPathTemplate (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.Template.ODataPathSegmentTemplate]] segments)
+	public ODataPathTemplate (System.Collections.Generic.IList`1[[System.Web.OData.Routing.Template.ODataPathSegmentTemplate]] segments)
+	public ODataPathTemplate (ODataPathSegmentTemplate[] segments)
+
+	System.Collections.ObjectModel.ReadOnlyCollection`1[[System.Web.OData.Routing.Template.ODataPathSegmentTemplate]] Segments  { public get; }
+
+	public bool TryMatch (ODataPath path, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.OpenPropertySegmentTemplate : ODataPathSegmentTemplate {
+	public OpenPropertySegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
+
+	Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment Segment  { public get; }
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.OperationImportSegmentTemplate : ODataPathSegmentTemplate {
+	public OperationImportSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
+
+	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ParameterMappings  { public get; }
+	Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment Segment  { public get; }
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.OperationSegmentTemplate : ODataPathSegmentTemplate {
+	public OperationSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)
+
+	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ParameterMappings  { public get; }
+	Microsoft.OData.Core.UriParser.Semantic.OperationSegment Segment  { public get; }
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.PathTemplateSegmentTemplate : ODataPathSegmentTemplate {
+	public PathTemplateSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment segment)
+
+	string PropertyName  { public get; }
+	string SegmentName  { public get; }
+	Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment TemplateSegment  { public get; }
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.PropertySegmentTemplate : ODataPathSegmentTemplate {
+	public PropertySegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.PropertySegment segment)
+
+	Microsoft.OData.Core.UriParser.Semantic.PropertySegment Segment  { public get; }
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.SingletonSegmentTemplate : ODataPathSegmentTemplate {
+	public SingletonSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.SingletonSegment segment)
+
+	Microsoft.OData.Core.UriParser.Semantic.SingletonSegment Segment  { public get; }
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+}
+
+public class System.Web.OData.Routing.Template.TypeSegmentTemplate : ODataPathSegmentTemplate {
+	public TypeSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.TypeSegment segment)
+
+	Microsoft.OData.Core.UriParser.Semantic.TypeSegment Segment  { public get; }
+
+	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 

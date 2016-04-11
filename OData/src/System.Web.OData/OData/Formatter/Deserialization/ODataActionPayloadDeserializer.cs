@@ -11,9 +11,10 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Properties;
-using System.Web.OData.Routing;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter.Deserialization
 {
@@ -182,19 +183,23 @@ namespace System.Web.OData.Formatter.Deserialization
             if (path.PathTemplate == "~/unboundaction")
             {
                 // only one segment, it may be an unbound action
-                UnboundActionPathSegment unboundActionSegment = path.Segments.Last() as UnboundActionPathSegment;
+                OperationImportSegment unboundActionSegment = path.Segments.Last() as OperationImportSegment;
                 if (unboundActionSegment != null)
                 {
-                    action = unboundActionSegment.Action.Action;
+                    IEdmActionImport actionImport = unboundActionSegment.OperationImports.First() as IEdmActionImport;
+                    if (actionImport != null)
+                    {
+                        action = actionImport.Action;
+                    }
                 }
             }
             else
             {
                 // otherwise, it may be a bound action
-                BoundActionPathSegment actionSegment = path.Segments.Last() as BoundActionPathSegment;
+                OperationSegment actionSegment = path.Segments.Last() as OperationSegment;
                 if (actionSegment != null)
                 {
-                    action = actionSegment.Action;
+                    action = actionSegment.Operations.First() as IEdmAction;
                 }
             }
 

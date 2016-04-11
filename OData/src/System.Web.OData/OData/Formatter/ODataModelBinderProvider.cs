@@ -23,8 +23,10 @@ using System.Web.OData.Properties;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter
 {
@@ -360,25 +362,26 @@ namespace System.Web.OData.Formatter
 
                 DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
                 string serviceRoot = GetServiceRoot(request);
-                IDictionary<string, string> keyValues = GetKeys(pathHandler, edmModel, serviceRoot, entry.Id);
+                IEnumerable<KeyValuePair<string, object>> keyValues = GetKeys(pathHandler, edmModel, serviceRoot, entry.Id);
 
                 IList<IEdmStructuralProperty> keys = entityTypeReference.Key().ToList();
 
-                if (keys.Count == 1 && keyValues.Count == 1)
+                if (keys.Count == 1 && keyValues.Count() == 1)
                 {
-                    object propertyValue = ODataUriUtils.ConvertFromUriLiteral(keyValues.First().Value, ODataVersion.V4, edmModel, keys[0].Type);
+                    // TODO: make sure the enum key works
+                    object propertyValue = keyValues.First().Value;
                     DeserializationHelpers.SetDeclaredProperty(source, EdmTypeKind.Primitive, keys[0].Name, propertyValue, keys[0], readContext);
                     return source;
                 }
 
+                IDictionary<string, object> keyValuesDic = keyValues.ToDictionary(e => e.Key, e => e.Value);
                 foreach (IEdmStructuralProperty key in keys)
                 {
-                    string value;
-                    if (keyValues.TryGetValue(key.Name, out value))
+                    object value;
+                    if (keyValuesDic.TryGetValue(key.Name, out value))
                     {
-                        object propertyValue = ODataUriUtils.ConvertFromUriLiteral(value, ODataVersion.V4, edmModel, key.Type);
-
-                        DeserializationHelpers.SetDeclaredProperty(source, EdmTypeKind.Primitive, key.Name, propertyValue, key, readContext);
+                        // TODO: make sure the enum key works
+                        DeserializationHelpers.SetDeclaredProperty(source, EdmTypeKind.Primitive, key.Name, value, key, readContext);
                     }
                 }
 
@@ -392,16 +395,16 @@ namespace System.Web.OData.Formatter
                     request.ODataProperties().PathHandler, new List<ODataPathSegment>());
             }
 
-            internal static IDictionary<string, string> GetKeys(DefaultODataPathHandler pathHandler, IEdmModel edmModel, string serviceRoot, Uri uri)
+            internal static IEnumerable<KeyValuePair<string, object>> GetKeys(DefaultODataPathHandler pathHandler, IEdmModel edmModel, string serviceRoot, Uri uri)
             {
                 ODataPath odataPath = pathHandler.Parse(edmModel, serviceRoot, uri.ToString());
-                KeyValuePathSegment segment = odataPath.Segments.OfType<KeyValuePathSegment>().Last();
+                KeySegment segment = odataPath.Segments.OfType<KeySegment>().Last();
                 if (segment == null)
                 {
                     throw Error.InvalidOperation(SRResources.EntityReferenceMustHasKeySegment, uri);
                 }
 
-                return segment.Values;
+                return segment.Keys;
             }
 
             internal static ODataDeserializerContext BuildDeserializerContext(HttpActionContext actionContext,

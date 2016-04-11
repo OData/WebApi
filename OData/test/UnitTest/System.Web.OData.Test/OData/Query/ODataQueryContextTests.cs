@@ -4,12 +4,13 @@
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
-using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Query
 {
@@ -187,7 +188,7 @@ namespace System.Web.OData.Query
             IEdmModel model = odataModel.GetEdmModel();
             IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet(setName);
             IEdmEntityType entityType = entitySet.EntityType();
-            ODataPath path = new ODataPath(new EntitySetPathSegment(entitySet));
+            ODataPath path = new ODataPath(new EntitySetSegment(entitySet));
 
             // Act
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer), path);
@@ -207,7 +208,7 @@ namespace System.Web.OData.Query
             IEdmEntityType entityType = new Mock<IEdmEntityType>().Object;
             IEdmEntityContainer entityContiner = new Mock<IEdmEntityContainer>().Object;
             EdmEntitySet entitySet = new EdmEntitySet(entityContiner, "entitySet", entityType);
-            ODataPath path = new ODataPath(new EntitySetPathSegment(entitySet)); 
+            ODataPath path = new ODataPath(new EntitySetSegment(entitySet)); 
 
             // Act
             ODataQueryContext context = new ODataQueryContext(model, entityType, path);

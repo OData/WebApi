@@ -12,8 +12,8 @@ using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
-using System.Web.OData.Routing;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Moq;
 
@@ -65,13 +65,15 @@ namespace System.Web.OData.Formatter
                 color.Member(Color.Blue);
 
                 var people = model.EntitySet<FormatterPerson>("People");
-                people.HasFeedSelfLink(context => new Uri(context.Url.CreateODataLink(new EntitySetPathSegment(
-                    context.EntitySetBase))));
+
+                people.HasFeedSelfLink(context => new Uri(context.Url.CreateODataLink(new EntitySetSegment(
+                    context.EntitySetBase as IEdmEntitySet))));
                 people.HasIdLink(context =>
-                    {
+                {
+                    var keys = new[] {new KeyValuePair<string, object>("PerId", context.GetPropertyValue("PerId"))};
                         return new Uri(context.Url.CreateODataLink(
-                            new EntitySetPathSegment(context.NavigationSource as IEdmEntitySet),
-                            new KeyValuePathSegment(context.GetPropertyValue("PerId").ToString())));
+                            new EntitySetSegment(context.NavigationSource as IEdmEntitySet),
+                            new KeySegment(keys, context.EntityType, context.NavigationSource)));
                     },
                     followsConventions: false);
 
@@ -143,7 +145,7 @@ namespace System.Web.OData.Formatter
                 var president = model.Singleton<FormatterPerson>("President");
                 president.HasIdLink(context =>
                     {
-                        return new Uri(context.Url.CreateODataLink(new SingletonPathSegment((IEdmSingleton)context.NavigationSource)));
+                        return new Uri(context.Url.CreateODataLink(new SingletonSegment((IEdmSingleton)context.NavigationSource)));
                     },
                     followsConventions: false);
 

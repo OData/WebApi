@@ -23,10 +23,12 @@ using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Query
 {
@@ -289,7 +291,7 @@ namespace System.Web.OData.Query
             HttpRequestMessage request = new HttpRequestMessage(
                 HttpMethod.Get,
                 "http://localhost/DollarCountEntities(5)/StringCollectionProp/$count");
-            request.ODataProperties().Path = new ODataPath(new CountPathSegment());
+            request.ODataProperties().Path = new ODataPath(CountSegment.Instance);
             HttpConfiguration config = new HttpConfiguration();
             request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(
@@ -981,7 +983,10 @@ namespace System.Web.OData.Query
             var customers = Enumerable.Empty<Customer>().AsQueryable();
             SingleResult result = SingleResult.Create(customers);
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", result);
-            actionExecutedContext.Request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment("C"));
+            var container = new EdmEntityContainer("NS", "Default");
+            var entityType = new EdmEntityType("NS", "entity");
+            var entitySet = new EdmEntitySet(container, "entities", entityType);
+            actionExecutedContext.Request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));
             EnableQueryAttribute attribute = new EnableQueryAttribute();
 
             // Act
@@ -1041,7 +1046,10 @@ namespace System.Web.OData.Query
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", singleResult);
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = actionExecutedContext.Request;
-            request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment("Customer"));
+            var container = new EdmEntityContainer("NS", "Default");
+            var entityType = new EdmEntityType("NS", "entity");
+            var entitySet = new EdmEntitySet(container, "entities", entityType);
+            request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));
 
             // Act
             attribute.OnActionExecuted(actionExecutedContext);

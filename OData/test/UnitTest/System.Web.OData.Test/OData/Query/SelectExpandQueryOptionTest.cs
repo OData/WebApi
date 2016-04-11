@@ -122,7 +122,7 @@ namespace System.Web.OData.Query
             // Arrange
             IEdmModel model = _model.Model;
             _model.Model.SetAnnotationValue(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(_model.Customers));
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(_model.Customers));
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer), odataPath);
             SelectExpandQueryOption option = new SelectExpandQueryOption("ID,Name,SimpleEnum,Orders", "Orders", context);
 
@@ -140,7 +140,7 @@ namespace System.Web.OData.Query
             // Arrange
             IEdmModel model = _model.Model;
             _model.Model.SetAnnotationValue(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(_model.Customers));
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(_model.Customers));
             ODataQueryContext context = new ODataQueryContext(model, _model.Customer, odataPath);
             SelectExpandQueryOption option = new SelectExpandQueryOption("ID,Name,SimpleEnum,Orders", "Orders", context);
 

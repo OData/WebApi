@@ -10,12 +10,11 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.TestCommon.Models;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
-using Moq;
 using ODataPath = System.Web.OData.Routing.ODataPath;
-using ODataPathSegment = System.Web.OData.Routing.ODataPathSegment;
 
 namespace System.Web.OData.Query
 {
@@ -87,12 +86,12 @@ namespace System.Web.OData.Query
             IEdmModel model = builder.GetEdmModel();
 
             var customers = model.FindDeclaredEntitySet("Customers");
-            Mock<ODataPathSegment> mockSegment = new Mock<ODataPathSegment> { CallBase = true };
-            mockSegment.Setup(s => s.GetEdmType(null)).Returns(model.GetEdmType(typeof(Customer)));
-            mockSegment.Setup(s => s.GetNavigationSource(null)).Returns((IEdmNavigationSource)customers);
-            ODataPath odataPath = new ODataPath(new[] { mockSegment.Object });
+
+            EntitySetSegment entitySetSegment = new EntitySetSegment(customers);
+            ODataPath odataPath = new ODataPath(new[] { entitySetSegment });
             request.ODataProperties().Path = odataPath;
             request.ODataProperties().Model = model;
+
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));
 
             // Act

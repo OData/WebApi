@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing.Conventions
@@ -60,7 +61,7 @@ namespace System.Web.OData.Routing.Conventions
 
                 Contract.Assert(httpMethodName != null);
 
-                IEdmEntityType entityType = odataPath.EdmType as IEdmEntityType;
+                IEdmEntityType entityType = (IEdmEntityType)odataPath.EdmType;
 
                 // e.g. Try GetCustomer first, then fallback on Get action name
                 string actionName = actionMap.FindMatchingAction(
@@ -69,8 +70,8 @@ namespace System.Web.OData.Routing.Conventions
 
                 if (actionName != null)
                 {
-                    KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                    controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                    KeySegment keySegment = (KeySegment)odataPath.Segments[1];
+                    controllerContext.AddKeyValueToRouteData(keySegment);
                     return actionName;
                 }
             }

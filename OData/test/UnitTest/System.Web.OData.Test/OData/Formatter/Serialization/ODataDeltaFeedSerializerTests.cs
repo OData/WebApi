@@ -6,8 +6,8 @@ using System.IO;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.OData.Formatter.Serialization.Models;
-using System.Web.OData.Routing;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -31,7 +31,7 @@ namespace System.Web.OData.Formatter.Serialization
             _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
             _customerSet = _model.EntityContainer.FindEntitySet("Customers");
             _model.SetAnnotationValue(_customerSet.EntityType(), new ClrTypeAnnotation(typeof(Customer)));
-            _path = new ODataPath(new EntitySetPathSegment(_customerSet));
+            _path = new ODataPath(new EntitySetSegment(_customerSet));
             _customers = new[] {
                 new Customer()
                 {

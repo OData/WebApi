@@ -1,7 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Routing
 {
@@ -24,66 +29,48 @@ namespace System.Web.OData.Routing
         public void ToStringWithOneSegment()
         {
             // Arrange
-            string expectedValue = "Set";
-            ODataPath path = new ODataPath(new EntitySetPathSegment(expectedValue));
+            ODataPath path = new ODataPath(MetadataSegment.Instance);
 
             // Act
             string value = path.ToString();
 
             // Assert
-            Assert.Equal(expectedValue, value);
+            Assert.Equal("$metadata", value);
         }
 
         [Fact]
         public void ToStringWithOneTwoSegments()
         {
             // Arrange
-            string expectedFirstSegment = "Set";
-            string expectedSecondSegment = "Action";
-            ODataPath path = new ODataPath(new EntitySetPathSegment(expectedFirstSegment),
-                new BoundActionPathSegment(expectedSecondSegment));
+            EdmEntityType entityType = new EdmEntityType("NS", "entity");
+            EdmEntityContainer container = new EdmEntityContainer("NS", "default");
+            EdmEntitySet entitySet = new EdmEntitySet(container, "set", entityType);
+            EdmAction action = new EdmAction("NS", "action", null, true, null);
+            ODataPath path = new ODataPath(new EntitySetSegment(entitySet),
+                new OperationSegment(new[] { action }, null));
 
             // Act
             string value = path.ToString();
 
             // Assert
-            string expectedValue = expectedFirstSegment + "/" + expectedSecondSegment;
-            Assert.Equal(expectedValue, value);
+            Assert.Equal("set/NS.action", value);
         }
 
         [Fact]
         public void ToStringWithKeyValueSegment()
         {
             // Arrange
-            string segment = "1";
-            ODataPath path = new ODataPath(new KeyValuePathSegment(segment));
+            EdmEntityType entityType = new EdmEntityType("NS", "entity");
+            entityType.AddKeys(entityType.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
+            var keys = new[] {new KeyValuePair<string, object>("ID", 1)};
+            ODataPath path = new ODataPath(new KeySegment(keys, entityType, null));
 
             // Act
             string value = path.ToString();
 
             // Assert
-            string expectedValue = "(" + segment + ")";
+            string expectedValue = "(" + 1 + ")";
             Assert.Equal(expectedValue, value);
-        }
-
-        [Fact]
-        public void PathTemplateWithOneUnboundActionPathSegment()
-        {
-            // Arrange
-            ODataPath path = new ODataPath(new UnboundActionPathSegment("TopAction"));
-
-            // Act & Assert
-            Assert.Equal("~/unboundaction", path.PathTemplate);
-        }
-
-        [Fact]
-        public void PathTemplateWithOneUnboundFunctionPathSegment()
-        {
-            // Arrange
-            ODataPath path = new ODataPath(new UnboundFunctionPathSegment("TopFunction", null));
-
-            // Act & Assert
-            Assert.Equal("~/unboundfunction", path.PathTemplate);
         }
     }
 }

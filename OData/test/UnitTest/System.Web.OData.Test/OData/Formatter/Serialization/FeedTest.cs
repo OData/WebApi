@@ -7,11 +7,12 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -55,7 +56,7 @@ namespace System.Web.OData.Formatter.Serialization
             request.SetConfiguration(configuration);
             IEdmEntitySet entitySet = _model.EntityContainer.FindEntitySet("employees");
             request.ODataProperties().Model = _model;
-            request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment(entitySet));
+            request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));
             request.ODataProperties().RouteName = routeName;
             return request;
         }

@@ -13,8 +13,10 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter.Deserialization
 {
@@ -68,7 +70,7 @@ namespace System.Web.OData.Formatter.Deserialization
             request.ODataProperties().PathHandler = new DefaultODataPathHandler();
             request.ODataProperties().RouteName = "odata";
             request.ODataProperties().Model = model;
-            request.ODataProperties().Path = new ODataPath(new[] { new SingletonPathSegment(singleton) });
+            request.ODataProperties().Path = new ODataPath(new[] { new SingletonSegment(singleton) });
             request.RequestUri = new Uri("http://localhost/odata/Boss");
             return request;
         }

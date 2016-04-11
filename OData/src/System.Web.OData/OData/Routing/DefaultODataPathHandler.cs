@@ -8,17 +8,17 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
-using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
+using System.Web.OData.Routing.Template;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
-using Semantic = Microsoft.OData.Core.UriParser.Semantic;
+using ODL = Microsoft.OData.Core.UriParser.Semantic;
 
 namespace System.Web.OData.Routing
 {
     /// <summary>
-    /// Parses an OData path as an <see cref="ODataPath"/> and converts an <see cref="ODataPath"/> into an OData link.
+    /// Parses an OData path as an <see cref="ODataPath"/> into an OData link.
     /// </summary>
     public class DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler
     {
@@ -43,16 +43,18 @@ namespace System.Web.OData.Routing
             {
                 throw Error.ArgumentNull("model");
             }
+
             if (serviceRoot == null)
             {
                 throw Error.ArgumentNull("serviceRoot");
             }
+
             if (odataPath == null)
             {
                 throw Error.ArgumentNull("odataPath");
             }
 
-            return Parse(model, serviceRoot, odataPath, ResolverSetttings, enableUriTemplateParsing: false);
+            return Parse(model, serviceRoot, odataPath, ResolverSetttings, template: false);
         }
 
         /// <summary>
@@ -68,14 +70,13 @@ namespace System.Web.OData.Routing
             {
                 throw Error.ArgumentNull("model");
             }
+
             if (odataPathTemplate == null)
             {
                 throw Error.ArgumentNull("odataPathTemplate");
             }
 
-            return Templatify(
-                Parse(model, serviceRoot: null, odataPath: odataPathTemplate, resolverSettings: ResolverSetttings,
-                enableUriTemplateParsing: true),
+            return Templatify(Parse(model, serviceRoot: null, odataPath: odataPathTemplate, resolverSettings: ResolverSetttings, template: true),
                 odataPathTemplate);
         }
 
@@ -96,19 +97,15 @@ namespace System.Web.OData.Routing
             return path.ToString();
         }
 
-        private static ODataPath Parse(
-            IEdmModel model,
-            string serviceRoot,
-            string odataPath,
-            ODataUriResolverSetttings resolverSettings,
-            bool enableUriTemplateParsing)
+        private static ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath,
+            ODataUriResolverSetttings resolverSettings, bool template)
         {
             ODataUriParser uriParser;
             Uri serviceRootUri = null;
             Uri fullUri = null;
             NameValueCollection queryString = null;
 
-            if (enableUriTemplateParsing)
+            if (template)
             {
                 uriParser = new ODataUriParser(model, new Uri(odataPath, UriKind.Relative));
                 uriParser.EnableUriTemplateParsing = true;
@@ -128,12 +125,11 @@ namespace System.Web.OData.Routing
             }
 
             uriParser.UrlConventions = resolverSettings.UrlConventions;
-
             uriParser.Resolver = resolverSettings.CreateResolver(model);
 
-            Semantic.ODataPath path;
+            ODL.ODataPath path;
             UnresolvedPathSegment unresolvedPathSegment = null;
-            Semantic.KeySegment id = null;
+            ODL.KeySegment id = null;
             try
             {
                 path = uriParser.ParsePath();
@@ -141,14 +137,14 @@ namespace System.Web.OData.Routing
             catch (ODataUnrecognizedPathException ex)
             {
                 if (ex.ParsedSegments != null &&
-                    ex.ParsedSegments.Count() > 0 &&
+                    ex.ParsedSegments.Any() &&
                     (ex.ParsedSegments.Last().EdmType is IEdmComplexType ||
                      ex.ParsedSegments.Last().EdmType is IEdmEntityType) &&
                     ex.CurrentSegment != ODataSegmentKinds.Count)
                 {
-                    if (ex.UnparsedSegments.Count() == 0)
+                    if (!ex.UnparsedSegments.Any())
                     {
-                        path = new Semantic.ODataPath(ex.ParsedSegments);
+                        path = new ODL.ODataPath(ex.ParsedSegments);
                         unresolvedPathSegment = new UnresolvedPathSegment(ex.CurrentSegment);
                     }
                     else
@@ -166,13 +162,13 @@ namespace System.Web.OData.Routing
                 }
             }
 
-            if (!enableUriTemplateParsing && path.LastSegment is Semantic.NavigationPropertyLinkSegment)
+            if (!template && path.LastSegment is ODL.NavigationPropertyLinkSegment)
             {
                 IEdmCollectionType lastSegmentEdmType = path.LastSegment.EdmType as IEdmCollectionType;
 
                 if (lastSegmentEdmType != null)
                 {
-                    Semantic.EntityIdSegment entityIdSegment = null;
+                    ODL.EntityIdSegment entityIdSegment = null;
                     bool exceptionThrown = false;
 
                     try
@@ -183,7 +179,7 @@ namespace System.Web.OData.Routing
                         {
                             // Create another ODataUriParser to parse $id, which is absolute or relative.
                             ODataUriParser parser = new ODataUriParser(model, serviceRootUri, entityIdSegment.Id);
-                            id = parser.ParsePath().LastSegment as Semantic.KeySegment;
+                            id = parser.ParsePath().LastSegment as ODL.KeySegment;
                         }
                     }
                     catch (ODataException)
@@ -204,16 +200,38 @@ namespace System.Web.OData.Routing
                 }
             }
 
-            ODataPath webAPIPath = ODataPathSegmentTranslator.TranslateODataLibPathToWebApiPath(
-                path,
-                model,
-                unresolvedPathSegment,
-                id,
-                enableUriTemplateParsing,
-                uriParser.ParameterAliasNodes);
+            // do validation for the odata path
+            path.WalkWith(new DefaultODataPathValidator(model));
 
-            CheckNavigableProperty(webAPIPath, model);
-            return webAPIPath;
+            // do segment translator (for example parameter alias, key & function parameter template, etc)
+            var segments =
+                ODataPathSegmentTranslator.Translate(model, path, uriParser.ParameterAliasNodes).ToList();
+
+            if (unresolvedPathSegment != null)
+            {
+                segments.Add(unresolvedPathSegment);
+            }
+
+            if (!template)
+            {
+                AppendIdForRef(segments, id);
+            }
+
+            return new ODataPath(segments)
+            {
+                ODLPath = path
+            };
+        }
+
+        // We need to append the key value path segment from $id.
+        private static void AppendIdForRef(IList<ODL.ODataPathSegment> segments, ODL.KeySegment id)
+        {
+            if (id == null || !(segments.Last() is ODL.NavigationPropertyLinkSegment))
+            {
+                return;
+            }
+
+            segments.Add(id);
         }
 
         private static ODataPathTemplate Templatify(ODataPath path, string pathTemplate)
@@ -223,59 +241,20 @@ namespace System.Web.OData.Routing
                 throw new ODataException(Error.Format(SRResources.InvalidODataPathTemplate, pathTemplate));
             }
 
-            List<ODataPathSegmentTemplate> templateSegments = new List<ODataPathSegmentTemplate>();
-            foreach (ODataPathSegment pathSegment in path.Segments)
+            ODataPathSegmentTemplateTranslator translator = new ODataPathSegmentTemplateTranslator();
+            var newPath = path.Segments.Select(e =>
             {
-                switch (pathSegment.SegmentKind)
+                UnresolvedPathSegment unresolvedPathSegment = e as UnresolvedPathSegment;
+                if (unresolvedPathSegment != null)
                 {
-                    case ODataSegmentKinds._Unresolved:
-                        throw new ODataException(
-                            Error.Format(SRResources.UnresolvedPathSegmentInTemplate, pathSegment.ToString(), pathTemplate));
-
-                    case ODataSegmentKinds._Key:
-                        templateSegments.Add(new KeyValuePathSegmentTemplate((KeyValuePathSegment)pathSegment));
-                        break;
-
-                    case ODataSegmentKinds._Function:
-                        templateSegments.Add(new BoundFunctionPathSegmentTemplate((BoundFunctionPathSegment)pathSegment));
-                        break;
-
-                    case ODataSegmentKinds._UnboundFunction:
-                        templateSegments.Add(new UnboundFunctionPathSegmentTemplate((UnboundFunctionPathSegment)pathSegment));
-                        break;
-
-                    case ODataSegmentKinds._DynamicProperty:
-                        templateSegments.Add(new DynamicPropertyPathSegmentTemplate((DynamicPropertyPathSegment)pathSegment));
-                        break;
-
-                    default:
-                        templateSegments.Add(pathSegment);
-                        break;
+                    throw new ODataException(
+                           Error.Format(SRResources.UnresolvedPathSegmentInTemplate, unresolvedPathSegment, pathTemplate));
                 }
-            }
 
-            return new ODataPathTemplate(templateSegments);
-        }
+                return e.TranslateWith(translator);
+            });
 
-        private static void CheckNavigableProperty(ODataPath path, IEdmModel model)
-        {
-            Contract.Assert(path != null);
-            Contract.Assert(model != null);
-
-            foreach (ODataPathSegment segment in path.Segments)
-            {
-                NavigationPathSegment navigationPathSegment = segment as NavigationPathSegment;
-
-                if (navigationPathSegment != null)
-                {
-                    if (EdmLibHelpers.IsNotNavigable(navigationPathSegment.NavigationProperty, model))
-                    {
-                        throw new ODataException(Error.Format(
-                            SRResources.NotNavigablePropertyUsedInNavigation,
-                            navigationPathSegment.NavigationProperty.Name));
-                    }
-                }
-            }
+            return new ODataPathTemplate(newPath);
         }
     }
 }

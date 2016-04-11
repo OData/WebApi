@@ -9,13 +9,14 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter
 {
@@ -76,7 +77,7 @@ namespace System.Web.OData.Formatter
                 IEdmProperty property =
                     model.EntityContainer.EntitySets().Single().EntityType().Properties().First();
                 request.ODataProperties().Model = model;
-                request.ODataProperties().Path = new ODataPath(new PropertyAccessPathSegment(property));
+                request.ODataProperties().Path = new ODataPath(new PropertySegment(property as IEdmStructuralProperty));
                 request.SetFakeODataRouteName();
 
                 ODataMediaTypeFormatter formatter = CreateFormatter(request);

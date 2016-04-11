@@ -34,6 +34,7 @@ namespace System.Web.OData.Routing
             builder.ComplexType<Dog>();
             builder.ComplexType<Cat>();
             builder.EntityType<SpecialProduct>();
+            builder.ComplexType<UsAddress>();
 
             ActionConfiguration getRoutingCustomerById = builder.Action("GetRoutingCustomerById");
             getRoutingCustomerById.Parameter<int>("RoutingCustomerId");
@@ -270,6 +271,11 @@ namespace System.Web.OData.Routing
             public string Street { get; set; }
             public string City { get; set; }
             public string ZipCode { get; set; }
+        }
+
+        public class UsAddress : Address
+        {
+            public string Country { get; set; }
         }
 
         public class Pet

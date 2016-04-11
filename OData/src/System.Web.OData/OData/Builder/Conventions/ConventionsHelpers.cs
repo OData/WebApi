@@ -18,6 +18,50 @@ namespace System.Web.OData.Builder.Conventions
 {
     internal static class ConventionsHelpers
     {
+        public static IEnumerable<KeyValuePair<string, object>> GetEntityKey(EntityInstanceContext entityContext)
+        {
+            Contract.Assert(entityContext != null);
+            Contract.Assert(entityContext.EntityType != null);
+            Contract.Assert(entityContext.EdmObject != null);
+
+            IEnumerable<IEdmStructuralProperty> keys = entityContext.EntityType.Key();
+
+            return keys.Select(k => new KeyValuePair<string, object>(k.Name, GetKeyValue(k, entityContext)));
+        }
+
+        private static object GetKeyValue(IEdmProperty key, EntityInstanceContext entityInstanceContext)
+        {
+            Contract.Assert(key != null);
+            Contract.Assert(entityInstanceContext != null);
+
+            object value = entityInstanceContext.GetPropertyValue(key.Name);
+            if (value == null)
+            {
+                IEdmTypeReference edmType = entityInstanceContext.EdmObject.GetEdmType();
+                throw Error.InvalidOperation(SRResources.KeyValueCannotBeNull, key.Name, edmType.Definition);
+            }
+
+            return ConvertValue(value);
+        }
+
+        public static object ConvertValue(object value)
+        {
+            Contract.Assert(value != null);
+
+            Type type = value.GetType();
+            if (type.IsEnum)
+            {
+                value = new ODataEnumValue(value.ToString(), type.EdmFullName());
+            }
+            else
+            {
+                Contract.Assert(EdmLibHelpers.GetEdmPrimitiveTypeOrNull(type) != null);
+                value = ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(value);
+            }
+
+            return value;
+        }
+
         public static string GetEntityKeyValue(EntityInstanceContext entityContext)
         {
             Contract.Assert(entityContext != null);

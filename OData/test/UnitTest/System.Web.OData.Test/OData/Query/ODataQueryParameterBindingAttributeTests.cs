@@ -16,11 +16,12 @@ using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Query.Controllers;
-using System.Web.OData.Routing;
 using System.Web.OData.TestCommon.Models;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Query
 {
@@ -189,7 +190,7 @@ namespace System.Web.OData.Query
             IEdmModel model = odataModel.GetEdmModel();
             IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet(setName);
             request.ODataProperties().Model = model;
-            request.ODataProperties().Path = new ODataPath(new EntitySetPathSegment(entitySet));
+            request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));
 
             // Setup action context and parameter descriptor.
             HttpControllerContext controllerContext = new HttpControllerContext(

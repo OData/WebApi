@@ -10,7 +10,6 @@ using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
 using System.Web.OData.Test;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
@@ -76,7 +75,7 @@ namespace System.Web.OData.Formatter.Serialization
             _specialCustomerType = _model.GetEdmTypeReference(typeof(SpecialCustomer)).AsEntity();
             _specialOrderType = _model.GetEdmTypeReference(typeof(SpecialOrder)).AsEntity();
             _serializer = new ODataEntityTypeSerializer(_serializerProvider);
-            _path = new ODataPath(new EntitySetPathSegment(_customerSet));
+            _path = new ODataPath(new EntitySetSegment(_customerSet));
             _writeContext = new ODataSerializerContext() { NavigationSource = _customerSet, Model = _model, Path = _path };
             _entityInstanceContext = new EntityInstanceContext(_writeContext, _customerSet.EntityType().AsReference(), _customer);
         }
@@ -813,7 +812,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataSerializerContext writeContext = new ODataSerializerContext
             {
                 Model = model,
-                Path = new ODataPath(new EntitySetPathSegment(customers))
+                Path = new ODataPath(new EntitySetSegment(customers))
             };
 
             SimpleOpenCustomer customer = new SimpleOpenCustomer()
@@ -917,7 +916,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataSerializerContext writeContext = new ODataSerializerContext
             {
                 Model = model,
-                Path = new ODataPath(new EntitySetPathSegment(customers)),
+                Path = new ODataPath(new EntitySetSegment(customers)),
                 Request = request
             };
 

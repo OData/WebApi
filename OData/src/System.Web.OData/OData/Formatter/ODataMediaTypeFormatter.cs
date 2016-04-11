@@ -20,9 +20,10 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
-using System.Web.OData.Routing;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter
 {
@@ -512,7 +513,7 @@ namespace System.Web.OData.Formatter
                 Version = _version,
             };
 
-            string metadataLink = urlHelper.CreateODataLink(new MetadataPathSegment());
+            string metadataLink = urlHelper.CreateODataLink(MetadataSegment.Instance);
 
             if (metadataLink == null)
             {
@@ -674,13 +675,17 @@ namespace System.Web.OData.Formatter
                 ODataPathSegment lastSegment = path.Segments.LastOrDefault();
                 if (lastSegment != null)
                 {
-                    BoundActionPathSegment actionSegment = lastSegment as BoundActionPathSegment;
+                    OperationSegment actionSegment = lastSegment as OperationSegment;
                     if (actionSegment != null)
                     {
-                        return actionSegment.Action.Name;
+                        IEdmAction action = actionSegment.Operations.Single() as IEdmAction;
+                        if (action != null)
+                        {
+                            return action.Name;
+                        }
                     }
 
-                    PropertyAccessPathSegment propertyAccessSegment = lastSegment as PropertyAccessPathSegment;
+                    PropertySegment propertyAccessSegment = lastSegment as PropertySegment;
                     if (propertyAccessSegment != null)
                     {
                         return propertyAccessSegment.Property.Name;
@@ -809,13 +814,10 @@ namespace System.Web.OData.Formatter
 
             foreach (ODataPathSegment segment in path.Segments)
             {
-                switch (segment.SegmentKind)
+                if (segment is OperationSegment ||
+                    segment is OperationImportSegment)
                 {
-                    case ODataSegmentKinds._Action:
-                    case ODataSegmentKinds._Function:
-                    case ODataSegmentKinds._UnboundAction:
-                    case ODataSegmentKinds._UnboundFunction:
-                        return true;
+                    return true;
                 }
             }
 

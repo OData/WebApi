@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using System.Web.OData.TestCommon;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
@@ -34,12 +36,12 @@ namespace System.Web.OData.Routing.Conventions
             string expectedSelectedAction)
         {
             // Arrange
-            string key = "42";
+            var keys = new[] { new KeyValuePair<string, object>("ID", 42) };
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var ordersProperty = model.Customer.FindProperty("Orders") as IEdmNavigationProperty;
 
-            ODataPath odataPath = new ODataPath(new EntitySetPathSegment(model.Customers), new KeyValuePathSegment(key),
-                new NavigationPathSegment(ordersProperty), new RefPathSegment());
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers), new KeySegment(keys, model.Customer, model.Customers),
+                new NavigationPropertyLinkSegment(ordersProperty, model.Orders));
 
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap(methodsInController);
@@ -56,7 +58,7 @@ namespace System.Web.OData.Routing.Conventions
             else
             {
                 Assert.Equal(2, controllerContext.RouteData.Values.Count);
-                Assert.Equal(key, controllerContext.RouteData.Values["key"]);
+                Assert.Equal(42, controllerContext.RouteData.Values["key"]);
                 Assert.Equal(ordersProperty.Name, controllerContext.RouteData.Values["navigationProperty"]);
             }
         }
@@ -81,16 +83,15 @@ namespace System.Web.OData.Routing.Conventions
             string expectedSelectedAction)
         {
             // Arrange
-            string key = "42";
+            var keys = new[] { new KeyValuePair<string, object>("ID", 42) };
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
 
             ODataPath odataPath = new ODataPath(
-                new EntitySetPathSegment(model.Customers),
-                new KeyValuePathSegment(key),
-                new CastPathSegment(model.SpecialCustomer),
-                new NavigationPathSegment(specialOrdersProperty),
-                new RefPathSegment());
+                new EntitySetSegment(model.Customers),
+                new KeySegment(keys, model.Customer, model.Customers),
+                new TypeSegment(model.SpecialCustomer, model.Customers),
+                new NavigationPropertyLinkSegment(specialOrdersProperty, model.Orders));
 
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = GetMockActionMap(methodsInController);
@@ -107,7 +108,7 @@ namespace System.Web.OData.Routing.Conventions
             else
             {
                 Assert.Equal(2, controllerContext.RouteData.Values.Count);
-                Assert.Equal(key, controllerContext.RouteData.Values["key"]);
+                Assert.Equal(42, controllerContext.RouteData.Values["key"]);
                 Assert.Equal(specialOrdersProperty.Name, controllerContext.RouteData.Values["navigationProperty"]);
             }
         }
@@ -116,18 +117,17 @@ namespace System.Web.OData.Routing.Conventions
         public void SelectAction_SetsRelatedKey_ForDeleteRefRequests()
         {
             // Arrange
-            string key = "42";
-            string relatedKey = "24";
+            var keys = new[] { new KeyValuePair<string, object>("ID", 42) };
+            var relatedKeys = new[] { new KeyValuePair<string, object>("ID", 24) };
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
 
             ODataPath odataPath = new ODataPath(
-                new EntitySetPathSegment(model.Customers),
-                new KeyValuePathSegment(key),
-                new CastPathSegment(model.SpecialCustomer),
-                new NavigationPathSegment(specialOrdersProperty),
-                new KeyValuePathSegment(relatedKey),
-                new RefPathSegment());
+                new EntitySetSegment(model.Customers),
+                new KeySegment(keys, model.Customer, model.Customers),
+                new TypeSegment(model.SpecialCustomer, model.Customers),
+                new NavigationPropertyLinkSegment(specialOrdersProperty, model.Orders),
+                new KeySegment(relatedKeys, model.Order, model.Orders));
 
             HttpControllerContext controllerContext = CreateControllerContext("DELETE");
             var actionMap = GetMockActionMap("DeleteRef");
@@ -137,9 +137,9 @@ namespace System.Web.OData.Routing.Conventions
             var routeData = controllerContext.RouteData;
 
             // Assert
-            Assert.Equal(key, routeData.Values["key"]);
+            Assert.Equal(42, routeData.Values["key"]);
             Assert.Equal("SpecialOrders", routeData.Values["navigationProperty"]);
-            Assert.Equal(relatedKey, routeData.Values["relatedKey"]);
+            Assert.Equal(24, routeData.Values["relatedKey"]);
         }
 
         [Theory]
@@ -159,9 +159,9 @@ namespace System.Web.OData.Routing.Conventions
 
             // Assert
             Assert.Equal("DeleteRef", actionName);
-            Assert.Equal("42", routeData.Values["key"]);
+            Assert.Equal(42, routeData.Values["key"]);
             Assert.Equal("Orders", routeData.Values["navigationProperty"]);
-            Assert.Equal("24", routeData.Values["relatedKey"]);
+            Assert.Equal(24, routeData.Values["relatedKey"]);
         }
 
         [Theory]
@@ -193,16 +193,15 @@ namespace System.Web.OData.Routing.Conventions
         public void SelectAction_SetsRouteData_ForGetOrCreateRefRequests(string method, string actionName)
         {
             // Arrange
-            string key = "42";
+            var keys = new[] { new KeyValuePair<string, object>("ID", 42) };
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var specialOrdersProperty = model.SpecialCustomer.FindProperty("SpecialOrders") as IEdmNavigationProperty;
 
             ODataPath odataPath = new ODataPath(
-                new EntitySetPathSegment(model.Customers),
-                new KeyValuePathSegment(key),
-                new CastPathSegment(model.SpecialCustomer),
-                new NavigationPathSegment(specialOrdersProperty),
-                new RefPathSegment());
+                new EntitySetSegment(model.Customers),
+                new KeySegment(keys, model.Customer, model.Customers),
+                new TypeSegment(model.SpecialCustomer, model.Customers),
+                new NavigationPropertyLinkSegment(specialOrdersProperty, model.Orders));
 
             HttpControllerContext controllerContext = CreateControllerContext(method);
             var actionMap = new[] { GetMockActionDescriptor(actionName) }.ToLookup(a => a.ActionName);
@@ -212,7 +211,7 @@ namespace System.Web.OData.Routing.Conventions
             var routeData = controllerContext.RouteData;
 
             // Assert
-            Assert.Equal(key, routeData.Values["key"]);
+            Assert.Equal(42, routeData.Values["key"]);
             Assert.Equal("SpecialOrders", routeData.Values["navigationProperty"]);
         }
 

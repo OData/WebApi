@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Web.OData.Routing.Template;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing

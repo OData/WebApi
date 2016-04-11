@@ -8,8 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData
 {
@@ -68,7 +69,7 @@ namespace System.Web.OData
             // Skip any sequence of cast segments at the end of the path.
             int currentIndex = oDataPath.Segments.Count - 1;
             ReadOnlyCollection<ODataPathSegment> segments = oDataPath.Segments;
-            while (currentIndex >= 0 && segments[currentIndex].SegmentKind == ODataSegmentKinds.Cast)
+            while (currentIndex >= 0 && segments[currentIndex] is TypeSegment)
             {
                 currentIndex--;
             }
@@ -76,7 +77,7 @@ namespace System.Web.OData
             // Null value properties should be treated in the same way independent of whether the user asked for the
             // raw value of the property or a specific format, so we skip the $value segment as it can only be
             // preceeded by a property access segment.
-            if (currentIndex >= 0 && segments[currentIndex].SegmentKind == ODataSegmentKinds.Value)
+            if (currentIndex >= 0 && segments[currentIndex] is ValueSegment)
             {
                 currentIndex--;
             }
@@ -87,55 +88,62 @@ namespace System.Web.OData
                 return null;
             }
 
-            switch (segments[currentIndex].SegmentKind)
+            KeySegment keySegment = segments[currentIndex] as KeySegment;
+            if (keySegment != null)
             {
-                case ODataSegmentKinds._Key:
-                    // Look at the previous segment to decide, but skip any possible sequence of cast segments in 
-                    // between.
+                // Look at the previous segment to decide, but skip any possible sequence of cast segments in 
+                // between.
+                currentIndex--;
+                while (currentIndex >= 0 && segments[currentIndex] is TypeSegment)
+                {
                     currentIndex--;
-                    while (currentIndex >= 0 && segments[currentIndex].SegmentKind == ODataSegmentKinds.Cast)
-                    {
-                        currentIndex--;
-                    }
-                    if (currentIndex < 0)
-                    {
-                        return null;
-                    }
-
-                    switch (segments[currentIndex].SegmentKind)
-                    {
-                        case ODataSegmentKinds._EntitySet:
-                            // Return 404 if we were trying to retrieve a specific entity from an entity set.
-                            return HttpStatusCode.NotFound;
-                        case ODataSegmentKinds._Navigation:
-                            // Return 204 if we were trying to retrieve a related entity via a navigation property.
-                            return HttpStatusCode.NoContent;
-                        default:
-                            break;
-                    }
+                }
+                if (currentIndex < 0)
+                {
                     return null;
+                }
 
-                case ODataSegmentKinds._Property:
-                    // Return 204 only if the property is single valued (not a collection of values).
-                    PropertyAccessPathSegment property = (PropertyAccessPathSegment)segments[currentIndex];
-                    return GetChangedStatusCodeForProperty(property);
-
-                case ODataSegmentKinds._Navigation:
-                    // Return 204 only if the navigation property is a single related entity and not a collection
-                    // of entities.
-                    NavigationPathSegment navigation = (NavigationPathSegment)segments[currentIndex];
-                    return GetChangedStatusCodeForNavigationProperty(navigation);
-
-                case ODataSegmentKinds._Singleton:
-                    // Return 404 for a singleton with a null value.
+                if (segments[currentIndex] is EntitySetSegment)
+                {
+                    // Return 404 if we were trying to retrieve a specific entity from an entity set.
                     return HttpStatusCode.NotFound;
+                }
 
-                default:
-                    return null;
+                if (segments[currentIndex] is NavigationPropertySegment)
+                {
+                    // Return 204 if we were trying to retrieve a related entity via a navigation property.
+                    return HttpStatusCode.NoContent;
+                }
+
+                return null;
             }
+
+            PropertySegment propertySegment = segments[currentIndex] as PropertySegment;
+            if (propertySegment != null)
+            {
+                // Return 204 only if the property is single valued (not a collection of values).
+                return GetChangedStatusCodeForProperty(propertySegment);
+            }
+
+            NavigationPropertySegment navigationSegment = segments[currentIndex] as NavigationPropertySegment;
+            if (navigationSegment != null)
+            {
+                // Return 204 only if the navigation property is a single related entity and not a collection
+                // of entities.
+                return GetChangedStatusCodeForNavigationProperty(navigationSegment);
+            }
+
+            SingletonSegment singletonSegment = segments[currentIndex] as SingletonSegment;
+            if (singletonSegment != null)
+            {
+                // Return 404 for a singleton with a null value.
+                return HttpStatusCode.NotFound;
+            }
+
+            return null;
         }
 
-        private static HttpStatusCode? GetChangedStatusCodeForNavigationProperty(NavigationPathSegment navigation)
+        private static HttpStatusCode? GetChangedStatusCodeForNavigationProperty(NavigationPropertySegment navigation)
         {
             EdmMultiplicity multiplicity = navigation.NavigationProperty.TargetMultiplicity();
             return multiplicity == EdmMultiplicity.ZeroOrOne || multiplicity == EdmMultiplicity.One ?
@@ -143,7 +151,7 @@ namespace System.Web.OData
                 (HttpStatusCode?)null;
         }
 
-        private static HttpStatusCode? GetChangedStatusCodeForProperty(PropertyAccessPathSegment propertySegment)
+        private static HttpStatusCode? GetChangedStatusCodeForProperty(PropertySegment propertySegment)
         {
             IEdmTypeReference type = propertySegment.Property.Type;
             return type.IsPrimitive() || type.IsComplex() ? HttpStatusCode.NoContent : (HttpStatusCode?)null;

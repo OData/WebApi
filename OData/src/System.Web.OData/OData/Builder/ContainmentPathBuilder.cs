@@ -6,6 +6,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Builder
 {
@@ -16,9 +17,9 @@ namespace System.Web.OData.Builder
         public ODataPath TryComputeCanonicalContainingPath(ODataPath path)
         {
             Contract.Assert(path != null);
-            Contract.Assert(path.Count >= 2);
+            Contract.Assert(path.Segments.Count >= 2);
 
-            _segments = path.ToList();
+            _segments = path.Segments.ToList();
 
             RemoveAllTypeCasts();
 

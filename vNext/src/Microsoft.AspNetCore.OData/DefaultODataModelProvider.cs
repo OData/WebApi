@@ -24,8 +24,9 @@ namespace Microsoft.AspNetCore.OData
                 var entity = builder.AddEntityType(entityClrType);
                 builder.AddEntitySet(property.Name, entity);
             }
-            after?.Invoke(builder);
-            return builder.GetEdmModel();
-        }
+			after?.Invoke(builder);
+			var edmModel = builder.GetEdmModel();
+            return edmModel;
+		}
     }
 }

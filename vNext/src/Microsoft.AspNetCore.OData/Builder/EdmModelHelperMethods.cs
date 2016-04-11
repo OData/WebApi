@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             EdmEntityContainer container = new EdmEntityContainer(builder.Namespace, builder.ContainerName);
 
             // add types and sets, building an index on the way.
-	        Dictionary<Type, IEdmType> edmTypeMap = model.AddTypes(builder.StructuralTypes, builder.EnumTypes);
+	        Dictionary<Type, IEdmType> edmTypeMap = model.AddTypes(builder.StructuralTypes.Where(s => s.IsInUse()), builder.EnumTypes);
 
             // Add EntitySets and build the mapping between the EdmEntitySet and the NavigationSourceConfiguration
             NavigationSourceAndAnnotations[] entitySets = container.AddEntitySetAndAnnotations(builder, edmTypeMap);

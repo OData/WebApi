@@ -33,7 +33,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         public NavigationPropertyConfiguration(PropertyInfo property, EdmMultiplicity multiplicity, EntityTypeConfiguration declaringType)
             : base(property, declaringType)
         {
-            if (property == null)
+			if (property == null)
             {
                 throw Error.ArgumentNull("property");
             }
@@ -223,8 +223,8 @@ namespace Microsoft.AspNetCore.OData.Builder
                     .OfType<EntityTypeConfiguration>().FirstOrDefault(e => e.ClrType == RelatedClrType);
             Contract.Assert(principalEntity != null);
 
-            PrimitivePropertyConfiguration principal = principalEntity.AddProperty(constraint.Value);
-            PrimitivePropertyConfiguration dependent = DeclaringEntityType.AddProperty(constraint.Key);
+            PrimitivePropertyConfiguration principal = principalEntity.AddPrimitiveProperty(constraint.Value);
+            PrimitivePropertyConfiguration dependent = DeclaringEntityType.AddPrimitiveProperty(constraint.Key);
 
             // If the navigation property on which the referential constraint is defined or the principal property
             // is nullable, then the dependent property MUST be nullable.

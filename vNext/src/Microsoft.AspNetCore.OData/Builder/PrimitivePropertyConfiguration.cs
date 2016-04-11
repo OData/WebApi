@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.AspNetCore.OData.Builder
 {

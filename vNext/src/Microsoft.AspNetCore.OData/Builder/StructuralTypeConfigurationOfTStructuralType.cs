@@ -115,25 +115,17 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// </summary>
         /// <remarks>This method is used to exclude all properties from the type that would have been added by convention during model discovery.</remarks>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
-        public virtual StructuralTypeConfiguration<TStructuralType> RemoveAllProperties()
+		public virtual StructuralTypeConfiguration<TStructuralType> RemoveAllProperties(Func<PropertyInfo, bool> predicate = null)
         {
 	        foreach (var property in ConventionsHelpers.GetAllProperties(_configuration, true))
 	        {
-		        RemovePropertyIfOfPrimitiveType(property);
+		        if (predicate == null || predicate(property))
+		        {
+					_configuration.RemoveProperty(property);
+				}
 			}
 			return this;
         }
-
-	    private void RemovePropertyIfOfPrimitiveType(PropertyInfo property)
-	    {
-		    var typeInfo = property.PropertyType.GetTypeInfo();
-		    if (!typeInfo.IsClass ||
-		        typeInfo.IsPrimitive ||
-		        property.PropertyType == typeof (string))
-		    {
-			    Property(property).Ignored(true);
-		    }
-	    }
 
 	    /// <summary>
 		/// Adds an optional primitive property to the EDM type.
@@ -146,7 +138,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific expression type is clearer")]
         public PrimitivePropertyConfiguration Property(PropertyInfo property)
 		{
-			return _configuration.AddProperty(property);
+			return _configuration.AddPrimitiveProperty(property);
         }
 
 		/// <summary>
@@ -160,10 +152,13 @@ namespace Microsoft.AspNetCore.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific expression type is clearer")]
         public StructuralTypeConfiguration<TStructuralType> AddProperty<T>(Expression<Func<TStructuralType, T>> propertyExpression, Action<PrimitivePropertyConfiguration> configure = null)
         {
-	        var config = GetPrimitivePropertyConfiguration(propertyExpression, optional: true);
-			config.Ignored(false);
-	        configure?.Invoke(config);
-	        return this;
+			PropertyInfo ignoredProperty = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
+			_configuration.AddProperty(ignoredProperty);
+			return this;
+			//var config = GetPrimitivePropertyConfiguration(propertyExpression, optional: true);
+			//config.Ignored(false);
+	  //      configure?.Invoke(config);
+	  //      return this;
         }
 
 	    /// <summary>
@@ -308,7 +303,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         private PrimitivePropertyConfiguration GetPrimitivePropertyConfiguration(Expression propertyExpression, bool optional)
         {
             PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
-            PrimitivePropertyConfiguration property = _configuration.AddProperty(propertyInfo);
+            PrimitivePropertyConfiguration property = _configuration.AddPrimitiveProperty(propertyInfo);
             if (optional)
             {
                 property.IsOptional();

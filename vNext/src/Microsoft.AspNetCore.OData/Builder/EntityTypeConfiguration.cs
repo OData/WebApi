@@ -131,7 +131,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             }
             else
             {
-                PrimitivePropertyConfiguration propertyConfig = AddProperty(keyProperty);
+                PrimitivePropertyConfiguration propertyConfig = AddPrimitiveProperty(keyProperty);
 
                 // keys are always required
                 propertyConfig.IsRequired();

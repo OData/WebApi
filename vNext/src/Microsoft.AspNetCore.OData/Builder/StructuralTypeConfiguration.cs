@@ -235,7 +235,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// </summary>
         /// <param name="propertyInfo">The property being added.</param>
         /// <returns>The <see cref="PrimitivePropertyConfiguration"/> so that the property can be configured further.</returns>
-        public virtual PrimitivePropertyConfiguration AddProperty(PropertyInfo propertyInfo)
+        public virtual PrimitivePropertyConfiguration AddPrimitiveProperty(PropertyInfo propertyInfo)
         {
             if (propertyInfo == null)
             {
@@ -459,6 +459,39 @@ namespace Microsoft.AspNetCore.OData.Builder
 	    }
 
 	    /// <summary>
+	    /// Removes the given property.
+	    /// </summary>
+	    /// <param name="propertyInfo">The property being removed.</param>
+	    public virtual PropertyConfiguration AddProperty(PropertyInfo propertyInfo)
+        {
+			if (propertyInfo == null)
+			{
+				throw Error.ArgumentNull("propertyInfo");
+			}
+
+			if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
+			{
+				throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
+			}
+
+		    (ModelBuilder as ODataConventionModelBuilder)
+			    .AddPropertyInternal(
+				    (EntityTypeConfiguration) ModelBuilder.GetTypeConfigurationOrNull(ClrType), propertyInfo);
+
+			//if (ExplicitProperties.ContainsKey(propertyInfo))
+			//{
+				ExplicitProperties[propertyInfo].Ignored(false);
+			//}
+			
+			if (Equals(_dynamicPropertyDictionary, propertyInfo))
+			{
+				_dynamicPropertyDictionary = null;
+			}
+
+		    return ExplicitProperties[propertyInfo];
+        }
+
+	    /// <summary>
         /// Removes the given property.
         /// </summary>
         /// <param name="propertyInfo">The property being removed.</param>
@@ -474,12 +507,20 @@ namespace Microsoft.AspNetCore.OData.Builder
 				throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
 			}
 
+		    if (propertyInfo.Name == "Roles")
+		    {
+			    
+		    }
+		    (ModelBuilder as ODataConventionModelBuilder)
+			    .AddPropertyInternal(
+				    (EntityTypeConfiguration) ModelBuilder.GetTypeConfigurationOrNull(ClrType), propertyInfo);
+
 			if (ExplicitProperties.ContainsKey(propertyInfo))
 			{
 				ExplicitProperties[propertyInfo].Ignored(true);
 			}
-
-		    AddProperty(propertyInfo).Ignored(true);
+			
+			//.AddPrAddProperty(propertyInfo).Ignored(true);
 
 			if (Equals(_dynamicPropertyDictionary, propertyInfo))
 			{

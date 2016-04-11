@@ -541,8 +541,11 @@ namespace Microsoft.AspNetCore.OData.Builder
         {
             foreach (StructuralTypeConfiguration edmType in _explicitlyAddedTypes)
             {
-                MapType(edmType);
-            }
+	            if (edmType.Properties.Any(p => !p.IsIgnored))
+	            {
+					MapType(edmType);
+				}
+			}
 
             // Apply foreign key conventions after the type mapping, because foreign key conventions depend on
             // entity key setting to be finished.
@@ -591,55 +594,59 @@ namespace Microsoft.AspNetCore.OData.Builder
             IEnumerable<PropertyInfo> properties = ConventionsHelpers.GetProperties(entity, includeReadOnly: _isQueryCompositionMode);
             foreach (PropertyInfo property in properties)
             {
-                bool isCollection;
-                IEdmTypeConfiguration mappedType;
-
-                PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType);
-
+				// TODO: JC: Investigate moving this to newer "Ignored" pattern
                 var notMappedAttribute = property.GetCustomAttribute<NotMappedAttribute>();
                 if (notMappedAttribute != null)
                 {
                     // Don't map this type if we have a "NotMapped" attribute
                     continue;
                 }
-                if (propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Enum)
-                {
-                    MapStructuralProperty(entity, property, propertyKind, isCollection);
-                }
-                else if (propertyKind == PropertyKind.Dynamic)
-                {
-                    entity.AddDynamicPropertyDictionary(property);
-                }
-                else
-                {
-                    // don't add this property if the user has already added it.
-                    if (!entity.NavigationProperties.Any(p => p.Name == property.Name))
-                    {
-                        NavigationPropertyConfiguration addedNavigationProperty;
-                        if (!isCollection)
-                        {
-                            addedNavigationProperty = entity.AddNavigationProperty(property, EdmMultiplicity.ZeroOrOne);
-                        }
-                        else
-                        {
-                            addedNavigationProperty = entity.AddNavigationProperty(property, EdmMultiplicity.Many);
-                        }
-
-                        ContainedAttribute containedAttribute = property.GetCustomAttribute<ContainedAttribute>();
-                        if (containedAttribute != null)
-                        {
-                            addedNavigationProperty.Contained();
-                        }
-
-                        addedNavigationProperty.AddedExplicitly = false;
-                    }
-                }
+				AddPropertyInternal(entity, property);
             }
 
             MapDerivedTypes(entity);
         }
 
-        private void MapComplexType(ComplexTypeConfiguration complexType)
+	    internal void AddPropertyInternal(EntityTypeConfiguration entity, PropertyInfo property)
+	    {
+		    bool isCollection;
+		    IEdmTypeConfiguration mappedType;
+		    PropertyKind propertyKind = GetPropertyType(property, out isCollection, out mappedType);
+		    if (propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Enum)
+		    {
+			    MapStructuralProperty(entity, property, propertyKind, isCollection);
+		    }
+		    else if (propertyKind == PropertyKind.Dynamic)
+		    {
+			    entity.AddDynamicPropertyDictionary(property);
+		    }
+		    else
+		    {
+			    // don't add this property if the user has already added it.
+			    if (!entity.NavigationProperties.Any(p => p.Name == property.Name))
+			    {
+				    NavigationPropertyConfiguration addedNavigationProperty;
+				    if (!isCollection)
+				    {
+					    addedNavigationProperty = entity.AddNavigationProperty(property, EdmMultiplicity.ZeroOrOne);
+				    }
+				    else
+				    {
+					    addedNavigationProperty = entity.AddNavigationProperty(property, EdmMultiplicity.Many);
+				    }
+
+				    ContainedAttribute containedAttribute = property.GetCustomAttribute<ContainedAttribute>();
+				    if (containedAttribute != null)
+				    {
+					    addedNavigationProperty.Contained();
+				    }
+
+				    addedNavigationProperty.AddedExplicitly = false;
+			    }
+		    }
+	    }
+
+	    private void MapComplexType(ComplexTypeConfiguration complexType)
         {
             IEnumerable<PropertyInfo> properties = ConventionsHelpers.GetAllProperties(complexType, includeReadOnly: _isQueryCompositionMode);
             foreach (PropertyInfo property in properties)
@@ -700,7 +707,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             {
                 if (propertyKind == PropertyKind.Primitive)
                 {
-                    addedEdmProperty = type.AddProperty(property);
+                    addedEdmProperty = type.AddPrimitiveProperty(property);
                 }
                 else if (propertyKind == PropertyKind.Enum)
                 {

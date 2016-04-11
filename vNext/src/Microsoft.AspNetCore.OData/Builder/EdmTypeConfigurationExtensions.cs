@@ -11,8 +11,60 @@ namespace Microsoft.AspNetCore.OData.Builder
 {
     internal static class EdmTypeConfigurationExtensions
     {
-        // returns all the properties declared in the base types of this type.
-        public static IEnumerable<PropertyConfiguration> DerivedProperties(
+		// returns all the properties declared in the base types of this type.
+		public static bool IsInUse(this StructuralTypeConfiguration type)
+		{
+			var typesChecked = new List<IEdmTypeConfiguration>();
+			var builder = type.ModelBuilder;
+			foreach (var entitySet in builder.EntitySets)
+			{
+				if (IsUsedBy(type, entitySet.EntityType, typesChecked))
+				{
+					return true;
+				}
+			}
+			foreach (var procedure in builder.Procedures)
+			{
+				if (IsUsedBy(type, procedure.ReturnType, typesChecked))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private static bool IsUsedBy(
+			StructuralTypeConfiguration toCheckFor,
+			IEdmTypeConfiguration toCheckIn,
+			List<IEdmTypeConfiguration> typesChecked)
+		{
+			if (typesChecked.Contains(toCheckIn))
+			{
+				return false;
+			}
+			typesChecked.Add(toCheckIn);
+			if (toCheckIn == toCheckFor)
+			{
+				return true;
+			}
+			var toCheckInStructural = toCheckIn as StructuralTypeConfiguration;
+			if (toCheckInStructural != null)
+			{
+				foreach (var property in toCheckInStructural.Properties
+					.Where(p => !p.IsIgnored))
+				{
+					var propertyType = toCheckFor.ModelBuilder.GetTypeConfigurationOrNull(property.RelatedClrType);
+					if (IsUsedBy(toCheckFor, propertyType, typesChecked))
+					{
+						return true;
+					}
+				}
+			}
+			typesChecked.Add(toCheckIn);
+			return false;
+		}
+
+		public static IEnumerable<PropertyConfiguration> DerivedProperties(
             this StructuralTypeConfiguration structuralType)
         {
             if (structuralType == null)

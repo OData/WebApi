@@ -71,6 +71,14 @@ namespace ODataSample.Web
 			services.AddOData<ISampleService>(builder =>
 			{
 				builder.Namespace = "Sample";
+				builder.EntityType<ApplicationUser>()
+					.RemoveAllProperties()
+					//.AddProperty(p => p.Roles)
+					.AddProperty(p => p.UserName)
+					.AddProperty(p => p.Email)
+					.AddProperty(p => p.FavouriteProductId)
+					.AddProperty(p => p.FavouriteProduct)
+					;
 				builder
 					.EntityType<Order>()
 					.HasKey(o => o.Id);
@@ -81,16 +89,8 @@ namespace ODataSample.Web
 				builder
 					.EntityType<Product>()
 					;
-				builder.EntityType<Product>()
-					.HasKey(p => p.ProductId);
-				builder.EntityType<ApplicationUser>()
-					.RemoveAllProperties()
-					//.AddProperty(p => p.Roles)
-					.AddProperty(p => p.UserName)
-					.AddProperty(p => p.Email)
-					.AddProperty(p => p.FavouriteProductId)
-					.AddProperty(p => p.FavouriteProduct)
-					;
+				//builder.EntityType<Product>()
+				//	.HasKey(p => p.ProductId);
 				builder.EntityType<ApplicationUser>()
 					.HasKey(p => p.Id);
 				builder

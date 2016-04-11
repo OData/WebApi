@@ -21,6 +21,10 @@ namespace ODataSample.Web.Models
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
 			builder
+				.Entity<ApplicationUser>()
+				.HasOne(u => u.UsedProduct)
+				.WithMany(p => p.UsedByUsers);
+			builder
 				.Entity<Product>()
 				.HasOne(u => u.CreatedByUser)
 				.WithMany(u => u.ProductsCreated);

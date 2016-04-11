@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -7,11 +9,35 @@ using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Models;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace ODataSample.Web
 {
 	public class Startup
 	{
+		public Startup(IApplicationEnvironment env, IRuntimeEnvironment runtimeEnvironment)
+		{
+			// Set up configuration sources.
+			var builder = new ConfigurationBuilder()
+			 .AddJsonFile("appsettings.json")
+			 //.AddJsonFile($"appsettings.{env.EnvironmentName}.json", true)
+			 ;
+
+
+			//if (env.IsDevelopment())
+			//{
+			//	// For more details on using the user secret store see http://go.microsoft.com/fwlink/?LinkID=532709
+			//	builder.AddUserSecrets();
+
+			//	//// This will push telemetry data through Application Insights pipeline faster, allowing you to view results immediately.
+			//	//builder.AddApplicationInsightsSettings(developerMode: true);
+			//}
+
+			builder.AddEnvironmentVariables();
+			builder.Build();
+		}
+
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddEntityFramework()
@@ -51,26 +77,19 @@ namespace ODataSample.Web
 				builder
 					.EntityType<Customer>()
 					.Property(p => p.CustomerId)
-					//.IsOptional()
 					;
 				builder
 					.EntityType<Product>()
-					//.RemoveAllProperties()
-					//.AddProperty(p => p.Name)
-					//.AddProperty(p => p.Price)
-					//.AddProperty(p =>)
-					//.RemoveProperty(p => p.Price)
 					;
 				builder.EntityType<Product>()
 					.HasKey(p => p.ProductId);
 				builder.EntityType<ApplicationUser>()
-					.RemoveProperty(p => p.Roles)
-					.RemoveProperty(p => p.Claims)
-					.RemoveProperty(p => p.Logins)
-					//.RemoveProperty(p => p.Id)
-					//.RemoveAllProperties()
-					//.AddProperty(p => p.UserName)
-					//.AddProperty(p => p.Email)
+					.RemoveAllProperties()
+					//.AddProperty(p => p.Roles)
+					.AddProperty(p => p.UserName)
+					.AddProperty(p => p.Email)
+					.AddProperty(p => p.FavouriteProductId)
+					.AddProperty(p => p.FavouriteProduct)
 					;
 				builder.EntityType<ApplicationUser>()
 					.HasKey(p => p.Id);
@@ -119,42 +138,22 @@ namespace ODataSample.Web
 			});
 		}
 
-		public void Configure(IApplicationBuilder app, UserManager<ApplicationUser> userManager)
+		public void Configure(IApplicationBuilder app,
+			UserManager<ApplicationUser> userManager,
+			RoleManager<IdentityRole> roleManager
+			)
 		{
-			MigrateDatabase(app);
-			new Seeder().EnsureDatabase(app, userManager);
-			//mvc.AddWebApiConventions();
-			app.UseDeveloperExceptionPage();
+			Seeder.MigrateDatabase(app.ApplicationServices);
 
-			app.UseOData("odata");
+			app.UseDeveloperExceptionPage();
 
 			app.UseIISPlatformHandler();
 
-			app.UseMvcWithDefaultRoute();
-		}
+			app.UseIdentity();
 
-		private static void MigrateDatabase(IApplicationBuilder app)
-		{
-			try
-			{
-				using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
-					.CreateScope())
-				{
-					var context = serviceScope.ServiceProvider.GetService<ApplicationDbContext>();
-					if (context != null)
-					{
-						context.Database.Migrate();
-					}
-					else
-					{
-						throw new Exception("Unable to resolve database context");
-					}
-				}
-			}
-			catch
-			{
-				throw;
-			}
+			app.UseOData("odata");
+
+			app.UseMvcWithDefaultRoute();
 		}
 	}
 }

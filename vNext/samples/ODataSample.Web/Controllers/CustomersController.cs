@@ -72,26 +72,5 @@ namespace ODataSample.Web.Controllers
 
 			return new ObjectResult(customer.Products);
 		}
-
-		public override Task<IQueryable<Customer>> Get()
-		{
-			//var db = _sampleService as ApplicationDbContext;
-			//var query = db.Customers.Select(var1 => new SelectExpandBinder.SelectAllAndExpand<Customer>()
-			//{
-			//	ModelID = "29beea7c-dd56-427f-b192-79969ad77c5f",
-			//	Instance = var1
-			//	,
-			//	Container = new PropertyContainer.NamedProperty<IEnumerable<SelectExpandBinder.SelectAll<Product>>>()
-			//	{
-			//		Name = "Products",
-			//		Value = //new List<SelectExpandBinder.SelectAll<Product>>()
-			//		//(var1 == null ? null : var1.Products) == null ? new List<SelectExpandBinder.SelectAll<Product>>() : (var1 == null ? null : var1.Products).Select(p => new SelectExpandBinder.SelectAll<Product>()),
-			//		//(var1 == null ? null : var1.Products) == null ? new List<SelectExpandBinder.SelectAll<Product>>() : var1.Products.Select(p => new SelectExpandBinder.SelectAll<Product>()),
-			//		var1.Products.Select(p => new SelectExpandBinder.SelectAll<Product>())
-			//	}
-			//});
-			//var elms = query.ToList();
-			return base.Get();
-		}
 	}
 }

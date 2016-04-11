@@ -11,6 +11,8 @@ namespace ODataSample.Web.Models
 		public DbSet<Order> Orders { get; set; }
 
 		IQueryable<ApplicationUser> ISampleService.Users => Users;
+		//IQueryable<IdentityUserRole<string>> ISampleService.UserRoles => UserRoles;
+		//IQueryable<IdentityRole> ISampleService.Roles => Roles;
 		IQueryable<Order> ISampleService.Orders => Orders;
 		IQueryable<Product> ISampleService.Products => Products;
 		IQueryable<Customer> ISampleService.Customers => Customers;

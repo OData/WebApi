@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Controllers;
 
@@ -10,26 +10,39 @@ namespace ODataSample.Web.Models
 {
 	public class Seeder
 	{
+		public IServiceProvider ServiceProvider { get; set; }
+
+		public static async Task SeedAllAsync(IServiceProvider serviceProvider)
+		{
+			await new Seeder(serviceProvider)
+				.EnsureDatabaseAsync();
+		}
+
 		private CrudBase<Product, int> _productsCrud;
 		private int _productId;
 		private CrudBase<Order, string> _ordersCrud;
+		private UserManager<ApplicationUser> _userManager;
 
-		public async Task EnsureDatabase(IApplicationBuilder app, UserManager<ApplicationUser> userManager)
+		public Seeder(IServiceProvider serviceProvider)
 		{
-			var user = await userManager.FindByIdAsync("1");
-			if (user == null)
+			ServiceProvider = serviceProvider;
+		}
+
+		public async Task EnsureDatabaseAsync()
+		{
+			MigrateDatabase(ServiceProvider);
+			_userManager = ServiceProvider.GetService<UserManager<ApplicationUser>>();
+			var roleManager = ServiceProvider.GetService<RoleManager<IdentityRole>>();
+			await EnsureUserAsync("1", "testy@example.com", "testy@example.com", 7);
+			await EnsureUserAsync("2", "testy@testy.com", "testy@testy.com", 12);
+			await EnsureUserAsync("3", "money@boy.com", "money@boy.com", 13);
+			using (var context = ServiceProvider.GetRequiredService<ApplicationDbContext>())
 			{
-				await userManager.CreateAsync(new ApplicationUser()
-				{
-					Id = "1",
-					UserName = "test@example.com",
-					Email = "test@example.com"
-				});
-			}
-			using (var context = app.ApplicationServices.GetRequiredService<ApplicationDbContext>())
-			{
-				var us = app.ServerFeatures.Get<UserManager<ApplicationUser>>();
-				;
+				await roleManager.CreateAsync(new IdentityRole("Admin"));
+				await roleManager.CreateAsync(new IdentityRole("User"));
+				await _userManager.AddToRoleAsync(await _userManager.FindByIdAsync("1"), "Admin");
+				await _userManager.AddToRoleAsync(await _userManager.FindByIdAsync("1"), "User");
+				await _userManager.AddToRoleAsync(await _userManager.FindByIdAsync("2"), "User");
 				//var userStore = new UserStore<ApplicationUser>(context);
 				////var roleManager = new RoleManager<IdentityRole>();
 				//var userManager = new UserManager<ApplicationUser>(
@@ -98,6 +111,29 @@ namespace ODataSample.Web.Models
 			}
 		}
 
+		private async Task EnsureUserAsync(string id, string userName, string email, int? favouriteProductId)
+		{
+			var user = await _userManager.FindByIdAsync(id);
+			if (user == null)
+			{
+				user = new ApplicationUser
+				{
+					Id = id,
+					UserName = userName,
+					Email = email,
+					FavouriteProductId = favouriteProductId
+				};
+				await _userManager.CreateAsync(user);
+			}
+			else
+			{
+				user.UserName = userName;
+				user.Email = email;
+				user.FavouriteProductId = favouriteProductId;
+				await _userManager.UpdateAsync(user);
+			}
+		}
+
 		private int Prod(string name, double price, int? customerId,
 			DateTime? dateCreated, string cratedByUserId = null)
 		{
@@ -122,6 +158,19 @@ namespace ODataSample.Web.Models
 					entity.Title = title;
 					entity.CustomerId = customerId;
 				});
+		}
+
+		public static void MigrateDatabase(IServiceProvider serviceProvider)
+		{
+			var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+			if (context != null)
+			{
+				context.Database.Migrate();
+			}
+			else
+			{
+				throw new Exception("Unable to resolve database context");
+			}
 		}
 	}
 }

@@ -9,7 +9,9 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
 using System.Web.OData.TestCommon.Models;
+using Microsoft.OData.Core.UriParser.Metadata;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
@@ -98,8 +100,20 @@ namespace System.Web.OData
                 typeof(RoutingCustomersController),
             }.GetHttpConfiguration();
 
-            config.EnableCaseInsensitive(caseInsensitive);
-            config.EnableUnqualifiedNameCall(unqualifiedNameCall);
+            if (unqualifiedNameCall)
+            {
+                config.SetUriResolver(new UnqualifiedODataUriResolver
+                {
+                    EnableCaseInsensitive = caseInsensitive
+                });
+            }
+            else
+            {
+                config.SetUriResolver(new ODataUriResolver
+                {
+                    EnableCaseInsensitive = caseInsensitive
+                });
+            }
 
             config.MapODataServiceRoute("odata", "odata", model);
             return config;
@@ -185,7 +199,10 @@ namespace System.Web.OData
         private static HttpConfiguration GetQueryOptionConfiguration(bool caseInsensitive)
         {
             HttpConfiguration config = new[] { typeof(ParserExtenstionCustomersController) }.GetHttpConfiguration();
-            config.EnableCaseInsensitive(caseInsensitive);
+            config.SetUriResolver(new ODataUriResolver
+            {
+                EnableCaseInsensitive = caseInsensitive
+            });
             config.MapODataServiceRoute("query", "query", GetEdmModel());
             return config;
         }
@@ -202,7 +219,11 @@ namespace System.Web.OData
             // Arrange
             IEdmModel model = GetEdmModel();
             HttpConfiguration config = new[] { typeof(ParserExtenstionCustomersController) }.GetHttpConfiguration();
-            config.EnableEnumPrefixFree(enableEnumPrefix);
+            if (enableEnumPrefix)
+            {
+                config.SetUriResolver(new StringAsEnumResolver());
+            };
+
             config.MapODataServiceRoute("odata", "odata", model);
             HttpClient client = new HttpClient(new HttpServer(config));
 
@@ -241,7 +262,10 @@ namespace System.Web.OData
             // Arrange
             IEdmModel model = GetEdmModel();
             HttpConfiguration config = new[] { typeof(ParserExtenstionCustomersController) }.GetHttpConfiguration();
-            config.EnableEnumPrefixFree(enableEnumPrefix);
+            if (enableEnumPrefix)
+            {
+                config.SetUriResolver(new StringAsEnumResolver());
+            };
             config.MapODataServiceRoute("odata", "odata", model);
             HttpClient client = new HttpClient(new HttpServer(config));
 
@@ -266,7 +290,6 @@ namespace System.Web.OData
             // Arrange
             IEdmModel model = GetEdmModel();
             HttpConfiguration config = new[] { typeof(ParserExtenstionCustomers2Controller) }.GetHttpConfiguration();
-            config.EnableUnqualifiedNameCall(false);
             config.MapODataServiceRoute("odata", "odata", model);
             HttpClient client = new HttpClient(new HttpServer(config));
 
@@ -285,7 +308,7 @@ namespace System.Web.OData
             // Arrange
             IEdmModel model = GetEdmModel();
             HttpConfiguration config = new[] { typeof(ParserExtenstionCustomers2Controller) }.GetHttpConfiguration();
-            config.EnableUnqualifiedNameCall(true);
+            config.SetUriResolver(new UnqualifiedODataUriResolver());
             config.MapODataServiceRoute("odata", "odata", model);
             HttpClient client = new HttpClient(new HttpServer(config));
 

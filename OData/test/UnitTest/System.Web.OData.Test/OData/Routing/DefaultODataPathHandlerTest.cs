@@ -9,6 +9,7 @@ using System.Web.OData.Routing.Template;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Metadata;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Expressions;
@@ -410,7 +411,7 @@ namespace System.Web.OData.Routing
             string expectedText = "112";
             IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
             var simplifiedParser = new DefaultODataPathHandler();
-            simplifiedParser.ResolverSetttings.UrlConventions = ODataUrlConventions.ODataSimplified;
+            simplifiedParser.UrlConventions = ODataUrlConventions.ODataSimplified;
 
             // Act
             ODataPath path = simplifiedParser.Parse(_model, _serviceRoot, odataPath);
@@ -2272,12 +2273,10 @@ namespace System.Web.OData.Routing
         public void DefaultUriResolverHandler_Works_CaseInsensitive(string path, string template, string expect)
         {
             // Arrange & Act
-            DefaultODataPathHandler pathHandler = new DefaultODataPathHandler
+            DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
+            pathHandler.UriResolver = new ODataUriResolver
             {
-                ResolverSetttings = new ODataUriResolverSetttings
-                {
-                    CaseInsensitive = true,
-                }
+                EnableCaseInsensitive = true
             };
 
             ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path);
@@ -2318,13 +2317,10 @@ namespace System.Web.OData.Routing
         public void Unqualified_Works_CustomUriResolverHandler(string path, string template, string expect)
         {
             // Arrange
-            DefaultODataPathHandler pathHandler = new DefaultODataPathHandler
+            DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
+            pathHandler.UriResolver = new UnqualifiedODataUriResolver
             {
-                ResolverSetttings = new ODataUriResolverSetttings
-                {
-                    CaseInsensitive = true,
-                    UnqualifiedNameCall = true
-                }
+                EnableCaseInsensitive = true
             };
 
             // Act
@@ -2366,13 +2362,8 @@ namespace System.Web.OData.Routing
         public void PrefixFreeEnumValue_Works_PrefixFreeResolver(string path, string template, string expect)
         {
             // Arrange
-            DefaultODataPathHandler pathHandler = new DefaultODataPathHandler
-            {
-                ResolverSetttings = new ODataUriResolverSetttings
-                {
-                    EnumPrefixFree = true
-                }
-            };
+            DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
+            pathHandler.UriResolver = new StringAsEnumResolver();
 
             // Act
             ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path);

@@ -6,6 +6,7 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData;
 using System.Web.OData.Extensions;
+using Microsoft.OData.Core.UriParser.Metadata;
 using Nuwa;
 using WebStack.QA.Common.WebHost;
 using WebStack.QA.Common.XUnit;
@@ -34,7 +35,7 @@ namespace WebStack.QA.Test.OData.UriParserExtension
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
-            configuration.EnableEnumPrefixFree(true);
+            configuration.SetUriResolver(new StringAsEnumResolver());
 
             configuration.Routes.Clear();
 

@@ -59,7 +59,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             var baseEntitySet = builder.EntitySet<BaseEntity>("BaseEntity");
 
             var alwaysAvailableActionBaseType = baseEntitySet.EntityType.Action("AlwaysAvailableActionBaseType");
-            Func<EntityInstanceContext, Uri> alwaysAvailableActionBaseTypeLinkFactory = eic =>
+            Func<EntityContext, Uri> alwaysAvailableActionBaseTypeLinkFactory = eic =>
             {
                 object id;
                 eic.EdmObject.TryGetPropertyValue("Id", out id);
@@ -80,7 +80,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             alwaysAvailableActionBaseType.HasActionLink(alwaysAvailableActionBaseTypeLinkFactory, false);
 
             var transientActionBaseType = baseEntitySet.EntityType.Action("TransientActionBaseType");
-            Func<EntityInstanceContext, Uri> transientActionBaseTypeLinkFactory = eic =>
+            Func<EntityContext, Uri> transientActionBaseTypeLinkFactory = eic =>
             {
                 IEdmType baseType = eic.EdmModel.FindType(typeof(BaseEntity).FullName);
                 object id;
@@ -110,7 +110,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
 
             var derivedEntityType = builder.EntityType<DerivedEntity>().DerivesFrom<BaseEntity>();
             var alwaysAvailableActionDerivedType = derivedEntityType.Action("AlwaysAvailableActionDerivedType");
-            Func<EntityInstanceContext, Uri> alwaysAvailableActionDerivedTypeLinkFactory = eic =>
+            Func<EntityContext, Uri> alwaysAvailableActionDerivedTypeLinkFactory = eic =>
             {
                 object id;
                 eic.EdmObject.TryGetPropertyValue("Id", out id);
@@ -132,7 +132,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             alwaysAvailableActionDerivedType.HasActionLink(alwaysAvailableActionDerivedTypeLinkFactory, false);
 
             var transientActionDerivedType = derivedEntityType.Action("TransientActionDerivedType");
-            Func<EntityInstanceContext, Uri> transientActionDerivedTypeLinkFactory = eic =>
+            Func<EntityContext, Uri> transientActionDerivedTypeLinkFactory = eic =>
             {
                 IEdmType derivedType = eic.EdmModel.FindType(typeof(DerivedEntity).FullName);
                 object id;

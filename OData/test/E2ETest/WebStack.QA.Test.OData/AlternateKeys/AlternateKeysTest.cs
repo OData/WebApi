@@ -7,6 +7,8 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData;
 using System.Web.OData.Extensions;
+using Microsoft.OData.Core.UriParser.Metadata;
+using Microsoft.OData.Edm;
 using Nuwa;
 using WebStack.QA.Common.XUnit;
 using WebStack.QA.Test.OData.Common;
@@ -39,11 +41,12 @@ namespace WebStack.QA.Test.OData.AlternateKeys
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Services.Replace(typeof (IAssembliesResolver), resolver);
 
-            configuration.EnableAlternateKeys(true);
+            IEdmModel model = AlternateKeysEdmModel.GetEdmModel();
+            configuration.SetUriResolver(new AlternateKeysODataUriResolver(model));
 
             configuration.Routes.Clear();
 
-            configuration.MapODataServiceRoute("odata", "odata", model: AlternateKeysEdmModel.GetEdmModel());
+            configuration.MapODataServiceRoute("odata", "odata", model: model);
 
             configuration.EnsureInitialized();
         }

@@ -10,6 +10,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.OData.Core.UriParser.Metadata;
 using Microsoft.OData.Edm;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
@@ -36,7 +37,7 @@ namespace WebStack.QA.Test.OData.Routing
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             config.Services.Replace(typeof(IAssembliesResolver), resolver);
 
-            config.EnableCaseInsensitive(true);
+            config.SetUriResolver(new ODataUriResolver { EnableCaseInsensitive = true });
 
             config.Routes.Clear();
             config.MapODataServiceRoute("odata", "", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

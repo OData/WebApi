@@ -11,7 +11,9 @@ using System.Web.Http.Filters;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
+using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
+using Microsoft.OData.Core.UriParser.Metadata;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
@@ -67,7 +69,10 @@ namespace System.Web.OData.Query
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", useCustomEdmModel: true));
             HttpClient client = new HttpClient(server);
 
-            server.Configuration.EnableCaseInsensitive(caseInsensitive);
+            server.Configuration.SetUriResolver(new ODataUriResolver
+            {
+                EnableCaseInsensitive = caseInsensitive
+            });
 
             // Act
             HttpResponseMessage response = client.GetAsync(
@@ -219,7 +224,7 @@ namespace System.Web.OData.Query
                 config.Filters.Add(new SetModelFilter(_queryCompositionCustomerModel));
             }
 
-            return config;
+           return config;
         }
 
         private static void AreEqual(List<QueryCompositionCustomer> expectedList, List<QueryCompositionCustomer> actualList)

@@ -250,6 +250,7 @@
     <Compile Include="OData\Routing\Conventions\NavigationSourceRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\SingletonRoutingConvention.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandler.cs" />
+    <Compile Include="OData\Routing\IODataPathResolver.cs" />
     <Compile Include="OData\Routing\ODataParameterValue.cs" />
     <Compile Include="OData\Routing\DefaultODataPathValidator.cs" />
     <Compile Include="OData\Routing\ODataPathSegmentExtensions.cs" />

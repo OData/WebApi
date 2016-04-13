@@ -12,6 +12,7 @@ using System.Web.OData.Properties;
 using System.Web.OData.Routing.Template;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Metadata;
 using Microsoft.OData.Edm;
 using ODL = Microsoft.OData.Core.UriParser.Semantic;
 
@@ -20,15 +21,18 @@ namespace System.Web.OData.Routing
     /// <summary>
     /// Parses an OData path as an <see cref="ODataPath"/> into an OData link.
     /// </summary>
-    public class DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler
+    public class DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler, IODataPathResolver
     {
-        private ODataUriResolverSetttings _resolverSettings = new ODataUriResolverSetttings();
+        /// <summary>
+        /// Gets or sets the resolver for Uri parsing
+        /// </summary>
+        public ODataUriResolver UriResolver { get; set; }
 
-        internal ODataUriResolverSetttings ResolverSetttings
-        {
-            get { return _resolverSettings; }
-            set { _resolverSettings = value; }
-        }
+        /// <summary>
+        /// Gets or Sets the <see cref="ODataUrlConventions"/> to use while parsing, specifically
+        /// whether to recognize keys as segments or not.
+        /// </summary>
+        public ODataUrlConventions UrlConventions { get; set; }
 
         /// <summary>
         /// Parses the specified OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
@@ -54,7 +58,7 @@ namespace System.Web.OData.Routing
                 throw Error.ArgumentNull("odataPath");
             }
 
-            return Parse(model, serviceRoot, odataPath, ResolverSetttings, template: false);
+            return Parse(model, serviceRoot, odataPath, template: false);
         }
 
         /// <summary>
@@ -76,7 +80,7 @@ namespace System.Web.OData.Routing
                 throw Error.ArgumentNull("odataPathTemplate");
             }
 
-            return Templatify(Parse(model, serviceRoot: null, odataPath: odataPathTemplate, resolverSettings: ResolverSetttings, template: true),
+            return Templatify(Parse(model, serviceRoot: null, odataPath: odataPathTemplate, template: true),
                 odataPathTemplate);
         }
 
@@ -97,8 +101,7 @@ namespace System.Web.OData.Routing
             return path.ToString();
         }
 
-        private static ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath,
-            ODataUriResolverSetttings resolverSettings, bool template)
+        private ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath, bool template)
         {
             ODataUriParser uriParser;
             Uri serviceRootUri = null;
@@ -115,17 +118,24 @@ namespace System.Web.OData.Routing
                 Contract.Assert(serviceRoot != null);
 
                 serviceRootUri = new Uri(
-                    serviceRoot.EndsWith("/", StringComparison.Ordinal) ?
-                        serviceRoot :
-                        serviceRoot + "/");
+                    serviceRoot.EndsWith("/", StringComparison.Ordinal)
+                        ? serviceRoot
+                        : serviceRoot + "/");
 
                 fullUri = new Uri(serviceRootUri, odataPath);
                 queryString = fullUri.ParseQueryString();
                 uriParser = new ODataUriParser(model, serviceRootUri, fullUri);
             }
 
-            uriParser.UrlConventions = resolverSettings.UrlConventions;
-            uriParser.Resolver = resolverSettings.CreateResolver(model);
+            if (UriResolver != null)
+            {
+                uriParser.Resolver = UriResolver;
+            }
+
+            if (UrlConventions != null)
+            {
+                uriParser.UrlConventions = UrlConventions;
+            }
 
             ODL.ODataPath path;
             UnresolvedPathSegment unresolvedPathSegment = null;

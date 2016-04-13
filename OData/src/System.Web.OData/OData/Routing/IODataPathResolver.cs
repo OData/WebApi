@@ -4,19 +4,22 @@
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Metadata;
 
-namespace System.Web.OData
+namespace System.Web.OData.Routing
 {
-    internal class ODataUriResolverSettings
+    /// <summary>
+    /// Exposes the ability to set the Uri resolver settings.
+    /// </summary>
+    public interface IODataPathResolver
     {
         /// <summary>
         /// Gets or sets the resolver for Uri parsing
         /// </summary>
-        public ODataUriResolver UriResolver { get; set; }
+        ODataUriResolver UriResolver { get; set; }
 
         /// <summary>
         /// Gets or Sets the <see cref="ODataUrlConventions"/> to use while parsing, specifically
         /// whether to recognize keys as segments or not.
         /// </summary>
-        public ODataUrlConventions UrlConventions { get; set; }
+        ODataUrlConventions UrlConventions { get; set; }
     }
 }

@@ -6,6 +6,7 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData;
 using System.Web.OData.Extensions;
+using Microsoft.OData.Core.UriParser.Metadata;
 using Nuwa;
 using WebStack.QA.Common.XUnit;
 using WebStack.QA.Test.OData.Common;
@@ -33,7 +34,7 @@ namespace WebStack.QA.Test.OData.UriParserExtension
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
-            configuration.EnableCaseInsensitive(true);
+            configuration.SetUriResolver(new ODataUriResolver {EnableCaseInsensitive = true});
 
             configuration.Routes.Clear();
 

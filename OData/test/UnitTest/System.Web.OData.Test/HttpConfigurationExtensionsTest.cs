@@ -13,8 +13,10 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Query;
 using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Metadata;
 using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
@@ -175,77 +177,6 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void GetResolverSettings_ReturnDefaultResolverSettings_IfNotSet()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-
-            // Act
-            ODataUriResolverSetttings resolverSetttings = config.GetResolverSettings();
-
-            // Assert
-            Assert.False(resolverSetttings.CaseInsensitive);
-            Assert.False(resolverSetttings.UnqualifiedNameCall);
-            Assert.False(resolverSetttings.EnumPrefixFree);
-        }
-
-        [Fact]
-        public void EnableCaseInsensitive_Sets_KeyWordAndMetadataFlag()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-
-            // Act
-            config.EnableCaseInsensitive(caseInsensitive: true);
-            ODataUriResolverSetttings resolverSetttings = config.GetResolverSettings();
-
-            // Assert
-            Assert.True(resolverSetttings.CaseInsensitive);
-        }
-
-        [Fact]
-        public void EnableUnqualifedCall_Sets_UnqualifedCallFlag()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-
-            // Act
-            config.EnableUnqualifiedNameCall(unqualifiedNameCall: true);
-            ODataUriResolverSetttings resolverSetttings = config.GetResolverSettings();
-
-            // Assert
-            Assert.True(resolverSetttings.UnqualifiedNameCall);
-        }
-
-        [Fact]
-        public void EnableEnumPrefixFree_Sets_EnumPrefixFreeFlag()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-
-            // Act
-            config.EnableEnumPrefixFree(enumPrefixFree: true);
-            ODataUriResolverSetttings resolverSetttings = config.GetResolverSettings();
-
-            // Assert
-            Assert.True(resolverSetttings.EnumPrefixFree);
-        }
-
-        [Fact]
-        public void EnableAlternateKeys_Sets_AlternateKeyFlag()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-
-            // Act
-            config.EnableAlternateKeys(true);
-            ODataUriResolverSetttings resolverSetttings = config.GetResolverSettings();
-
-            // Assert
-            Assert.True(resolverSetttings.AlternateKeys);
-        }
-
-        [Fact]
         public void EnableContinueOnError_Sets_ContinueOnErrorKeyFlag()
         {
             // Arrange
@@ -259,6 +190,60 @@ namespace System.Web.OData
         }
 
         [Fact]
+        public void SetODataUriResolver_Sets_UriResolver()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            UnqualifiedODataUriResolver resolver = new UnqualifiedODataUriResolver();
+
+            // Act
+            config.SetUriResolver(resolver);
+            ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
+            var pathResolver = route.PathRouteConstraint.PathHandler as IODataPathResolver;
+
+            // Assert
+            Assert.NotNull(pathResolver);
+            Assert.Same(resolver, pathResolver.UriResolver);
+        }
+
+        [Fact]
+        public void SetODataUriResolver_Sets_DefaultValue()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
+            var pathResolver = route.PathRouteConstraint.PathHandler as IODataPathResolver;
+
+            // Assert
+            Assert.NotNull(pathResolver);
+            Assert.Null(pathResolver.UriResolver);
+        }
+
+        [Fact]
+        public void SetODataUriResolver_CannotOverrideLocalSetting()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            UnqualifiedODataUriResolver resolver = new UnqualifiedODataUriResolver();
+            DefaultODataPathHandler pathHandler = new DefaultODataPathHandler
+            {
+                UriResolver = resolver
+            };
+
+            // Act
+            config.SetUriResolver(new StringAsEnumResolver());
+            ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel(), pathHandler,
+                ODataRoutingConventions.CreateDefault());
+            var pathResolver = route.PathRouteConstraint.PathHandler as IODataPathResolver;
+
+            // Assert
+            Assert.NotNull(pathResolver);
+            Assert.Same(resolver, pathResolver.UriResolver);
+        }
+
+        [Fact]
         public void SetUrlConvension_Sets_UrlConvension()
         {
             // Arrange
@@ -267,11 +252,11 @@ namespace System.Web.OData
             // Act
             config.SetUrlConventions(ODataUrlConventions.ODataSimplified);
             ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
-            var pathHandler = route.PathRouteConstraint.PathHandler as DefaultODataPathHandler;
+            var pathResolver = route.PathRouteConstraint.PathHandler as IODataPathResolver;
 
             // Assert
-            Assert.NotNull(pathHandler);
-            Assert.Equal(pathHandler.ResolverSetttings.UrlConventions, ODataUrlConventions.ODataSimplified);
+            Assert.NotNull(pathResolver);
+            Assert.Equal(pathResolver.UrlConventions, ODataUrlConventions.ODataSimplified);
         }
 
         [Fact]
@@ -282,11 +267,11 @@ namespace System.Web.OData
 
             // Act
             ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
-            var pathHandler = route.PathRouteConstraint.PathHandler as DefaultODataPathHandler;
+            var pathResolver = route.PathRouteConstraint.PathHandler as IODataPathResolver;
 
             // Assert
-            Assert.NotNull(pathHandler);
-            Assert.Equal(pathHandler.ResolverSetttings.UrlConventions, ODataUrlConventions.Default);
+            Assert.NotNull(pathResolver);
+            Assert.Null(pathResolver.UrlConventions);
         }
 
         private static ODataMediaTypeFormatter CreateODataFormatter()

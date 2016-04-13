@@ -18,6 +18,7 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
+using System.Web.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Core.UriParser.Semantic;
@@ -92,8 +93,11 @@ namespace System.Web.OData.Query
             HttpConfiguration configuration = Request.GetConfiguration();
             if (configuration != null)
             {
-                ODataUriResolverSetttings resolverSettings = configuration.GetResolverSettings();
-                _queryOptionParser.Resolver = resolverSettings.CreateResolver(context.Model);
+                ODataUriResolverSettings resolverSettings = configuration.GetResolverSettings();
+                if (resolverSettings.UriResolver != null)
+                {
+                    _queryOptionParser.Resolver = resolverSettings.UriResolver;
+                }
             }
 
             BuildQueryOptions(queryParameters);

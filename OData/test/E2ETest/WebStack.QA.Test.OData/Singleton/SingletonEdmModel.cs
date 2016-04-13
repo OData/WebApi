@@ -53,14 +53,14 @@ namespace WebStack.QA.Test.OData.Singleton
             EntitySetConfiguration<Partner> partnersConfiguration = builder.EntitySet<Partner>("Partners");
             partnersConfiguration.HasIdLink(c=>c.GenerateSelfLink(false), true);
             partnersConfiguration.HasSingletonBinding(c => c.Company, singletonName);
-            Func<EntityInstanceContext<Partner>, IEdmNavigationProperty, Uri> link = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            Func<EntityContext<Partner>, IEdmNavigationProperty, Uri> link = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
             partnersConfiguration.HasNavigationPropertyLink(partnerCompany, link, true);
             partnersConfiguration.EntityType.Collection.Action("ResetDataSource");
 
             SingletonConfiguration<Company> companyConfiguration = builder.Singleton<Company>(singletonName);
             companyConfiguration.HasIdLink(c => c.GenerateSelfLink(false), true);
             companyConfiguration.HasManyBinding(c => c.Partners, "Partners");
-            Func<EntityInstanceContext<Company>, IEdmNavigationProperty, Uri> linkFactory = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
+            Func<EntityContext<Company>, IEdmNavigationProperty, Uri> linkFactory = (eic, np) => eic.GenerateNavigationPropertyLink(np, false);
             companyConfiguration.HasNavigationPropertyLink(companyPartners, linkFactory, true);
             companyConfiguration.EntityType.Action("ResetDataSource");
             companyConfiguration.EntityType.Function("GetPartnersCount").Returns<int>();

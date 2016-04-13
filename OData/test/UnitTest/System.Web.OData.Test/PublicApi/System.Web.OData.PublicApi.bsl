@@ -1567,27 +1567,7 @@ public sealed class System.Web.OData.Extensions.HttpConfigurationExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static void EnableAlternateKeys (System.Web.Http.HttpConfiguration configuration, bool alternateKeys)
-
-	[
-	ExtensionAttribute(),
-	]
-	public static void EnableCaseInsensitive (System.Web.Http.HttpConfiguration configuration, bool caseInsensitive)
-
-	[
-	ExtensionAttribute(),
-	]
 	public static void EnableContinueOnErrorHeader (System.Web.Http.HttpConfiguration configuration)
-
-	[
-	ExtensionAttribute(),
-	]
-	public static void EnableEnumPrefixFree (System.Web.Http.HttpConfiguration configuration, bool enumPrefixFree)
-
-	[
-	ExtensionAttribute(),
-	]
-	public static void EnableUnqualifiedNameCall (System.Web.Http.HttpConfiguration configuration, bool unqualifiedNameCall)
 
 	[
 	ExtensionAttribute(),
@@ -1643,6 +1623,11 @@ public sealed class System.Web.OData.Extensions.HttpConfigurationExtensions {
 	ExtensionAttribute(),
 	]
 	public static void SetTimeZoneInfo (System.Web.Http.HttpConfiguration configuration, System.TimeZoneInfo timeZoneInfo)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static void SetUriResolver (System.Web.Http.HttpConfiguration configuration, Microsoft.OData.Core.UriParser.Metadata.ODataUriResolver uriResolver)
 
 	[
 	ExtensionAttribute(),
@@ -2291,6 +2276,11 @@ public interface System.Web.OData.Routing.IODataPathHandler {
 	ODataPath Parse (Microsoft.OData.Edm.IEdmModel model, string serviceRoot, string odataPath)
 }
 
+public interface System.Web.OData.Routing.IODataPathResolver {
+	Microsoft.OData.Core.UriParser.Metadata.ODataUriResolver UriResolver  { public abstract get; public abstract set; }
+	Microsoft.OData.Core.UriParser.ODataUrlConventions UrlConventions  { public abstract get; public abstract set; }
+}
+
 public interface System.Web.OData.Routing.IODataPathTemplateHandler {
 	ODataPathTemplate ParseTemplate (Microsoft.OData.Edm.IEdmModel model, string odataPathTemplate)
 }
@@ -2356,8 +2346,11 @@ public sealed class System.Web.OData.Routing.ODataSegmentKinds {
 	public static string Value = "$value"
 }
 
-public class System.Web.OData.Routing.DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler {
+public class System.Web.OData.Routing.DefaultODataPathHandler : IODataPathHandler, IODataPathResolver, IODataPathTemplateHandler {
 	public DefaultODataPathHandler ()
+
+	Microsoft.OData.Core.UriParser.Metadata.ODataUriResolver UriResolver  { public virtual get; public virtual set; }
+	Microsoft.OData.Core.UriParser.ODataUrlConventions UrlConventions  { public virtual get; public virtual set; }
 
 	public virtual string Link (ODataPath path)
 	public virtual ODataPath Parse (Microsoft.OData.Edm.IEdmModel model, string serviceRoot, string odataPath)

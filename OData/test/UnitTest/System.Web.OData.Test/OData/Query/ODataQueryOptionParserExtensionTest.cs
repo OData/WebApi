@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Metadata;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;
@@ -91,7 +92,10 @@ namespace System.Web.OData.Query
             string uri = "Http://localhost/RoutingCustomers?" + queryOption;
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableCaseInsensitive(true);
+            configuration.SetUriResolver(new ODataUriResolver
+            {
+                EnableCaseInsensitive = true
+            });
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.SetConfiguration(configuration);

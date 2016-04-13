@@ -5,6 +5,7 @@ using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Metadata;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Nuwa;
@@ -32,7 +33,7 @@ namespace WebStack.QA.Test.OData.Routing
 
             config.Services.Replace(typeof(IAssembliesResolver), resolver);
             config.Routes.Clear();
-            config.EnableUnqualifiedNameCall(true);
+            config.SetUriResolver(new UnqualifiedODataUriResolver());
             config.MapODataServiceRoute("odata", "odata", GetModel());
         }
 

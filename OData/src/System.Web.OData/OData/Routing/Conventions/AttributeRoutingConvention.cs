@@ -54,10 +54,17 @@ namespace System.Web.OData.Routing.Conventions
                 throw Error.ArgumentNull("configuration");
             }
 
-            DefaultODataPathHandler odataPathHanlder = pathTemplateHandler as DefaultODataPathHandler;
-            if (odataPathHanlder != null)
+            // if setting is not on local, use the global configuration setting.
+            ODataUriResolverSettings settings = configuration.GetResolverSettings();
+            IODataPathResolver pathResolver = pathTemplateHandler as IODataPathResolver;
+            if (pathResolver != null && pathResolver.UriResolver == null)
             {
-                odataPathHanlder.ResolverSetttings = configuration.GetResolverSettings();
+                pathResolver.UriResolver = settings.UriResolver;
+            }
+
+            if (pathResolver != null && pathResolver.UrlConventions == null)
+            {
+                pathResolver.UrlConventions = settings.UrlConventions;
             }
 
             Action<HttpConfiguration> oldInitializer = configuration.Initializer;

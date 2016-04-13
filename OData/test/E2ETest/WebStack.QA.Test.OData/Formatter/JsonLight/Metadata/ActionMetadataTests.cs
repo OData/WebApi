@@ -47,7 +47,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             var alwaysAvailableActionBaseType = baseEntitySet.EntityType.Action("AlwaysAvailableActionBaseType");
             var transientActionBaseType = baseEntitySet.EntityType.Action("TransientActionBaseType");
 
-            Func<EntityInstanceContext, Uri> transientActionBaseTypeLinkFactory = eic =>
+            Func<EntityContext, Uri> transientActionBaseTypeLinkFactory = eic =>
             {
                 IEdmEntityType baseType = eic.EdmModel.FindType(typeof(BaseEntity).FullName) as IEdmEntityType;
                 object id;
@@ -77,7 +77,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             var derivedEntityType = builder.EntityType<DerivedEntity>().DerivesFrom<BaseEntity>();
             var alwaysAvailableActionDerivedType = derivedEntityType.Action("AlwaysAvailableActionDerivedType");
             var transientActionDerivedType = derivedEntityType.Action("TransientActionDerivedType");
-            Func<EntityInstanceContext, Uri> transientActionDerivedTypeLinkFactory = eic =>
+            Func<EntityContext, Uri> transientActionDerivedTypeLinkFactory = eic =>
             {
                 IEdmEntityType derivedType = eic.EdmModel.FindType(typeof(DerivedEntity).FullName) as IEdmEntityType;
                 object id;

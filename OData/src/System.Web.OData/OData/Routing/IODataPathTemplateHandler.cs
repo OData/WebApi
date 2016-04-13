@@ -10,7 +10,7 @@ namespace System.Web.OData.Routing
     /// <summary>
     /// Exposes the ability to parse an OData path template as an <see cref="ODataPathTemplate"/>.
     /// </summary>
-    public interface IODataPathTemplateHandler
+    public interface IODataPathTemplateHandler 
     {
         /// <summary>
         /// Parses the specified OData path template as an <see cref="ODataPathTemplate"/>.

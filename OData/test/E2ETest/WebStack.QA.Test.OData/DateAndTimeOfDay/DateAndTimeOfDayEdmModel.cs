@@ -97,7 +97,7 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
             builder.Action("ResetDataSource");
         }
 
-        private static Func<EntityInstanceContext, Uri> link = entityContext =>
+        private static Func<EntityContext, Uri> link = entityContext =>
         {
             object id;
             entityContext.EdmObject.TryGetPropertyValue("Id", out id);

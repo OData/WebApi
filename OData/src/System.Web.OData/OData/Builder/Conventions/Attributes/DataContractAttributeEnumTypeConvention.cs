@@ -66,9 +66,10 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                         .FirstOrDefault() as EnumMemberAttribute;
                 if (!member.AddedExplicitly)
                 {
-                    if (model.ModelAliasingEnabled && enumMemberAttribute != null && !String.IsNullOrWhiteSpace(enumMemberAttribute.Value))
+                    if (model.ModelAliasingEnabled && enumMemberAttribute != null)
                     {
-                        member.Name = enumMemberAttribute.Value;
+                        if (!string.IsNullOrWhiteSpace(enumMemberAttribute.Value))
+                            member.Name = enumMemberAttribute.Value;
                     }
                     else
                     {

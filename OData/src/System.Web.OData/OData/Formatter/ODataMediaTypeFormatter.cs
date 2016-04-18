@@ -124,6 +124,7 @@ namespace System.Web.OData.Formatter
             _payloadKinds = formatter._payloadKinds;
             MessageWriterSettings = formatter.MessageWriterSettings;
             MessageReaderSettings = formatter.MessageReaderSettings;
+            BaseAddressFactory = formatter.BaseAddressFactory;
 
             // Parameter 2: version
             _version = version;

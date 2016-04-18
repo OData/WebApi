@@ -1076,11 +1076,12 @@ namespace System.Web.OData.Builder
             // Assert
             IEdmEnumType enumType = model.SchemaElements.OfType<IEdmEnumType>().Single();
             Assert.NotNull(enumType);
-            Assert.Equal(2, enumType.Members.Count());
+            Assert.Equal(3, enumType.Members.Count());
             Assert.Equal("Feelings", enumType.Name);
             Assert.Equal("Test", enumType.Namespace);
             Assert.True(enumType.Members.Any(m => m.Name.Equals("happy")));
             Assert.True(enumType.Members.Any(m => m.Name.Equals("sad")));
+            Assert.True(enumType.Members.Any(m => m.Name.Equals("KeepDefaultName")));
         }
 
         [Fact]
@@ -1097,12 +1098,13 @@ namespace System.Web.OData.Builder
             // Assert
             IEdmEnumType enumType = model.SchemaElements.OfType<IEdmEnumType>().Single();
             Assert.NotNull(enumType);
-            Assert.Equal(3, enumType.Members.Count());
+            Assert.Equal(4, enumType.Members.Count());
             Assert.Equal("Feelings", enumType.Name);
             Assert.Equal("Test", enumType.Namespace);
             Assert.True(enumType.Members.Any(m => m.Name.Equals("happy")));
             Assert.True(enumType.Members.Any(m => m.Name.Equals("sad")));
             Assert.True(enumType.Members.Any(m => m.Name.Equals("JustSoSo")));
+            Assert.True(enumType.Members.Any(m => m.Name.Equals("KeepDefaultName")));
         }
 
         private IEdmStructuredType AddComplexTypeWithODataConventionModelBuilder()
@@ -1172,6 +1174,8 @@ namespace System.Web.OData.Builder
         Happy = 1,
         [EnumMember(Value = "sad")]
         Sad = 2,
-        JustSoSo = 3
+        JustSoSo = 3,
+        [EnumMember]
+        KeepDefaultName
     }
 }

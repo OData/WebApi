@@ -10,72 +10,63 @@ using System.Web.OData.Formatter;
 namespace System.Web.OData.Builder
 {
     /// <summary>
-    /// Represents a Procedure that is exposed in the model
+    /// Represents a Operation that is exposed in the model
     /// </summary>
-    public abstract class ProcedureConfiguration
+    public abstract class OperationConfiguration
     {
         private List<ParameterConfiguration> _parameters = new List<ParameterConfiguration>();
         private BindingParameterConfiguration _bindingParameter;
         private string _namespace;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ProcedureConfiguration" /> class.
+        /// Initializes a new instance of <see cref="OperationConfiguration" /> class.
         /// </summary>
-        /// <param name="builder">The ODataModelBuilder to which this ProcedureConfiguration should be added.</param>
-        /// <param name="name">The name of this ProcedureConfiguration.</param>
-        internal ProcedureConfiguration(ODataModelBuilder builder, string name)
+        /// <param name="builder">The ODataModelBuilder to which this OperationConfiguration should be added.</param>
+        /// <param name="name">The name of this OperationConfiguration.</param>
+        internal OperationConfiguration(ODataModelBuilder builder, string name)
         {
             Name = name;
             ModelBuilder = builder;
         }
 
         /// <summary>
-        /// Gets or sets the currently registered procedure link builder.
+        /// Gets or sets the currently registered operation link builder.
         /// </summary>
-        protected ProcedureLinkBuilder ProcedureLinkBuilder { get; set; }
+        protected OperationLinkBuilder OperationLinkBuilder { get; set; }
 
         /// <summary>
-        /// Gets or sets the currently registered procedure link factory.
-        /// </summary>
-        protected Func<EntityInstanceContext, Uri> LinkFactory 
-        {
-            get { return ProcedureLinkBuilder.LinkFactory; }
-            set { ProcedureLinkBuilder.LinkFactory = value; } 
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether procedure links follow OData conventions.
+        /// Gets a value indicating whether operation links follow OData conventions.
         /// </summary>
         public bool FollowsConventions { get; protected set; }
 
         /// <summary>
-        /// The Name of the procedure
+        /// The Name of the operation
         /// </summary>
         public string Name { get; protected set; }
 
         /// <summary>
-        /// The Title of the procedure. When customized, the title of the procedure
+        /// The Title of the operation. When customized, the title of the operation
         /// will be sent back when the OData client asks for an entity or a feed in
         /// JSON full metadata.
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// The Kind of procedure, which can be either Action or Function
+        /// The Kind of operation, which can be either Action or Function
         /// </summary>
-        public abstract ProcedureKind Kind { get; }
+        public abstract OperationKind Kind { get; }
 
         /// <summary>
-        /// Can the procedure be composed upon.
+        /// Can the operation be composed upon.
         /// 
-        /// For example can a URL that invokes the procedure be used as the base URL for 
-        /// a request that invokes the procedure and does something else with the results
+        /// For example can a URL that invokes the operation be used as the base URL for 
+        /// a request that invokes the operation and does something else with the results
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "Copies existing spelling used in EdmLib.")]
         public virtual bool IsComposable { get; internal set; }
 
         /// <summary>
-        /// Does the procedure have side-effects.
+        /// Does the operation have side-effects.
         /// </summary>
         public abstract bool IsSideEffecting { get; }
 
@@ -97,7 +88,7 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// The type returned when the procedure is invoked.
+        /// The type returned when the operation is invoked.
         /// </summary>
         public IEdmTypeConfiguration ReturnType { get; set; }
 
@@ -118,7 +109,7 @@ namespace System.Web.OData.Builder
 
         /// <summary>
         /// Get the bindingParameter. 
-        /// <remarks>Null means the procedure has no bindingParameter.</remarks>
+        /// <remarks>Null means the operation has no bindingParameter.</remarks>
         /// </summary>
         public virtual BindingParameterConfiguration BindingParameter
         {
@@ -126,7 +117,7 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// The parameters the procedure takes
+        /// The parameters the operation takes
         /// </summary>
         public virtual IEnumerable<ParameterConfiguration> Parameters
         {
@@ -144,7 +135,7 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Can the procedure be bound to a URL representing the BindingParameter.
+        /// Can the operation be bound to a URL representing the BindingParameter.
         /// </summary>
         public virtual bool IsBindable
         {
@@ -211,19 +202,19 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Established the return type of the procedure.
+        /// Established the return type of the operation.
         /// <remarks>Used when the return type is a single Primitive or ComplexType.</remarks>
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
         internal void ReturnsImplementation(Type clrReturnType)
         {
-            IEdmTypeConfiguration configuration = GetProcedureTypeConfiguration(clrReturnType);
+            IEdmTypeConfiguration configuration = GetOperationTypeConfiguration(clrReturnType);
             ReturnType = configuration;
             OptionalReturn = EdmLibHelpers.IsNullable(clrReturnType);
         }
 
         /// <summary>
-        /// Establishes the return type of the procedure
+        /// Establishes the return type of the operation
         /// <remarks>Used when the return type is a collection of either Primitive or ComplexTypes.</remarks>
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
@@ -235,13 +226,13 @@ namespace System.Web.OData.Builder
             // You can imagine the override of this that takes a delegate using the correct CLR type for the return type.
             Type clrCollectionType = typeof(IEnumerable<TReturnElementType>);
             Type clrElementType = typeof(TReturnElementType);
-            IEdmTypeConfiguration edmElementType = GetProcedureTypeConfiguration(clrElementType);
+            IEdmTypeConfiguration edmElementType = GetOperationTypeConfiguration(clrElementType);
             ReturnType = new CollectionTypeConfiguration(edmElementType, clrCollectionType);
             OptionalReturn = EdmLibHelpers.IsNullable(clrElementType);
         }
 
         /// <summary>
-        /// Specifies the bindingParameter name, type and whether it is alwaysBindable, use only if the procedure "isBindable".
+        /// Specifies the bindingParameter name, type and whether it is alwaysBindable, use only if the operation "isBindable".
         /// </summary>
         internal void SetBindingParameterImplementation(string name, IEdmTypeConfiguration bindingParameterType)
         {
@@ -268,7 +259,7 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("clrParameterType");
             }
 
-            IEdmTypeConfiguration parameterType = GetProcedureTypeConfiguration(clrParameterType);
+            IEdmTypeConfiguration parameterType = GetOperationTypeConfiguration(clrParameterType);
             return AddParameter(name, parameterType);
         }
 
@@ -288,7 +279,7 @@ namespace System.Web.OData.Builder
         public ParameterConfiguration CollectionParameter<TElementType>(string name)
         {
             Type elementType = typeof(TElementType);
-            IEdmTypeConfiguration elementTypeConfiguration = GetProcedureTypeConfiguration(typeof(TElementType));
+            IEdmTypeConfiguration elementTypeConfiguration = GetOperationTypeConfiguration(typeof(TElementType));
             CollectionTypeConfiguration parameterType = new CollectionTypeConfiguration(elementTypeConfiguration, typeof(IEnumerable<>).MakeGenericType(elementType));
             return AddParameter(name, parameterType);
         }
@@ -331,7 +322,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         protected ODataModelBuilder ModelBuilder { get; set; }
 
-        private IEdmTypeConfiguration GetProcedureTypeConfiguration(Type clrType)
+        private IEdmTypeConfiguration GetOperationTypeConfiguration(Type clrType)
         {
             Type type = TypeHelper.GetUnderlyingTypeOrSelf(clrType);
             IEdmTypeConfiguration edmTypeConfiguration;

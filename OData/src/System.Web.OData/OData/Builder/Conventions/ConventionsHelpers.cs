@@ -18,7 +18,7 @@ namespace System.Web.OData.Builder.Conventions
 {
     internal static class ConventionsHelpers
     {
-        public static IEnumerable<KeyValuePair<string, object>> GetEntityKey(EntityInstanceContext entityContext)
+        public static IEnumerable<KeyValuePair<string, object>> GetEntityKey(EntityContext entityContext)
         {
             Contract.Assert(entityContext != null);
             Contract.Assert(entityContext.EntityType != null);
@@ -29,15 +29,15 @@ namespace System.Web.OData.Builder.Conventions
             return keys.Select(k => new KeyValuePair<string, object>(k.Name, GetKeyValue(k, entityContext)));
         }
 
-        private static object GetKeyValue(IEdmProperty key, EntityInstanceContext entityInstanceContext)
+        private static object GetKeyValue(IEdmProperty key, EntityContext entityContext)
         {
             Contract.Assert(key != null);
-            Contract.Assert(entityInstanceContext != null);
+            Contract.Assert(entityContext != null);
 
-            object value = entityInstanceContext.GetPropertyValue(key.Name);
+            object value = entityContext.GetPropertyValue(key.Name);
             if (value == null)
             {
-                IEdmTypeReference edmType = entityInstanceContext.EdmObject.GetEdmType();
+                IEdmTypeReference edmType = entityContext.EdmObject.GetEdmType();
                 throw Error.InvalidOperation(SRResources.KeyValueCannotBeNull, key.Name, edmType.Definition);
             }
 
@@ -62,7 +62,7 @@ namespace System.Web.OData.Builder.Conventions
             return value;
         }
 
-        public static string GetEntityKeyValue(EntityInstanceContext entityContext)
+        public static string GetEntityKeyValue(EntityContext entityContext)
         {
             Contract.Assert(entityContext != null);
             Contract.Assert(entityContext.EntityType != null);
@@ -191,15 +191,15 @@ namespace System.Web.OData.Builder.Conventions
             return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4);
         }
 
-        private static string GetUriRepresentationForKeyValue(IEdmProperty key, EntityInstanceContext entityInstanceContext)
+        private static string GetUriRepresentationForKeyValue(IEdmProperty key, EntityContext entityContext)
         {
             Contract.Assert(key != null);
-            Contract.Assert(entityInstanceContext != null);
+            Contract.Assert(entityContext != null);
 
-            object value = entityInstanceContext.GetPropertyValue(key.Name);
+            object value = entityContext.GetPropertyValue(key.Name);
             if (value == null)
             {
-                IEdmTypeReference edmType = entityInstanceContext.EdmObject.GetEdmType();
+                IEdmTypeReference edmType = entityContext.EdmObject.GetEdmType();
                 throw Error.InvalidOperation(SRResources.KeyValueCannotBeNull, key.Name, edmType.Definition);
             }
 

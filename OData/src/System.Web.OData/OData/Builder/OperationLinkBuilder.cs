@@ -6,22 +6,22 @@ using System.Web.Http;
 namespace System.Web.OData.Builder
 {
     /// <summary>
-    /// <see cref="ProcedureLinkBuilder"/> can be used to annotate an action or a function.
+    /// <see cref="OperationLinkBuilder"/> can be used to annotate an action or a function.
     /// This is how formatters create links to invoke bound actions or functions.
     /// </summary>
-    public class ProcedureLinkBuilder
+    public class OperationLinkBuilder
     {
-        private Func<EntityInstanceContext, Uri> _linkFactory; // bound to entity
+        private Func<EntityContext, Uri> _linkFactory; // bound to entity
         private readonly Func<FeedContext, Uri> _feedLinkFactory; // bound to collection of entity
 
         /// <summary>
-        /// Create a new <see cref="ProcedureLinkBuilder"/> based on an entity link factory.
+        /// Create a new <see cref="OperationLinkBuilder"/> based on an entity link factory.
         /// </summary>
-        /// <param name="linkFactory">The link factory this <see cref="ProcedureLinkBuilder"/> should use when building links.</param>
+        /// <param name="linkFactory">The link factory this <see cref="OperationLinkBuilder"/> should use when building links.</param>
         /// <param name="followsConventions">
         /// A value indicating whether the link factory generates links that follow OData conventions.
         /// </param>
-        public ProcedureLinkBuilder(Func<EntityInstanceContext, Uri> linkFactory, bool followsConventions)
+        public OperationLinkBuilder(Func<EntityContext, Uri> linkFactory, bool followsConventions)
         {
             if (linkFactory == null)
             {
@@ -33,13 +33,13 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Create a new <see cref="ProcedureLinkBuilder"/> based on a feed link factory.
+        /// Create a new <see cref="OperationLinkBuilder"/> based on a feed link factory.
         /// </summary>
-        /// <param name="linkFactory">The link factory this <see cref="ProcedureLinkBuilder"/> should use when building links.</param>
+        /// <param name="linkFactory">The link factory this <see cref="OperationLinkBuilder"/> should use when building links.</param>
         /// <param name="followsConventions">
         /// A value indicating whether the action link factory generates links that follow OData conventions.
         /// </param>
-        public ProcedureLinkBuilder(Func<FeedContext, Uri> linkFactory, bool followsConventions)
+        public OperationLinkBuilder(Func<FeedContext, Uri> linkFactory, bool followsConventions)
         {
             if (linkFactory == null)
             {
@@ -53,7 +53,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Gets the entity link factory.
         /// </summary>
-        public Func<EntityInstanceContext, Uri> LinkFactory
+        public Func<EntityContext, Uri> LinkFactory
         {
             get { return _linkFactory; }
             internal set { _linkFactory = value; }
@@ -73,11 +73,11 @@ namespace System.Web.OData.Builder
         public bool FollowsConventions { get; private set; }
 
         /// <summary>
-        /// Builds the procedure link for the given entity.
+        /// Builds the operation link for the given entity.
         /// </summary>
         /// <param name="context">An instance context wrapping the entity instance.</param>
         /// <returns>The generated link.</returns>
-        public virtual Uri BuildLink(EntityInstanceContext context)
+        public virtual Uri BuildLink(EntityContext context)
         {
             if (_linkFactory == null)
             {
@@ -88,7 +88,7 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Builds the procedure link for the given feed.
+        /// Builds the operation link for the given feed.
         /// </summary>
         /// <param name="context">An feed context wrapping the feed instance.</param>
         /// <returns>The generated link.</returns>

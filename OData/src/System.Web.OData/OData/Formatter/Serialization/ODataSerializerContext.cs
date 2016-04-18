@@ -35,7 +35,7 @@ namespace System.Web.OData.Formatter.Serialization
         /// <param name="selectExpandClause">The <see cref="SelectExpandClause"/> for the navigation property being expanded.</param>
         /// <param name="navigationProperty">The navigation property being expanded.</param>
         /// <remarks>This constructor is used to construct the serializer context for writing expanded properties.</remarks>
-        public ODataSerializerContext(EntityInstanceContext entity, SelectExpandClause selectExpandClause, IEdmNavigationProperty navigationProperty)
+        public ODataSerializerContext(EntityContext entity, SelectExpandClause selectExpandClause, IEdmNavigationProperty navigationProperty)
         {
             if (entity == null)
             {
@@ -120,7 +120,7 @@ namespace System.Web.OData.Formatter.Serialization
         /// <summary>
         /// Gets or sets the entity that is being expanded.
         /// </summary>
-        public EntityInstanceContext ExpandedEntity { get; set; }
+        public EntityContext ExpandedEntity { get; set; }
 
         /// <summary>
         /// Gets or sets the navigation property being expanded.

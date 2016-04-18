@@ -28,7 +28,7 @@ namespace System.Web.OData.Results
 
         public static Uri GenerateODataLink(HttpRequestMessage request, object entity, bool isEntityId)
         {
-            EntityInstanceContext entityContext = CreateEntityInstanceContext(request, entity);
+            EntityContext entityContext = CreateEntityContext(request, entity);
             Contract.Assert(entityContext != null);
 
             // Generate location or entityId header from request Uri and key, if Post to a containment.
@@ -80,7 +80,7 @@ namespace System.Web.OData.Results
             }
         }
 
-        private static Uri GenerateContainmentODataPathSegments(EntityInstanceContext entityContext, bool isEntityId)
+        private static Uri GenerateContainmentODataPathSegments(EntityContext entityContext, bool isEntityId)
         {
             Contract.Assert(entityContext != null);
             Contract.Assert(
@@ -121,7 +121,7 @@ namespace System.Web.OData.Results
             return odataLink == null ? null : new Uri(odataLink);
         }
 
-        private static EntityInstanceContext CreateEntityInstanceContext(HttpRequestMessage request, object entity)
+        private static EntityContext CreateEntityContext(HttpRequestMessage request, object entity)
         {
             IEdmModel model = request.ODataProperties().Model;
             if (model == null)
@@ -153,7 +153,7 @@ namespace System.Web.OData.Results
             };
 
             IEdmEntityTypeReference entityType = GetEntityType(model, entity);
-            return new EntityInstanceContext(serializerContext, entityType, entity);
+            return new EntityContext(serializerContext, entityType, entity);
         }
 
         private static IEdmEntityTypeReference GetEntityType(IEdmModel model, object entity)

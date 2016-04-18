@@ -8,18 +8,18 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData.Builder
 {
     /// <summary>
-    /// This class builds a cache that allows for efficient look up of bindable procedure by EntityType. 
+    /// This class builds a cache that allows for efficient look up of bindable operation by EntityType. 
     /// </summary>
-    internal class BindableProcedureFinder
+    internal class BindableOperationFinder
     {
         private Dictionary<IEdmEntityType, List<IEdmOperation>> _map = new Dictionary<IEdmEntityType, List<IEdmOperation>>();
 
         private Dictionary<IEdmEntityType, List<IEdmOperation>> _collectionMap = new Dictionary<IEdmEntityType, List<IEdmOperation>>();
 
         /// <summary>
-        /// Constructs a concurrent cache for looking up bindable procedures for any EntityType in the provided model.
+        /// Constructs a concurrent cache for looking up bindable operations for any EntityType in the provided model.
         /// </summary>
-        public BindableProcedureFinder(IEdmModel model)
+        public BindableOperationFinder(IEdmModel model)
         {
             var operationGroups =
                 from op in model.SchemaElements.OfType<IEdmOperation>()
@@ -56,25 +56,25 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Finds procedures that can be invoked on the given entity type. This would include all the procedures that are bound
+        /// Finds operations that can be invoked on the given entity type. This would include all the operations that are bound
         /// to the given type and its base types.
         /// </summary>
         /// <param name="entityType">The EDM entity type.</param>
-        /// <returns>A collection of procedures bound to the entity type.</returns>
-        public virtual IEnumerable<IEdmOperation> FindProcedures(IEdmEntityType entityType)
+        /// <returns>A collection of operations bound to the entity type.</returns>
+        public virtual IEnumerable<IEdmOperation> FindOperations(IEdmEntityType entityType)
         {
-            return GetTypeHierarchy(entityType).SelectMany(FindDeclaredProcedures);
+            return GetTypeHierarchy(entityType).SelectMany(FindDeclaredOperations);
         }
 
         /// <summary>
-        /// Finds procedures that can be invoked on the feed. This would include all the procedures that are bound to the given
+        /// Finds operations that can be invoked on the feed. This would include all the operations that are bound to the given
         /// type and its base types.
         /// </summary>
         /// <param name="entityType">The EDM entity type.</param>
-        /// <returns>A collection of procedures bound to the feed.</returns>
-        public virtual IEnumerable<IEdmOperation> FindProceduresBoundToCollection(IEdmEntityType entityType)
+        /// <returns>A collection of operations bound to the feed.</returns>
+        public virtual IEnumerable<IEdmOperation> FindOperationsBoundToCollection(IEdmEntityType entityType)
         {
-            return GetTypeHierarchy(entityType).SelectMany(FindDeclaredProceduresBoundToCollection);
+            return GetTypeHierarchy(entityType).SelectMany(FindDeclaredOperationsBoundToCollection);
         }
 
         private static IEnumerable<IEdmEntityType> GetTypeHierarchy(IEdmEntityType entityType)
@@ -87,7 +87,7 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private IEnumerable<IEdmOperation> FindDeclaredProcedures(IEdmEntityType entityType)
+        private IEnumerable<IEdmOperation> FindDeclaredOperations(IEdmEntityType entityType)
         {
             List<IEdmOperation> results;
 
@@ -101,7 +101,7 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private IEnumerable<IEdmOperation> FindDeclaredProceduresBoundToCollection(IEdmEntityType entityType)
+        private IEnumerable<IEdmOperation> FindDeclaredOperationsBoundToCollection(IEdmEntityType entityType)
         {
             List<IEdmOperation> results;
 

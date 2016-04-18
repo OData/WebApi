@@ -172,10 +172,10 @@ namespace System.Web.OData.Builder.Conventions
             entityType.AddKeys(entityType.AddStructuralProperty("Property", EdmPrimitiveTypeKind.String));
             var entityInstance = new { Property = "key" };
 
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, entityType.AsReference(), entityInstance);
+            EntityContext entityContext = new EntityContext(_writeContext, entityType.AsReference(), entityInstance);
 
             // Act
-            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityContext);
 
             // Assert
             Assert.Equal("'key'", keyValue);
@@ -190,10 +190,10 @@ namespace System.Web.OData.Builder.Conventions
             entityType.AddKeys(entityType.AddStructuralProperty("Property", EdmPrimitiveTypeKind.String));
             var entityInstance = new { Property = value };
 
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, entityType.AsReference(), entityInstance);
+            EntityContext entityContext = new EntityContext(_writeContext, entityType.AsReference(), entityInstance);
 
             // Act
-            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityContext);
 
             // Assert
             Assert.Equal(expectedValue, keyValue);
@@ -209,10 +209,10 @@ namespace System.Web.OData.Builder.Conventions
             entityType.AddKeys(entityType.AddStructuralProperty("Key2", EdmPrimitiveTypeKind.Int32));
             entityType.AddKeys(entityType.AddStructuralProperty("Key3", EdmPrimitiveTypeKind.Boolean));
 
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, entityType.AsReference(), entityInstance);
+            EntityContext entityContext = new EntityContext(_writeContext, entityType.AsReference(), entityInstance);
 
             // Act
-            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityContext);
 
             // Assert
             Assert.Equal("Key1='key1',Key2=2,Key3=true", keyValue);
@@ -227,11 +227,11 @@ namespace System.Web.OData.Builder.Conventions
             entityType.AddKeys(entityType.AddStructuralProperty("Key1", EdmPrimitiveTypeKind.Date));
             entityType.AddKeys(entityType.AddStructuralProperty("Key2", EdmPrimitiveTypeKind.TimeOfDay));
 
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext,
+            EntityContext entityContext = new EntityContext(_writeContext,
                 entityType.AsReference(), entityInstance);
 
             // Act
-            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityContext);
 
             // Assert
             Assert.Equal("Key1=2015-12-02,Key2=04:03:02.0010000", keyValue);
@@ -245,11 +245,11 @@ namespace System.Web.OData.Builder.Conventions
             EdmEntityType entityType = new EdmEntityType("NS", "Name");
             entityType.AddKeys(entityType.AddStructuralProperty("Key", EdmPrimitiveTypeKind.String));
 
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, entityType.AsReference(), entityInstance);
+            EntityContext entityContext = new EntityContext(_writeContext, entityType.AsReference(), entityInstance);
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => ConventionsHelpers.GetEntityKeyValue(entityInstanceContext),
+                () => ConventionsHelpers.GetEntityKeyValue(entityContext),
                 "Key property 'Key' of type 'NS.Name' is null. Key properties cannot have null values.");
         }
 
@@ -263,11 +263,11 @@ namespace System.Web.OData.Builder.Conventions
             entityType.AddKeys(entityType.AddStructuralProperty("Key2", EdmPrimitiveTypeKind.Int32));
             entityType.AddKeys(entityType.AddStructuralProperty("Key3", EdmPrimitiveTypeKind.Boolean));
 
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, entityType.AsReference(), entityInstance);
+            EntityContext entityContext = new EntityContext(_writeContext, entityType.AsReference(), entityInstance);
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => ConventionsHelpers.GetEntityKeyValue(entityInstanceContext),
+                () => ConventionsHelpers.GetEntityKeyValue(entityContext),
                 "Key property 'Key3' of type 'NS.Name' is null. Key properties cannot have null values.");
         }
 
@@ -280,10 +280,10 @@ namespace System.Web.OData.Builder.Conventions
             baseEntityType.AddKeys(baseEntityType.AddStructuralProperty("Key", EdmPrimitiveTypeKind.String));
             EdmEntityType derivedEntityType = new EdmEntityType("NS", "Derived", baseEntityType);
 
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, derivedEntityType.AsReference(), entityInstance);
+            EntityContext entityContext = new EntityContext(_writeContext, derivedEntityType.AsReference(), entityInstance);
 
             // Act
-            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityContext);
 
             // Assert
             Assert.Equal("'key'", keyValue);
@@ -300,10 +300,10 @@ namespace System.Web.OData.Builder.Conventions
             baseEntityType.AddKeys(baseEntityType.AddStructuralProperty("Key3", EdmPrimitiveTypeKind.Boolean));
             EdmEntityType derivedEntityType = new EdmEntityType("NS", "Derived", baseEntityType);
 
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext, derivedEntityType.AsReference(), entityInstance);
+            EntityContext entityContext = new EntityContext(_writeContext, derivedEntityType.AsReference(), entityInstance);
 
             // Act
-            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityContext);
 
             // Assert
             Assert.Equal("Key1='key1',Key2=2,Key3=true", keyValue);
@@ -319,11 +319,11 @@ namespace System.Web.OData.Builder.Conventions
             baseEntityType.AddKeys(baseEntityType.AddStructuralProperty("Key2", EdmPrimitiveTypeKind.TimeOfDay));
             EdmEntityType derivedEntityType = new EdmEntityType("NS", "Derived", baseEntityType);
 
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(_writeContext,
+            EntityContext entityContext = new EntityContext(_writeContext,
                 derivedEntityType.AsReference(), entityInstance);
 
             // Act
-            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityInstanceContext);
+            var keyValue = ConventionsHelpers.GetEntityKeyValue(entityContext);
 
             // Assert
             Assert.Equal("Key1=2015-02-26,Key2=01:02:03.0040000", keyValue);

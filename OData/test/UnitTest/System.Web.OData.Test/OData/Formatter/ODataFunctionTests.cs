@@ -282,7 +282,7 @@ namespace System.Web.OData.Formatter
             // bound to collection
             BoundToCollectionFunction(model, "BoundToCollectionFunction", "p", intType, entityType);
 
-            model.SetAnnotationValue<BindableProcedureFinder>(model, new BindableProcedureFinder(model));
+            model.SetAnnotationValue<BindableOperationFinder>(model, new BindableOperationFinder(model));
             return model;
         }
 

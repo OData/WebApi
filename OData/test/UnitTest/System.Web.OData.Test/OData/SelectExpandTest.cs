@@ -47,7 +47,7 @@ namespace System.Web.OData
                 "odata-alias2-inheritance",
                 "odata-alias2-inheritance",
                 GetModelWithCustomerAliasAndInheritance());
-            _configuration.MapODataServiceRoute("odata2", "odata2", GetModelWithProcedures());
+            _configuration.MapODataServiceRoute("odata2", "odata2", GetModelWithOperations());
             _configuration.Routes.MapHttpRoute("api", "api/{controller}", new { controller = "NonODataSelectExpandTestCustomers" });
 
             HttpServer server = new HttpServer(_configuration);
@@ -408,7 +408,7 @@ namespace System.Web.OData
             return builder.GetEdmModel();
         }
 
-        private IEdmModel GetModelWithProcedures()
+        private IEdmModel GetModelWithOperations()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<Player>("Players");

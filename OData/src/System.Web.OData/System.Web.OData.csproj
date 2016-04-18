@@ -75,7 +75,7 @@
     <Compile Include="Extensions\HttpErrorExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
-    <Compile Include="OData\Builder\ProcedureLinkBuilder.cs" />
+    <Compile Include="OData\Builder\OperationLinkBuilder.cs" />
     <Compile Include="OData\Builder\AutoExpandAttribute.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AutoExpandAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AutoExpandAttributeEdmPropertyConvention.cs" />
@@ -178,7 +178,6 @@
     <Compile Include="OData\Builder\Conventions\Attributes\UnsortableAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\FunctionLinkGenerationConvention.cs" />
     <Compile Include="OData\Builder\FunctionConfiguration.cs" />
-    <Compile Include="OData\Builder\FunctionLinkBuilder.cs" />
     <Compile Include="OData\Builder\EdmTypeMap.cs" />
     <Compile Include="OData\ClrPropertyInfoAnnotation.cs" />
     <Compile Include="OData\EdmModelExtensions.cs" />
@@ -294,10 +293,9 @@
     <Compile Include="OData\Routing\ODataRouteConstants.cs" />
     <Compile Include="OData\NonValidatingParameterBindingAttribute.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="OData\Builder\ActionLinkBuilder.cs" />
-    <Compile Include="OData\Builder\BindableProcedureFinder.cs" />
+    <Compile Include="OData\Builder\BindableOperationFinder.cs" />
     <Compile Include="OData\Builder\Conventions\ActionLinkGenerationConvention.cs" />
-    <Compile Include="OData\Builder\Conventions\IProcedureConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\IOperationConvention.cs" />
     <Compile Include="OData\Builder\Conventions\AssociationSetDiscoveryConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\DataMemberAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Formatter\Deserialization\CollectionDeserializationHelpers.cs" />
@@ -369,8 +367,8 @@
     <Compile Include="OData\Builder\ParameterConfiguration.cs" />
     <Compile Include="OData\Builder\PrimitivePropertyConfiguration.cs" />
     <Compile Include="OData\Builder\PrimitiveTypeConfiguration.cs" />
-    <Compile Include="OData\Builder\ProcedureConfiguration.cs" />
-    <Compile Include="OData\Builder\ProcedureKind.cs" />
+    <Compile Include="OData\Builder\OperationConfiguration.cs" />
+    <Compile Include="OData\Builder\OperationKind.cs" />
     <Compile Include="OData\Builder\PropertyConfiguration.cs" />
     <Compile Include="OData\Builder\PropertyKind.cs" />
     <Compile Include="OData\Builder\StructuralPropertyConfiguration.cs" />
@@ -382,8 +380,8 @@
     <Compile Include="OData\Builder\Conventions\EntityTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\IEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfigurationOfTComplexType.cs" />
-    <Compile Include="OData\EntityInstanceContextOfTEntityType.cs" />
-    <Compile Include="OData\EntityInstanceContext.cs" />
+    <Compile Include="OData\EntityContextOfTEntityType.cs" />
+    <Compile Include="OData\EntityContext.cs" />
     <Compile Include="OData\FastPropertyAccessor.cs" />
     <Compile Include="OData\PerRequestActionValueBinder.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataActionPayloadDeserializer.cs" />

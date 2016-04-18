@@ -28,7 +28,7 @@ namespace System.Web.OData.Builder
             var singleton = model.SchemaElements.OfType<IEdmEntityContainer>().Single().FindSingleton("Exchange");
             var singletonInstance = new SingletonProduct { ID = 15 };
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = singleton };
-            var entityContext = new EntityInstanceContext(serializerContext, productType.AsReference(), singletonInstance);
+            var entityContext = new EntityContext(serializerContext, productType.AsReference(), singletonInstance);
             var linkBuilderAnnotation = new NavigationSourceLinkBuilderAnnotation(exchange);
 
             // Act
@@ -64,7 +64,7 @@ namespace System.Web.OData.Builder
             var singleton = model.SchemaElements.OfType<IEdmEntityContainer>().Single().FindSingleton("Exchange");
             var singletonInstance = new SingletonProduct { ID = 15 };
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = singleton };
-            var entityContext = new EntityInstanceContext(serializerContext, productType.AsReference(), singletonInstance);
+            var entityContext = new EntityContext(serializerContext, productType.AsReference(), singletonInstance);
 
             // Act
             var editLink = exchange.GetEditLink().Factory(entityContext);

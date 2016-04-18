@@ -14,7 +14,7 @@ namespace System.Web.OData.Builder
     /// FunctionConfigurations are exposed via $metadata as a <Function/> element for bound function and <FunctionImport/> element for unbound function.
     /// </remarks>
     /// </summary>
-    public class FunctionConfiguration : ProcedureConfiguration
+    public class FunctionConfiguration : OperationConfiguration
     {
         /// <summary>
         /// Initializes a new instance of <see cref="FunctionConfiguration" /> class.
@@ -28,9 +28,9 @@ namespace System.Web.OData.Builder
         }
 
         /// <inheritdoc />
-        public override ProcedureKind Kind
+        public override OperationKind Kind
         {
-            get { return ProcedureKind.Function; }
+            get { return OperationKind.Function; }
         }
 
         /// <inheritdoc />
@@ -58,7 +58,7 @@ namespace System.Web.OData.Builder
         public bool SupportedInOrderBy { get; set; }
 
         /// <summary>
-        /// Gets/Set a value indicating whether the procedure is included in service document or not.
+        /// Gets/Set a value indicating whether the operation is included in service document or not.
         /// Meaningful only for function imports; ignore for bound functions.
         /// </summary>
         public bool IncludeInServiceDocument { get; set; }
@@ -66,7 +66,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Register a factory that creates functions links.
         /// </summary>
-        public FunctionConfiguration HasFunctionLink(Func<EntityInstanceContext, Uri> functionLinkFactory, bool followsConventions)
+        public FunctionConfiguration HasFunctionLink(Func<EntityContext, Uri> functionLinkFactory, bool followsConventions)
         {
             if (functionLinkFactory == null)
             {
@@ -78,7 +78,7 @@ namespace System.Web.OData.Builder
                 throw Error.InvalidOperation(SRResources.HasFunctionLinkRequiresBindToEntity, Name);
             }
 
-            ProcedureLinkBuilder = new FunctionLinkBuilder(functionLinkFactory, followsConventions);
+            OperationLinkBuilder = new OperationLinkBuilder(functionLinkFactory, followsConventions);
             FollowsConventions = followsConventions;
             return this;
         }
@@ -87,14 +87,14 @@ namespace System.Web.OData.Builder
         /// Retrieves the currently registered function link factory.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
-        public Func<EntityInstanceContext, Uri> GetFunctionLink()
+        public Func<EntityContext, Uri> GetFunctionLink()
         {
-            if (ProcedureLinkBuilder == null)
+            if (OperationLinkBuilder == null)
             {
                 return null;
             }
 
-            return ProcedureLinkBuilder.LinkFactory;
+            return OperationLinkBuilder.LinkFactory;
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace System.Web.OData.Builder
                 throw Error.InvalidOperation(SRResources.HasFunctionLinkRequiresBindToCollectionOfEntity, Name);
             }
 
-            ProcedureLinkBuilder = new FunctionLinkBuilder(functionLinkFactory, followsConventions);
+            OperationLinkBuilder = new OperationLinkBuilder(functionLinkFactory, followsConventions);
             FollowsConventions = followsConventions;
             return this;
         }
@@ -125,12 +125,12 @@ namespace System.Web.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
         public Func<FeedContext, Uri> GetFeedFunctionLink()
         {
-            if (ProcedureLinkBuilder == null)
+            if (OperationLinkBuilder == null)
             {
                 return null;
             }
 
-            return ProcedureLinkBuilder.FeedLinkFactory;
+            return OperationLinkBuilder.FeedLinkFactory;
         }
 
         /// <summary>

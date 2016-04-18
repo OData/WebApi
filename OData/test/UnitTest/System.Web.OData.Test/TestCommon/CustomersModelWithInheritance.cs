@@ -334,7 +334,7 @@ namespace System.Web.OData.TestCommon
                      Target = customer
                  }),
                 customers);
-            model.SetAnnotationValue<BindableProcedureFinder>(model, new BindableProcedureFinder(model));
+            model.SetAnnotationValue<BindableOperationFinder>(model, new BindableOperationFinder(model));
 
             // set properties
             Model = model;

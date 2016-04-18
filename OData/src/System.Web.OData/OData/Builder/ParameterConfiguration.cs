@@ -7,7 +7,7 @@ using System.Web.OData.Formatter;
 namespace System.Web.OData.Builder
 {
     /// <summary>
-    /// Represents a parameter to a Procedure
+    /// Represents a parameter to a Operation
     /// </summary>
     public abstract class ParameterConfiguration
     {

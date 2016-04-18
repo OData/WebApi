@@ -70,135 +70,51 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Gets the <see cref="ActionLinkBuilder"/> to be used while generating action links for the given action.
+        /// Gets the <see cref="OperationLinkBuilder"/> to be used while generating operation links for the given action.
         /// </summary>
-        /// <param name="model">The <see cref="IEdmModel"/> containing the action.</param>
-        /// <param name="action">The action for which the link builder is needed.</param>
-        /// <returns>The <see cref="ActionLinkBuilder"/> for the given action if one is set; otherwise, a new
-        /// <see cref="ActionLinkBuilder"/> that generates action links following OData URL conventions.</returns>
+        /// <param name="model">The <see cref="IEdmModel"/> containing the operation.</param>
+        /// <param name="operation">The operation for which the link builder is needed.</param>
+        /// <returns>The <see cref="OperationLinkBuilder"/> for the given operation if one is set; otherwise, a new
+        /// <see cref="OperationLinkBuilder"/> that generates operation links following OData URL conventions.</returns>
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
             Justification = "IEdmActionImport is more relevant here.")]
-        public static ActionLinkBuilder GetActionLinkBuilder(this IEdmModel model, IEdmAction action)
+        public static OperationLinkBuilder GetOperationLinkBuilder(this IEdmModel model, IEdmOperation operation)
         {
             if (model == null)
             {
                 throw Error.ArgumentNull("model");
             }
-            if (action == null)
+            if (operation == null)
             {
-                throw Error.ArgumentNull("action");
+                throw Error.ArgumentNull("operation");
             }
 
-            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(action);
-            if (actionLinkBuilder == null)
+            OperationLinkBuilder linkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(operation);
+            if (linkBuilder == null)
             {
-                // Let ODL to process the action link for entity
-                if (action.Parameters != null)
-                {
-                    if (action.Parameters.First().Type.IsEntity())
-                    {
-                        actionLinkBuilder = new ActionLinkBuilder(
-                            (EntityInstanceContext entityInstanceContext) =>
-                                entityInstanceContext.GenerateActionLink(action),
-                            followsConventions: true);
-                    }
-                    else if (action.Parameters.First().Type.IsCollection())
-                    {
-                        actionLinkBuilder =
-                            new ActionLinkBuilder((FeedContext feedContext) => feedContext.GenerateActionLink(action),
-                                followsConventions: true);
-                    }
-                }
-
-                model.SetActionLinkBuilder(action, actionLinkBuilder);
+                linkBuilder = GetDefaultOperationLinkBuilder(operation);
+                model.SetOperationLinkBuilder(operation, linkBuilder);
             }
 
-            return actionLinkBuilder;
+            return linkBuilder;
         }
 
         /// <summary>
-        /// Sets the <see cref="ActionLinkBuilder"/> to be used for generating the OData action link for the given action.
+        /// Sets the <see cref="OperationLinkBuilder"/> to be used for generating the OData operation link for the given operation.
         /// </summary>
         /// <param name="model">The <see cref="IEdmModel"/> containing the entity set.</param>
-        /// <param name="action">The action for which the action link is to be generated.</param>
-        /// <param name="actionLinkBuilder">The <see cref="ActionLinkBuilder"/> to set.</param>
+        /// <param name="operation">The operation for which the operation link is to be generated.</param>
+        /// <param name="actionLinkBuilder">The <see cref="OperationLinkBuilder"/> to set.</param>
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
             Justification = "IEdmActionImport is more relevant here.")]
-        public static void SetActionLinkBuilder(this IEdmModel model, IEdmAction action, ActionLinkBuilder actionLinkBuilder)
+        public static void SetOperationLinkBuilder(this IEdmModel model, IEdmOperation operation, OperationLinkBuilder actionLinkBuilder)
         {
             if (model == null)
             {
                 throw Error.ArgumentNull("model");
             }
 
-            model.SetAnnotationValue(action, actionLinkBuilder);
-        }
-
-        /// <summary>
-        /// Gets the <see cref="FunctionLinkBuilder"/> to be used while generating function links for the given function.
-        /// </summary>
-        /// <param name="model">The <see cref="IEdmModel"/> containing the action.</param>
-        /// <param name="function">The function for which the link builder is needed.</param>
-        /// <returns>The <see cref="FunctionLinkBuilder"/> for the given function if one is set; otherwise, a new
-        /// <see cref="FunctionLinkBuilder"/> that generates function links following OData URL conventions.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
-            Justification = "IEdmActionImport is more relevant here.")]
-        public static FunctionLinkBuilder GetFunctionLinkBuilder(this IEdmModel model, IEdmFunction function)
-        {
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
-            }
-
-            if (function == null)
-            {
-                throw Error.ArgumentNull("function");
-            }
-
-            FunctionLinkBuilder functionLinkBuilder = model.GetAnnotationValue<FunctionLinkBuilder>(function);
-            if (functionLinkBuilder == null)
-            {
-                if (function.Parameters != null)
-                {
-                    if (function.Parameters.First().Type.IsEntity())
-                    {
-                        functionLinkBuilder = new FunctionLinkBuilder(
-                            (EntityInstanceContext entityInstanceContext) =>
-                                entityInstanceContext.GenerateFunctionLink(function),
-                            followsConventions: true);
-                    }
-                    else if (function.Parameters.First().Type.IsCollection())
-                    {
-                        functionLinkBuilder =
-                            new FunctionLinkBuilder(
-                                (FeedContext feedContext) => feedContext.GenerateFunctionLink(function),
-                                followsConventions: true);
-                    }
-                }
-
-                model.SetFunctionLinkBuilder(function, functionLinkBuilder);
-            }
-
-            return functionLinkBuilder;
-        }
-
-        /// <summary>
-        /// Sets the <see cref="FunctionLinkBuilder"/> to be used for generating the OData function link for the given function.
-        /// </summary>
-        /// <param name="model">The <see cref="IEdmModel"/> containing the entity set.</param>
-        /// <param name="function">The function for which the function link is to be generated.</param>
-        /// <param name="functionLinkBuilder">The <see cref="FunctionLinkBuilder"/> to set.</param>
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
-            Justification = "IEdmFunctionImport is more relevant here.")]
-        public static void SetFunctionLinkBuilder(this IEdmModel model, IEdmFunction function,
-            FunctionLinkBuilder functionLinkBuilder)
-        {
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
-            }
-
-            model.SetAnnotationValue(function, functionLinkBuilder);
+            model.SetAnnotationValue(operation, actionLinkBuilder);
         }
 
         internal static ClrTypeCache GetTypeMappingCache(this IEdmModel model)
@@ -225,6 +141,49 @@ namespace System.Web.OData
         {
             Contract.Assert(model != null);
             return model.GetAnnotationValue<OperationTitleAnnotation>(action);
+        }
+
+        private static OperationLinkBuilder GetDefaultOperationLinkBuilder(IEdmOperation operation)
+        {
+            OperationLinkBuilder linkBuilder = null;
+            if (operation.Parameters != null)
+            {
+                if (operation.Parameters.First().Type.IsEntity())
+                {
+                    if (operation is IEdmAction)
+                    {
+                        linkBuilder = new OperationLinkBuilder(
+                            (EntityContext entityContext) =>
+                                entityContext.GenerateActionLink(operation),
+                            followsConventions: true);
+                    }
+                    else
+                    {
+                        linkBuilder = new OperationLinkBuilder(
+                            (EntityContext entityContext) =>
+                                entityContext.GenerateFunctionLink(operation),
+                            followsConventions: true);
+                    }
+                }
+                else if (operation.Parameters.First().Type.IsCollection())
+                {
+                    if (operation is IEdmAction)
+                    {
+                        linkBuilder =
+                            new OperationLinkBuilder(
+                                (FeedContext feedContext) => feedContext.GenerateActionLink(operation),
+                                followsConventions: true);
+                    }
+                    else
+                    {
+                        linkBuilder =
+                            new OperationLinkBuilder(
+                                (FeedContext feedContext) => feedContext.GenerateFunctionLink(operation),
+                                followsConventions: true);
+                    }
+                }
+            }
+            return linkBuilder;
         }
     }
 }

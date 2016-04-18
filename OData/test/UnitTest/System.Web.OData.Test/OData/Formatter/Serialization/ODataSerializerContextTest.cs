@@ -48,7 +48,7 @@ namespace System.Web.OData.Formatter.Serialization
                 SkipExpensiveAvailabilityChecks = true,
                 Url = new UrlHelper()
             };
-            EntityInstanceContext entity = new EntityInstanceContext { SerializerContext = context };
+            EntityContext entity = new EntityContext { SerializerContext = context };
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
             IEdmNavigationProperty navProp = model.Customer.NavigationProperties().First();
 
@@ -73,7 +73,7 @@ namespace System.Web.OData.Formatter.Serialization
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
             IEdmNavigationProperty navProp = model.Customer.NavigationProperties().First();
             ODataSerializerContext context = new ODataSerializerContext { NavigationSource = model.Customers, Model = model.Model };
-            EntityInstanceContext entity = new EntityInstanceContext { SerializerContext = context };
+            EntityContext entity = new EntityContext { SerializerContext = context };
 
             // Act
             ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpand, navProp);

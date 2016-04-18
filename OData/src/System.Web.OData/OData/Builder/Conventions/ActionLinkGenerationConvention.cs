@@ -8,9 +8,9 @@ namespace System.Web.OData.Builder.Conventions
     /// <summary>
     /// The ActionLinkGenerationConvention calls action.HasActionLink(..) if the action binds to a single entity and has not previously been configured.
     /// </summary>
-    internal class ActionLinkGenerationConvention : IProcedureConvention
+    internal class ActionLinkGenerationConvention : IOperationConvention
     {
-        public void Apply(ProcedureConfiguration configuration, ODataModelBuilder model)
+        public void Apply(OperationConfiguration configuration, ODataModelBuilder model)
         {
             ActionConfiguration action = configuration as ActionConfiguration;
 

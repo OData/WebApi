@@ -354,8 +354,8 @@
   <data name="InvalidBindingParameterType" xml:space="preserve">
     <value>Invalid bindingParameter type '{0}'. A bindingParameter must be either an EntityType or a Collection of EntityTypes.</value>
   </data>
-  <data name="MoreThanOneProcedureFound" xml:space="preserve">
-    <value>More than one Procedure called '{0}' was found. Try using the other RemoveProcedure override.</value>
+  <data name="MoreThanOneOperationFound" xml:space="preserve">
+    <value>More than one Operation called '{0}' was found. Try using the other RemoveOperation override.</value>
   </data>
   <data name="NoMatchingIEdmTypeFound" xml:space="preserve">
     <value>No IEdmType could be found for '{0}'.</value>
@@ -685,8 +685,8 @@
   <data name="MoreThanOneUnboundActionFound" xml:space="preserve">
     <value>Found more than one unbound action with name '{0}'. Each unbound action must have an unique action name.</value>
   </data>
-  <data name="ProcedureHasInvalidEntitySetPath" xml:space="preserve">
-    <value>Invalid EntitySetPath detected. '{0}' is not a valid entity set path for procedure '{1}'.</value>
+  <data name="OperationHasInvalidEntitySetPath" xml:space="preserve">
+    <value>Invalid EntitySetPath detected. '{0}' is not a valid entity set path for operation '{1}'.</value>
   </data>
   <data name="FunctionParameterNotFound" xml:space="preserve">
     <value>The function parameter '{0}' cannot be found.</value>

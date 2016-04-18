@@ -15,7 +15,7 @@ namespace System.Web.OData.Builder
     /// ActionConfigurations are exposed via $metadata as a <Action/> element for bound action and <ActionImport/> element for unbound action.
     /// </remarks> 
     /// </summary>
-    public class ActionConfiguration : ProcedureConfiguration
+    public class ActionConfiguration : OperationConfiguration
     {
         /// <summary>
         /// Initializes a new instance of <see cref="ActionConfiguration" /> class.
@@ -28,9 +28,9 @@ namespace System.Web.OData.Builder
         }
 
         /// <inheritdoc />
-        public override ProcedureKind Kind
+        public override OperationKind Kind
         {
-            get { return ProcedureKind.Action; }
+            get { return OperationKind.Action; }
         }
 
         /// <inheritdoc />
@@ -42,7 +42,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Register a factory that creates actions links.
         /// </summary>
-        public ActionConfiguration HasActionLink(Func<EntityInstanceContext, Uri> actionLinkFactory, bool followsConventions)
+        public ActionConfiguration HasActionLink(Func<EntityContext, Uri> actionLinkFactory, bool followsConventions)
         {
             if (actionLinkFactory == null)
             {
@@ -54,7 +54,7 @@ namespace System.Web.OData.Builder
                 throw Error.InvalidOperation(SRResources.HasActionLinkRequiresBindToEntity, Name);
             }
 
-            ProcedureLinkBuilder = new ActionLinkBuilder(actionLinkFactory, followsConventions);
+            OperationLinkBuilder = new OperationLinkBuilder(actionLinkFactory, followsConventions);
             FollowsConventions = followsConventions;
             return this;
         }
@@ -63,14 +63,14 @@ namespace System.Web.OData.Builder
         /// Retrieves the currently registered action link factory.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
-        public Func<EntityInstanceContext, Uri> GetActionLink()
+        public Func<EntityContext, Uri> GetActionLink()
         {
-            if (ProcedureLinkBuilder == null)
+            if (OperationLinkBuilder == null)
             {
                 return null;
             }
 
-            return ProcedureLinkBuilder.LinkFactory;
+            return OperationLinkBuilder.LinkFactory;
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace System.Web.OData.Builder
                 throw Error.InvalidOperation(SRResources.HasActionLinkRequiresBindToCollectionOfEntity, Name);
             }
 
-            ProcedureLinkBuilder = new ActionLinkBuilder(actionLinkFactory, followsConventions);
+            OperationLinkBuilder = new OperationLinkBuilder(actionLinkFactory, followsConventions);
             FollowsConventions = followsConventions;
             return this;
         }
@@ -101,12 +101,12 @@ namespace System.Web.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
         public Func<FeedContext, Uri> GetFeedActionLink()
         {
-            if (ProcedureLinkBuilder == null)
+            if (OperationLinkBuilder == null)
             {
                 return null;
             }
 
-            return ProcedureLinkBuilder.FeedLinkFactory;
+            return OperationLinkBuilder.FeedLinkFactory;
         }
 
         /// <summary>

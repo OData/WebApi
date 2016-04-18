@@ -51,14 +51,14 @@ namespace System.Web.OData.Builder
             // Add the capabilities vocabulary annotations
             model.AddCapabilitiesVocabularyAnnotations(entitySets, edmMap);
 
-            // add procedures
-            model.AddProcedures(builder.Procedures, container, edmTypeMap, navigationSourceMap);
+            // add operations
+            model.AddOperations(builder.Operation, container, edmTypeMap, navigationSourceMap);
 
             // finish up
             model.AddElement(container);
 
             // build the map from IEdmEntityType to IEdmFunctionImport
-            model.SetAnnotationValue<BindableProcedureFinder>(model, new BindableProcedureFinder(model));
+            model.SetAnnotationValue<BindableOperationFinder>(model, new BindableOperationFinder(model));
 
             return model;
         }
@@ -166,9 +166,9 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private static void AddProcedureParameters(EdmOperation operation, ProcedureConfiguration procedure, Dictionary<Type, IEdmType> edmTypeMap)
+        private static void AddOperationParameters(EdmOperation operation, OperationConfiguration operationConfiguration, Dictionary<Type, IEdmType> edmTypeMap)
         {
-            foreach (ParameterConfiguration parameter in procedure.Parameters)
+            foreach (ParameterConfiguration parameter in operationConfiguration.Parameters)
             {
                 bool isParameterOptional = parameter.OptionalParameter;
                 IEdmTypeReference parameterTypeReference = GetEdmTypeReference(edmTypeMap, parameter.TypeConfiguration, nullable: isParameterOptional);
@@ -177,117 +177,117 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private static void AddProcedureLinkBuilder(IEdmModel model, IEdmOperation operation, ProcedureConfiguration procedure)
+        private static void AddOperationLinkBuilder(IEdmModel model, IEdmOperation operation, OperationConfiguration operationConfiguration)
         {
-            ActionConfiguration actionConfiguration = procedure as ActionConfiguration;
+            ActionConfiguration actionConfiguration = operationConfiguration as ActionConfiguration;
             IEdmAction action = operation as IEdmAction;
-            FunctionConfiguration functionConfiguration = procedure as FunctionConfiguration;
+            FunctionConfiguration functionConfiguration = operationConfiguration as FunctionConfiguration;
             IEdmFunction function = operation as IEdmFunction;
-            if (procedure.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity)
+            if (operationConfiguration.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity)
             {
                 if (actionConfiguration != null && actionConfiguration.GetActionLink() != null && action != null)
                 {
-                    model.SetActionLinkBuilder(
+                    model.SetOperationLinkBuilder(
                         action,
-                        new ActionLinkBuilder(actionConfiguration.GetActionLink(), actionConfiguration.FollowsConventions));
+                        new OperationLinkBuilder(actionConfiguration.GetActionLink(), actionConfiguration.FollowsConventions));
                 }
                 else if (functionConfiguration != null && functionConfiguration.GetFunctionLink() != null && function != null)
                 {
-                    model.SetFunctionLinkBuilder(
+                    model.SetOperationLinkBuilder(
                         function,
-                        new FunctionLinkBuilder(functionConfiguration.GetFunctionLink(), functionConfiguration.FollowsConventions));
+                        new OperationLinkBuilder(functionConfiguration.GetFunctionLink(), functionConfiguration.FollowsConventions));
                 }
             }
-            else if (procedure.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Collection)
+            else if (operationConfiguration.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Collection)
             {
                 CollectionTypeConfiguration collectionTypeConfiguration =
-                    (CollectionTypeConfiguration)procedure.BindingParameter.TypeConfiguration;
+                    (CollectionTypeConfiguration)operationConfiguration.BindingParameter.TypeConfiguration;
 
                 if (collectionTypeConfiguration.ElementType.Kind == EdmTypeKind.Entity)
                 {
                     if (actionConfiguration != null && actionConfiguration.GetFeedActionLink() != null && action != null)
                     {
-                        model.SetActionLinkBuilder(
+                        model.SetOperationLinkBuilder(
                             action,
-                            new ActionLinkBuilder(actionConfiguration.GetFeedActionLink(), actionConfiguration.FollowsConventions));
+                            new OperationLinkBuilder(actionConfiguration.GetFeedActionLink(), actionConfiguration.FollowsConventions));
                     }
                     else if (functionConfiguration != null && functionConfiguration.GetFeedFunctionLink() != null && function != null)
                     {
-                        model.SetFunctionLinkBuilder(
+                        model.SetOperationLinkBuilder(
                             function,
-                            new FunctionLinkBuilder(functionConfiguration.GetFeedFunctionLink(), functionConfiguration.FollowsConventions));
+                            new OperationLinkBuilder(functionConfiguration.GetFeedFunctionLink(), functionConfiguration.FollowsConventions));
                     }
                 }
             }
         }
 
-        private static void ValidateProcedureEntitySetPath(IEdmModel model, IEdmOperationImport operationImport, ProcedureConfiguration procedure)
+        private static void ValidateOperationEntitySetPath(IEdmModel model, IEdmOperationImport operationImport, OperationConfiguration operationConfiguration)
         {
-            IEdmOperationParameter procedureParameter;
+            IEdmOperationParameter operationParameter;
             IEnumerable<IEdmNavigationProperty> navPath;
             IEnumerable<EdmError> edmErrors;
-            if (procedure.EntitySetPath != null && !operationImport.TryGetRelativeEntitySetPath(model, out procedureParameter, out navPath, out edmErrors))
+            if (operationConfiguration.EntitySetPath != null && !operationImport.TryGetRelativeEntitySetPath(model, out operationParameter, out navPath, out edmErrors))
             {
-                throw Error.InvalidOperation(SRResources.ProcedureHasInvalidEntitySetPath, String.Join("/", procedure.EntitySetPath), procedure.FullyQualifiedName);
+                throw Error.InvalidOperation(SRResources.OperationHasInvalidEntitySetPath, String.Join("/", operationConfiguration.EntitySetPath), operationConfiguration.FullyQualifiedName);
             }
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", 
             Justification = "The majority of types referenced by this method are EdmLib types this method needs to know about to operate correctly")]
-        private static void AddProcedures(this EdmModel model, IEnumerable<ProcedureConfiguration> configurations, EdmEntityContainer container,
+        private static void AddOperations(this EdmModel model, IEnumerable<OperationConfiguration> configurations, EdmEntityContainer container,
             Dictionary<Type, IEdmType> edmTypeMap, IDictionary<string, EdmNavigationSource> edmNavigationSourceMap)
         {
             Contract.Assert(model != null, "Model can't be null");
 
             ValidateActionOverload(configurations.OfType<ActionConfiguration>());
 
-            foreach (ProcedureConfiguration procedure in configurations)
+            foreach (OperationConfiguration operationConfiguration in configurations)
             {
                 IEdmTypeReference returnReference = GetEdmTypeReference(edmTypeMap,
-                    procedure.ReturnType,
-                    procedure.ReturnType != null && procedure.OptionalReturn);
-                IEdmExpression expression = GetEdmEntitySetExpression(edmNavigationSourceMap, procedure);
-                IEdmPathExpression pathExpression = procedure.EntitySetPath != null
-                    ? new EdmPathExpression(procedure.EntitySetPath)
+                    operationConfiguration.ReturnType,
+                    operationConfiguration.ReturnType != null && operationConfiguration.OptionalReturn);
+                IEdmExpression expression = GetEdmEntitySetExpression(edmNavigationSourceMap, operationConfiguration);
+                IEdmPathExpression pathExpression = operationConfiguration.EntitySetPath != null
+                    ? new EdmPathExpression(operationConfiguration.EntitySetPath)
                     : null;
 
                 EdmOperationImport operationImport;
 
-                switch (procedure.Kind)
+                switch (operationConfiguration.Kind)
                 {
-                    case ProcedureKind.Action:
-                        operationImport = CreateActionImport(procedure, container, returnReference, expression, pathExpression);
+                    case OperationKind.Action:
+                        operationImport = CreateActionImport(operationConfiguration, container, returnReference, expression, pathExpression);
                         break;
-                    case ProcedureKind.Function:
-                        operationImport = CreateFunctionImport((FunctionConfiguration)procedure, container, returnReference, expression, pathExpression);
+                    case OperationKind.Function:
+                        operationImport = CreateFunctionImport((FunctionConfiguration)operationConfiguration, container, returnReference, expression, pathExpression);
                         break;
-                    case ProcedureKind.ServiceOperation:
+                    case OperationKind.ServiceOperation:
                         Contract.Assert(false, "ServiceOperations are not supported.");
                         goto default;
                     default:
-                        Contract.Assert(false, "Unsupported ProcedureKind");
+                        Contract.Assert(false, "Unsupported OperationKind");
                         return;
                 }
 
                 EdmOperation operation = (EdmOperation)operationImport.Operation;
-                if (procedure.IsBindable && procedure.Title != null && procedure.Title != procedure.Name)
+                if (operationConfiguration.IsBindable && operationConfiguration.Title != null && operationConfiguration.Title != operationConfiguration.Name)
                 {
-                    model.SetOperationTitleAnnotation(operation, new OperationTitleAnnotation(procedure.Title));
+                    model.SetOperationTitleAnnotation(operation, new OperationTitleAnnotation(operationConfiguration.Title));
                 }
 
-                if (procedure.IsBindable &&
-                    procedure.NavigationSource != null &&
-                    edmNavigationSourceMap.ContainsKey(procedure.NavigationSource.Name))
+                if (operationConfiguration.IsBindable &&
+                    operationConfiguration.NavigationSource != null &&
+                    edmNavigationSourceMap.ContainsKey(operationConfiguration.NavigationSource.Name))
                 {
-                    model.SetAnnotationValue(operation, new ReturnedEntitySetAnnotation(procedure.NavigationSource.Name));
+                    model.SetAnnotationValue(operation, new ReturnedEntitySetAnnotation(operationConfiguration.NavigationSource.Name));
                 }
 
-                AddProcedureParameters(operation, procedure, edmTypeMap);
+                AddOperationParameters(operation, operationConfiguration, edmTypeMap);
 
-                if (procedure.IsBindable)
+                if (operationConfiguration.IsBindable)
                 {
-                    AddProcedureLinkBuilder(model, operation, procedure);
-                    ValidateProcedureEntitySetPath(model, operationImport, procedure);
+                    AddOperationLinkBuilder(model, operation, operationConfiguration);
+                    ValidateOperationEntitySetPath(model, operationImport, operationConfiguration);
                 }
                 else
                 {
@@ -299,19 +299,19 @@ namespace System.Web.OData.Builder
         }
 
         private static EdmOperationImport CreateActionImport(
-            ProcedureConfiguration procedure,
+            OperationConfiguration operationConfiguration,
             EdmEntityContainer container,
             IEdmTypeReference returnReference,
             IEdmExpression expression,
             IEdmPathExpression pathExpression)
         {
             EdmAction operation = new EdmAction(
-                procedure.Namespace,
-                procedure.Name,
+                operationConfiguration.Namespace,
+                operationConfiguration.Name,
                 returnReference,
-                procedure.IsBindable,
+                operationConfiguration.IsBindable,
                 pathExpression);
-            return new EdmActionImport(container, procedure.Name, operation, expression);
+            return new EdmActionImport(container, operationConfiguration.Name, operation, expression);
         }
 
         private static EdmOperationImport CreateFunctionImport(
@@ -720,12 +720,12 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private static IEdmExpression GetEdmEntitySetExpression(IDictionary<string, EdmNavigationSource> navigationSources, ProcedureConfiguration procedure)
+        private static IEdmExpression GetEdmEntitySetExpression(IDictionary<string, EdmNavigationSource> navigationSources, OperationConfiguration operationConfiguration)
         {
-            if (procedure.NavigationSource != null)
+            if (operationConfiguration.NavigationSource != null)
             {
                 EdmNavigationSource navigationSource;
-                if (navigationSources.TryGetValue(procedure.NavigationSource.Name, out navigationSource))
+                if (navigationSources.TryGetValue(operationConfiguration.NavigationSource.Name, out navigationSource))
                 {
                     EdmEntitySet entitySet = navigationSource as EdmEntitySet;
                     if (entitySet != null)
@@ -735,12 +735,12 @@ namespace System.Web.OData.Builder
                 }
                 else
                 {
-                    throw Error.InvalidOperation(SRResources.EntitySetNotFoundForName, procedure.NavigationSource.Name);
+                    throw Error.InvalidOperation(SRResources.EntitySetNotFoundForName, operationConfiguration.NavigationSource.Name);
                 }
             }
-            else if (procedure.EntitySetPath != null)
+            else if (operationConfiguration.EntitySetPath != null)
             {
-                return new EdmPathExpression(procedure.EntitySetPath);
+                return new EdmPathExpression(operationConfiguration.EntitySetPath);
             }
 
             return null;
@@ -830,20 +830,20 @@ namespace System.Web.OData.Builder
 
         internal static IEnumerable<IEdmAction> GetAvailableActions(this IEdmModel model, IEdmEntityType entityType)
         {
-            return model.GetAvailableProcedures(entityType, false).OfType<IEdmAction>();
+            return model.GetAvailableOperations(entityType, false).OfType<IEdmAction>();
         }
 
         internal static IEnumerable<IEdmFunction> GetAvailableFunctions(this IEdmModel model, IEdmEntityType entityType)
         {
-            return model.GetAvailableProcedures(entityType, false).OfType<IEdmFunction>();
+            return model.GetAvailableOperations(entityType, false).OfType<IEdmFunction>();
         }
 
         internal static IEnumerable<IEdmOperation> GetAvailableOperationsBoundToCollection(this IEdmModel model, IEdmEntityType entityType)
         {
-            return model.GetAvailableProcedures(entityType, true);
+            return model.GetAvailableOperations(entityType, true);
         }
 
-        internal static IEnumerable<IEdmOperation> GetAvailableProcedures(this IEdmModel model, IEdmEntityType entityType, bool boundToCollection = false)
+        internal static IEnumerable<IEdmOperation> GetAvailableOperations(this IEdmModel model, IEdmEntityType entityType, bool boundToCollection = false)
         {
             if (model == null)
             {
@@ -855,20 +855,20 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("entityType");
             }
 
-            BindableProcedureFinder annotation = model.GetAnnotationValue<BindableProcedureFinder>(model);
+            BindableOperationFinder annotation = model.GetAnnotationValue<BindableOperationFinder>(model);
             if (annotation == null)
             {
-                annotation = new BindableProcedureFinder(model);
+                annotation = new BindableOperationFinder(model);
                 model.SetAnnotationValue(model, annotation);
             }
 
             if (boundToCollection)
             {
-                return annotation.FindProceduresBoundToCollection(entityType);
+                return annotation.FindOperationsBoundToCollection(entityType);
             }
             else
             {
-                return annotation.FindProcedures(entityType);
+                return annotation.FindOperations(entityType);
             }
         }
     }

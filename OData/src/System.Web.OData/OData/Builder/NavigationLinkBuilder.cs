@@ -16,7 +16,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="navigationLinkFactory">The navigation link factory for creating navigation links.</param>
         /// <param name="followsConventions">Represents whether this factory follows OData conventions or not.</param>
-        public NavigationLinkBuilder(Func<EntityInstanceContext, IEdmNavigationProperty, Uri> navigationLinkFactory, bool followsConventions)
+        public NavigationLinkBuilder(Func<EntityContext, IEdmNavigationProperty, Uri> navigationLinkFactory, bool followsConventions)
         {
             if (navigationLinkFactory == null)
             {
@@ -30,7 +30,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Gets the navigation link factory for creating navigation links.
         /// </summary>
-        public Func<EntityInstanceContext, IEdmNavigationProperty, Uri> Factory { get; private set; }
+        public Func<EntityContext, IEdmNavigationProperty, Uri> Factory { get; private set; }
 
         /// <summary>
         /// Gets a value representing whether this factory follows OData conventions or not.

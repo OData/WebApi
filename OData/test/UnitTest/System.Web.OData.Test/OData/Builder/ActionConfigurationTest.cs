@@ -35,7 +35,7 @@ namespace System.Web.OData.Builder
 
             // Assert
             Assert.Equal("Format", action.Name);
-            Assert.Equal(ProcedureKind.Action, action.Kind);
+            Assert.Equal(OperationKind.Action, action.Kind);
             Assert.NotNull(action.Parameters);
             Assert.Empty(action.Parameters);
             Assert.Null(action.ReturnType);
@@ -46,8 +46,8 @@ namespace System.Web.OData.Builder
             Assert.Equal("MyNamespace.Format", action.FullyQualifiedName);
             Assert.Equal("MyNamespaceII", actionII.Namespace);
             Assert.Equal("MyNamespaceII.FormatII", actionII.FullyQualifiedName);
-            Assert.NotNull(builder.Procedures);
-            Assert.Equal(2, builder.Procedures.Count());
+            Assert.NotNull(builder.Operation);
+            Assert.Equal(2, builder.Operation.Count());
         }
 
         [Fact]
@@ -56,11 +56,11 @@ namespace System.Web.OData.Builder
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
             ODataModelBuilder builder2 = new ODataModelBuilder();
-            ProcedureConfiguration toRemove = builder2.Action("ToRemove");
+            OperationConfiguration toRemove = builder2.Action("ToRemove");
 
             // Act
-            bool removedByName = builder.RemoveProcedure("ToRemove");
-            bool removed = builder.RemoveProcedure(toRemove);
+            bool removedByName = builder.RemoveOperation("ToRemove");
+            bool removed = builder.RemoveOperation(toRemove);
 
             //Assert
             Assert.False(removedByName);
@@ -501,14 +501,14 @@ namespace System.Web.OData.Builder
             IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault();
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model };
 
-            EntityInstanceContext context = new EntityInstanceContext(serializerContext, customerType.AsReference(), new Customer { CustomerId = 1 });
+            EntityContext context = new EntityContext(serializerContext, customerType.AsReference(), new Customer { CustomerId = 1 });
             IEdmAction rewardAction = Assert.Single(model.SchemaElements.OfType<IEdmAction>()); // Guard
-            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(rewardAction);
+            OperationLinkBuilder actionLinkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(rewardAction);
 
             //Assert
             Assert.Equal(expectedUri, reward.GetActionLink()(context));
             Assert.NotNull(actionLinkBuilder);
-            Assert.Equal(expectedUri, actionLinkBuilder.BuildActionLink(context));
+            Assert.Equal(expectedUri, actionLinkBuilder.BuildLink(context));
         }
 
         [Fact]
@@ -526,13 +526,13 @@ namespace System.Web.OData.Builder
 
             // Act
             IEdmAction rewardAction = Assert.Single(model.SchemaElements.OfType<IEdmAction>()); // Guard
-            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(rewardAction);
+            OperationLinkBuilder actionLinkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(rewardAction);
             FeedContext context = new FeedContext();
 
             //Assert
             Assert.Equal(expectedUri, reward.GetFeedActionLink()(context));
             Assert.NotNull(actionLinkBuilder);
-            Assert.Equal(expectedUri, actionLinkBuilder.BuildActionLink(context));
+            Assert.Equal(expectedUri, actionLinkBuilder.BuildLink(context));
         }
 
         [Fact]
@@ -561,13 +561,13 @@ namespace System.Web.OData.Builder
             IEdmEntitySet entitySet = container.EntitySets().SingleOrDefault();
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model, NavigationSource = entitySet, Url = urlHelper };
 
-            EntityInstanceContext context = new EntityInstanceContext(serializerContext, movieType.AsReference(), new Movie { ID = 1, Name = "Avatar" });
-            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(watchAction);
+            EntityContext context = new EntityContext(serializerContext, movieType.AsReference(), new Movie { ID = 1, Name = "Avatar" });
+            OperationLinkBuilder actionLinkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(watchAction);
 
             //Assert
             Assert.Equal(expectedUri, watch.GetActionLink()(context));
             Assert.NotNull(actionLinkBuilder);
-            Assert.Equal(expectedUri, actionLinkBuilder.BuildActionLink(context));
+            Assert.Equal(expectedUri, actionLinkBuilder.BuildLink(context));
         }
 
         [Fact]
@@ -601,12 +601,12 @@ namespace System.Web.OData.Builder
                 Request = request
             };
 
-            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(watchAction);
+            OperationLinkBuilder actionLinkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(watchAction);
 
             //Assert
             Assert.Equal(expectedUri, watch.GetFeedActionLink()(context));
             Assert.NotNull(actionLinkBuilder);
-            Assert.Equal(expectedUri, actionLinkBuilder.BuildActionLink(context));
+            Assert.Equal(expectedUri, actionLinkBuilder.BuildLink(context));
         }
 
         [Fact]
@@ -745,7 +745,7 @@ namespace System.Web.OData.Builder
             var actionBuilder = movie.Action("ActionName");
             actionBuilder.Parameter(paramType, "p1");
 
-            MethodInfo method = typeof(ProcedureConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
+            MethodInfo method = typeof(OperationConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
             method.MakeGenericMethod(paramType).Invoke(actionBuilder, new[] { "p2" });
 
             // Act

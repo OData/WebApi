@@ -25,7 +25,7 @@ namespace System.Web.OData.Builder
         private Dictionary<string, INavigationSourceConfiguration> _navigationSources
             = new Dictionary<string, INavigationSourceConfiguration>();
         private Dictionary<Type, PrimitiveTypeConfiguration> _primitiveTypes = new Dictionary<Type, PrimitiveTypeConfiguration>();
-        private List<ProcedureConfiguration> _procedures = new List<ProcedureConfiguration>();
+        private List<OperationConfiguration> _operations = new List<OperationConfiguration>();
 
         private Version _dataServiceVersion;
         private Version _maxDataServiceVersion;
@@ -130,11 +130,11 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Gets the collection of Procedures (i.e. Actions, Functions and ServiceOperations) in the model to be built.
+        /// Gets the collection of Operations (i.e. Actions, Functions and ServiceOperations) in the model to be built.
         /// </summary>
-        public virtual IEnumerable<ProcedureConfiguration> Procedures
+        public virtual IEnumerable<OperationConfiguration> Operation
         {
-            get { return _procedures; }
+            get { return _operations; }
         }
 
         /// <summary>
@@ -203,7 +203,7 @@ namespace System.Web.OData.Builder
         public virtual ActionConfiguration Action(string name)
         {
             ActionConfiguration action = new ActionConfiguration(this, name);
-            _procedures.Add(action);
+            _operations.Add(action);
             return action;
         }
 
@@ -216,7 +216,7 @@ namespace System.Web.OData.Builder
         public virtual FunctionConfiguration Function(string name)
         {
             FunctionConfiguration function = new FunctionConfiguration(this, name);
-            _procedures.Add(function);
+            _operations.Add(function);
             return function;
         }
 
@@ -318,11 +318,11 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Adds a procedure to the model.
+        /// Adds a operation to the model.
         /// </summary>
-        public virtual void AddProcedure(ProcedureConfiguration procedure)
+        public virtual void AddOperation(OperationConfiguration operation)
         {
-            _procedures.Add(procedure);
+            _operations.Add(operation);
         }
 
         /// <summary>
@@ -500,26 +500,26 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Remove the procedure from the model
+        /// Remove the operation from the model
         /// <remarks>
-        /// If there is more than one procedure with the name specified this method will not work.
-        /// You need to use the other RemoveProcedure(..) overload instead.
+        /// If there is more than one operation with the name specified this method will not work.
+        /// You need to use the other RemoveOperation(..) overload instead.
         /// </remarks>
         /// </summary>
-        /// <param name="name">The name of the procedure to be removed.</param>
-        /// <returns><c>true</c> if the procedure is present in the model and <c>false</c> otherwise.</returns>
-        public virtual bool RemoveProcedure(string name)
+        /// <param name="name">The name of the operation to be removed.</param>
+        /// <returns><c>true</c> if the operation is present in the model and <c>false</c> otherwise.</returns>
+        public virtual bool RemoveOperation(string name)
         {
             if (name == null)
             {
                 throw Error.ArgumentNull("name");
             }
 
-            ProcedureConfiguration[] toRemove = _procedures.Where(p => p.Name == name).ToArray();
+            OperationConfiguration[] toRemove = _operations.Where(p => p.Name == name).ToArray();
             int count = toRemove.Count();
             if (count == 1)
             {
-                return RemoveProcedure(toRemove[0]);
+                return RemoveOperation(toRemove[0]);
             }
             else if (count == 0)
             {
@@ -529,22 +529,22 @@ namespace System.Web.OData.Builder
             }
             else
             {
-                throw Error.InvalidOperation(SRResources.MoreThanOneProcedureFound, name);
+                throw Error.InvalidOperation(SRResources.MoreThanOneOperationFound, name);
             }
         }
 
         /// <summary>
-        /// Remove the procedure from the model
+        /// Remove the operation from the model
         /// </summary>
-        /// <param name="procedure">The procedure to be removed.</param>
-        /// <returns><c>true</c> if the procedure is present in the model and <c>false</c> otherwise.</returns>
-        public virtual bool RemoveProcedure(ProcedureConfiguration procedure)
+        /// <param name="operation">The operation to be removed.</param>
+        /// <returns><c>true</c> if the operation is present in the model and <c>false</c> otherwise.</returns>
+        public virtual bool RemoveOperation(OperationConfiguration operation)
         {
-            if (procedure == null)
+            if (operation == null)
             {
-                throw Error.ArgumentNull("procedure");
+                throw Error.ArgumentNull("operation");
             }
-            return _procedures.Remove(procedure);
+            return _operations.Remove(operation);
         }
 
         /// <summary>

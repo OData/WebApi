@@ -12,17 +12,17 @@ using Moq;
 
 namespace System.Web.OData
 {
-    public class EntityInstanceContextTest
+    public class EntityContextTest
     {
         private ODataSerializerContext _serializerContext = new ODataSerializerContext { Model = EdmCoreModel.Instance };
         private IEdmEntityType _entityType = new EdmEntityType("NS", "Name");
         private object _entityInstance = new object();
-        private EntityInstanceContext _context = new EntityInstanceContext();
+        private EntityContext _context = new EntityContext();
 
         [Fact]
         public void EmptyCtor_InitializesProperty_SerializerContext()
         {
-            var context = new EntityInstanceContext();
+            var context = new EntityContext();
             Assert.NotNull(context.SerializerContext);
         }
 
@@ -80,7 +80,7 @@ namespace System.Web.OData
             IEdmEntityTypeReference entityType = new EdmEntityTypeReference(new EdmEntityType("NS", "Name"), isNullable: false);
             Mock<IEdmStructuredObject> edmObject = new Mock<IEdmStructuredObject>();
             edmObject.Setup(o => o.GetEdmType()).Returns(entityType);
-            EntityInstanceContext instanceContext = new EntityInstanceContext(_serializerContext, entityType, edmObject.Object);
+            EntityContext instanceContext = new EntityContext(_serializerContext, entityType, edmObject.Object);
 
             Assert.Throws<InvalidOperationException>(
                 () => instanceContext.GetPropertyValue("NotPresentProperty"),
@@ -90,10 +90,10 @@ namespace System.Web.OData
         [Fact]
         public void GetPropertyValue_ThrowsInvalidOperation_IfEdmObjectIsNull()
         {
-            EntityInstanceContext instanceContext = new EntityInstanceContext();
+            EntityContext instanceContext = new EntityContext();
             Assert.Throws<InvalidOperationException>(
                 () => instanceContext.GetPropertyValue("SomeProperty"),
-                "The property 'EdmObject' of EntityInstanceContext cannot be null.");
+                "The property 'EdmObject' of EntityContext cannot be null.");
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace System.Web.OData
             Mock<IEdmEntityObject> mock = new Mock<IEdmEntityObject>();
             mock.Setup(o => o.TryGetPropertyValue(It.IsAny<string>(), out outObject)).Returns(false).Verifiable();
             mock.Setup(o => o.GetEdmType()).Returns<IEdmTypeReference>(null).Verifiable();
-            EntityInstanceContext context = new EntityInstanceContext();
+            EntityContext context = new EntityContext();
             context.EdmObject = mock.Object;
 
             // Act & Assert
@@ -128,7 +128,7 @@ namespace System.Web.OData
             edmObject.Setup(e => e.TryGetPropertyValue("Property", out propertyValue)).Returns(true);
             edmObject.Setup(e => e.GetEdmType()).Returns(new EdmEntityTypeReference(edmType, isNullable: false));
 
-            EntityInstanceContext entityContext = new EntityInstanceContext { EdmModel = model, EdmObject = edmObject.Object, EntityType = edmType };
+            EntityContext entityContext = new EntityContext { EdmModel = model, EdmObject = edmObject.Object, EntityType = edmType };
 
             // Act
             object resource = entityContext.EntityInstance;
@@ -155,7 +155,7 @@ namespace System.Web.OData
             edmObject.Setup(e => e.TryGetPropertyValue("CollectionProperty", out propertyValue)).Returns(true);
             edmObject.Setup(e => e.GetEdmType()).Returns(new EdmEntityTypeReference(edmType, isNullable: false));
 
-            EntityInstanceContext entityContext = new EntityInstanceContext { EdmModel = model, EdmObject = edmObject.Object, EntityType = edmType };
+            EntityContext entityContext = new EntityContext { EdmModel = model, EdmObject = edmObject.Object, EntityType = edmType };
 
             // Act
             object resource = entityContext.EntityInstance;
@@ -171,7 +171,7 @@ namespace System.Web.OData
             EdmEntityType entityType = new EdmEntityType("NS", "Name");
             EdmModel model = new EdmModel();
             IEdmEntityObject instance = new Mock<IEdmEntityObject>().Object;
-            EntityInstanceContext entityContext = new EntityInstanceContext { EntityType = entityType, EdmModel = model, EdmObject = instance };
+            EntityContext entityContext = new EntityContext { EntityType = entityType, EdmModel = model, EdmObject = instance };
 
             Assert.Throws<InvalidOperationException>(
                 () => entityContext.EntityInstance, "The provided mapping does not contain an entry for the entity type 'NS.Name'.");
@@ -180,7 +180,7 @@ namespace System.Web.OData
         [Fact]
         public void Property_EntityInstance_ReturnsNullWhenEdmObjectIsNull()
         {
-            EntityInstanceContext entityContext = new EntityInstanceContext { EdmObject = null };
+            EntityContext entityContext = new EntityContext { EdmObject = null };
             Assert.Null(entityContext.EntityInstance);
         }
 
@@ -190,8 +190,8 @@ namespace System.Web.OData
             object instance = new object();
             IEdmEntityTypeReference entityType = new Mock<IEdmEntityTypeReference>().Object;
             IEdmModel edmModel = new Mock<IEdmModel>().Object;
-            EntityInstanceContext entityContext =
-                new EntityInstanceContext { EdmObject = new TypedEdmEntityObject(instance, entityType, edmModel) };
+            EntityContext entityContext =
+                new EntityContext { EdmObject = new TypedEdmEntityObject(instance, entityType, edmModel) };
 
             Assert.Same(instance, entityContext.EntityInstance);
         }

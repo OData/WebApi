@@ -272,9 +272,9 @@ namespace System.Web.OData.Builder
                 ApplyNavigationSourceConventions(navigationSource);
             }
 
-            foreach (ProcedureConfiguration procedure in Procedures)
+            foreach (OperationConfiguration operation in Operation)
             {
-                ApplyProcedureConventions(procedure);
+                ApplyOperationConventions(operation);
             }
 
             if (OnModelCreating != null)
@@ -1092,11 +1092,11 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private void ApplyProcedureConventions(ProcedureConfiguration procedure)
+        private void ApplyOperationConventions(OperationConfiguration operation)
         {
-            foreach (IProcedureConvention convention in _conventions.OfType<IProcedureConvention>())
+            foreach (IOperationConvention convention in _conventions.OfType<IOperationConvention>())
             {
-                convention.Apply(procedure, this);
+                convention.Apply(operation, this);
             }
         }
 

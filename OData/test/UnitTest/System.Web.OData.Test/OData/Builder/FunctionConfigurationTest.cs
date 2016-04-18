@@ -35,7 +35,7 @@ namespace System.Web.OData.Builder
 
             // Assert
             Assert.Equal("Format", function.Name);
-            Assert.Equal(ProcedureKind.Function, function.Kind);
+            Assert.Equal(OperationKind.Function, function.Kind);
             Assert.NotNull(function.Parameters);
             Assert.Empty(function.Parameters);
             Assert.Null(function.ReturnType);
@@ -48,8 +48,8 @@ namespace System.Web.OData.Builder
             Assert.Equal("MyNamespace.Format", function.FullyQualifiedName);
             Assert.Equal("MyNamespaceII", functionII.Namespace);
             Assert.Equal("MyNamespaceII.FormatII", functionII.FullyQualifiedName);
-            Assert.NotNull(builder.Procedures);
-            Assert.Equal(2, builder.Procedures.Count());
+            Assert.NotNull(builder.Operation);
+            Assert.Equal(2, builder.Operation.Count());
         }
 
         [Fact]
@@ -58,11 +58,11 @@ namespace System.Web.OData.Builder
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
             ODataModelBuilder builder2 = new ODataModelBuilder();
-            ProcedureConfiguration toRemove = builder2.Function("ToRemove");
+            OperationConfiguration toRemove = builder2.Function("ToRemove");
 
             // Act
-            bool removedByName = builder.RemoveProcedure("ToRemove");
-            bool removed = builder.RemoveProcedure(toRemove);
+            bool removedByName = builder.RemoveOperation("ToRemove");
+            bool removed = builder.RemoveOperation(toRemove);
 
             //Assert
             Assert.False(removedByName);
@@ -569,14 +569,14 @@ namespace System.Web.OData.Builder
             IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault();
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model };
 
-            EntityInstanceContext context = new EntityInstanceContext(serializerContext, customerType.AsReference(), new Customer { CustomerId = 1 });
+            EntityContext context = new EntityContext(serializerContext, customerType.AsReference(), new Customer { CustomerId = 1 });
             IEdmFunction rewardFunction = Assert.Single(model.SchemaElements.OfType<IEdmFunction>()); // Guard
-            FunctionLinkBuilder functionLinkBuilder = model.GetAnnotationValue<FunctionLinkBuilder>(rewardFunction);
+            OperationLinkBuilder functionLinkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(rewardFunction);
 
             //Assert
             Assert.Equal(expectedUri, reward.GetFunctionLink()(context));
             Assert.NotNull(functionLinkBuilder);
-            Assert.Equal(expectedUri, functionLinkBuilder.BuildFunctionLink(context));
+            Assert.Equal(expectedUri, functionLinkBuilder.BuildLink(context));
         }
 
         [Fact]
@@ -594,13 +594,13 @@ namespace System.Web.OData.Builder
 
             // Act
             IEdmFunction rewardFuntion = Assert.Single(model.SchemaElements.OfType<IEdmFunction>()); // Guard
-            FunctionLinkBuilder functionLinkBuilder = model.GetAnnotationValue<FunctionLinkBuilder>(rewardFuntion);
+            OperationLinkBuilder functionLinkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(rewardFuntion);
             FeedContext context = new FeedContext();
 
             //Assert
             Assert.Equal(expectedUri, reward.GetFeedFunctionLink()(context));
             Assert.NotNull(functionLinkBuilder);
-            Assert.Equal(expectedUri, functionLinkBuilder.BuildFunctionLink(context));
+            Assert.Equal(expectedUri, functionLinkBuilder.BuildLink(context));
         }
 
         [Fact]
@@ -630,13 +630,13 @@ namespace System.Web.OData.Builder
             IEdmEntitySet entitySet = container.EntitySets().SingleOrDefault();
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model, NavigationSource = entitySet, Url = urlHelper };
 
-            EntityInstanceContext context = new EntityInstanceContext(serializerContext, movieType.AsReference(), new Movie { ID = 1, Name = "Avatar" });
-            FunctionLinkBuilder functionLinkBuilder = model.GetAnnotationValue<FunctionLinkBuilder>(watchFunction);
+            EntityContext context = new EntityContext(serializerContext, movieType.AsReference(), new Movie { ID = 1, Name = "Avatar" });
+            OperationLinkBuilder functionLinkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(watchFunction);
 
             //Assert
             Assert.Equal(expectedUri, watch.GetFunctionLink()(context));
             Assert.NotNull(functionLinkBuilder);
-            Assert.Equal(expectedUri, functionLinkBuilder.BuildFunctionLink(context));
+            Assert.Equal(expectedUri, functionLinkBuilder.BuildLink(context));
         }
 
         [Fact]
@@ -672,12 +672,12 @@ namespace System.Web.OData.Builder
                 Request = request
             };
 
-            FunctionLinkBuilder functionLinkBuilder = model.GetAnnotationValue<FunctionLinkBuilder>(watchFunction);
+            OperationLinkBuilder functionLinkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(watchFunction);
 
             //Assert
             Assert.Equal(expectedUri, watch.GetFeedFunctionLink()(context));
             Assert.NotNull(functionLinkBuilder);
-            Assert.Equal(expectedUri, functionLinkBuilder.BuildFunctionLink(context));
+            Assert.Equal(expectedUri, functionLinkBuilder.BuildLink(context));
         }
 
         [Fact]
@@ -814,7 +814,7 @@ namespace System.Web.OData.Builder
             var functionBuilder = movie.Function("FunctionName").Returns<int>();
             functionBuilder.Parameter(paramType, "p1");
 
-            MethodInfo method = typeof(ProcedureConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
+            MethodInfo method = typeof(OperationConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
             method.MakeGenericMethod(paramType).Invoke(functionBuilder, new[] { "p2" });
 
             // Act

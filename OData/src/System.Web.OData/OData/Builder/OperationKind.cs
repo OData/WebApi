@@ -4,10 +4,10 @@
 namespace System.Web.OData.Builder
 {
     /// <summary>
-    /// The Kind of OData Procedure.
+    /// The Kind of OData Operation.
     /// One of Action, Function or ServiceOperation.
     /// </summary>
-    public enum ProcedureKind
+    public enum OperationKind
     {
         /// <summary>
         /// An action

@@ -15,7 +15,7 @@ namespace System.Web.OData.Builder.Conventions
     public class ActionLinkGenerationConventionTest
     {
         [Fact]
-        public void Apply_SetFunctionLinkBuilder_ForActionBoundToEntity()
+        public void Apply_SetOperationLinkBuilder_ForActionBoundToEntity()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -31,7 +31,7 @@ namespace System.Web.OData.Builder.Conventions
             // Assert
             var actionLink = action.GetActionLink();
             Assert.NotNull(actionLink);
-            Assert.IsType<Func<EntityInstanceContext, Uri>>(actionLink);
+            Assert.IsType<Func<EntityContext, Uri>>(actionLink);
 
             Assert.Null(action.GetFeedActionLink());
         }
@@ -57,14 +57,14 @@ namespace System.Web.OData.Builder.Conventions
             IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
             var edmType = model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "Customer");
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = customers, Url = request.GetUrlHelper() };
-            var entityContext = new EntityInstanceContext(serializerContext, edmType.AsReference(), new Customer { Id = 109 });
+            var entityContext = new EntityContext(serializerContext, edmType.AsReference(), new Customer { Id = 109 });
 
             // Assert
             var edmAction = model.SchemaElements.OfType<IEdmAction>().First(f => f.Name == "MyAction");
             Assert.NotNull(edmAction);
 
-            ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(edmAction);
-            Uri link = actionLinkBuilder.BuildActionLink(entityContext);
+            OperationLinkBuilder actionLinkBuilder = model.GetOperationLinkBuilder(edmAction);
+            Uri link = actionLinkBuilder.BuildLink(entityContext);
 
             Assert.Equal("http://localhost:123/odata/Customers(109)/Default.MyAction", link.AbsoluteUri);
         }
@@ -118,8 +118,8 @@ namespace System.Web.OData.Builder.Conventions
             var edmAction = model.SchemaElements.OfType<IEdmAction>().First(f => f.Name == "MyAction");
             Assert.NotNull(edmAction);
 
-            ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(edmAction);
-            Uri link = actionLinkBuilder.BuildActionLink(entityContext);
+            OperationLinkBuilder actionLinkBuilder = model.GetOperationLinkBuilder(edmAction);
+            Uri link = actionLinkBuilder.BuildLink(entityContext);
 
             Assert.Equal("http://localhost:123/odata/Customers/Default.MyAction", link.AbsoluteUri);
         }
@@ -149,18 +149,18 @@ namespace System.Web.OData.Builder.Conventions
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
 
-            ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(edmAction);
+            OperationLinkBuilder actionLinkBuilder = model.GetOperationLinkBuilder(edmAction);
 
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = edmCustomers, Url = request.GetUrlHelper() };
-            var entityContext = new EntityInstanceContext(serializerContext, edmCustomer.AsReference(), new Customer { Id = 2009 });
+            var entityContext = new EntityContext(serializerContext, edmCustomer.AsReference(), new Customer { Id = 2009 });
 
             // Assert
-            Uri link = actionLinkBuilder.BuildActionLink(entityContext);
+            Uri link = actionLinkBuilder.BuildLink(entityContext);
             Assert.Equal("http://localhost/ActionTestWorks", link.AbsoluteUri);
         }
 
         [Fact]
-        public void Apply_SetsActionLinkBuilder_OnlyIfActionIsBindable()
+        public void Apply_SetsOperationLinkBuilder_OnlyIfActionIsBindable()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -175,7 +175,7 @@ namespace System.Web.OData.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
             var paintEdmAction = model.EntityContainer.Elements.OfType<IEdmActionImport>().Single();
 
-            ActionLinkBuilder actionLinkBuilder = model.GetAnnotationValue<ActionLinkBuilder>(paintEdmAction);
+            OperationLinkBuilder actionLinkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(paintEdmAction);
 
             Assert.Null(actionLinkBuilder);
         }

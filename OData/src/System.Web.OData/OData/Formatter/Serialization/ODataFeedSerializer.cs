@@ -263,16 +263,8 @@ namespace System.Web.OData.Formatter.Serialization
                 return null;
             }
 
-            ProcedureLinkBuilder builder;
-            IEdmAction action = operation as IEdmAction;
-            if (action != null)
-            {
-                builder = model.GetActionLinkBuilder(action);
-            }
-            else
-            {
-                builder = model.GetFunctionLinkBuilder((IEdmFunction)operation);
-            }
+            OperationLinkBuilder builder;
+            builder = model.GetOperationLinkBuilder(operation);
 
             if (builder == null)
             {
@@ -289,6 +281,7 @@ namespace System.Web.OData.Formatter.Serialization
             Uri metadata = new Uri(baseUri, "#" + operation.FullName());
 
             ODataOperation odataOperation;
+            IEdmAction action = operation as IEdmAction;
             if (action != null)
             {
                 odataOperation = new ODataAction();

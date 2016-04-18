@@ -44,35 +44,35 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void CanRemoveProcedureByName()
+        public void CanRemoveOperationByName()
         {
             // Arrange
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
             ActionConfiguration action = builder.Action("Format");
-            bool removed = builder.RemoveProcedure("Format");
+            bool removed = builder.RemoveOperation("Format");
 
             // Assert      
-            Assert.Equal(0, builder.Procedures.Count());
+            Assert.Equal(0, builder.Operation.Count());
         }
 
         [Fact]
-        public void CanRemoveProcedure()
+        public void CanRemoveOperation()
         {
             // Arrange
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
             ActionConfiguration action = builder.Action("Format");
-            ProcedureConfiguration procedure = builder.Procedures.SingleOrDefault();
-            bool removed = builder.RemoveProcedure(procedure);
+            OperationConfiguration operation = builder.Operation.SingleOrDefault();
+            bool removed = builder.RemoveOperation(operation);
 
             // Assert
             Assert.True(removed);
-            Assert.Equal(0, builder.Procedures.Count());
+            Assert.Equal(0, builder.Operation.Count());
         }
 
         [Fact]
-        public void RemoveProcedureByNameThrowsWhenAmbiguous()
+        public void RemoveOperationByNameThrowsWhenAmbiguous()
         {
             // Arrange
             // Act
@@ -84,12 +84,12 @@ namespace System.Web.OData.Builder
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                builder.RemoveProcedure("Format");
+                builder.RemoveOperation("Format");
             });
         }
 
         [Fact]
-        public void BuilderIncludesMapFromEntityTypeToBindableProcedures()
+        public void BuilderIncludesMapFromEntityTypeToBindableOperations()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -101,12 +101,12 @@ namespace System.Web.OData.Builder
             IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault();
 
             // Act
-            BindableProcedureFinder finder = model.GetAnnotationValue<BindableProcedureFinder>(model);
+            BindableOperationFinder finder = model.GetAnnotationValue<BindableOperationFinder>(model);
 
             // Assert
             Assert.NotNull(finder);
-            Assert.NotNull(finder.FindProcedures(customerType).SingleOrDefault());
-            Assert.Equal("Reward", finder.FindProcedures(customerType).SingleOrDefault().Name);
+            Assert.NotNull(finder.FindOperations(customerType).SingleOrDefault());
+            Assert.Equal("Reward", finder.FindOperations(customerType).SingleOrDefault().Name);
         }
 
         [Fact]
@@ -149,7 +149,7 @@ namespace System.Web.OData.Builder
             bindingParameterTypeMock.Setup(o => o.ClrType).Returns(entityType);
             configuration.SetBindingParameter("IgnoreParameter", bindingParameterTypeMock.Object);
             configuration.HasActionLink((a) => { throw new NotImplementedException(); }, followsConventions: value);
-            builder.AddProcedure(configuration);
+            builder.AddOperation(configuration);
             builder.AddEntityType(entityType);
 
             // Act
@@ -157,7 +157,7 @@ namespace System.Web.OData.Builder
 
             // Assert
             var action = Assert.Single(model.SchemaElements.OfType<IEdmAction>());
-            ActionLinkBuilder actionLinkBuilder = model.GetActionLinkBuilder(action);
+            OperationLinkBuilder actionLinkBuilder = model.GetOperationLinkBuilder(action);
             Assert.NotNull(actionLinkBuilder);
             Assert.Equal(value, actionLinkBuilder.FollowsConventions);
         }
@@ -177,7 +177,7 @@ namespace System.Web.OData.Builder
             bindingParameterTypeMock.Setup(o => o.ClrType).Returns(entityType);
             configuration.SetBindingParameter("IgnoreParameter", bindingParameterTypeMock.Object);
             configuration.HasFunctionLink((a) => { throw new NotImplementedException(); }, followsConventions: value);
-            builder.AddProcedure(configuration);
+            builder.AddOperation(configuration);
             builder.AddEntityType(entityType);
 
             // Act
@@ -185,7 +185,7 @@ namespace System.Web.OData.Builder
 
             // Assert
             var function = Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
-            FunctionLinkBuilder functionLinkBuilder = model.GetFunctionLinkBuilder(function);
+            OperationLinkBuilder functionLinkBuilder = model.GetOperationLinkBuilder(function);
             Assert.NotNull(functionLinkBuilder);
             Assert.Equal(value, functionLinkBuilder.FollowsConventions);
         }

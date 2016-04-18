@@ -1114,20 +1114,20 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to More than one Operation called &apos;{0}&apos; was found. Try using the other RemoveOperation override..
+        /// </summary>
+        internal static string MoreThanOneOperationFound {
+            get {
+                return ResourceManager.GetString("MoreThanOneOperationFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Found more than one action with name &apos;{0}&apos; bound to the same type &apos;{1}&apos;. Each bound action must have a different binding type or name..
         /// </summary>
         internal static string MoreThanOneOverloadActionBoundToSameTypeFound {
             get {
                 return ResourceManager.GetString("MoreThanOneOverloadActionBoundToSameTypeFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to More than one Procedure called &apos;{0}&apos; was found. Try using the other RemoveProcedure override..
-        /// </summary>
-        internal static string MoreThanOneProcedureFound {
-            get {
-                return ResourceManager.GetString("MoreThanOneProcedureFound", resourceCulture);
             }
         }
         
@@ -1510,6 +1510,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid EntitySetPath detected. &apos;{0}&apos; is not a valid entity set path for operation &apos;{1}&apos;..
+        /// </summary>
+        internal static string OperationHasInvalidEntitySetPath {
+            get {
+                return ResourceManager.GetString("OperationHasInvalidEntitySetPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The operation import segment must be a function import segment..
         /// </summary>
         internal static string OperationImportSegmentMustBeFunction {
@@ -1578,15 +1587,6 @@ namespace System.Web.OData.Properties {
         internal static string ParameterTypeIsNotCollection {
             get {
                 return ResourceManager.GetString("ParameterTypeIsNotCollection", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid EntitySetPath detected. &apos;{0}&apos; is not a valid entity set path for procedure &apos;{1}&apos;..
-        /// </summary>
-        internal static string ProcedureHasInvalidEntitySetPath {
-            get {
-                return ResourceManager.GetString("ProcedureHasInvalidEntitySetPath", resourceCulture);
             }
         }
         

@@ -547,7 +547,7 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
-        public void CanParseRootProcedureSegment()
+        public void CanParseRootOperationSegment()
         {
             // Arrange
             string odataPath = "GetRoutingCustomerById()";
@@ -1918,7 +1918,7 @@ namespace System.Web.OData.Routing
         [InlineData("GetRoutingCustomerById", "RoutingCustomer", "RoutingCustomers", false)]
         [InlineData("GetSalesPersonById", "SalesPerson", "SalesPeople", false)]
         [InlineData("GetAllVIPs", "VIP", "RoutingCustomers", true)]
-        public void CanResolveSetAndTypeViaRootProcedureSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
+        public void CanResolveSetAndTypeViaRootOperationSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
             AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
         }

@@ -728,20 +728,20 @@ namespace System.Web.OData.Formatter
 
             EntitySetConfiguration<MainEntity> mainSet = builder.EntitySet<MainEntity>("MainEntity");
 
-            Func<EntityInstanceContext<MainEntity>, Uri> idLinkFactory = (e) =>
+            Func<EntityContext<MainEntity>, Uri> idLinkFactory = (e) =>
                 CreateAbsoluteUri("/MainEntity/id/" + e.GetPropertyValue("Id").ToString());
             mainSet.HasIdLink(idLinkFactory, followsConventions: true);
 
             if (!sameLinksForIdAndEdit)
             {
-                Func<EntityInstanceContext<MainEntity>, Uri> editLinkFactory =
+                Func<EntityContext<MainEntity>, Uri> editLinkFactory =
                     (e) => CreateAbsoluteUri("/MainEntity/edit/" + e.GetPropertyValue("Id").ToString());
                 mainSet.HasEditLink(editLinkFactory, followsConventions: false);
             }
 
             if (!sameLinksForEditAndRead)
             {
-                Func<EntityInstanceContext<MainEntity>, Uri> readLinkFactory =
+                Func<EntityContext<MainEntity>, Uri> readLinkFactory =
                     (e) => CreateAbsoluteUri("/MainEntity/read/" + e.GetPropertyValue("Id").ToString());
                 mainSet.HasReadLink(readLinkFactory, followsConventions: false);
             }
@@ -851,9 +851,9 @@ namespace System.Web.OData.Formatter
             {
             }
 
-            public override ODataEntry CreateEntry(SelectExpandNode selectExpandNode, EntityInstanceContext entityInstanceContext)
+            public override ODataEntry CreateEntry(SelectExpandNode selectExpandNode, EntityContext entityContext)
             {
-                ODataEntry entry = base.CreateEntry(selectExpandNode, entityInstanceContext);
+                ODataEntry entry = base.CreateEntry(selectExpandNode, entityContext);
 
                 // instance annotation on entry
                 ODataPrimitiveValue guidValue = new ODataPrimitiveValue(new Guid("A6E07EAC-AD49-4BF7-A06E-203FF4D4B0D8"));
@@ -864,9 +864,9 @@ namespace System.Web.OData.Formatter
                 return entry;
             }
 
-            public override ODataProperty CreateStructuralProperty(IEdmStructuralProperty structuralProperty, EntityInstanceContext entityInstanceContext)
+            public override ODataProperty CreateStructuralProperty(IEdmStructuralProperty structuralProperty, EntityContext entityContext)
             {
-                ODataProperty property = base.CreateStructuralProperty(structuralProperty, entityInstanceContext);
+                ODataProperty property = base.CreateStructuralProperty(structuralProperty, entityContext);
 
                 // instance annotation on property
                 if (property.Name == "Age")

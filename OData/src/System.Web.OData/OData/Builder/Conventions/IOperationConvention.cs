@@ -4,10 +4,10 @@
 namespace System.Web.OData.Builder.Conventions
 {
     /// <summary>
-    /// Convention to apply to <see cref="ProcedureConfiguration"/> instances in the model
+    /// Convention to apply to <see cref="OperationConfiguration"/> instances in the model
     /// </summary>
-    internal interface IProcedureConvention : IConvention
+    internal interface IOperationConvention : IConvention
     {
-        void Apply(ProcedureConfiguration configuration, ODataModelBuilder model);
+        void Apply(OperationConfiguration configuration, ODataModelBuilder model);
     }
 }

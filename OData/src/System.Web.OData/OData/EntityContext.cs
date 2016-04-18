@@ -13,7 +13,7 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData
 {
     /// <summary>
-    /// An instance of <see cref="EntityInstanceContext"/> gets passed to the self link (
+    /// An instance of <see cref="EntityContext"/> gets passed to the self link (
     /// <see cref="M:NavigationSourceConfiguration.HasIdLink"/>,
     /// <see cref="M:NavigationSourceConfiguration.HasEditLink"/>,
     /// <see cref="M:NavigationSourceConfiguration.HasReadLink"/>
@@ -22,30 +22,30 @@ namespace System.Web.OData
     /// <see cref="M:NavigationSourceConfiguration.HasNavigationPropertiesLink"/>
     /// ) builders and can be used by the link builders to generate links.
     /// </summary>
-    public class EntityInstanceContext
+    public class EntityContext
     {
         private object _entityInstance;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityInstanceContext"/> class.
+        /// Initializes a new instance of the <see cref="EntityContext"/> class.
         /// </summary>
-        public EntityInstanceContext()
+        public EntityContext()
         {
             SerializerContext = new ODataSerializerContext();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityInstanceContext"/> class.
+        /// Initializes a new instance of the <see cref="EntityContext"/> class.
         /// </summary>
         /// <param name="serializerContext">The backing <see cref="ODataSerializerContext"/>.</param>
         /// <param name="entityType">The EDM entity type of this instance context.</param>
         /// <param name="entityInstance">The object representing the instance of this context.</param>
-        public EntityInstanceContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, object entityInstance)
+        public EntityContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, object entityInstance)
             : this(serializerContext, entityType, AsEdmEntityObject(entityInstance, entityType, serializerContext.Model))
         {
         }
 
-        private EntityInstanceContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, IEdmEntityObject edmObject)
+        private EntityContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, IEdmEntityObject edmObject)
         {
             if (serializerContext == null)
             {
@@ -181,7 +181,7 @@ namespace System.Web.OData
         {
             if (EdmObject == null)
             {
-                throw Error.InvalidOperation(SRResources.EdmObjectNull, typeof(EntityInstanceContext).Name);
+                throw Error.InvalidOperation(SRResources.EdmObjectNull, typeof(EntityContext).Name);
             }
 
             object value;

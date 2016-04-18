@@ -66,7 +66,7 @@ namespace System.Web.OData
             IEdmEntityTypeReference typeReference = GetTypeReference(model, edmType, value);
             if (typeReference != null)
             {
-                EntityInstanceContext context = CreateInstanceContext(typeReference, value);
+                EntityContext context = CreateInstanceContext(typeReference, value);
                 context.EdmModel = model;
                 context.NavigationSource = path.NavigationSource;
                 IETagHandler etagHandler = configuration.GetETagHandler();
@@ -104,11 +104,11 @@ namespace System.Web.OData
         }
 
         private static EntityTagHeaderValue CreateETag(
-            EntityInstanceContext entityInstanceContext,
+            EntityContext entityContext,
             IETagHandler handler)
         {
-            IEdmModel model = entityInstanceContext.EdmModel;
-            IEdmEntitySet entitySet = entityInstanceContext.NavigationSource as IEdmEntitySet;
+            IEdmModel model = entityContext.EdmModel;
+            IEdmEntitySet entitySet = entityContext.NavigationSource as IEdmEntitySet;
 
             IEnumerable<IEdmStructuralProperty> concurrencyProperties;
             if (model != null && entitySet != null)
@@ -123,7 +123,7 @@ namespace System.Web.OData
             IDictionary<string, object> properties = new Dictionary<string, object>();
             foreach (IEdmStructuralProperty etagProperty in concurrencyProperties)
             {
-                properties.Add(etagProperty.Name, entityInstanceContext.GetPropertyValue(etagProperty.Name));
+                properties.Add(etagProperty.Name, entityContext.GetPropertyValue(etagProperty.Name));
             }
             EntityTagHeaderValue etagHeaderValue = handler.CreateETag(properties);
             return etagHeaderValue;
@@ -142,13 +142,13 @@ namespace System.Web.OData
             return null;
         }
 
-        private static EntityInstanceContext CreateInstanceContext(IEdmEntityTypeReference reference, object value)
+        private static EntityContext CreateInstanceContext(IEdmEntityTypeReference reference, object value)
         {
             Contract.Assert(reference != null);
             Contract.Assert(value != null);
 
             ODataSerializerContext serializerCtx = new ODataSerializerContext();
-            return new EntityInstanceContext(serializerCtx, reference, value);
+            return new EntityContext(serializerCtx, reference, value);
         }
 
         // Retrieves the IEdmEntityType from the path only in the case that we are addressing a single entity.

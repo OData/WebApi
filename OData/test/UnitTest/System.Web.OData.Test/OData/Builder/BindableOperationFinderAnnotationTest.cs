@@ -7,10 +7,10 @@ using Microsoft.TestCommon;
 
 namespace System.Web.OData.Builder
 {
-    public class BindableProcedureFinderAnnotationTest
+    public class BindableOperationFinderAnnotationTest
     {
         [Fact]
-        public void CanBuildBoundProcedureCacheForIEdmModel()
+        public void CanBuildBoundOperationCacheForIEdmModel()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -46,14 +46,14 @@ namespace System.Web.OData.Builder
             IEdmEntityType blockBusterType = model.SchemaElements.OfType<IEdmEntityType>().Single(e => e.Name == "Blockbuster");
 
             // Act 
-            BindableProcedureFinder annotation = new BindableProcedureFinder(model);
-            IEdmAction[] movieActions = annotation.FindProcedures(movieType)
+            BindableOperationFinder annotation = new BindableOperationFinder(model);
+            IEdmAction[] movieActions = annotation.FindOperations(movieType)
                 .OfType<IEdmAction>()
                 .ToArray();
-            IEdmAction[] customerActions = annotation.FindProcedures(customerType)
+            IEdmAction[] customerActions = annotation.FindOperations(customerType)
                 .OfType<IEdmAction>()
                 .ToArray();
-            IEdmAction[] blockBusterActions = annotation.FindProcedures(blockBusterType)
+            IEdmAction[] blockBusterActions = annotation.FindOperations(blockBusterType)
                 .OfType<IEdmAction>()
                 .ToArray();
 
@@ -71,7 +71,7 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void CanBuildProcedureBoundToCollectionCacheForIEdmModel()
+        public void CanBuildOperationBoundToCollectionCacheForIEdmModel()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -119,10 +119,10 @@ namespace System.Web.OData.Builder
             IEdmEntityType blockBusterType = model.SchemaElements.OfType<IEdmEntityType>().Single(e => e.Name == "Blockbuster");
 
             // Act
-            BindableProcedureFinder annotation = new BindableProcedureFinder(model);
-            var movieOperations = annotation.FindProceduresBoundToCollection(movieType).ToArray();
-            var customerOperations = annotation.FindProceduresBoundToCollection(customerType).ToArray();
-            var blockBusterOperations = annotation.FindProceduresBoundToCollection(blockBusterType).ToArray();
+            BindableOperationFinder annotation = new BindableOperationFinder(model);
+            var movieOperations = annotation.FindOperationsBoundToCollection(movieType).ToArray();
+            var customerOperations = annotation.FindOperationsBoundToCollection(customerType).ToArray();
+            var blockBusterOperations = annotation.FindOperationsBoundToCollection(blockBusterType).ToArray();
 
             // Assert
             Assert.Equal(3, movieOperations.Length);

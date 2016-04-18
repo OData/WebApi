@@ -14,9 +14,9 @@ namespace System.Web.OData.Builder
 
         public SelfLinkBuilder<Uri> ReadLinkBuilder { get; set; }
 
-        public Func<EntityInstanceContext, IEdmNavigationProperty, ODataMetadataLevel, Uri> NavigationLinkBuilder { get; set; }
+        public Func<EntityContext, IEdmNavigationProperty, ODataMetadataLevel, Uri> NavigationLinkBuilder { get; set; }
 
-        public override Uri BuildEditLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, Uri idLink)
+        public override Uri BuildEditLink(EntityContext instanceContext, ODataMetadataLevel metadataLevel, Uri idLink)
         {
             if (EditLinkBuilder != null)
             {
@@ -26,7 +26,7 @@ namespace System.Web.OData.Builder
             return null;
         }
 
-        public override Uri BuildIdLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel)
+        public override Uri BuildIdLink(EntityContext instanceContext, ODataMetadataLevel metadataLevel)
         {
             if (IdLinkBuilder != null)
             {
@@ -36,7 +36,7 @@ namespace System.Web.OData.Builder
             return null;
         }
 
-        public override Uri BuildReadLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, Uri editLink)
+        public override Uri BuildReadLink(EntityContext instanceContext, ODataMetadataLevel metadataLevel, Uri editLink)
         {
             if (ReadLinkBuilder != null)
             {
@@ -46,7 +46,7 @@ namespace System.Web.OData.Builder
             return null;
         }
 
-        public override Uri BuildNavigationLink(EntityInstanceContext context, IEdmNavigationProperty navigationProperty, ODataMetadataLevel metadataLevel)
+        public override Uri BuildNavigationLink(EntityContext context, IEdmNavigationProperty navigationProperty, ODataMetadataLevel metadataLevel)
         {
             if (NavigationLinkBuilder != null)
             {

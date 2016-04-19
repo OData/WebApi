@@ -4,6 +4,8 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData;
 using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace WebStack.QA.Test.OData.ParameterAlias
 {
@@ -153,7 +155,7 @@ namespace WebStack.QA.Test.OData.ParameterAlias
         [HttpGet]
         public IHttpActionResult HandleUnmappedRequest(ODataPath path)
         {
-            var functionSegment = path.Segments.ElementAt(1) as BoundFunctionPathSegment;
+            var functionSegment = path.Segments.ElementAt(1) as OperationSegment;
             if (functionSegment != null)
             {
                 return Ok(functionSegment.GetParameterValue("productName") as string);

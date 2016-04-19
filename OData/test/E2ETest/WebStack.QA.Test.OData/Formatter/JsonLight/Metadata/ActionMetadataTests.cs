@@ -9,6 +9,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Newtonsoft.Json.Linq;
@@ -64,10 +65,8 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
                        .FirstOrDefault();
 
                     var segments = new List<ODataPathSegment>();
-                    segments.Add(new EntitySetPathSegment(eic.NavigationSource as IEdmEntitySet));
-                    segments.Add(new KeyValuePathSegment(id.ToString()));
-                    // bug 1985: Make the internal constructor as public in BoundActionPathSegment
-                    //segments.Add(new BoundActionPathSegment(action));
+                    segments.Add(new EntitySetSegment(eic.NavigationSource as IEdmEntitySet));
+                    segments.Add(new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, eic.EntityType, null));
                     string link = eic.Url.CreateODataLink("Actions", eic.Request.ODataProperties().PathHandler, segments);
                     link += "/" + action.FullName();
                     return new Uri(link);
@@ -96,9 +95,9 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
                        .FirstOrDefault();
 
                     var segments = new List<ODataPathSegment>();
-                    segments.Add(new EntitySetPathSegment(eic.NavigationSource as IEdmEntitySet));
-                    segments.Add(new KeyValuePathSegment(id.ToString()));
-                    segments.Add(new CastPathSegment(derivedType.FullName()));
+                    segments.Add(new EntitySetSegment(eic.NavigationSource as IEdmEntitySet));
+                    segments.Add(new KeySegment(new[] {new KeyValuePair<string, object>("Id", id)}, eic.EntityType, null));
+                    segments.Add(new TypeSegment(derivedType, null));
                     // bug 1985: Make the internal constructor as public in BoundActionPathSegment
                     //segments.Add(new BoundActionPathSegment(action));
                     string link = eic.Url.CreateODataLink("Actions", eic.Request.ODataProperties().PathHandler, segments);

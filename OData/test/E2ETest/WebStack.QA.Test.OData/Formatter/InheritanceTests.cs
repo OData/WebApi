@@ -11,6 +11,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using Microsoft.OData.Client;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using WebStack.QA.Instancing;
 using WebStack.QA.Test.OData.Common;
@@ -97,10 +98,12 @@ namespace WebStack.QA.Test.OData.Formatter
                 new InheritanceTests_VehiclesController().LocalTable.AddOrUpdate(vehicle.Id, vehicle, (id, v) => vehicle);
                 this.LocalTable[key].BaseTypeNavigationProperty.Add(vehicle);
 
-                var response = this.Request.CreateResponse(System.Net.HttpStatusCode.Created, vehicle);
+                IEdmEntitySet entitySet = Request.ODataProperties().Model.EntityContainer.FindEntitySet("InheritanceTests_Vehicles");
+                
+                var response = this.Request.CreateResponse(HttpStatusCode.Created, vehicle);
                 response.Headers.Location = new Uri(this.Url.CreateODataLink(
-                        new EntitySetPathSegment("InheritanceTests_Vehicles"),
-                        new KeyValuePathSegment(vehicle.Id.ToString())));
+                        new EntitySetSegment(entitySet),
+                        new KeySegment(new[] { new KeyValuePair<string, object>("Id", vehicle.Id) }, entitySet.EntityType(), null)));
                 return response;
             });
         }
@@ -120,10 +123,12 @@ namespace WebStack.QA.Test.OData.Formatter
                 new InheritanceTests_VehiclesController().LocalTable.AddOrUpdate(vehicle.Id, vehicle, (id, v) => vehicle);
                 this.LocalTable[key].DerivedTypeNavigationProperty.Add(vehicle);
 
+                IEdmEntitySet entitySet = Request.ODataProperties().Model.EntityContainer.FindEntitySet("InheritanceTests_Vehicles");
+
                 var response = this.Request.CreateResponse(System.Net.HttpStatusCode.Created, vehicle);
                 response.Headers.Location = new Uri(this.Url.CreateODataLink(
-                        new EntitySetPathSegment("InheritanceTests_Vehicles"),
-                        new KeyValuePathSegment(vehicle.Id.ToString())));
+                        new EntitySetSegment(entitySet),
+                        new KeySegment(new[] { new KeyValuePair<string, object>("Id", vehicle.Id) }, entitySet.EntityType(), null)));
                 return response;
             });
         }
@@ -201,10 +206,8 @@ namespace WebStack.QA.Test.OData.Formatter
             var cars = builder.EntitySet<Car>("InheritanceTests_Cars");
             cars.EntityType.Action("Wash");
 
-            //// Skip: http://aspnetwebstack.codeplex.com/workitem/780
             builder.OnModelCreating = mb =>
                 {
-                    //cars = builder.EntitySets.OfType<EntitySetConfiguration<Car>>().First();
                     cars.HasNavigationPropertiesLink(
                         cars.EntityType.NavigationProperties,
                         (entityContext, navigationProperty) =>
@@ -212,9 +215,9 @@ namespace WebStack.QA.Test.OData.Formatter
                             object id;
                             entityContext.EdmObject.TryGetPropertyValue("Id", out id);
                             return new Uri(entityContext.Url.CreateODataLink(
-                                new EntitySetPathSegment("InheritanceTests_Cars"),
-                                new KeyValuePathSegment(id.ToString()),
-                                new NavigationPathSegment(navigationProperty.Name)));
+                                new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
+                                new KeySegment(new[] { new KeyValuePair<string, object>("Id", id)}, entityContext.EntityType, null),
+                                new NavigationPropertySegment(navigationProperty, null)));
                         },
                         false);
 

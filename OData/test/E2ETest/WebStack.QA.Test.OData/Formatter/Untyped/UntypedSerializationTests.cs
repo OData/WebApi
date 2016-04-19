@@ -12,6 +12,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Query;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Newtonsoft.Json.Linq;
@@ -139,6 +140,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
             request.Content = new StringContent(untypedCustomer.ToString());
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
             HttpResponseMessage response = Client.SendAsync(request).Result;
+            Console.WriteLine(response.Content.ReadAsStringAsync().Result);
             Assert.True(response.IsSuccessStatusCode);
 
             HttpRequestMessage getRequest = new HttpRequestMessage(HttpMethod.Get, string.Format("{0}{1}({2})?$expand=Orders", BaseAddress, url, i));
@@ -283,7 +285,10 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
             postedCustomer = customer;
             object id;
             customer.TryGetPropertyValue("Id", out id);
-            return Created(Url.CreateODataLink(new EntitySetPathSegment("UntypedCustomer"), new KeyValuePathSegment(id.ToString())), customer);
+
+            IEdmEntitySet entitySet = Request.ODataProperties().Model.EntityContainer.FindEntitySet("UntypedCustomers");
+            return Created(Url.CreateODataLink(new EntitySetSegment(entitySet),
+                new KeySegment(new[] {new KeyValuePair<string, object>("Id", id)}, entitySet.EntityType(), null)), customer);
         }
 
         public IHttpActionResult PrimitiveCollection()

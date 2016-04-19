@@ -5,6 +5,9 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.Edm;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace WebStack.QA.Test.OData.Common
 {
@@ -43,37 +46,45 @@ namespace WebStack.QA.Test.OData.Common
                 {
                     return null;
                 }
-                var navigationSegment = odataPath.Segments.OfType<NavigationPathSegment>().Last();
-                actionName += navigationSegment.NavigationPropertyName;
+                var navigationSegment = odataPath.Segments.OfType<NavigationPropertyLinkSegment>().Last();
+                actionName += navigationSegment.NavigationProperty.Name;
 
-                var castSegment = odataPath.Segments[2] as CastPathSegment;
+                var castSegment = odataPath.Segments[2] as TypeSegment;
+                
                 if (castSegment != null)
                 {
-                    var actionCastName = string.Format("{0}On{1}", actionName, castSegment.CastType.Name);
+                    IEdmType elementType = castSegment.EdmType;
+                    if (castSegment.EdmType.TypeKind == EdmTypeKind.Collection)
+                    {
+                        elementType = ((IEdmCollectionType)castSegment.EdmType).ElementType.Definition;
+                    }
+
+                    var actionCastName = string.Format("{0}On{1}", actionName, ((IEdmEntityType)elementType).Name);
                     if (actionMap.Contains(actionCastName))
                     {
-                        AddLinkInfoToRouteData(controllerContext.RouteData, odataPath);
+                        AddLinkInfoToRouteData(controllerContext, odataPath);
                         return actionCastName;
                     }
                 }
 
                 if (actionMap.Contains(actionName))
                 {
-                    AddLinkInfoToRouteData(controllerContext.RouteData, odataPath);
+                    AddLinkInfoToRouteData(controllerContext, odataPath);
                     return actionName;
                 }
             }
             return null;
         }
 
-        private static void AddLinkInfoToRouteData(IHttpRouteData routeData, ODataPath odataPath)
+        private static void AddLinkInfoToRouteData(HttpControllerContext controllerContext, ODataPath odataPath)
         {
-            KeyValuePathSegment keyValueSegment = odataPath.Segments.OfType<KeyValuePathSegment>().First();
-            routeData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
-            KeyValuePathSegment relatedKeySegment = odataPath.Segments.Last() as KeyValuePathSegment;
+            KeySegment keyValueSegment = odataPath.Segments.OfType<KeySegment>().First();
+            controllerContext.AddKeyValueToRouteData(keyValueSegment);
+
+            KeySegment relatedKeySegment = odataPath.Segments.Last() as KeySegment;
             if (relatedKeySegment != null)
             {
-                routeData.Values[ODataRouteConstants.RelatedKey] = relatedKeySegment.Value;
+                controllerContext.AddKeyValueToRouteData(relatedKeySegment, ODataRouteConstants.RelatedKey);
             }
         }
     }

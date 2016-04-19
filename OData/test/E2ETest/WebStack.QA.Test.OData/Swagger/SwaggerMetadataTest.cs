@@ -12,6 +12,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Newtonsoft.Json.Linq;
@@ -19,6 +20,7 @@ using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
 using Xunit.Extensions;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace WebStack.QA.Test.OData.Swagger
 {

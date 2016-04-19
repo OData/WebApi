@@ -9,6 +9,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Nuwa;
@@ -63,8 +64,8 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
                 object id;
                 eic.EdmObject.TryGetPropertyValue("Id", out id);
                 IList<ODataPathSegment> segments = new List<ODataPathSegment>();
-                segments.Add(new EntitySetPathSegment(eic.NavigationSource as IEdmEntitySet));
-                segments.Add(new KeyValuePathSegment(id.ToString()));
+                segments.Add(new EntitySetSegment(eic.NavigationSource as IEdmEntitySet));
+                segments.Add(new KeySegment(new[] {new KeyValuePair<string, object>("Id", id) }, eic.EntityType, null));
 
                 var action = eic.EdmModel.SchemaElements
                                 .Where(elem => elem.Name == "AlwaysAvailableActionBaseType")
@@ -91,8 +92,8 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
                 else
                 {
                     IList<ODataPathSegment> segments = new List<ODataPathSegment>();
-                    segments.Add(new EntitySetPathSegment(eic.NavigationSource as IEdmEntitySet));
-                    segments.Add(new KeyValuePathSegment(id.ToString()));
+                    segments.Add(new EntitySetSegment(eic.NavigationSource as IEdmEntitySet));
+                    segments.Add(new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, eic.EntityType, null));
 
                     var action = eic.EdmModel.SchemaElements
                                     .Where(elem => elem.Name == "TransientActionBaseType")
@@ -111,13 +112,12 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             var alwaysAvailableActionDerivedType = derivedEntityType.Action("AlwaysAvailableActionDerivedType");
             Func<EntityInstanceContext, Uri> alwaysAvailableActionDerivedTypeLinkFactory = eic =>
             {
-                string entityName = eic.EntityType.FullName();
                 object id;
                 eic.EdmObject.TryGetPropertyValue("Id", out id);
                 IList<ODataPathSegment> segments = new List<ODataPathSegment>();
-                segments.Add(new EntitySetPathSegment(eic.NavigationSource as IEdmEntitySet));
-                segments.Add(new KeyValuePathSegment(id.ToString()));
-                segments.Add(new CastPathSegment(entityName));
+                segments.Add(new EntitySetSegment(eic.NavigationSource as IEdmEntitySet));
+                segments.Add(new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, eic.EntityType, null));
+                segments.Add(new TypeSegment(eic.EntityType, null));
 
                 var action = eic.EdmModel.SchemaElements
                                 .Where(elem => elem.Name == "AlwaysAvailableActionDerivedType")
@@ -144,9 +144,9 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
                 else
                 {
                     IList<ODataPathSegment> segments = new List<ODataPathSegment>();
-                    segments.Add(new EntitySetPathSegment(eic.NavigationSource as IEdmEntitySet));
-                    segments.Add(new KeyValuePathSegment(id.ToString()));
-                    segments.Add(new CastPathSegment(eic.EntityType.FullName()));
+                    segments.Add(new EntitySetSegment(eic.NavigationSource as IEdmEntitySet));
+                    segments.Add(new KeySegment(new[] {new KeyValuePair<string, object>("Id", id)}, eic.EntityType, null));
+                    segments.Add(new TypeSegment(eic.EntityType, null));
 
                     var action = eic.EdmModel.SchemaElements
                                     .Where(elem => elem.Name == "TransientActionDerivedType")

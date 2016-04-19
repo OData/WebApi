@@ -339,6 +339,19 @@ namespace System.Web.OData.Routing
             _pathUriLiteral.Add(segment.SegmentValue);
         }
 
+        /// <summary>
+        /// Handle a general path segment
+        /// </summary>
+        /// <param name="segment">the segment to handle</param>
+        public virtual void Handle(ODataPathSegment segment)
+        {
+            // ODL doesn't provide the handle function for unresolved path segment
+            _navigationSource = null;
+
+            _pathTemplate.Add(segment.ToString());
+            _pathUriLiteral.Add(segment.ToString());
+        }
+
         // Convert the objects of keys in ODL path to string literals.
         private static string ConvertKeysToString(IEnumerable<KeyValuePair<string, object>> keys, IEdmType edmType)
         {

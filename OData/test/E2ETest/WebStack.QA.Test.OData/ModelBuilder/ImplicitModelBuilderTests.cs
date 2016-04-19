@@ -7,6 +7,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 using Microsoft.OData.Edm.Library;
@@ -144,9 +145,9 @@ namespace WebStack.QA.Test.OData.ModelBuilder
                             object id;
                             entityContext.EdmObject.TryGetPropertyValue("ID", out id);
                             return new Uri(entityContext.Url.CreateODataLink(
-                                new EntitySetPathSegment("Products"),
-                                new KeyValuePathSegment(id.ToString()),
-                                new NavigationPathSegment(navigationProperty.Name)));
+                                new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
+                                new KeySegment(new[] {new KeyValuePair<string, object>("ID", id)}, entityContext.EntityType, null),
+                                new NavigationPropertySegment(navigationProperty, null)));
                         },
                         false);
                 };

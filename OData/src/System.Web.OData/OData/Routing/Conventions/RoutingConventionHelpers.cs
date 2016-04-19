@@ -85,36 +85,6 @@ namespace System.Web.OData.Routing.Conventions
                 }
 
                 string nameInRouteData = templateParameter.Value;
-                /*
-                UriTemplateExpression uriTemplateExpression = templateParameter.Value as UriTemplateExpression;
-                if (uriTemplateExpression != null)
-                {
-                    nameInRouteData = uriTemplateExpression.LiteralText.Trim();
-                }
-                else
-                {
-                    nameInRouteData = templateParameter.Value.ToString().Trim();
-                }
-                
-                if (!IsRouteParameter(nameInRouteData))
-                {
-                    throw new ODataException("Key template must be in curly braces."); // TODO: modify
-                }
-
-                nameInRouteData = nameInRouteData.Substring(1, nameInRouteData.Length - 2);
-                if (String.IsNullOrEmpty(nameInRouteData))
-                {
-                    throw new ODataException(String.Format("key template '{0}' is empty.", nameInRouteData));
-                }
-                
-                object newValue = TranslateValue(value);
-
-                ODataEnumValue enumValue = value as ODataEnumValue;
-                if (enumValue != null)
-                {
-                    value = enumValue.Value;
-                }*/
-
                 routeData.Add(nameInRouteData, value);
             }
 

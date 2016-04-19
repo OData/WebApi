@@ -2,7 +2,9 @@
 using System.Web.Http.Controllers;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace WebStack.QA.Test.OData.Common
 {
@@ -12,7 +14,7 @@ namespace WebStack.QA.Test.OData.Common
         {
             if ((odataPath.PathTemplate == "~/entityset/key/navigation") || (odataPath.PathTemplate == "~/entityset/key/cast/navigation"))
             {
-                NavigationPathSegment segment = odataPath.Segments.Last<ODataPathSegment>() as NavigationPathSegment;
+                NavigationPropertySegment segment = odataPath.Segments.Last<ODataPathSegment>() as NavigationPropertySegment;
                 IEdmNavigationProperty navigationProperty = segment.NavigationProperty;
                 IEdmEntityType declaringType = navigationProperty.DeclaringType as IEdmEntityType;
                 if (declaringType != null)
@@ -22,8 +24,8 @@ namespace WebStack.QA.Test.OData.Common
                     {
                         return null;
                     }
-                    KeyValuePathSegment segment2 = odataPath.Segments[1] as KeyValuePathSegment;
-                    controllerContext.RouteData.Values.Add(ODataRouteConstants.Key, segment2.Value);
+                    KeySegment segment2 = odataPath.Segments[1] as KeySegment;
+                    controllerContext.AddKeyValueToRouteData(segment2);
                     string key = prefix + navigationProperty.Name + "On" + declaringType.Name;
                     return (actionMap.Contains(key) ? key : (prefix + navigationProperty.Name));
                 }

@@ -2,9 +2,11 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Properties;
+using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
@@ -75,7 +77,21 @@ namespace System.Web.OData.Routing
                 throw Error.Argument("parameterName", SRResources.FunctionParameterNotFound, parameterName);
             }
 
-            return TranslateNode(parameter.Value);
+            object value = TranslateNode(parameter.Value);
+
+            if (value == null || value is ODataNullValue)
+            {
+                IEdmOperation operation = segment.Operations.First();
+                IEdmOperationParameter operationParameter = operation.Parameters.First(p => p.Name == parameterName);
+                Contract.Assert(operationParameter != null);
+
+                if (!operationParameter.Type.IsNullable)
+                {
+                    throw new ODataException(String.Format(SRResources.NullOnNonNullableFunctionParameter, operationParameter.Type.FullName()));
+                }
+            }
+
+            return value;
         }
 
         /// <summary>
@@ -138,7 +154,21 @@ namespace System.Web.OData.Routing
                 throw Error.Argument("parameterName", SRResources.FunctionParameterNotFound, parameterName);
             }
 
-            return TranslateNode(parameter.Value);
+            object value = TranslateNode(parameter.Value);
+
+            if (value == null || value is ODataNullValue)
+            {
+                IEdmOperationImport operation = segment.OperationImports.First();
+                IEdmOperationParameter operationParameter = operation.Operation.Parameters.First(p => p.Name == parameterName);
+                Contract.Assert(operationParameter != null);
+
+                if (!operationParameter.Type.IsNullable)
+                {
+                    throw new ODataException(String.Format(SRResources.NullOnNonNullableFunctionParameter, operationParameter.Type.FullName()));
+                }
+            }
+
+            return value;
         }
 
         internal static object TranslateNode(object value)

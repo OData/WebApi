@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -9,7 +10,9 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace WebStack.QA.Test.OData.Common
 {
@@ -22,13 +25,9 @@ namespace WebStack.QA.Test.OData.Common
 
         public static void EnableODataSupport(this HttpConfiguration configuration, IEdmModel model, string routePrefix)
         {
-            //TODO: how to customize OData path handler?
-            //configuration.SetODataPathHandler(new AzureODataPathHandler());
-
             var conventions = ODataRoutingConventions.CreateDefault();
             conventions.Insert(0, new PropertyRoutingConvention());
             conventions.Insert(0, new NavigationRoutingConvention2());
-            //conventions.Insert(0, new LinkRoutingConvention2());
 
             configuration.MapODataServiceRoute(
                 ODataTestConstants.DefaultRouteName, 
@@ -42,24 +41,6 @@ namespace WebStack.QA.Test.OData.Common
         public static void EnableODataSupport(this HttpConfiguration configuration, IEdmModel model)
         {
             configuration.EnableODataSupport(model, routePrefix: null);
-        }
-
-        public static string EntitySetLink(this IODataPathHandler parser, string entitySet, object id)
-        {
-            ODataPath path = new ODataPath(
-                new EntitySetPathSegment(entitySet),
-                new KeyValuePathSegment(ODataUriUtils.ConvertToUriLiteral(id, Microsoft.OData.Core.ODataVersion.V4)));
-            return parser.Link(path);
-        }
-
-        public static string NavigationLink(this IODataPathHandler parser, string entitySet, object key, IEdmNavigationProperty navigationProperty)
-        {
-            ODataPath path = new ODataPath(
-                new EntitySetPathSegment(entitySet),
-                new KeyValuePathSegment(ODataUriUtils.ConvertToUriLiteral(key, Microsoft.OData.Core.ODataVersion.V4)),
-                new NavigationPathSegment(navigationProperty));
-
-            return parser.Link(path);
         }
 
         /// <summary>
@@ -110,14 +91,13 @@ namespace WebStack.QA.Test.OData.Common
 
             //get the odata path Ex: ~/entityset/key/$links/navigation
             var odataPath = request.CreateODataPath(uri);
-            var keySegment = odataPath.Segments.OfType<KeyValuePathSegment>().FirstOrDefault();
+            var keySegment = odataPath.Segments.OfType<KeySegment>().FirstOrDefault();
             if (keySegment == null)
             {
                 throw new InvalidOperationException("The link does not contain a key.");
             }
 
-            var value = ODataUriUtils.ConvertFromUriLiteral(keySegment.Value, Microsoft.OData.Core.ODataVersion.V4);
-            return (TKey)value;
+            return (TKey)keySegment.Keys.First().Value;
         }
 
         /// <summary>

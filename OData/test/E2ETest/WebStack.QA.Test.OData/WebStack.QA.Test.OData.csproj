@@ -154,6 +154,7 @@
     <Compile Include="Batch\Client\UnbufferedBatchGeneratedClient.cs" />
     <Compile Include="Batch\Tests\DataServicesClient\DefaultODataBatchHandlerTests.cs" />
     <Compile Include="Batch\Tests\DataServicesClient\UnbufferedODataBatchHandlerTests.cs" />
+    <Compile Include="Common\HttpControllerContextExtensions.cs" />
     <Compile Include="ComplexTypeInheritance\ComplexTypeInheritanceSerializeTest.cs" />
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayContext.cs" />
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayController.cs" />
@@ -232,7 +233,6 @@
     <Compile Include="LowerCamelCase\LowerCamelCaseEdmModel.cs" />
     <Compile Include="LowerCamelCase\LowerCamelCaseTest.cs" />
     <Compile Include="Common\AssertExtension.cs" />
-    <Compile Include="Common\AzureODataPathHandler.cs" />
     <Compile Include="Common\DataServiceContextAsyncExtension.cs" />
     <Compile Include="Common\Container.cs" />
     <Compile Include="Common\Controllers\AsyncInMemoryODataController.cs" />

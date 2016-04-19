@@ -1474,6 +1474,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Type verification failed. Expected non-nullable type &apos;{0}&apos; but received a null value..
+        /// </summary>
+        internal static string NullOnNonNullableFunctionParameter {
+            get {
+                return ResourceManager.GetString("NullOnNonNullableFunctionParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The object has not yet been initialized. Ensure that HttpConfiguration.EnsureInitialized() is called in the application&apos;s startup code after all other initialization code..
         /// </summary>
         internal static string Object_NotYetInitialized {

@@ -71,8 +71,13 @@ namespace System.Web.OData.Routing.Template
                     return false;
                 }
 
-                IDictionary<string, object> parameterValues = other.Parameters.ToDictionary(e => e.Name,
-                    e => ODataParameterHelper.TranslateNode(e.Value));
+                IDictionary<string, object> parameterValues = new Dictionary<string, object>();
+                foreach (var parameter in other.Parameters)
+                {
+                    object value = other.GetParameterValue(parameter.Name);
+                    parameterValues[parameter.Name] = value;
+                }
+
                 if (RoutingConventionHelpers.TryMatch(ParameterMappings, parameterValues, values))
                 {
                     foreach (var operationSegmentParameter in other.Parameters)

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace WebStack.QA.Test.OData.ComplexTypeInheritance
@@ -66,8 +68,8 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
                 object id;
                 entityContext.EdmObject.TryGetPropertyValue("Id", out id);
                 string uri = entityContext.Url.CreateODataLink(
-                                new EntitySetPathSegment(entityContext.NavigationSource.Name),
-                                new KeyValuePathSegment(id.ToString()));
+                                new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
+                                new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, entityContext.EntityType, null));
                 return new Uri(uri);
             };
     }

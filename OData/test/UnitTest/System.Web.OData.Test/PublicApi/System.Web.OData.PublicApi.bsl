@@ -2433,6 +2433,7 @@ public class System.Web.OData.Routing.ODataPathSegmentHandler : Microsoft.OData.
 	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.MetadataSegment segment)
 	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
 	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
+	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment segment)
 	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
 	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
 	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)

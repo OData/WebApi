@@ -835,4 +835,7 @@
   <data name="UriFunctionClrBinderAlreadyBound" xml:space="preserve">
     <value>The function '{0}' is already bound to another method.</value>
   </data>
+  <data name="NullOnNonNullableFunctionParameter" xml:space="preserve">
+    <value>Type verification failed. Expected non-nullable type '{0}' but received a null value.</value>
+  </data>
 </root>

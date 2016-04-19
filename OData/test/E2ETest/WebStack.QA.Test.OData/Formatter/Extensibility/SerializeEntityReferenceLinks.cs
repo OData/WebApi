@@ -16,11 +16,13 @@ using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace WebStack.QA.Test.OData.Formatter.Extensibility
 {
@@ -50,10 +52,13 @@ namespace WebStack.QA.Test.OData.Formatter.Extensibility
 
         public HttpResponseMessage GetLinksForChildren(int key)
         {
+            IEdmModel model = Request.ODataProperties().Model;
+            IEdmEntitySet childEntity = model.EntityContainer.FindEntitySet("ChildEntity");
+
             return Request.CreateResponse(HttpStatusCode.OK,
                 PARENT_ENTITY.Children.Select(x => Url.CreateODataLink(
-                    new EntitySetPathSegment("ChildEntity"),
-                    new KeyValuePathSegment(x.Id.ToString())
+                    new EntitySetSegment(childEntity),
+                    new KeySegment(new[] { new KeyValuePair<string, object>("Id", x.Id)}, childEntity.EntityType(), null)
                 )).ToArray());
         }
     }
@@ -139,10 +144,10 @@ namespace WebStack.QA.Test.OData.Formatter.Extensibility
             HttpMethod requestMethod = controllerContext.Request.Method;
             if (odataPath.PathTemplate == "~/entityset/key/navigation/$ref" && requestMethod == HttpMethod.Get)
             {
-                KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
-                NavigationPathSegment navigationSegment = odataPath.Segments[2] as NavigationPathSegment;
-                IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
+                KeySegment keyValueSegment = odataPath.Segments[1] as KeySegment;
+                controllerContext.AddKeyValueToRouteData(keyValueSegment);
+                NavigationPropertyLinkSegment navigationLinkSegment = odataPath.Segments[2] as NavigationPropertyLinkSegment;
+                IEdmNavigationProperty navigationProperty = navigationLinkSegment.NavigationProperty;
                 IEdmEntityType declaredType = navigationProperty.DeclaringType as IEdmEntityType;
 
                 string action = requestMethod + "LinksFor" + navigationProperty.Name + "From" + declaredType.Name;
@@ -207,6 +212,5 @@ namespace WebStack.QA.Test.OData.Formatter.Extensibility
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
             JsonAssert.ArrayLength(10, "value", result);
         }
-
     }
 }

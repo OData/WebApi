@@ -10,7 +10,9 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Query;
 using System.Web.OData.Routing;
 using Microsoft.OData.Client;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using WebStack.QA.Test.OData.Common.Controllers;
@@ -55,7 +57,9 @@ namespace WebStack.QA.Test.OData.Formatter
                 });
             }
             var baseUri = new Uri(this.Url.CreateODataLink());
-            var uri = new Uri(this.Url.CreateODataLink(new EntitySetPathSegment("ODataResult_Model2")));
+
+            IEdmEntitySet entitySet = Request.ODataProperties().Model.EntityContainer.FindEntitySet("ODataResult_Model2");
+            var uri = new Uri(this.Url.CreateODataLink(new EntitySetSegment(entitySet)));
             return new PageResult<ODataResult_Model2>(models, baseUri.MakeRelativeUri(uri), count);
         }
     }

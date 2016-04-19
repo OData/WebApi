@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -95,8 +96,14 @@ namespace System.Web.OData.Formatter
                         bindingContext.Model = ConvertTo(paramValue, actionContext, bindingContext);
                         return true;
                     }
-
+                    /*
                     // Support key value's [FromODataUri] binding
+                    if (bindingContext.ModelType == typeof(string))
+                    {
+                        bindingContext.Model = EdmPrimitiveHelpers.ConvertPrimitiveValue(value.RawValue, bindingContext.ModelType);
+                        return true;
+                    }*/
+
                     string valueString = value.RawValue as string;
                     if (valueString != null)
                     {
@@ -473,7 +480,20 @@ namespace System.Web.OData.Formatter
                     return ODataUriUtils.ConvertFromUriLiteral(valueString, ODataVersion.V4, model, dateTypeReference);
                 }
 
-                object value = ODataUriUtils.ConvertFromUriLiteral(valueString, ODataVersion.V4);
+                object value;
+                try
+                {
+                    value = ODataUriUtils.ConvertFromUriLiteral(valueString, ODataVersion.V4);
+                }
+                catch
+                {
+                    if (type == typeof (string))
+                    {
+                        return valueString;
+                    }
+
+                    throw;
+                }
 
                 bool isNonStandardEdmPrimitive;
                 EdmLibHelpers.IsNonstandardEdmPrimitive(type, out isNonStandardEdmPrimitive);

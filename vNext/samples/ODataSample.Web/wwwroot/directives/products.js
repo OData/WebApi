@@ -11,7 +11,7 @@ angular
 			controller: [
 				"$http", "$scope",
 				function ($http, $scope) {
-					$scope.name = "New product";
+					$scope.name = "";
 					$scope.price = 200;
 					$scope.addProduct = function() {
 						$http.post("odata/Products", {

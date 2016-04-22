@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace ODataSample.Web.Models
 {
@@ -19,6 +20,7 @@ namespace ODataSample.Web.Models
 		public string LastModifiedByUserId { get; set; }
 		public ApplicationUser LastModifiedByUser { get; set; }
 
+		[Required]
 		public string Name { get; set; }
 		public double Price { get; set; }
 		public DateTimeOffset DateInvented { get; set; }

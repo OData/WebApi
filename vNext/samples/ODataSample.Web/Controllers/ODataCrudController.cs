@@ -1,4 +1,6 @@
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -45,10 +47,17 @@ namespace ODataSample.Web.Controllers
 		[HttpPost]
 		public virtual async Task<IActionResult> Post([FromBody] T value)
 		{
-			// For legibility
-			var req = HttpContext.Request;
-			var locationUri = $"{req.Protocol}://{req.Host}/{req.Path}/{Crud.EntityId(value)}";
-			return Created(locationUri, await Crud.AddAndSaveAsync(value));
+			if (ModelState.IsValid)
+			{
+				// For legibility
+				var req = HttpContext.Request;
+				var locationUri = $"{req.Protocol}://{req.Host}/{req.Path}/{Crud.EntityId(value)}";
+				return Created(locationUri, await Crud.AddAndSaveAsync(value));
+			}
+			else
+			{
+				return BadRequest(ModelState);
+			}
 		}
 
 		public virtual async Task OnBeforePatchAsync(TKey id, T entity, T patchEntity, JObject jObject)

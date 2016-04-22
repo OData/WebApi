@@ -69,7 +69,7 @@ namespace ODataSample.Web.Models
 			Context.SaveChanges();
 			Prod("00d5c0b0-738d-41ff-86d4-dca84da1d4d5", "Apple number1", 10, null, null);
 			Prod("cd4c554d-3ca2-49aa-9286-08abacba3fa0", "Apple number1", 10, 1, null, "1");
-			Prod("d100c753-3335-439c-88db-b8d9b6c09cc8", "Orange number1", 20, null, new DateTime());
+			Prod("d100c753-3335-439c-88db-b8d9b6c09cc8", "Orange number1", 20, null, null);
 			Prod("da93b8a4-4378-4ce0-918e-653f1bd4acaf", "Peanut butter number1", 25, 2, null);
 			Prod("fe208521-4a77-4b09-94c2-2f08a4dd8872", "xApple number2", 10, 1, null);
 			Prod("844fbc16-3d77-4421-9498-aa65300bc789", "xOrange number2", 20, 2, null);

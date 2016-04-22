@@ -231,9 +231,9 @@ namespace System.Web.OData.Builder
                     EnumMemberConfiguration enumMemberConfiguration = enumTypeConfiguration.AddMember((Enum)member);
                     enumMemberConfiguration.AddedExplicitly = addedExplicitly;
                 }
-            }
 
-            ApplyEnumTypeConventions(enumTypeConfiguration);
+                ApplyEnumTypeConventions(enumTypeConfiguration);
+            }
 
             return enumTypeConfiguration;
         }

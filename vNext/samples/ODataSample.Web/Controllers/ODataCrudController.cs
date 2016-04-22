@@ -3,10 +3,13 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Web.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.WebApiCompatShim;
 using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Newtonsoft.Json.Linq;
@@ -54,10 +57,7 @@ namespace ODataSample.Web.Controllers
 				var locationUri = $"{req.Protocol}://{req.Host}/{req.Path}/{Crud.EntityId(value)}";
 				return Created(locationUri, await Crud.AddAndSaveAsync(value));
 			}
-			else
-			{
-				return BadRequest(ModelState);
-			}
+			return this.ODataModelStateError();
 		}
 
 		public virtual async Task OnBeforePatchAsync(TKey id, T entity, T patchEntity, JObject jObject)

@@ -10,6 +10,7 @@ using Microsoft.OData.Edm;
 using System.Linq;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter;
+using Newtonsoft.Json.Serialization;
 
 namespace Microsoft.AspNetCore.OData.Builder
 {
@@ -23,6 +24,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         private string _name;
         private PropertyInfo _dynamicPropertyDictionary;
         private StructuralTypeConfiguration _baseType;
+	    private IValueProvider _valueProvider;
         private bool _baseTypeConfigured;
 
         /// <summary>

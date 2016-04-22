@@ -78,7 +78,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             return CreatePrimitive(graph, primitiveType, writeContext);
         }
 
-        internal static void AddTypeNameAnnotationAsNeeded(ODataPrimitiveValue primitive, IEdmPrimitiveTypeReference primitiveType,
+		private static void AddTypeNameAnnotationAsNeeded(ODataPrimitiveValue primitive, IEdmPrimitiveTypeReference primitiveType,
             ODataMetadataLevel metadataLevel)
         {
             // ODataLib normally has the caller decide whether or not to serialize properties by leaving properties
@@ -103,7 +103,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             });
         }
 
-        internal static ODataPrimitiveValue CreatePrimitive(object value, IEdmPrimitiveTypeReference primitveType,
+		private static ODataPrimitiveValue CreatePrimitive(object value, IEdmPrimitiveTypeReference primitveType,
             ODataSerializerContext writeContext)
         {
             if (value == null)
@@ -175,7 +175,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             return value;
         }
 
-        internal static bool CanTypeBeInferredInJson(object value)
+        private static bool CanTypeBeInferredInJson(object value)
         {
             Contract.Assert(value != null);
 
@@ -205,7 +205,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             }
         }
 
-        internal static bool ShouldSuppressTypeNameSerialization(object value, ODataMetadataLevel metadataLevel)
+		private static bool ShouldSuppressTypeNameSerialization(object value, ODataMetadataLevel metadataLevel)
         {
             // For dynamic properties in minimal metadata level, the type name always appears as declared property.
             if (metadataLevel != ODataMetadataLevel.FullMetadata)

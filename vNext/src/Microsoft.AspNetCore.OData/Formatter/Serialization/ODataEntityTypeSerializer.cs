@@ -507,7 +507,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 }
             }
 
-            return serializer.CreateProperty(propertyValue, propertyType, structuralProperty.Name, writeContext);
+            return serializer.CreateProperty(propertyValue, propertyType, structuralProperty.Name, writeContext, entityInstanceContext);
         }
 
         private IEnumerable<ODataAction> CreateODataActions(

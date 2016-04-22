@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Reflection;
 using Microsoft.AspNetCore.OData.Common;
-using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using System.Linq;
+using Microsoft.AspNetCore.OData.Builder;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
@@ -74,18 +74,71 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             throw Error.NotSupported(SRResources.CreateODataValueNotSupported, GetType().Name);
         }
 
-        internal ODataProperty CreateProperty(object graph, IEdmTypeReference expectedType, string elementName,
-            ODataSerializerContext writeContext)
+	    internal ODataProperty CreateProperty(object graph, IEdmTypeReference expectedType, string elementName,
+		    ODataSerializerContext writeContext, EntityInstanceContext entityInstanceContext)
+	    {
+		    return CreateProperty(graph, expectedType, elementName, writeContext, entityInstanceContext.EntityInstance,
+			    null, entityInstanceContext.EntityType, null);
+	    }
+
+	    internal ODataProperty CreateProperty(object graph, IEdmTypeReference expectedType, string elementName,
+		    ODataSerializerContext writeContext)
+	    {
+		    return CreateProperty(graph, expectedType, elementName, writeContext, null,
+			    null, null, null);
+	    }
+
+	    private ODataProperty CreateProperty(object graph, IEdmTypeReference expectedType, string elementName,
+            ODataSerializerContext writeContext, object declaringInstance, 
+			IEdmTypeReference declaringTypeReference, 
+			IEdmType declaringType,
+			Type declaringClrType)
         {
             Contract.Assert(elementName != null);
-            return new ODataProperty
+	        graph = InterceptValue(graph, expectedType, elementName, writeContext, declaringInstance, declaringTypeReference, declaringType, declaringClrType);
+		    return new ODataProperty
             {
                 Name = elementName,
                 Value = CreateODataValue(graph, expectedType, writeContext)
             };
         }
 
-        internal List<ODataProperty> AppendDynamicProperties(object source, IEdmStructuredTypeReference structuredType,
+	    private static object InterceptValue(object graph, IEdmTypeReference expectedType, string elementName,
+		    ODataSerializerContext writeContext, object declaringInstance, IEdmTypeReference declaringTypeReference,
+		    IEdmType declaringType, Type declaringClrType)
+	    {
+		    var modelBuilder = EdmModelHelperMethods.Configuration[writeContext.Model];
+		    var clrType = EdmLibHelpers.GetClrType(expectedType, writeContext.Model, modelBuilder.AssemblyName);
+		    var serializers = modelBuilder.GetSerializeInterceptors(
+			    clrType).ToList();
+		    var isRoot = declaringInstance == null &&
+		                 declaringTypeReference == null &&
+		                 declaringType == null &&
+		                 declaringClrType == null;
+
+		    if (serializers.Any())
+		    {
+			    if (declaringClrType == null)
+			    {
+				    declaringClrType = declaringType != null
+					    ? EdmLibHelpers.GetClrType(declaringType, writeContext.Model, modelBuilder.AssemblyName)
+					    : EdmLibHelpers.GetClrType(declaringTypeReference, writeContext.Model, modelBuilder.AssemblyName);
+			    }
+			    var vp = new ValueInterceptor(
+				    graph, clrType, elementName, declaringInstance, declaringClrType, isRoot);
+			    foreach (var serializer in serializers)
+			    {
+				    if (!serializer.Process(vp))
+				    {
+					    break;
+				    }
+			    }
+			    graph = vp.Value;
+		    }
+		    return graph;
+	    }
+
+	    internal List<ODataProperty> AppendDynamicProperties(object source, IEdmStructuredTypeReference structuredType,
             ODataSerializerContext writeContext, List<ODataProperty> declaredProperties,
             string[] selectedDynamicProperties)
         {
@@ -151,7 +204,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 }
 
                 dynamicProperties.Add(propertySerializer.CreateProperty(
-                    dynamicProperty.Value, edmTypeReference, dynamicProperty.Key, writeContext));
+                    dynamicProperty.Value, edmTypeReference, dynamicProperty.Key, writeContext, source, structuredType, null, null));
             }
 
             return dynamicProperties;

@@ -19,6 +19,7 @@ namespace Microsoft.AspNetCore.OData.Builder
     /// </summary>
     public class ODataModelBuilder
     {
+        public string AssemblyName { get; protected set; }
         private static readonly Version _defaultDataServiceVersion = EdmConstants.EdmVersion4;
         private static readonly Version _defaultMaxDataServiceVersion = EdmConstants.EdmVersion4;
 
@@ -620,6 +621,119 @@ namespace Microsoft.AspNetCore.OData.Builder
                     throw Error.InvalidOperation(SRResources.NavigationSourceTypeHasNoKeys, navigationSource.Name,
                         navigationSource.EntityType().FullName());
                 }
+            }
+        }
+
+        internal Dictionary<Type, List<IValueProcessor>> SerializerInterceptors { get; } =
+            new Dictionary<Type, List<IValueProcessor>>();
+
+        internal Dictionary<Func<ValueInterceptor, bool>, IValueProcessor> SerializerInlineValueInterceptors { get; } =
+            new Dictionary<Func<ValueInterceptor, bool>, IValueProcessor>();
+
+        //internal Dictionary<Type, List<IValueProcessor>> DeserializerInterceptors { get; } =
+        //    new Dictionary<Type, List<IValueProcessor>>();
+
+        //internal Dictionary<Func<ValueInterceptor, bool>, IValueProcessor> DeserializerInlineValueInterceptors { get; } =
+        //    new Dictionary<Func<ValueInterceptor, bool>, IValueProcessor>();
+
+        /// <summary>
+        /// Serializes output
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="serialize"></param>
+        /// <returns></returns>
+        public ODataModelBuilder AddSerializeInterceptor<T>(
+            Func<ValueInterceptor, bool> serialize)
+        {
+            AddSerializeInterceptor<T>(serialize, SerializerInterceptors, SerializerInlineValueInterceptors);
+            return this;
+        }
+
+        /// <summary>
+        /// Serializes output
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="serialize"></param>
+        /// <returns></returns>
+        public ODataModelBuilder RemoveSerializeInterceptor<T>(
+            Func<ValueInterceptor, bool> serialize)
+        {
+            RemoveSerializeInterceptor<T>(serialize, SerializerInterceptors, SerializerInlineValueInterceptors);
+            return this;
+        }
+
+        ///// <summary>
+        ///// Serializes output
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="serialize"></param>
+        ///// <returns></returns>
+        //public ODataModelBuilder AddDeserializeInterceptor<T>(
+        //    Func<ValueInterceptor, bool> serialize)
+        //{
+        //    AddSerializeInterceptor<T>(serialize, DeserializerInterceptors, DeserializerInlineValueInterceptors);
+        //    return this;
+        //}
+
+        ///// <summary>
+        ///// Serializes output
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="serialize"></param>
+        ///// <returns></returns>
+        //public ODataModelBuilder RemoveDeserializeInterceptor<T>(
+        //    Func<ValueInterceptor, bool> serialize)
+        //{
+        //    RemoveSerializeInterceptor<T>(serialize, DeserializerInterceptors, DeserializerInlineValueInterceptors);
+        //    return this;
+        //}
+
+        public IEnumerable<IValueProcessor> GetSerializeInterceptors(Type type)
+        {
+            return GetSerializeInterceptors(type, SerializerInterceptors);
+        }
+
+        //public IEnumerable<IValueProcessor> GetDeserializerInterceptors(Type type)
+        //{
+        //    return GetSerializeInterceptors(type, DeserializerInterceptors);
+        //}
+
+        private static IEnumerable<IValueProcessor> GetSerializeInterceptors(Type type, IReadOnlyDictionary<Type, List<IValueProcessor>> collection)
+        {
+            return collection.ContainsKey(type) 
+                ? collection[type] 
+                : new List<IValueProcessor>();
+        }
+
+        private static void AddSerializeInterceptor<T>(Func<ValueInterceptor, bool> serialize, IDictionary<Type, List<IValueProcessor>> dictionary, Dictionary<Func<ValueInterceptor, bool>, IValueProcessor> inlineValueProcessors)
+        {
+            var type = typeof(T);
+            InitDictionary(type, dictionary);
+            var ivp = new InlineValueProcessor(serialize);
+            inlineValueProcessors.Add(serialize, ivp);
+            dictionary[type].Add(ivp);
+        }
+
+        private static void RemoveSerializeInterceptor<T>(
+            Func<ValueInterceptor, bool> serialize,
+            Dictionary<Type, List<IValueProcessor>> serializers,
+            IDictionary<Func<ValueInterceptor, bool>, IValueProcessor> inlineValueProcessors)
+        {
+            if (serializers == null) throw new ArgumentNullException(nameof(serializers));
+            var type = typeof(T);
+            if (!inlineValueProcessors.ContainsKey(serialize))
+            {
+                return;
+            }
+            serializers[type].Remove(inlineValueProcessors[serialize]);
+            inlineValueProcessors.Remove(serialize);
+        }
+
+        private static void InitDictionary(Type type, IDictionary<Type, List<IValueProcessor>> dictionary)
+        {
+            if (!dictionary.ContainsKey(type))
+            {
+                dictionary.Add(type, new List<IValueProcessor>());
             }
         }
     }

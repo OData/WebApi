@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.OData.Builder
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Most of the referenced types are helper types needed for operation.")]
     public class ODataConventionModelBuilder : ODataModelBuilder
     {
-        private static readonly List<IConvention> _conventions = new List<IConvention>
+	    private static readonly List<IConvention> _conventions = new List<IConvention>
         {
             // type and property conventions (ordering is important here).
             new AbstractTypeDiscoveryConvention(),
@@ -93,16 +93,17 @@ namespace Microsoft.AspNetCore.OData.Builder
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
-        /// </summary>
-        /// <param name="assemblyProvider">The <see cref="IAssemblyProvider"/> to use.</param>
-        /// <param name="isQueryCompositionMode">If the model is being built for only querying.</param>
-        /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <c>true</c> has more relaxed
-        /// inference rules and also treats all types as entity types. This constructor is intended for use by unit testing only.</remarks>
-        public ODataConventionModelBuilder(string assemblyName, bool isQueryCompositionMode)
+	    /// <summary>
+	    /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
+	    /// </summary>
+	    /// <param name="assemblyName">The full name of the assembly to use</param>
+	    /// <param name="isQueryCompositionMode">If the model is being built for only querying.</param>
+	    /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <c>true</c> has more relaxed
+	    /// inference rules and also treats all types as entity types. This constructor is intended for use by unit testing only.</remarks>
+	    public ODataConventionModelBuilder(string assemblyName, bool isQueryCompositionMode)
         {
-            if (assemblyName == null)
+		    AssemblyName = assemblyName;
+		    if (assemblyName == null)
             {
                 throw Error.ArgumentNull("assemblyName");
             }

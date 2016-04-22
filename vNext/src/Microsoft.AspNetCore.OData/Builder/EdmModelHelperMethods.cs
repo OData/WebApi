@@ -19,7 +19,10 @@ namespace Microsoft.AspNetCore.OData.Builder
 {
     internal static class EdmModelHelperMethods
     {
-        public static IEdmModel BuildEdmModel(ODataModelBuilder builder)
+	    internal static Dictionary<IEdmModel, ODataModelBuilder> Configuration { get; } =
+		    new Dictionary<IEdmModel, ODataModelBuilder>();
+
+	    public static IEdmModel BuildEdmModel(ODataModelBuilder builder)
         {
             if (builder == null)
             {
@@ -27,7 +30,9 @@ namespace Microsoft.AspNetCore.OData.Builder
             }
 
             EdmModel model = new EdmModel();
-            EdmEntityContainer container = new EdmEntityContainer(builder.Namespace, builder.ContainerName);
+	        Configuration.Add(model, builder);
+
+			EdmEntityContainer container = new EdmEntityContainer(builder.Namespace, builder.ContainerName);
 
             // add types and sets, building an index on the way.
 	        Dictionary<Type, IEdmType> edmTypeMap = model.AddTypes(builder.StructuralTypes.Where(s => s.IsInUse()), builder.EnumTypes);

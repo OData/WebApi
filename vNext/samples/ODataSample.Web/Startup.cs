@@ -81,11 +81,11 @@ namespace ODataSample.Web
 				});
 				builder.EntityType<Order>()
 					.Property(p => p.Title)
-					.UseSerializer(value =>
-					{
-						value.Value = "Hey";
-						return true;
-					})
+					//.UseSerializer(value =>
+					//{
+					//	value.Value = "Hey";
+					//	return true;
+					//})
 					;
 				builder.EntityType<ApplicationUser>()
 					.RemoveAllProperties()

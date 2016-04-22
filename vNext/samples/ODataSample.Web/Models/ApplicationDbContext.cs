@@ -21,6 +21,10 @@ namespace ODataSample.Web.Models
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
 			builder
+				.Entity<Product>()
+				.Property(e => e.DateCreated)
+				.HasDefaultValueSql("getdate()");
+			builder
 				.Entity<ApplicationUser>()
 				.HasOne(u => u.UsedProduct)
 				.WithMany(p => p.UsedByUsers);

@@ -8,8 +8,8 @@ using ODataSample.Web.Models;
 namespace DCodeGitForksODataWebApivNextsamples.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20160422011257_Init")]
-    partial class Init
+    [Migration("20160422020220_ProductDateCreatedToDateTimeOffset")]
+    partial class ProductDateCreatedToDateTimeOffset
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -223,7 +223,11 @@ namespace DCodeGitForksODataWebApivNextsamples.Migrations
 
                     b.Property<int?>("CustomerId");
 
-                    b.Property<DateTime?>("DateCreated");
+                    b.Property<DateTimeOffset>("DateCreated")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValueSql("getdate()");
+
+                    b.Property<DateTimeOffset>("DateInvented");
 
                     b.Property<Guid?>("Guid");
 

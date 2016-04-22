@@ -395,9 +395,9 @@ namespace System.Web.OData.Extensions
                 routes.MapHttpBatchRoute(routeName + "Batch", batchTemplate, batchHandler);
             }
 
-            // if setting is not on local, use the global configuration setting.
+            // if settings is not on local, use the global configuration settings.
             ODataUriResolverSettings settings = configuration.GetResolverSettings();
-            IODataPathResolver pathResolver = pathHandler as IODataPathResolver;
+            IODataUriResolver pathResolver = pathHandler as IODataUriResolver;
             if (pathResolver != null && pathResolver.UriResolver == null)
             {
                 pathResolver.UriResolver = settings.UriResolver;
@@ -459,7 +459,7 @@ namespace System.Web.OData.Extensions
 
             // if setting is not on local, use the global configuration setting.
             ODataUriResolverSettings settings = configuration.GetResolverSettings();
-            IODataPathResolver pathResolver = pathHandler as IODataPathResolver;
+            IODataUriResolver pathResolver = pathHandler as IODataUriResolver;
             if (pathResolver != null && pathResolver.UriResolver == null)
             {
                 pathResolver.UriResolver = settings.UriResolver;

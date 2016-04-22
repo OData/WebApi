@@ -343,9 +343,9 @@ namespace System.Web.OData.Routing
         /// Handle a general path segment
         /// </summary>
         /// <param name="segment">the segment to handle</param>
-        public virtual void Handle(ODataPathSegment segment)
+        public virtual void HandleODataPathSegment(ODataPathSegment segment)
         {
-            // ODL doesn't provide the handle function for unresolved path segment
+            // ODL doesn't provide the handle function for general path segment
             _navigationSource = null;
 
             _pathTemplate.Add(segment.ToString());

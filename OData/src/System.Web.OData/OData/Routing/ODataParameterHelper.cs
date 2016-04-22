@@ -3,6 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Properties;
@@ -87,7 +88,8 @@ namespace System.Web.OData.Routing
 
                 if (!operationParameter.Type.IsNullable)
                 {
-                    throw new ODataException(String.Format(SRResources.NullOnNonNullableFunctionParameter, operationParameter.Type.FullName()));
+                    throw new ODataException(String.Format(CultureInfo.InvariantCulture,
+                        SRResources.NullOnNonNullableFunctionParameter, operationParameter.Type.FullName()));
                 }
             }
 
@@ -164,7 +166,8 @@ namespace System.Web.OData.Routing
 
                 if (!operationParameter.Type.IsNullable)
                 {
-                    throw new ODataException(String.Format(SRResources.NullOnNonNullableFunctionParameter, operationParameter.Type.FullName()));
+                    throw new ODataException(String.Format(CultureInfo.InvariantCulture,
+                        SRResources.NullOnNonNullableFunctionParameter, operationParameter.Type.FullName()));
                 }
             }
 

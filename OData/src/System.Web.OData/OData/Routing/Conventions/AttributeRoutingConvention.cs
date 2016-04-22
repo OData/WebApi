@@ -56,7 +56,7 @@ namespace System.Web.OData.Routing.Conventions
 
             // if setting is not on local, use the global configuration setting.
             ODataUriResolverSettings settings = configuration.GetResolverSettings();
-            IODataPathResolver pathResolver = pathTemplateHandler as IODataPathResolver;
+            IODataUriResolver pathResolver = pathTemplateHandler as IODataUriResolver;
             if (pathResolver != null && pathResolver.UriResolver == null)
             {
                 pathResolver.UriResolver = settings.UriResolver;

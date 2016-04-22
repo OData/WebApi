@@ -222,7 +222,7 @@ namespace System.Web.OData
             if (enableEnumPrefix)
             {
                 config.SetUriResolver(new StringAsEnumResolver());
-            };
+            }
 
             config.MapODataServiceRoute("odata", "odata", model);
             HttpClient client = new HttpClient(new HttpServer(config));
@@ -265,7 +265,8 @@ namespace System.Web.OData
             if (enableEnumPrefix)
             {
                 config.SetUriResolver(new StringAsEnumResolver());
-            };
+            }
+
             config.MapODataServiceRoute("odata", "odata", model);
             HttpClient client = new HttpClient(new HttpServer(config));
 
@@ -300,27 +301,6 @@ namespace System.Web.OData
 
             // Assert
             Assert.Throws<InvalidOperationException>(() => client.SendAsync(request).Result);
-        }
-
-        [Fact]
-        public void ExtensionResolver_Works_UnqualifiedNameTemplate()
-        {
-            // Arrange
-            IEdmModel model = GetEdmModel();
-            HttpConfiguration config = new[] { typeof(ParserExtenstionCustomers2Controller) }.GetHttpConfiguration();
-            config.SetUriResolver(new UnqualifiedODataUriResolver());
-            config.MapODataServiceRoute("odata", "odata", model);
-            HttpClient client = new HttpClient(new HttpServer(config));
-
-            // Act
-            HttpRequestMessage request = new HttpRequestMessage(
-                HttpMethod.Get,
-                "http://localhost/odata/ParserExtenstionCustomers2/GetCustomerTitleById(id=32)");
-            HttpResponseMessage response = client.SendAsync(request).Result;
-
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal("GetCustomerTitleById/32", (response.Content as ObjectContent<string>).Value);
         }
 
         private static IEdmModel GetEdmModel()

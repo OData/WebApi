@@ -9,7 +9,7 @@ namespace System.Web.OData.Routing
     /// <summary>
     /// Exposes the ability to set the Uri resolver settings.
     /// </summary>
-    public interface IODataPathResolver
+    public interface IODataUriResolver
     {
         /// <summary>
         /// Gets or sets the resolver for Uri parsing

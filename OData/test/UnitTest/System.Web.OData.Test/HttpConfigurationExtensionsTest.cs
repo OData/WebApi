@@ -199,7 +199,7 @@ namespace System.Web.OData
             // Act
             config.SetUriResolver(resolver);
             ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
-            var pathResolver = route.PathRouteConstraint.PathHandler as IODataPathResolver;
+            var pathResolver = route.PathRouteConstraint.PathHandler as IODataUriResolver;
 
             // Assert
             Assert.NotNull(pathResolver);
@@ -214,7 +214,7 @@ namespace System.Web.OData
 
             // Act
             ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
-            var pathResolver = route.PathRouteConstraint.PathHandler as IODataPathResolver;
+            var pathResolver = route.PathRouteConstraint.PathHandler as IODataUriResolver;
 
             // Assert
             Assert.NotNull(pathResolver);
@@ -236,7 +236,7 @@ namespace System.Web.OData
             config.SetUriResolver(new StringAsEnumResolver());
             ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel(), pathHandler,
                 ODataRoutingConventions.CreateDefault());
-            var pathResolver = route.PathRouteConstraint.PathHandler as IODataPathResolver;
+            var pathResolver = route.PathRouteConstraint.PathHandler as IODataUriResolver;
 
             // Assert
             Assert.NotNull(pathResolver);
@@ -252,7 +252,7 @@ namespace System.Web.OData
             // Act
             config.SetUrlConventions(ODataUrlConventions.ODataSimplified);
             ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
-            var pathResolver = route.PathRouteConstraint.PathHandler as IODataPathResolver;
+            var pathResolver = route.PathRouteConstraint.PathHandler as IODataUriResolver;
 
             // Assert
             Assert.NotNull(pathResolver);
@@ -267,7 +267,7 @@ namespace System.Web.OData
 
             // Act
             ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
-            var pathResolver = route.PathRouteConstraint.PathHandler as IODataPathResolver;
+            var pathResolver = route.PathRouteConstraint.PathHandler as IODataUriResolver;
 
             // Assert
             Assert.NotNull(pathResolver);

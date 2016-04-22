@@ -487,7 +487,7 @@ namespace System.Web.OData.Formatter
                 }
                 catch
                 {
-                    if (type == typeof (string))
+                    if (type == typeof(string))
                     {
                         return valueString;
                     }

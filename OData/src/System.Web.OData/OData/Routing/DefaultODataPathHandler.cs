@@ -21,7 +21,7 @@ namespace System.Web.OData.Routing
     /// <summary>
     /// Parses an OData path as an <see cref="ODataPath"/> into an OData link.
     /// </summary>
-    public class DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler, IODataPathResolver
+    public class DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler, IODataUriResolver
     {
         /// <summary>
         /// Gets or sets the resolver for Uri parsing

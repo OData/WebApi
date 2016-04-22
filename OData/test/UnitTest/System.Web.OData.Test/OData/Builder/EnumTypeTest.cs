@@ -1085,6 +1085,18 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void ODataConventionModelBuilder_DataContractAttribute_AllowsReferencingSameEnumTwice()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EnumType<Life>();
+        
+            // Act
+            builder.EnumType<Life>();
+            IEdmModel model = builder.GetEdmModel();
+        }
+
+        [Fact]
         public void ODataConventionModelBuilder_DataContractAttribute_WithAddedExplicitlyMember()
         {
             // Arrange

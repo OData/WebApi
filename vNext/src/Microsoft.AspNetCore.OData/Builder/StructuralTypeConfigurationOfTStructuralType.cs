@@ -136,7 +136,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 		/// <returns>A configuration object that can be used to further configure the property.</returns>
 		[SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Nested generics appropriate here")]
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific expression type is clearer")]
-        public PrimitivePropertyConfiguration Property(PropertyInfo property)
+        public PrimitivePropertyConfiguration PrimitiveProperty(PropertyInfo property)
 		{
 			return _configuration.AddPrimitiveProperty(property);
         }
@@ -152,8 +152,8 @@ namespace Microsoft.AspNetCore.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific expression type is clearer")]
         public StructuralTypeConfiguration<TStructuralType> AddProperty<T>(Expression<Func<TStructuralType, T>> propertyExpression, Action<PrimitivePropertyConfiguration> configure = null)
         {
-			PropertyInfo ignoredProperty = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
-			_configuration.AddProperty(ignoredProperty);
+			PropertyInfo property = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
+			_configuration.AddProperty(property);
 			return this;
 			//var config = GetPrimitivePropertyConfiguration(propertyExpression, optional: true);
 			//config.Ignored(false);
@@ -284,7 +284,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             return GetCollectionPropertyConfiguration(propertyExpression);
         }
 
-        /// <summary>
+		/// <summary>
         /// Adds a dynamic property dictionary property.
         /// </summary>
         /// <param name="propertyExpression">A lambda expression representing the dynamic property dictionary for the relationship.

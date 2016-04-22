@@ -118,7 +118,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             {
 				//_configuration.RemoveProperty();
 				//_configuration.AddProperty(property);
-	            Property(property).Ignored(false);
+	            PrimitiveProperty(property).Ignored(false);
                 _configuration.HasKey(property);
             }
             return this;

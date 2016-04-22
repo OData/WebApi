@@ -27,9 +27,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         private static readonly ODataPrimitiveSerializer _primitiveSerializer = new ODataPrimitiveSerializer();
         private static readonly ODataEnumSerializer _enumSerializer = new ODataEnumSerializer();
 
-        private static readonly DefaultODataSerializerProvider _instance = new DefaultODataSerializerProvider();
-
-        private readonly ODataFeedSerializer _feedSerializer;
+	    private readonly ODataFeedSerializer _feedSerializer;
         private readonly ODataDeltaFeedSerializer _deltaFeedSerializer;
         private readonly ODataCollectionSerializer _collectionSerializer;
         private readonly ODataComplexTypeSerializer _complexTypeSerializer;
@@ -50,15 +48,9 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <summary>
         /// Gets the default instance of the <see cref="DefaultODataSerializerProvider"/>.
         /// </summary>
-        public static DefaultODataSerializerProvider Instance
-        {
-            get
-            {
-                return _instance;
-            }
-        }
+        public static DefaultODataSerializerProvider Instance { get; } = new DefaultODataSerializerProvider();
 
-        /// <inheritdoc />
+	    /// <inheritdoc />
         public override ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmType)
         {
             if (edmType == null)

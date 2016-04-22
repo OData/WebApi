@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.OData.Extensions;
+﻿using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Models;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.PlatformAbstractions;
 
@@ -70,7 +67,26 @@ namespace ODataSample.Web
 			services.AddSingleton<ISampleService, ApplicationDbContext>();
 			services.AddOData<ISampleService>(builder =>
 			{
+				// OData actions are HTTP POST
+				// OData functions are HTTP GET
+
 				builder.Namespace = "Sample";
+				builder.AddSerializeInterceptor<string>(interceptor =>
+				{
+					if (interceptor.DeclaringType == typeof(Order))
+					{
+						interceptor.Value = (interceptor.Value ?? "") + "!";
+					}
+					return true;
+				});
+				builder.EntityType<Order>()
+					.Property(p => p.Title)
+					.UseSerializer(value =>
+					{
+						value.Value = "Hey";
+						return true;
+					})
+					;
 				builder.EntityType<ApplicationUser>()
 					.RemoveAllProperties()
 					//.AddProperty(p => p.Roles)
@@ -135,6 +151,14 @@ namespace ODataSample.Web
 					.EntityType<Product>()
 					.Function("ShortName")
 					.Returns<string>();
+				builder
+					.EntityType<Order>()
+					.Function("DuplicateMethodName")
+					.Returns<string>();
+				builder
+					.EntityType<Product>()
+					.Function("DuplicateMethodName")
+					.Returns<string>();
 			});
 		}
 
@@ -153,6 +177,11 @@ namespace ODataSample.Web
 
 			app.UseOData("odata");
 
+			app.UseStaticFiles();
+
+			var defaultFilesOptions = new DefaultFilesOptions();
+			defaultFilesOptions.DefaultFileNames.Add("index.html");
+			app.UseDefaultFiles(defaultFilesOptions);
 			app.UseMvcWithDefaultRoute();
 		}
 	}

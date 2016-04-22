@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ODataSample.Web.Models
 {
-    public class Customer
+    public class Customer:DbObject
     {
-		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public int CustomerId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }

@@ -4,22 +4,25 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
 {
 	public static class CrudBaseExtensions
 	{
-		public static void EnsureEntity<T, TKey>(this CrudBase<T, TKey> crud, TKey id, Action<T> update)
-			where T : class
+		public static T EnsureEntity<T, TKey>(this CrudBase<T, TKey> crud, string id, Action<T> update)
+			where T : DbObject
 		{
-			var entity = crud.Find(id);
+			var guid = new Guid(id);
+			var entity = crud.All().FirstOrDefault(e =>e.Guid == guid);
 			if (entity == null)
 			{
 				entity = Activator.CreateInstance<T>();
-				crud.SetEntityId(entity, id);
+				entity.Guid = guid;
 				crud.Add(entity);
 			}
 			update(entity);
+			return entity;
 		}
 	}
 

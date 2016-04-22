@@ -7,9 +7,9 @@ namespace ODataSample.Web.Migrations
 	{
 		public static void Main(string[] args)
 		{
-			const string projectPath = @"D:\B\Forks\OData-WebApi\vNext\samples\ODataSample.Web";
+			const string projectPath = @"D:\Code\Git\Forks\OData-WebApi\vNext\samples\ODataSample.Web";
 			var mig = new CodeFirstMigrations<ApplicationDbContext>(projectPath);
-			mig.Add("UsedByUsers");
+			mig.Add("Init");
 		}
 	}
 }

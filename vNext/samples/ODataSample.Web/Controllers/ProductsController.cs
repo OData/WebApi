@@ -28,6 +28,12 @@ namespace ODataSample.Web.Controllers
 			_sampleService = sampleService;
 		}
 
+		[HttpGet("{id}/DuplicateMethodName")]
+		public IActionResult DuplicateMethodName(int id)
+		{
+			return Ok($"Hello from product {id}");
+		}
+
 		// This is needed to prevent action resolution issues
 		[HttpGet("MostExpensive")]
 		public IActionResult MostExpensive()
@@ -63,27 +69,26 @@ namespace ODataSample.Web.Controllers
 		}
 
 		// GET: api/Products
-		[PageSize(4)]
+		//[PageSize(4)]
 		public override async Task<IQueryable<Product>> Get()
 		{
-			//var db = _sampleService as ApplicationDbContext;
-			//var query = db.Products.Select(var1 => new SelectExpandBinder.SelectAllAndExpand<Product>()
-			//{
-			//	ModelID = "788080e9-dd2b-4531-940f-da126125c157",
-			//	Instance = var1
-			//	,
-			//	Container = new PropertyContainer.SingleExpandedProperty<SelectExpandBinder.SelectAll<Customer>>()
-			//	{
-			//		Name = "Customer",
-			//		Value = new SelectExpandBinder.SelectAll<Customer>()
-			//		{
-			//			ModelID = "788080e9-dd2b-4531-940f-da126125c157",
-			//			Instance = var1.Customer
-			//		},
-			//		IsNull = Equals(var1.Customer, null)
-			//	}
-			//});
-			//var elms = query.ToList();
+			var db = _sampleService as ApplicationDbContext;
+			var query = db.Users.Select(var1 => new //SelectExpandBinder.SelectAllAndExpand<ApplicationUser>()
+			{
+				ModelID = "788080e9-dd2b-4531-940f-da126125c157",
+				User = var1,
+				Container = new //PropertyContainer.SingleExpandedProperty<SelectExpandBinder.SelectAll<Product>>()
+				{
+					Name = "FavouriteProduct",
+					Value = new //SelectExpandBinder.SelectAll<Product>()
+					{
+						ModelID = "788080e8-dd2b-4531-940f-da126125c157",
+						FavProd = var1.FavouriteProduct
+					},
+					//IsNull = Equals(var1.Customer, null)
+				}
+			});
+			var elms = query.ToList();
 			//IQueryable<Product> pp;
 			//pp.SelectAndExpand()
 			return await base.Get();

@@ -12,7 +12,8 @@
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-*",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0-rc2-*",
     "Microsoft.AspNetCore.OData": "1.0.0.1-*",
-    "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.0.0-rc2-*"
+    "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.StaticFiles": "1.0.0-rc2-*"
   },
   "commands": {
     "web": "ODataSample.Web"
@@ -28,6 +29,8 @@
         "System.Collections": "4.0.0.0",
         "System.Xml.ReaderWriter": "4.0.0.0",
         "System.IO": "4.0.0.0"
+      },
+      "dependencies": {
       }
     },
     "netstandardapp1.5": {

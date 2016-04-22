@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using ODataSample.Web.Models;
 
-namespace ODataSample.Web.Migrations
+namespace DCodeGitForksODataWebApivNextsamples.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -181,9 +181,12 @@ namespace ODataSample.Web.Migrations
 
             modelBuilder.Entity("ODataSample.Web.Models.Customer", b =>
                 {
-                    b.Property<int>("CustomerId");
+                    b.Property<int>("CustomerId")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("FirstName");
+
+                    b.Property<Guid?>("Guid");
 
                     b.Property<string>("LastName");
 
@@ -194,9 +197,12 @@ namespace ODataSample.Web.Migrations
 
             modelBuilder.Entity("ODataSample.Web.Models.Order", b =>
                 {
-                    b.Property<string>("Id");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<int>("CustomerId");
+
+                    b.Property<Guid?>("Guid");
 
                     b.Property<string>("Title");
 
@@ -209,13 +215,16 @@ namespace ODataSample.Web.Migrations
 
             modelBuilder.Entity("ODataSample.Web.Models.Product", b =>
                 {
-                    b.Property<int>("ProductId");
+                    b.Property<int>("ProductId")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("CreatedByUserId");
 
                     b.Property<int?>("CustomerId");
 
                     b.Property<DateTime?>("DateCreated");
+
+                    b.Property<Guid?>("Guid");
 
                     b.Property<string>("LastModifiedByUserId");
 

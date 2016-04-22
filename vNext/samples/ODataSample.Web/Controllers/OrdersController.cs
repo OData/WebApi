@@ -8,14 +8,20 @@ namespace ODataSample.Web.Controllers
 {
 	[EnableQuery]
 	[Route("odata/Orders")]
-	public class OrdersController : ODataCrudController<Order, string>
+	public class OrdersController : ODataCrudController<Order, int>
 	{
 		public OrdersController(IEdmModel model, ISampleService sampleService) : base(
 			model,
-			new CrudBase<Order, string>(sampleService as DbContext, (sampleService as ApplicationDbContext).Orders,
+			new CrudBase<Order, int>(sampleService as DbContext, (sampleService as ApplicationDbContext).Orders,
 				entity => entity.Id)
 			)
 		{
+		}
+
+		[HttpGet("{id}/DuplicateMethodName")]
+		public IActionResult DuplicateMethodName(int id)
+		{
+			return Ok($"Hello from order {id}");
 		}
 	}
 }

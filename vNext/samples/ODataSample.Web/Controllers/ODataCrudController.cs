@@ -11,17 +11,6 @@ using Newtonsoft.Json.Linq;
 
 namespace ODataSample.Web.Controllers
 {
-	public class ModelResult<T>
-	{
-		public T Model { get; set; }
-		public ModelStateDictionary ModelState { get; set; }
-
-		public ModelResult(T model, ModelStateDictionary modelState)
-		{
-			Model = model;
-			ModelState = modelState;
-		}
-	}
 	public abstract class ODataCrudController<T, TKey> : Controller
 		where T : class
 	{

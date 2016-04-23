@@ -139,13 +139,13 @@ namespace ODataSample.Web.Controllers
 			return new ObjectResult(product.ProductId);
 		}
 
-		public override Task<IActionResult> OnPost(Product model)
+		protected override Task OnValidate(Product entity, JObject value)
 		{
-			if (model != null && model.Name == "aaa")
+			if (entity != null && entity.Name == "aaa")
 			{
 				ModelState.AddModelError("Name", "Nope, no \"aaa\"");
 			}
-			return base.OnPost(model);
+			return base.OnValidate(entity, value);
 		}
 	}
 }

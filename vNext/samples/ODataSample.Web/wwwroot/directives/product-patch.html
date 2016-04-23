@@ -1,0 +1,31 @@
+<form name="productsForm" ng-submit="productsForm.$valid && addProduct()" server-form-validation>
+	<!---->
+	<h2>Products PATCH</h2>
+	<div class="form-group">
+		<label for="Name">ID</label>
+		<input type="text" id="ProductId" class="form-control"
+		       name="ProductId" ng-model="ProductId"
+		       server-field-validation="Products.ProductId"
+		       ng-model-options="{ debounce: 300 }"/>
+		<!---->
+	</div>
+	<div class="form-group">
+		<label for="Name">Name</label>
+		<input type="text" id="Name" class="form-control"
+		       name="Name" ng-model="Name"
+		       server-field-validation="Products.Name"
+		       ng-model-options="{ debounce: 300 }"/>
+		<!---->
+	</div>
+	<div class="form-group">
+		<label for="product-price">Price</label>
+		<input type="text" id="product-price"
+		       server-field-validation="Products.Price"
+		       class="form-control" name="Price" ng-model="Price"/>
+	</div>
+	<h2>Is invalid: {{productsForm.$invalid}}</h2>
+	<div class="form-group">
+		<!--ng-disabled="(productsForm.$submitted && productsForm.$invalid) || productsForm.$pending"-->
+		<button class="btn btn-default">PATCH to Products</button>
+	</div>
+</form>

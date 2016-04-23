@@ -68,7 +68,9 @@ namespace ODataSample.Web.Controllers
 		[HttpPost]
 		public virtual async Task<IActionResult> Post([FromBody] JObject valueObj)
 		{
-			return await OnPost(this.GetODataModel<T>(valueObj, false));
+			var oDataModel = this.GetODataModel<T>(valueObj, false);
+			await OnValidate(oDataModel, valueObj);
+			return await OnPost(oDataModel);
 		}
 
 		[HttpPost("ValidateField")]
@@ -85,27 +87,42 @@ namespace ODataSample.Web.Controllers
 		{
 		}
 
+		public virtual async Task<IActionResult> OnPatch(TKey id, T entity, T patchEntity, JObject value)
+		{
+			if (ModelState.IsValid)
+			{
+				await OnBeforePatchAsync(id, entity, patchEntity, value);
+				foreach (var property in value)
+				{
+					var propertyInfo = entity.GetType().GetTypeInfo().GetProperty(property.Key);
+					var entityType = Model.GetEdmType(propertyInfo.DeclaringType) as EdmEntityType;
+					var propertyConfiguration = entityType?.FindProperty(propertyInfo.Name) as PropertyConfiguration;
+					if (propertyConfiguration != null && !propertyConfiguration.IsIgnored)
+					{
+						// Set the value to the value of the same property on the patch entity
+						propertyInfo?.SetValue(entity, propertyInfo.GetValue(patchEntity));
+					}
+				}
+				await OnAfterPatchAsync(id, entity, patchEntity, value);
+				if (!await Crud.UpdateAndSaveAsync(entity))
+				{
+					return NotFound();
+				}
+				return new NoContentResult();
+			}
+			return this.ODataModelStateError();
+		}
+
 		public virtual async Task<IActionResult> Patch(TKey id, T entity, JObject value)
 		{
-			var patchEntity = value.ToObject<T>();
-			await OnBeforePatchAsync(id, entity, patchEntity, value);
-			foreach (var property in value)
-			{
-				var propertyInfo = entity.GetType().GetTypeInfo().GetProperty(property.Key);
-				var entityType = Model.GetEdmType(propertyInfo.DeclaringType) as EdmEntityType;
-				var propertyConfiguration = entityType?.FindProperty(propertyInfo.Name) as PropertyConfiguration;
-				if (propertyConfiguration != null && !propertyConfiguration.IsIgnored)
-				{
-					// Set the value to the value of the same property on the patch entity
-					propertyInfo?.SetValue(entity, propertyInfo.GetValue(patchEntity));
-				}
-			}
-			await OnAfterPatchAsync(id, entity, patchEntity, value);
-			if (!await Crud.UpdateAndSaveAsync(entity))
-			{
-				return NotFound();
-			}
-			return new NoContentResult();
+			var patchEntity = this.GetODataModel<T>(value, true);
+			await OnValidate(patchEntity, value);
+			return await OnPatch(id, entity, patchEntity, value);
+		}
+
+		protected virtual async Task OnValidate(T entity, JObject value)
+		{
+			
 		}
 
 		// PATCH api/[Entities]/5

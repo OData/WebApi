@@ -113,7 +113,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 			{
 				var c = d as ControllerActionDescriptor;
 				var isUs = false;
-				if (c.ControllerName == "Metadata")
+				if (c.ControllerName == "Functions")
 				{
 					int a = 0;
 				}
@@ -125,13 +125,12 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 				{
 					return false;
 				}
-				if (c.ControllerName != controllerName && controllerName != "*")
-				{
-					return false;
-				}
 				if (controllerName != null && c.ControllerName != controllerName)
 				{
-					return false;
+					if (controllerName != "*")
+					{
+						return false;
+					}
 				}
 				if (c.AttributeRouteInfo == null && actionName == null)
 				{
@@ -141,13 +140,26 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 				{
 					return false;
 				}
-				if (c.AttributeRouteInfo != null && !c.AttributeRouteInfo.Template.EndsWith(routeTemplate))
+				if (c.AttributeRouteInfo != null)
 				{
-					//if (isUs)
-					//{
-					//	throw new Exception(c.AttributeRouteInfo.Template);
-					//}
-					return false;
+					if (c.AttributeRouteInfo.Template.Contains("HelloWorld"))
+					{
+						
+					}
+					var odataPrefix = ODataRoute.Instance.RoutePrefix;
+					var template = c.AttributeRouteInfo.Template.Trim('/');
+					if (template.StartsWith(odataPrefix))
+					{
+						template = template.Substring(odataPrefix.Length).Trim('/');
+						if (template != routeTemplate.Trim('/'))
+						{
+							return false;
+						}
+					}
+					else
+					{
+						return false;
+					}
 				}
 				// If we find no action constraints, this isn't our method
 				if (c.ActionConstraints == null || !c.ActionConstraints.Any())
@@ -159,7 +171,12 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 				{
 					if (httpMethodName.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
 					{
-						return httpMethodConstraint.HttpMethods.Contains(preflightFor);
+						var success = httpMethodConstraint.HttpMethods.Contains(preflightFor);
+						if (success)
+						{
+							return true;
+						}
+						return false;
 					}
 					var contains = httpMethodConstraint.HttpMethods.Contains(httpMethodName);
 					if (contains)

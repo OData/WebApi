@@ -1,6 +1,9 @@
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Extensions;
+using Newtonsoft.Json.Linq;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
@@ -9,7 +12,7 @@ namespace ODataSample.Web.Controllers
 	[Route("odata")]
 	public class FunctionsController : Controller
 	{
-		[HttpGet("odata/HelloWorld")]
+		[HttpGet("HelloWorld")]
 		public IActionResult HelloWorld()
 		{
 			double rate = 5.6;  // Use a fake number for the sample.
@@ -26,6 +29,12 @@ namespace ODataSample.Web.Controllers
 		public IActionResult Multiply([FromUri]int a, [FromUri]int b)
 		{
 			return Ok(a * b);
+		}
+
+		[HttpPost("ValidateField")]
+		public virtual async Task<IActionResult> ValidateField([FromBody]JObject validation)
+		{
+			return await this.ValidateFieldInService<ISampleService>(validation);
 		}
 	}
 }

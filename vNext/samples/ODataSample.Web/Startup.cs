@@ -151,14 +151,25 @@ namespace ODataSample.Web
 					.EntityType<Product>()
 					.Function("ShortName")
 					.Returns<string>();
-				var validateField = 
+				var validateField =
 				builder
-					.EntityType<Product>()
-					.Collection
 					.Action("ValidateField")
-					;
+					.Returns<string>();
+				validateField.Parameter<string>("SetName");
 				validateField.Parameter<string>("Name");
 				validateField.Parameter<string>("Value");
+				//builder
+				//	.EntityType<Product>()
+				//	.Collection
+				//	.Action("ValidateField")
+				//	;
+				//builder
+				//	.EntityType<Product>()
+				//	.Collection
+				//	.Action("ValidateField")
+				//	;
+				//validateField.Parameter<string>("Name");
+				//validateField.Parameter<string>("Value");
 
 				builder
 					.EntityType<Order>()

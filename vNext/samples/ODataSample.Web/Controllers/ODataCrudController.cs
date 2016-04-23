@@ -74,10 +74,7 @@ namespace ODataSample.Web.Controllers
 		[HttpPost("ValidateField")]
 		public virtual async Task<IActionResult> ValidateField([FromBody]JObject validation)
 		{
-			var fieldName = validation.GetValue("Name").Value<string>();
-			var valueToValidate = validation.GetValue("Value")?.Value<string>();
-			this.ValidateField<T>(fieldName, valueToValidate);
-			return this.ODataModelState();
+			return await this.ValidateField<T>(validation);
 		}
 
 		public virtual async Task OnBeforePatchAsync(TKey id, T entity, T patchEntity, JObject jObject)

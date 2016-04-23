@@ -16,16 +16,22 @@ angular
 						// our element
 						angular.element(element).after(path.element);
 					}
-					var result = {};
-					scope.$broadcast("resolve-field-validation-url", result);
-					var propertyValidationUrl = result.fieldValidationUrl;
+					var config = {
+						element: element,
+						path: attrs.serverFieldValidation,
+						propertyName: path.propertyName,
+						formName: path.formName
+					};
+					scope.$broadcast("resolve-field-validation-url", config);
+					var propertyValidationUrl = config.fieldValidationUrl;
 					ngModel.$asyncValidators.server =
 						function(modelValue, viewValue) {
 							var deferred = $q.defer();
 							if (path.propertyName) {
 								$http.post(propertyValidationUrl, {
 									Value: viewValue,
-									Name: path.propertyName
+									Name: path.propertyName,
+									SetName: config.setName
 								}).then(
 									function (response) {
 										response.data.error.details = response.data.error.details || [];

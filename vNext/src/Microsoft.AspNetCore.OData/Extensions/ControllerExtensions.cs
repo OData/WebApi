@@ -1,6 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Newtonsoft.Json;
@@ -62,11 +64,48 @@ namespace Microsoft.AspNetCore.OData.Extensions
 			controller.ValidateField(property, propertyValue, modelState);
 		}
 
+		public static async Task<IActionResult> ValidateField<T>(this Controller controller,
+			JObject validation)
+		{
+			return await controller.ValidateField(validation, typeof (T));
+		}
+
+		public static async Task<IActionResult> ValidateFieldInService<TService>(this Controller controller, 
+			JObject validation)
+		{
+			var setName = validation.GetValue("SetName").Value<string>();
+			var setType = typeof (TService).GetProperty(setName).PropertyType.GetGenericArguments().First();
+			var fieldName = validation.GetValue("Name").Value<string>();
+			var valueToValidate = validation.GetValue("Value")?.Value<string>();
+			controller.ValidateField(setType, fieldName, valueToValidate);
+			return controller.ODataModelState();
+		}
+
+		public static async Task<IActionResult> ValidateField(this Controller controller, 
+			JObject validation, Type type)
+		{
+			var fieldName = validation.GetValue("Name").Value<string>();
+			var valueToValidate = validation.GetValue("Value")?.Value<string>();
+			controller.ValidateField(type, fieldName, valueToValidate);
+			return controller.ODataModelState();
+		}
+
 		public static void ValidateField<T>(this Controller controller, string propertyName, object propertyValue,
 			ModelStateDictionary modelState = null)
 		{
 			controller.ValidateField(
-				typeof(T).GetProperty(propertyName),
+				typeof(T),
+				propertyName,
+				propertyValue,
+				modelState
+				);
+		}
+
+		public static void ValidateField(this Controller controller, Type type, string propertyName, object propertyValue,
+			ModelStateDictionary modelState = null)
+		{
+			controller.ValidateField(
+				type.GetProperty(propertyName),
 				propertyValue,
 				modelState
 				);

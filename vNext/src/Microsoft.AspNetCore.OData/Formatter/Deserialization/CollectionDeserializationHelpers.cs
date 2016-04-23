@@ -21,7 +21,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
         private static readonly MethodInfo _toArrayMethodInfo = typeof(Enumerable).GetMethod("ToArray");
 
         public static void AddToCollection(this IEnumerable items, IEnumerable collection, Type elementType,
-            Type resourceType, string propertyName, Type propertyType, AssemblyNames assemblyNames)
+            Type resourceType, string propertyName, Type propertyType, AssembliesResolver assembliesResolver)
         {
             Contract.Assert(items != null);
             Contract.Assert(collection != null);
@@ -48,10 +48,10 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
                 throw new SerializationException(message);
             }
 
-            items.AddToCollectionCore(collection, elementType, list, addMethod, assemblyNames);
+            items.AddToCollectionCore(collection, elementType, list, addMethod, assembliesResolver);
         }
 
-        public static void AddToCollection(this IEnumerable items, IEnumerable collection, Type elementType, string paramName, Type paramType, AssemblyNames assemblyNames)
+        public static void AddToCollection(this IEnumerable items, IEnumerable collection, Type elementType, string paramName, Type paramType, AssembliesResolver assembliesResolver)
         {
             Contract.Assert(items != null);
             Contract.Assert(collection != null);
@@ -71,13 +71,13 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
                 }
             }
 
-            items.AddToCollectionCore(collection, elementType, list, addMethod, assemblyNames);
+            items.AddToCollectionCore(collection, elementType, list, addMethod, assembliesResolver);
         }
 
-        private static void AddToCollectionCore(this IEnumerable items, IEnumerable collection, Type elementType, IList list, MethodInfo addMethod, AssemblyNames assemblyNames)
+        private static void AddToCollectionCore(this IEnumerable items, IEnumerable collection, Type elementType, IList list, MethodInfo addMethod, AssembliesResolver assembliesResolver)
         {
             bool isNonstandardEdmPrimitiveCollection;
-            EdmLibHelpers.IsNonstandardEdmPrimitive(elementType, assemblyNames, out isNonstandardEdmPrimitiveCollection);
+            EdmLibHelpers.IsNonstandardEdmPrimitive(elementType, assembliesResolver, out isNonstandardEdmPrimitiveCollection);
 
             foreach (object item in items)
             {

@@ -16,9 +16,9 @@ namespace Microsoft.AspNetCore.OData
 		/// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
 		/// </summary>
 		/// <param name="edmType">The <see cref="IEdmEntityType"/> of this object.</param>
-		/// <param name="assemblyNames">The assemblies resolve to use for type resolution</param>
-		public EdmEntityObject(IEdmEntityType edmType, AssemblyNames assemblyNames)
-            : this(edmType, assemblyNames, isNullable: false)
+		/// <param name="assembliesResolver">The assemblies resolve to use for type resolution</param>
+		public EdmEntityObject(IEdmEntityType edmType, AssembliesResolver assembliesResolver)
+            : this(edmType, assembliesResolver, isNullable: false)
         {
         }
 
@@ -26,9 +26,9 @@ namespace Microsoft.AspNetCore.OData
 		/// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
 		/// </summary>
 		/// <param name="edmType">The <see cref="IEdmEntityTypeReference"/> of this object.</param>
-		/// <param name="assemblyNames">The assemblies resolve to use for type resolution</param>
-		public EdmEntityObject(IEdmEntityTypeReference edmType, AssemblyNames assemblyNames)
-            : this(edmType.EntityDefinition(), assemblyNames, edmType.IsNullable)
+		/// <param name="assembliesResolver">The assemblies resolve to use for type resolution</param>
+		public EdmEntityObject(IEdmEntityTypeReference edmType, AssembliesResolver assembliesResolver)
+            : this(edmType.EntityDefinition(), assembliesResolver, edmType.IsNullable)
         {
         }
 
@@ -36,10 +36,10 @@ namespace Microsoft.AspNetCore.OData
 		/// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
 		/// </summary>
 		/// <param name="edmType">The <see cref="IEdmEntityType"/> of this object.</param>
-		/// <param name="assemblyNames">The assemblies resolve to use for type resolution</param>
+		/// <param name="assembliesResolver">The assemblies resolve to use for type resolution</param>
 		/// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
-		public EdmEntityObject(IEdmEntityType edmType, AssemblyNames assemblyNames, bool isNullable)
-            : base(edmType, assemblyNames, isNullable)
+		public EdmEntityObject(IEdmEntityType edmType, AssembliesResolver assembliesResolver, bool isNullable)
+            : base(edmType, assembliesResolver, isNullable)
         {
         }
     }

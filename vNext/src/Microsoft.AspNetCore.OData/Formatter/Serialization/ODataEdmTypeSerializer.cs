@@ -109,7 +109,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			IEdmType declaringType, Type declaringClrType)
 		{
 			var modelBuilder = EdmModelHelperMethods.Configuration[writeContext.Model];
-			var assemblyNames = writeContext.Request.HttpContext.RequestServices.GetService<AssemblyNames>();
+			var assemblyNames = writeContext.Request.HttpContext.RequestServices.GetService<AssembliesResolver>();
 			var clrType = EdmLibHelpers.GetClrType(expectedType, writeContext.Model, assemblyNames);
 			var serializers = modelBuilder.GetSerializeInterceptors(
 				clrType).ToList();

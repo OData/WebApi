@@ -238,25 +238,25 @@ namespace Microsoft.AspNetCore.OData.Formatter
 			return results;
 		}
 
-		public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, AssemblyNames assemblyNames)
+		public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, AssembliesResolver assembliesResolver)
         {
             IEdmSchemaType edmSchemaType = edmType as IEdmSchemaType;
 
             Contract.Assert(edmSchemaType != null);
 
             string typeName = edmSchemaType.FullName();
-            IEnumerable<Type> matchingTypes = GetMatchingTypes(typeName, assemblyNames);
+            IEnumerable<Type> matchingTypes = GetMatchingTypes(typeName, assembliesResolver);
 
 			return matchingTypes.FirstOrDefault();
         }
 
-        //public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel, string assemblyName)
+        //public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel, string assembliesResolver)
         //{
-        //    return GetClrType(edmTypeReference, edmModel, assemblyName);
+        //    return GetClrType(edmTypeReference, edmModel, assembliesResolver);
         //}
 
         public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel,
-            AssemblyNames assemblyNames)
+            AssembliesResolver assembliesResolver)
         {
             if (edmTypeReference == null)
             {
@@ -277,7 +277,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             }
             else
             {
-                return GetClrType(edmTypeReference.Definition, edmModel, assemblyNames);
+                return GetClrType(edmTypeReference.Definition, edmModel, assembliesResolver);
             }
         }
 
@@ -397,15 +397,15 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 : null;
         }
         
-        public static Type IsNonstandardEdmPrimitive(Type type, AssemblyNames assemblyNames, out bool isNonstandardEdmPrimitive)
+        public static Type IsNonstandardEdmPrimitive(Type type, AssembliesResolver assembliesResolver, out bool isNonstandardEdmPrimitive)
         {
-            return IsNonstandardEdmPrimitive(type, out isNonstandardEdmPrimitive, assemblyNames);
+            return IsNonstandardEdmPrimitive(type, out isNonstandardEdmPrimitive, assembliesResolver);
         }
 
         // figures out if the given clr type is nonstandard edm primitive like uint, ushort, char[] etc.
         // and returns the corresponding clr type to which we map like uint => long.
         public static Type IsNonstandardEdmPrimitive(Type type, out bool isNonstandardEdmPrimitive,
-			AssemblyNames assemblyNames)
+			AssembliesResolver assembliesResolver)
         {
             IEdmPrimitiveTypeReference edmType = GetEdmPrimitiveTypeReferenceOrNull(type);
             if (edmType == null)
@@ -414,7 +414,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 return type;
             }
 
-            Type reverseLookupClrType = GetClrType(edmType, EdmCoreModel.Instance, assemblyNames);
+            Type reverseLookupClrType = GetClrType(edmType, EdmCoreModel.Instance, assembliesResolver);
             isNonstandardEdmPrimitive = (type != reverseLookupClrType);
 
             return reverseLookupClrType;
@@ -436,10 +436,10 @@ namespace Microsoft.AspNetCore.OData.Formatter
             return edmModel.GetAnnotationValue<QueryableRestrictionsAnnotation>(edmProperty);
         }
 
-        private static IEnumerable<Type> GetMatchingTypes(string edmFullName, AssemblyNames assemblyNames)
+        private static IEnumerable<Type> GetMatchingTypes(string edmFullName, AssembliesResolver assembliesResolver)
         {
             return
-                TypeHelper.GetLoadedTypes(assemblyNames)
+                TypeHelper.GetLoadedTypes(assembliesResolver)
                     .Where(t => t.GetTypeInfo().IsPublic && t.EdmFullName() == edmFullName);
         }
 

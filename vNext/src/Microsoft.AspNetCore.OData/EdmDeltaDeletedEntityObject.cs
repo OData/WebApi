@@ -23,8 +23,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmDeltaDeletedEntityObject"/> class.
         /// </summary>
         /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaDeletedEntityObject.</param>
-        public EdmDeltaDeletedEntityObject(IEdmEntityType entityType, AssemblyNames assemblyNames)
-            : this(entityType, assemblyNames, isNullable: false)
+        public EdmDeltaDeletedEntityObject(IEdmEntityType entityType, AssembliesResolver assembliesResolver)
+            : this(entityType, assembliesResolver, isNullable: false)
         {
         }
 
@@ -32,8 +32,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmDeltaDeletedEntityObject"/> class.
         /// </summary>
         /// <param name="entityTypeReference">The <see cref="IEdmEntityTypeReference"/> of this DeltaDeletedEntityObject.</param>
-        public EdmDeltaDeletedEntityObject(IEdmEntityTypeReference entityTypeReference, AssemblyNames assemblyNames)
-            : this(entityTypeReference.EntityDefinition(), assemblyNames, entityTypeReference.IsNullable)
+        public EdmDeltaDeletedEntityObject(IEdmEntityTypeReference entityTypeReference, AssembliesResolver assembliesResolver)
+            : this(entityTypeReference.EntityDefinition(), assembliesResolver, entityTypeReference.IsNullable)
         {
         }
 
@@ -42,8 +42,8 @@ namespace Microsoft.AspNetCore.OData
         /// </summary>
         /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaDeletedEntityObject.</param>
         /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
-        public EdmDeltaDeletedEntityObject(IEdmEntityType entityType, AssemblyNames assemblyNames, bool isNullable)
-            : base(entityType, assemblyNames, isNullable)
+        public EdmDeltaDeletedEntityObject(IEdmEntityType entityType, AssembliesResolver assembliesResolver, bool isNullable)
+            : base(entityType, assembliesResolver, isNullable)
         {
             _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.DeletedEntry);
         }

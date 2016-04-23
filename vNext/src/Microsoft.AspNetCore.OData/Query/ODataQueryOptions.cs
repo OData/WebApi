@@ -21,7 +21,7 @@ namespace Microsoft.AspNetCore.OData.Query
 	public class ODataQueryOptions
 	{
 		private ODataQueryOptionParser _queryOptionParser;
-		private readonly AssemblyNames _assemblyNames;
+		private readonly AssembliesResolver _assembliesResolver;
 		private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
 
 		/// <summary>
@@ -30,8 +30,8 @@ namespace Microsoft.AspNetCore.OData.Query
 		/// </summary>
 		/// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information.</param>
 		/// <param name="request">The incoming request message.</param>
-		/// <param name="assemblyNames"></param>
-		public ODataQueryOptions(ODataQueryContext context, HttpRequest request, AssemblyNames assemblyNames)
+		/// <param name="assembliesResolver"></param>
+		public ODataQueryOptions(ODataQueryContext context, HttpRequest request, AssembliesResolver assembliesResolver)
 		{
 			if (context == null)
 			{
@@ -43,7 +43,7 @@ namespace Microsoft.AspNetCore.OData.Query
 				throw Error.ArgumentNull("request");
 			}
 
-			_assemblyNames = assemblyNames;
+			_assembliesResolver = assembliesResolver;
 
 			Context = context;
 			Request = request;
@@ -112,7 +112,7 @@ namespace Microsoft.AspNetCore.OData.Query
 			// Construct the actual query and apply them in the following order: filter
 			if (IsAvailableODataQueryOption(Filter, AllowedQueryOptions.Filter))
 			{
-				query = Filter.ApplyTo(query, querySettings, _assemblyNames);
+				query = Filter.ApplyTo(query, querySettings, _assembliesResolver);
 			}
 
 			if (IsAvailableODataQueryOption(Count, AllowedQueryOptions.Count))
@@ -481,11 +481,11 @@ namespace Microsoft.AspNetCore.OData.Query
 				var type = typeof(T);
 				if (type == typeof(IQueryable))
 				{
-					result = (T)newSelectExpand.ApplyTo((IQueryable)entity, querySettings, _assemblyNames);
+					result = (T)newSelectExpand.ApplyTo((IQueryable)entity, querySettings, _assembliesResolver);
 				}
 				else if (type == typeof(object))
 				{
-					result = (T)newSelectExpand.ApplyTo(entity, querySettings, _assemblyNames);
+					result = (T)newSelectExpand.ApplyTo(entity, querySettings, _assembliesResolver);
 				}
 			}
 			return result;

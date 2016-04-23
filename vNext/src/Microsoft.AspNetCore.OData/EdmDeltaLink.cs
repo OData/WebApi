@@ -23,8 +23,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmDeltaLink"/> class.
         /// </summary>
         /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaLink.</param>
-        public EdmDeltaLink(IEdmEntityType entityType, AssemblyNames assemblyNames)
-            : this(entityType, assemblyNames, isNullable: false)
+        public EdmDeltaLink(IEdmEntityType entityType, AssembliesResolver assembliesResolver)
+            : this(entityType, assembliesResolver, isNullable: false)
         {
         }
 
@@ -32,8 +32,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmDeltaLink"/> class.
         /// </summary>
         /// <param name="entityTypeReference">The <see cref="IEdmEntityTypeReference"/> of this DeltaLink.</param>
-        public EdmDeltaLink(IEdmEntityTypeReference entityTypeReference, AssemblyNames assemblyNames)
-            : this(entityTypeReference.EntityDefinition(), assemblyNames, entityTypeReference.IsNullable)
+        public EdmDeltaLink(IEdmEntityTypeReference entityTypeReference, AssembliesResolver assembliesResolver)
+            : this(entityTypeReference.EntityDefinition(), assembliesResolver, entityTypeReference.IsNullable)
         {
         }
 
@@ -42,8 +42,8 @@ namespace Microsoft.AspNetCore.OData
         /// </summary>
         /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaLink.</param>
         /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
-        public EdmDeltaLink(IEdmEntityType entityType, AssemblyNames assemblyNames, bool isNullable)
-            : base(entityType, assemblyNames, isNullable)
+        public EdmDeltaLink(IEdmEntityType entityType, AssembliesResolver assembliesResolver, bool isNullable)
+            : base(entityType, assembliesResolver, isNullable)
         {
             _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.LinkEntry);
         }

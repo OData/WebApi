@@ -224,7 +224,7 @@ namespace Microsoft.AspNetCore.OData
                 return edmEntityObject.Instance;
             }
 
-	        var assemblyNames = Request.HttpContext.RequestServices.GetService<AssemblyNames>();
+	        var assemblyNames = Request.HttpContext.RequestServices.GetService<AssembliesResolver>();
 	        Type clrType = EdmLibHelpers.GetClrType(EntityType, EdmModel, assemblyNames);
             if (clrType == null)
             {

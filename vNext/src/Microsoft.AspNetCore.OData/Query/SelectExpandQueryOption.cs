@@ -181,9 +181,9 @@ namespace Microsoft.AspNetCore.OData.Query
         ///// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
         ///// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
         //[SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "stopgap. will be used later.")]
-        //public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings, string assemblyNames)
+        //public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings, string AssembliesResolver)
         //{
-        //    return ApplyTo(queryable, settings, assemblyNames);
+        //    return ApplyTo(queryable, settings, AssembliesResolver);
         //}
 
 	    /// <summary>
@@ -192,10 +192,10 @@ namespace Microsoft.AspNetCore.OData.Query
 	    /// </summary>
 	    /// <param name="queryable">The original <see cref="IQueryable"/>.</param>
 	    /// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
-	    /// <param name="assemblyNames">The assemblies resolve to use for type resolution</param>
+	    /// <param name="assembliesResolver">The assemblies resolve to use for type resolution</param>
 	    /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
 	    [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "stopgap. will be used later.")]
-        public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings, AssemblyNames assemblyNames)
+        public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings, AssembliesResolver assembliesResolver)
         {
             if (queryable == null)
             {
@@ -218,7 +218,7 @@ namespace Microsoft.AspNetCore.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(queryable);
             }
 
-            return SelectExpandBinder.Bind(queryable, updatedSettings, assemblyNames, this);
+            return SelectExpandBinder.Bind(queryable, updatedSettings, assembliesResolver, this);
         }
 
         ///// <summary>
@@ -227,9 +227,9 @@ namespace Microsoft.AspNetCore.OData.Query
         ///// <param name="entity">The original entity.</param>
         ///// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
         ///// <returns>The new entity after the $select and $expand query has been applied to.</returns>
-        //public object ApplyTo(object entity, ODataQuerySettings settings, string assemblyNames)
+        //public object ApplyTo(object entity, ODataQuerySettings settings, string AssembliesResolver)
         //{
-        //    return ApplyTo(entity, settings, assemblyNames);
+        //    return ApplyTo(entity, settings, AssembliesResolver);
         //}
 
 		/// <summary>
@@ -237,9 +237,9 @@ namespace Microsoft.AspNetCore.OData.Query
 		/// </summary>
 		/// <param name="entity">The original entity.</param>
 		/// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
-		/// <param name="assemblyNames">The name of the assembly to use.</param>
+		/// <param name="assembliesResolver">The name of the assembly to use.</param>
 		/// <returns>The new entity after the $select and $expand query has been applied to.</returns>
-		public object ApplyTo(object entity, ODataQuerySettings settings, AssemblyNames assemblyNames)
+		public object ApplyTo(object entity, ODataQuerySettings settings, AssembliesResolver assembliesResolver)
         {
             if (entity == null)
             {
@@ -262,7 +262,7 @@ namespace Microsoft.AspNetCore.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOption.True;
             }
 
-            return SelectExpandBinder.Bind(entity, updatedSettings, assemblyNames, this);
+            return SelectExpandBinder.Bind(entity, updatedSettings, assembliesResolver, this);
         }
 
         /// <summary>

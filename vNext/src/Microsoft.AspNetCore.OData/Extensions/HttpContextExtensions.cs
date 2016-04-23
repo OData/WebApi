@@ -51,14 +51,14 @@ namespace Microsoft.AspNetCore.OData.Extensions
             return httpContext.RequestServices.GetRequiredService<IODataPathHandler>();
         }
 
-        public static AssemblyNames AssemblyProvider(this HttpContext httpContext)
+        public static AssembliesResolver AssemblyProvider(this HttpContext httpContext)
         {
             if (httpContext == null)
             {
                 throw Error.ArgumentNull("httpContext");
             }
 
-            return httpContext.RequestServices.GetRequiredService<AssemblyNames>();
+            return httpContext.RequestServices.GetRequiredService<AssembliesResolver>();
         }
     }
 }

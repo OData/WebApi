@@ -54,19 +54,20 @@ namespace Microsoft.AspNetCore.OData.Common
 			return null;
 		}
 
-		internal static IEnumerable<Type> GetLoadedTypes(AssemblyNames assemblyNames)
+		// TODO: Move this into AssembliesResolver and cache results
+		internal static IEnumerable<Type> GetLoadedTypes(AssembliesResolver assembliesResolver)
 		{
 			var result = new List<Type>();
-			foreach (var assemblyName in assemblyNames.Names)
+			foreach (var assembly in assembliesResolver.Assemblies)
 			{
 				// Go through all assemblies referenced by the application and search for types matching a predicate
-				var assemblies =
-					DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(assemblyName)
+				var assemblyParts =
+					DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(assembly.FullName)
 						.Select(s => (s as AssemblyPart).Assembly);
-				foreach (var assembly in assemblies)
+				foreach (var assemblyPart in assemblyParts)
 				{
 					Type[] exportedTypes = null;
-					if (assembly == null || assembly.IsDynamic)
+					if (assemblyPart == null || assemblyPart.IsDynamic)
 					{
 						// can't call GetTypes on a null (or dynamic?) assembly
 						continue;
@@ -74,7 +75,7 @@ namespace Microsoft.AspNetCore.OData.Common
 
 					try
 					{
-						exportedTypes = assembly.GetTypes();
+						exportedTypes = assemblyPart.GetTypes();
 					}
 					catch (ReflectionTypeLoadException ex)
 					{

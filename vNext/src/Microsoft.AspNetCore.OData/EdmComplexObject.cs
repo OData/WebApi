@@ -16,9 +16,9 @@ namespace Microsoft.AspNetCore.OData
 		/// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
 		/// </summary>
 		/// <param name="edmType">The <see cref="IEdmStructuredType"/> of this object.</param>
-		/// <param name="assemblyNames">The assemblies resolve to use for type resolution</param>
-		public EdmComplexObject(IEdmComplexType edmType, AssemblyNames assemblyNames)
-            : this(edmType, assemblyNames, isNullable: false)
+		/// <param name="assembliesResolver">The assemblies resolve to use for type resolution</param>
+		public EdmComplexObject(IEdmComplexType edmType, AssembliesResolver assembliesResolver)
+            : this(edmType, assembliesResolver, isNullable: false)
         {
         }
 
@@ -26,9 +26,9 @@ namespace Microsoft.AspNetCore.OData
 		/// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
 		/// </summary>
 		/// <param name="edmType">The <see cref="IEdmComplexTypeReference"/> of this object.</param>
-		/// <param name="assemblyNames">The assemblies resolve to use for type resolution</param>
-		public EdmComplexObject(IEdmComplexTypeReference edmType, AssemblyNames assemblyNames)
-            : this(edmType.ComplexDefinition(), assemblyNames, edmType.IsNullable)
+		/// <param name="assembliesResolver">The assemblies resolve to use for type resolution</param>
+		public EdmComplexObject(IEdmComplexTypeReference edmType, AssembliesResolver assembliesResolver)
+            : this(edmType.ComplexDefinition(), assembliesResolver, edmType.IsNullable)
         {
         }
 
@@ -36,10 +36,10 @@ namespace Microsoft.AspNetCore.OData
 		/// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
 		/// </summary>
 		/// <param name="edmType">The <see cref="IEdmComplexType"/> of this object.</param>
-		/// <param name="assemblyNames">The assemblies resolve to use for type resolution</param>
+		/// <param name="assembliesResolver">The assemblies resolve to use for type resolution</param>
 		/// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
-		public EdmComplexObject(IEdmComplexType edmType, AssemblyNames assemblyNames, bool isNullable)
-            : base(edmType, assemblyNames, isNullable)
+		public EdmComplexObject(IEdmComplexType edmType, AssembliesResolver assembliesResolver, bool isNullable)
+            : base(edmType, assembliesResolver, isNullable)
         {
         }
     }

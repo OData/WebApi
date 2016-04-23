@@ -24,7 +24,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
 	    {
 		    services.AddOData();
 			var type = typeof(T);
-			var assemblyNames = new AssemblyNames(type.GetTypeInfo().Assembly.FullName);
+			var assemblyNames = new AssembliesResolver(type.GetTypeInfo().Assembly);
 			var model = DefaultODataModelProvider.BuildEdmModel(type, assemblyNames, after);
 		    services.AddSingleton(model);
 		    services.AddSingleton(assemblyNames);

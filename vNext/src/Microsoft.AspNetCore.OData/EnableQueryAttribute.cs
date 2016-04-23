@@ -45,12 +45,12 @@ namespace Microsoft.AspNetCore.OData
 
 				if (result.Value != null)
 				{
-					result.Value = ApplyQueryOptions(result.Value, request, context.ActionDescriptor, context.HttpContext.RequestServices.GetService<AssemblyNames>());
+					result.Value = ApplyQueryOptions(result.Value, request, context.ActionDescriptor, context.HttpContext.RequestServices.GetService<AssembliesResolver>());
 				}
 			}
 		}
 
-		public virtual object ApplyQueryOptions(object value, HttpRequest request, ActionDescriptor actionDescriptor, AssemblyNames assemblyNames)
+		public virtual object ApplyQueryOptions(object value, HttpRequest request, ActionDescriptor actionDescriptor, AssembliesResolver assembliesResolver)
 		{
 			var elementClrType = value is IEnumerable
 				? TypeHelper.GetImplementedIEnumerableType(value.GetType())
@@ -65,11 +65,11 @@ namespace Microsoft.AspNetCore.OData
 			var queryContext = new ODataQueryContext(
 				model,
 				elementClrType,
-				assemblyNames,
+				assembliesResolver,
 				request.ODataProperties().Path
 				);
 
-			var queryOptions = new ODataQueryOptions(queryContext, request, assemblyNames);
+			var queryOptions = new ODataQueryOptions(queryContext, request, assembliesResolver);
 
 			var enumerable = value as IEnumerable;
 			if (enumerable == null)

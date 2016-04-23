@@ -23,8 +23,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmDeltaDeletedLink"/> class.
         /// </summary>
         /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaDeletedLink.</param>
-        public EdmDeltaDeletedLink(IEdmEntityType entityType, AssemblyNames assemblyNames)
-            : this(entityType, assemblyNames, isNullable: false)
+        public EdmDeltaDeletedLink(IEdmEntityType entityType, AssembliesResolver assembliesResolver)
+            : this(entityType, assembliesResolver, isNullable: false)
         {
         }
 
@@ -32,8 +32,8 @@ namespace Microsoft.AspNetCore.OData
         /// Initializes a new instance of the <see cref="EdmDeltaDeletedLink"/> class.
         /// </summary>
         /// <param name="entityTypeReference">The <see cref="IEdmEntityTypeReference"/> of this DeltaDeletedLink.</param>
-        public EdmDeltaDeletedLink(IEdmEntityTypeReference entityTypeReference, AssemblyNames assemblyNames)
-            : this(entityTypeReference.EntityDefinition(), assemblyNames, entityTypeReference.IsNullable)
+        public EdmDeltaDeletedLink(IEdmEntityTypeReference entityTypeReference, AssembliesResolver assembliesResolver)
+            : this(entityTypeReference.EntityDefinition(), assembliesResolver, entityTypeReference.IsNullable)
         {
         }
 
@@ -42,8 +42,8 @@ namespace Microsoft.AspNetCore.OData
         /// </summary>
         /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaDeletedLink.</param>
         /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
-        public EdmDeltaDeletedLink(IEdmEntityType entityType, AssemblyNames assemblyNames, bool isNullable)
-            : base(entityType, assemblyNames, isNullable)
+        public EdmDeltaDeletedLink(IEdmEntityType entityType, AssembliesResolver assembliesResolver, bool isNullable)
+            : base(entityType, assembliesResolver, isNullable)
         {
             _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.DeletedLinkEntry);
         }

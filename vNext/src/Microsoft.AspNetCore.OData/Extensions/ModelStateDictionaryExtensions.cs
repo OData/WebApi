@@ -1,11 +1,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Web.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.OData.Core;
 
 namespace Microsoft.AspNetCore.OData.Extensions
@@ -22,18 +19,20 @@ namespace Microsoft.AspNetCore.OData.Extensions
 			{
 				Message = errorMessage,
 				ErrorCode = errorCode,
-				Details = modelState.Select(kvp => ToODataErrorDetail(kvp.Key, kvp.Value)).ToList(),
+				Details = modelState.SelectMany(kvp => ToODataErrorDetails(kvp.Key, kvp.Value)).ToList(),
 //				InnerError = ToODataInnerError(httpError)
 			};
 		}
 
-		private static ODataErrorDetail ToODataErrorDetail(string key, ModelStateEntry modelStateEntry)
+		private static IEnumerable<ODataErrorDetail> ToODataErrorDetails(string key, ModelStateEntry modelStateEntry)
 		{
-			var detail = new ODataErrorDetail();
-			var messages = modelStateEntry.Errors.Select(error => error.ErrorMessage).ToList();
-			detail.Target = key;
-			detail.Message = string.Join(", ", messages);
-			return detail;
+			foreach (var error in modelStateEntry.Errors)
+			{
+				var detail = new ODataErrorDetail();
+				detail.Target = key;
+				detail.Message = error.ErrorMessage;
+				yield return detail;
+			}
 		}
 	}
 }

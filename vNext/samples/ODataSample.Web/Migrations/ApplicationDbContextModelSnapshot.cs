@@ -232,7 +232,11 @@ namespace DCodeGitForksODataWebApivNextsamples.Migrations
 
                     b.Property<string>("LastModifiedByUserId");
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired();
+
+                    b.Property<string>("OwnerEmailAddress")
+                        .IsRequired();
 
                     b.Property<double>("Price");
 

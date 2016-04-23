@@ -55,10 +55,11 @@ namespace ODataSample.Web.Controllers
 
 		// POST api/[Entities]
 		[HttpPost]
-		public virtual async Task<IActionResult> Post([FromBody] JObject valueObj)
+		public virtual async Task<IActionResult> Post([FromBody] JObject value)
 		{
-			var oDataModel = this.GetODataModel<T>(valueObj, false);
-			await OnValidate(oDataModel, valueObj);
+			await OnBeforeDeserializeModel(value);
+			var oDataModel = this.GetODataModel<T>(value, false);
+			await OnValidate(oDataModel, value);
 			return await OnPost(oDataModel);
 		}
 
@@ -104,9 +105,15 @@ namespace ODataSample.Web.Controllers
 
 		public virtual async Task<IActionResult> Patch(TKey id, T entity, JObject value)
 		{
+			await OnBeforeDeserializeModel(value);
 			var patchEntity = this.GetODataModel<T>(value, true);
 			await OnValidate(patchEntity, value);
 			return await OnPatch(id, entity, patchEntity, value);
+		}
+
+		protected virtual async Task OnBeforeDeserializeModel(JObject value)
+		{
+			
 		}
 
 		protected virtual async Task OnValidate(T entity, JObject value)

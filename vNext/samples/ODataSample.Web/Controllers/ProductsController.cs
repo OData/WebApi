@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
@@ -137,6 +138,19 @@ namespace ODataSample.Web.Controllers
 			}
 
 			return new ObjectResult(product.ProductId);
+		}
+
+		protected override Task OnBeforeDeserializeModel(JObject value)
+		{
+			JToken name;
+			if (value.TryGetValue(nameof(Product.Name), out name))
+			{
+				if (name.Value<string>().StartsWith("j"))
+				{
+					value.Add(nameof(Product.OwnerEmailAddress), "blue@blue.com");
+				}
+			}
+			return base.OnBeforeDeserializeModel(value);
 		}
 
 		protected override Task OnValidate(Product entity, JObject value)

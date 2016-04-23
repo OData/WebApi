@@ -28,6 +28,9 @@ namespace ODataSample.Web.Models
 		[DisplayName("export price")]
 		[Range((double)5, 10)]
 		public double Price { get; set; }
+		[Required(ErrorMessage = "Please enter an email address")]
+		[EmailAddress(ErrorMessage = "Please provide a valid email address")]
+		public string OwnerEmailAddress { get; set; }
 		public DateTimeOffset DateInvented { get; set; }
 		public DateTimeOffset DateCreated { get; set; }
 		public string SomeSecretFieldThatShouldNotBeReturned { get; set; }

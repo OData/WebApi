@@ -15,6 +15,8 @@ angular
 						config.setName = "Products";
 						config.fieldValidationUrl = "/odata/ValidateField";
 					});
+					$scope.Name = "a";
+					$scope.Price = 7;
 					$scope.addProduct = function () {
 						$http.post("odata/Products", {
 								Name: $scope.Name,

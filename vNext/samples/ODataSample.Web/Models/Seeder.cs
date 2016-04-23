@@ -1,4 +1,5 @@
 using System;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -31,7 +32,7 @@ namespace ODataSample.Web.Models
 
 		public async Task EnsureDatabaseAsync()
 		{
-			MigrateDatabase(ServiceProvider);
+			await MigrateDatabaseAsync(ServiceProvider);
 			_userManager = ServiceProvider.GetService<UserManager<ApplicationUser>>();
 			var roleManager = ServiceProvider.GetService<RoleManager<IdentityRole>>();
 			await EnsureUsersAsync(false);
@@ -40,6 +41,7 @@ namespace ODataSample.Web.Models
 			////var roleManager = new RoleManager<IdentityRole>();
 			//var userManager = new UserManager<ApplicationUser>(
 			//	, );
+			EnsureDatabaseExists();
 			Context.Database.EnsureCreated();
 			// Add Mvc.Client to the known applications.
 			_productsCrud = new CrudBase<Product, int>(
@@ -154,6 +156,7 @@ namespace ODataSample.Web.Models
 					product.CustomerId = customerId;
 					product.DateCreated = dateCreated ?? DateTime.UtcNow.AddDays(-ToInt(guid) % 365);
 					product.CreatedByUserId = cratedByUserId;
+					product.OwnerEmailAddress = "empty@empty.com";
 				});
 			Context.SaveChanges();
 			return entity.ProductId;
@@ -174,16 +177,54 @@ namespace ODataSample.Web.Models
 				});
 		}
 
-		public static void MigrateDatabase(IServiceProvider serviceProvider)
+		public static async Task MigrateDatabaseAsync(IServiceProvider serviceProvider)
 		{
+			var dbCreated = EnsureDatabaseExists(false);
 			var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
 			if (context != null)
 			{
-				context.Database.Migrate();
+				try
+				{
+					context.Database.Migrate();
+				}
+				catch (SqlException e)
+				{
+					if (e.Message == "There is already an object named 'AspNetRoles' in the database.")
+					{
+						EnsureDatabaseExists(true);
+						context.Database.Migrate();
+					}
+				}
+				if (dbCreated)
+				{
+					await SeedAllAsync(serviceProvider);
+				}
 			}
 			else
 			{
 				throw new Exception("Unable to resolve database context");
+			}
+		}
+
+		private static bool EnsureDatabaseExists(bool force = false)
+		{
+			using (var sqlConnection = new SqlConnection(
+				"Server=.;Integrated Security=true;"))
+			{
+				sqlConnection.Open();
+				if (!force)
+				{
+					var dbExists = new SqlCommand("SELECT db_id('" + DbScript.DbName + "')", sqlConnection).ExecuteScalar() == DBNull.Value;
+					force = dbExists;
+				}
+				if (force)
+				{
+					foreach (var sql in DbScript.NewDb.Split(new[] { "GO" }, StringSplitOptions.RemoveEmptyEntries))
+					{
+						new SqlCommand(sql, sqlConnection).ExecuteNonQuery();
+					}
+				}
+				return force;
 			}
 		}
 	}

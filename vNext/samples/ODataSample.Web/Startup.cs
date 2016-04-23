@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using ODataSample.Web.Models;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -187,7 +186,7 @@ namespace ODataSample.Web
 			RoleManager<IdentityRole> roleManager
 			)
 		{
-			Seeder.MigrateDatabase(app.ApplicationServices);
+			Seeder.MigrateDatabaseAsync(app.ApplicationServices);
 
 			app.UseDeveloperExceptionPage();
 

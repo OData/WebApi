@@ -16,6 +16,13 @@
 		       class="form-control" name="Price" ng-model="Price"/>
 		<!---->
 	</div>
+	<div class="form-group">
+		<label for="product-price">Owner email address</label>
+		<input type="text" id="product-owner-email-address"
+		       odata-server-field-validation
+		       class="form-control" name="OwnerEmailAddress" ng-model="OwnerEmailAddress"/>
+		<!---->
+	</div>
 	<h2>Is invalid: {{productsForm.$invalid}}</h2>
 	<h2>Is unknown invalid: {{productsForm.unknownInvalid}}</h2>
 	<div class="form-group">

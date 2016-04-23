@@ -1,23 +1,30 @@
 "use strict";
 angular
 	.module("odataSampleApp")
-	.directive("products", function() {
+	.directive("products", function () {
 		return {
 			restrict: "E",
 			scope: {
-				
+
 			},
 			templateUrl: "/directives/products.html",
 			controller: [
 				"$http", "$scope",
 				function ($http, $scope) {
-					$scope.name = "";
-					$scope.price = 200;
-					$scope.addProduct = function() {
+					$scope.$on("resolve-field-validation-url", function (e, result) {
+						result.fieldValidationUrl = "/odata/Products/Sample.ValidateField";
+					});
+					$scope.addProduct = function () {
 						$http.post("odata/Products", {
-							Name: $scope.name,
-							Price: $scope.price
-						});
+								Name: $scope.Name,
+								Price: $scope.Price
+							})
+							.then(function(success) {
+									$scope.odataErrors = null;
+								},
+								function(errors) {
+									$scope.odataErrors = errors;
+								});
 					};
 				}
 			]

@@ -1,21 +1,27 @@
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.WebApiCompatShim;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Newtonsoft.Json.Linq;
 
 namespace ODataSample.Web.Controllers
 {
+	public class ModelResult<T>
+	{
+		public T Model { get; set; }
+		public ModelStateDictionary ModelState { get; set; }
+
+		public ModelResult(T model, ModelStateDictionary modelState)
+		{
+			Model = model;
+			ModelState = modelState;
+		}
+	}
 	public abstract class ODataCrudController<T, TKey> : Controller
 		where T : class
 	{
@@ -46,18 +52,32 @@ namespace ODataSample.Web.Controllers
 			return new ObjectResult(entity);
 		}
 
-		// POST api/[Entities]
-		[HttpPost]
-		public virtual async Task<IActionResult> Post([FromBody] T value)
+		public virtual async Task<IActionResult> OnPost(T model)
 		{
 			if (ModelState.IsValid)
 			{
 				// For legibility
 				var req = HttpContext.Request;
-				var locationUri = $"{req.Protocol}://{req.Host}/{req.Path}/{Crud.EntityId(value)}";
-				return Created(locationUri, await Crud.AddAndSaveAsync(value));
+				var locationUri = $"{req.Protocol}://{req.Host}/{req.Path}/{Crud.EntityId(model)}";
+				return Created(locationUri, await Crud.AddAndSaveAsync(model));
 			}
 			return this.ODataModelStateError();
+		}
+
+		// POST api/[Entities]
+		[HttpPost]
+		public virtual async Task<IActionResult> Post([FromBody] JObject valueObj)
+		{
+			return await OnPost(this.GetODataModel<T>(valueObj, false));
+		}
+
+		[HttpPost("ValidateField")]
+		public virtual async Task<IActionResult> ValidateField([FromBody]JObject validation)
+		{
+			var fieldName = validation.GetValue("Name").Value<string>();
+			var valueToValidate = validation.GetValue("Value")?.Value<string>();
+			this.ValidateField<T>(fieldName, valueToValidate);
+			return this.ODataModelState();
 		}
 
 		public virtual async Task OnBeforePatchAsync(TKey id, T entity, T patchEntity, JObject jObject)

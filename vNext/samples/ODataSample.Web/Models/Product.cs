@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.OData;
 
 namespace ODataSample.Web.Models
 {
@@ -21,7 +22,11 @@ namespace ODataSample.Web.Models
 		public ApplicationUser LastModifiedByUser { get; set; }
 
 		[Required]
+		[RegularExpression("[^0-9]+", ErrorMessage = "The name cannot contain any numbers")]
 		public string Name { get; set; }
+		[Required]
+		[DisplayName("export price")]
+		[Range((double)5, 10)]
 		public double Price { get; set; }
 		public DateTimeOffset DateInvented { get; set; }
 		public DateTimeOffset DateCreated { get; set; }

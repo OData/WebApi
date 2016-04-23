@@ -138,5 +138,14 @@ namespace ODataSample.Web.Controllers
 
 			return new ObjectResult(product.ProductId);
 		}
+
+		public override Task<IActionResult> OnPost(Product model)
+		{
+			if (model != null && model.Name == "aaa")
+			{
+				ModelState.AddModelError("Name", "Nope, no \"aaa\"");
+			}
+			return base.OnPost(model);
+		}
 	}
 }

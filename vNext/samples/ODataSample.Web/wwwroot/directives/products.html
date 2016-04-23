@@ -1,12 +1,24 @@
-<h2>Products</h2>
-<div class="form-group">
-	<label for="product-name">Name</label>
-	<input type="text" id="product-name" class="form-control" ng-model="name" />
-</div>
-<div class="form-group">
-	<label for="product-price">Price</label>
-	<input type="text" id="product-price" class="form-control" ng-model="price"/>
-</div>
-<div class="form-group">
-	<button class="btn btn-default" ng-click="addProduct()">POST to Products</button>
-</div>
+<form name="productsForm" ng-submit="productsForm.$valid && addProduct()" server-form-validation>
+	<!---->
+	<h2>Products</h2>
+	<div class="form-group">
+		<label for="Name">Name</label>
+		<input type="text" id="Name" class="form-control"
+		       name="Name" ng-model="Name"
+		       server-field-validation="Products.Name"
+		       ng-model-options="{ debounce: 300 }"/>
+		<!---->
+	</div>
+	<div class="form-group">
+		<label for="product-price">Price</label>
+		<input type="text" id="product-price"
+		       server-field-validation="Products.Price"
+		       class="form-control" name="Price" ng-model="Price"/>
+		<!---->
+	</div>
+	<h2>Is invalid: {{productsForm.$invalid}}</h2>
+	<div class="form-group">
+		<!--ng-disabled="(productsForm.$submitted && productsForm.$invalid) || productsForm.$pending"-->
+		<button class="btn btn-default">POST to Products</button>
+	</div>
+</form>

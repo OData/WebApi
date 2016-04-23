@@ -12,31 +12,34 @@ namespace Microsoft.AspNetCore.OData
     [NonValidatingParameterBinding]
     public class EdmEntityObject : EdmStructuredObject, IEdmEntityObject
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
-        /// </summary>
-        /// <param name="edmType">The <see cref="IEdmEntityType"/> of this object.</param>
-        public EdmEntityObject(IEdmEntityType edmType, string assemblyName)
-            : this(edmType, assemblyName, isNullable: false)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
+		/// </summary>
+		/// <param name="edmType">The <see cref="IEdmEntityType"/> of this object.</param>
+		/// <param name="assemblyNames">The assemblies resolve to use for type resolution</param>
+		public EdmEntityObject(IEdmEntityType edmType, AssemblyNames assemblyNames)
+            : this(edmType, assemblyNames, isNullable: false)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
-        /// </summary>
-        /// <param name="edmType">The <see cref="IEdmEntityTypeReference"/> of this object.</param>
-        public EdmEntityObject(IEdmEntityTypeReference edmType, string assemblyName)
-            : this(edmType.EntityDefinition(), assemblyName, edmType.IsNullable)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
+		/// </summary>
+		/// <param name="edmType">The <see cref="IEdmEntityTypeReference"/> of this object.</param>
+		/// <param name="assemblyNames">The assemblies resolve to use for type resolution</param>
+		public EdmEntityObject(IEdmEntityTypeReference edmType, AssemblyNames assemblyNames)
+            : this(edmType.EntityDefinition(), assemblyNames, edmType.IsNullable)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
-        /// </summary>
-        /// <param name="edmType">The <see cref="IEdmEntityType"/> of this object.</param>
-        /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
-        public EdmEntityObject(IEdmEntityType edmType, string assemblyName, bool isNullable)
-            : base(edmType, assemblyName, isNullable)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
+		/// </summary>
+		/// <param name="edmType">The <see cref="IEdmEntityType"/> of this object.</param>
+		/// <param name="assemblyNames">The assemblies resolve to use for type resolution</param>
+		/// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
+		public EdmEntityObject(IEdmEntityType edmType, AssemblyNames assemblyNames, bool isNullable)
+            : base(edmType, assemblyNames, isNullable)
         {
         }
     }

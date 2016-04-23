@@ -19,7 +19,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
     internal static class DeserializationHelpers
     {
         internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource,
-            ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext, string assemblyName)
+            ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext, AssemblyNames assemblyNames)
         {
             IEdmProperty edmProperty = resourceType.FindProperty(property.Name);
 
@@ -45,23 +45,23 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
             if (isDynamicProperty)
             {
                 SetDynamicProperty(resource, resourceType, propertyKind, propertyName, value, propertyType,
-                    readContext, assemblyName);
+                    readContext, assemblyNames);
             }
             else
             {
-                SetDeclaredProperty(resource, propertyKind, propertyName, value, edmProperty, readContext, assemblyName);
+                SetDeclaredProperty(resource, propertyKind, propertyName, value, edmProperty, readContext, assemblyNames);
             }
         }
 
         internal static void SetDynamicProperty(object resource, IEdmStructuredTypeReference resourceType,
             EdmTypeKind propertyKind, string propertyName, object propertyValue, IEdmTypeReference propertyType,
-            ODataDeserializerContext readContext, string assemblyName)
+            ODataDeserializerContext readContext, AssemblyNames assemblyNames)
         {  
             if (propertyKind == EdmTypeKind.Collection && propertyValue.GetType() != typeof(EdmComplexObjectCollection)
                 && propertyValue.GetType() != typeof(EdmEnumObjectCollection))
             {
                 SetDynamicCollectionProperty(resource, propertyName, propertyValue, propertyType.AsCollection(),
-                    resourceType.StructuredDefinition(), readContext, assemblyName);
+                    resourceType.StructuredDefinition(), readContext, assemblyNames);
             }
             else
             {
@@ -71,11 +71,11 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
         }
 
         internal static void SetDeclaredProperty(object resource, EdmTypeKind propertyKind, string propertyName,
-            object propertyValue, IEdmProperty edmProperty, ODataDeserializerContext readContext, string assemblyName)
+            object propertyValue, IEdmProperty edmProperty, ODataDeserializerContext readContext, AssemblyNames assemblyNames)
         {
             if (propertyKind == EdmTypeKind.Collection)
             {
-                SetCollectionProperty(resource, edmProperty, propertyValue, propertyName, assemblyName);
+                SetCollectionProperty(resource, edmProperty, propertyValue, propertyName, assemblyNames);
             }
             else
             {
@@ -92,15 +92,15 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
             }
         }
 
-        internal static void SetCollectionProperty(object resource, IEdmProperty edmProperty, object value, string propertyName, string assemblyName)
+        internal static void SetCollectionProperty(object resource, IEdmProperty edmProperty, object value, string propertyName, AssemblyNames assemblyNames)
         {
             Contract.Assert(edmProperty != null);
 
-            SetCollectionProperty(resource, propertyName, edmProperty.Type.AsCollection(), value, false, assemblyName);
+            SetCollectionProperty(resource, propertyName, edmProperty.Type.AsCollection(), value, false, assemblyNames);
         }
 
         internal static void SetCollectionProperty(object resource, string propertyName,
-            IEdmCollectionTypeReference edmPropertyType, object value, bool clearCollection, string assemblyName)
+            IEdmCollectionTypeReference edmPropertyType, object value, bool clearCollection, AssemblyNames assemblyNames)
         {
             if (value != null)
             {
@@ -123,7 +123,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
                     CollectionDeserializationHelpers.TryCreateInstance(propertyType, edmPropertyType, elementType, out newCollection))
                 {
                     // settable collections
-                    collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType, assemblyName);
+                    collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType, assemblyNames);
                     if (propertyType.IsArray)
                     {
                         newCollection = CollectionDeserializationHelpers.ToArray(newCollection, elementType);
@@ -146,14 +146,14 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
                         newCollection.Clear(propertyName, resourceType);
                     }
 
-                    collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType, assemblyName);
+                    collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType, assemblyNames);
                 }
             }
         }
 
         internal static void SetDynamicCollectionProperty(object resource, string propertyName, object value,
             IEdmCollectionTypeReference edmPropertyType, IEdmStructuredType structuredType,
-            ODataDeserializerContext readContext, string assemblyName)
+            ODataDeserializerContext readContext, AssemblyNames assemblyName)
         {
             Contract.Assert(value != null);
             Contract.Assert(readContext != null);

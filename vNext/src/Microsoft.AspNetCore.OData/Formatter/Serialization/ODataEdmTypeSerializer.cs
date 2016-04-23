@@ -10,6 +10,7 @@ using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using System.Linq;
 using Microsoft.AspNetCore.OData.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
@@ -108,7 +109,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			IEdmType declaringType, Type declaringClrType)
 		{
 			var modelBuilder = EdmModelHelperMethods.Configuration[writeContext.Model];
-			var clrType = EdmLibHelpers.GetClrType(expectedType, writeContext.Model, modelBuilder.AssemblyName);
+			var assemblyNames = writeContext.Request.HttpContext.RequestServices.GetService<AssemblyNames>();
+			var clrType = EdmLibHelpers.GetClrType(expectedType, writeContext.Model, assemblyNames);
 			var serializers = modelBuilder.GetSerializeInterceptors(
 				clrType).ToList();
 			var isRoot = declaringInstance == null &&
@@ -121,8 +123,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 				if (declaringClrType == null && declaringTypeReference != null)
 				{
 					declaringClrType = declaringType != null
-						? EdmLibHelpers.GetClrType(declaringType, writeContext.Model, modelBuilder.AssemblyName)
-						: EdmLibHelpers.GetClrType(declaringTypeReference, writeContext.Model, modelBuilder.AssemblyName);
+						? EdmLibHelpers.GetClrType(declaringType, writeContext.Model, assemblyNames)
+						: EdmLibHelpers.GetClrType(declaringTypeReference, writeContext.Model, assemblyNames);
 				}
 				var vp = new ValueInterceptor(
 					graph, clrType, elementName, declaringInstance, declaringClrType, isRoot);

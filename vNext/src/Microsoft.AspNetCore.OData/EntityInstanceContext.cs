@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Formatter.Deserialization;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.OData.Properties;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNetCore.OData
@@ -45,18 +46,20 @@ namespace Microsoft.AspNetCore.OData
         /// <param name="serializerContext">The backing <see cref="ODataSerializerContext"/>.</param>
         /// <param name="entityType">The EDM entity type of this instance context.</param>
         /// <param name="entityInstance">The object representing the instance of this context.</param>
-        public EntityInstanceContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, object entityInstance)
-            : this(serializerContext, entityType, AsEdmEntityObject(entityInstance, entityType, serializerContext.Model))
+        public EntityInstanceContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, object entityInstance, string assemblyName)
+            : this(serializerContext, entityType, AsEdmEntityObject(entityInstance, entityType, serializerContext.Model),
+				   assemblyName)
         {
         }
 
-        private EntityInstanceContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, IEdmEntityObject edmObject)
+        private EntityInstanceContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, IEdmEntityObject edmObject, string assemblyName)
         {
             if (serializerContext == null)
             {
                 throw Error.ArgumentNull("serializerContext");
             }
 
+	        AssemblyName = assemblyName;
             SerializerContext = serializerContext;
             EntityType = entityType.EntityDefinition();
             EdmObject = edmObject;
@@ -221,7 +224,8 @@ namespace Microsoft.AspNetCore.OData
                 return edmEntityObject.Instance;
             }
 
-            Type clrType = EdmLibHelpers.GetClrType(EntityType, EdmModel, AssemblyName);
+	        var assemblyNames = Request.HttpContext.RequestServices.GetService<AssemblyNames>();
+	        Type clrType = EdmLibHelpers.GetClrType(EntityType, EdmModel, assemblyNames);
             if (clrType == null)
             {
                 throw new InvalidOperationException(Error.Format(SRResources.MappingDoesNotContainEntityType, EntityType.FullName()));
@@ -235,7 +239,7 @@ namespace Microsoft.AspNetCore.OData
                 {
                     if (value.GetType().IsCollection())
                     {
-                        DeserializationHelpers.SetCollectionProperty(resource, property, value, property.Name, AssemblyName);
+                        DeserializationHelpers.SetCollectionProperty(resource, property, value, property.Name, assemblyNames);
                     }
                     else
                     {

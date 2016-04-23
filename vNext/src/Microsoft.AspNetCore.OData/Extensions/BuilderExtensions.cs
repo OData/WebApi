@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.AspNetCore.OData.Routing;
@@ -11,11 +12,11 @@ namespace Microsoft.AspNetCore.OData.Extensions
 {
     public static class BuilderExtensions
     {
-        public static IRouteBuilder MapODataRoute<T>(this IRouteBuilder builder, string prefix) where T : class
-        {
-            builder.Routes.Add(new ODataRoute(prefix, DefaultODataModelProvider.BuildEdmModel(typeof(T))));
-            return builder;
-        }
+        //public static IRouteBuilder MapODataRoute<T>(this IRouteBuilder builder, string prefix) where T : class
+        //{
+        //    builder.Routes.Add(new ODataRoute(prefix, DefaultODataModelProvider.BuildEdmModel(typeof(T))));
+        //    return builder;
+        //}
 
 	    public static IServiceCollection AddOData<T>([NotNull] this IServiceCollection services,
 			Action<ODataConventionModelBuilder> after = null)
@@ -23,9 +24,11 @@ namespace Microsoft.AspNetCore.OData.Extensions
 	    {
 		    services.AddOData();
 			var type = typeof(T);
-			var model = DefaultODataModelProvider.BuildEdmModel(type, after);
+			var assemblyNames = new AssemblyNames(type.GetTypeInfo().Assembly.FullName);
+			var model = DefaultODataModelProvider.BuildEdmModel(type, assemblyNames, after);
 		    services.AddSingleton(model);
-		    return services;
+		    services.AddSingleton(assemblyNames);
+			return services;
 	    }
 
 	    public static IApplicationBuilder UseOData(

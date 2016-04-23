@@ -9,12 +9,10 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Web.OData.Query.Expressions;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
@@ -30,14 +28,14 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
         private ODataQueryContext _context;
         private IEdmModel _model;
         private ODataQuerySettings _settings;
-        private string _assemblyName;
+        private AssemblyNames _assemblyNames;
         private string _modelID;
 
-        public SelectExpandBinder(ODataQuerySettings settings, string assemblyName,
+        public SelectExpandBinder(ODataQuerySettings settings, AssemblyNames assemblyNames,
             SelectExpandQueryOption selectExpandQuery)
         {
             Contract.Assert(settings != null);
-            Contract.Assert(assemblyName != null);
+            Contract.Assert(assemblyNames != null);
             Contract.Assert(selectExpandQuery != null);
             Contract.Assert(selectExpandQuery.Context != null);
             Contract.Assert(selectExpandQuery.Context.Model != null);
@@ -48,25 +46,25 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             _model = _context.Model;
             _modelID = ModelContainer.GetModelID(_model);
             _settings = settings;
-			_assemblyName = assemblyName;
+			_assemblyNames = assemblyNames;
         }
 
         public static IQueryable Bind(IQueryable queryable, ODataQuerySettings settings,
-            string assemblyName, SelectExpandQueryOption selectExpandQuery)
+			AssemblyNames assemblyNames, SelectExpandQueryOption selectExpandQuery)
         {
             Contract.Assert(queryable != null);
 
-            SelectExpandBinder binder = new SelectExpandBinder(settings, assemblyName, selectExpandQuery);
+            SelectExpandBinder binder = new SelectExpandBinder(settings, assemblyNames, selectExpandQuery);
 	        var bound = binder.Bind(queryable);
 	        return bound;
         }
 
-        public static object Bind(object entity, ODataQuerySettings settings, string assemblyName,
+        public static object Bind(object entity, ODataQuerySettings settings, AssemblyNames assemblyNames,
             SelectExpandQueryOption selectExpandQuery)
         {
             Contract.Assert(entity != null);
 
-            SelectExpandBinder binder = new SelectExpandBinder(settings, assemblyName, selectExpandQuery);
+            SelectExpandBinder binder = new SelectExpandBinder(settings, assemblyNames, selectExpandQuery);
             return binder.Bind(entity);
         }
 
@@ -139,8 +137,8 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             // derived navigation property using cast
             if (elementType != declaringType)
             {
-                Type originalType = EdmLibHelpers.GetClrType(elementType, _model, _assemblyName);
-                Type castType = EdmLibHelpers.GetClrType(declaringType, _model, _assemblyName);
+                Type originalType = EdmLibHelpers.GetClrType(elementType, _model, _assemblyNames);
+                Type castType = EdmLibHelpers.GetClrType(declaringType, _model, _assemblyNames);
                 if (castType == null)
                 {
                     throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType, declaringType.FullName()));
@@ -184,7 +182,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             // derived property using cast
             if (elementType != declaringType)
             {
-                Type castType = EdmLibHelpers.GetClrType(declaringType, _model, _assemblyName);
+                Type castType = EdmLibHelpers.GetClrType(declaringType, _model, _assemblyNames);
                 if (castType == null)
                 {
                     throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType,
@@ -202,7 +200,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             if (filterClause != null && property.Type.IsCollection())
             {
                 IEdmTypeReference edmElementType = property.Type.AsCollection().ElementType();
-                Type clrElementType = EdmLibHelpers.GetClrType(edmElementType, _model, _assemblyName);
+                Type clrElementType = EdmLibHelpers.GetClrType(edmElementType, _model, _assemblyNames);
                 if (clrElementType == null)
                 {
                     throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType,
@@ -220,7 +218,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
                     filterClause,
                     clrElementType,
                     _model,
-                    _assemblyName,
+                    _assemblyNames,
                     _settings);
                 MethodCallExpression filterResult = Expression.Call(
                     ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(clrElementType),
@@ -291,7 +289,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             else
             {
                 // Initialize property 'TypeName' on the wrapper class as we don't have the instance.
-                Expression typeName = CreateTypeNameExpression(source, entityType, _model, _assemblyName);
+                Expression typeName = CreateTypeNameExpression(source, entityType, _model, _assemblyNames);
                 if (typeName != null)
                 {
                     wrapperProperty = wrapperType.GetProperty("TypeName");
@@ -476,7 +474,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             if (orderbyClause != null)
             {
                 LambdaExpression orderByExpression =
-                    FilterBinder.Bind(orderbyClause, elementType, _model, _settings, _assemblyName);
+                    FilterBinder.Bind(orderbyClause, elementType, _model, _settings, _assemblyNames);
                 source = ExpressionHelpers.OrderBy(source, orderByExpression, elementType, orderbyClause.Direction);
             }
             return source;
@@ -570,7 +568,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
         //      source is GrandChild ? "GrandChild" : ( source is Child ? "Child" : "Root" )
         // Notice that the order is important here. The most derived type must be the first to check.
         // If entity framework had a way to figure out the type name without selecting the whole object, we don't have to do this magic.
-        internal static Expression CreateTypeNameExpression(Expression source, IEdmEntityType elementType, IEdmModel model, string assemblyName)
+        internal static Expression CreateTypeNameExpression(Expression source, IEdmEntityType elementType, IEdmModel model, AssemblyNames assemblyNames)
         {
             IReadOnlyList<IEdmEntityType> derivedTypes = GetAllDerivedTypes(elementType, model);
 
@@ -584,7 +582,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
                 Expression expression = Expression.Constant(elementType.FullName());
                 for (int i = 0; i < derivedTypes.Count; i++)
                 {
-                    Type clrType = EdmLibHelpers.GetClrType(derivedTypes[i], model, assemblyName);
+                    Type clrType = EdmLibHelpers.GetClrType(derivedTypes[i], model, assemblyNames);
                     if (clrType == null)
                     {
                         throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType, derivedTypes[0].FullName()));

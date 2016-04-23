@@ -47,15 +47,15 @@ namespace Microsoft.AspNetCore.OData.Extensions
             return new ODataServiceBuilder(services);
         }
 
-        public static void AddApiContext<T>(
-           [NotNull] this ODataServiceBuilder builder,
-           [NotNull] string prefix)
-            where T : class
-        {
-            builder.Register<T>(prefix);
-        }
+		//public static void AddApiContext<T>(
+		//   [NotNull] this ODataServiceBuilder builder,
+		//   [NotNull] string prefix)
+		//	where T : class
+		//{
+		//	builder.Register<T>(prefix);
+		//}
 
-        public static void ConfigureOData(
+		public static void ConfigureOData(
             [NotNull] this IServiceCollection services,
             [NotNull] Action<ODataOptions> setupAction)
         {

@@ -23,33 +23,36 @@ namespace Microsoft.AspNetCore.OData
         private HashSet<string> _setProperties = new HashSet<string>();
 
         private IEdmStructuredType _expectedEdmType;
-	    private readonly string _assemblyName;
+	    private readonly AssemblyNames _assemblyNames;
 	    private IEdmStructuredType _actualEdmType;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
-        /// </summary>
-        /// <param name="edmType">The <see cref="IEdmStructuredType"/> of this object.</param>
-        protected EdmStructuredObject(IEdmStructuredType edmType, string assemblyName)
-            : this(edmType, assemblyName, isNullable: false)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
+		/// </summary>
+		/// <param name="edmType">The <see cref="IEdmStructuredType"/> of this object.</param>
+		/// <param name="assemblyNames">Assembly names to use for type resolution</param>
+		protected EdmStructuredObject(IEdmStructuredType edmType, AssemblyNames assemblyNames)
+            : this(edmType, assemblyNames, isNullable: false)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
-        /// </summary>
-        /// <param name="edmType">The <see cref="IEdmStructuredTypeReference"/> of this object.</param>
-        protected EdmStructuredObject(IEdmStructuredTypeReference edmType, string assemblyName)
-            : this(edmType.StructuredDefinition(), assemblyName, edmType.IsNullable)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
+		/// </summary>
+		/// <param name="edmType">The <see cref="IEdmStructuredTypeReference"/> of this object.</param>
+		/// <param name="assemblyNames">Assembly names to use for type resolution</param>
+		protected EdmStructuredObject(IEdmStructuredTypeReference edmType, AssemblyNames assemblyNames)
+            : this(edmType.StructuredDefinition(), assemblyNames, edmType.IsNullable)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
-        /// </summary>
-        /// <param name="edmType">The <see cref="IEdmStructuredTypeReference"/> of this object.</param>
-        /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
-        protected EdmStructuredObject(IEdmStructuredType edmType, string assemblyName, bool isNullable)
+	    /// <summary>
+	    /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
+	    /// </summary>
+	    /// <param name="edmType">The <see cref="IEdmStructuredTypeReference"/> of this object.</param>
+	    /// <param name="assemblyNames">Assembly names to use for type resolution</param>
+	    /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
+	    protected EdmStructuredObject(IEdmStructuredType edmType, AssemblyNames assemblyNames, bool isNullable)
         {
             if (edmType == null)
             {
@@ -57,7 +60,7 @@ namespace Microsoft.AspNetCore.OData
             }
 
             _expectedEdmType = edmType;
-	        _assemblyName = assemblyName;
+	        _assemblyNames = assemblyNames;
 	        _actualEdmType = edmType;
             IsNullable = isNullable;
         }
@@ -145,7 +148,7 @@ namespace Microsoft.AspNetCore.OData
                 }
                 else
                 {
-                    value = GetDefaultValue(property.Type, _assemblyName);
+                    value = GetDefaultValue(property.Type, _assemblyNames);
                     // store the default value (but don't update the list of 'set properties').
                     _container[name] = value;
                     return true;
@@ -164,7 +167,7 @@ namespace Microsoft.AspNetCore.OData
             IEdmProperty property = _actualEdmType.FindProperty(name);
             if (property != null)
             {
-                type = GetClrTypeForUntypedDelta(property.Type, _assemblyName);
+                type = GetClrTypeForUntypedDelta(property.Type, _assemblyNames);
                 return true;
             }
             else if (_actualEdmType.IsOpen && _container.ContainsKey(name))
@@ -212,14 +215,14 @@ namespace Microsoft.AspNetCore.OData
             return EdmLibHelpers.ToEdmTypeReference(_actualEdmType, IsNullable);
         }
 
-        internal static object GetDefaultValue(IEdmTypeReference propertyType, string assemblyName)
+        internal static object GetDefaultValue(IEdmTypeReference propertyType, AssemblyNames assemblyNames)
         {
             Contract.Assert(propertyType != null);
 
             bool isCollection = propertyType.IsCollection();
             if (!propertyType.IsNullable || isCollection)
             {
-                Type clrType = GetClrTypeForUntypedDelta(propertyType, assemblyName);
+                Type clrType = GetClrTypeForUntypedDelta(propertyType, assemblyNames);
 
                 if (propertyType.IsPrimitive() ||
                     (isCollection && propertyType.AsCollection().ElementType().IsPrimitive()))
@@ -237,14 +240,14 @@ namespace Microsoft.AspNetCore.OData
             return null;
         }
 
-        internal static Type GetClrTypeForUntypedDelta(IEdmTypeReference edmType, string assemblyName)
+        internal static Type GetClrTypeForUntypedDelta(IEdmTypeReference edmType, AssemblyNames assemblyNames)
         {
             Contract.Assert(edmType != null);
 
             switch (edmType.TypeKind())
             {
                 case EdmTypeKind.Primitive:
-                    return EdmLibHelpers.GetClrType(edmType.AsPrimitive(), EdmCoreModel.Instance, assemblyName);
+                    return EdmLibHelpers.GetClrType(edmType.AsPrimitive(), EdmCoreModel.Instance, assemblyNames);
 
                 case EdmTypeKind.Complex:
                     return typeof(EdmComplexObject);
@@ -259,7 +262,7 @@ namespace Microsoft.AspNetCore.OData
                     IEdmTypeReference elementType = edmType.AsCollection().ElementType();
                     if (elementType.IsPrimitive())
                     {
-                        Type elementClrType = GetClrTypeForUntypedDelta(elementType, assemblyName);
+                        Type elementClrType = GetClrTypeForUntypedDelta(elementType, assemblyNames);
                         return typeof(List<>).MakeGenericType(elementClrType);
                     }
                     else if (elementType.IsComplex())

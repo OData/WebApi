@@ -7,15 +7,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Reflection;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.OData.Builder.Conventions;
 using Microsoft.AspNetCore.OData.Builder.Conventions.Attributes;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Edm;
 using System.Linq;
-using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.OData.Formatter;
 
 namespace Microsoft.AspNetCore.OData.Builder
@@ -87,28 +84,26 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <summary>
         /// Initializes a new <see cref="ODataConventionModelBuilder"/>.
         /// </summary>
-        /// <param name="assemblyProvider">The <see cref="IAssemblyProvider"/> to use.</param>
-        public ODataConventionModelBuilder(string assemblyName)
-            : this(assemblyName, isQueryCompositionMode: false)
+        public ODataConventionModelBuilder(AssemblyNames assemblyNames)
+            : this(assemblyNames, isQueryCompositionMode: false)
         {
         }
 
 	    /// <summary>
 	    /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
 	    /// </summary>
-	    /// <param name="assemblyName">The full name of the assembly to use</param>
+	    /// <param name="assemblyNames">The assemblies resolve to use for type resolution</param>
 	    /// <param name="isQueryCompositionMode">If the model is being built for only querying.</param>
 	    /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <c>true</c> has more relaxed
 	    /// inference rules and also treats all types as entity types. This constructor is intended for use by unit testing only.</remarks>
-	    public ODataConventionModelBuilder(string assemblyName, bool isQueryCompositionMode)
+	    public ODataConventionModelBuilder(AssemblyNames assemblyNames, bool isQueryCompositionMode)
         {
-		    AssemblyName = assemblyName;
-		    if (assemblyName == null)
+		    if (assemblyNames == null)
             {
-                throw Error.ArgumentNull("assemblyName");
+                throw Error.ArgumentNull("assemblyNames");
             }
 
-            Initialize(assemblyName, isQueryCompositionMode);
+            Initialize(assemblyNames, isQueryCompositionMode);
         }
 
         /// <summary>
@@ -123,7 +118,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <remarks>Use this action to modify the <see cref="ODataModelBuilder"/> configuration that has been inferred by convention.</remarks>
         public Action<ODataConventionModelBuilder> OnModelCreating { get; set; }
 
-        internal void Initialize(string assemblyName, bool isQueryCompositionMode)
+        internal void Initialize(AssemblyNames assemblyNames, bool isQueryCompositionMode)
         {
             _isQueryCompositionMode = isQueryCompositionMode;
             _configuredNavigationSources = new HashSet<INavigationSourceConfiguration>();
@@ -131,7 +126,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             _ignoredTypes = new HashSet<Type>();
             ModelAliasingEnabled = true;
             _allTypesWithDerivedTypeMapping = new Lazy<IDictionary<Type, List<Type>>>(
-                () => BuildDerivedTypesMapping(assemblyName),
+                () => BuildDerivedTypesMapping(assemblyNames),
                 isThreadSafe: false);
         }
 
@@ -1126,11 +1121,11 @@ namespace Microsoft.AspNetCore.OData.Builder
             }
         }
 
-        private static Dictionary<Type, List<Type>> BuildDerivedTypesMapping(string assemblyName)
+        private static Dictionary<Type, List<Type>> BuildDerivedTypesMapping(AssemblyNames assemblyNames)
         {
             IEnumerable<Type> allTypes = 
 				//DefaultAssemblyPartDiscoveryProvider.
-				TypeHelper.GetLoadedTypes(assemblyName).Where(t => t.GetTypeInfo().IsVisible && t.GetTypeInfo().IsClass && t != typeof(object));
+				TypeHelper.GetLoadedTypes(assemblyNames).Where(t => t.GetTypeInfo().IsVisible && t.GetTypeInfo().IsClass && t != typeof(object));
             Dictionary<Type, List<Type>> allTypeMapping = allTypes.ToDictionary(k => k, k => new List<Type>());
 
             foreach (Type type in allTypes)

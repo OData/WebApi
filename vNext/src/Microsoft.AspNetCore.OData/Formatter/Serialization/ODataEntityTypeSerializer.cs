@@ -9,14 +9,11 @@ using System.Runtime.Serialization;
 using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Properties;
-using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using System.Linq;
-using Microsoft.AspNetCore.OData.Query.Expressions;
 using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
@@ -124,7 +121,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             Contract.Assert(writeContext != null);
 
             IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext, entityType, graph);
+            EntityInstanceContext entityInstanceContext = 
+				new EntityInstanceContext(writeContext, entityType, graph, null);
             SelectExpandNode selectExpandNode = CreateSelectExpandNode(entityInstanceContext);
             if (selectExpandNode != null)
             {
@@ -144,7 +142,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             Contract.Assert(writeContext != null);
 
             IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
-            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext, entityType, graph);
+            EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext, entityType, graph, null);
             SelectExpandNode selectExpandNode = CreateSelectExpandNode(entityInstanceContext);
             if (selectExpandNode != null)
             {

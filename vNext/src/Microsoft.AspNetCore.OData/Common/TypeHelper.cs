@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.OData.Common
 	{
 		internal static bool IsSubclassOfRawGeneric(this TypeInfo toCheck, TypeInfo generic)
 		{
-			while (toCheck != null && toCheck != typeof (object).GetTypeInfo())
+			while (toCheck != null && toCheck != typeof(object).GetTypeInfo())
 			{
 				if (generic == toCheck)
 				{
@@ -41,7 +41,7 @@ namespace Microsoft.AspNetCore.OData.Common
 				throw Error.ArgumentNull("type");
 			}
 
-			foreach (var interfaceType in type.GetInterfaces().Concat(new[] {type}))
+			foreach (var interfaceType in type.GetInterfaces().Concat(new[] { type }))
 			{
 				var gt = interfaceType.GetGenericArguments();
 
@@ -54,42 +54,44 @@ namespace Microsoft.AspNetCore.OData.Common
 			return null;
 		}
 
-		internal static IEnumerable<Type> GetLoadedTypes(string assemblyName)
+		internal static IEnumerable<Type> GetLoadedTypes(AssemblyNames assemblyNames)
 		{
 			var result = new List<Type>();
-
-			// Go through all assemblies referenced by the application and search for types matching a predicate
-			var assemblies =
-				DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(assemblyName)
-					.Select(s => (s as AssemblyPart).Assembly);
-			foreach (var assembly in assemblies)
+			foreach (var assemblyName in assemblyNames.Names)
 			{
-				Type[] exportedTypes = null;
-				if (assembly == null || assembly.IsDynamic)
+				// Go through all assemblies referenced by the application and search for types matching a predicate
+				var assemblies =
+					DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(assemblyName)
+						.Select(s => (s as AssemblyPart).Assembly);
+				foreach (var assembly in assemblies)
 				{
-					// can't call GetTypes on a null (or dynamic?) assembly
-					continue;
+					Type[] exportedTypes = null;
+					if (assembly == null || assembly.IsDynamic)
+					{
+						// can't call GetTypes on a null (or dynamic?) assembly
+						continue;
+					}
+
+					try
+					{
+						exportedTypes = assembly.GetTypes();
+					}
+					catch (ReflectionTypeLoadException ex)
+					{
+						exportedTypes = ex.Types;
+					}
+					catch
+					{
+						continue;
+					}
+
+					if (exportedTypes != null)
+					{
+						result.AddRange(exportedTypes.Where(t => t != null && t.GetTypeInfo().IsVisible));
+					}
 				}
 
-				try
-				{
-					exportedTypes = assembly.GetTypes();
-				}
-				catch (ReflectionTypeLoadException ex)
-				{
-					exportedTypes = ex.Types;
-				}
-				catch
-				{
-					continue;
-				}
-
-				if (exportedTypes != null)
-				{
-					result.AddRange(exportedTypes.Where(t => t != null && t.GetTypeInfo().IsVisible));
-				}
 			}
-
 			return result;
 		}
 

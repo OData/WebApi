@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.AspNetCore.OData.Common;
-using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using System.Linq;
@@ -19,7 +18,6 @@ namespace Microsoft.AspNetCore.OData.Builder
     /// </summary>
     public class ODataModelBuilder
     {
-        public string AssemblyName { get; protected set; }
         private static readonly Version _defaultDataServiceVersion = EdmConstants.EdmVersion4;
         private static readonly Version _defaultMaxDataServiceVersion = EdmConstants.EdmVersion4;
 

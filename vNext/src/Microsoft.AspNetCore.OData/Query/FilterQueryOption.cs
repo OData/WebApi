@@ -83,18 +83,18 @@ namespace Microsoft.AspNetCore.OData.Query
 	    /// </remarks>
 	    /// <param name="query">The original <see cref="IQueryable"/>.</param>
 	    /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
-	    /// <param name="assemblyName">The assembly to use.</param>
+	    /// <param name="assemblyNames">The assembly to use.</param>
 	    /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
-	    public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, string assemblyName)
+	    public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, AssemblyNames assemblyNames)
         {
             if (query == null)
             {
                 throw Error.ArgumentNull("query");
             }
             
-            if (assemblyName == null)
+            if (assemblyNames == null)
             {
-                throw Error.ArgumentNull("assemblyName");
+                throw Error.ArgumentNull("assemblyNames");
             }
 
             if (Context.ElementClrType == null)
@@ -102,7 +102,7 @@ namespace Microsoft.AspNetCore.OData.Query
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
             
-            var filter = FilterBinder.Bind(FilterClause, Context.ElementClrType, Context.Model, assemblyName, querySettings);
+            var filter = FilterBinder.Bind(FilterClause, Context.ElementClrType, Context.Model, assemblyNames, querySettings);
             return ExpressionHelpers.Where(query, filter, Context.ElementClrType);
         }
     }

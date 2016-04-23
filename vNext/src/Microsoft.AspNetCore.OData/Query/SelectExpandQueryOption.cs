@@ -181,21 +181,21 @@ namespace Microsoft.AspNetCore.OData.Query
         ///// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
         ///// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
         //[SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "stopgap. will be used later.")]
-        //public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings, string assemblyName)
+        //public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings, string assemblyNames)
         //{
-        //    return ApplyTo(queryable, settings, assemblyName);
+        //    return ApplyTo(queryable, settings, assemblyNames);
         //}
 
-        /// <summary>
-        /// Applies the $select and $expand query options to the given <see cref="IQueryable"/> using the given
-        /// <see cref="ODataQuerySettings"/>.
-        /// </summary>
-        /// <param name="queryable">The original <see cref="IQueryable"/>.</param>
-        /// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
-        /// <param name="assembliesResolver">The <see cref="IAssembliesResolver"/> to use.</param>
-        /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "stopgap. will be used later.")]
-        public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings, string assemblyName)
+	    /// <summary>
+	    /// Applies the $select and $expand query options to the given <see cref="IQueryable"/> using the given
+	    /// <see cref="ODataQuerySettings"/>.
+	    /// </summary>
+	    /// <param name="queryable">The original <see cref="IQueryable"/>.</param>
+	    /// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
+	    /// <param name="assemblyNames">The assemblies resolve to use for type resolution</param>
+	    /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
+	    [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "stopgap. will be used later.")]
+        public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings, AssemblyNames assemblyNames)
         {
             if (queryable == null)
             {
@@ -218,7 +218,7 @@ namespace Microsoft.AspNetCore.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(queryable);
             }
 
-            return SelectExpandBinder.Bind(queryable, updatedSettings, assemblyName, this);
+            return SelectExpandBinder.Bind(queryable, updatedSettings, assemblyNames, this);
         }
 
         ///// <summary>
@@ -227,9 +227,9 @@ namespace Microsoft.AspNetCore.OData.Query
         ///// <param name="entity">The original entity.</param>
         ///// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
         ///// <returns>The new entity after the $select and $expand query has been applied to.</returns>
-        //public object ApplyTo(object entity, ODataQuerySettings settings, string assemblyName)
+        //public object ApplyTo(object entity, ODataQuerySettings settings, string assemblyNames)
         //{
-        //    return ApplyTo(entity, settings, assemblyName);
+        //    return ApplyTo(entity, settings, assemblyNames);
         //}
 
 		/// <summary>
@@ -237,9 +237,9 @@ namespace Microsoft.AspNetCore.OData.Query
 		/// </summary>
 		/// <param name="entity">The original entity.</param>
 		/// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
-		/// <param name="assemblyName">The name of the assembly to use.</param>
+		/// <param name="assemblyNames">The name of the assembly to use.</param>
 		/// <returns>The new entity after the $select and $expand query has been applied to.</returns>
-		public object ApplyTo(object entity, ODataQuerySettings settings, string assemblyName)
+		public object ApplyTo(object entity, ODataQuerySettings settings, AssemblyNames assemblyNames)
         {
             if (entity == null)
             {
@@ -262,7 +262,7 @@ namespace Microsoft.AspNetCore.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOption.True;
             }
 
-            return SelectExpandBinder.Bind(entity, updatedSettings, assemblyName, this);
+            return SelectExpandBinder.Bind(entity, updatedSettings, assemblyNames, this);
         }
 
         /// <summary>

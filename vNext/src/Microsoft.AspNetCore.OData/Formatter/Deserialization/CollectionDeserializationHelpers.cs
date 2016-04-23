@@ -21,7 +21,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
         private static readonly MethodInfo _toArrayMethodInfo = typeof(Enumerable).GetMethod("ToArray");
 
         public static void AddToCollection(this IEnumerable items, IEnumerable collection, Type elementType,
-            Type resourceType, string propertyName, Type propertyType, string assemblyName)
+            Type resourceType, string propertyName, Type propertyType, AssemblyNames assemblyNames)
         {
             Contract.Assert(items != null);
             Contract.Assert(collection != null);
@@ -48,10 +48,10 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
                 throw new SerializationException(message);
             }
 
-            items.AddToCollectionCore(collection, elementType, list, addMethod, assemblyName);
+            items.AddToCollectionCore(collection, elementType, list, addMethod, assemblyNames);
         }
 
-        public static void AddToCollection(this IEnumerable items, IEnumerable collection, Type elementType, string paramName, Type paramType, string assemblyName)
+        public static void AddToCollection(this IEnumerable items, IEnumerable collection, Type elementType, string paramName, Type paramType, AssemblyNames assemblyNames)
         {
             Contract.Assert(items != null);
             Contract.Assert(collection != null);
@@ -71,13 +71,13 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
                 }
             }
 
-            items.AddToCollectionCore(collection, elementType, list, addMethod, assemblyName);
+            items.AddToCollectionCore(collection, elementType, list, addMethod, assemblyNames);
         }
 
-        private static void AddToCollectionCore(this IEnumerable items, IEnumerable collection, Type elementType, IList list, MethodInfo addMethod, string assemblyName)
+        private static void AddToCollectionCore(this IEnumerable items, IEnumerable collection, Type elementType, IList list, MethodInfo addMethod, AssemblyNames assemblyNames)
         {
             bool isNonstandardEdmPrimitiveCollection;
-            EdmLibHelpers.IsNonstandardEdmPrimitive(elementType, assemblyName, out isNonstandardEdmPrimitiveCollection);
+            EdmLibHelpers.IsNonstandardEdmPrimitive(elementType, assemblyNames, out isNonstandardEdmPrimitiveCollection);
 
             foreach (object item in items)
             {

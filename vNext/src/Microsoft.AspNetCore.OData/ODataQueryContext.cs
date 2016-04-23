@@ -26,8 +26,8 @@ namespace Microsoft.AspNetCore.OData
 	    /// the given <paramref name="elementClrType"/>.</param>
 	    /// <param name="elementClrType">The CLR type of the element of the collection being queried.</param>
 	    /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
-	    /// <param name="assemblyName"></param>
-	    public ODataQueryContext(IEdmModel model, Type elementClrType, string assemblyName, ODataPath path)
+	    /// <param name="assemblyNames"></param>
+	    public ODataQueryContext(IEdmModel model, Type elementClrType, AssemblyNames assemblyNames, ODataPath path)
         {
             if (model == null)
             {
@@ -49,7 +49,7 @@ namespace Microsoft.AspNetCore.OData
             ElementClrType = elementClrType;
             Model = model;
             Path = path;
-	        AssemblyName = assemblyName;
+	        AssemblyNames = assemblyNames;
 	        NavigationSource = GetNavigationSource(Model, ElementType, path);
         }
 
@@ -77,13 +77,13 @@ namespace Microsoft.AspNetCore.OData
             NavigationSource = GetNavigationSource(Model, ElementType, path);
         }
 
-        //internal ODataQueryContext(IEdmModel model, Type elementClrType, string assemblyName)
-        //    : this(model, elementClrType, assemblyName, path: null)
+        //internal ODataQueryContext(IEdmModel model, Type elementClrType, string assemblyNames)
+        //    : this(model, elementClrType, assemblyNames, path: null)
         //{
         //}
 
-        //internal ODataQueryContext(IEdmModel model, IEdmType elementType, string assemblyName)
-        //    : this(model, elementType, assemblyName, path: null)
+        //internal ODataQueryContext(IEdmModel model, IEdmType elementType, string assemblyNames)
+        //    : this(model, elementType, assemblyNames, path: null)
         //{
         //}
 
@@ -112,14 +112,14 @@ namespace Microsoft.AspNetCore.OData
         /// </summary>
         public ODataPath Path { get; private set; }
 
-	    public string AssemblyName { get; set; }
+	    public AssemblyNames AssemblyNames { get; set; }
 
 	    private static IEdmNavigationSource GetNavigationSource(IEdmModel model, IEdmType elementType, ODataPath odataPath)
         {
             Contract.Assert(model != null);
             Contract.Assert(elementType != null);
 
-            IEdmNavigationSource navigationSource = (odataPath != null) ? odataPath.NavigationSource : null;
+            IEdmNavigationSource navigationSource = odataPath?.NavigationSource;
             if (navigationSource != null)
             {
                 return navigationSource;

@@ -1,8 +1,5 @@
-﻿using System.Net.Http;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.WebApiCompatShim;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Routing;
@@ -54,14 +51,14 @@ namespace Microsoft.AspNetCore.OData.Extensions
             return httpContext.RequestServices.GetRequiredService<IODataPathHandler>();
         }
 
-        public static IAssemblyProvider AssemblyProvider(this HttpContext httpContext)
+        public static AssemblyNames AssemblyProvider(this HttpContext httpContext)
         {
             if (httpContext == null)
             {
                 throw Error.ArgumentNull("httpContext");
             }
 
-            return httpContext.RequestServices.GetRequiredService<IAssemblyProvider>();
+            return httpContext.RequestServices.GetRequiredService<AssemblyNames>();
         }
     }
 }

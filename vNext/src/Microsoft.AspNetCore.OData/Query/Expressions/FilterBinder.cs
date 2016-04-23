@@ -69,28 +69,28 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
         private Dictionary<string, ParameterExpression> _lambdaParameters;
 
         private ODataQuerySettings _querySettings;
-	    private readonly string _assemblyName;
+	    private readonly AssemblyNames _assemblyNames;
 
-        private FilterBinder(IEdmModel model, ODataQuerySettings querySettings, string assemblyName)
+        private FilterBinder(IEdmModel model, ODataQuerySettings querySettings, AssemblyNames assemblyNames)
         {
             Contract.Assert(model != null);
             Contract.Assert(querySettings != null);
             Contract.Assert(querySettings.HandleNullPropagation != HandleNullPropagationOption.Default);
 
             _querySettings = querySettings;
-	        _assemblyName = assemblyName;
+	        _assemblyNames = assemblyNames;
 	        _parametersStack = new Stack<Dictionary<string, ParameterExpression>>();
             _model = model;
         }
 
         public static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterClause filterClause, IEdmModel model,
-            string assemblyName, ODataQuerySettings querySettings)
+			AssemblyNames assemblyNames, ODataQuerySettings querySettings)
         {
-            return Bind(filterClause, typeof(TEntityType), model, assemblyName, querySettings) as Expression<Func<TEntityType, bool>>;
+            return Bind(filterClause, typeof(TEntityType), model, assemblyNames, querySettings) as Expression<Func<TEntityType, bool>>;
         }
 
         public static Expression Bind(FilterClause filterClause, Type filterType, IEdmModel model,
-            string assemblyName, ODataQuerySettings querySettings)
+			AssemblyNames assemblyNames, ODataQuerySettings querySettings)
         {
             if (filterClause == null)
             {
@@ -104,12 +104,12 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             {
                 throw Error.ArgumentNull("model");
             }
-            if (assemblyName == null)
+            if (assemblyNames == null)
             {
-                throw Error.ArgumentNull("assemblyName");
+                throw Error.ArgumentNull("assemblyNames");
             }
 
-            FilterBinder binder = new FilterBinder(model, querySettings, assemblyName);
+            FilterBinder binder = new FilterBinder(model, querySettings, assemblyNames);
             LambdaExpression filter = binder.BindExpression(filterClause.Expression, filterClause.RangeVariable, filterType);
             filter = Expression.Lambda(binder.ApplyNullPropagationForFilterBody(filter.Body), filter.Parameters);
 
@@ -123,14 +123,14 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
         }
 
         public static LambdaExpression Bind(OrderByClause orderBy, Type elementType,
-            IEdmModel model, ODataQuerySettings querySettings, string assemblyName)
+            IEdmModel model, ODataQuerySettings querySettings, AssemblyNames assemblyNames)
         {
             Contract.Assert(orderBy != null);
             Contract.Assert(elementType != null);
             Contract.Assert(model != null);
             Contract.Assert(querySettings != null);
 
-            FilterBinder binder = new FilterBinder(model, querySettings, assemblyName);
+            FilterBinder binder = new FilterBinder(model, querySettings, assemblyNames);
             LambdaExpression orderByLambda = binder.BindExpression(orderBy.Expression, orderBy.RangeVariable, elementType);
             return orderByLambda;
         }
@@ -307,7 +307,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
 
             if (targetEdmType != null)
             {
-                targetClrType = EdmLibHelpers.GetClrType(targetEdmType.ToEdmTypeReference(false), _model, _assemblyName);
+                targetClrType = EdmLibHelpers.GetClrType(targetEdmType.ToEdmTypeReference(false), _model, _assemblyNames);
             }
 
             if (arguments[0].Type == targetClrType)
@@ -327,7 +327,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             IEdmEntityTypeReference entity = node.EntityTypeReference;
             Contract.Assert(entity != null, "NS casts can contain only entity types");
 
-            Type clrType = EdmLibHelpers.GetClrType(entity, _model, _assemblyName);
+            Type clrType = EdmLibHelpers.GetClrType(entity, _model, _assemblyNames);
 
             Expression source = BindCastSourceNode(node.Source);
             return Expression.TypeAs(source, clrType);
@@ -338,7 +338,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             IEdmEntityTypeReference entity = node.EntityItemType;
             Contract.Assert(entity != null, "NS casts can contain only entity types");
 
-            Type clrType = EdmLibHelpers.GetClrType(entity, _model, _assemblyName);
+            Type clrType = EdmLibHelpers.GetClrType(entity, _model, _assemblyNames);
 
             Expression source = BindCastSourceNode(node.Source);
             return OfType(source, clrType);
@@ -447,7 +447,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
                 return _nullConstant;
             }
 
-            Type constantType = EdmLibHelpers.GetClrType(constantNode.TypeReference, _model, _assemblyName);
+            Type constantType = EdmLibHelpers.GetClrType(constantNode.TypeReference, _model, _assemblyNames);
             object value = constantNode.Value;
 
             if (constantNode.TypeReference != null && constantNode.TypeReference.IsEnum())
@@ -477,7 +477,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
 
             Expression source = Bind(convertNode.Source);
 
-            Type conversionType = EdmLibHelpers.GetClrType(convertNode.TypeReference, _model, _assemblyName);
+            Type conversionType = EdmLibHelpers.GetClrType(convertNode.TypeReference, _model, _assemblyNames);
 
             if (conversionType == typeof(bool?) && source.Type == typeof(bool))
             {
@@ -823,7 +823,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             if (targetEdmType != null)
             {
                 IEdmTypeReference targetEdmTypeReference = targetEdmType.ToEdmTypeReference(false);
-                targetClrType = EdmLibHelpers.GetClrType(targetEdmTypeReference, _model, _assemblyName);
+                targetClrType = EdmLibHelpers.GetClrType(targetEdmTypeReference, _model, _assemblyNames);
 
                 if (source != _nullConstant)
                 {
@@ -1382,7 +1382,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
                         }
                     }
 
-                    parameter = Expression.Parameter(EdmLibHelpers.GetClrType(edmTypeReference, _model, _assemblyName), rangeVariable.Name);
+                    parameter = Expression.Parameter(EdmLibHelpers.GetClrType(edmTypeReference, _model, _assemblyNames), rangeVariable.Name);
                     Contract.Assert(lambdaIt == null, "There can be only one parameter in an Any/All lambda");
                     lambdaIt = parameter;
                 }
@@ -1399,7 +1399,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
         private Expression ConvertNonStandardPrimitives(Expression source)
         {
             bool isNonstandardEdmPrimitive;
-            Type conversionType = EdmLibHelpers.IsNonstandardEdmPrimitive(source.Type, out isNonstandardEdmPrimitive, _assemblyName);
+            Type conversionType = EdmLibHelpers.IsNonstandardEdmPrimitive(source.Type, out isNonstandardEdmPrimitive, _assemblyNames);
 
             if (isNonstandardEdmPrimitive)
             {

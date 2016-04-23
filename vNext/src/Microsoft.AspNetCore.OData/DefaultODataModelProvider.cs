@@ -8,11 +8,9 @@ namespace Microsoft.AspNetCore.OData
 {
     internal class DefaultODataModelProvider
     {
-        public static IEdmModel BuildEdmModel(Type apiContextType, Action<ODataConventionModelBuilder> after = null)
+        public static IEdmModel BuildEdmModel(Type apiContextType, AssemblyNames assemblyNames, Action<ODataConventionModelBuilder> after = null)
         {
-            var builder = new ODataConventionModelBuilder(
-				apiContextType.GetTypeInfo().Assembly.FullName
-				)
+            var builder = new ODataConventionModelBuilder(assemblyNames)
             {
                 Namespace = apiContextType.Namespace
             };

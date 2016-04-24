@@ -60,8 +60,8 @@ namespace Microsoft.AspNetCore.OData.Extensions
 		{
 			var modelState = controller.ModelState;
 			var jToken = obj.GetValue(property.Name);
-			var propertyValue = jToken != null && jToken.HasValues ? jToken.Value<string>() : null;
-			controller.ValidateField(property, propertyValue, modelState);
+			var propertyValue = jToken?.Value<JValue>();
+			controller.ValidateField(property, propertyValue?.Value, modelState);
 		}
 
 		public static async Task<IActionResult> ValidateField<T>(this Controller controller,

@@ -56,7 +56,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
 			return value;
 		}
 
-		private static void ValidateProperty(Controller controller, JObject obj, PropertyInfo property)
+		public static void ValidateProperty(this Controller controller, JObject obj, PropertyInfo property)
 		{
 			var modelState = controller.ModelState;
 			var jToken = obj.GetValue(property.Name);

@@ -37,14 +37,14 @@ namespace Microsoft.AspNetCore.OData.Extensions
 				// we're trying to update
 				foreach (var jProperty in obj.PropertyValues())
 				{
-					ValidateProperty<T>(controller, obj, type.GetProperty(jProperty.Path));
+					ValidateProperty(controller, obj, type.GetProperty(jProperty.Path));
 				}
 			}
 			else
 			{
 				foreach (var property in type.GetProperties())
 				{
-					ValidateProperty<T>(controller, obj, property);
+					ValidateProperty(controller, obj, property);
 				}
 			}
 			var value = default(T);
@@ -56,7 +56,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
 			return value;
 		}
 
-		private static void ValidateProperty<T>(Controller controller, JObject obj, PropertyInfo property)
+		private static void ValidateProperty(Controller controller, JObject obj, PropertyInfo property)
 		{
 			var modelState = controller.ModelState;
 			var jToken = obj.GetValue(property.Name);

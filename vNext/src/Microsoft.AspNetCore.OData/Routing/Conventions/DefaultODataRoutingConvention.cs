@@ -68,7 +68,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 				}
 
 				var navigationPropertySegment =
-					odataPath.FirstOrDefault(s => s is NavigationPropertySegment) as NavigationPropertySegment;
+					odataPath.LastOrDefault(s => s is NavigationPropertySegment) as NavigationPropertySegment;
 				if (navigationPropertySegment != null)
 				{
 					routeTemplate += "/" + navigationPropertySegment.NavigationProperty.Name;

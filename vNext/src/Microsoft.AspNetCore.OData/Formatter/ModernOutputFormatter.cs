@@ -31,6 +31,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 			SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/json"));
 			SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/json"));
 			SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/xml"));
+			//SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/plain"));
 
 			//foreach (var mediaType in SupportedMediaTypes)
 			//{

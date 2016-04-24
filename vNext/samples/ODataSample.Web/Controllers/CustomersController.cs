@@ -37,6 +37,12 @@ namespace ODataSample.Web.Controllers
 			return new ObjectResult(customer.FirstName);
 		}
 
+		[HttpGet("{id}/Orders")]
+		public IQueryable<Order> Orders(int id)
+		{
+			return _sampleService.Orders.Where(o => o.CustomerId == id);
+		}
+
 		[HttpGet("{id}/LastName")]
 		public IActionResult GetLastName(int id)
 		{

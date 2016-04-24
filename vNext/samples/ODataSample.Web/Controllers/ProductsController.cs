@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +46,7 @@ namespace ODataSample.Web.Controllers
 		public IActionResult MostExpensive2()
 		{
 			var value = _sampleService.Products.Max(x => x.Price);
-			return Ok(value*2);
+			return Ok(value * 2);
 		}
 
 		[HttpGet("{id}/ShortName")]

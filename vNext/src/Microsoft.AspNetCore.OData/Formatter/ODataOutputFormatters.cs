@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
+using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Core;
 
 namespace Microsoft.AspNetCore.OData.Formatter
@@ -41,7 +42,8 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 // Place JSON formatter first so it gets used when the request doesn't ask for a specific content type
                 CreateApplicationJson(serializerProvider),
                 CreateApplicationXml(serializerProvider),
-                CreateRawValue(serializerProvider)
+                CreateRawValue(serializerProvider),
+                //CreateTextPlain(serializerProvider)
             };
         }
 
@@ -56,12 +58,26 @@ namespace Microsoft.AspNetCore.OData.Formatter
         private static ODataOutputFormatter CreateRawValue(ODataSerializerProvider serializerProvider)
         {
             ODataOutputFormatter formatter = CreateFormatterWithoutMediaTypes(serializerProvider, ODataPayloadKind.Value);
+            //formatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/plain"));
             //formatter.MediaTypeMappings.Add(new ODataPrimitiveValueMediaTypeMapping());
             //formatter.MediaTypeMappings.Add(new ODataEnumValueMediaTypeMapping());
             //formatter.MediaTypeMappings.Add(new ODataBinaryValueMediaTypeMapping());
             //formatter.MediaTypeMappings.Add(new ODataCountMediaTypeMapping());
             return formatter;
         }
+
+        //private static ODataOutputFormatter CreateTextPlain(ODataSerializerProvider serializerProvider)
+        //{
+        //    ODataOutputFormatter formatter = CreateFormatterWithoutMediaTypes(
+        //        serializerProvider,
+        //        ODataPayloadKind.Unsupported);
+        //    formatter.SupportedMediaTypes.Add(ODataMediaTypes.TextPlain);
+
+        //    //formatter.AddDollarFormatQueryStringMappings();
+        //    //formatter.AddQueryStringMapping(DollarFormat, XmlFormat, ODataMediaTypes.ApplicationXml);
+
+        //    return formatter;
+        //}
 
         private static ODataOutputFormatter CreateApplicationJson(ODataSerializerProvider serializerProvider)
         {

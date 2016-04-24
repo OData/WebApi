@@ -69,6 +69,12 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
 			string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(Request);
 			string annotationFilter = null;
+
+			if (ODataCountMediaTypeMapping.IsCountRequest(Request))
+			{
+				Response.ContentType = "text/plain";
+			}
+
 			if (!String.IsNullOrEmpty(preferHeader))
 			{
 				ODataMessageWrapper messageWrapper = new ODataMessageWrapper(writeStream, Response.Headers);

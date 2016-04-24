@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ViewFeatures.Internal;
+using Microsoft.AspNetCore.OData.Query.Expressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -59,29 +63,40 @@ namespace Microsoft.AspNetCore.OData.Extensions
 		public static void ValidateProperty(this Controller controller, JObject obj, PropertyInfo property)
 		{
 			var modelState = controller.ModelState;
-			var jToken = obj.GetValue(property.Name);
-			var propertyValue = jToken?.Value<JValue>();
-			controller.ValidateField(property, propertyValue?.Value, modelState);
+			JToken jToken;
+			object result = null;
+			if (obj.TryGetValue(property.Name, out jToken))
+			{
+				try
+				{
+					result = jToken.ToObject(property.PropertyType);
+				}
+				catch (FormatException)
+				{
+
+				}
+			}
+			controller.ValidateField(property, result, modelState);
 		}
 
 		public static async Task<IActionResult> ValidateField<T>(this Controller controller,
 			JObject validation)
 		{
-			return await controller.ValidateField(validation, typeof (T));
+			return await controller.ValidateField(validation, typeof(T));
 		}
 
-		public static async Task<IActionResult> ValidateFieldInService<TService>(this Controller controller, 
+		public static async Task<IActionResult> ValidateFieldInService<TService>(this Controller controller,
 			JObject validation)
 		{
 			var setName = validation.GetValue("SetName").Value<string>();
-			var setType = typeof (TService).GetProperty(setName).PropertyType.GetGenericArguments().First();
+			var setType = typeof(TService).GetProperty(setName).PropertyType.GetGenericArguments().First();
 			var fieldName = validation.GetValue("Name").Value<string>();
 			var valueToValidate = validation.GetValue("Value")?.Value<string>();
 			controller.ValidateField(setType, fieldName, valueToValidate);
 			return controller.ODataModelState();
 		}
 
-		public static async Task<IActionResult> ValidateField(this Controller controller, 
+		public static async Task<IActionResult> ValidateField(this Controller controller,
 			JObject validation, Type type)
 		{
 			var fieldName = validation.GetValue("Name").Value<string>();
@@ -118,7 +133,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
 			var validations = property.GetCustomAttributes<ValidationAttribute>();
 			foreach (var validation in validations)
 			{
-				var validationContext = new ValidationContext(controller) {DisplayName = DisplayName(property)};
+				var validationContext = new ValidationContext(controller) { DisplayName = DisplayName(property) };
 				//var valid = validation.IsValid(propertyValue);
 				var result = validation.GetValidationResult(propertyValue, validationContext);
 				if (result?.ErrorMessage != null)

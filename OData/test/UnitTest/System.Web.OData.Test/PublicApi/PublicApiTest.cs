@@ -21,7 +21,7 @@ namespace System.Web.OData.PublicApi
             string outputFile = outputPath + Path.DirectorySeparatorChar + OutputFileName;
 
             // Act
-            using (FileStream fs = new FileStream(outputFile, FileMode.OpenOrCreate))
+            using (FileStream fs = new FileStream(outputFile, FileMode.Create))
             {
                 using (StreamWriter sw = new StreamWriter(fs))
                 {

@@ -45,7 +45,7 @@ namespace System.Web.OData
         [Fact]
         public void Ctor_ThrowsArgumentNull_entityType()
         {
-            Assert.ThrowsArgumentNull(() => new Delta<Base>(entityType: null), "entityType");
+            Assert.ThrowsArgumentNull(() => new Delta<Base>(structuralType: null), "structuralType");
         }
 
         [Fact]
@@ -252,7 +252,7 @@ namespace System.Web.OData
         public void CanCreateDeltaOfDerivedTypes()
         {
             var delta = new Delta<Base>(typeof(Derived));
-            Assert.IsType(typeof(Derived), delta.GetEntity());
+            Assert.IsType(typeof(Derived), delta.GetInstance());
         }
 
         [Fact]

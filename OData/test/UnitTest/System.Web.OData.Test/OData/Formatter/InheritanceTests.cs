@@ -436,7 +436,7 @@ namespace System.Web.OData.Formatter
 
         public Vehicle PatchMotorcycle_When_Expecting_Vehicle(Delta<Vehicle> patch)
         {
-            Assert.IsType<Motorcycle>(patch.GetEntity());
+            Assert.IsType<Motorcycle>(patch.GetInstance());
             patch.Patch(motorcycle);
             return motorcycle;
         }

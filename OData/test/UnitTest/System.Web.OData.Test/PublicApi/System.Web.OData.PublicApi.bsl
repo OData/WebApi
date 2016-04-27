@@ -185,21 +185,21 @@ NonValidatingParameterBindingAttribute(),
 ]
 public class System.Web.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProvider, IDelta {
 	public Delta`1 ()
-	public Delta`1 (System.Type entityType)
-	public Delta`1 (System.Type entityType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties)
-	public Delta`1 (System.Type entityType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo)
+	public Delta`1 (System.Type structuralType)
+	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties)
+	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo)
 
 	System.Type EntityType  { public virtual get; }
 	System.Type ExpectedClrType  { public virtual get; }
 
 	public virtual void Clear ()
-	public void CopyChangedValues (TEntityType original)
-	public void CopyUnchangedValues (TEntityType original)
+	public void CopyChangedValues (TStructuralType original)
+	public void CopyUnchangedValues (TStructuralType original)
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetChangedPropertyNames ()
-	public TEntityType GetEntity ()
+	public TStructuralType GetInstance ()
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
-	public void Patch (TEntityType original)
-	public void Put (TEntityType original)
+	public void Patch (TStructuralType original)
+	public void Put (TStructuralType original)
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)
 	public virtual bool TryGetPropertyValue (string name, out System.Object& value)
 	public virtual bool TrySetPropertyValue (string name, object value)

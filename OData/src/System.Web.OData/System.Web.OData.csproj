@@ -195,7 +195,7 @@
     <Compile Include="OData\Batch\ODataHttpContentExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchContent.cs" />
     <Compile Include="OData\Batch\DefaultODataBatchHandler.cs" />
-    <Compile Include="OData\DeltaOfTEntityType.cs" />
+    <Compile Include="OData\DeltaOfTStructuralType.cs" />
     <Compile Include="OData\EdmComplexCollectionObject.cs" />
     <Compile Include="OData\EdmComplexObject.cs" />
     <Compile Include="OData\EdmEntityCollectionObject.cs" />

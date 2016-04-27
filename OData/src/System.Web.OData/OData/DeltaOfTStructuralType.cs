@@ -14,21 +14,21 @@ using System.Web.OData.Properties;
 namespace System.Web.OData
 {
     /// <summary>
-    /// A class the tracks changes (i.e. the Delta) for a particular <typeparamref name="TEntityType"/>.
+    /// A class the tracks changes (i.e. the Delta) for a particular <typeparamref name="TStructuralType"/>.
     /// </summary>
-    /// <typeparam name="TEntityType">TEntityType is the base entity type or complex type of entity this delta tracks changes for.</typeparam>
+    /// <typeparam name="TStructuralType">TStructuralType is the type of the instance this delta tracks changes for.</typeparam>
     [NonValidatingParameterBinding]
-    public class Delta<TEntityType> : TypedDelta, IDelta where TEntityType : class
+    public class Delta<TStructuralType> : TypedDelta, IDelta where TStructuralType : class
     {
         // cache property accessors for this type and all its derived types.
-        private static ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TEntityType>>> _propertyCache
-            = new ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TEntityType>>>();
+        private static ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TStructuralType>>> _propertyCache
+            = new ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TStructuralType>>>();
 
-        private Dictionary<string, PropertyAccessor<TEntityType>> _allProperties;
+        private Dictionary<string, PropertyAccessor<TStructuralType>> _allProperties;
         private HashSet<string> _updatableProperties;
 
         private HashSet<string> _changedProperties;
-        private TEntityType _entity;
+        private TStructuralType _instance;
         private Type _entityType;
 
         private PropertyInfo _dynamicDictionaryPropertyinfo;
@@ -36,52 +36,52 @@ namespace System.Web.OData
         private IDictionary<string, object> _dynamicDictionaryCache;
  
         /// <summary>
-        /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
+        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
         /// </summary>
         public Delta()
-            : this(typeof(TEntityType))
+            : this(typeof(TStructuralType))
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
+        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
         /// </summary>
-        /// <param name="entityType">The derived entity type or complex type for which the changes would be tracked.
-        /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.
+        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
+        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
         /// </param>
-        public Delta(Type entityType)
-            : this(entityType, updatableProperties: null)
+        public Delta(Type structuralType)
+            : this(structuralType, updatableProperties: null)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
+        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
         /// </summary>
-        /// <param name="entityType">The derived entity type or complex type for which the changes would be tracked.
-        /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.
+        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
+        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
         /// </param>
         /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
         /// names, including those of dynamic properties, are ignored.</param>
-        public Delta(Type entityType, IEnumerable<string> updatableProperties)
-            : this(entityType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo: null)
+        public Delta(Type structuralType, IEnumerable<string> updatableProperties)
+            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo: null)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="Delta{TEntityType}"/>.
+        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
         /// </summary>
-        /// <param name="entityType">The derived entity type or complex type for which the changes would be tracked.
-        /// <paramref name="entityType"/> should be assignable to instances of <typeparamref name="TEntityType"/>.
+        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
+        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
         /// </param>
         /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
         /// names, including those of dynamic properties, are ignored.</param>
         /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
         /// properties. <c>null</c> means this entity type is not open.</param>
-        public Delta(Type entityType, IEnumerable<string> updatableProperties,
+        public Delta(Type structuralType, IEnumerable<string> updatableProperties,
             PropertyInfo dynamicDictionaryPropertyInfo)
         {
             _dynamicDictionaryPropertyinfo = dynamicDictionaryPropertyInfo;
-            Reset(entityType);
+            Reset(structuralType);
             InitializeProperties(updatableProperties);
         }
 
@@ -97,7 +97,7 @@ namespace System.Web.OData
         /// <inheritdoc/>
         public override Type ExpectedClrType
         {
-            get { return typeof(TEntityType); }
+            get { return typeof(TStructuralType); }
         }
 
         /// <inheritdoc/>
@@ -123,7 +123,7 @@ namespace System.Web.OData
                     if (_dynamicDictionaryCache == null)
                     {
                         _dynamicDictionaryCache =
-                            GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _entity, create: true);
+                            GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: true);
                     }
 
                     _dynamicDictionaryCache[name] = value;
@@ -137,7 +137,7 @@ namespace System.Web.OData
                 return false;
             }
 
-            PropertyAccessor<TEntityType> cacheHit = _allProperties[name];
+            PropertyAccessor<TStructuralType> cacheHit = _allProperties[name];
 
             if (value == null && !EdmLibHelpers.IsNullable(cacheHit.Property.PropertyType))
             {
@@ -150,8 +150,7 @@ namespace System.Web.OData
                 return false;
             }
 
-            //.Setter.Invoke(_entity, new object[] { value });
-            cacheHit.SetValue(_entity, value);
+            cacheHit.SetValue(_instance, value);
             _changedProperties.Add(name);
             return true;
         }
@@ -169,7 +168,7 @@ namespace System.Web.OData
                 if (_dynamicDictionaryCache == null)
                 {
                     _dynamicDictionaryCache = 
-                        GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _entity, create: false);
+                        GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: false);
                 }
 
                 if (_dynamicDictionaryCache != null && _dynamicDictionaryCache.TryGetValue(name, out value))
@@ -178,10 +177,10 @@ namespace System.Web.OData
                 }
             }
 
-            PropertyAccessor<TEntityType> cacheHit;
+            PropertyAccessor<TStructuralType> cacheHit;
             if (_allProperties.TryGetValue(name, out cacheHit))
             {
-                value = cacheHit.GetValue(_entity);
+                value = cacheHit.GetValue(_instance);
                 return true;
             }
 
@@ -202,7 +201,7 @@ namespace System.Web.OData
                 if (_dynamicDictionaryCache == null)
                 {
                     _dynamicDictionaryCache =
-                        GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _entity, create: false);
+                        GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: false);
                 }
 
                 object dynamicValue;
@@ -220,7 +219,7 @@ namespace System.Web.OData
                 }
             }
 
-            PropertyAccessor<TEntityType> value;
+            PropertyAccessor<TStructuralType> value;
             if (_allProperties.TryGetValue(name, out value))
             {
                 type = value.Property.PropertyType;
@@ -232,13 +231,12 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Returns the <see cref="EntityType"/> instance
-        /// that holds all the changes (and original values) being tracked by this Delta.
+        /// Returns the instance that holds all the changes (and original values) being tracked by this Delta.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Not appropriate to be a property")]
-        public TEntityType GetEntity()
+        public TStructuralType GetInstance()
         {
-            return _entity;
+            return _instance;
         }
 
         /// <summary>
@@ -262,11 +260,11 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Copies the changed property values from the underlying entity (accessible via <see cref="GetEntity()" />) 
+        /// Copies the changed property values from the underlying entity (accessible via <see cref="GetInstance()" />) 
         /// to the <paramref name="original"/> entity.
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
-        public void CopyChangedValues(TEntityType original)
+        public void CopyChangedValues(TStructuralType original)
         {
             if (original == null)
             {
@@ -278,17 +276,17 @@ namespace System.Web.OData
                 throw Error.Argument("original", SRResources.DeltaTypeMismatch, _entityType, original.GetType());
             }
 
-            PropertyAccessor<TEntityType>[] propertiesToCopy = GetChangedPropertyNames().Select(s => _allProperties[s]).ToArray();
-            foreach (PropertyAccessor<TEntityType> propertyToCopy in propertiesToCopy)
+            PropertyAccessor<TStructuralType>[] propertiesToCopy = GetChangedPropertyNames().Select(s => _allProperties[s]).ToArray();
+            foreach (PropertyAccessor<TStructuralType> propertyToCopy in propertiesToCopy)
             {
-                propertyToCopy.Copy(_entity, original);
+                propertyToCopy.Copy(_instance, original);
             }
 
             CopyChangedDynamicValues(original);
         }
 
         // Copy changed dynamic properties and leave the unchanged dynamic properties
-        private void CopyChangedDynamicValues(TEntityType targetEntity)
+        private void CopyChangedDynamicValues(TStructuralType targetEntity)
         {
             if (_dynamicDictionaryPropertyinfo == null)
             {
@@ -298,7 +296,7 @@ namespace System.Web.OData
             if (_dynamicDictionaryCache == null)
             {
                 _dynamicDictionaryCache =
-                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _entity, create: false);
+                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: false);
             }
 
             IDictionary<string, object> fromDictionary = _dynamicDictionaryCache;
@@ -318,7 +316,7 @@ namespace System.Web.OData
             {
                 object dynamicPropertyValue = fromDictionary[dynamicPropertyName];
 
-                // a dynamic propery value equal to null, it means to remove this dynamic property
+                // a dynamic property value equal to null, it means to remove this dynamic property
                 if (dynamicPropertyValue == null)
                 {
                     tempDictionary.Remove(dynamicPropertyName);
@@ -334,33 +332,33 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Copies the unchanged property values from the underlying entity (accessible via <see cref="GetEntity()" />) 
+        /// Copies the unchanged property values from the underlying entity (accessible via <see cref="GetInstance()" />) 
         /// to the <paramref name="original"/> entity.
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
-        public void CopyUnchangedValues(TEntityType original)
+        public void CopyUnchangedValues(TStructuralType original)
         {
             if (original == null)
             {
                 throw Error.ArgumentNull("original");
             }
 
-            if (!_entityType.IsAssignableFrom(original.GetType()))
+            if (!_entityType.IsInstanceOfType(original))
             {
                 throw Error.Argument("original", SRResources.DeltaTypeMismatch, _entityType, original.GetType());
             }
 
-            IEnumerable<PropertyAccessor<TEntityType>> propertiesToCopy = GetUnchangedPropertyNames().Select(s => _allProperties[s]);
-            foreach (PropertyAccessor<TEntityType> propertyToCopy in propertiesToCopy)
+            IEnumerable<PropertyAccessor<TStructuralType>> propertiesToCopy = GetUnchangedPropertyNames().Select(s => _allProperties[s]);
+            foreach (PropertyAccessor<TStructuralType> propertyToCopy in propertiesToCopy)
             {
-                propertyToCopy.Copy(_entity, original);
+                propertyToCopy.Copy(_instance, original);
             }
 
             CopyUnchangedDynamicValues(original);
         }
 
         // Missing dynamic structural properties MUST be removed or set to null in *Put*
-        private void CopyUnchangedDynamicValues(TEntityType targetEntity)
+        private void CopyUnchangedDynamicValues(TStructuralType targetEntity)
         {
             if (_dynamicDictionaryPropertyinfo == null)
             {
@@ -370,7 +368,7 @@ namespace System.Web.OData
             if (_dynamicDictionaryCache == null)
             {
                 _dynamicDictionaryCache =
-                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _entity, create: false);
+                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: false);
             }
 
             IDictionary<string, object> toDictionary =
@@ -406,7 +404,7 @@ namespace System.Web.OData
         /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
-        public void Patch(TEntityType original)
+        public void Patch(TStructuralType original)
         {
             CopyChangedValues(original);
         }
@@ -416,27 +414,27 @@ namespace System.Web.OData
         /// <remarks>The semantics of this operation are equivalent to a HTTP PUT operation, hence the name.</remarks>
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
-        public void Put(TEntityType original)
+        public void Put(TStructuralType original)
         {
             CopyChangedValues(original);
             CopyUnchangedValues(original);
         }
 
-        private void Reset(Type entityType)
+        private void Reset(Type structuralType)
         {
-            if (entityType == null)
+            if (structuralType == null)
             {
-                throw Error.ArgumentNull("entityType");
+                throw Error.ArgumentNull("structuralType");
             }
 
-            if (!typeof(TEntityType).IsAssignableFrom(entityType))
+            if (!typeof(TStructuralType).IsAssignableFrom(structuralType))
             {
-                throw Error.InvalidOperation(SRResources.DeltaEntityTypeNotAssignable, entityType, typeof(TEntityType));
+                throw Error.InvalidOperation(SRResources.DeltaEntityTypeNotAssignable, structuralType, typeof(TStructuralType));
             }
 
-            _entity = Activator.CreateInstance(entityType) as TEntityType;
+            _instance = Activator.CreateInstance(structuralType) as TStructuralType;
             _changedProperties = new HashSet<string>();
-            _entityType = entityType;
+            _entityType = structuralType;
 
             _changedDynamicProperties = new HashSet<string>();
             _dynamicDictionaryCache = null;
@@ -449,7 +447,7 @@ namespace System.Web.OData
                 (backingType) => backingType
                     .GetProperties()
                     .Where(p => (p.GetSetMethod() != null || p.PropertyType.IsCollection()) && p.GetGetMethod() != null)
-                    .Select<PropertyInfo, PropertyAccessor<TEntityType>>(p => new FastPropertyAccessor<TEntityType>(p))
+                    .Select<PropertyInfo, PropertyAccessor<TStructuralType>>(p => new FastPropertyAccessor<TStructuralType>(p))
                     .ToDictionary(p => p.Property.Name));
 
             if (updatableProperties != null)
@@ -468,8 +466,8 @@ namespace System.Web.OData
             }
         }
 
-        private static void CopyDynamicPropertyDictionary(IDictionary<string, object> source, 
-            IDictionary<string, object> dest, PropertyInfo dynamicPropertyInfo, TEntityType targetEntity)
+        private static void CopyDynamicPropertyDictionary(IDictionary<string, object> source,
+            IDictionary<string, object> dest, PropertyInfo dynamicPropertyInfo, TStructuralType targetEntity)
         {
             Contract.Assert(source != null);
             Contract.Assert(dynamicPropertyInfo != null);
@@ -501,7 +499,7 @@ namespace System.Web.OData
         }
 
         private static IDictionary<string, object> GetDynamicPropertyDictionary(PropertyInfo propertyInfo,
-            TEntityType entity, bool create)
+            TStructuralType entity, bool create)
         {
             if (propertyInfo == null)
             {

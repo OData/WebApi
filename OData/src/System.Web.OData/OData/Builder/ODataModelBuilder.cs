@@ -132,7 +132,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Gets the collection of Operations (i.e. Actions, Functions and ServiceOperations) in the model to be built.
         /// </summary>
-        public virtual IEnumerable<OperationConfiguration> Operation
+        public virtual IEnumerable<OperationConfiguration> Operations
         {
             get { return _operations; }
         }

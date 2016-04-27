@@ -150,7 +150,7 @@ public sealed class System.Web.OData.EdmModelExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static void SetOperationLinkBuilder (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Edm.IEdmOperation operation, OperationLinkBuilder actionLinkBuilder)
+	public static void SetOperationLinkBuilder (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Edm.IEdmOperation operation, OperationLinkBuilder operationLinkBuilder)
 }
 
 [
@@ -371,6 +371,8 @@ public class System.Web.OData.EntityContext {
 	ODataSerializerContext SerializerContext  { public get; public set; }
 	bool SkipExpensiveAvailabilityChecks  { public get; public set; }
 	System.Web.Http.Routing.UrlHelper Url  { public get; public set; }
+
+	public object GetPropertyValue (string propertyName)
 }
 
 public class System.Web.OData.EntityContext`1 : EntityContext {
@@ -1432,7 +1434,7 @@ public class System.Web.OData.Builder.ODataModelBuilder {
 	System.Version MaxDataServiceVersion  { public get; public set; }
 	string Namespace  { public get; public set; }
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.INavigationSourceConfiguration]] NavigationSources  { public virtual get; }
-	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.OperationConfiguration]] Operation  { public virtual get; }
+	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.OperationConfiguration]] Operations  { public virtual get; }
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.SingletonConfiguration]] Singletons  { public virtual get; }
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.StructuralTypeConfiguration]] StructuralTypes  { public virtual get; }
 
@@ -1464,9 +1466,7 @@ public class System.Web.OData.Builder.OperationLinkBuilder {
 	public OperationLinkBuilder (System.Func`2[[System.Web.OData.EntityContext],[System.Uri]] linkFactory, bool followsConventions)
 	public OperationLinkBuilder (System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] linkFactory, bool followsConventions)
 
-	System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] FeedLinkFactory  { public get; }
 	bool FollowsConventions  { public get; }
-	System.Func`2[[System.Web.OData.EntityContext],[System.Uri]] LinkFactory  { public get; }
 
 	public virtual System.Uri BuildLink (EntityContext context)
 	public virtual System.Uri BuildLink (FeedContext context)

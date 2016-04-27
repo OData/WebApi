@@ -53,7 +53,7 @@ namespace System.Web.OData.Builder
             bool removed = builder.RemoveOperation("Format");
 
             // Assert      
-            Assert.Equal(0, builder.Operation.Count());
+            Assert.Equal(0, builder.Operations.Count());
         }
 
         [Fact]
@@ -63,12 +63,12 @@ namespace System.Web.OData.Builder
             // Act
             ODataModelBuilder builder = new ODataModelBuilder();
             ActionConfiguration action = builder.Action("Format");
-            OperationConfiguration operation = builder.Operation.SingleOrDefault();
+            OperationConfiguration operation = builder.Operations.SingleOrDefault();
             bool removed = builder.RemoveOperation(operation);
 
             // Assert
             Assert.True(removed);
-            Assert.Equal(0, builder.Operation.Count());
+            Assert.Equal(0, builder.Operations.Count());
         }
 
         [Fact]

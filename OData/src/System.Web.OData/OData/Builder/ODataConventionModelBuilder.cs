@@ -271,7 +271,7 @@ namespace System.Web.OData.Builder
                 ApplyNavigationSourceConventions(navigationSource);
             }
 
-            foreach (OperationConfiguration operation in Operation)
+            foreach (OperationConfiguration operation in Operations)
             {
                 ApplyOperationConventions(operation);
             }

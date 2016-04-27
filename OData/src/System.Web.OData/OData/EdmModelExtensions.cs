@@ -104,17 +104,17 @@ namespace System.Web.OData
         /// </summary>
         /// <param name="model">The <see cref="IEdmModel"/> containing the entity set.</param>
         /// <param name="operation">The operation for which the operation link is to be generated.</param>
-        /// <param name="actionLinkBuilder">The <see cref="OperationLinkBuilder"/> to set.</param>
+        /// <param name="operationLinkBuilder">The <see cref="OperationLinkBuilder"/> to set.</param>
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
             Justification = "IEdmActionImport is more relevant here.")]
-        public static void SetOperationLinkBuilder(this IEdmModel model, IEdmOperation operation, OperationLinkBuilder actionLinkBuilder)
+        public static void SetOperationLinkBuilder(this IEdmModel model, IEdmOperation operation, OperationLinkBuilder operationLinkBuilder)
         {
             if (model == null)
             {
                 throw Error.ArgumentNull("model");
             }
 
-            model.SetAnnotationValue(operation, actionLinkBuilder);
+            model.SetAnnotationValue(operation, operationLinkBuilder);
         }
 
         internal static ClrTypeCache GetTypeMappingCache(this IEdmModel model)
@@ -137,10 +137,10 @@ namespace System.Web.OData
             model.SetAnnotationValue(action, title);
         }
 
-        internal static OperationTitleAnnotation GetOperationTitleAnnotation(this IEdmModel model, IEdmOperation action)
+        internal static OperationTitleAnnotation GetOperationTitleAnnotation(this IEdmModel model, IEdmOperation operation)
         {
             Contract.Assert(model != null);
-            return model.GetAnnotationValue<OperationTitleAnnotation>(action);
+            return model.GetAnnotationValue<OperationTitleAnnotation>(operation);
         }
 
         private static OperationLinkBuilder GetDefaultOperationLinkBuilder(IEdmOperation operation)

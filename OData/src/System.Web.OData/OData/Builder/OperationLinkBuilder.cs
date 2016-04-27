@@ -53,16 +53,15 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Gets the entity link factory.
         /// </summary>
-        public Func<EntityContext, Uri> LinkFactory
+        internal Func<EntityContext, Uri> LinkFactory
         {
             get { return _linkFactory; }
-            internal set { _linkFactory = value; }
         }
 
         /// <summary>
         /// Gets the feed link factory.
         /// </summary>
-        public Func<FeedContext, Uri> FeedLinkFactory
+        internal Func<FeedContext, Uri> FeedLinkFactory
         {
             get { return _feedLinkFactory; }
         }

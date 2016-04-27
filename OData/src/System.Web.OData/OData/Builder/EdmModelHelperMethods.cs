@@ -52,7 +52,7 @@ namespace System.Web.OData.Builder
             model.AddCapabilitiesVocabularyAnnotations(entitySets, edmMap);
 
             // add operations
-            model.AddOperations(builder.Operation, container, edmTypeMap, navigationSourceMap);
+            model.AddOperations(builder.Operations, container, edmTypeMap, navigationSourceMap);
 
             // finish up
             model.AddElement(container);

@@ -46,8 +46,8 @@ namespace System.Web.OData.Builder
             Assert.Equal("MyNamespace.Format", action.FullyQualifiedName);
             Assert.Equal("MyNamespaceII", actionII.Namespace);
             Assert.Equal("MyNamespaceII.FormatII", actionII.FullyQualifiedName);
-            Assert.NotNull(builder.Operation);
-            Assert.Equal(2, builder.Operation.Count());
+            Assert.NotNull(builder.Operations);
+            Assert.Equal(2, builder.Operations.Count());
         }
 
         [Fact]

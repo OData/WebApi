@@ -33,11 +33,11 @@ namespace Microsoft.AspNetCore.OData
 
 			var request = context.HttpContext.Request;
 
+			var result = context.Result as ObjectResult;
 			if (request.HasQueryOptions() ||
 				ODataCountMediaTypeMapping.IsCountRequest(request) ||
 				context.ActionDescriptor.HasQueryOption())
 			{
-				var result = context.Result as ObjectResult;
 				if (result == null)
 				{
 					throw Error.Argument("context", SRResources.QueryingRequiresObjectContent, context.Result.GetType().FullName);
@@ -46,6 +46,14 @@ namespace Microsoft.AspNetCore.OData
 				if (result.Value != null)
 				{
 					result.Value = ApplyQueryOptions(result.Value, request, context.ActionDescriptor, context.HttpContext.RequestServices.GetService<AssembliesResolver>());
+				}
+			}
+			if (result != null && ShouldBeSingleEntity(request.ODataProperties().Path.PathTemplate))
+			{
+				var queryable = result.Value as IQueryable;
+				if (queryable != null)
+				{
+					result.Value = SingleOrDefault(queryable, context.ActionDescriptor);
 				}
 			}
 		}
@@ -89,18 +97,13 @@ namespace Microsoft.AspNetCore.OData
 					// set it to true
 					HandleNullPropagation = 
 					//HandleNullPropagationOption.True
-					HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query)
-					,
+					HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query),
 					PageSize = actionDescriptor.PageSize(),
 					SearchDerivedTypeWhenAutoExpand = true
 				},
 				AllowedQueryOptions.None);
 			// Determine if this result should be a single entity
 			
-			if (ShouldBeSingleEntity(queryOptions))
-			{
-				return SingleOrDefault(query, actionDescriptor);
-			}
 			if (ODataCountMediaTypeMapping.IsCountRequest(request))
 			{
 				long? count = request.ODataProperties().TotalCount;
@@ -116,7 +119,12 @@ namespace Microsoft.AspNetCore.OData
 
 		private bool ShouldBeSingleEntity(ODataQueryOptions queryOptions)
 		{
-			return queryOptions.Context.Path.PathTemplate == "~/entityset/key";
+			return ShouldBeSingleEntity(queryOptions.Context.Path.PathTemplate);
+		}
+
+		private bool ShouldBeSingleEntity(string pathTemplate)
+		{
+			return pathTemplate == "~/entityset/key";
 		}
 
 		internal static object SingleOrDefault(IQueryable queryable, ActionDescriptor actionDescriptor)

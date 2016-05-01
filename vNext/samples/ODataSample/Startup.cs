@@ -83,6 +83,8 @@ namespace ODataSample.Web
 
 
 			services.AddSingleton<ISampleService, ApplicationDbContext>();
+			//services.ConfigureODataOutputFormatter<SampleOutputFormatter>();
+			services.ConfigureODataSerializerProvider<SampleODataSerializerProvider>();
 			services.AddOData<ISampleService>(builder =>
 			{
 				// OData actions are HTTP POST

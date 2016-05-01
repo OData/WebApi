@@ -101,10 +101,9 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
 		// In the future, should convert to ODataEntry and use ODL to write out.
 		// Or use ODL to build a JObject and use Json.NET to write out.
-		public virtual Task WriteObjectAsync(Stream stream, OutputFormatterWriteContext context)
+		public virtual async Task WriteObjectAsync(Stream stream, OutputFormatterWriteContext context)
 		{
-			ResolveJsonSerializer(context).WriteJson(context.Object, stream);
-			return Task.FromResult(true);
+			await ResolveJsonSerializer(context).WriteJson(context.Object, stream);
 		}
 
 		private static ODataJsonSerializer ResolveJsonSerializer(OutputFormatterWriteContext context)

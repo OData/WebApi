@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
@@ -33,7 +34,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         }
 
         /// <inheritdoc />
-        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override async Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -62,7 +63,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             IEdmEntityTypeReference entityType = GetEntityType(feedType);
             ODataDeltaWriter writer = messageWriter.CreateODataDeltaWriter(entitySet, entityType.EntityDefinition());
 
-            WriteDeltaFeedInline(graph, feedType, writer, writeContext);
+            await WriteDeltaFeedInline(graph, feedType, writer, writeContext);
         }
 
         /// <summary>
@@ -73,7 +74,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <param name="expectedType">The expected EDM type of the object represented by <paramref name="graph"/>.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteDeltaFeedInline(object graph, IEdmTypeReference expectedType, ODataDeltaWriter writer,
+        public virtual Task WriteDeltaFeedInline(object graph, IEdmTypeReference expectedType, ODataDeltaWriter writer,
             ODataSerializerContext writeContext)
         {
             if (writer == null)
@@ -101,6 +102,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             }
 
             WriteFeed(enumerable, expectedType, writer, writeContext);
+
+			return Task.FromResult(true);
         }
 
         private void WriteFeed(IEnumerable enumerable, IEdmTypeReference feedType, ODataDeltaWriter writer,

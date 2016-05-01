@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Core;
 
@@ -23,7 +24,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <inheritdoc/>
         /// <remarks>The metadata written is from the model set on the <paramref name="messageWriter"/>. The <paramref name="graph" />
         /// is not used.</remarks>
-        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -33,6 +34,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             // NOTE: ODataMessageWriter doesn't have a way to set the IEdmModel. So, there is an underlying assumption here that
             // the model received by this method and the model passed(from configuration) while building ODataMessageWriter is the same (clr object).
             messageWriter.WriteMetadataDocument();
+
+	        return Task.FromResult(true);
         }
     }
 }

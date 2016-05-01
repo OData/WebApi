@@ -4,8 +4,8 @@
 using System;
 using System.Diagnostics.Contracts;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.OData.Common;
-using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override async Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -43,18 +43,18 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             IEdmTypeReference edmType = writeContext.GetEdmType(graph, type);
             Contract.Assert(edmType != null);
 
-            messageWriter.WriteProperty(CreateProperty(graph, edmType, writeContext.RootElementName, writeContext));
+            messageWriter.WriteProperty(await CreateProperty(graph, edmType, writeContext.RootElementName, writeContext));
         }
 
         /// <inheritdoc/>
-        public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+        public sealed override async Task<ODataValue> CreateODataValue(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
         {
             if (!expectedType.IsEnum())
             {
                 throw Error.InvalidOperation(SRResources.CannotWriteType, typeof(ODataEnumSerializer).Name, expectedType.FullName());
             }
 
-            ODataEnumValue value = CreateODataEnumValue(graph, expectedType.AsEnum(), writeContext);
+            ODataEnumValue value = await CreateODataEnumValue(graph, expectedType.AsEnum(), writeContext);
             if (value == null)
             {
                 return new ODataNullValue();
@@ -70,7 +70,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <param name="enumType">The EDM enum type of the value.</param>
         /// <param name="writeContext">The serializer write context.</param>
         /// <returns>The created <see cref="ODataEnumValue"/>.</returns>
-        public virtual ODataEnumValue CreateODataEnumValue(object graph, IEdmEnumTypeReference enumType,
+        public virtual Task<ODataEnumValue> CreateODataEnumValue(object graph, IEdmEnumTypeReference enumType,
             ODataSerializerContext writeContext)
         {
             if (graph == null)
@@ -98,7 +98,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 : ODataMetadataLevel.MinimalMetadata;
             AddTypeNameAnnotationAsNeeded(enumValue, enumType, metadataLevel);
 
-            return enumValue;
+            return Task.FromResult(enumValue);
         }
 
         internal static void AddTypeNameAnnotationAsNeeded(ODataEnumValue enumValue, IEdmEnumTypeReference enumType, ODataMetadataLevel metadataLevel)

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
@@ -41,7 +42,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <param name="type">The type of the object to be written.</param>
         /// <param name="messageWriter">The <see cref="ODataMessageWriter"/> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public virtual Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             throw Error.NotSupported(SRResources.WriteObjectNotSupported, GetType().Name);
         }

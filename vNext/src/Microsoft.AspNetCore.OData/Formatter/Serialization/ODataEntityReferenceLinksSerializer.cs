@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         }
 
         /// <inheridoc />
-        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -62,6 +62,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 
                 messageWriter.WriteEntityReferenceLinks(entityReferenceLinks);
             }
+
+	        return Task.FromResult(true);
         }
     }
 }

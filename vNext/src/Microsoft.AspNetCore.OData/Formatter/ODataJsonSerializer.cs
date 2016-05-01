@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
@@ -43,7 +44,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 			};
 		}
 
-		public void WriteJson(object value, Stream writeStream)
+		public async Task WriteJson(object value, Stream writeStream)
 		{
 			IEdmModel model = _odataProperties.Model;
 			if (model == null)
@@ -53,7 +54,6 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
 			var type = value.GetType();
 			type = _context.ObjectType;
-			ODataSerializer serializer = GetSerializer(type, value, model, _context.HttpContext.RequestServices.GetService<ODataSerializerProvider>());
 
 			var urlHelper = UrlHelper(_context.HttpContext);
 			ODataPath path = Request.ODataProperties().Path;
@@ -116,6 +116,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
 			using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, model))
 			{
+				ODataSerializer serializer = GetSerializer(type, value, model, _context.HttpContext.RequestServices.GetService<ODataSerializerProvider>());
 				ODataSerializerContext writeContext = new ODataSerializerContext()
 				{
 					Request = Request,
@@ -130,7 +131,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 					SelectExpandClause = Request.ODataProperties().SelectExpandClause
 				};
 
-				serializer.WriteObject(value, type, messageWriter, writeContext);
+				await serializer.WriteObject(value, type, messageWriter, writeContext);
 			}
 
 		}

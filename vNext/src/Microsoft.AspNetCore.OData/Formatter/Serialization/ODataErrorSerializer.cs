@@ -3,10 +3,10 @@
 
 using System;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public override void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (graph == null)
             {
@@ -53,6 +53,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 
             bool includeDebugInformation = oDataError.InnerError != null;
             messageWriter.WriteError(oDataError, includeDebugInformation);
+
+	        return Task.FromResult(true);
         }
     }
 }

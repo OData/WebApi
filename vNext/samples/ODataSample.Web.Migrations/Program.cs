@@ -12,8 +12,8 @@ namespace ODataSample.Web.Migrations
 		{
 			string[] possibleProjectPaths =
 			{
-				@"D:\Code\Git\Forks\OData-WebApi\vNext\samples\ODataSample.Web",
-				@"D:\B\Forks\OData-WebApi\vNext\samples\ODataSample.Web"
+				@"D:\Code\Git\Forks\OData-WebApi\vNext\samples\ODataSample",
+				@"D:\B\Forks\OData-WebApi\vNext\samples\ODataSample"
 			};
 			var projectPath = possibleProjectPaths.First(Directory.Exists);
 			var mig = new CodeFirstMigrations<ApplicationDbContext>(projectPath);

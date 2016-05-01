@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0.0-*",
   "description": "ODataSample.Web.Migrations Console Application",
   "authors": [ "Josh Comley" ],
@@ -12,7 +12,7 @@
 
   "dependencies": {
     "Brandless.EntityFrameworkCore.Migrations": "1.0.0-rc2-*",
-    "ODataSample.Web": "1.0.0-*"
+    "ODataSample": "1.0.0-*"
   },
 
   "commands": {

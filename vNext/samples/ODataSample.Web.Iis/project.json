@@ -1,0 +1,78 @@
+{
+  "webroot": "wwwroot",
+  "compilationOptions": {
+    "emitEntryPoint": true,
+    "preserveCompilationContext": true
+  },
+
+  "content": [
+    "Views",
+    "wwwroot",
+    "Logs",
+    "web.config",
+    "appsettings.json",
+    "appsettings.*.json"
+  ],
+
+  "dependencies": {
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-20458",
+    "Microsoft.AspNetCore.Mvc.Dnx": "1.0.0-rc2-20458",
+    "Microsoft.AspNetCore.Diagnostics": "1.0.0-rc2-20458",
+    "Microsoft.AspNetCore.IISPlatformHandler": "1.0.0-rc2-20458",
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0-rc3-20565",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20458",
+    "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.OData": "1.0.0.1-*",
+    "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.0.0-rc2-20458",
+    "Microsoft.AspNetCore.StaticFiles": "1.0.0-rc2-*",
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2-rc2-24018",
+    "ODataSample": "1.0.0-*"
+  },
+  "runtimes": {
+    "win81-x64": { }
+  },
+
+  "commands": {
+    "web": "ODataSample.Web.Iis"
+  },
+  "tools": {
+    "dotnet-publish-iis": "1.0.0-*"
+  },
+  "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Runtime": "4.0.10.0",
+        "System.ComponentModel": "4.0.0.0",
+        "System.Collections": "4.0.0.0",
+        "System.Xml.ReaderWriter": "4.0.0.0",
+        "System.IO": "4.0.0.0",
+        "System.Threading.Tasks": "4.0.0.0"
+      },
+      "dependencies": {
+      }
+    },
+    "netstandardapp1.5": {
+      "dependencies": {
+        "System.Collections.Specialized": "4.0.1-beta-23516",
+        "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23516",
+        "NETStandard.Library": "1.5.0-*"
+      },
+      "imports": [
+        "dnxcore50",
+        "portable-net451+win8"
+      ]
+    }
+  },
+  "exclude": [
+    "wwwroot",
+    "node_modules",
+    "bower_components"
+  ],
+  "publishExclude": [
+    "node_modules",
+    "bower_components",
+    "**.xproj",
+    "**.user",
+    "**.vspscc"
+  ]
+}

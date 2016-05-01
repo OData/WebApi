@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
@@ -68,7 +69,7 @@ namespace ODataSample.Web.Controllers
 		}
 
 		// GET: api/Products
-		//[PageSize(4)]
+		[PageSize(4)]
 		public override async Task<IQueryable<Product>> Get()
 		{
 			var db = _sampleService as ApplicationDbContext;

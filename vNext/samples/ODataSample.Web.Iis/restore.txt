@@ -1,0 +1,150 @@
+log  : Restoring packages for D:\Code\Git\Forks\OData-WebApi\vNext\samples\ODataSample.Web.Iis\project.json...
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.PlatformAbstractions'
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.EntityFrameworkCore.SqlServer'
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.Core'
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.WebApiCompatShim'
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.EntityFrameworkCore'
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.StaticFiles'
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='System.Security.Cryptography.Algorithms'
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='System.Security.Cryptography.X509Certificates'
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/netstandard.library/index.json
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='NETStandard.Library'
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.PlatformAbstractions' 657ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.Core' 577ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.EntityFrameworkCore' 579ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.WebApiCompatShim' 590ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.StaticFiles' 576ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json 281ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json 189ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.EntityFrameworkCore.SqlServer' 632ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json 220ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json 222ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json 238ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/netstandard.library/index.json 204ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json 214ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='System.Security.Cryptography.X509Certificates' 502ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='System.Security.Cryptography.Algorithms' 579ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='NETStandard.Library' 429ms
+info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.extensions.platformabstractions/index.json
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.extensions.platformabstractions/index.json 473ms
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json 758ms
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.core/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.entityframeworkcore/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.staticfiles/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/system.security.cryptography.algorithms/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/system.security.cryptography.algorithms/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/system.security.cryptography.algorithms/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/system.security.cryptography.algorithms/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/system.security.cryptography.algorithms/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/system.security.cryptography.x509certificates/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/system.security.cryptography.x509certificates/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/system.security.cryptography.x509certificates/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/system.security.cryptography.x509certificates/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/netstandard.library/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/system.security.cryptography.x509certificates/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/netstandard.library/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/netstandard.library/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/netstandard.library/index.json
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/system.security.cryptography.algorithms/index.json 118ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/system.security.cryptography.x509certificates/index.json 120ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json 179ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json 232ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json 231ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json 234ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json 229ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json 232ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json 233ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/netstandard.library/index.json 232ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/system.security.cryptography.x509certificates/index.json 234ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/system.security.cryptography.algorithms/index.json 237ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json 783ms
+info :   NotFound https://api.nuget.org/v3-flatcontainer/netstandard.library/index.json 573ms
+info :   OK https://api.nuget.org/v3-flatcontainer/system.security.cryptography.x509certificates/index.json 577ms
+info :   OK https://api.nuget.org/v3-flatcontainer/system.security.cryptography.algorithms/index.json 580ms
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json 586ms
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.entityframeworkcore/index.json 713ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json 732ms
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.staticfiles/index.json 733ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json 735ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json 738ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json 741ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json 742ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json 741ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json 745ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json 748ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json 750ms
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json 760ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/system.security.cryptography.x509certificates/index.json 776ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/netstandard.library/index.json 779ms
+info :   OK https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/netstandard.library/index.json 780ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/system.security.cryptography.algorithms/index.json 783ms
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.core/index.json 817ms
+info :   OK https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/system.security.cryptography.x509certificates/index.json 827ms
+info :   OK https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/system.security.cryptography.algorithms/index.json 935ms
+log  : Restoring packages for tool 'dotnet-publish-iis' in D:\Code\Git\Forks\OData-WebApi\vNext\samples\ODataSample.Web.Iis\project.json...
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/dotnet-publish-iis/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/dotnet-publish-iis/index.json
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='dotnet-publish-iis'
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/dotnet-publish-iis/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/dotnet-publish-iis/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/dotnet-publish-iis/index.json
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/dotnet-publish-iis/index.json 102ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/dotnet-publish-iis/index.json 120ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='dotnet-publish-iis' 162ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/dotnet-publish-iis/index.json 178ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/dotnet-publish-iis/index.json 180ms
+info :   OK https://api.nuget.org/v3-flatcontainer/dotnet-publish-iis/index.json 217ms
+warn : Detected package downgrade: System.Diagnostics.FileVersionInfo from 4.0.0-rc2-23910 to 4.0.0-beta-23516 
+warn :  ODataSample.Web.Iis (>= 1.0.0) -> Microsoft.AspNetCore.Mvc (>= 1.0.0-rc2-20458) -> Microsoft.AspNetCore.Mvc.Razor (>= 1.0.0-rc2-20458) -> Microsoft.CodeAnalysis.CSharp (>= 1.3.0-beta1-20160321-04) -> Microsoft.CodeAnalysis.Common (= 1.3.0-beta1-20160321-04) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-rc2-23910) 
+warn :  ODataSample.Web.Iis (>= 1.0.0) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-beta-23516)
+warn : Detected package downgrade: System.Diagnostics.FileVersionInfo from 4.0.0-rc2-23910 to 4.0.0-beta-23516 
+warn :  ODataSample.Web.Iis (>= 1.0.0) -> Microsoft.AspNetCore.Mvc.Dnx (>= 1.0.0-rc2-20458) -> Microsoft.AspNetCore.Mvc.Razor (>= 1.0.0-rc2-20458) -> Microsoft.CodeAnalysis.CSharp (>= 1.3.0-beta1-20160321-04) -> Microsoft.CodeAnalysis.Common (= 1.3.0-beta1-20160321-04) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-rc2-23910) 
+warn :  ODataSample.Web.Iis (>= 1.0.0) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-beta-23516)
+warn : Detected package downgrade: System.Diagnostics.FileVersionInfo from 4.0.0-rc2-23910 to 4.0.0-beta-23516 
+warn :  ODataSample.Web.Iis (>= 1.0.0) -> Microsoft.AspNetCore.Mvc (>= 1.0.0-rc2-20458) -> Microsoft.AspNetCore.Mvc.Razor (>= 1.0.0-rc2-20458) -> Microsoft.CodeAnalysis.CSharp (>= 1.3.0-beta1-20160321-04) -> Microsoft.CodeAnalysis.Common (= 1.3.0-beta1-20160321-04) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-rc2-23910) 
+warn :  ODataSample.Web.Iis (>= 1.0.0) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-beta-23516)
+warn : Detected package downgrade: System.Diagnostics.FileVersionInfo from 4.0.0-rc2-23910 to 4.0.0-beta-23516 
+warn :  ODataSample.Web.Iis (>= 1.0.0) -> Microsoft.AspNetCore.Mvc.Dnx (>= 1.0.0-rc2-20458) -> Microsoft.AspNetCore.Mvc.Razor (>= 1.0.0-rc2-20458) -> Microsoft.CodeAnalysis.CSharp (>= 1.3.0-beta1-20160321-04) -> Microsoft.CodeAnalysis.Common (= 1.3.0-beta1-20160321-04) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-rc2-23910) 
+warn :  ODataSample.Web.Iis (>= 1.0.0) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-beta-23516)
+info : Committing restore...
+log  : Writing lock file to disk. Path: D:\Code\Git\Forks\OData-WebApi\vNext\samples\ODataSample.Web.Iis\project.lock.json
+log  : D:\Code\Git\Forks\OData-WebApi\vNext\samples\ODataSample.Web.Iis\project.json
+log  : Restore completed in 12635ms.
+
+NuGet Config files used:
+    D:\Code\Git\Forks\OData-WebApi\vNext\NuGet.Config
+    C:\Users\Josh Comley\AppData\Roaming\NuGet\NuGet.Config
+
+Feeds used:
+    https://www.myget.org/F/aspnetcidev/api/v3/index.json
+    https://api.nuget.org/v3/index.json
+    https://www.nuget.org/api/v2/
+    https://www.myget.org/F/dotnet-core/api/v3/index.json
+    https://www.myget.org/F/dotnet-cli/api/v3/index.json
+    https://www.myget.org/F/aspnetvnext/api/v3/index.json

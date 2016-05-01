@@ -6,14 +6,7 @@ namespace ODataSample.Web
 	{
 		public static void Main(string[] args)
 		{
-			var host = new WebHostBuilder()
-				.UseDefaultHostingConfiguration(args)
-				.UseIISPlatformHandlerUrl()
-				.UseKestrel()
-				.UseStartup<Startup>()
-				.Build();
-
-			host.Run();
+			StartupBase.Init<Startup>(host => host.UseIISPlatformHandlerUrl());
 		}
 	}
 }

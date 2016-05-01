@@ -1,0 +1,3 @@
+﻿    "Microsoft.AspNetCore.Hosting": "1.0.0-*",
+    "Microsoft.AspNetCore.StaticFiles": "1.0.0-*",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-*",

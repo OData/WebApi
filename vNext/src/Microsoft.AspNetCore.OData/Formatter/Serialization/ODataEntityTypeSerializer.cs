@@ -15,6 +15,7 @@ using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
@@ -123,7 +124,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 
 			IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
 			EntityInstanceContext entityInstanceContext =
-				new EntityInstanceContext(writeContext, entityType, graph, null);
+				await CreateEntityInstanceContextAsync(graph, writeContext, entityType);
 			SelectExpandNode selectExpandNode = await CreateSelectExpandNodeAsync(entityInstanceContext);
 			if (selectExpandNode != null)
 			{
@@ -143,7 +144,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			Contract.Assert(writeContext != null);
 
 			IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
-			EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext, entityType, graph, null);
+			EntityInstanceContext entityInstanceContext = await CreateEntityInstanceContextAsync(graph, writeContext, entityType);
 			SelectExpandNode selectExpandNode = await CreateSelectExpandNodeAsync(entityInstanceContext);
 			if (selectExpandNode != null)
 			{
@@ -153,6 +154,22 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 					await WriteNodeAsync(writer, entry, selectExpandNode, entityInstanceContext);
 				}
 			}
+		}
+
+		private async Task<EntityInstanceContext> CreateEntityInstanceContextAsync(object graph, ODataSerializerContext writeContext, IEdmEntityTypeReference entityType)
+		{
+			var entity = graph;
+			if (graph is ISelectExpandWrapper)
+			{
+				entity = (graph as ISelectExpandWrapper).Instance;
+			}
+			await CreatingEntityInstanceContextAsync(entity, entityType, graph, writeContext);
+			return new EntityInstanceContext(writeContext, entityType, graph, null);
+		}
+
+		protected virtual Task CreatingEntityInstanceContextAsync(object entity, IEdmEntityTypeReference entityType, object graph, ODataSerializerContext writeContext)
+		{
+			return Task.FromResult(true);
 		}
 
 		private async Task WriteNodeAsync(ODataWriter writer, ODataEntry entry, SelectExpandNode selectExpandNode,

@@ -27,11 +27,16 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
 
         private Dictionary<string, object> _containerDict;
         private TypedEdmEntityObject _typedEdmEntityObject;
+	    private TElement _instance;
 
-        /// <summary>
-        /// Gets or sets the instance of the element being selected and expanded.
-        /// </summary>
-        public TElement Instance { get; set; }
+	    /// <summary>
+	    /// Gets or sets the instance of the element being selected and expanded.
+	    /// </summary>
+	    public TElement Instance
+	    {
+		    get { return _instance; }
+		    set { _instance = value; }
+	    }
 
 	    object ISelectExpandWrapper.Instance => Instance;
 

@@ -82,7 +82,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
 		//    return GetNextPageLink(requestUri, new FormDataCollection(requestUri), pageSize);
 		//}
 
-		internal static Uri GetNextPageLink(Uri requestUri, IQueryCollection queryParameters, int pageSize)
+		private static Uri GetNextPageLink(Uri requestUri, IQueryCollection queryParameters, int pageSize)
 		{
 			Contract.Assert(requestUri != null);
 			Contract.Assert(queryParameters != null);

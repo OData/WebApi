@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -33,7 +32,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         }
 
         /// <inheritdoc />
-        public override async Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -56,11 +55,11 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 
             IEdmEntityTypeReference entityType = GetEntityType(feedType);
             ODataWriter writer = messageWriter.CreateODataFeedWriter(entitySet, entityType.EntityDefinition());
-            await WriteObjectInline(graph, feedType, writer, writeContext);
+            await WriteObjectInlineAsync(graph, feedType, writer, writeContext);
         }
 
         /// <inheritdoc />
-        public override async Task WriteObjectInline(object graph, IEdmTypeReference expectedType, ODataWriter writer,
+        public override async Task WriteObjectInlineAsync(object graph, IEdmTypeReference expectedType, ODataWriter writer,
             ODataSerializerContext writeContext)
         {
             if (writer == null)
@@ -87,10 +86,10 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
             }
 
-            await WriteFeed(enumerable, expectedType, writer, writeContext);
+            await WriteFeedAsync(enumerable, expectedType, writer, writeContext);
         }
 
-        private async Task WriteFeed(IEnumerable enumerable, IEdmTypeReference feedType, ODataWriter writer,
+        private async Task WriteFeedAsync(IEnumerable enumerable, IEdmTypeReference feedType, ODataWriter writer,
             ODataSerializerContext writeContext)
         {
             Contract.Assert(writer != null);
@@ -99,7 +98,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             Contract.Assert(feedType != null);
 
             IEdmEntityTypeReference elementType = GetEntityType(feedType);
-            ODataFeed feed = await CreateODataFeed(enumerable, feedType.AsCollection(), writeContext);
+            ODataFeed feed = await CreateODataFeedAsync(enumerable, feedType.AsCollection(), writeContext);
             if (feed == null)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Feed));
@@ -125,7 +124,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     throw new SerializationException(SRResources.NullElementInCollection);
                 }
 
-                await entrySerializer.WriteObjectInline(entry, elementType, writer, writeContext);
+                await entrySerializer.WriteObjectInlineAsync(entry, elementType, writer, writeContext);
             }
 
             // Subtle and suprising behavior: If the NextPageLink property is set before calling WriteStart(feed),
@@ -149,7 +148,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <param name="feedType">The EDM type of the feed being written.</param>
         /// <param name="writeContext">The serializer context.</param>
         /// <returns>The created <see cref="ODataFeed"/> object.</returns>
-        public virtual Task<ODataFeed> CreateODataFeed(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
+        public virtual Task<ODataFeed> CreateODataFeedAsync(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
             ODataSerializerContext writeContext)
         {
             ODataFeed feed = new ODataFeed();

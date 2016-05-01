@@ -131,7 +131,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 					SelectExpandClause = Request.ODataProperties().SelectExpandClause
 				};
 
-				await serializer.WriteObject(value, type, messageWriter, writeContext);
+				await serializer.WriteObjectAsync(value, type, messageWriter, writeContext);
 			}
 
 		}

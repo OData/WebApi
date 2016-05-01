@@ -34,7 +34,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         }
 
         /// <inheritdoc />
-        public override async Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -63,7 +63,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             IEdmEntityTypeReference entityType = GetEntityType(feedType);
             ODataDeltaWriter writer = messageWriter.CreateODataDeltaWriter(entitySet, entityType.EntityDefinition());
 
-            await WriteDeltaFeedInline(graph, feedType, writer, writeContext);
+            await WriteDeltaFeedInlineAsync(graph, feedType, writer, writeContext);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <param name="expectedType">The expected EDM type of the object represented by <paramref name="graph"/>.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual Task WriteDeltaFeedInline(object graph, IEdmTypeReference expectedType, ODataDeltaWriter writer,
+        public virtual async Task WriteDeltaFeedInlineAsync(object graph, IEdmTypeReference expectedType, ODataDeltaWriter writer,
             ODataSerializerContext writeContext)
         {
             if (writer == null)
@@ -101,12 +101,10 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
             }
 
-            WriteFeed(enumerable, expectedType, writer, writeContext);
-
-			return Task.FromResult(true);
+            await WriteFeedAsync(enumerable, expectedType, writer, writeContext);
         }
 
-        private void WriteFeed(IEnumerable enumerable, IEdmTypeReference feedType, ODataDeltaWriter writer,
+        private async Task WriteFeedAsync(IEnumerable enumerable, IEdmTypeReference feedType, ODataDeltaWriter writer,
             ODataSerializerContext writeContext)
         {
             Contract.Assert(writer != null);
@@ -114,7 +112,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             Contract.Assert(enumerable != null);
             Contract.Assert(feedType != null);
 
-            ODataDeltaFeed deltaFeed = CreateODataDeltaFeed(enumerable, feedType.AsCollection(), writeContext);
+            ODataDeltaFeed deltaFeed = await CreateODataDeltaFeedAsync(enumerable, feedType.AsCollection(), writeContext);
             if (deltaFeed == null)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, DeltaFeed));
@@ -148,10 +146,10 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                         WriteDeltaDeletedEntry(entry, writer, writeContext);
                         break;
                     case EdmDeltaEntityKind.DeletedLinkEntry:
-                        WriteDeltaDeletedLink(entry, writer, writeContext);
+						await WriteDeltaDeletedLinkAsync(entry, writer, writeContext);
                         break;
                     case EdmDeltaEntityKind.LinkEntry:
-                        WriteDeltaLink(entry, writer, writeContext);
+                        await WriteDeltaLinkAsync(entry, writer, writeContext);
                         break;
                     case EdmDeltaEntityKind.Entry:
                         {
@@ -162,7 +160,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                                 throw new SerializationException(
                                     Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName(), typeof(ODataOutputFormatter).Name));
                             }
-                            entrySerializer.WriteDeltaObjectInline(entry, elementType, writer, writeContext);
+                            await entrySerializer.WriteDeltaObjectInlineAsync(entry, elementType, writer, writeContext);
                             break;
                         }
                     default:
@@ -191,7 +189,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <param name="feedType">The EDM type of the feed being written.</param>
         /// <param name="writeContext">The serializer context.</param>
         /// <returns>The created <see cref="ODataDeltaFeed"/> object.</returns>
-        public virtual ODataDeltaFeed CreateODataDeltaFeed(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
+        public virtual Task<ODataDeltaFeed> CreateODataDeltaFeedAsync(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
             ODataSerializerContext writeContext)
         {
             ODataDeltaFeed feed = new ODataDeltaFeed();
@@ -225,7 +223,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     feed.NextPageLink = GetNestedNextPageLink(writeContext, truncatedCollection.PageSize);
                 }
             }
-            return feed;
+            return Task.FromResult(feed);
         }
 
         /// <summary>
@@ -259,7 +257,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <param name="graph">The object to be written.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteDeltaDeletedLink(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
+        public virtual Task WriteDeltaDeletedLinkAsync(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
         {
             EdmDeltaDeletedLink edmDeltaDeletedLink = graph as EdmDeltaDeletedLink;
             if (edmDeltaDeletedLink == null)
@@ -276,6 +274,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             {
                 writer.WriteDeltaDeletedLink(deltaDeletedLink);
             }
+	        return Task.FromResult(true);
         }
 
         /// <summary>
@@ -285,7 +284,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <param name="graph">The object to be written.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteDeltaLink(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
+        public virtual Task WriteDeltaLinkAsync(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
         {
             EdmDeltaLink edmDeltaLink = graph as EdmDeltaLink;
             if (edmDeltaLink == null)
@@ -302,6 +301,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             {
                 writer.WriteDeltaLink(deltaLink);
             }
+	        return Task.FromResult(true);
         }
 
         private static IEdmEntityTypeReference GetEntityType(IEdmTypeReference feedType)

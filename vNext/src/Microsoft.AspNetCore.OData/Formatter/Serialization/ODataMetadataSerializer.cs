@@ -24,7 +24,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <inheritdoc/>
         /// <remarks>The metadata written is from the model set on the <paramref name="messageWriter"/>. The <paramref name="graph" />
         /// is not used.</remarks>
-        public override Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {

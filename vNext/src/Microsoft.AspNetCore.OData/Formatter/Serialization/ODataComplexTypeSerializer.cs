@@ -7,7 +7,6 @@ using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.OData.Common;
-using Microsoft.AspNetCore.OData.Properties;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 
@@ -28,7 +27,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public override async Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter,
+        public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter,
             ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
@@ -52,7 +51,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         }
 
         /// <inheitdoc />
-        public sealed override async Task<ODataValue> CreateODataValue(object graph, IEdmTypeReference expectedType,
+        public sealed override async Task<ODataValue> CreateODataValueAsync(object graph, IEdmTypeReference expectedType,
             ODataSerializerContext writeContext)
         {
             if (expectedType == null)
@@ -66,7 +65,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     Error.Format(SRResources.CannotWriteType, GetType().Name, expectedType.FullName()));
             }
 
-            return await CreateODataComplexValue(graph, expectedType.AsComplex(), writeContext);
+            return await CreateODataComplexValueAsync(graph, expectedType.AsComplex(), writeContext);
         }
 
         /// <summary>
@@ -76,7 +75,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <param name="complexType">The EDM complex type of the object.</param>
         /// <param name="writeContext">The serializer context.</param>
         /// <returns>The created <see cref="ODataComplexValue"/>.</returns>
-        public virtual async Task<ODataComplexValue> CreateODataComplexValue(object graph, IEdmComplexTypeReference complexType,
+        public virtual async Task<ODataComplexValue> CreateODataComplexValueAsync(object graph, IEdmComplexTypeReference complexType,
             ODataSerializerContext writeContext)
         {
             if (writeContext == null)

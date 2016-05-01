@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public override async Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -47,14 +47,14 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public sealed override async Task<ODataValue> CreateODataValue(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+        public sealed override async Task<ODataValue> CreateODataValueAsync(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
         {
             if (!expectedType.IsEnum())
             {
                 throw Error.InvalidOperation(SRResources.CannotWriteType, typeof(ODataEnumSerializer).Name, expectedType.FullName());
             }
 
-            ODataEnumValue value = await CreateODataEnumValue(graph, expectedType.AsEnum(), writeContext);
+            ODataEnumValue value = await CreateODataEnumValueAsync(graph, expectedType.AsEnum(), writeContext);
             if (value == null)
             {
                 return new ODataNullValue();
@@ -70,7 +70,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <param name="enumType">The EDM enum type of the value.</param>
         /// <param name="writeContext">The serializer write context.</param>
         /// <returns>The created <see cref="ODataEnumValue"/>.</returns>
-        public virtual Task<ODataEnumValue> CreateODataEnumValue(object graph, IEdmEnumTypeReference enumType,
+        public virtual Task<ODataEnumValue> CreateODataEnumValueAsync(object graph, IEdmEnumTypeReference enumType,
             ODataSerializerContext writeContext)
         {
             if (graph == null)

@@ -33,7 +33,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		}
 
 		/// <inheritdoc />
-		public override async Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter,
+		public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter,
 			ODataSerializerContext writeContext)
 		{
 			if (messageWriter == null)
@@ -59,11 +59,11 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			}
 
 			ODataWriter writer = messageWriter.CreateODataEntryWriter(navigationSource, path.EdmType as IEdmEntityType);
-			await WriteObjectInline(graph, navigationSource.EntityType().ToEdmTypeReference(isNullable: false), writer, writeContext);
+			await WriteObjectInlineAsync(graph, navigationSource.EntityType().ToEdmTypeReference(isNullable: false), writer, writeContext);
 		}
 
 		/// <inheritdoc />
-		public override Task WriteObjectInline(object graph, IEdmTypeReference expectedType, ODataWriter writer,
+		public override async Task WriteObjectInlineAsync(object graph, IEdmTypeReference expectedType, ODataWriter writer,
 			ODataSerializerContext writeContext)
 		{
 			if (writer == null)
@@ -82,9 +82,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			}
 			else
 			{
-				WriteEntry(graph, writer, writeContext);
+				await WriteEntryAsync(graph, writer, writeContext);
 			}
-			return Task.FromResult(true);
 		}
 
 		/// <summary>
@@ -95,7 +94,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		/// <param name="expectedType">The expected EDM type of the object represented by <paramref name="graph"/>.</param>
 		/// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
 		/// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-		public virtual async Task WriteDeltaObjectInline(object graph, IEdmTypeReference expectedType, ODataDeltaWriter writer,
+		public virtual async Task WriteDeltaObjectInlineAsync(object graph, IEdmTypeReference expectedType, ODataDeltaWriter writer,
 		   ODataSerializerContext writeContext)
 		{
 			if (writer == null)
@@ -114,21 +113,21 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			}
 			else
 			{
-				await WriteDeltaEntry(graph, writer, writeContext);
+				await WriteDeltaEntryAsync(graph, writer, writeContext);
 			}
 		}
 
-		private async Task WriteDeltaEntry(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
+		private async Task WriteDeltaEntryAsync(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
 		{
 			Contract.Assert(writeContext != null);
 
 			IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
 			EntityInstanceContext entityInstanceContext =
 				new EntityInstanceContext(writeContext, entityType, graph, null);
-			SelectExpandNode selectExpandNode = CreateSelectExpandNode(entityInstanceContext);
+			SelectExpandNode selectExpandNode = await CreateSelectExpandNodeAsync(entityInstanceContext);
 			if (selectExpandNode != null)
 			{
-				ODataEntry entry = await CreateEntry(selectExpandNode, entityInstanceContext);
+				ODataEntry entry = await CreateEntryAsync(selectExpandNode, entityInstanceContext);
 				if (entry != null)
 				{
 					writer.WriteStart(entry);
@@ -139,31 +138,31 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			}
 		}
 
-		private async Task WriteEntry(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+		private async Task WriteEntryAsync(object graph, ODataWriter writer, ODataSerializerContext writeContext)
 		{
 			Contract.Assert(writeContext != null);
 
 			IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
 			EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext, entityType, graph, null);
-			SelectExpandNode selectExpandNode = CreateSelectExpandNode(entityInstanceContext);
+			SelectExpandNode selectExpandNode = await CreateSelectExpandNodeAsync(entityInstanceContext);
 			if (selectExpandNode != null)
 			{
-				ODataEntry entry = await CreateEntry(selectExpandNode, entityInstanceContext);
+				ODataEntry entry = await CreateEntryAsync(selectExpandNode, entityInstanceContext);
 				if (entry != null)
 				{
-					WriteNode(writer, entry, selectExpandNode, entityInstanceContext);
+					await WriteNodeAsync(writer, entry, selectExpandNode, entityInstanceContext);
 				}
 			}
 		}
 
-		private void WriteNode(ODataWriter writer, ODataEntry entry, SelectExpandNode selectExpandNode,
+		private async Task WriteNodeAsync(ODataWriter writer, ODataEntry entry, SelectExpandNode selectExpandNode,
 			EntityInstanceContext entityInstanceContext)
 		{
 
 			//(entityInstanceContext.EdmModel as ISelectExpandWrapper<string>)
 			writer.WriteStart(entry);
-			WriteNavigationLinks(selectExpandNode.SelectedNavigationProperties, entityInstanceContext, writer);
-			WriteExpandedNavigationProperties(selectExpandNode.ExpandedNavigationProperties, entityInstanceContext, writer);
+			await WriteNavigationLinksAsync(selectExpandNode.SelectedNavigationProperties, entityInstanceContext, writer);
+			await WriteExpandedNavigationPropertiesAsync(selectExpandNode.ExpandedNavigationProperties, entityInstanceContext, writer);
 			writer.WriteEnd();
 		}
 
@@ -174,7 +173,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		/// <returns>
 		/// The <see cref="SelectExpandNode"/> that describes the set of properties and actions to select and expand while writing this entity.
 		/// </returns>
-		public virtual SelectExpandNode CreateSelectExpandNode(EntityInstanceContext entityInstanceContext)
+		public virtual Task<SelectExpandNode> CreateSelectExpandNodeAsync(EntityInstanceContext entityInstanceContext)
 		{
 			if (entityInstanceContext == null)
 			{
@@ -192,7 +191,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 				selectExpandNode = new SelectExpandNode(writeContext.SelectExpandClause, entityType, writeContext.Model);
 				writeContext.Items[key] = selectExpandNode;
 			}
-			return selectExpandNode as SelectExpandNode;
+			return Task.FromResult(selectExpandNode as SelectExpandNode);
 		}
 
 		/// <summary>
@@ -201,7 +200,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		/// <param name="selectExpandNode">The <see cref="SelectExpandNode"/> describing the response graph.</param>
 		/// <param name="entityInstanceContext">The context for the entity instance being written.</param>
 		/// <returns>The created <see cref="ODataEntry"/>.</returns>
-		public virtual async Task<ODataEntry> CreateEntry(SelectExpandNode selectExpandNode, EntityInstanceContext entityInstanceContext)
+		public virtual async Task<ODataEntry> CreateEntryAsync(SelectExpandNode selectExpandNode, EntityInstanceContext entityInstanceContext)
 		{
 			if (selectExpandNode == null)
 			{
@@ -217,7 +216,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			ODataEntry entry = new ODataEntry
 			{
 				TypeName = typeName,
-				Properties = await CreateStructuralPropertyBag(selectExpandNode.SelectedStructuralProperties, entityInstanceContext),
+				Properties = await CreateStructuralPropertyBagAsync(selectExpandNode.SelectedStructuralProperties, entityInstanceContext),
 			};
 
 			// Try to add the dynamic properties if the entity type is open.
@@ -238,7 +237,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 				}
 			}
 
-			IEnumerable<ODataAction> actions = CreateODataActions(selectExpandNode.SelectedActions, entityInstanceContext);
+			IEnumerable<ODataAction> actions = await CreateODataActionsAsync(selectExpandNode.SelectedActions, entityInstanceContext);
 			foreach (ODataAction action in actions)
 			{
 				entry.AddAction(action);
@@ -271,7 +270,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 					}
 				}
 
-				string etag = CreateETag(entityInstanceContext);
+				string etag = await CreateETagAsync(entityInstanceContext);
 				if (etag != null)
 				{
 					entry.ETag = etag;
@@ -286,7 +285,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		/// </summary>
 		/// <param name="entityInstanceContext">The context for the entity instance being written.</param>
 		/// <returns>The created ETag.</returns>
-		public virtual string CreateETag(EntityInstanceContext entityInstanceContext)
+		public virtual Task<string> CreateETagAsync(EntityInstanceContext entityInstanceContext)
 		{
 			if (entityInstanceContext.Request != null)
 			{
@@ -301,19 +300,19 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 				EntityTagHeaderValue etagHeaderValue = entityInstanceContext.Request.ETagHandler().CreateETag(properties);
 				if (etagHeaderValue != null)
 				{
-					return etagHeaderValue.ToString();
+					return Task.FromResult(etagHeaderValue.ToString());
 				}
 			}
 
-			return null;
+			return Task.FromResult((string)null);
 		}
 
-		private async Task WriteNavigationLinks(
+		private async Task WriteNavigationLinksAsync(
 			IEnumerable<IEdmNavigationProperty> navigationProperties, EntityInstanceContext entityInstanceContext, ODataWriter writer)
 		{
 			Contract.Assert(entityInstanceContext != null);
 
-			IEnumerable<ODataNavigationLink> navigationLinks = await CreateNavigationLinks(navigationProperties, entityInstanceContext);
+			IEnumerable<ODataNavigationLink> navigationLinks = await CreateNavigationLinksAsync(navigationProperties, entityInstanceContext);
 			foreach (ODataNavigationLink navigationLink in navigationLinks)
 			{
 				writer.WriteStart(navigationLink);
@@ -321,7 +320,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			}
 		}
 
-		private async Task WriteExpandedNavigationProperties(
+		private async Task WriteExpandedNavigationPropertiesAsync(
 			IDictionary<IEdmNavigationProperty, SelectExpandClause> navigationPropertiesToExpand,
 			EntityInstanceContext entityInstanceContext,
 			ODataWriter writer)
@@ -334,17 +333,17 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			{
 				IEdmNavigationProperty navigationProperty = navigationPropertyToExpand.Key;
 
-				ODataNavigationLink navigationLink = await CreateNavigationLink(navigationProperty, entityInstanceContext);
+				ODataNavigationLink navigationLink = await CreateNavigationLinkAsync(navigationProperty, entityInstanceContext);
 				if (navigationLink != null)
 				{
 					writer.WriteStart(navigationLink);
-					WriteExpandedNavigationProperty(navigationPropertyToExpand, entityInstanceContext, writer);
+					await WriteExpandedNavigationPropertyAsync(navigationPropertyToExpand, entityInstanceContext, writer);
 					writer.WriteEnd();
 				}
 			}
 		}
 
-		private void WriteExpandedNavigationProperty(
+		private async Task WriteExpandedNavigationPropertyAsync(
 			KeyValuePair<IEdmNavigationProperty, SelectExpandClause> navigationPropertyToExpand,
 			EntityInstanceContext entityInstanceContext,
 			ODataWriter writer)
@@ -388,11 +387,11 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 						Error.Format(SRResources.TypeCannotBeSerialized, navigationProperty.Type.ToTraceString(), typeof(ODataOutputFormatter).Name));
 				}
 
-				serializer.WriteObjectInline(propertyValue, navigationProperty.Type, writer, nestedWriteContext);
+				await serializer.WriteObjectInlineAsync(propertyValue, navigationProperty.Type, writer, nestedWriteContext);
 			}
 		}
 
-		private async Task<IEnumerable<ODataNavigationLink>> CreateNavigationLinks(
+		private async Task<IEnumerable<ODataNavigationLink>> CreateNavigationLinksAsync(
 			IEnumerable<IEdmNavigationProperty> navigationProperties, EntityInstanceContext entityInstanceContext)
 		{
 			Contract.Assert(navigationProperties != null);
@@ -400,7 +399,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			List<ODataNavigationLink> result = new List<ODataNavigationLink>();
 			foreach (IEdmNavigationProperty navProperty in navigationProperties)
 			{
-				ODataNavigationLink navigationLink = await CreateNavigationLink(navProperty, entityInstanceContext);
+				ODataNavigationLink navigationLink = await CreateNavigationLinkAsync(navProperty, entityInstanceContext);
 				if (navigationLink != null)
 				{
 					result.Add(navigationLink);
@@ -415,7 +414,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		/// <param name="navigationProperty">The navigation property for which the navigation link is being created.</param>
 		/// <param name="entityInstanceContext">The context for the entity instance being written.</param>
 		/// <returns>The navigation link to be written.</returns>
-		public virtual Task<ODataNavigationLink> CreateNavigationLink(IEdmNavigationProperty navigationProperty, EntityInstanceContext entityInstanceContext)
+		public virtual Task<ODataNavigationLink> CreateNavigationLinkAsync(IEdmNavigationProperty navigationProperty, EntityInstanceContext entityInstanceContext)
 		{
 			if (navigationProperty == null)
 			{
@@ -451,7 +450,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			return Task.FromResult(navigationLink);
 		}
 
-		private async Task<IEnumerable<ODataProperty>> CreateStructuralPropertyBag(
+		private async Task<IEnumerable<ODataProperty>> CreateStructuralPropertyBagAsync(
 			IEnumerable<IEdmStructuralProperty> structuralProperties, EntityInstanceContext entityInstanceContext)
 		{
 			Contract.Assert(structuralProperties != null);
@@ -460,7 +459,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			List<ODataProperty> properties = new List<ODataProperty>();
 			foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
 			{
-				ODataProperty property = await CreateStructuralProperty(structuralProperty, entityInstanceContext);
+				ODataProperty property = await CreateStructuralPropertyAsync(structuralProperty, entityInstanceContext);
 				if (property != null)
 				{
 					properties.Add(property);
@@ -476,7 +475,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		/// <param name="structuralProperty">The EDM structural property being written.</param>
 		/// <param name="entityInstanceContext">The context for the entity instance being written.</param>
 		/// <returns>The <see cref="ODataProperty"/> to write.</returns>
-		public virtual async Task<ODataProperty> CreateStructuralProperty(IEdmStructuralProperty structuralProperty, EntityInstanceContext entityInstanceContext)
+		public virtual async Task<ODataProperty> CreateStructuralPropertyAsync(IEdmStructuralProperty structuralProperty, EntityInstanceContext entityInstanceContext)
 		{
 			if (structuralProperty == null)
 			{
@@ -511,20 +510,21 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			return await serializer.CreateProperty(propertyValue, propertyType, structuralProperty.Name, writeContext, entityInstanceContext);
 		}
 
-		private IEnumerable<ODataAction> CreateODataActions(
+		private async Task<IEnumerable<ODataAction>> CreateODataActionsAsync(
 			IEnumerable<IEdmAction> actions, EntityInstanceContext entityInstanceContext)
 		{
 			Contract.Assert(actions != null);
 			Contract.Assert(entityInstanceContext != null);
-
+			List<ODataAction> result = new List<ODataAction>();
 			foreach (IEdmAction action in actions)
 			{
-				ODataAction oDataAction = CreateODataAction(action, entityInstanceContext);
+				ODataAction oDataAction = await CreateODataActionAsync(action, entityInstanceContext);
 				if (oDataAction != null)
 				{
-					yield return oDataAction;
+					result.Add(oDataAction);
 				}
 			}
+			return result;
 		}
 
 		/// <summary>
@@ -534,7 +534,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		/// <param name="entityInstanceContext">The context for the entity instance being written.</param>
 		/// <returns>The created action or null if the action should not be written.</returns>
 		[SuppressMessage("Microsoft.Usage", "CA2234: Pass System.Uri objects instead of strings", Justification = "This overload is equally good")]
-		public virtual ODataAction CreateODataAction(IEdmAction action, EntityInstanceContext entityInstanceContext)
+		public virtual Task<ODataAction> CreateODataActionAsync(IEdmAction action, EntityInstanceContext entityInstanceContext)
 		{
 			if (action == null)
 			{
@@ -553,19 +553,19 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 
 			if (builder == null)
 			{
-				return null;
+				return Task.FromResult((ODataAction)null);
 			}
 
 			if (ShouldOmitAction(action, builder, metadataLevel))
 			{
-				return null;
+				return Task.FromResult((ODataAction)null);
 			}
 
 			Uri target = builder.BuildActionLink(entityInstanceContext);
 
 			if (target == null)
 			{
-				return null;
+				return Task.FromResult((ODataAction)null);
 			}
 
 			Uri baseUri = new Uri(entityInstanceContext.Url.CreateODataLink(new MetadataPathSegment()));
@@ -590,7 +590,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 				odataAction.Target = target;
 			}
 
-			return odataAction;
+			return Task.FromResult(odataAction);
 		}
 
 		internal static void EmitTitle(IEdmModel model, IEdmOperation operation, ODataOperation odataAction)

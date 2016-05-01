@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		}
 
 		/// <inheritdoc/>
-		public override async Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter,
+		public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter,
 			ODataSerializerContext writeContext)
 		{
 			if (messageWriter == null)
@@ -48,11 +48,11 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 
 			IEdmTypeReference elementType = GetElementType(collectionType);
 			ODataCollectionWriter writer = messageWriter.CreateODataCollectionWriter(elementType);
-			await WriteCollection(writer, graph, collectionType.AsCollection(), writeContext);
+			await WriteCollectionAsync(writer, graph, collectionType.AsCollection(), writeContext);
 		}
 
 		/// <inheritdoc/>
-		public sealed override async Task<ODataValue> CreateODataValue(object graph, IEdmTypeReference expectedType,
+		public sealed override async Task<ODataValue> CreateODataValueAsync(object graph, IEdmTypeReference expectedType,
 			ODataSerializerContext writeContext)
 		{
 			if (graph == null)
@@ -72,7 +72,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 
 			IEdmTypeReference elementType = GetElementType(expectedType);
 
-			return await CreateODataCollectionValue(enumerable, elementType, writeContext);
+			return await CreateODataCollectionValueAsync(enumerable, elementType, writeContext);
 		}
 
 		/// <summary>
@@ -82,7 +82,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		/// <param name="graph">The collection to write.</param>
 		/// <param name="collectionType">The EDM type of the collection.</param>
 		/// <param name="writeContext">The serializer context.</param>
-		public virtual async Task WriteCollection(ODataCollectionWriter writer, object graph, IEdmTypeReference collectionType,
+		public virtual async Task WriteCollectionAsync(ODataCollectionWriter writer, object graph, IEdmTypeReference collectionType,
 			ODataSerializerContext writeContext)
 		{
 			if (writer == null)
@@ -108,7 +108,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			writer.WriteStart(collectionStart);
 			if (graph != null)
 			{
-				ODataCollectionValue collectionValue = await CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
+				ODataCollectionValue collectionValue = await CreateODataValueAsync(graph, collectionType, writeContext) as ODataCollectionValue;
 				if (collectionValue != null)
 				{
 					foreach (object item in collectionValue.Items)
@@ -128,7 +128,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		/// <param name="elementType">The element EDM type of the collection.</param>
 		/// <param name="writeContext">The serializer context to be used while creating the collection.</param>
 		/// <returns>The created <see cref="ODataCollectionValue"/>.</returns>
-		public virtual async Task<ODataCollectionValue> CreateODataCollectionValue(IEnumerable enumerable, IEdmTypeReference elementType,
+		public virtual async Task<ODataCollectionValue> CreateODataCollectionValueAsync(IEnumerable enumerable, IEdmTypeReference elementType,
 			ODataSerializerContext writeContext)
 		{
 			if (writeContext == null)
@@ -172,7 +172,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 					// ODataCollectionWriter expects the individual elements in the collection to be the underlying
 					// values and not ODataValues.
 					valueCollection.Add(
-						(await itemSerializer.CreateODataValue(item, actualType, writeContext)).GetInnerValue());
+						(await itemSerializer.CreateODataValueAsync(item, actualType, writeContext)).GetInnerValue());
 				}
 			}
 

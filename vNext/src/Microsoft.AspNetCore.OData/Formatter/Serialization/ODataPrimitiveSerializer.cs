@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		}
 
 		/// <inheritdoc/>
-		public override async Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+		public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 		{
 			if (messageWriter == null)
 			{
@@ -48,14 +48,14 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		}
 
 		/// <inheritdoc/>
-		public sealed override async Task<ODataValue> CreateODataValue(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+		public sealed override async Task<ODataValue> CreateODataValueAsync(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
 		{
 			if (!expectedType.IsPrimitive())
 			{
 				throw Error.InvalidOperation(SRResources.CannotWriteType, typeof(ODataPrimitiveSerializer), expectedType.FullName());
 			}
 
-			ODataPrimitiveValue value = await CreateODataPrimitiveValue(graph, expectedType.AsPrimitive(), writeContext);
+			ODataPrimitiveValue value = await CreateODataPrimitiveValueAsync(graph, expectedType.AsPrimitive(), writeContext);
 			if (value == null)
 			{
 				return new ODataNullValue();
@@ -71,7 +71,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		/// <param name="primitiveType">The EDM primitive type of the value.</param>
 		/// <param name="writeContext">The serializer write context.</param>
 		/// <returns>The created <see cref="ODataPrimitiveValue"/>.</returns>
-		public virtual Task<ODataPrimitiveValue> CreateODataPrimitiveValue(object graph, IEdmPrimitiveTypeReference primitiveType,
+		public virtual Task<ODataPrimitiveValue> CreateODataPrimitiveValueAsync(object graph, IEdmPrimitiveTypeReference primitiveType,
 			ODataSerializerContext writeContext)
 		{
 			// TODO: Bug 467598: validate the type of the object being passed in here with the underlying primitive type. 

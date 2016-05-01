@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         }
 
         /// <inheridoc />
-        public override Task WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {

@@ -58,7 +58,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		/// <param name="expectedType">The expected EDM type of the object represented by <paramref name="graph"/>.</param>
 		/// <param name="writer">The <see cref="ODataWriter" /> to be used for writing.</param>
 		/// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-		public virtual async Task WriteObjectInline(object graph, IEdmTypeReference expectedType, ODataWriter writer,
+		public virtual async Task WriteObjectInlineAsync(object graph, IEdmTypeReference expectedType, ODataWriter writer,
 			ODataSerializerContext writeContext)
 		{
 			throw Error.NotSupported(SRResources.WriteObjectInlineNotSupported, GetType().Name);
@@ -71,7 +71,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 		/// <param name="expectedType">The expected EDM type of the object represented by <paramref name="graph"/>.</param>
 		/// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
 		/// <returns>The <see cref="ODataValue"/> created.</returns>
-		public virtual async Task<ODataValue> CreateODataValue(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+		public virtual async Task<ODataValue> CreateODataValueAsync(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
 		{
 			throw Error.NotSupported(SRResources.CreateODataValueNotSupported, GetType().Name);
 		}
@@ -101,7 +101,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 			return new ODataProperty
 			{
 				Name = elementName,
-				Value = await CreateODataValue(graph, expectedType, writeContext)
+				Value = await CreateODataValueAsync(graph, expectedType, writeContext)
 			};
 		}
 

@@ -44,7 +44,7 @@ namespace Microsoft.AspNetCore.OData.Properties
         }
 
         /// <summary>
-        /// {0} does not support WriteObjectInline.
+        /// {0} does not support WriteObjectInlineAsync.
         /// </summary>
         internal static string WriteObjectInlineNotSupported
         {
@@ -52,7 +52,7 @@ namespace Microsoft.AspNetCore.OData.Properties
         }
 
         /// <summary>
-        /// {0} does not support WriteObjectInline.
+        /// {0} does not support WriteObjectInlineAsync.
         /// </summary>
         internal static string FormatWriteObjectInlineNotSupported(object p0)
         {
@@ -76,7 +76,7 @@ namespace Microsoft.AspNetCore.OData.Properties
         }
 
         /// <summary>
-        /// {0} does not support CreateODataValue.
+        /// {0} does not support CreateODataValueAsync.
         /// </summary>
         internal static string CreateODataValueNotSupported
         {
@@ -84,7 +84,7 @@ namespace Microsoft.AspNetCore.OData.Properties
         }
 
         /// <summary>
-        /// {0} does not support CreateODataValue.
+        /// {0} does not support CreateODataValueAsync.
         /// </summary>
         internal static string FormatCreateODataValueNotSupported(object p0)
         {
@@ -108,7 +108,7 @@ namespace Microsoft.AspNetCore.OData.Properties
         }
 
         /// <summary>
-        /// {0} does not support WriteObject.
+        /// {0} does not support WriteObjectAsync.
         /// </summary>
         internal static string WriteObjectNotSupported
         {
@@ -116,7 +116,7 @@ namespace Microsoft.AspNetCore.OData.Properties
         }
 
         /// <summary>
-        /// {0} does not support WriteObject.
+        /// {0} does not support WriteObjectAsync.
         /// </summary>
         internal static string FormatWriteObjectNotSupported(object p0)
         {

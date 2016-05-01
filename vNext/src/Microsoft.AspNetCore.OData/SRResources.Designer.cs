@@ -384,7 +384,7 @@ namespace Microsoft.AspNetCore.OData {
         }
         
         /// <summary>
-        ///    Looks up a localized string similar to {0} does not support CreateODataValue..
+        ///    Looks up a localized string similar to {0} does not support CreateODataValueAsync..
         /// </summary>
         internal static string CreateODataValueNotSupported {
             get {
@@ -2049,7 +2049,7 @@ namespace Microsoft.AspNetCore.OData {
         }
         
         /// <summary>
-        ///    Looks up a localized string similar to {0} does not support WriteObjectInline..
+        ///    Looks up a localized string similar to {0} does not support WriteObjectInlineAsync..
         /// </summary>
         internal static string WriteObjectInlineNotSupported {
             get {
@@ -2058,7 +2058,7 @@ namespace Microsoft.AspNetCore.OData {
         }
         
         /// <summary>
-        ///    Looks up a localized string similar to {0} does not support WriteObject..
+        ///    Looks up a localized string similar to {0} does not support WriteObjectAsync..
         /// </summary>
         internal static string WriteObjectNotSupported {
             get {

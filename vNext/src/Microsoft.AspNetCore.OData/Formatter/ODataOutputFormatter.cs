@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.OData.Properties;
 // ReSharper disable once RedundantUsingDirective
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
@@ -25,12 +26,6 @@ namespace Microsoft.AspNetCore.OData.Formatter
         private readonly ODataMessageWriterSettings _messageWriterSettings;
         private readonly ODataSerializerProvider _serializerProvider;
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
-
-        public ODataOutputFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
-            : this(new DefaultODataSerializerProvider(), payloadKinds)
-        {
-
-        }
 
         public ODataOutputFormatter(ODataSerializerProvider serializerProvider, IEnumerable<ODataPayloadKind> payloadKinds)
         {
@@ -64,7 +59,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
             object value = context.Object;
             Type type = value.GetType();
-            ODataSerializer serializer = GetSerializer(type, value, model, new DefaultODataSerializerProvider(), request);
+            ODataSerializer serializer = GetSerializer(type, value, model, context.HttpContext.RequestServices.GetService<ODataSerializerProvider>(), request);
 
             IUrlHelper urlHelper = context.HttpContext.UrlHelper();
 

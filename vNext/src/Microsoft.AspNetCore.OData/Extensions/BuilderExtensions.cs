@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.OData.Builder;
+using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.OData.Routing;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Framework.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
@@ -12,18 +13,50 @@ namespace Microsoft.AspNetCore.OData.Extensions
 {
     public static class BuilderExtensions
     {
-        //public static IRouteBuilder MapODataRoute<T>(this IRouteBuilder builder, string prefix) where T : class
-        //{
-        //    builder.Routes.Add(new ODataRoute(prefix, DefaultODataModelProvider.BuildEdmModel(typeof(T))));
-        //    return builder;
-        //}
-
-	    public static IServiceCollection AddOData<T>([NotNull] this IServiceCollection services,
-			Action<ODataConventionModelBuilder> after = null)
-			where T : class
+	    public static IServiceCollection ConfigureODataOutputFormatter<TOutputFormatter>(
+			[NotNull] this IServiceCollection services)
+		    where TOutputFormatter : class, IOutputFormatter, new()
 	    {
-		    services.AddOData();
-			var type = typeof(T);
+		    return
+			    services.ConfigureODataOutputFormatterProvider<DefaultODataOutputFormatterProvider<TOutputFormatter>>();
+	    }
+
+		public static IServiceCollection ConfigureODataOutputFormatterProvider<TOutputFormatterProvider>(
+			[NotNull] this IServiceCollection services)
+		    where TOutputFormatterProvider : class, IODataOutputFormatterProvider
+		{
+			return services.AddTransient<IODataOutputFormatterProvider, TOutputFormatterProvider>();
+	    }
+
+		public static IServiceCollection ConfigureODataOutputFormatterProvider(
+			[NotNull] this IServiceCollection services,
+			Func<IServiceProvider, IODataOutputFormatterProvider> resolver)
+		{
+			return services.AddTransient(resolver);
+	    }
+
+		public static IServiceCollection ConfigureODataSerializerProvider<TODataSerializerProvider>(
+			[NotNull] this IServiceCollection services)
+		    where TODataSerializerProvider : ODataSerializerProvider
+		{
+			return services.AddTransient<ODataSerializerProvider, TODataSerializerProvider>();
+		}
+
+		public static IServiceCollection ConfigureODataSerializerProvider(
+			[NotNull] this IServiceCollection services,
+			Func<IServiceProvider, ODataSerializerProvider> provider)
+		{
+			return services.AddTransient(provider);
+		}
+
+		public static IServiceCollection AddOData<TODataService>(
+			[NotNull] this IServiceCollection services,
+			Action<ODataConventionModelBuilder> after = null
+			)
+			where TODataService : class 
+	    {
+			services.AddOData();
+			var type = typeof(TODataService);
 			var assemblyNames = new AssembliesResolver(type.GetTypeInfo().Assembly);
 			var model = DefaultODataModelProvider.BuildEdmModel(type, assemblyNames, after);
 		    services.AddSingleton(model);

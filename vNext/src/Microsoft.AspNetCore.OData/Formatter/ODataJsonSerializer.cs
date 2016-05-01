@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -52,7 +53,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
 			var type = value.GetType();
 			type = _context.ObjectType;
-			ODataSerializer serializer = GetSerializer(type, value, model, DefaultODataSerializerProvider.Instance);
+			ODataSerializer serializer = GetSerializer(type, value, model, _context.HttpContext.RequestServices.GetService<ODataSerializerProvider>());
 
 			var urlHelper = UrlHelper(_context.HttpContext);
 			ODataPath path = Request.ODataProperties().Path;

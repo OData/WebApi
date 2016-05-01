@@ -45,11 +45,6 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             _entityTypeSerializer = new ODataEntityTypeSerializer(this);
         }
 
-        /// <summary>
-        /// Gets the default instance of the <see cref="DefaultODataSerializerProvider"/>.
-        /// </summary>
-        public static DefaultODataSerializerProvider Instance { get; } = new DefaultODataSerializerProvider();
-
 	    /// <inheritdoc />
         public override ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmType)
         {

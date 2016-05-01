@@ -39,7 +39,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 			//}
 		}
 
-		public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
+		public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
 		{
 			var response = context.HttpContext.Response;
 			//var selectedEncoding = context.ContentType.Encoding == null ? Encoding.UTF8 : context.ContentType.Encoding;
@@ -67,11 +67,9 @@ namespace Microsoft.AspNetCore.OData.Formatter
 			{
 				using (var delegatingStream = new NonDisposableStream(response.Body))
 				{
-					WriteObject(delegatingStream, context);
+					await WriteObjectAsync(delegatingStream, context);
 				}
 			}
-
-			return Task.FromResult(true);
 		}
 
 		private JsonWriter CreateJsonWriter(TextWriter writer)
@@ -103,9 +101,15 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
 		// In the future, should convert to ODataEntry and use ODL to write out.
 		// Or use ODL to build a JObject and use Json.NET to write out.
-		public void WriteObject(Stream stream, OutputFormatterWriteContext context)
+		public virtual Task WriteObjectAsync(Stream stream, OutputFormatterWriteContext context)
 		{
-			new ODataJsonSerializer(context).WriteJson(context.Object, stream);
+			ResolveJsonSerializer(context).WriteJson(context.Object, stream);
+			return Task.FromResult(true);
+		}
+
+		private static ODataJsonSerializer ResolveJsonSerializer(OutputFormatterWriteContext context)
+		{
+			return new ODataJsonSerializer(context);
 		}
 
 		private void WriteMetadata(TextWriter writer, IEdmModel model)

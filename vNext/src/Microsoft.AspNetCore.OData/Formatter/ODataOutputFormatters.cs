@@ -21,16 +21,6 @@ namespace Microsoft.AspNetCore.OData.Formatter
         private const string XmlFormat = "xml";
 
         /// <summary>
-        /// Creates a list of media type formatters to handle OData.
-        /// The default serializer provider is <see cref="DefaultODataSerializerProvider"/>.
-        /// </summary>
-        /// <returns>A list of output formatters to handle OData.</returns>
-        public static IList<ODataOutputFormatter> Create()
-        {
-            return Create(DefaultODataSerializerProvider.Instance);
-        }
-
-        /// <summary>
         /// Creates a list of media type formatters to handle OData with the given <paramref name="serializerProvider"/>.
         /// </summary>
         /// <param name="serializerProvider">The serializer provider to use.</param>

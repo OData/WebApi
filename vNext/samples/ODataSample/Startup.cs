@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,17 +22,22 @@ namespace ODataSample.Web
 			var host = new WebHostBuilder()
 				.CaptureStartupErrors(true)
 //				.ConfigureLogging(options => options.AddDebug())
-				.UseDefaultHostingConfiguration(args);
+//.UseConfiguration(config)
+				
+				;
 			building?.Invoke(host);
 			//.UseIISIntegration()
-			host.UseKestrel()
-				.UseStartup<TStartup>();
+			
+			host
+				//.UseStartup("ODataSaple.Web")
+				//.UseKestrel()
+				.UseStartup<TStartup>()
+				;
 			host.Build().Run();
 		}
 
 		protected StartupBase(
 			IHostingEnvironment env,
-			IRuntimeEnvironment runtimeEnvironment,
 			string environment = null)
 		{
 			// Set up configuration sources.
@@ -57,10 +65,8 @@ namespace ODataSample.Web
 			services.AddEntityFramework()
 				.AddDbContext<ApplicationDbContext>();
 			services.AddEntityFrameworkSqlServer();
-			services.AddMvc()
-				.AddWebApiConventions();
+			services.AddMvc();
 			services.AddMvcDnx();
-
 			services.AddCors(options =>
 			{
 				options.AddPolicy("AllowAll",
@@ -209,7 +215,22 @@ namespace ODataSample.Web
 		{
 			Seeder.MigrateDatabaseAsync(app.ApplicationServices);
 
+			//app.UseMiddleware<ReflectionTypeLoadExceptionMiddleware>();
 			app.UseDeveloperExceptionPage();
+
+			app.Use(async (context, next) =>
+			{
+				//await context.Response.WriteAsync("HEYY2");
+				try
+				{
+					await next();
+				}
+				catch (ReflectionTypeLoadException e)
+				{
+					await context.Response.WriteAsync(e.LoaderExceptions[0].Message);
+					//throw new Exception("Got it: " + e.InnerException.Message);
+				}
+			});
 
 			app.UseIISPlatformHandler();
 
@@ -231,6 +252,27 @@ namespace ODataSample.Web
 				});
 
 			//app.UseMvcWithDefaultRoute();
+		}
+	}
+
+	public class ReflectionTypeLoadExceptionMiddleware
+	{
+		private readonly RequestDelegate _next;
+
+		public ReflectionTypeLoadExceptionMiddleware(RequestDelegate next)
+		{
+			_next = next;
+		}
+
+		public async Task Invoke(HttpContext context)
+		{
+			try
+			{
+				await this._next(context);
+			}
+			catch (ReflectionTypeLoadException ex)
+			{
+			}
 		}
 	}
 }

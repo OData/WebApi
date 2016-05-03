@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace ODataSample.Web
 {
@@ -6,7 +7,14 @@ namespace ODataSample.Web
 	{
 		public static void Main(string[] args)
 		{
-			StartupBase.Init<Startup>(host => host.UseIISPlatformHandlerUrl());
+			var config = new ConfigurationBuilder()
+				 .AddEnvironmentVariables(prefix: "ASPNETCORE_")
+				 .Build();
+			StartupBase.Init<Startup>(host => host
+				.UseConfiguration(config)
+				//.UseDefaultHostingConfiguration(args)
+				.UseIISPlatformHandlerUrl()
+				.UseKestrel());
 		}
 	}
 }

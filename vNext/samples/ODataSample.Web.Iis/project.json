@@ -15,17 +15,22 @@
   ],
 
   "dependencies": {
-    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-20458",
-    "Microsoft.AspNetCore.Mvc.Dnx": "1.0.0-rc2-20458",
-    "Microsoft.AspNetCore.Diagnostics": "1.0.0-rc2-20458",
-    "Microsoft.AspNetCore.IISPlatformHandler": "1.0.0-rc2-20458",
-    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0-rc3-20565",
-    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-20458",
-    "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc3-*",
+    "Microsoft.AspNetCore.Mvc.Core": "1.0.0-rc3-*",
+    "Microsoft.AspNetCore.Mvc.Dnx": "1.0.0-rc3-*",
+    "Microsoft.AspNetCore.Diagnostics": "1.0.0-rc3-*",
+    "Microsoft.AspNetCore.Hosting": "1.0.0-rc3-*",
+    "Microsoft.AspNetCore.IISPlatformHandler": "1.0.0-rc3-*",
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0-rc3-*",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc3-*",
+    "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0-rc3-*",
     "Microsoft.AspNetCore.OData": "1.0.0.1-*",
-    "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.0.0-rc2-20458",
-    "Microsoft.AspNetCore.StaticFiles": "1.0.0-rc2-*",
-    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2-rc2-24018",
+    "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.0.0-rc3-*",
+    "Microsoft.AspNetCore.StaticFiles": "1.0.0-rc3-*",
+    "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2-rc3-*",
+    "Microsoft.Extensions.Configuration.CommandLine": "1.0.0-*",
+    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-*",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-*",
     "ODataSample": "1.0.0-*"
   },
   "runtimes": {
@@ -74,5 +79,8 @@
     "**.xproj",
     "**.user",
     "**.vspscc"
+  ],
+  "compileExclude": [
+    "../ODataSample/**/*assemblyinfo.cs"
   ]
 }

@@ -1,13 +1,13 @@
 {
-  "version": "1.0.0.24-rc3",
-  "description": "Microsoft.AspNetCore.OData",
+  "version": "1.0.0.24-rc2",
+  "description": "Microsoft.AspNetCore.OData.Rc2",
 
   "dependencies": {
     "Microsoft.OData.Core": "6.15.0",
-    "Microsoft.AspNetCore.Mvc": "1.0.0-rc3-*",
-    "Microsoft.AspNetCore.Mvc.Core": "1.0.0-rc3-*",
-    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc3-*",
-    "Microsoft.EntityFrameworkCore": "1.0.0-rc3-*"
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Mvc.Core": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc2-*",
+    "Microsoft.EntityFrameworkCore": "1.0.0-rc2-*"
   },
 
   "frameworks": {
@@ -23,12 +23,16 @@
     },
     "netstandardapp1.5": {
       "dependencies": {
-        "NETStandard.Library": "1.5.0-*"
+        "NETStandard.Library": "1.5.0-rc2-*"
       },
       "imports": [
         "dnxcore50",
         "portable-net451+win8"
       ]
     }
-  }
+  },
+  "compile": [
+    "**/*.cs",
+    "../Microsoft.AspNetCore.OData/**/*.cs"
+  ]
 }

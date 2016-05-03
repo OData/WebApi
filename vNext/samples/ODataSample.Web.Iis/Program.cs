@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using ODataSample.Web.Models;
 
 namespace ODataSample.Web
 {
@@ -8,8 +10,15 @@ namespace ODataSample.Web
 	{
 		public static void Main(string[] args)
 		{
+			var config = new ConfigurationBuilder()
+				 .AddCommandLine(args)
+				 .AddEnvironmentVariables(prefix: "ASPNETCORE_")
+				 .Build();
+
 			StartupBase.Init<Startup>(s => s
+				.UseConfiguration(config)
 				.UseEnvironment("Development")
+				.UseKestrel()
 				.UseIISIntegration());
 		}
 
@@ -17,7 +26,7 @@ namespace ODataSample.Web
 		{
 			var host = new WebHostBuilder()
 				.UseKestrel()
-				.UseDefaultHostingConfiguration(args)
+				//.UseDefaultHostingConfiguration(args)
 				.UseEnvironment("Development")
 				//.UseIISPlatformHandlerUrl()
 				.UseIISIntegration()

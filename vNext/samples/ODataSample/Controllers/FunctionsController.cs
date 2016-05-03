@@ -31,10 +31,10 @@ namespace ODataSample.Web.Controllers
 			return Ok(a * b);
 		}
 
-		[HttpPost("ValidateField")]
-		public virtual async Task<IActionResult> ValidateField([FromBody]JObject validation)
-		{
-			return await this.ValidateFieldInService<ISampleService>(validation);
-		}
+		//[HttpPost("ValidateField")]
+		//public virtual async Task<IActionResult> ValidateField([FromBody]JObject validation)
+		//{
+		//	return await this.ValidateFieldInService<ISampleService>(validation);
+		//}
 	}
 }

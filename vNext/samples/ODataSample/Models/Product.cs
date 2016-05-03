@@ -31,7 +31,7 @@ namespace ODataSample.Web.Models
 		[Required(ErrorMessage = "Please enter an email address")]
 		[EmailAddress(ErrorMessage = "Please provide a valid email address")]
 		public string OwnerEmailAddress { get; set; }
-		[Required]
+		//[Required]
 		public DateTimeOffset? DateInvented { get; set; }
 		public DateTimeOffset DateCreated { get; set; }
 		public string SomeSecretFieldThatShouldNotBeReturned { get; set; }

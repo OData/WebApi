@@ -1,0 +1,3 @@
+﻿{
+  "server": "Microsoft.AspNetCore.Server.Kestrel"
+}

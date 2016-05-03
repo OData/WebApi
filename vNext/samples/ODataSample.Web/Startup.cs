@@ -5,8 +5,8 @@ namespace ODataSample.Web
 {
 	public class Startup : StartupBase
 	{
-		public Startup(IHostingEnvironment env, IRuntimeEnvironment runtimeEnvironment)
-			: base(env, runtimeEnvironment, "development")
+		public Startup(IHostingEnvironment env)
+			: base(env, "development")
 		{
 		}
 	}

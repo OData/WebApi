@@ -5,12 +5,19 @@ using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
 {
-    public class HomeController : Controller
-    {
-        public IActionResult Index()
-        {
-            return View(new {});
-        }
+	public class HomeController : Controller
+	{
+		public IActionResult Index()
+		{
+			return View(new LoginViewModel());
+		}
+
+		public IActionResult Index2()
+		{
+			return Content("Hey ho");
+		}
+
+
 
 		[AllowAnonymous]
 		[HttpGet]

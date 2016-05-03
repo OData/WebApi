@@ -581,10 +581,10 @@ namespace System.Web.OData
         {
             var newParameter = new JObject()
             {
-                {"name", name},
-                {"in", kind},
-                {"description", description},
-                {"type", type},
+                { "name", name },
+                { "in", kind },
+                { "description", description },
+                { "type", type },
             };
 
             if (!String.IsNullOrEmpty(format))

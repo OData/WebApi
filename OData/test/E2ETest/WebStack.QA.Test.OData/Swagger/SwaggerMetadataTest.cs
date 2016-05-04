@@ -64,6 +64,8 @@ namespace WebStack.QA.Test.OData.Swagger
             builder.Function("UnboundFunction").Returns<string>().Parameter<int>("param");
             builder.Action("UnboundAction").Parameter<double>("param");
             builder.EntityType<Customer>().Function("BoundFunction").Returns<double>().Parameter<string>("name");
+            builder.EntitySet<CompositeKeyItem>("CompositeKeyItems");
+            builder.EntityType<CompositeKeyItem>().HasKey(x => new { x.FirstKey, x.SecondKey });
             return builder.GetEdmModel();
         }
 
@@ -515,6 +517,230 @@ namespace WebStack.QA.Test.OData.Swagger
         }
       }
     },
+    ""/CompositeKeyItems"": {
+       ""get"": {
+         ""summary"": ""Get EntitySet CompositeKeyItems"",
+         ""operationId"": ""CompositeKeyItems_Get"",
+         ""description"": ""Returns the EntitySet CompositeKeyItems"",
+         ""tags"": [
+           ""CompositeKeyItems""
+         ],
+         ""parameters"": [
+           {
+             ""name"": ""$expand"",
+             ""in"": ""query"",
+             ""description"": ""Expand navigation property"",
+             ""type"": ""string""
+           },
+           {
+             ""name"": ""$select"",
+             ""in"": ""query"",
+             ""description"": ""select structural property"",
+             ""type"": ""string""
+           },
+           {
+             ""name"": ""$orderby"",
+             ""in"": ""query"",
+             ""description"": ""order by some property"",
+             ""type"": ""string""
+           },
+           {
+             ""name"": ""$top"",
+             ""in"": ""query"",
+             ""description"": ""top elements"",
+             ""type"": ""integer""
+           },
+           {
+             ""name"": ""$skip"",
+             ""in"": ""query"",
+             ""description"": ""skip elements"",
+             ""type"": ""integer""
+           },
+           {
+             ""name"": ""$count"",
+             ""in"": ""query"",
+             ""description"": ""include count in response"",
+             ""type"": ""boolean""
+           }
+         ],
+         ""responses"": {
+           ""200"": {
+             ""description"": ""EntitySet CompositeKeyItems"",
+             ""schema"": {
+               ""$ref"": ""#/definitions/WebStack.QA.Test.OData.Swagger.CompositeKeyItem""
+             }
+           },
+           ""default"": {
+             ""description"": ""Unexpected error"",
+             ""schema"": {
+               ""$ref"": ""#/definitions/_Error""
+             }
+           }
+         }
+       },
+       ""post"": {
+         ""summary"": ""Post a new entity to EntitySet CompositeKeyItems"",
+         ""operationId"": ""CompositeKeyItems_Post"",
+         ""description"": ""Post a new entity to EntitySet CompositeKeyItems"",
+         ""tags"": [
+           ""CompositeKeyItems""
+         ],
+         ""parameters"": [
+           {
+             ""name"": ""CompositeKeyItem"",
+             ""in"": ""body"",
+             ""description"": ""The entity to post"",
+             ""schema"": {
+               ""$ref"": ""#/definitions/WebStack.QA.Test.OData.Swagger.CompositeKeyItem""
+             }
+           }
+         ],
+         ""responses"": {
+           ""200"": {
+             ""description"": ""EntitySet CompositeKeyItems"",
+             ""schema"": {
+               ""$ref"": ""#/definitions/WebStack.QA.Test.OData.Swagger.CompositeKeyItem""
+             }
+           },
+           ""default"": {
+             ""description"": ""Unexpected error"",
+             ""schema"": {
+               ""$ref"": ""#/definitions/_Error""
+             }
+           }
+         }
+       }
+     },
+     ""/CompositeKeyItems({FirstKey}, {SecondKey})"": {
+       ""get"": {
+         ""summary"": ""Get entity from CompositeKeyItems by key."",
+         ""operationId"": ""CompositeKeyItems_GetById"",
+         ""description"": ""Returns the entity with the key from CompositeKeyItems"",
+         ""tags"": [
+           ""CompositeKeyItems""
+         ],
+         ""parameters"": [
+           {
+             ""name"": ""FirstKey"",
+             ""in"": ""path"",
+             ""description"": ""key: FirstKey"",
+             ""type"": ""integer"",
+             ""format"": ""int32""
+           },
+           {
+             ""name"": ""SecondKey"",
+             ""in"": ""path"",
+             ""description"": ""key: SecondKey"",
+             ""type"": ""integer"",
+             ""format"": ""int32""
+           },
+           {
+             ""name"": ""$select"",
+             ""in"": ""query"",
+             ""description"": ""description"",
+             ""type"": ""string""
+           }
+         ],
+         ""responses"": {
+           ""200"": {
+             ""description"": ""EntitySet CompositeKeyItems"",
+             ""schema"": {
+               ""$ref"": ""#/definitions/WebStack.QA.Test.OData.Swagger.CompositeKeyItem""
+             }
+           },
+           ""default"": {
+             ""description"": ""Unexpected error"",
+             ""schema"": {
+               ""$ref"": ""#/definitions/_Error""
+             }
+           }
+         }
+       },
+       ""patch"": {
+         ""summary"": ""Update entity in EntitySet CompositeKeyItems"",
+         ""operationId"": ""CompositeKeyItems_PatchById"",
+         ""description"": ""Update entity in EntitySet CompositeKeyItems"",
+         ""tags"": [
+           ""CompositeKeyItems""
+         ],
+         ""parameters"": [
+           {
+             ""name"": ""FirstKey"",
+             ""in"": ""path"",
+             ""description"": ""key: FirstKey"",
+             ""type"": ""integer"",
+             ""format"": ""int32""
+           },
+           {
+             ""name"": ""SecondKey"",
+             ""in"": ""path"",
+             ""description"": ""key: SecondKey"",
+             ""type"": ""integer"",
+             ""format"": ""int32""
+           },
+           {
+             ""name"": ""CompositeKeyItem"",
+             ""in"": ""body"",
+             ""description"": ""The entity to patch"",
+             ""schema"": {
+               ""$ref"": ""#/definitions/WebStack.QA.Test.OData.Swagger.CompositeKeyItem""
+             }
+           }
+         ],
+         ""responses"": {
+           ""204"": {
+             ""description"": ""Empty response""
+           },
+           ""default"": {
+             ""description"": ""Unexpected error"",
+             ""schema"": {
+               ""$ref"": ""#/definitions/_Error""
+             }
+           }
+         }
+       },
+       ""delete"": {
+         ""summary"": ""Delete entity in EntitySet CompositeKeyItems"",
+         ""operationId"": ""CompositeKeyItems_DeleteById"",
+         ""description"": ""Delete entity in EntitySet CompositeKeyItems"",
+         ""tags"": [
+           ""CompositeKeyItems""
+         ],
+         ""parameters"": [
+           {
+             ""name"": ""FirstKey"",
+             ""in"": ""path"",
+             ""description"": ""key: FirstKey"",
+             ""type"": ""integer"",
+             ""format"": ""int32""
+           },
+           {
+             ""name"": ""SecondKey"",
+             ""in"": ""path"",
+             ""description"": ""key: SecondKey"",
+             ""type"": ""integer"",
+             ""format"": ""int32""
+           },
+           {
+             ""name"": ""If-Match"",
+             ""in"": ""header"",
+             ""description"": ""If-Match header"",
+             ""type"": ""string""
+           }
+         ],
+         ""responses"": {
+           ""204"": {
+             ""description"": ""Empty response""
+           },
+           ""default"": {
+             ""description"": ""Unexpected error"",
+             ""schema"": {
+               ""$ref"": ""#/definitions/_Error""
+             }
+           }
+         }
+       }
+     },
     ""/UnboundFunction(param={param})"": {
       ""get"": {
         ""summary"": ""Call operation import  UnboundFunction"",
@@ -641,6 +867,20 @@ namespace WebStack.QA.Test.OData.Swagger
         }
       }
     },
+    ""WebStack.QA.Test.OData.Swagger.CompositeKeyItem"": {
+      ""properties"": {
+        ""FirstKey"": {
+          ""description"": ""FirstKey"",
+          ""type"": ""integer"",
+          ""format"": ""int32""
+        },
+        ""SecondKey"": {
+          ""description"": ""SecondKey"",
+          ""type"": ""integer"",
+          ""format"": ""int32""
+        }
+      }
+    },
     ""_Error"": {
       ""properties"": {
         ""error"": {
@@ -682,6 +922,12 @@ namespace WebStack.QA.Test.OData.Swagger
         public class Order
         {
             public int OrderId { get; set; }
+        }
+
+        public class CompositeKeyItem
+        {
+            public int FirstKey { get; set; }
+            public int SecondKey { get; set; }
         }
     }
 }

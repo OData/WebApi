@@ -579,18 +579,20 @@ namespace System.Web.OData
 
         private static JArray Parameter(this JArray parameters, string name, string kind, string description, string type, string format = null)
         {
-            parameters.Add(new JObject()
+            var newParameter = new JObject()
             {
                 { "name", name },
                 { "in", kind },
                 { "description", description },
                 { "type", type },
-            });
+            };
 
             if (!String.IsNullOrEmpty(format))
             {
-                (parameters.First as JObject).Add("format", format);
+                newParameter.Add("format", format);
             }
+
+            parameters.Add(newParameter);
 
             return parameters;
         }

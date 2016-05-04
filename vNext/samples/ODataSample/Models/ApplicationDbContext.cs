@@ -20,14 +20,23 @@ namespace ODataSample.Web.Models
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
-			builder
-				.Entity<Product>()
-				.Property(e => e.DateCreated)
-				.HasDefaultValueSql("getdate()");
+			//builder
+			//	.Entity<Product>()
+			//	.Property(e => e.DateCreated)
+			//	.HasDefaultValueSql("getdate()");
 			builder
 				.Entity<ApplicationUser>()
 				.HasOne(u => u.UsedProduct)
 				.WithMany(p => p.UsedByUsers);
+			builder
+				.Entity<ApplicationUser>()
+				.HasOne(u => u.FavouriteProduct)
+				;
+			builder
+				.Entity<ApplicationUser>()
+				.HasMany(u => u.ProductsCreated)
+				.WithOne(u => u.CreatedByUser)
+				;
 			builder
 				.Entity<Product>()
 				.HasOne(u => u.CreatedByUser)
@@ -36,10 +45,10 @@ namespace ODataSample.Web.Models
 				.Entity<Product>()
 				.HasOne(u => u.LastModifiedByUser)
 				.WithMany(u => u.ProductsLastModified);
-			builder
-				.Entity<Order>()
-				.HasOne(u => u.Customer)
-				.WithMany(u => u.Orders);
+			//builder
+			//	.Entity<Order>()
+			//	.HasOne(u => u.Customer)
+			//	.WithMany(u => u.Orders);
 			base.OnModelCreating(builder);
 		}
 

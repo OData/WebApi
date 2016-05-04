@@ -1,299 +1,233 @@
 log  : Restoring packages for D:\B\Forks\OData-WebApi\vNext\samples\ODataSample.Web.Iis\project.json...
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.Core'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.Dnx'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Diagnostics'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Hosting'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.IISPlatformHandler'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Server.IISIntegration'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Server.Kestrel'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.EntityFrameworkCore.SqlServer'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.WebApiCompatShim'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.EntityFrameworkCore'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Identity.EntityFrameworkCore'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.StaticFiles'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.NETCore.Runtime.CoreCLR'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Configuration.CommandLine'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Configuration.EnvironmentVariables'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Configuration.Json'
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='NETStandard.Library'
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc/index.json
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.Dnx' 644ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.StaticFiles' 581ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.NETCore.Runtime.CoreCLR' 585ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Diagnostics' 649ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc/index.json 244ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.Core' 658ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.IISPlatformHandler' 652ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Hosting' 659ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.EntityFrameworkCore.SqlServer' 658ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc' 695ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Configuration.Json' 615ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Configuration.CommandLine' 617ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Configuration.EnvironmentVariables' 630ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Server.IISIntegration' 697ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Server.Kestrel' 709ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.WebApiCompatShim' 661ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Identity.EntityFrameworkCore' 660ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.EntityFrameworkCore' 661ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='NETStandard.Library' 576ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc/index.json 504ms
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc/index.json
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc/index.json 736ms
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.core/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.core/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.Core'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.Dnx'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.diagnostics/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.diagnostics/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Diagnostics'
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting/index.json
 info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.hosting/index.json
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Hosting'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting/index.json
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.IISPlatformHandler'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Server.IISIntegration'
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.server.kestrel/index.json
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.server.kestrel/index.json
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Server.Kestrel'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.EntityFrameworkCore.SqlServer'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.entityframeworkcore/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Identity.EntityFrameworkCore'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.logging.debug/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.debug/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Logging.Debug'
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.logging.debug/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.logging.debug/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.logging.debug/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.staticfiles/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.StaticFiles'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.staticfiles/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json
 info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.netcore.runtime.coreclr/index.json
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.NETCore.Runtime.CoreCLR'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.commandline/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.configuration.commandline/index.json
+info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.commandline/index.json
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Configuration.CommandLine'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.commandline/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.configuration.commandline/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.configuration.commandline/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json
 info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Configuration.EnvironmentVariables'
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json
+info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json
 info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.json/index.json
+info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Configuration.Json'
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/netstandard.library/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/netstandard.library/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Mvc.WebApiCompatShim'
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.entityframeworkcore/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.EntityFrameworkCore'
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json
+info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/netstandard.library/index.json
 info :   GET https://api.nuget.org/v3-flatcontainer/netstandard.library/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='NETStandard.Library'
+info :   CACHE https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/netstandard.library/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/netstandard.library/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/netstandard.library/index.json
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json 121ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json 187ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json 224ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json 216ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json 226ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json 218ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json 240ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json 221ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc/index.json 240ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json 235ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json 235ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting/index.json 241ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.configuration.commandline/index.json 228ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json 227ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json 229ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json 259ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json 243ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json 240ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json 246ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json 262ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json 254ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json 252ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json 268ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json 251ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json 250ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.configuration.commandline/index.json 254ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting/index.json 275ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json 282ms
-info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json 279ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json 279ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/netstandard.library/index.json 265ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json 279ms
-info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/netstandard.library/index.json 269ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json 279ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json 320ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc/index.json 735ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json 549ms
-info :   NotFound https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json 650ms
-info :   NotFound https://api.nuget.org/v3-flatcontainer/netstandard.library/index.json 636ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.netcore.runtime.coreclr/index.json 645ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.hosting/index.json 701ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.json/index.json 684ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json 712ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json 726ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.entityframeworkcore/index.json 709ms
-info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.json/index.json
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.commandline/index.json 715ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json 745ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.core/index.json 748ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json 748ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json 751ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json 753ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json 758ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json 751ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting/index.json 762ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json 762ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json 763ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json 757ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json 766ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json 756ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json 758ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json 759ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json 761ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json 764ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json 778ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.diagnostics/index.json 785ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json 773ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/netstandard.library/index.json 770ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json 775ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json 782ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json 783ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.server.kestrel/index.json 794ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.commandline/index.json 781ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json 790ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json 782ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json 786ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json 781ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.configuration.commandline/index.json 783ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json 781ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json 791ms
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.staticfiles/index.json 799ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json 793ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json 824ms
-info :   OK https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json 826ms
-info :   OK https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/netstandard.library/index.json 820ms
-info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Hosting.Abstractions'
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/netstandard.library/index.json
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json 292ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json 335ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json 287ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting/index.json 345ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.configuration.commandline/index.json 297ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json 332ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json 384ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json 478ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json 500ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json 509ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.configuration.commandline/index.json 536ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json 535ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting/index.json 597ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json 583ms
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.hosting/index.json 613ms
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.server.kestrel/index.json 607ms
+info :   NotFound https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json 663ms
+info :   NotFound https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json 628ms
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json 593ms
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.netcore.runtime.coreclr/index.json 615ms
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.commandline/index.json 612ms
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.extensions.configuration.json/index.json 603ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Configuration.Json' 603ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Hosting' 680ms
+info :   NotFound https://api.nuget.org/v3-flatcontainer/netstandard.library/index.json 567ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Server.Kestrel' 763ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Configuration.EnvironmentVariables' 739ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Configuration.CommandLine' 753ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.NETCore.Runtime.CoreCLR' 758ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Server.IISIntegration' 802ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc/index.json 880ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json 895ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json 910ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json 909ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.logging.debug/index.json 925ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json 957ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json 980ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.server.kestrel/index.json 981ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json 975ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json 995ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json 954ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.commandline/index.json 959ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json 963ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.server.iisintegration/index.json 997ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.configuration.environmentvariables/index.json 954ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.configuration.commandline/index.json 958ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/netstandard.library/index.json 898ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json 977ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json 1041ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.diagnostics/index.json 1027ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.iisplatformhandler/index.json 1011ms
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Hosting.Abstractions'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.http/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.http/index.json
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Http'
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.http/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.http/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Http'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.http/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.http/index.json
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting/index.json 893ms
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.http/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.http.extensions/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.http.extensions/index.json
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Http.Extensions'
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.http/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.http.extensions/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.http.extensions/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Http.Extensions'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.http.extensions/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.http.extensions/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.http.extensions/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.logging.abstractions/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/index.json
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Logging.Abstractions'
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.http.extensions/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.logging.abstractions/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Logging.Abstractions'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.logging.abstractions/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.logging.abstractions/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.logging.abstractions/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.options/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/index.json
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Options'
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.logging.abstractions/index.json
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.options/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/index.json
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Options'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.options/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.options/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.options/index.json
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json 95ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json 90ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.http/index.json 91ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json 180ms
-info :   NotFound https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.mvc.dnx/index.json 993ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.aspnetcore.http.extensions/index.json 92ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.http/index.json 105ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json 152ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.aspnetcore.http.extensions/index.json 91ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.logging.abstractions/index.json 90ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.options/index.json 83ms
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json
-info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.extensions.platformabstractions/index.json
-info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.PlatformAbstractions'
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.options/index.json
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json 1157ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json 1118ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.webapicompatshim/index.json 1134ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json 1129ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.identity.entityframeworkcore/index.json 1204ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting/index.json 1294ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json 1236ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json 1236ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting/index.json 1323ms
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json
+info :   CACHE https://api.nuget.org/v3-flatcontainer/microsoft.extensions.platformabstractions/index.json
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc.core/index.json 1402ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.entityframeworkcore/index.json 1270ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json 1360ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.mvc/index.json 1445ms
+info :   CACHE https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.PlatformAbstractions'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json
-info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.options/index.json 89ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.configuration.json/index.json 181ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Hosting.Abstractions' 173ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Http' 165ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json 180ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json 185ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.http/index.json 188ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.AspNetCore.Http.Extensions' 162ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.http/index.json 190ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Logging.Abstractions' 161ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.Options' 165ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.http.extensions/index.json 179ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.http.extensions/index.json 180ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.logging.abstractions/index.json 182ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json 93ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json 89ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.options/index.json 179ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.options/index.json 180ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.logging.abstractions/index.json 191ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.logging.abstractions/index.json 196ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.PlatformAbstractions' 165ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json 179ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json 181ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.http.extensions/index.json 457ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.extensions.logging.abstractions/index.json 468ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.extensions.options/index.json 490ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.aspnetcore.http/index.json 554ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.extensions.platformabstractions/index.json 462ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.staticfiles/index.json 2868ms
+info :   CACHE https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.logging.debug/index.json 1396ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.entityframeworkcore.sqlserver/index.json 1410ms
+info :   OK https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.netcore.runtime.coreclr/index.json 1387ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.options/index.json 275ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.http/index.json 379ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.logging.abstractions/index.json 307ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.options/index.json 277ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.http/index.json 380ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.logging.abstractions/index.json 310ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json 444ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.aspnetcore.http.extensions/index.json 387ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.hosting.abstractions/index.json 445ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.aspnetcore.http.extensions/index.json 408ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json 310ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.platformabstractions/index.json 315ms
 log  : Restoring packages for tool 'dotnet-publish-iis' in D:\B\Forks\OData-WebApi\vNext\samples\ODataSample.Web.Iis\project.json...
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/dotnet-publish-iis/index.json
 info :   GET https://api.nuget.org/v3-flatcontainer/dotnet-publish-iis/index.json
@@ -301,24 +235,24 @@ info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='dotnet-publish-
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/dotnet-publish-iis/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/dotnet-publish-iis/index.json
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/dotnet-publish-iis/index.json
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/dotnet-publish-iis/index.json 97ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/dotnet-publish-iis/index.json 100ms
-info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='dotnet-publish-iis' 158ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/dotnet-publish-iis/index.json 178ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/dotnet-publish-iis/index.json 113ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/dotnet-publish-iis/index.json 117ms
+info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='dotnet-publish-iis' 162ms
 info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/dotnet-publish-iis/index.json 179ms
-info :   OK https://api.nuget.org/v3-flatcontainer/dotnet-publish-iis/index.json 505ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/dotnet-publish-iis/index.json 191ms
+info :   OK https://api.nuget.org/v3-flatcontainer/dotnet-publish-iis/index.json 504ms
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.commandlineutils/index.json
 info :   GET https://api.nuget.org/v3-flatcontainer/microsoft.extensions.commandlineutils/index.json
 info :   GET https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.CommandLineUtils'
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.commandlineutils/index.json
 info :   GET https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.commandlineutils/index.json
 info :   GET https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.commandlineutils/index.json
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.commandlineutils/index.json 90ms
-info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.commandlineutils/index.json 108ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetvnext/nuget/v3/flatcontainer/microsoft.extensions.commandlineutils/index.json 112ms
+info :   OK https://myget-2e16.kxcdn.com/artifacts/aspnetcidev/nuget/v3/flatcontainer/microsoft.extensions.commandlineutils/index.json 134ms
 info :   OK https://www.nuget.org/api/v2/FindPackagesById()?id='Microsoft.Extensions.CommandLineUtils' 159ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.commandlineutils/index.json 179ms
-info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.commandlineutils/index.json 180ms
-info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.extensions.commandlineutils/index.json 500ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-core/nuget/v3/flatcontainer/microsoft.extensions.commandlineutils/index.json 181ms
+info :   NotFound https://dotnetmyget.blob.core.windows.net/artifacts/dotnet-cli/nuget/v3/flatcontainer/microsoft.extensions.commandlineutils/index.json 196ms
+info :   OK https://api.nuget.org/v3-flatcontainer/microsoft.extensions.commandlineutils/index.json 601ms
 error: Package Newtonsoft.Json 8.0.3 is not compatible with netcoreapp1.0 (.NETCoreApp,Version=v1.0). Package Newtonsoft.Json 8.0.3 supports:
 error:   - net20 (.NETFramework,Version=v2.0)
 error:   - net35 (.NETFramework,Version=v3.5)
@@ -327,34 +261,10 @@ error:   - net45 (.NETFramework,Version=v4.5)
 error:   - portable-dnxcore50+net45+win8+wp8+wpa81 (.NETPortable,Version=v0.0,Profile=net45+wp80+win8+wpa81+dnxcore50)
 error:   - portable-net40+sl5+win8+wp8+wpa81 (.NETPortable,Version=v0.0,Profile=Profile328)
 error: One or more packages are incompatible with .NETCoreApp,Version=v1.0.
-warn : Detected package downgrade: Microsoft.AspNetCore.OData from 1.0.0.23 to 1.0.0.1-- 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> ODataSample (>= 1.0.0) -> Microsoft.AspNetCore.OData (>= 1.0.0.23) 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> Microsoft.AspNetCore.OData (>= 1.0.0.1)
-warn : Detected package downgrade: Microsoft.AspNetCore.OData from 1.0.0.23 to 1.0.0.1-- 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> ODataSample (>= 1.0.0) -> Microsoft.AspNetCore.OData (>= 1.0.0.23) 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> Microsoft.AspNetCore.OData (>= 1.0.0.1)
-warn : Detected package downgrade: System.Diagnostics.FileVersionInfo from 4.0.0-rc2-24008 to 4.0.0-beta-23516 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> Microsoft.AspNetCore.Mvc (>= 1.0.0-rc3) -> Microsoft.AspNetCore.Mvc.Razor (>= 1.0.0-rc3-20775) -> Microsoft.CodeAnalysis.CSharp (>= 1.3.0-beta1-20160418-02) -> Microsoft.CodeAnalysis.Common (= 1.3.0-beta1-20160418-02) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-rc2-24008) 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-beta-23516)
-warn : Detected package downgrade: System.Diagnostics.FileVersionInfo from 4.0.0-rc2-24008 to 4.0.0-beta-23516 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> Microsoft.AspNetCore.Mvc.Dnx (>= 1.0.0-rc3) -> Microsoft.AspNetCore.Mvc.Razor (>= 1.0.0-rc3-20765) -> Microsoft.CodeAnalysis.CSharp (>= 1.3.0-beta1-20160418-02) -> Microsoft.CodeAnalysis.Common (= 1.3.0-beta1-20160418-02) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-rc2-24008) 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-beta-23516)
-warn : Detected package downgrade: Microsoft.AspNetCore.OData from 1.0.0.23 to 1.0.0.1-- 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> ODataSample (>= 1.0.0) -> Microsoft.AspNetCore.OData (>= 1.0.0.23) 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> Microsoft.AspNetCore.OData (>= 1.0.0.1)
-warn : Detected package downgrade: Microsoft.AspNetCore.OData from 1.0.0.23 to 1.0.0.1-- 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> ODataSample (>= 1.0.0) -> Microsoft.AspNetCore.OData (>= 1.0.0.23) 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> Microsoft.AspNetCore.OData (>= 1.0.0.1)
-warn : Detected package downgrade: System.Diagnostics.FileVersionInfo from 4.0.0-rc2-24008 to 4.0.0-beta-23516 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> Microsoft.AspNetCore.Mvc (>= 1.0.0-rc3) -> Microsoft.AspNetCore.Mvc.Razor (>= 1.0.0-rc3-20775) -> Microsoft.CodeAnalysis.CSharp (>= 1.3.0-beta1-20160418-02) -> Microsoft.CodeAnalysis.Common (= 1.3.0-beta1-20160418-02) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-rc2-24008) 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-beta-23516)
-warn : Detected package downgrade: System.Diagnostics.FileVersionInfo from 4.0.0-rc2-24008 to 4.0.0-beta-23516 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> Microsoft.AspNetCore.Mvc.Dnx (>= 1.0.0-rc3) -> Microsoft.AspNetCore.Mvc.Razor (>= 1.0.0-rc3-20765) -> Microsoft.CodeAnalysis.CSharp (>= 1.3.0-beta1-20160418-02) -> Microsoft.CodeAnalysis.Common (= 1.3.0-beta1-20160418-02) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-rc2-24008) 
-warn :  ODataSample.Web.Iis (>= 1.0.0) -> System.Diagnostics.FileVersionInfo (>= 4.0.0-beta-23516)
 info : Committing restore...
 log  : Writing lock file to disk. Path: D:\B\Forks\OData-WebApi\vNext\samples\ODataSample.Web.Iis\project.lock.json
 log  : D:\B\Forks\OData-WebApi\vNext\samples\ODataSample.Web.Iis\project.json
-log  : Restore failed in 15340ms.
+log  : Restore failed in 7695ms.
 
 NuGet Config files used:
     D:\B\Forks\OData-WebApi\vNext\NuGet.Config

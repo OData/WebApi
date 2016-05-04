@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0.24-rc2",
+  "version": "1.0.0.26",
   "description": "Microsoft.AspNetCore.OData.Rc2",
 
   "dependencies": {
@@ -33,6 +33,6 @@
   },
   "compile": [
     "**/*.cs",
-    "../Microsoft.AspNetCore.OData/**/*.cs"
+    "../../Microsoft.AspNetCore.OData/**/*.cs"
   ]
 }

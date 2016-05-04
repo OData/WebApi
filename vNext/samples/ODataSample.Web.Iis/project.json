@@ -24,14 +24,14 @@
     "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0-rc3-*",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc3-*",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0-rc3-*",
-    "Microsoft.AspNetCore.OData": "1.0.0.1-*",
     "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.0.0-rc3-*",
+    "Microsoft.Extensions.Logging.Debug": "1.0.0-rc3-*",
     "Microsoft.AspNetCore.StaticFiles": "1.0.0-rc3-*",
     "Microsoft.NETCore.Runtime.CoreCLR": "1.0.2-rc3-*",
     "Microsoft.Extensions.Configuration.CommandLine": "1.0.0-*",
     "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-*",
     "Microsoft.Extensions.Configuration.Json": "1.0.0-*",
-    "ODataSample": "1.0.0-*"
+    "Microsoft.AspNetCore.OData": "1.0.0.25"
   },
   "runtimes": {
     "win81-x64": { }
@@ -58,8 +58,6 @@
     },
     "netstandardapp1.5": {
       "dependencies": {
-        "System.Collections.Specialized": "4.0.1-beta-23516",
-        "System.Diagnostics.FileVersionInfo": "4.0.0-beta-23516",
         "NETStandard.Library": "1.5.0-*"
       },
       "imports": [
@@ -82,5 +80,8 @@
   ],
   "compileExclude": [
     "../ODataSample/**/*assemblyinfo.cs"
+  ],
+  "compile": [
+    "../ODataSample/**/*.cs"
   ]
 }

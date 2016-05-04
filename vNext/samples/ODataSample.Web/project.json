@@ -9,7 +9,7 @@
     "Microsoft.AspNetCore.Mvc.Core": "1.0.0-rc2-*",
     "Microsoft.AspNetCore.Mvc.Dnx": "1.0.0-rc2-*",
     "Microsoft.AspNetCore.Mvc.Razor": "1.0.0-rc2-20446",
-    "Microsoft.AspNetCore.Mvc.TagHelpers": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Mvc.TagHelpers": "1.0.0-rc2-20446",
     "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc2-*",
     "Microsoft.AspNetCore.Diagnostics": "1.0.0-rc2-*",
     "Microsoft.AspNetCore.IISPlatformHandler": "1.0.0-rc2-*",

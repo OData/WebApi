@@ -363,15 +363,18 @@ namespace System.Web.OData.Formatter
             Assert.Equal(Resources.GetString(expect), response.Content.ReadAsStringAsync().Result);
         }
 
-        [Fact]
-        public void EnumKeySimpleSerializerTest()
+        [Theory]
+        [InlineData("EnumKeyCustomers")] // using [FromODataUri]
+        [InlineData("EnumKeyCustomers2")] // without [FromODataUri]
+        [InlineData("EnumKeyCustomers3")] // using EdmEnumObject
+        public void EnumKeySimpleSerializerTest(string entitySet)
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.EntitySet<EnumCustomer>("EnumKeyCustomers");
+            builder.EntitySet<EnumCustomer>(entitySet);
             builder.EntityType<EnumCustomer>().HasKey(c => c.Color);
             IEdmModel model = builder.GetEdmModel();
-            var controllers = new[] { typeof(EnumKeyCustomersController) };
+            var controllers = new[] { typeof(EnumKeyCustomersController), typeof(EnumKeyCustomers2Controller), typeof(EnumKeyCustomers3Controller) };
 
             HttpConfiguration configuration = controllers.GetHttpConfiguration();
             configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
@@ -380,7 +383,7 @@ namespace System.Web.OData.Formatter
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
-                "http://localhost/EnumKeyCustomers(System.Web.OData.Builder.TestModels.Color'Red')");
+                "http://localhost/" + entitySet + "(System.Web.OData.Builder.TestModels.Color'Red')");
             HttpResponseMessage response = client.SendAsync(request).Result;
 
             // Assert
@@ -650,6 +653,212 @@ namespace System.Web.OData.Formatter
                 return Ok(customer);
             }
         }
+
+        public class EnumKeyCustomers2Controller : ODataController
+        {
+            public IHttpActionResult Get(Color key)
+            {
+                EnumCustomer customer = new EnumCustomer
+                {
+                    ID = 9,
+                    Color = key,
+                    Colors = new List<Color> { Color.Blue, Color.Red }
+                };
+
+                return Ok(customer);
+            }
+        }
+
+        public class EnumKeyCustomers3Controller : ODataController
+        {
+            public IHttpActionResult Get([FromODataUri] EdmEnumObject key)
+            {
+                EnumCustomer customer = new EnumCustomer
+                {
+                    ID = 9,
+                    Color = (Color) Enum.Parse(typeof (Color), key.Value),
+                    Colors = new List<Color> {Color.Blue, Color.Red}
+                };
+
+                return Ok(customer);
+            }
+        }
+
+        [Theory]
+        [InlineData("KeyCustomers1")] // without [FromODataUriAttribute] in convention routing
+        [InlineData("KeyCustomers2")] // with [FromODataUriAttribute] in convention routing
+        public void SingleKeySimpleSerializerTest(string entitySet)
+        {
+            // Arrange
+            IEdmModel model = GetKeyCustomerOrderModel();
+            var controllers = new[] { typeof(KeyCustomers1Controller), typeof(KeyCustomers2Controller) };
+
+            HttpConfiguration configuration = controllers.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
+            HttpServer host = new HttpServer(configuration);
+            HttpClient client = new HttpClient(host);
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                "http://localhost/" + entitySet + "(5)");
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            Assert.Equal(5, customer["value"]);
+        }
+
+        [Theory]
+        [InlineData("KeyOrders1")] // without [FromODataUriAttribute] in convention routing
+        [InlineData("KeyOrders2")] // with [FromODataUriAttribute] in convention routing
+        public void MultipleKeySimpleSerializerTest(string entitySet)
+        {
+            // Arrange
+            IEdmModel model = GetKeyCustomerOrderModel();
+            var controllers = new[] { typeof(KeyOrders1Controller), typeof(KeyOrders2Controller) };
+
+            HttpConfiguration configuration = controllers.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
+            HttpServer host = new HttpServer(configuration);
+            HttpClient client = new HttpClient(host);
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                "http://localhost/" + entitySet + "(StringKey='my',DateKey=2016-05-11,GuidKey=46538EC2-E497-4DFE-A039-1C22F0999D6C)");
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            Assert.Equal("my", customer["value"]);
+        }
+
+        [Theory]
+        [InlineData("KeyCustomers1")] // without [FromODataUriAttribute] in convention routing
+        [InlineData("KeyCustomers2")] // with [FromODataUriAttribute] in convention routing
+        public void RelatedKeySimpleSerializerTest(string entitySet)
+        {
+            // Arrange
+            IEdmModel model = GetKeyCustomerOrderModel();
+            var controllers = new[] { typeof(KeyCustomers1Controller), typeof(KeyCustomers2Controller) };
+
+            HttpConfiguration configuration = controllers.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
+            HttpServer host = new HttpServer(configuration);
+            HttpClient client = new HttpClient(host);
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete,
+                "http://localhost/" + entitySet + "(6)/Orders(StringKey='my',DateKey=2016-05-11,GuidKey=46538EC2-E497-4DFE-A039-1C22F0999D6C)/$ref");
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            Assert.Equal("6+my", customer["value"]);
+        }
+
+        private static IEdmModel GetKeyCustomerOrderModel()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+
+            builder.EntityType<KeyCustomer>().HasKey(c => c.Id);
+            builder.EntityType<KeyOrder>().HasKey(c => new { c.StringKey, c.DateKey, c.GuidKey });
+
+            // without [FromODataUri]
+            builder.EntitySet<KeyCustomer>("KeyCustomers1").HasManyBinding(c => c.Orders, "KeyOrders1");
+
+            // with [FromODataUri]
+            builder.EntitySet<KeyCustomer>("KeyCustomers2").HasManyBinding(c => c.Orders, "KeyOrders2");
+
+            // Attribute routing  without [FromODataUri]
+            builder.EntitySet<KeyCustomer>("KeyCustomers3").HasManyBinding(c => c.Orders, "KeyOrders3");
+
+            // Attribute routing  with [FromODataUri]
+            builder.EntitySet<KeyCustomer>("KeyCustomers4").HasManyBinding(c => c.Orders, "KeyOrders4");
+
+            return builder.GetEdmModel();
+        }
+
+        public class KeyCustomer
+        {
+            public int Id { get; set; }
+
+            public IList<KeyOrder> Orders { get; set; }
+        }
+
+        public class KeyOrder
+        {
+            public string StringKey { get; set; }
+
+            public Date DateKey { get; set; }
+
+            // public TimeOfDay TimeKey { get; set; }
+
+            public Guid GuidKey { get; set; }
+        }
+
+        public class KeyCustomers1Controller : ODataController
+        {
+            public IHttpActionResult Get(int key)
+            {
+                return Ok(key);
+            }
+
+            public IHttpActionResult DeleteRef(int key, string navigationProperty, string relatedKeyStringKey, Guid relatedKeyGuidKey,
+                [FromODataUri]Date relatedKeyDateKey)
+            {
+                AssertMultipleKey(relatedKeyStringKey, relatedKeyDateKey, relatedKeyGuidKey);
+
+                return Ok(key + "+" + relatedKeyStringKey);
+            }
+        }
+
+        public class KeyCustomers2Controller : ODataController
+        {
+            public IHttpActionResult Get([FromODataUri]int key)
+            {
+                return Ok(key);
+            }
+
+            public IHttpActionResult DeleteRef([FromODataUri]int key, [FromODataUri]string navigationProperty,
+                [FromODataUri]string relatedKeyStringKey, [FromODataUri]Guid relatedKeyGuidKey, [FromODataUri]Date relatedKeyDateKey)
+            {
+                AssertMultipleKey(relatedKeyStringKey, relatedKeyDateKey, relatedKeyGuidKey);
+
+                return Ok(key + "+" + relatedKeyStringKey);
+            }
+        }
+
+        public class KeyOrders1Controller : ODataController
+        {
+            // [FromODataUri] before Date type is necessary, otherwise it will use the content binding.
+            public IHttpActionResult Get(string keyStringKey, [FromODataUri]Date keyDateKey, Guid keyGuidKey)
+            {
+                AssertMultipleKey(keyStringKey, keyDateKey, keyGuidKey);
+
+                return Ok(keyStringKey);
+            }
+        }
+
+        public class KeyOrders2Controller : ODataController
+        {
+            public IHttpActionResult Get([FromODataUri]string keyStringKey, [FromODataUri]Date keyDateKey, [FromODataUri]Guid keyGuidKey)
+            {
+                AssertMultipleKey(keyStringKey, keyDateKey, keyGuidKey);
+
+                return Ok(keyStringKey);
+            }
+        }
+
+        private static void AssertMultipleKey(string key1, Date key2, Guid key3)
+        {
+            Assert.Equal("my", key1);
+            Assert.Equal(new Date(2016, 5, 11), key2);
+            Assert.Equal(new Guid("46538EC2-E497-4DFE-A039-1C22F0999D6C"), key3);
+        }
+
 
         public class CollectionSerializerCustomer
         {

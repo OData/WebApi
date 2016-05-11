@@ -8,6 +8,7 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
+using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Routing.Conventions
@@ -95,14 +96,16 @@ namespace System.Web.OData.Routing.Conventions
             {
                 if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
                 {
-                    KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                    controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                    EntitySetPathSegment entitySetPathSegment = (EntitySetPathSegment)odataPath.Segments.First();
+                    IEdmEntityType edmEntityType = entitySetPathSegment.EntitySetBase.EntityType();
+                    KeyValuePathSegment keyValueSegment = (KeyValuePathSegment)odataPath.Segments[1];
+
+                    controllerContext.AddKeyValueToRouteData(keyValueSegment, edmEntityType, ODataRouteConstants.Key);
                 }
 
                 controllerContext.RouteData.Values[ODataRouteConstants.DynamicProperty] = dynamicPropertSegment.PropertyName;
                 var key = ODataParameterValue.ParameterValuePrefix + ODataRouteConstants.DynamicProperty;
                 var value = new ODataParameterValue(dynamicPropertSegment.PropertyName, EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
-                controllerContext.RouteData.Values[key] = value;
                 controllerContext.Request.ODataProperties().RoutingConventionsStore[key] = value;
                 return actionName;
             }

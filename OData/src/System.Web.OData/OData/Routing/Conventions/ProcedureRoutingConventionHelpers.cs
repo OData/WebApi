@@ -7,6 +7,7 @@ using System.Linq;
 using System.Web.Http.Controllers;
 using System.Web.OData.Extensions;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing.Conventions
@@ -54,16 +55,72 @@ namespace System.Web.OData.Routing.Conventions
             return null;
         }
 
-        public static void AddKeyValueToRouteData(this HttpControllerContext controllerContext, ODataPath odataPath)
+        public static void AddKeyValueToRouteData(this HttpControllerContext controllerContext, KeyValuePathSegment keySegment, IEdmEntityType entityType, string keyPrefix)
         {
             Contract.Assert(controllerContext != null);
-            Contract.Assert(odataPath != null);
+            Contract.Assert(keySegment != null);
+            Contract.Assert(entityType != null);
 
-            KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-            if (keyValueSegment != null)
+            IEdmModel model = controllerContext.Request.ODataProperties().Model;
+            IDictionary<string, object> routingConventionsStore = controllerContext.Request.ODataProperties().RoutingConventionsStore;
+
+            string newKeyName;
+
+            int count = keySegment.Values.Count;
+            IDictionary<string, string> keyValues = keySegment.Values;
+            foreach (var keyValue in keyValues)
             {
-                controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                // if there's only one key, just use the given key name, for example: "key, relatedKey"  
+                // otherwise, to append the key name after the given key name.  
+                // so for multiple keys, the parameter name is "keyId1, keyId2..."  
+                // for navigation property, the parameter name is "relatedKeyId1, relatedKeyId2 ..."  
+                IEdmStructuralProperty keyProperty;
+                if (count == 1)
+                {
+                    keyProperty = entityType.Key().First();
+                    newKeyName = keyPrefix;
+                }
+                else
+                {
+                    keyProperty = entityType.Key().FirstOrDefault(k => k.Name == keyValue.Key);
+                    newKeyName = keyPrefix + keyValue.Key;
+                }
+                Contract.Assert(keyProperty != null);
+
+                object value = ODataUriUtils.ConvertFromUriLiteral(keyValue.Value, ODataVersion.V4, model, keyProperty.Type);
+                Contract.Assert(value != null);
+
+                AddKeyValues(newKeyName, value, keyProperty.Type, controllerContext.RouteData.Values,
+                    routingConventionsStore);
             }
+        }
+
+        private static void AddKeyValues(string name, object value, IEdmTypeReference edmTypeReference, IDictionary<string, object> routeValues, IDictionary<string, object> odataValues)
+        {
+            Contract.Assert(routeValues != null);
+            Contract.Assert(odataValues != null);
+
+            object routeValue;
+            object odataValue;
+            ODataEnumValue enumValue = value as ODataEnumValue;
+            if (enumValue != null)
+            {
+                odataValue = new ODataParameterValue(enumValue, edmTypeReference);
+                routeValue = enumValue.Value;
+            }
+            else
+            {
+                // primitive value
+                odataValue = new ODataParameterValue(value, edmTypeReference);
+                routeValue = value; 
+            }
+
+            // for without FromODataUri
+            routeValues[name] = routeValue;
+
+            // For FromODataUri
+            string prefixName = ODataParameterValue.ParameterValuePrefix + name;
+            odataValues[prefixName] = odataValue; 
         }
 
         public static void AddFunctionParameterToRouteData(this HttpControllerContext controllerContext, BoundFunctionPathSegment functionSegment)

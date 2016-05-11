@@ -59,7 +59,11 @@ namespace System.Web.OData.Routing.Conventions
                 {
                     if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
                     {
-                        routeData.Values[ODataRouteConstants.Key] = ((KeyValuePathSegment)odataPath.Segments[1]).Value;
+                        EntitySetPathSegment entitySetPathSegment = (EntitySetPathSegment)odataPath.Segments.First();
+                        IEdmEntityType edmEntityType = entitySetPathSegment.EntitySetBase.EntityType();
+                        KeyValuePathSegment keyValueSegment = (KeyValuePathSegment)odataPath.Segments[1];
+
+                        controllerContext.AddKeyValueToRouteData(keyValueSegment, edmEntityType, ODataRouteConstants.Key);
                     }
 
                     routeData.Values[ODataRouteConstants.NavigationProperty] = navigationSegment.NavigationProperty.Name;
@@ -81,11 +85,20 @@ namespace System.Web.OData.Routing.Conventions
                 {
                     if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
                     {
-                        routeData.Values[ODataRouteConstants.Key] = ((KeyValuePathSegment)odataPath.Segments[1]).Value;
+                        EntitySetPathSegment entitySetPathSegment = (EntitySetPathSegment)odataPath.Segments.First();
+                        IEdmEntityType edmEntityType = entitySetPathSegment.EntitySetBase.EntityType();
+                        KeyValuePathSegment keyValueSegment = (KeyValuePathSegment)odataPath.Segments[1];
+
+                        controllerContext.AddKeyValueToRouteData(keyValueSegment, edmEntityType, ODataRouteConstants.Key);
                     }
 
                     routeData.Values[ODataRouteConstants.NavigationProperty] = navigationSegment.NavigationProperty.Name;
-                    routeData.Values[ODataRouteConstants.RelatedKey] = ((KeyValuePathSegment)odataPath.Segments[odataPath.Segments.Count - 2]).Value;
+
+                    KeyValuePathSegment relatedKeySegment = odataPath.Segments.Last(e => e is KeyValuePathSegment) as KeyValuePathSegment;
+
+                    IEdmEntityType navEntityType = navigationProperty.Type.AsCollection().ElementType().AsEntity().EntityDefinition();
+
+                    controllerContext.AddKeyValueToRouteData(relatedKeySegment, navEntityType, ODataRouteConstants.RelatedKey);
                     return refActionName;
                 }
             }

@@ -102,7 +102,7 @@ namespace WebStack.QA.Test.OData.ModelBuilder
         }
     }
 
-    // Skip webhost as it denies most of the special charactors
+    // Skip webhost as it denies most of the special characters
     [NuwaFramework]
     [NwHost(HostType.KatanaSelf)]
     [NuwaHttpClientConfiguration(MessageLog = false)]

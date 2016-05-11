@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing.Conventions;
@@ -49,36 +48,10 @@ namespace System.Web.OData.Routing.Template
             KeySegment keySegment = pathSegment as KeySegment;
             if (keySegment != null)
             {
-                return RoutingConventionHelpers.TryMatch(ParameterMappings,
-                    keySegment.Keys.ToDictionary(e => e.Key, e => TranslateKeyValue(e.Value)), values);
+                return keySegment.TryMatch(ParameterMappings, values);
             }
 
             return false;
-        }
-
-        private static object TranslateKeyValue(object value)
-        {
-            Contract.Assert(value != null);
-
-            UriTemplateExpression uriTemplateExpression = value as UriTemplateExpression;
-            if (uriTemplateExpression != null)
-            {
-                return uriTemplateExpression.LiteralText.Trim();
-            }
-
-            ConstantNode constantNode = value as ConstantNode;
-            if (constantNode != null)
-            {
-                ODataEnumValue enumValue = constantNode.Value as ODataEnumValue;
-                if (enumValue != null)
-                {
-                    return enumValue.Value;
-                }
-
-                return constantNode.Value;
-            }
-
-            return value;
         }
 
         internal static IDictionary<string, string> BuildKeyMappings(IEnumerable<KeyValuePair<string, object>> keys)

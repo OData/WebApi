@@ -96,13 +96,6 @@ namespace System.Web.OData.Formatter
                         bindingContext.Model = ConvertTo(paramValue, actionContext, bindingContext);
                         return true;
                     }
-                    /*
-                    // Support key value's [FromODataUri] binding
-                    if (bindingContext.ModelType == typeof(string))
-                    {
-                        bindingContext.Model = EdmPrimitiveHelpers.ConvertPrimitiveValue(value.RawValue, bindingContext.ModelType);
-                        return true;
-                    }*/
 
                     string valueString = value.RawValue as string;
                     if (valueString != null)

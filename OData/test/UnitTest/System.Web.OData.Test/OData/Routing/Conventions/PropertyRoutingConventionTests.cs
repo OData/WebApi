@@ -83,7 +83,7 @@ namespace System.Web.OData.Routing.Conventions
             Assert.NotNull(selectedAction);
             Assert.Equal(prefix + "NameFromCustomer", selectedAction);
             Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
-            Assert.Equal("7", controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Equal(7, controllerContext.Request.GetRouteData().Values["key"]);
         }
 
         [Theory]
@@ -112,7 +112,7 @@ namespace System.Web.OData.Routing.Conventions
             Assert.NotNull(selectedAction);
             Assert.Equal(prefix + "AccountOfSpecialAccountFromCustomer", selectedAction);
             Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
-            Assert.Equal("7", controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Equal(7, controllerContext.Request.GetRouteData().Values["key"]);
         }
 
         [Fact]
@@ -140,7 +140,7 @@ namespace System.Web.OData.Routing.Conventions
             Assert.NotNull(selectedAction);
             Assert.Equal("GetEnumCollectionPropFromDollarCountEntity", selectedAction);
             Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
-            Assert.Equal("7", controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Equal(7, controllerContext.Request.GetRouteData().Values["key"]);
         }
 
         [Theory]

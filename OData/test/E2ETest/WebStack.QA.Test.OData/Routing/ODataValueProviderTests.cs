@@ -78,7 +78,7 @@ namespace WebStack.QA.Test.OData.Routing
             IDictionary<string, object> conventionStore = controllerContext.Request.ODataProperties().RoutingConventionsStore;
             if (result != null && conventionStore != null)
             {
-                conventionStore["keyAsCustomer"] = new BindCustomer { Id = int.Parse((string)controllerContext.RouteData.Values["key"]) };
+                conventionStore["keyAsCustomer"] = new BindCustomer { Id = (int)controllerContext.RouteData.Values["key"] };
             }
             return result;
         }

@@ -15,6 +15,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Query;
+using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
@@ -363,7 +364,7 @@ namespace System.Web.OData.Formatter
             Assert.Equal(Resources.GetString(expect), response.Content.ReadAsStringAsync().Result);
         }
 
-        [Theory]
+        [Theory] // add a test case for enum key template after issue github#722 fixed.
         [InlineData("EnumKeyCustomers")] // using [FromODataUri]
         [InlineData("EnumKeyCustomers2")] // without [FromODataUri]
         [InlineData("EnumKeyCustomers3")] // using EdmEnumObject
@@ -676,8 +677,8 @@ namespace System.Web.OData.Formatter
                 EnumCustomer customer = new EnumCustomer
                 {
                     ID = 9,
-                    Color = (Color) Enum.Parse(typeof (Color), key.Value),
-                    Colors = new List<Color> {Color.Blue, Color.Red}
+                    Color = (Color)Enum.Parse(typeof(Color), key.Value),
+                    Colors = new List<Color> { Color.Blue, Color.Red }
                 };
 
                 return Ok(customer);
@@ -687,11 +688,13 @@ namespace System.Web.OData.Formatter
         [Theory]
         [InlineData("KeyCustomers1")] // without [FromODataUriAttribute] in convention routing
         [InlineData("KeyCustomers2")] // with [FromODataUriAttribute] in convention routing
+        [InlineData("KeyCustomers3")] // without [FromODataUriAttribute] in attribute routing  
+        [InlineData("KeyCustomers4")] // with [FromODataUriAttribute] int attribute routing  
         public void SingleKeySimpleSerializerTest(string entitySet)
         {
             // Arrange
             IEdmModel model = GetKeyCustomerOrderModel();
-            var controllers = new[] { typeof(KeyCustomers1Controller), typeof(KeyCustomers2Controller) };
+            var controllers = new[] { typeof(KeyCustomers1Controller), typeof(KeyCustomers2Controller), typeof(KeyCustomerOrderController) };
 
             HttpConfiguration configuration = controllers.GetHttpConfiguration();
             configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
@@ -712,11 +715,13 @@ namespace System.Web.OData.Formatter
         [Theory]
         [InlineData("KeyOrders1")] // without [FromODataUriAttribute] in convention routing
         [InlineData("KeyOrders2")] // with [FromODataUriAttribute] in convention routing
+        [InlineData("KeyOrders3")] // without [FromODataUriAttribute] in attribute routing 
+        [InlineData("KeyOrders4")] // with [FromODataUriAttribute] int attribute routing 
         public void MultipleKeySimpleSerializerTest(string entitySet)
         {
             // Arrange
             IEdmModel model = GetKeyCustomerOrderModel();
-            var controllers = new[] { typeof(KeyOrders1Controller), typeof(KeyOrders2Controller) };
+            var controllers = new[] { typeof(KeyOrders1Controller), typeof(KeyOrders2Controller), typeof(KeyCustomerOrderController)};
 
             HttpConfiguration configuration = controllers.GetHttpConfiguration();
             configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
@@ -737,11 +742,17 @@ namespace System.Web.OData.Formatter
         [Theory]
         [InlineData("KeyCustomers1")] // without [FromODataUriAttribute] in convention routing
         [InlineData("KeyCustomers2")] // with [FromODataUriAttribute] in convention routing
+        [InlineData("KeyCustomers3")] // without [FromODataUriAttribute] in attribute routing
+        [InlineData("KeyCustomers4")] // with [FromODataUriAttribute] int attribute routing
         public void RelatedKeySimpleSerializerTest(string entitySet)
         {
             // Arrange
             IEdmModel model = GetKeyCustomerOrderModel();
-            var controllers = new[] { typeof(KeyCustomers1Controller), typeof(KeyCustomers2Controller) };
+            var controllers = new[]
+            {
+                typeof(KeyCustomers1Controller), typeof(KeyCustomers2Controller),
+                typeof(KeyCustomerOrderController)
+            };
 
             HttpConfiguration configuration = controllers.GetHttpConfiguration();
             configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
@@ -793,8 +804,6 @@ namespace System.Web.OData.Formatter
             public string StringKey { get; set; }
 
             public Date DateKey { get; set; }
-
-            // public TimeOfDay TimeKey { get; set; }
 
             public Guid GuidKey { get; set; }
         }
@@ -852,13 +861,66 @@ namespace System.Web.OData.Formatter
             }
         }
 
+        public class KeyCustomerOrderController : ODataController
+        {
+            [HttpGet]
+            [ODataRoute("KeyCustomers3({customerKey})")]
+            public IHttpActionResult Customers3WithKey(int customerKey)
+            {
+                return Ok(customerKey);
+            }
+
+            [HttpGet]
+            [ODataRoute("KeyCustomers4({customerKey})")]
+            public IHttpActionResult Customers4WithKey([FromODataUri]int customerKey)
+            {
+                return Ok(customerKey);
+            }
+
+            [HttpGet]
+            [ODataRoute("KeyOrders3(StringKey={key1},DateKey={key2},GuidKey={key3})")]
+            public IHttpActionResult Orders3WithKey(string key1, [FromODataUri]Date key2, Guid key3)
+            {
+                AssertMultipleKey(key1, key2, key3);
+
+                return Ok(key1);
+            }
+
+            [HttpGet]
+            [ODataRoute("KeyOrders4(StringKey={key1},DateKey={key2},GuidKey={key3})")]
+            public IHttpActionResult Orders4WithKey([FromODataUri]string key1, [FromODataUri]Date key2, [FromODataUri]Guid key3)
+            {
+                AssertMultipleKey(key1, key2, key3);
+
+                return Ok(key1);
+            }
+
+            [HttpDelete]
+            [ODataRoute("KeyCustomers3({customerKey})/Orders(StringKey={key1},DateKey={key2},GuidKey={key3})/$ref")]
+            public IHttpActionResult DeleteOrderFromCustomer3(int customerKey, string key1, [FromODataUri]Date key2, Guid key3)
+            {
+                AssertMultipleKey(key1, key2, key3);
+
+                return Ok(customerKey + "+" + key1);
+            }
+
+            [HttpDelete]
+            [ODataRoute("KeyCustomers4({customerKey})/Orders(StringKey={key1},DateKey={key2},GuidKey={key3})/$ref")]
+            public IHttpActionResult DeleteOrderFromCustomer4([FromODataUri]int customerKey, [FromODataUri]string key1,
+                [FromODataUri]Date key2, [FromODataUri]Guid key3)
+            {
+                AssertMultipleKey(key1, key2, key3);
+
+                return Ok(customerKey + "+" + key1);
+            }
+        }
+
         private static void AssertMultipleKey(string key1, Date key2, Guid key3)
         {
             Assert.Equal("my", key1);
             Assert.Equal(new Date(2016, 5, 11), key2);
             Assert.Equal(new Guid("46538EC2-E497-4DFE-A039-1C22F0999D6C"), key3);
         }
-
 
         public class CollectionSerializerCustomer
         {

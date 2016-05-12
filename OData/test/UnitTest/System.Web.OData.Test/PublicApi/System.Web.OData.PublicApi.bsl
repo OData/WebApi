@@ -2503,8 +2503,10 @@ public class System.Web.OData.Routing.EntitySetPathSegment : ODataPathSegment {
 }
 
 public class System.Web.OData.Routing.KeyValuePathSegment : ODataPathSegment {
+	public KeyValuePathSegment (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
 	public KeyValuePathSegment (string value)
 
+	Microsoft.OData.Core.UriParser.Semantic.KeySegment Segment  { public get; }
 	string SegmentKind  { public virtual get; }
 	string Value  { public get; }
 

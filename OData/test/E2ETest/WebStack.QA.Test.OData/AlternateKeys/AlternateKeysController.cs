@@ -28,6 +28,11 @@ namespace WebStack.QA.Test.OData.AlternateKeys
             return NotFound();
         }
 
+        public IHttpActionResult Get(string keySSN)
+        {
+            return GetCustomerBySSN(keySSN);
+        }
+
         // alternate key: SSN
         [HttpGet]
         [ODataRoute("Customers(SSN={ssn})")]
@@ -176,6 +181,13 @@ namespace WebStack.QA.Test.OData.AlternateKeys
             }
 
             return NotFound();
+        }
+
+        // keyCountry without [FromODataUri]
+        // keyPassport with [FromODataUri]
+        public IHttpActionResult Get(string keyCountry, [FromODataUri]string keyPassport)
+        {
+            return FindPeopleByCountryAndPassport(keyCountry, keyPassport);
         }
 
         [HttpGet]

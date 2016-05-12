@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -21,6 +22,7 @@ namespace System.Web.OData.Routing.Conventions
         private readonly string _actionName = "DynamicProperty";
 
         /// <inheritdoc/>
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
         public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext,
             ILookup<string, HttpActionDescriptor> actionMap)
         {

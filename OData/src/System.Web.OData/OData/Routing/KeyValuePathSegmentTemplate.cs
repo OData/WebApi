@@ -7,6 +7,7 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using Microsoft.OData.Core;
+using Microsoft.OData.Core.UriParser.Semantic;
 
 namespace System.Web.OData.Routing
 {
@@ -26,7 +27,7 @@ namespace System.Web.OData.Routing
                 throw Error.ArgumentNull("keyValueSegment");
             }
 
-            ParameterMappings = BuildParameterMappings(keyValueSegment.Values, keyValueSegment.Value);
+            ParameterMappings = BuildKeyMappings(keyValueSegment);
         }
 
         /// <summary>
@@ -40,6 +41,12 @@ namespace System.Web.OData.Routing
             if (pathSegment.SegmentKind == ODataSegmentKinds.Key)
             {
                 KeyValuePathSegment keySegment = (KeyValuePathSegment)pathSegment;
+
+                if (keySegment.Segment != null)
+                {
+                    return keySegment.Segment.TryMatch(ParameterMappings, values);
+                }
+
                 return TryMatch(ParameterMappings, keySegment.Values, values, null);
             }
 
@@ -94,6 +101,50 @@ namespace System.Web.OData.Routing
                 matches[kvp.Key] = kvp.Value;
             }
             return true;
+        }
+
+        internal static IDictionary<string, string> BuildKeyMappings(KeyValuePathSegment keyValuePathSegment)
+        {
+            Contract.Assert(keyValuePathSegment != null);
+
+            if (keyValuePathSegment.Segment != null)
+            {
+                Dictionary<string, string> parameterMappings = new Dictionary<string, string>();
+                foreach (var key in keyValuePathSegment.Segment.Keys)
+                {
+                    string parameterNameInRouteData = null;
+                    UriTemplateExpression uriTemplateExpression = key.Value as UriTemplateExpression;
+                    if (uriTemplateExpression != null)
+                    {
+                        parameterNameInRouteData = uriTemplateExpression.LiteralText;
+                    }
+
+                    if (String.IsNullOrEmpty(parameterNameInRouteData))
+                    {
+                        parameterNameInRouteData = key.Key;
+                    }
+                    else if (IsRouteParameter(parameterNameInRouteData))
+                    {
+                        parameterNameInRouteData = parameterNameInRouteData.Substring(1, parameterNameInRouteData.Length - 2);
+                        if (String.IsNullOrEmpty(parameterNameInRouteData))
+                        {
+                            throw new ODataException(
+                                Error.Format(SRResources.EmptyKeyTemplate, keyValuePathSegment.Value));
+                        }
+                    }
+                    else
+                    {
+                        throw new ODataException(
+                            Error.Format(SRResources.KeyTemplateMustBeInCurlyBraces, keyValuePathSegment.Value));
+                    }
+
+                    parameterMappings[key.Key] = parameterNameInRouteData;
+                }
+
+                return parameterMappings;
+            }
+
+            return BuildParameterMappings(keyValuePathSegment.Values, keyValuePathSegment.Value);
         }
 
         internal static IDictionary<string, string> BuildParameterMappings(IDictionary<string, string> parameters, string segment)

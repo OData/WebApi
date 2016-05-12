@@ -197,6 +197,7 @@ namespace WebStack.QA.Test.OData.Aggregation
         [InlineData("?$apply=aggregate(Order/Price with max as Result)", "900")]
         [InlineData("?$apply=aggregate(Order/Price with average as Result)", "500")]
         [InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)", "9")]
+        [InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)&$orderby=Result", "9")]
         public void AggregateMethodWorks(string query, string expectedResult)
         {
             // Arrange

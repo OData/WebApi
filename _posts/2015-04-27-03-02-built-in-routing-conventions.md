@@ -44,6 +44,8 @@ So, the controller convention is:  **[entityset name] + "Controller"**, derived 
 
 **Querying Entities**
 
+![]({{site.baseurl}}/img/03-02-queryEntitiesConvention.png)
+
 Request | Example URI | Action Name | Example Action
 ------------ | ------------- | ------------- | -------------
 GET /entityset | /Products | GetEntitySet or Get | GetProducts

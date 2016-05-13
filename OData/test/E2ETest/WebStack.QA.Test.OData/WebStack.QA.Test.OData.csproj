@@ -183,6 +183,11 @@
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesController.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesModel.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesTest.cs" />
+    <Compile Include="Spatial\SpatialController.cs" />
+    <Compile Include="Spatial\SpatialEdmModel.cs" />
+    <Compile Include="Spatial\SpatialFactory.cs" />
+    <Compile Include="Spatial\SpatialTests.cs" />
+    <Compile Include="Spatial\SpatialModels.cs" />
     <Compile Include="Swagger\SwaggerController.cs" />
     <Compile Include="Swagger\SwaggerMetadataTest.cs" />
     <Compile Include="Swagger\SwaggerPathHandler.cs" />

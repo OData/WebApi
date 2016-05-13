@@ -25,6 +25,11 @@ namespace System.Web.OData.Formatter
                 return value;
             }
 
+            if (type.IsInstanceOfType(value))
+            {
+                return value;
+            }
+
             string str = value as string;
 
             if (type == typeof(char))

@@ -5,36 +5,40 @@ description: "Routing Conventions"
 category: "3. Routing"
 ---
 
-When Web API gets an OData request, it maps the request to a controller name and an action name. The mapping is based on the HTTP method and the URI. For example, GET /odata/Products(1) maps to ProductsController.GetProduct.
+When Web API gets an OData request, it maps the request to a controller name and an action name. The mapping is based on the HTTP method and the URI. For example, `GET /odata/Products(1)` maps to `ProductsController.GetProduct`.
 
 This article describe the built-in OData routing conventions. These conventions are designed specifically for OData endpoints, and they replace the default Web API routing system. (The replacement happens when you call MapODataRoute.)
 
 
 ### Built-in Routing Conventions
-Before I describe the OData routing conventions in Web API, it’s helpful to understand OData URIs. An OData URI consists of:
+Before describe the OData routing conventions in Web API, it’s helpful to understand OData URIs. An OData URI consists of:
 
 * The service root
-* The resource path
+* The odata path
 * Query options
 
-http://example.com/odata/Products(1)/Supplier?$top=2  
+[For example]: `http://example.com/odata/Products(1)/Supplier?$top=2 `
 
-* The service root : http://example.com/odata
-* The resource path : /Products(1)/Supplier
-* Query options : ?$top=2  
+* *The service root* : http://example.com/odata
+* *The odata path* : Products(1)/Supplier
+* *Query options* : ?$top=2  
 
 
-For routing, the important part is the resource path. The resource path is divided into segments. For example, /Products(1)/Supplier has three segments:
+For OData routing, the important part is the OData path. The OData path is divided into segments, each segments are seperated with '/'.
 
-* Products refers to an entity set named “Products”.
-* 1 is an entity key, selecting a single entity from the set.
-* Supplier is a navigation property that selects a related entity.
+[For example], `Products(1)/Supplier` has three segments:
+
+* **Products** refers to an entity set named “Products”.
+* **1** is an entity key, selecting a single entity from the set.
+* **Supplier** is a navigation property that selects a related entity.
 
 So this path picks out the supplier of product 1.
 
-**OData path segments do not always correspond to URI segments. For example, “1” is considered a path segment.**
+**OData path segments do not always correspond to URI segments. For example, “1” is considered a key path segment.**
 
-**Controller Names.** The controller name is always derived from the entity set at the root of the resource path. For example, if the resource path is /Products(1)/Supplier, Web API looks for a controller named ProductsController.
+**Controller Names.** The controller name is always derived from the entity set at the root of the OData path. For example, if the OData path is `Products(1)/Supplier`, Web API looks for a controller named ProductsController.
+
+So, the controller convention is:  **[entityset name] + "Controller"**, derived from `ODataController`
 
 **Action Names.** Action names are derived from the path segments plus the entity data model (EDM), as listed in the following tables. In some cases, you have two choices for the action name. For example, “Get” or "GetProducts".
 

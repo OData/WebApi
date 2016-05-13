@@ -46,23 +46,9 @@ So, the controller convention is:  **[entityset name] + "Controller"**, derived 
 
 ![]({{site.baseurl}}/img/03-02-queryEntitiesConvention.png)
 
-Request | Example URI | Action Name | Example Action
------------- | ------------- | ------------- | -------------
-GET /entityset | /Products | GetEntitySet or Get | GetProducts
-GET /entityset(key) | /Products(1) | GetEntityType or Get | GetProduct
-GET /entityset(key)/cast | /Products(1)/Models.Book | GetEntityType or Get | GetBook
-
 **Creating, Updating, and Deleting Entities**
 
-Request | Example URI | Action Name | Example Action
------------- | ------------- | ------------- | -------------
-POST /entityset | /Products | PostEntityType or Post | PostProduct
-PUT /entityset(key) | /Products(1) | PutEntityType or Put | PutProduct
-PUT /entityset(key)/cast | /Products(1)/Models.Book |PutEntityType or Put | PutBook
-PATCH /entityset(key) | /Products | PostEntityType or Post | PostProduct
-PATCH /entityset(key)/cast| /Products(1)/Models.Book | PatchEntityType or Patch | PatchBook
-DELETE /entityset(key) | /Products(1) | DeleteEntityType or Delete | DeleteProduct
-DELETE /entityset(key)/cast | /Products(1)/Models.Book | DeleteEntityType or Delete | DeleteBook
+![]({{site.baseurl}}/img/03-02-updateDeleteEntitiesConvention.png)
 
 **Querying a Navigation Property**
 

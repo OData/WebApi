@@ -17,7 +17,7 @@ Before describe the OData routing conventions in Web API, it’s helpful to unde
 * The odata path
 * Query options
 
-[For example]: `http://example.com/odata/Products(1)/Supplier?$top=2 `
+For example: `http://example.com/odata/Products(1)/Supplier?$top=2 `
 
 * *The service root* : http://example.com/odata
 * *The odata path* : Products(1)/Supplier

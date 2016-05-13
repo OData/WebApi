@@ -50,12 +50,9 @@ So, the controller convention is:  **[entityset name] + "Controller"**, derived 
 
 ![]({{site.baseurl}}/img/03-02-updateDeleteEntitiesConvention.png)
 
-**Querying a Navigation Property**
+**Operation on Navigation Property**
 
-Request | Example URI | Action Name | Example Action
------------- | ------------- | ------------- | -------------
-GET /entityset(key)/navigation | /Products(1)/Supplier | GetNavigationFromEntityType or GetNavigation | GetSupplierFromProduct
-GET /entityset(key)/cast/navigation | /Products(1)/Models.Book/Author | GetNavigationFromEntityType or GetNavigation | GetAuthorFromBook
+![]({{site.baseurl}}/img/03-02-navigationRoutingConvention.png)
 
 **Querying, Creating and Deleting Links**
 

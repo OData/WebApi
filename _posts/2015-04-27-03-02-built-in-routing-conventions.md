@@ -78,6 +78,7 @@ GET /entityset(key)/cast/property | /Products(1)/Models.Book/Author | GetPropert
 ![]({{site.baseurl}}/img/03-02-functionConvention.png)
 
 
+
 **Method Signatures**
 
 Here are some rules for the method signatures:

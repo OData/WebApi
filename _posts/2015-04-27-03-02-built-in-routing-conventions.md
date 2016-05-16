@@ -56,18 +56,7 @@ So, the controller convention is:  **[entityset name] + "Controller"**, derived 
 
 **Querying, Creating and Deleting Links**
 
-Request | Example URI | Action Name
------------- | ------------- | -------------
-GET /entityset(key)/navigation/$ref | /Products(1)/Supplier/$ref | GetRef
-GET /entityset(key)/cast/navigation/$ref | /Products(1)/Models.Book/Author/\$ref | GetRef
-POST /entityset(key)/navigation/$ref | /Products(1)/Supplier/$ref | CreateRef
-POST /entityset(key)/cast/navigation/$ref | /Products(1)/Models.Book/Author/$ref | CreateRef
-PUT /entityset(key)/navigation/$ref | /Products(1)/Supplier/$ref | CreateRef
-PUT /entityset(key)/cast/navigation/$ref | /Products(1)/Models.Book/Author/$ref | CreateRef
-DELETE /entityset(key)/navigation/$ref | /Products(1)/Supplier/$ref | DeleteRef
-DELETE /entityset(key)/cast/navigation/$ref | /Products(1)/Models.Book/Author/$ref | DeleteRef
-DELETE /entityset(key)/navigation(relatedKey)/$ref | /Products(1)/Supplier(1)/$ref | DeleteRef
-DELETE /entityset(key)/cast/navigation(relatedKey)/$ref | /Products(1)/Models.Book/Author(1)/$ref | DeleteRef
+![]({{site.baseurl}}/img/03-02-navigationlinkeConvention.png)
 
 **Properties**
 

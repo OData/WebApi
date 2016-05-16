@@ -67,21 +67,16 @@ GET /entityset(key)/cast/property | /Products(1)/Models.Book/Author | GetPropert
 
 **Actions**
 
-Request | Example URI | Action Name | Example Action
------------- | ------------- | ------------- | -------------
-POST /entityset(key)/action | /Products(1)/Rate | ActionNameOnEntityType or ActionName | RateOnProduct
-POST /entityset(key)/cast/action | /Products(1)/Models.Book/CheckOut | ActionNameOnEntityType or ActionName | CheckOutOnBook
-POST /entityset/action | /Products/Rate | ActionNameOnCollectionOfEntityType or ActionName | RateOnCollectionOfProduct
-POST /entityset/cast/action | /Products/Models.Book/CheckOut | ActionNameOnCollectionOfEntityType or ActionName | CheckOutOnCollectionOfBook
+**Action** only supports the **POST** request method, and the parameters are sent using the request body. In controller, each action is using an `ODataActionParameters` to accept the parameters' value:
+
+![]({{site.baseurl}}/img/03-02-actionConvention.png)
 
 **Functions**
 
-Request | Example URI | Action Name | Example Action
------------- | ------------- | ------------- | -------------
-GET /entityset(key)/function | /Products(1)/Rate | functionNameOnEntityType or functionName | RateOnProduct
-GET /entityset(key)/cast/function | /Products(1)/Models.Book/CheckOut | functionNameOnEntityType or functionName | CheckOutOnBook
-GET /entityset/function | /Products/Rate | functionNameOnCollectionOfEntityType or functionName | RateOnCollectionOfProduct
-GET /entityset/cast/function | /Products/Models.Book/CheckOut | functionNameOnCollectionOfEntityType or functionName | CheckOutOnCollectionOfBook
+**Functions** only supports the **GET** request method.
+
+![]({{site.baseurl}}/img/03-02-functionConvention.png)
+
 
 **Method Signatures**
 

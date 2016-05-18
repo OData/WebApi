@@ -726,7 +726,7 @@ namespace System.Web.OData.Query.Validators
                     result = AllowedFunctions.Concat;
                     break;
                 case ClrCanonicalFunctions.ContainsFunctionName:
-                    result = AllowedFunctions.SubstringOf;
+                    result = AllowedFunctions.Contains;
                     break;
                 case ClrCanonicalFunctions.DayFunctionName:
                     result = AllowedFunctions.Day;

@@ -169,7 +169,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                     MaxSkip = 10,
                     AllowedQueryOptions = AllowedQueryOptions.Top | AllowedQueryOptions.OrderBy | AllowedQueryOptions.Filter,
                     AllowedLogicalOperators = AllowedLogicalOperators.Not | AllowedLogicalOperators.Equal | AllowedLogicalOperators.GreaterThan | AllowedLogicalOperators.And | AllowedLogicalOperators.Or,
-                    AllowedFunctions = AllowedFunctions.AllMathFunctions | AllowedFunctions.SubstringOf | AllowedFunctions.AllDateTimeFunctions,
+                    AllowedFunctions = AllowedFunctions.AllMathFunctions | AllowedFunctions.Contains | AllowedFunctions.AllDateTimeFunctions,
                     AllowedArithmeticOperators = AllowedArithmeticOperators.Add | AllowedArithmeticOperators.Subtract
                 };
                 commonSettings.AllowedOrderByProperties.Add("ID");
@@ -212,7 +212,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                 data.Add(AllowedFunctions.AllStringFunctions, AllowedFunctions.Length);
                 data.Add(AllowedFunctions.AllStringFunctions, AllowedFunctions.StartsWith);
                 data.Add(AllowedFunctions.AllStringFunctions, AllowedFunctions.Substring);
-                data.Add(AllowedFunctions.AllStringFunctions, AllowedFunctions.SubstringOf);
+                data.Add(AllowedFunctions.AllStringFunctions, AllowedFunctions.Contains);
                 data.Add(AllowedFunctions.AllStringFunctions, AllowedFunctions.ToLower);
                 data.Add(AllowedFunctions.AllStringFunctions, AllowedFunctions.ToUpper);
                 data.Add(AllowedFunctions.AllStringFunctions, AllowedFunctions.Trim);

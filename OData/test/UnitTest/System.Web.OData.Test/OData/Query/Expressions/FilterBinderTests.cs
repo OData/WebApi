@@ -840,7 +840,7 @@ namespace System.Web.OData.Query.Expressions
         [InlineData(null, false, typeof(NullReferenceException))]
         [InlineData("Abcd", true, true)]
         [InlineData("Abd", false, false)]
-        public void StringSubstringOf(string productName, bool withNullPropagation, object withoutNullPropagation)
+        public void StringContains(string productName, bool withNullPropagation, object withoutNullPropagation)
         {
             // In OData, the order of parameters is actually reversed in the resulting
             // String.Contains expression

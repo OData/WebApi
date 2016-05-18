@@ -1846,6 +1846,7 @@ public enum System.Web.OData.Query.AllowedFunctions : int {
 	Cast = 1024
 	Ceiling = 33554432
 	Concat = 32
+	Contains = 4
 	Date = 4096
 	Day = 32768
 	EndsWith = 2
@@ -1862,7 +1863,6 @@ public enum System.Web.OData.Query.AllowedFunctions : int {
 	Second = 2097152
 	StartsWith = 1
 	Substring = 64
-	SubstringOf = 4
 	Time = 16384
 	ToLower = 128
 	ToUpper = 256

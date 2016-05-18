@@ -25,9 +25,9 @@ namespace System.Web.OData.Query
         EndsWith = 0x2,
 
         /// <summary>
-        /// A value that corresponds to allowing 'SubstringOf' function in $filter.
+        /// A value that corresponds to allowing 'Contains' function in $filter.
         /// </summary>
-        SubstringOf = 0x4,
+        Contains = 0x4,
 
         /// <summary>
         /// A value that corresponds to allowing 'Length' function in $filter.
@@ -147,7 +147,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// A value that corresponds to allowing all string related functions in $filter.
         /// </summary>
-        AllStringFunctions = StartsWith | EndsWith | SubstringOf | Length | IndexOf | Concat | Substring | ToLower | ToUpper | Trim,
+        AllStringFunctions = StartsWith | EndsWith | Contains | Length | IndexOf | Concat | Substring | ToLower | ToUpper | Trim,
 
         /// <summary>
         /// A value that corresponds to allowing all datetime related functions in $filter.

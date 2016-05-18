@@ -56,7 +56,7 @@ namespace System.Web.OData.Query
         /// 
         /// The allowed functions include the following:
         /// 
-        /// String related: substringof, endswith, startswith, length, indexof, substring, tolower, toupper, trim, concat
+        /// String related: contains, endswith, startswith, length, indexof, substring, tolower, toupper, trim, concat
         ///
         /// e.g. ~/Customers?$filter=length(CompanyName) eq 19
         ///

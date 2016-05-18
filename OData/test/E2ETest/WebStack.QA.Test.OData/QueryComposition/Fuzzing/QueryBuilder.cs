@@ -125,7 +125,7 @@ namespace WebStack.QA.Test.OData.QueryComposition.Fuzzing
             // return bool func call
             var endsWithMethodCallExpr = new Literal("endswith(") + stringCommonExpr + ", " + stringCommonExpr + ")";
             var startsWithMethodCallExpr = new Literal("startswith(") + stringCommonExpr + ", " + stringCommonExpr + ")";
-            var substringOfMethodCallExpr = new Literal("substringof(") + stringCommonExpr + ", " + stringCommonExpr + ")";
+            var containsMethodCallExpr = new Literal("contains(") + stringCommonExpr + ", " + stringCommonExpr + ")";
 
             // return string func call
             var toLowerMethodCallExpr = new Literal("tolower(") + stringCommonExpr + ")";
@@ -156,7 +156,7 @@ namespace WebStack.QA.Test.OData.QueryComposition.Fuzzing
 
             boolCommonExpr.Syntax |= endsWithMethodCallExpr
                 | startsWithMethodCallExpr
-                | substringOfMethodCallExpr;
+                | containsMethodCallExpr;
 
             stringCommonExpr.Syntax |= toLowerMethodCallExpr
                 | toUpperMethodCallExpr

@@ -21,7 +21,7 @@ namespace System.Web.OData.Query
                     AllowedFunctions.StartsWith,
                     AllowedFunctions.EndsWith,
                     AllowedFunctions.Substring,
-                    AllowedFunctions.SubstringOf,
+                    AllowedFunctions.Contains,
                     AllowedFunctions.ToLower,
                     AllowedFunctions.ToUpper,
                     AllowedFunctions.Trim,

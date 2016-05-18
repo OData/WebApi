@@ -81,7 +81,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
         //        var products = ModelHelper.CreateRandomProducts().OrderBy(p => p.ID);
         //        var data = new TheoryDataSet<string, IEnumerable<Product>>();
         //        string name = products.First().Supplier.Name;
-        //        data.Add("substringof('a', Name) eq true", products.Where(p => p.Name == null ? false : p.Name.Contains("a")));
+        //        data.Add("contains('a', Name) eq true", products.Where(p => p.Name == null ? false : p.Name.Contains("a")));
         //    }
         //}
 

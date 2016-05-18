@@ -183,7 +183,7 @@ namespace System.Web.OData
         /// <list type="definition">
         /// <item>
         /// <term>String related:</term>
-        /// <description>substringof, endswith, startswith, length, indexof, substring, tolower, toupper, trim,
+        /// <description>contains, endswith, startswith, length, indexof, substring, tolower, toupper, trim,
         /// concat e.g. ~/Customers?$filter=length(CompanyName) eq 19</description>
         /// </item>
         /// <item>

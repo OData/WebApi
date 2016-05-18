@@ -26,7 +26,7 @@ namespace WebStack.QA.Test.OData.DollarLevels
         [NuwaConfiguration]
         public static void UpdateConfiguration(HttpConfiguration configuration)
         {
-            var controllers = new[] { typeof(DLManagersController), typeof(DLEmployeesController) };
+            var controllers = new[] { typeof(DLManagersController), typeof(DLEmployeesController), typeof(DLManagers2Controller) };
             TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
 
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
@@ -193,6 +193,33 @@ namespace WebStack.QA.Test.OData.DollarLevels
             var result = response.Content.ReadAsStringAsync().Result;
             Assert.Contains(errorMessage,
                 result);
+        }
+
+        [Theory]
+        [InlineData("$expand=Manager($levels=3)",
+            "$expand=Manager($expand=Manager($expand=Manager))")]
+        [InlineData("$expand=Manager($levels=0)",
+            "")]
+        [InlineData("$expand=Manager($levels=max)",
+            "$expand=Manager($expand=Manager)")]
+        [InlineData("$expand=Manager($levels=max;$expand=DirectReport($levels=2))",
+            "$expand=Manager($expand=Manager($expand=DirectReport($expand=DirectReport)),DirectReport($expand=DirectReport))")]
+        public async Task LevelsWithDisableMaxExpansionDepth(string originalQuery, string expandedQuery)
+        {
+            string requestUri = this.BaseAddress + "/odata/DLManagers2?" + originalQuery;
+
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsAsync<JObject>();
+
+            requestUri = this.BaseAddress + "/odata/DLManagers2?" + expandedQuery;
+            response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var baseline = await response.Content.ReadAsAsync<JObject>();
+
+            Assert.True(JToken.DeepEquals(baseline, result));
         }
     }
 }

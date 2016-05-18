@@ -284,7 +284,7 @@ namespace System.Web.OData.Query
             bool levelsEncountered;
             bool isMaxLevel;
             return ProcessLevels(SelectExpandClause, 
-                LevelsMaxLiteralExpansionDepth < 0 ? ODataValidationSettings.DefaultMaxExpansionDepth : LevelsMaxLiteralExpansionDepth, 
+                LevelsMaxLiteralExpansionDepth, 
                 out levelsEncountered, 
                 out isMaxLevel);
         }
@@ -444,22 +444,35 @@ namespace System.Web.OData.Query
             int level;
             isMaxLevelInExpand = false;
 
-            if (expandItem.LevelsOption == null)
+            // $level=x
+            if (expandItem.LevelsOption != null && !expandItem.LevelsOption.IsMaxLevel)
             {
-                levelsEncounteredInExpand = false;
-                level = 1;
+                levelsEncounteredInExpand = true;
+                level = (int)expandItem.LevelsOption.Level;
+                if (LevelsMaxLiteralExpansionDepth < 0)
+                {
+                    levelsMaxLiteralExpansionDepth = level;
+                }
             }
             else
             {
-                levelsEncounteredInExpand = true;
-                if (expandItem.LevelsOption.IsMaxLevel)
+                if (levelsMaxLiteralExpansionDepth < 0)
                 {
-                    isMaxLevelInExpand = true;
-                    level = levelsMaxLiteralExpansionDepth;
+                    levelsMaxLiteralExpansionDepth = ODataValidationSettings.DefaultMaxExpansionDepth;
+                }
+
+                if (expandItem.LevelsOption == null)
+                {
+                    // no $level
+                    levelsEncounteredInExpand = false;
+                    level = 1;
                 }
                 else
                 {
-                    level = (int)expandItem.LevelsOption.Level;
+                    // $level=max
+                    levelsEncounteredInExpand = true;
+                    isMaxLevelInExpand = true;
+                    level = levelsMaxLiteralExpansionDepth;
                 }
             }
 

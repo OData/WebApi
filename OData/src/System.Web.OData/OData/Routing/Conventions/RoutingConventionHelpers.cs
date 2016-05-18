@@ -124,6 +124,12 @@ namespace System.Web.OData.Routing.Conventions
                 if (entityType != null)
                 {
                     IEdmStructuralProperty keyProperty = entityType.Key().FirstOrDefault(k => k.Name == key.Key);
+                    if (keyProperty == null)
+                    {
+                        // If it's an alternate key
+                        keyProperty = entityType.Properties().OfType<IEdmStructuralProperty>().FirstOrDefault(p => p.Name == key.Key);
+                    }
+
                     Contract.Assert(keyProperty != null);
                     typeReference = keyProperty.Type;
                 }
@@ -156,15 +162,30 @@ namespace System.Web.OData.Routing.Conventions
             int keyCount = segment.Keys.Count();
             foreach (var keyValuePair in segment.Keys)
             {
+                bool alternateKey = false; 
                 // get the key property from the entity type
                 IEdmStructuralProperty keyProperty = entityType.Key().FirstOrDefault(k => k.Name == keyValuePair.Key);
+                if (keyProperty == null)
+                {
+                    // If it's alternate key.
+                    keyProperty = entityType.Properties().OfType<IEdmStructuralProperty>().FirstOrDefault(p => p.Name == keyValuePair.Key);
+                    alternateKey = true;
+                }
                 Contract.Assert(keyProperty != null);
 
                 // if there's only one key, just use the given key name, for example: "key, relatedKey"
                 // otherwise, to append the key name after the given key name.
                 // so for multiple keys, the parameter name is "keyId1, keyId2..."
-                // for navigation property, the paremter name is "relatedKeyId1, relatedKeyId2 ..."
-                string newKeyName = keyCount == 1 ? keyName : keyName + keyValuePair.Key;
+                // for navigation property, the parameter name is "relatedKeyId1, relatedKeyId2 ..."
+                string newKeyName;
+                if (alternateKey || keyCount > 1)
+                {
+                    newKeyName = keyName + keyValuePair.Key;
+                }
+                else
+                {
+                    newKeyName = keyName;
+                }
 
                 AddKeyValues(newKeyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData.Values, routingConventionsStore);
             }

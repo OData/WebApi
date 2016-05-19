@@ -67,7 +67,6 @@ namespace WebStack.QA.Test.OData.DollarLevels
         public IHttpActionResult Get(int key)
         {
             return Ok(_DLManagers.Single(e => e.ID == key));
-
         }
 
         private IHttpActionResult Ok(object content, Type type)
@@ -155,6 +154,43 @@ namespace WebStack.QA.Test.OData.DollarLevels
         {
             var resultType = typeof(OkNegotiatedContentResult<>).MakeGenericType(type);
             return Activator.CreateInstance(resultType, content, this) as IHttpActionResult;
+        }
+    }
+
+    public class DLManagers2Controller : ODataController
+    {
+        public DLManagers2Controller()
+        {
+            if (null == _DLManagers)
+            {
+                InitDLManagers();
+            }
+        }
+
+        /// <summary>
+        /// static so that the data is shared among requests.
+        /// </summary>
+        private static List<DLManager2> _DLManagers = null;
+
+        private static void InitDLManagers()
+        {
+            _DLManagers = Enumerable.Range(1, 10).Select(i =>
+                        new DLManager2
+                        {
+                            ID = i,
+                            Name = "Name" + i,
+                        }).ToList();
+
+            for (int i = 0; i < 9; i++)
+            {
+                _DLManagers[i].Manager = _DLManagers[i + 1];
+            }
+        }
+
+        [EnableQuery(MaxExpansionDepth = 0)]
+        public IHttpActionResult Get()
+        {
+            return Ok(_DLManagers);
         }
     }
 }

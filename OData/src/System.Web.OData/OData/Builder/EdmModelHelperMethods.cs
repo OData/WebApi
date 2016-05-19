@@ -795,8 +795,9 @@ namespace System.Web.OData.Builder
                 }
                 else if (configuration.Kind == EdmTypeKind.Primitive)
                 {
-                    PrimitiveTypeConfiguration primitiveTypeConfiguration = configuration as PrimitiveTypeConfiguration;
-                    return new EdmPrimitiveTypeReference(primitiveTypeConfiguration.EdmPrimitiveType, nullable);
+                    PrimitiveTypeConfiguration primitiveTypeConfiguration = (PrimitiveTypeConfiguration)configuration;
+                    EdmPrimitiveTypeKind typeKind = EdmTypeBuilder.GetTypeKind(primitiveTypeConfiguration.ClrType);
+                    return EdmCoreModel.Instance.GetPrimitive(typeKind, nullable);
                 }
                 else
                 {

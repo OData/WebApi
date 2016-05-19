@@ -564,12 +564,12 @@ namespace System.Web.OData.Builder
 @"<Schema Namespace='Default' xmlns='http://docs.oasis-open.org/odata/ns/edm'>
       <Action Name='NullableAction' IsBound='true'>
         <Parameter Name='bindingParameter' Type='System.Web.OData.Formatter.FormatterPerson' />
-        <Parameter Name='param' Type='Edm.String' Unicode='false' />
+        <Parameter Name='param' Type='Edm.String' />
         <ReturnType Type='System.Web.OData.Formatter.FormatterAddress' />
       </Action>
       <Action Name='NonNullableAction' IsBound='true'>
         <Parameter Name='bindingParameter' Type='System.Web.OData.Formatter.FormatterPerson' />
-        <Parameter Name='param' Type='Edm.String' Nullable='false' Unicode='false' />
+        <Parameter Name='param' Type='Edm.String' Nullable='false' />
         <ReturnType Type='System.Web.OData.Formatter.FormatterAddress' Nullable='false' />
       </Action>
       <EntityContainer Name='Container' />
@@ -610,12 +610,12 @@ namespace System.Web.OData.Builder
 @"<Schema Namespace='Default' xmlns='http://docs.oasis-open.org/odata/ns/edm'>
       <Function Name='NullableFunction' IsBound='true'>
         <Parameter Name='bindingParameter' Type='System.Web.OData.Formatter.FormatterPerson' />
-        <Parameter Name='param' Type='Edm.String' Unicode='false' />
+        <Parameter Name='param' Type='Edm.String' />
         <ReturnType Type='System.Web.OData.Formatter.FormatterAddress' />
       </Function>
       <Function Name='NonNullableFunction' IsBound='true'>
         <Parameter Name='bindingParameter' Type='System.Web.OData.Formatter.FormatterPerson' />
-        <Parameter Name='param' Type='Edm.String' Nullable='false' Unicode='false' />
+        <Parameter Name='param' Type='Edm.String' Nullable='false' />
         <ReturnType Type='System.Web.OData.Formatter.FormatterAddress' Nullable='false' />
       </Function>
       <EntityContainer Name='Container' />

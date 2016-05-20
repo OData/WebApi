@@ -501,6 +501,73 @@ namespace System.Web.OData.Query
             Assert.Equal(1, results[2].CustomerId);
         }
 
+        [Theory]
+        [InlineData("Orders/$count")]
+        [InlineData("Addresses/$count")]
+        [InlineData("Aliases/$count")]
+        public void CanApplyOrderBy_WithCollectionCount(string orderby)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+
+            var parser = new ODataQueryOptionParser(
+                model,
+                model.FindType("System.Web.OData.Builder.TestModels.Customer"),
+                model.FindDeclaredNavigationSource("Default.Container.Customers"),
+                new Dictionary<string, string> { { "$orderby", orderby } });
+
+            var orderByOption = new OrderByQueryOption(orderby, new ODataQueryContext(model, typeof(Customer)), parser);
+
+            var customers = (new List<Customer>
+            {
+                new Customer
+                {
+                    CustomerId = 1, 
+                    Name = "Andy", 
+                    Orders = new List<Order>
+                    {
+                        new Order { OrderId = 1 },
+                        new Order { OrderId = 2 }
+                    },
+                    Addresses = new List<Address>
+                    {
+                        new Address { City = "1" },
+                        new Address { City = "2" }
+                    },
+                    Aliases = new List<string> { "1", "2" }
+                },
+                new Customer
+                {
+                    CustomerId = 2, 
+                    Name = "Aaron",
+                    Orders = new List<Order>
+                    {
+                        new Order { OrderId = 3 }
+                    },
+                    Addresses = new List<Address>
+                    {
+                        new Address { City = "3" }
+                    },
+                    Aliases = new List<string> { "3" }
+                },
+                new Customer { CustomerId = 3, Name = "Alex" }
+            }).AsQueryable();
+
+            // Act
+            var results = orderByOption.ApplyTo(customers).ToArray();
+
+            // Assert
+            Assert.Equal(3, results[0].CustomerId);
+            Assert.Equal(2, results[1].CustomerId);
+            Assert.Equal(1, results[2].CustomerId);
+        }
+
         [Fact]
         public void OrderBy_Throws_ParameterAliasNotFound()
         {

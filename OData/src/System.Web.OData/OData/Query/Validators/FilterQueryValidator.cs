@@ -622,6 +622,11 @@ namespace System.Web.OData.Query.Validators
         /// <param name="settings"></param>
         private void ValidateSingleValueNode(SingleValueNode node, ODataValidationSettings settings)
         {
+            if (node as CountNode != null)
+            {
+                return;
+            }
+
             switch (node.Kind)
             {
                 case QueryNodeKind.BinaryOperator:

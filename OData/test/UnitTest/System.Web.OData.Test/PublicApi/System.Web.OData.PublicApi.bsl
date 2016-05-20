@@ -2105,6 +2105,12 @@ public class System.Web.OData.Query.ODataValidationSettings {
 	System.Nullable`1[[System.Int32]] MaxTop  { public get; public set; }
 }
 
+public class System.Web.OData.Query.OrderByCountNode : OrderByNode {
+	public OrderByCountNode (Microsoft.OData.Core.UriParser.Semantic.OrderByClause orderByClause)
+
+	Microsoft.OData.Core.UriParser.Semantic.OrderByClause OrderByClause  { public get; }
+}
+
 public class System.Web.OData.Query.OrderByItNode : OrderByNode {
 	public OrderByItNode (Microsoft.OData.Core.UriParser.OrderByDirection direction)
 }
@@ -2153,6 +2159,7 @@ public class System.Web.OData.Query.ParameterAliasNodeTranslator : Microsoft.ODa
 	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.CollectionPropertyCastNode nodeIn)
 	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.ConstantNode nodeIn)
 	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.ConvertNode nodeIn)
+	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.CountNode nodeIn)
 	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.EntityCollectionCastNode nodeIn)
 	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.EntityCollectionFunctionCallNode nodeIn)
 	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.EntityRangeVariableReferenceNode nodeIn)

@@ -136,6 +136,12 @@ namespace System.Web.OData.Query.Expressions
             }
             else if (singleValueNode != null)
             {
+                CountNode countNode = singleValueNode as CountNode;
+                if (countNode != null)
+                {
+                    return BindCountNode(countNode);
+                }
+
                 switch (node.Kind)
                 {
                     case QueryNodeKind.BinaryOperator:
@@ -195,6 +201,43 @@ namespace System.Web.OData.Query.Expressions
             else
             {
                 throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
+            }
+        }
+
+        private Expression BindCountNode(CountNode node)
+        {
+            Expression source = Bind(node.Source);            
+            Expression countExpression = Expression.Constant(null, typeof(long?));
+            Type elementType;
+            if (!source.Type.IsCollection(out elementType))
+            {
+                return countExpression;
+            }
+
+            MethodInfo countMethod;
+            if (typeof(IQueryable).IsAssignableFrom(source.Type))
+            {
+                countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(elementType);
+            }
+            else
+            {
+                countMethod = ExpressionHelperMethods.EnumerableCountGeneric.MakeGenericMethod(elementType);
+            }
+
+            // call Count() method.
+            countExpression = Expression.Call(null, countMethod, new[] { source });
+
+            if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
+            {
+                // source == null ? null : countExpression
+                return Expression.Condition(
+                       test: Expression.Equal(source, Expression.Constant(null)),
+                       ifTrue: Expression.Constant(null, typeof(long?)),
+                       ifFalse: ExpressionHelpers.ToNullable(countExpression));
+            }
+            else
+            {
+                return countExpression;
             }
         }
 

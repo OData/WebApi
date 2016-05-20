@@ -105,6 +105,7 @@ namespace System.Web.OData.Query
                 {
                     _orderByNodes = OrderByNode.CreateCollection(OrderByClause);
                 }
+
                 return _orderByNodes;
             }
         }
@@ -215,6 +216,7 @@ namespace System.Web.OData.Query
             {
                 OrderByPropertyNode propertyNode = node as OrderByPropertyNode;
                 OrderByOpenPropertyNode openPropertyNode = node as OrderByOpenPropertyNode;
+                OrderByCountNode countNode = node as OrderByCountNode;
 
                 if (propertyNode != null)
                 {
@@ -226,6 +228,7 @@ namespace System.Web.OData.Query
                     {
                         throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, property.Name));
                     }
+
                     propertiesSoFar.Add(property);
 
                     if (propertyNode.OrderByClause != null)
@@ -236,6 +239,7 @@ namespace System.Web.OData.Query
                     {
                         querySoFar = ExpressionHelpers.OrderByProperty(querySoFar, Context.Model, property, direction, Context.ElementClrType, alreadyOrdered);
                     }
+
                     alreadyOrdered = true;
                 }
                 else if (openPropertyNode != null)
@@ -245,9 +249,16 @@ namespace System.Web.OData.Query
                     {
                         throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, openPropertyNode.PropertyName));
                     }
+
                     openPropertiesSoFar.Add(openPropertyNode.PropertyName);
                     Contract.Assert(openPropertyNode.OrderByClause != null);
                     querySoFar = AddOrderByQueryForProperty(query, querySettings, openPropertyNode.OrderByClause, querySoFar, openPropertyNode.Direction, alreadyOrdered);
+                    alreadyOrdered = true;
+                }
+                else if (countNode != null)
+                {
+                    Contract.Assert(countNode.OrderByClause != null);
+                    querySoFar = AddOrderByQueryForProperty(query, querySettings, countNode.OrderByClause, querySoFar, countNode.Direction, alreadyOrdered);
                     alreadyOrdered = true;
                 }
                 else

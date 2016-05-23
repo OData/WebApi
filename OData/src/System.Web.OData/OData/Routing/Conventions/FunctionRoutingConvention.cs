@@ -45,7 +45,11 @@ namespace System.Web.OData.Routing.Conventions
                         actionName = GetFunction(function).SelectAction(actionMap, isCollection: false);
                         if (actionName != null)
                         {
-                            controllerContext.AddKeyValueToRouteData(odataPath);
+                            EntitySetPathSegment entitySetPathSegment = (EntitySetPathSegment)odataPath.Segments.First();
+                            IEdmEntityType edmEntityType = entitySetPathSegment.EntitySetBase.EntityType();
+                            KeyValuePathSegment keyValueSegment = (KeyValuePathSegment)odataPath.Segments[1];
+
+                            controllerContext.AddKeyValueToRouteData(keyValueSegment, edmEntityType, ODataRouteConstants.Key);
                         }
                         break;
                     case "~/entityset/key/cast/function/$count":
@@ -54,7 +58,11 @@ namespace System.Web.OData.Routing.Conventions
                         actionName = GetFunction(function).SelectAction(actionMap, isCollection: false);
                         if (actionName != null)
                         {
-                            controllerContext.AddKeyValueToRouteData(odataPath);
+                            EntitySetPathSegment entitySetPathSegment = (EntitySetPathSegment)odataPath.Segments.First();
+                            IEdmEntityType edmEntityType = entitySetPathSegment.EntitySetBase.EntityType();
+                            KeyValuePathSegment keyValueSegment = (KeyValuePathSegment)odataPath.Segments[1];
+
+                            controllerContext.AddKeyValueToRouteData(keyValueSegment, edmEntityType, ODataRouteConstants.Key);
                         }
                         break;
                     case "~/entityset/cast/function":

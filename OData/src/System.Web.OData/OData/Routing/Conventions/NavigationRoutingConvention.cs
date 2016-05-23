@@ -85,8 +85,11 @@ namespace System.Web.OData.Routing.Conventions
                     {
                         if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
                         {
-                            KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                            controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                            EntitySetPathSegment entitySetPathSegment = (EntitySetPathSegment)odataPath.Segments.First();
+                            IEdmEntityType edmEntityType = entitySetPathSegment.EntitySetBase.EntityType();
+                            KeyValuePathSegment keyValueSegment = (KeyValuePathSegment)odataPath.Segments[1];
+
+                            controllerContext.AddKeyValueToRouteData(keyValueSegment, edmEntityType, ODataRouteConstants.Key);
                         }
 
                         return actionName;

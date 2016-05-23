@@ -69,8 +69,8 @@ namespace System.Web.OData.Routing.Conventions
 
                 if (actionName != null)
                 {
-                    KeyValuePathSegment keyValueSegment = odataPath.Segments[1] as KeyValuePathSegment;
-                    controllerContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Value;
+                    KeyValuePathSegment keyValueSegment = (KeyValuePathSegment)odataPath.Segments[1];
+                    controllerContext.AddKeyValueToRouteData(keyValueSegment, entityType, ODataRouteConstants.Key);
                     return actionName;
                 }
             }

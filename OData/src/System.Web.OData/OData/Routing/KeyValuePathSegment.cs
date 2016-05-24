@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Web.Http;
+using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing
@@ -13,6 +14,26 @@ namespace System.Web.OData.Routing
     public class KeyValuePathSegment : ODataPathSegment
     {
         private IDictionary<string, string> _values;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KeyValuePathSegment" /> class.
+        /// </summary>
+        /// <param name="segment">The key segment.</param>
+        public KeyValuePathSegment(KeySegment segment)
+        {
+            if (segment == null)
+            {
+                throw Error.ArgumentNull("segment");
+            }
+
+            Segment = segment;
+            Value = segment.TranslateKeyValueToString();
+        }
+
+        /// <summary>
+        /// Gets or sets the key segment.
+        /// </summary>
+        public KeySegment Segment { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyValuePathSegment" /> class.
@@ -43,7 +64,14 @@ namespace System.Web.OData.Routing
             {
                 if (_values == null)
                 {
-                    _values = KeyValueParser.ParseKeys(Value);
+                    if (Segment != null)
+                    {
+                        _values = Segment.TranslateKeyValueToDictionary();
+                    }
+                    else
+                    {
+                        _values = KeyValueParser.ParseKeys(Value);
+                    }
                 }
 
                 return _values;
@@ -64,6 +92,11 @@ namespace System.Web.OData.Routing
         /// <inheritdoc/>
         public override IEdmType GetEdmType(IEdmType previousEdmType)
         {
+            if (Segment != null)
+            {
+                return Segment.EdmType;
+            }
+
             IEdmCollectionType previousCollectionType = previousEdmType as IEdmCollectionType;
             if (previousCollectionType != null)
             {
@@ -76,6 +109,10 @@ namespace System.Web.OData.Routing
         /// <inheritdoc/>
         public override IEdmNavigationSource GetNavigationSource(IEdmNavigationSource previousNavigationSource)
         {
+            if (Segment != null)
+            {
+                return Segment.NavigationSource;
+            }
             return previousNavigationSource;
         }
 

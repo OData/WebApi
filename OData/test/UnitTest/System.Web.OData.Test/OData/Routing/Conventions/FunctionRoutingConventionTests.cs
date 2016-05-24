@@ -98,7 +98,7 @@ namespace System.Web.OData.Routing.Conventions
             // Assert
             Assert.Equal("IsUpgraded", function);
             Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
-            Assert.Equal("1", controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Equal(1, controllerContext.Request.GetRouteData().Values["key"]);
         }
 
         [Fact]
@@ -174,7 +174,7 @@ namespace System.Web.OData.Routing.Conventions
             // Assert
             Assert.Equal("IsUpgradedWithParam", function);
             Assert.Equal(2, controllerContext.Request.GetRouteData().Values.Count);
-            Assert.Equal("1", controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Equal(1, controllerContext.Request.GetRouteData().Values["key"]);
             Assert.Equal("any", controllerContext.Request.GetRouteData().Values["city"]);
         }
 
@@ -248,7 +248,7 @@ namespace System.Web.OData.Routing.Conventions
             // Assert
             Assert.Equal("GetOrders", selectedAction);
             Assert.Equal(2, controllerContext.Request.GetRouteData().Values.Count);
-            Assert.Equal("1", controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Equal(1, controllerContext.Request.GetRouteData().Values["key"]);
             Assert.Equal(5, controllerContext.Request.GetRouteData().Values["parameter"]);
         }
     }

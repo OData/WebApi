@@ -41,7 +41,12 @@ namespace System.Web.OData.Routing.Conventions
                         string actionName = GetAction(odataPath).SelectAction(actionMap, isCollection: false);
                         if (actionName != null)
                         {
-                            controllerContext.AddKeyValueToRouteData(odataPath);
+                            EntitySetPathSegment entitySetPathSegment = (EntitySetPathSegment)odataPath.Segments.First();
+                            IEdmEntityType edmEntityType = entitySetPathSegment.EntitySetBase.EntityType();
+                            KeyValuePathSegment keyValueSegment = (KeyValuePathSegment)odataPath.Segments[1];
+
+                            controllerContext.AddKeyValueToRouteData(keyValueSegment, edmEntityType,
+                                ODataRouteConstants.Key);
                         }
                         return actionName;
                     case "~/entityset/cast/action":

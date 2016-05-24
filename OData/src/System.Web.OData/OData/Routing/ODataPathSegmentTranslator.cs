@@ -208,7 +208,7 @@ namespace System.Web.OData.Routing
         /// <returns>Translated WebApi path segment.</returns>
         public override IEnumerable<ODataPathSegment> Translate(KeySegment segment)
         {
-            yield return new KeyValuePathSegment(ConvertKeysToString(segment.Keys, segment.EdmType, _enableUriTemplateParsing));
+            yield return new KeyValuePathSegment(segment);
         }
 
         /// <summary>
@@ -375,7 +375,7 @@ namespace System.Web.OData.Routing
                 return;
             }
 
-            segments.Add(new KeyValuePathSegment(ConvertKeysToString(id.Keys, id.EdmType, enableUriTemplateParsing: false)));
+            segments.Add(new KeyValuePathSegment(id));
         }
 
         // We need to reverse the order of RefPathSegment and KeyValuePathSegment.
@@ -394,68 +394,6 @@ namespace System.Web.OData.Routing
                 segments[segments.Count - 2] = segments[segments.Count - 1];
                 segments[segments.Count - 1] = segment;
             }
-        }
-
-        // Convert the objects of keys in ODL path to string literals.
-        private static string ConvertKeysToString(
-            IEnumerable<KeyValuePair<string, object>> keys, IEdmType edmType,
-            bool enableUriTemplateParsing)
-        {
-            Contract.Assert(keys != null);
-
-            IEdmEntityType entityType = edmType as IEdmEntityType;
-            Contract.Assert(entityType != null);
-
-            if (keys.Count() < 2)
-            {
-                var keyValue = keys.First();
-                bool isDeclaredKey = entityType.Key().Any(k => k.Name == keyValue.Key);
-
-                if (isDeclaredKey)
-                {
-                    return String.Join(
-                        ",",
-                        keys.Select(keyValuePair =>
-                            TranslateKeySegmentValue(keyValuePair.Value, enableUriTemplateParsing)).ToArray());
-                }
-            }
-
-            return String.Join(
-                ",",
-                keys.Select(keyValuePair =>
-                    (keyValuePair.Key +
-                     "=" +
-                     TranslateKeySegmentValue(keyValuePair.Value, enableUriTemplateParsing))).ToArray());
-        }
-
-        // Translate the object of key in ODL path to string literal.
-        private static string TranslateKeySegmentValue(object value, bool enableUriTemplateParsing)
-        {
-            if (value == null)
-            {
-                throw Error.ArgumentNull("value");
-            }
-
-            if (enableUriTemplateParsing)
-            {
-                UriTemplateExpression uriTemplateExpression = value as UriTemplateExpression;
-                if (uriTemplateExpression != null)
-                {
-                    return uriTemplateExpression.LiteralText;
-                }
-            }
-
-            ConstantNode constantNode = value as ConstantNode;
-            if (constantNode != null)
-            {
-                ODataEnumValue enumValue = constantNode.Value as ODataEnumValue;
-                if (enumValue != null)
-                {
-                    return ODataUriUtils.ConvertToUriLiteral(enumValue, ODataVersion.V4);
-                }
-            }
-
-            return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4);
         }
 
         // Translate literal test of pathTemplateSegment to segment type and segment name.

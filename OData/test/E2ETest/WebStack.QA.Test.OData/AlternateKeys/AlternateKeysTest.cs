@@ -7,6 +7,9 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData;
 using System.Web.OData.Extensions;
+using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
+using Microsoft.OData.Edm;
 using Nuwa;
 using WebStack.QA.Common.XUnit;
 using WebStack.QA.Test.OData.Common;
@@ -42,8 +45,11 @@ namespace WebStack.QA.Test.OData.AlternateKeys
             configuration.EnableAlternateKeys(true);
 
             configuration.Routes.Clear();
-
+            IEdmModel model = AlternateKeysEdmModel.GetEdmModel();
             configuration.MapODataServiceRoute("odata", "odata", model: AlternateKeysEdmModel.GetEdmModel());
+
+            var conventions = ODataRoutingConventions.CreateDefault();
+            configuration.MapODataServiceRoute("odata1", "convention", model, new DefaultODataPathHandler(), conventions);
 
             configuration.EnsureInitialized();
         }
@@ -183,16 +189,18 @@ namespace WebStack.QA.Test.OData.AlternateKeys
             Assert.Equal(expect, responseContent);
         }
 
-        [Fact]
-        public async Task QueryEntityWithSingleAlternateKeysWorks()
+        [Theory]
+        [InlineData("odata")]
+        [InlineData("convention")]
+        public async Task QueryEntityWithSingleAlternateKeysWorks(string route)
         {
             // query with alternate keys
             string expect = "{\r\n" +
                             "  \"@odata.context\":\"{XXXX}\",\"value\":\"special-SSN\"\r\n" +
                             "}";
-            expect = expect.Replace("{XXXX}", string.Format("{0}/odata/$metadata#Edm.String", BaseAddress.ToLowerInvariant()));
+            expect = expect.Replace("{XXXX}", string.Format("{0}/{1}/$metadata#Edm.String", BaseAddress.ToLowerInvariant(), route));
 
-            var requestUri = string.Format("{0}/odata/Customers(SSN='special-SSN')", this.BaseAddress);
+            var requestUri = string.Format("{0}/{1}/Customers(SSN='special-SSN')", this.BaseAddress, route);
             HttpResponseMessage response = await Client.GetAsync(requestUri);
 
             response.EnsureSuccessStatusCode();
@@ -262,18 +270,20 @@ namespace WebStack.QA.Test.OData.AlternateKeys
             Assert.Equal(primitiveResponse, tokenResponse);
         }
 
-        [Fact]
-        public async Task QueryEntityWithComposedAlternateKeys_Returns_SameEntityWithPrimitiveKey()
+        [Theory]
+        [InlineData("odata")]
+        [InlineData("convention")]
+        public async Task QueryEntityWithComposedAlternateKeys_Returns_SameEntityWithPrimitiveKey(string route)
         {
             // query with declared key
-            var requestUri = string.Format("{0}/odata/People(2)", this.BaseAddress);
+            var requestUri = string.Format("{0}/{1}/People(2)", this.BaseAddress, route);
             HttpResponseMessage response = await Client.GetAsync(requestUri);
 
             response.EnsureSuccessStatusCode();
             string primitiveResponse = await response.Content.ReadAsStringAsync();
 
             // query with composed alternate keys
-            requestUri = string.Format("{0}/odata/People(Country='United States',Passport='9999')", this.BaseAddress);
+            requestUri = string.Format("{0}/{1}/People(Country='United States',Passport='9999')", this.BaseAddress, route);
             response = await Client.GetAsync(requestUri);
             response.EnsureSuccessStatusCode();
             string composedResponse = await response.Content.ReadAsStringAsync();

@@ -145,6 +145,7 @@
     <Compile Include="OData\DateTimeTest.cs" />
     <Compile Include="OData\EdmEnumObjectCollectionTest.cs" />
     <Compile Include="OData\EdmEnumObjectTest.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataEnumDeserializerTests.cs" />
     <Compile Include="OData\Formatter\NullCollectionsTests.cs" />
     <Compile Include="OData\Formatter\ODataFunctionTests.cs" />
     <Compile Include="OData\EdmChangedObjectCollectionTest.cs" />

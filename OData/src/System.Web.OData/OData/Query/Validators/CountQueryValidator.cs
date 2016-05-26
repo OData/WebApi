@@ -18,6 +18,26 @@ namespace System.Web.OData.Query.Validators
     /// </summary>
     public class CountQueryValidator
     {
+        private readonly DefaultQuerySettings _defaultQuerySettings;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CountQueryValidator" /> class.
+        /// </summary>>
+        public CountQueryValidator()
+        {
+            _defaultQuerySettings = new DefaultQuerySettings();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CountQueryValidator" /> class based on
+        /// the <see cref="DefaultQuerySettings" />.
+        /// </summary>
+        /// <param name="defaultQuerySettings">The <see cref="DefaultQuerySettings" />.</param>
+        public CountQueryValidator(DefaultQuerySettings defaultQuerySettings)
+        {
+            _defaultQuerySettings = defaultQuerySettings;
+        }
+
         /// <summary>
         /// Validates a <see cref="CountQueryOption" />.
         /// </summary>
@@ -52,7 +72,7 @@ namespace System.Web.OData.Query.Validators
             }
         }
 
-        private static void ValidateCount(ODataPathSegment segment, IEdmModel model)
+        private void ValidateCount(ODataPathSegment segment, IEdmModel model)
         {
             Contract.Assert(segment != null);
             Contract.Assert(model != null);
@@ -60,7 +80,9 @@ namespace System.Web.OData.Query.Validators
             NavigationPropertySegment navigationPathSegment = segment as NavigationPropertySegment;
             if (navigationPathSegment != null)
             {
-                if (EdmLibHelpers.IsNotCountable(navigationPathSegment.NavigationProperty, model))
+                if (EdmLibHelpers.IsNotCountable(navigationPathSegment.NavigationProperty,
+                    navigationPathSegment.NavigationProperty.ToEntityType(), model,
+                    _defaultQuerySettings.EnableCount))
                 {
                     throw new InvalidOperationException(Error.Format(
                         SRResources.NotCountablePropertyUsedForCount,
@@ -72,11 +94,26 @@ namespace System.Web.OData.Query.Validators
             PropertySegment propertyAccessPathSegment = segment as PropertySegment;
             if (propertyAccessPathSegment != null)
             {
-                if (EdmLibHelpers.IsNotCountable(propertyAccessPathSegment.Property, model))
+                if (EdmLibHelpers.IsNotCountable(propertyAccessPathSegment.Property,
+                    propertyAccessPathSegment.Property.Type.Definition as IEdmStructuredType, model,
+                    _defaultQuerySettings.EnableCount))
                 {
                     throw new InvalidOperationException(Error.Format(
                         SRResources.NotCountablePropertyUsedForCount,
                         propertyAccessPathSegment.Property.Name));
+                }
+            }
+
+            EntitySetSegment entitySetSegment = segment as EntitySetSegment;
+            if (entitySetSegment != null)
+            {
+                if (EdmLibHelpers.IsNotCountable(null, entitySetSegment.EntitySet.EntityType() as IEdmStructuredType,
+                    model,
+                    _defaultQuerySettings.EnableCount))
+                {
+                    throw new InvalidOperationException(Error.Format(
+                        SRResources.NotCountableEntitySetUsedForCount,
+                        entitySetSegment.EntitySet.Name));
                 }
             }
         }

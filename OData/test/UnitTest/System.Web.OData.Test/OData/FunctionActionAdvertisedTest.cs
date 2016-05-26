@@ -20,6 +20,7 @@ namespace System.Web.OData
         {
             // Arrange
             var configuration = new[] { typeof(AccountsController) }.GetHttpConfiguration();
+            configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
 
             HttpClient client = new HttpClient(new HttpServer(configuration));

@@ -43,6 +43,7 @@ namespace WebStack.QA.Test.OData.Cast
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
             configuration.Routes.Clear();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
 
             IEdmModel edmModel = CastEdmModel.GetEdmModel();
             foreach (string dataSourceType in dataSourceTypes)

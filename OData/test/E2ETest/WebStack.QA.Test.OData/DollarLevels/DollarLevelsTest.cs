@@ -33,6 +33,7 @@ namespace WebStack.QA.Test.OData.DollarLevels
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
             configuration.Routes.Clear();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("OData", "odata", DollarLevelsEdmModel.GetConventionModel());
             configuration.EnsureInitialized();
         }

@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
@@ -73,6 +74,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             f.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Formatters.Clear();
             configuration.Formatters.Add(f);
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
         }
 
         [Fact]

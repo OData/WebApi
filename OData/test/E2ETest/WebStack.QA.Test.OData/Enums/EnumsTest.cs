@@ -44,6 +44,7 @@ namespace WebStack.QA.Test.OData.Enums
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
             configuration.Routes.Clear();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("convention", "convention", EnumsEdmModel.GetConventionModel());
             configuration.MapODataServiceRoute("explicit", "explicit", EnumsEdmModel.GetExplicitModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.EnsureInitialized();

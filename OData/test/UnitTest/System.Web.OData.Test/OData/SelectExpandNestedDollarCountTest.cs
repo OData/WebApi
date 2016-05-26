@@ -31,6 +31,7 @@ namespace System.Web.OData
                 }.GetHttpConfiguration();
             _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
+            _configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
             _configuration.MapODataServiceRoute("odata", "odata", GetModel());
             HttpServer server = new HttpServer(_configuration);
             _client = new HttpClient(server);

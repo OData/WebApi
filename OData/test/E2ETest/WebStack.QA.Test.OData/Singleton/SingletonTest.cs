@@ -41,6 +41,7 @@ namespace WebStack.QA.Test.OData.Singleton
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
             configuration.Routes.Clear();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("ModelBuilderWithConventionRouting", "expCon", SingletonEdmModel.GetExplicitModel("Umbrella"), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.MapODataServiceRoute("ModelBuilderWithAttributeRouting", "expAttr", SingletonEdmModel.GetExplicitModel("MonstersInc"));
             configuration.MapODataServiceRoute("ConventionBuilderwithConventionRouting", "conCon", SingletonEdmModel.GetConventionModel("Umbrella"), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

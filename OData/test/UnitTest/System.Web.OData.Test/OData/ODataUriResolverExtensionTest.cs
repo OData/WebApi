@@ -202,6 +202,7 @@ namespace System.Web.OData
             {
                 EnableCaseInsensitive = caseInsensitive
             });
+            config.Count().OrderBy().Filter().Expand().MaxTop(null);
             config.MapODataServiceRoute("query", "query", GetEdmModel());
             return config;
         }

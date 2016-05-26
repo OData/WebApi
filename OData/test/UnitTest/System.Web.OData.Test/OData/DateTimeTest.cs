@@ -350,6 +350,7 @@ namespace System.Web.OData
                 config.SetTimeZoneInfo(TimeZoneInfo.Local);
             }
 
+            config.Count().OrderBy().Filter().Expand().MaxTop(null);
             config.MapODataServiceRoute("odata", "odata", GetEdmModel());
             return new HttpClient(new HttpServer(config));
         }

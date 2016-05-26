@@ -47,6 +47,14 @@ namespace System.Web.OData.Builder
             new MediaTypeAttributeConvention(),
             new AutoExpandAttributeEdmPropertyConvention(),
             new AutoExpandAttributeEdmTypeConvention(),
+            new PageAttributeEdmPropertyConvention(),
+            new PageAttributeEdmTypeConvention(),
+            new ExpandAttributeEdmPropertyConvention(),
+            new ExpandAttributeEdmTypeConvention(),
+            new CountAttributeEdmPropertyConvention(),
+            new CountAttributeEdmTypeConvention(),
+            new OrderByAttributeEdmTypeConvention(),
+            new FilterAttributeEdmTypeConvention(),
 
             // INavigationSourceConvention's
             new SelfLinksGenerationConvention(),
@@ -118,7 +126,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <remarks>Use this action to modify the <see cref="ODataModelBuilder"/> configuration that has been inferred by convention.</remarks>
         public Action<ODataConventionModelBuilder> OnModelCreating { get; set; }
-
+          
         internal void Initialize(IAssembliesResolver assembliesResolver, bool isQueryCompositionMode)
         {
             _isQueryCompositionMode = isQueryCompositionMode;

@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http;
 using System.Web.OData;
+using System.Web.OData.Extensions;
 using System.Web.OData.Query;
 using System.Web.OData.Query.Validators;
 using Microsoft.OData;
@@ -122,7 +123,10 @@ namespace WebStack.QA.Test.OData.QueryComposition
         {
             if (options.Filter != null)
             {
-                options.Filter.Validator = new CustomFilterValidator();
+                options.Filter.Validator = new CustomFilterValidator(new DefaultQuerySettings
+                {
+                    EnableFilter = true
+                });
             }
             try
             {
@@ -140,6 +144,11 @@ namespace WebStack.QA.Test.OData.QueryComposition
     public class CustomFilterValidator : FilterQueryValidator
     {
         private bool visited = false;
+
+        public CustomFilterValidator(DefaultQuerySettings defaultQuerySettings)
+            :base(defaultQuerySettings)
+        {
+        }
 
         public override void ValidateSingleValuePropertyAccessNode(SingleValuePropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
         {
@@ -236,6 +245,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
         {
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
         }
 
         [Theory]

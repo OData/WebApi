@@ -14,6 +14,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
 using System.Web.OData;
+using System.Web.OData.Extensions;
 using WebStack.QA.Common.XUnit;
 using WebStack.QA.Instancing;
 using WebStack.QA.Test.OData.ModelBuilder;
@@ -198,6 +199,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             EnableQueryAttribute q = new EnableQueryAttribute();
             var configuration = new HttpConfiguration();
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.Routes.MapHttpRoute("ApiDefault", "api/{controller}/{id}", new { id = RouteParameter.Optional });
             var request = new HttpRequestMessage(HttpMethod.Get, "http://test/api/Objects?" + queryString);
             request.Properties.Add(HttpPropertyKeys.HttpConfigurationKey, configuration);

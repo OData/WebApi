@@ -22,6 +22,8 @@ namespace System.Web.OData.Query
         {
             var controllers = new[] { typeof(MeController) };
             _configuration = controllers.GetHttpConfiguration();
+            _configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
+            
             _configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
             HttpServer server = new HttpServer(_configuration);
             _client = new HttpClient(server);

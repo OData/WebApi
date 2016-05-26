@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using Nuwa;
 using WebStack.QA.Common.XUnit;
 using Xunit.Extensions;
@@ -21,6 +22,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
         [NuwaConfiguration]
         public static void Configuration(HttpConfiguration config)
         {
+            config.Count().Filter().OrderBy().Expand().MaxTop(null);
             config.Routes.MapHttpRoute("api", "{controller}");
         }
 

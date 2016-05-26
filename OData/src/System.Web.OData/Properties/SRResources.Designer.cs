@@ -1015,7 +1015,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the &apos;{1}&apos; property on EnableQueryAttribute or ODataValidationSettings..
+        ///   Looks up a localized string similar to The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the &apos;{1}&apos; property on EnableQueryAttribute or ODataValidationSettings, or set the maxDepth in ExpandAttribute..
         /// </summary>
         internal static string MaxExpandDepthExceeded {
             get {
@@ -1362,6 +1362,15 @@ namespace System.Web.OData.Properties {
         internal static string NotAllowedQueryOption {
             get {
                 return ResourceManager.GetString("NotAllowedQueryOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The entity set &apos;{0}&apos; cannot be used for $count..
+        /// </summary>
+        internal static string NotCountableEntitySetUsedForCount {
+            get {
+                return ResourceManager.GetString("NotCountableEntitySetUsedForCount", resourceCulture);
             }
         }
         

@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
+using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -33,6 +34,7 @@ namespace System.Web.OData.Builder
         {
             ExplicitProperties = new Dictionary<PropertyInfo, PropertyConfiguration>();
             RemovedProperties = new List<PropertyInfo>();
+            QueryConfiguration = new QueryConfiguration();
         }
 
         /// <summary>
@@ -176,6 +178,11 @@ namespace System.Web.OData.Builder
                 return new ReadOnlyCollection<PropertyInfo>(RemovedProperties);
             }
         }
+
+        /// <summary>
+        /// Gets or sets the <see cref="QueryConfiguration"/>.
+        /// </summary>
+        public QueryConfiguration QueryConfiguration { get; set; }
 
         /// <summary>
         /// Gets or sets a value that is <c>true</c> if the type's name or namespace was set by the user; <c>false</c> if it was inferred through conventions.

@@ -33,6 +33,7 @@ namespace WebStack.QA.Test.OData.Singleton
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
             configuration.Routes.Clear();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute(
                 "explicit",
                 "clientTest",

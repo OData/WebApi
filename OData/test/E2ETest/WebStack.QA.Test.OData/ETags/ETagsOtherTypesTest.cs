@@ -30,6 +30,7 @@ namespace WebStack.QA.Test.OData.ETags
         public static void UpdateConfiguration(HttpConfiguration configuration)
         {
             configuration.Routes.Clear();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("odata1", "double", GetDoubleETagEdmModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.MapODataServiceRoute("odata2", "short", GetShortETagEdmModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }

@@ -40,6 +40,7 @@ namespace WebStack.QA.Test.OData.UriParserExtension
 
             configuration.Routes.Clear();
 
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute(routeName: "odata",
                 routePrefix: "odata", model: UriParserExtenstionEdmModel.GetEdmModel());
 

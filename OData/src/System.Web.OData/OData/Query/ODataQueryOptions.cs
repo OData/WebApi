@@ -7,16 +7,13 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Text;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
-using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -375,13 +372,24 @@ namespace System.Web.OData.Query
                 }
             }
 
+            int pageSize = -1;
             if (querySettings.PageSize.HasValue)
             {
+                pageSize = querySettings.PageSize.Value;
+            }
+            else if (querySettings.ModelBoundPageSize.HasValue)
+            {
+                pageSize = querySettings.ModelBoundPageSize.Value;
+            }
+
+            if (pageSize > 0)
+            {
                 bool resultsLimited;
-                result = LimitResults(result, querySettings.PageSize.Value, out resultsLimited);
-                if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri && Request.ODataProperties().NextLink == null)
+                result = LimitResults(result, pageSize, out resultsLimited);
+                if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri &&
+                    Request.ODataProperties().NextLink == null)
                 {
-                    Uri nextPageLink = Request.GetNextPageLink(querySettings.PageSize.Value);
+                    Uri nextPageLink = Request.GetNextPageLink(pageSize);
                     Request.ODataProperties().NextLink = nextPageLink;
                 }
             }
@@ -575,7 +583,7 @@ namespace System.Web.OData.Query
         /// <param name="limit">The query result limit.</param>
         /// <param name="resultsLimited"><c>true</c> if the query results were limited; <c>false</c> otherwise</param>
         /// <returns>The limited query results.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", Justification = "Not intended for public use, only public to enable invokation without security issues.")]
+        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", Justification = "Not intended for public use, only public to enable invocation without security issues.")]
         public static IQueryable<T> LimitResults<T>(IQueryable<T> queryable, int limit, out bool resultsLimited)
         {
             TruncatedCollection<T> truncatedCollection = new TruncatedCollection<T>(queryable, limit);

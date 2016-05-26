@@ -190,7 +190,7 @@ namespace System.Web.OData.Query
             ODataPath path = new ODataPath(new EntitySetSegment(entitySet));
 
             // Act
-            ODataQueryContext context = new ODataQueryContext(model, typeof(Customer), path);
+            ODataQueryContext context = new ODataQueryContext(model, typeof(Customer), path, defaultQuerySettings: null);
 
             // Assert
             Assert.Same(model, context.Model);

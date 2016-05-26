@@ -49,6 +49,7 @@ namespace WebStack.QA.Test.OData.AlternateKeys
 
             configuration.Routes.Clear();
 
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("odata", "odata", model: model);
 
             configuration.EnsureInitialized();

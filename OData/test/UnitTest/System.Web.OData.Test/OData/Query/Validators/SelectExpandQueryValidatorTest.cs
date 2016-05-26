@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Globalization;
+using System.Linq;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization.Models;
 using System.Web.OData.Routing;
@@ -16,11 +17,17 @@ namespace System.Web.OData.Query.Validators
     {
         private ODataQueryContext _queryContext;
 
+        public const string MaxExpandDepthExceededErrorString =
+            "The request includes a $expand path which is too deep. The maximum depth allowed is {0}. " +
+            "To increase the limit, set the 'MaxExpansionDepth' property on EnableQueryAttribute or ODataValidationSettings, or set the maxDepth in ExpandAttribute.";
+
         public SelectExpandQueryValidatorTest()
         {
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
-            _queryContext = new ODataQueryContext(model.Model, typeof(Customer));
+            DefaultQuerySettings defaultQuerySettings = new DefaultQuerySettings();
+            defaultQuerySettings.EnableExpand = true;
+            _queryContext = new ODataQueryContext(model.Model, typeof(Customer), null, defaultQuerySettings);
         }
 
         [Theory]
@@ -32,18 +39,48 @@ namespace System.Web.OData.Query.Validators
         public void Validate_DepthChecks(string expand, int maxExpansionDepth)
         {
             // Arrange
-            SelectExpandQueryValidator validator = new SelectExpandQueryValidator();
+            SelectExpandQueryValidator validator = new SelectExpandQueryValidator(_queryContext.DefaultQuerySettings);
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, _queryContext);
             selectExpandQueryOption.LevelsMaxLiteralExpansionDepth = 1;
 
             // Act & Assert
             Assert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }),
-                String.Format(CultureInfo.CurrentCulture, "The request includes a $expand path which is too deep. The maximum depth allowed is {0}. " +
-                "To increase the limit, set the 'MaxExpansionDepth' property on EnableQueryAttribute or ODataValidationSettings.", maxExpansionDepth));
+                String.Format(CultureInfo.CurrentCulture, MaxExpandDepthExceededErrorString, maxExpansionDepth));
 
             Assert.DoesNotThrow(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth + 1 }));
+        }
+
+        [Theory]
+        [InlineData("Orders($expand=Customer)", 1)]
+        [InlineData("Orders,Orders($expand=Customer)", 1)]
+        [InlineData("Orders($expand=Customer($expand=Orders))", 2)]
+        [InlineData("Orders($expand=Customer($expand=Orders($expand=Customer($expand=Orders($expand=Customer)))))", 5)]
+        [InlineData("Orders($expand=NS.SpecialOrder/SpecialCustomer)", 1)]
+        public void Validate_DepthChecks_QuerySettings(string expand, int maxExpansionDepth)
+        {
+            // Arrange
+            SelectExpandQueryValidator validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
+            ODataQueryContext queryContext = new ODataQueryContext(model.Model, typeof(Customer));
+            SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, queryContext);
+            selectExpandQueryOption.LevelsMaxLiteralExpansionDepth = 1;
+            IEdmStructuredType customerType =
+                model.Model.SchemaElements.First(e => e.Name.Equals("Customer")) as IEdmStructuredType;
+            ModelBoundQuerySettings querySettings = new ModelBoundQuerySettings();
+            querySettings.ExpandConfigurations.Add("Orders", new ExpandConfiguration
+            {
+                ExpandType = ExpandType.Allowed,
+                MaxDepth = maxExpansionDepth
+            });
+            model.Model.SetAnnotationValue(customerType, querySettings);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth + 1 }),
+                String.Format(CultureInfo.CurrentCulture, MaxExpandDepthExceededErrorString, maxExpansionDepth));
         }
 
         [Theory]
@@ -56,7 +93,7 @@ namespace System.Web.OData.Query.Validators
         public void Validate_DepthChecks_DollarLevels(string expand, int maxExpansionDepth)
         {
             // Arrange
-            var validator = new SelectExpandQueryValidator();
+            var validator = new SelectExpandQueryValidator(new DefaultQuerySettings {EnableExpand = true});
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
@@ -71,8 +108,7 @@ namespace System.Web.OData.Query.Validators
                     new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }),
                 String.Format(
                     CultureInfo.CurrentCulture,
-                    "The request includes a $expand path which is too deep. The maximum depth allowed is {0}. " +
-                    "To increase the limit, set the 'MaxExpansionDepth' property on EnableQueryAttribute or ODataValidationSettings.",
+                    MaxExpandDepthExceededErrorString,
                     maxExpansionDepth));
 
             Assert.DoesNotThrow(
@@ -86,7 +122,7 @@ namespace System.Web.OData.Query.Validators
         {
             // Arrange
             string expand = "Parent($expand=Parent($expand=Parent($levels=10)))";
-            var validator = new SelectExpandQueryValidator();
+            var validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
@@ -105,7 +141,7 @@ namespace System.Web.OData.Query.Validators
         {
             // Arrange
             string expand = "Parent($levels=2)";
-            var validator = new SelectExpandQueryValidator();
+            var validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
@@ -129,7 +165,7 @@ namespace System.Web.OData.Query.Validators
         {
             // Arrange
             string expand = "Parent($levels=1)";
-            var validator = new SelectExpandQueryValidator();
+            var validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
@@ -174,7 +210,7 @@ namespace System.Web.OData.Query.Validators
         {
             // Arrange
             string expand = "Parent($levels=2)";
-            var validator = new SelectExpandQueryValidator();
+            var validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
@@ -193,9 +229,35 @@ namespace System.Web.OData.Query.Validators
         public void ValidateDoesNotThrow_IfExpansionDepthIsZero()
         {
             string expand = "Orders($expand=Customer($expand=Orders($expand=Customer($expand=Orders($expand=Customer)))))";
-            SelectExpandQueryValidator validator = new SelectExpandQueryValidator();
+            SelectExpandQueryValidator validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, _queryContext);
 
+            Assert.DoesNotThrow(
+                () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = 0 }));
+        }
+
+        [Fact]
+        public void ValidateDoesNotThrow_IfExpansionDepthIsZero_QuerySettings()
+        {
+            // Arrange
+            string expand =
+                "Orders($expand=Customer($expand=Orders($expand=Customer($expand=Orders($expand=Customer)))))";
+            SelectExpandQueryValidator validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
+            ODataQueryContext queryContext = new ODataQueryContext(model.Model, typeof(Customer));
+            SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, queryContext);
+            IEdmStructuredType customerType =
+                model.Model.SchemaElements.First(e => e.Name.Equals("Customer")) as IEdmStructuredType;
+            ModelBoundQuerySettings querySettings = new ModelBoundQuerySettings();
+            querySettings.ExpandConfigurations.Add("Orders", new ExpandConfiguration
+            {
+                ExpandType = ExpandType.Allowed,
+                MaxDepth = 0
+            });
+            model.Model.SetAnnotationValue(customerType, querySettings);
+
+            // Act & Assert
             Assert.DoesNotThrow(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = 0 }));
         }
@@ -248,6 +310,31 @@ namespace System.Web.OData.Query.Validators
             string expand = "Orders";
             SelectExpandQueryValidator validator = new SelectExpandQueryValidator();
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, queryContext);
+            Assert.Throws<ODataException>(
+                () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings()),
+                "The property 'Orders' cannot be used in the $expand query option.");
+        }
+
+        [Fact]
+        public void ValidateThrowException_IfNotExpandable_QuerySettings()
+        {
+            // Arrange
+            SelectExpandQueryValidator validator = new SelectExpandQueryValidator();
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
+            ODataQueryContext queryContext = new ODataQueryContext(model.Model, typeof(Customer));
+            SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, "Orders", queryContext);
+            IEdmStructuredType customerType =
+                model.Model.SchemaElements.First(e => e.Name.Equals("Customer")) as IEdmStructuredType;
+            ModelBoundQuerySettings querySettings = new ModelBoundQuerySettings();
+            querySettings.ExpandConfigurations.Add("Orders", new ExpandConfiguration
+            {
+                ExpandType = ExpandType.Disabled,
+                MaxDepth = 0
+            });
+            model.Model.SetAnnotationValue(customerType, querySettings);
+
+            // Act & Assert
             Assert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings()),
                 "The property 'Orders' cannot be used in the $expand query option.");

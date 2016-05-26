@@ -34,6 +34,7 @@ namespace WebStack.QA.Test.OData.ETags
 
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Routes.Clear();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
         }
 

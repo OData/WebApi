@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
+using System.Web.OData.Extensions;
 using Nuwa;
 using WebStack.QA.Common.XUnit;
 using WebStack.QA.Instancing;
@@ -59,6 +60,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
         {
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
 
             var selfhostConfig = configuration as HttpSelfHostConfiguration;
             if (selfhostConfig != null)

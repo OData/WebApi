@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Reflection;
 using System.Web.Http;
+using System.Web.OData.Query;
 
 namespace System.Web.OData.Builder
 {
@@ -34,6 +36,7 @@ namespace System.Web.OData.Builder
             DeclaringType = declaringType;
             AddedExplicitly = true;
             _name = property.Name;
+            QueryConfiguration = new QueryConfiguration();
         }
 
         /// <summary>
@@ -140,6 +143,11 @@ namespace System.Web.OData.Builder
         public bool NotCountable { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="QueryConfiguration"/>.
+        /// </summary>
+        public QueryConfiguration QueryConfiguration { get; set; }
+
+        /// <summary>
         /// Sets the property as not filterable.
         /// </summary>
         public PropertyConfiguration IsNotFilterable()
@@ -244,6 +252,119 @@ namespace System.Web.OData.Builder
         public PropertyConfiguration IsCountable()
         {
             NotCountable = false;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the max value of $top of this property that a client can request
+        /// and the maximum number of query results of this property to return.
+        /// </summary>
+        public PropertyConfiguration Page(int? maxTopValue, int? pageSizeValue)
+        {
+            QueryConfiguration.SetMaxTop(maxTopValue);
+            QueryConfiguration.SetPageSize(pageSizeValue);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets this property enable paging.
+        /// </summary>
+        public PropertyConfiguration Page()
+        {
+            QueryConfiguration.SetMaxTop(null);
+            QueryConfiguration.SetPageSize(null);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the maximum depth of expand result,
+        /// expandable properties and their <see cref="ExpandType"/> of this property.
+        /// </summary>
+        public PropertyConfiguration Expand(int maxDepth, ExpandType expandType, params string[] properties)
+        {
+            QueryConfiguration.SetExpand(properties, maxDepth, expandType);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the expandable properties of this property.
+        /// </summary>
+        public PropertyConfiguration Expand(params string[] properties)
+        {
+            QueryConfiguration.SetExpand(properties, null, ExpandType.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the maximum depth of expand result,
+        /// expandable properties of this property.
+        /// </summary>
+        public PropertyConfiguration Expand(int maxDepth, params string[] properties)
+        {
+            QueryConfiguration.SetExpand(properties, maxDepth, ExpandType.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the expandable properties and their <see cref="ExpandType"/> of this property.
+        /// </summary>
+        public PropertyConfiguration Expand(ExpandType expandType, params string[] properties)
+        {
+            QueryConfiguration.SetExpand(properties, null, expandType);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets <see cref="ExpandType"/> of all properties with maximum depth of expand result.
+        /// </summary>
+        public PropertyConfiguration Expand(ExpandType expandType, int maxDepth)
+        {
+            QueryConfiguration.SetExpand(null, maxDepth, expandType);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties expandable with maximum depth of expand result.
+        /// </summary>
+        public PropertyConfiguration Expand(int maxDepth)
+        {
+            QueryConfiguration.SetExpand(null, maxDepth, ExpandType.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets <see cref="ExpandType"/> of all properties.
+        /// </summary>
+        public PropertyConfiguration Expand(ExpandType expandType)
+        {
+            QueryConfiguration.SetExpand(null, null, expandType);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties expandable.
+        /// </summary>
+        public PropertyConfiguration Expand()
+        {
+            QueryConfiguration.SetExpand(null, null, ExpandType.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets this property is countable.
+        /// </summary>
+        public PropertyConfiguration Count()
+        {
+            QueryConfiguration.SetCount(true);
+            return this;    
+        }
+
+        /// <summary>
+        /// Sets whether this property is countable.
+        /// </summary>
+        public PropertyConfiguration Count(QueryOptionSetting queryOptionSetting)
+        {
+            QueryConfiguration.SetCount(queryOptionSetting == QueryOptionSetting.Allowed);
             return this;
         }
     }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Web.Http;
 using System.Web.OData.Properties;
+using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Validation;
 using Microsoft.OData.Edm.Vocabularies;
@@ -355,7 +356,7 @@ namespace System.Web.OData.Builder
                 }
             }
 
-            // 2. validate each bound overload action specifies a diffrent binding parameter type
+            // 2. validate each bound overload action specifies a different binding parameter type
             ActionConfiguration[] boundActions = configurations.Where(a => a.IsBindable).ToArray();
             if (boundActions.Length > 0)
             {
@@ -400,6 +401,8 @@ namespace System.Web.OData.Builder
             Dictionary<PropertyInfo, IEdmProperty> edmProperties = edmTypeMap.EdmProperties;
             model.AddClrPropertyInfoAnnotations(edmProperties);
             model.AddPropertyRestrictionsAnnotations(edmTypeMap.EdmPropertiesRestrictions);
+            model.AddPropertiesQuerySettings(edmTypeMap.EdmPropertiesQuerySettings);
+            model.AddStructuredTypeQuerySettings(edmTypeMap.EdmStructuredTypeQuerySettings);
          
             // add dynamic dictionary property annotation for open types
             model.AddDynamicPropertyDictionaryAnnotations(edmTypeMap.OpenTypes);
@@ -480,6 +483,31 @@ namespace System.Web.OData.Builder
                 IEdmStructuredType edmStructuredType = openType.Key;
                 PropertyInfo propertyInfo = openType.Value;
                 model.SetAnnotationValue(edmStructuredType, new DynamicPropertyDictionaryAnnotation(propertyInfo));
+            }
+        }
+
+        private static void AddPropertiesQuerySettings(this EdmModel model,
+            Dictionary<IEdmProperty, ModelBoundQuerySettings> edmPropertiesQuerySettings)
+        {
+            foreach (KeyValuePair<IEdmProperty, ModelBoundQuerySettings> edmPropertiesQuerySetting in
+                    edmPropertiesQuerySettings)
+            {
+                IEdmProperty edmProperty = edmPropertiesQuerySetting.Key;
+                ModelBoundQuerySettings querySettings = edmPropertiesQuerySetting.Value;
+                model.SetAnnotationValue(edmProperty, querySettings);
+            }
+        }
+
+        private static void AddStructuredTypeQuerySettings(this EdmModel model,
+            Dictionary<IEdmStructuredType, ModelBoundQuerySettings> edmStructuredTypeQuerySettings)
+        {
+            foreach (
+                KeyValuePair<IEdmStructuredType, ModelBoundQuerySettings> edmStructuredTypeQuerySetting in
+                    edmStructuredTypeQuerySettings)
+            {
+                IEdmStructuredType structuredType = edmStructuredTypeQuerySetting.Key;
+                ModelBoundQuerySettings querySettings = edmStructuredTypeQuerySetting.Value;
+                model.SetAnnotationValue(structuredType, querySettings);
             }
         }
 

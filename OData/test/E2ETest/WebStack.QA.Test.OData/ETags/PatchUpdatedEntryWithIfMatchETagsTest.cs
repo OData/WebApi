@@ -28,6 +28,7 @@ namespace WebStack.QA.Test.OData.ETags
         {
             configuration.Routes.Clear();
             var model = GetEdmModel();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.
                 MapODataServiceRoute(
                     routeName: "odata",

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using Nuwa;
 using WebStack.QA.Common.XUnit;
 using WebStack.QA.Test.OData.Common;
@@ -32,6 +33,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
         public static void UpdateConfiguration(HttpConfiguration configuration)
         {
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
         }
 
         [Theory]

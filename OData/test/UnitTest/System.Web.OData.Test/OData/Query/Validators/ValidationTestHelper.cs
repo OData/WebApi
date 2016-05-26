@@ -14,7 +14,10 @@ namespace System.Web.OData.Query.Validators
     {
         internal static ODataQueryContext CreateCustomerContext()
         {
-            return new ODataQueryContext(GetCustomersModel(), typeof(QueryCompositionCustomer));
+            DefaultQuerySettings defaultQuerySettings = new DefaultQuerySettings();
+            defaultQuerySettings.EnableOrderBy = true;
+            defaultQuerySettings.MaxTop = null;
+            return new ODataQueryContext(GetCustomersModel(), typeof(QueryCompositionCustomer), null, defaultQuerySettings);
         }
 
         internal static ODataQueryContext CreateProductContext()
@@ -24,7 +27,9 @@ namespace System.Web.OData.Query.Validators
 
         internal static ODataQueryContext CreateDerivedProductsContext()
         {
-            return new ODataQueryContext(GetDerivedProductsModel(), typeof(Product));
+            DefaultQuerySettings defaultQuerySettings = new DefaultQuerySettings();
+            defaultQuerySettings.EnableFilter = true;
+            return new ODataQueryContext(GetDerivedProductsModel(), typeof(Product), null, defaultQuerySettings);
         }
 
         private static IEdmModel GetCustomersModel()

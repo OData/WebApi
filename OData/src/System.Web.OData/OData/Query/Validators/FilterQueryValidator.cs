@@ -24,8 +24,27 @@ namespace System.Web.OData.Query.Validators
     {
         private int _currentAnyAllExpressionDepth;
         private int _currentNodeCount;
+        private readonly DefaultQuerySettings _defaultQuerySettings;
 
         private IEdmModel _model;
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FilterQueryValidator" /> class.
+        /// </summary>>
+        public FilterQueryValidator()
+        {
+            _defaultQuerySettings = new DefaultQuerySettings();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FilterQueryValidator" /> class based on
+        /// the <see cref="DefaultQuerySettings" />.
+        /// </summary>
+        /// <param name="defaultQuerySettings">The <see cref="DefaultQuerySettings" />.</param>
+        public FilterQueryValidator(DefaultQuerySettings defaultQuerySettings)
+        {
+            _defaultQuerySettings = defaultQuerySettings;
+        }
 
         /// <summary>
         /// Validates a <see cref="FilterQueryOption" />.
@@ -47,11 +66,25 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("settings");
             }
 
+            Validate(filterQueryOption.FilterClause, settings, filterQueryOption.Context.Model);
+        }
+
+        /// <summary>
+        /// Validates a <see cref="FilterClause" />.
+        /// </summary>
+        /// <param name="filterClause">The <see cref="FilterClause" />.</param>
+        /// <param name="settings">The validation settings.</param>
+        /// <param name="model">The EdmModel.</param>
+        /// <remarks>
+        /// Please note this method is not thread safe.
+        /// </remarks>
+        public virtual void Validate(FilterClause filterClause, ODataValidationSettings settings, IEdmModel model)
+        {
             _currentAnyAllExpressionDepth = 0;
             _currentNodeCount = 0;
-            _model = filterQueryOption.Context.Model;
+            _model = model;
 
-            ValidateQueryNode(filterQueryOption.FilterClause.Expression, settings);
+            ValidateQueryNode(filterClause.Expression, settings);
         }
 
         /// <summary>
@@ -309,7 +342,7 @@ namespace System.Web.OData.Query.Validators
             }
 
             // Check whether the property is not filterable
-            if (EdmLibHelpers.IsNotFilterable(navigationProperty, _model))
+            if (EdmLibHelpers.IsNotFilterable(navigationProperty, _model, _defaultQuerySettings.EnableFilter))
             {
                 throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, navigationProperty.Name));
             }
@@ -368,7 +401,7 @@ namespace System.Web.OData.Query.Validators
 
             // Check whether the property is filterable.
             IEdmProperty property = propertyAccessNode.Property;
-            if (EdmLibHelpers.IsNotFilterable(property, _model))
+            if (EdmLibHelpers.IsNotFilterable(property, _model, _defaultQuerySettings.EnableFilter))
             {
                 throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, property.Name));
             }
@@ -399,7 +432,7 @@ namespace System.Web.OData.Query.Validators
 
             // Check whether the property is filterable.
             IEdmProperty property = propertyAccessNode.Property;
-            if (EdmLibHelpers.IsNotFilterable(property, _model))
+            if (EdmLibHelpers.IsNotFilterable(property, _model, _defaultQuerySettings.EnableFilter))
             {
                 throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, property.Name));
             }

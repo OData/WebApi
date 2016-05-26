@@ -102,13 +102,16 @@ namespace System.Web.OData.Query.Expressions
             return projectionLambdaExpression;
         }
 
-        internal Expression ProjectAsWrapper(Expression source, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet, ExpandedNavigationSelectItem expandedItem = null)
+        internal Expression ProjectAsWrapper(Expression source, SelectExpandClause selectExpandClause,
+            IEdmEntityType entityType, IEdmEntitySet entitySet, ExpandedNavigationSelectItem expandedItem = null,
+            int? modelBoundPageSize = null)
         {
             Type elementType;
             if (source.Type.IsCollection(out elementType))
             {
                 // new CollectionWrapper<ElementType> { Instance = source.Select(s => new Wrapper { ... }) };
-                return ProjectCollection(source, elementType, selectExpandClause, entityType, entitySet, expandedItem);
+                return ProjectCollection(source, elementType, selectExpandClause, entityType, entitySet, expandedItem,
+                    modelBoundPageSize);
             }
             else
             {
@@ -388,6 +391,10 @@ namespace System.Web.OData.Query.Expressions
                 ExpandedNavigationSelectItem expandItem = kvp.Value;
                 SelectExpandClause projection = expandItem.SelectAndExpand;
 
+                ModelBoundQuerySettings querySettings = EdmLibHelpers.GetModelBoundQuerySettings(propertyToExpand,
+                    propertyToExpand.ToEntityType(),
+                    _context.Model);
+
                 Expression propertyName = CreatePropertyNameExpression(elementType, propertyToExpand, source);
                 Expression propertyValue = CreatePropertyValueExpressionWithFilter(elementType, propertyToExpand, source,
                     expandItem.FilterOption);
@@ -398,7 +405,8 @@ namespace System.Web.OData.Query.Expressions
                 // projection can be null if the expanded navigation property is not further projected or expanded.
                 if (projection != null)
                 {
-                    propertyValue = ProjectAsWrapper(propertyValue, projection, propertyToExpand.ToEntityType(), expandItem.NavigationSource as IEdmEntitySet, expandItem);
+                    int? modelBoundPageSize = querySettings == null ? null : querySettings.PageSize;
+                    propertyValue = ProjectAsWrapper(propertyValue, projection, propertyToExpand.ToEntityType(), expandItem.NavigationSource as IEdmEntitySet, expandItem, modelBoundPageSize);
                 }
 
                 NamedPropertyExpression propertyExpression = new NamedPropertyExpression(propertyName, propertyValue);
@@ -408,9 +416,16 @@ namespace System.Web.OData.Query.Expressions
                     {
                         propertyExpression.NullCheck = nullCheck;
                     }
-                    else if (_settings.PageSize != null)
+                    else if (_settings.PageSize.HasValue)
                     {
                         propertyExpression.PageSize = _settings.PageSize.Value;
+                    }
+                    else
+                    {
+                        if (querySettings != null && querySettings.PageSize.HasValue)
+                        {
+                            propertyExpression.PageSize = querySettings.PageSize.Value;
+                        }
                     }
 
                     propertyExpression.TotalCount = countExpression;
@@ -501,7 +516,7 @@ namespace System.Web.OData.Query.Expressions
         }
 
         // new CollectionWrapper<ElementType> { Instance = source.Select((ElementType element) => new Wrapper { }) }
-        private Expression ProjectCollection(Expression source, Type elementType, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet, ExpandedNavigationSelectItem expandedItem)
+        private Expression ProjectCollection(Expression source, Type elementType, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet, ExpandedNavigationSelectItem expandedItem, int? modelBoundPageSize)
         {
             ParameterExpression element = Expression.Parameter(elementType);
 
@@ -518,7 +533,7 @@ namespace System.Web.OData.Query.Expressions
                 source = AddOrderByQueryForSource(source, expandedItem.OrderByOption, elementType);
             }
 
-            if (_settings.PageSize.HasValue || 
+            if (_settings.PageSize.HasValue || modelBoundPageSize.HasValue || 
                 (expandedItem != null && (expandedItem.TopOption.HasValue || expandedItem.SkipOption.HasValue)))
             {
                 // nested paging. Need to apply order by first, and take one more than page size as we need to know
@@ -562,6 +577,11 @@ namespace System.Web.OData.Query.Expressions
                 {
                     source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType,
                         _settings.EnableConstantParameterization);
+                }
+                else if (_settings.ModelBoundPageSize.HasValue)
+                {
+                    source = ExpressionHelpers.Take(source, modelBoundPageSize.Value + 1, elementType,
+                        _settings.EnableConstantParameterization);   
                 }
             }
 

@@ -32,6 +32,8 @@ namespace System.Web.OData
             }.GetHttpConfiguration();
 
             _model = GetEdmModel();
+
+            _configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
             _configuration.MapODataServiceRoute("odata", "odata", _model);
             HttpServer server = new HttpServer(_configuration);
             _client = new HttpClient(server);

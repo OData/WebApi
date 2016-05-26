@@ -191,6 +191,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             var resolver = new TestAssemblyResolver(new TypesInjectionAssembly(types));
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.AddODataQueryFilter();

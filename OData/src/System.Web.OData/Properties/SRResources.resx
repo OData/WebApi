@@ -569,7 +569,7 @@
     <value>'{0}' should be less than or equal to '{1}'.</value>
   </data>
   <data name="MaxExpandDepthExceeded" xml:space="preserve">
-    <value>The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the '{1}' property on EnableQueryAttribute or ODataValidationSettings.</value>
+    <value>The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the '{1}' property on EnableQueryAttribute or ODataValidationSettings, or set the maxDepth in ExpandAttribute.</value>
   </data>
   <data name="NonSelectExpandOnSingleEntity" xml:space="preserve">
     <value>The requested resource is not a collection. Query options $filter, $orderby, $count, $skip, and $top can be applied only on collections.</value>
@@ -720,6 +720,9 @@
   </data>
   <data name="NotCountablePropertyUsedForCount" xml:space="preserve">
     <value>The property '{0}' cannot be used for $count.</value>
+  </data>
+  <data name="NotCountableEntitySetUsedForCount" xml:space="preserve">
+    <value>The entity set '{0}' cannot be used for $count.</value>
   </data>
   <data name="EntityTypeDoesntHaveKeyDefined" xml:space="preserve">
     <value>The entity '{0}' does not have a key defined.</value>

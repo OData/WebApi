@@ -32,6 +32,7 @@ namespace WebStack.QA.Test.OData.ParameterAlias
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("OData", "", GetModel());
             configuration.EnsureInitialized();
         }

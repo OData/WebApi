@@ -68,6 +68,7 @@ namespace WebStack.QA.Test.OData.BoundOperation
                 new AttributeRoutingConvention(edmModel, configuration),
                 new MetadataRoutingConvention()
             };
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("AttributeRouting", "AttributeRouting", edmModel, pathHandler, routingConventions);
 
             // only with convention routing

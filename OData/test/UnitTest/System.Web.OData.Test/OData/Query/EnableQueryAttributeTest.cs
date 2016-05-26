@@ -265,6 +265,7 @@ namespace System.Web.OData.Query
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
+            config.Count().OrderBy().Filter().Expand().MaxTop(null);
             request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
@@ -505,8 +506,13 @@ namespace System.Web.OData.Query
             // Arrange
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query);
+            DefaultQuerySettings defaultQuerySettings = new DefaultQuerySettings();
+            defaultQuerySettings.EnableFilter = true;
+            defaultQuerySettings.EnableOrderBy = true;
+            defaultQuerySettings.MaxTop = null;
+            
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer)), request);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer), null, defaultQuerySettings), request);
 
             // Act & Assert
             Assert.DoesNotThrow(() => attribute.ValidateQuery(request, options));
@@ -625,6 +631,10 @@ namespace System.Web.OData.Query
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             attribute.AllowedOrderByProperties = allowedProperties;
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customers/?$orderby=Id,Name");
+            HttpConfiguration config = new HttpConfiguration();
+            config.Count().OrderBy().Filter().Expand().MaxTop(null);
+            request.SetConfiguration(config);
+            
             ODataQueryOptions queryOptions = new ODataQueryOptions(ValidationTestHelper.CreateCustomerContext(), request);
 
             Assert.DoesNotThrow(() => attribute.ValidateQuery(request, queryOptions));

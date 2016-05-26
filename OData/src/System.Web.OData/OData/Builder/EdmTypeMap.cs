@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Reflection;
+using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -13,12 +14,16 @@ namespace System.Web.OData.Builder
             Dictionary<Type, IEdmType> edmTypes,
             Dictionary<PropertyInfo, IEdmProperty> edmProperties,
             Dictionary<IEdmProperty, QueryableRestrictions> edmPropertiesRestrictions,
+            Dictionary<IEdmProperty, ModelBoundQuerySettings> edmPropertiesQuerySettings,
+            Dictionary<IEdmStructuredType, ModelBoundQuerySettings> edmStructuredTypeQuerySettings,
             Dictionary<Enum, IEdmEnumMember> enumMembers,
             Dictionary<IEdmStructuredType, PropertyInfo> openTypes)
         {
             EdmTypes = edmTypes;
             EdmProperties = edmProperties;
             EdmPropertiesRestrictions = edmPropertiesRestrictions;
+            EdmPropertiesQuerySettings = edmPropertiesQuerySettings;
+            EdmStructuredTypeQuerySettings = edmStructuredTypeQuerySettings;
             EnumMembers = enumMembers;
             OpenTypes = openTypes;
         }
@@ -28,6 +33,10 @@ namespace System.Web.OData.Builder
         public Dictionary<PropertyInfo, IEdmProperty> EdmProperties { get; private set; }
 
         public Dictionary<IEdmProperty, QueryableRestrictions> EdmPropertiesRestrictions { get; private set; }
+
+        public Dictionary<IEdmProperty, ModelBoundQuerySettings> EdmPropertiesQuerySettings { get; private set; }
+
+        public Dictionary<IEdmStructuredType, ModelBoundQuerySettings> EdmStructuredTypeQuerySettings { get; private set; }
 
         public Dictionary<Enum, IEdmEnumMember> EnumMembers { get; private set; }
 

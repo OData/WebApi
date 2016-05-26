@@ -15,6 +15,26 @@ namespace System.Web.OData.Query.Validators
     /// </summary>
     public class OrderByQueryValidator
     {
+        private readonly DefaultQuerySettings _defaultQuerySettings;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrderByQueryValidator" /> class.
+        /// </summary>>
+        public OrderByQueryValidator()
+        {
+            _defaultQuerySettings = new DefaultQuerySettings();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrderByQueryValidator" /> class based on
+        /// the <see cref="DefaultQuerySettings" />.
+        /// </summary>
+        /// <param name="defaultQuerySettings">The <see cref="DefaultQuerySettings" />.</param>
+        public OrderByQueryValidator(DefaultQuerySettings defaultQuerySettings)
+        {
+            _defaultQuerySettings = defaultQuerySettings;
+        }
+
         /// <summary>
         /// Validates an <see cref="OrderByQueryOption" />.
         /// </summary>
@@ -43,7 +63,7 @@ namespace System.Web.OData.Query.Validators
                 }
             }
 
-            OrderByModelLimitationsValidator validator = new OrderByModelLimitationsValidator(orderByOption.Context.Model);
+            OrderByModelLimitationsValidator validator = new OrderByModelLimitationsValidator(orderByOption.Context.Model, _defaultQuerySettings.EnableOrderBy);
             bool explicitAllowedProperties = validationSettings.AllowedOrderByProperties.Count > 0;
 
             foreach (OrderByNode node in orderByOption.OrderByNodes)
@@ -96,10 +116,12 @@ namespace System.Web.OData.Query.Validators
         private class OrderByModelLimitationsValidator : QueryNodeVisitor<SingleValueNode>
         {
             private readonly IEdmModel _model;
+            private readonly bool _enableOrderBy;
 
-            public OrderByModelLimitationsValidator(IEdmModel model)
+            public OrderByModelLimitationsValidator(IEdmModel model, bool enableOrderBy)
             {
                 _model = model;
+                _enableOrderBy = enableOrderBy;
             }
 
             // Visits the expression to find the first node if any, that is not sortable and throws
@@ -118,7 +140,7 @@ namespace System.Web.OData.Query.Validators
 
             public override SingleValueNode Visit(SingleValuePropertyAccessNode nodeIn)
             {
-                if (EdmLibHelpers.IsNotSortable(nodeIn.Property, _model))
+                if (EdmLibHelpers.IsNotSortable(nodeIn.Property, _model, _enableOrderBy))
                 {
                     return nodeIn;
                 }
@@ -131,7 +153,7 @@ namespace System.Web.OData.Query.Validators
 
             public override SingleValueNode Visit(SingleNavigationNode nodeIn)
             {
-                if (EdmLibHelpers.IsNotSortable(nodeIn.NavigationProperty, _model))
+                if (EdmLibHelpers.IsNotSortable(nodeIn.NavigationProperty, _model, _enableOrderBy))
                 {
                     return nodeIn;
                 }

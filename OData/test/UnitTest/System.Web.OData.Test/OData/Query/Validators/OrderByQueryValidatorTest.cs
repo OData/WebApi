@@ -18,8 +18,8 @@ namespace System.Web.OData.Query.Validators
 
         public OrderByQueryValidatorTest()
         {
-            _validator = new OrderByQueryValidator();
             _context = ValidationTestHelper.CreateCustomerContext();
+            _validator = new OrderByQueryValidator(_context.DefaultQuerySettings);
         }
 
         [Fact]
@@ -237,7 +237,10 @@ namespace System.Web.OData.Query.Validators
             ODataValidationSettings settings = new ODataValidationSettings();
 
             // Act & Assert
-            OrderByQueryValidator validator = new OrderByQueryValidator();
+            OrderByQueryValidator validator = new OrderByQueryValidator(new DefaultQuerySettings
+            {
+                EnableOrderBy = true
+            });
             Assert.Throws<ODataException>(() => validator.Validate(option, settings), message);
         }
 

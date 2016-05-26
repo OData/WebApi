@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Nop.Core.Domain.Blogs;
@@ -73,6 +74,7 @@ namespace WebStack.QA.Test.OData.Formatter
         {
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.EnableODataSupport(GetEdmModel(configuration), "odata");
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
         }
 
         protected static IEdmModel GetEdmModel(HttpConfiguration configuration)

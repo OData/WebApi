@@ -44,6 +44,7 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
             // model.SetPayloadValueConverter(new MyConverter());
 
             configuration.Routes.Clear();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("odata", "odata", model);
 
             configuration.EnsureInitialized();

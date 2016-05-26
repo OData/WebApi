@@ -28,6 +28,7 @@ namespace WebStack.QA.Test.OData.DollarId
 
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
 
             configuration.MapODataServiceRoute("Test", "", DollarIdEdmModel.GetModel());
             configuration.EnsureInitialized();

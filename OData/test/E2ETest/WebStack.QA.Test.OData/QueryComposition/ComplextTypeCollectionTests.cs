@@ -30,6 +30,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<ComplextTypeCollectionTests_Person>("ComplextTypeCollectionTests_Persons");
 
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("odataRoute", "odata", builder.GetEdmModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 

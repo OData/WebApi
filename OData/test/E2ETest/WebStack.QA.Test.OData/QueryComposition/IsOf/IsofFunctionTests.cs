@@ -39,6 +39,7 @@ namespace WebStack.QA.Test.OData.QueryComposition.IsOf
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             config.Services.Replace(typeof (IAssembliesResolver), resolver);
             config.Routes.Clear();
+            config.Count().Filter().OrderBy().Expand().MaxTop(null);
 
             IEdmModel model = IsofEdmModel.GetEdmModel();
             foreach (string dataSourceType in DataSourceTypes)

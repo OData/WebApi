@@ -63,7 +63,7 @@ namespace System.Web.OData.Query
             Context = context;
             RawSelect = select;
             RawExpand = expand;
-            Validator = new SelectExpandQueryValidator();
+            Validator = new SelectExpandQueryValidator(context.DefaultQuerySettings);
             _queryOptionParser = queryOptionParser;
         }
 
@@ -99,7 +99,7 @@ namespace System.Web.OData.Query
             Context = context;
             RawSelect = select;
             RawExpand = expand;
-            Validator = new SelectExpandQueryValidator();
+            Validator = new SelectExpandQueryValidator(context.DefaultQuerySettings);
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,
@@ -379,17 +379,19 @@ namespace System.Web.OData.Query
         }
 
         private static IEnumerable<SelectItem> GetAutoExpandedNavigationSelectItems(
-            IEdmEntityType baseEntityType, 
+            IEdmEntityType baseEntityType,
             IEdmModel model,
-            string alreadyExpandedNavigationSourceName,
+            IEdmTypeReference alreadyExpandedNavigationType,
             IEdmNavigationSource navigationSource,
-            bool isAllSelected)
+            bool isAllSelected,
+            ModelBoundQuerySettings modelBoundQuerySettings)
         {
             var expandItems = new List<SelectItem>();
-            var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(baseEntityType, model);
+            var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(baseEntityType, model,
+                modelBoundQuerySettings);
             foreach (var navigationProperty in autoExpandNavigationProperties)
             {
-                if (!alreadyExpandedNavigationSourceName.Equals(navigationProperty.Name))
+                if (!alreadyExpandedNavigationType.Equals(navigationProperty.Type))
                 {
                     IEdmEntityType entityType = navigationProperty.DeclaringEntityType();
                     IEdmNavigationSource currentEdmNavigationSource =
@@ -409,12 +411,15 @@ namespace System.Web.OData.Query
                             currentEdmNavigationSource, selectExpandClause);
                         if (!currentEdmNavigationSource.EntityType().Equals(entityType))
                         {
+                            modelBoundQuerySettings = EdmLibHelpers.GetModelBoundQuerySettings(navigationProperty,
+                                navigationProperty.ToEntityType(), model);
                             IEnumerable<SelectItem> nestedSelectItems = GetAutoExpandedNavigationSelectItems(
                                 currentEdmNavigationSource.EntityType(),
                                 model,
-                                alreadyExpandedNavigationSourceName,
+                                alreadyExpandedNavigationType,
                                 item.NavigationSource,
-                                true);
+                                true,
+                                modelBoundQuerySettings);
                             selectExpandClause = new SelectExpandClause(nestedSelectItems, true);
                             item = new ExpandedNavigationSelectItem(expandPath, currentEdmNavigationSource,
                                 selectExpandClause);
@@ -476,7 +481,7 @@ namespace System.Web.OData.Query
             bool levelsEncounteredInInnerExpand = false;
             bool isMaxLevelInInnerExpand = false;
 
-            // Try diffent expansion depth until expandItem.SelectAndExpand is successfully expanded
+            // Try different expansion depth until expandItem.SelectAndExpand is successfully expanded
             while (selectExpandClause == null && level > 0)
             {
                 selectExpandClause = ProcessLevels(
@@ -496,14 +501,18 @@ namespace System.Web.OData.Query
             level++;
 
             var entityType = expandItem.NavigationSource.EntityType();
-            string alreadyExpandedNavigationSourceName =
-                (expandItem.PathToNavigationProperty.LastSegment as NavigationPropertySegment).NavigationProperty.Name;
+            IEdmNavigationProperty navigationProperty = 
+                (expandItem.PathToNavigationProperty.LastSegment as NavigationPropertySegment).NavigationProperty;
+            ModelBoundQuerySettings querySettings = EdmLibHelpers.GetModelBoundQuerySettings(navigationProperty,
+                navigationProperty.ToEntityType(),
+                Context.Model);
             IEnumerable<SelectItem> autoExpandNavigationSelectItems = GetAutoExpandedNavigationSelectItems(
                 entityType,
                 Context.Model,
-                alreadyExpandedNavigationSourceName, 
+                navigationProperty.Type, 
                 expandItem.NavigationSource, 
-                selectExpandClause.AllSelected);
+                selectExpandClause.AllSelected,
+                querySettings);
             bool hasAutoExpandInExpand = (autoExpandNavigationSelectItems.Count() != 0);
 
             while (level > 0)

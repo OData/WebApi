@@ -2490,8 +2490,8 @@ namespace System.Web.OData.Builder.Conventions
             IEdmEntityType entityType = model.AssertHasEntityType(typeof(QueryLimitEmployee));
             IEdmProperty property = Assert.Single(entityType.DeclaredProperties.Where(e => e.Name == "Address"));
 
-            Assert.True(EdmLibHelpers.IsNotFilterable(property, model));
-            Assert.True(EdmLibHelpers.IsNotSortable(property, model));
+            Assert.True(EdmLibHelpers.IsNotFilterable(property, model, true));
+            Assert.True(EdmLibHelpers.IsNotSortable(property, model, true));
         }
 
         [Fact]

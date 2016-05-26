@@ -3,6 +3,7 @@
 
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
+using System.Web.OData.Extensions;
 using System.Web.OData.TestCommon;
 
 namespace System.Web.OData
@@ -14,6 +15,7 @@ namespace System.Web.OData
             var resolver = new TestAssemblyResolver(new MockAssembly(controllers));
             var configuration = new HttpConfiguration();
             configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+            configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
             return configuration;
         }
     }

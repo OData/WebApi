@@ -17,6 +17,7 @@ using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace System.Web.OData
 {
@@ -112,7 +113,7 @@ namespace System.Web.OData
         /// Denial of Service attacks.
         /// </summary>
         /// <value>
-        /// The maxiumum depth of the Any or All elements nested inside the query. The default value is 1.
+        /// The maximum depth of the Any or All elements nested inside the query. The default value is 1.
         /// </value>
         public int MaxAnyAllExpressionDepth
         {
@@ -250,7 +251,7 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// <para>Gets or sets a string with comma seperated list of property names. The queryable result can only be
+        /// <para>Gets or sets a string with comma separated list of property names. The queryable result can only be
         /// ordered by those properties defined in this list.</para>
         ///
         /// <para>Note, by default this string is null, which means it can be ordered by any property.</para>
@@ -389,12 +390,20 @@ namespace System.Web.OData
                         response.Content.GetType().FullName);
                 }
 
+                ODataQueryContext queryContext = null;
+
+                if (!_querySettings.PageSize.HasValue && responseContent.Value != null)
+                {
+                    GetModelBoundPageSize(queryContext, responseContent, request, actionDescriptor, actionExecutedContext);
+                }
+
                 // Apply the query if there are any query options, if there is a page size set, in the case of
                 // SingleResult or in the case of $count request.
                 bool shouldApplyQuery = responseContent.Value != null &&
                     request.RequestUri != null &&
                     (!String.IsNullOrWhiteSpace(request.RequestUri.Query) ||
                     _querySettings.PageSize.HasValue ||
+                    _querySettings.ModelBoundPageSize.HasValue ||
                     responseContent.Value is SingleResult ||
                     ODataCountMediaTypeMapping.IsCountRequest(request) ||
                     ContainsAutoExpandProperty(responseContent.Value, request, actionDescriptor));
@@ -403,7 +412,7 @@ namespace System.Web.OData
                 {
                     try
                     {
-                        object queryResult = ExecuteQuery(responseContent.Value, request, actionDescriptor);
+                        object queryResult = ExecuteQuery(responseContent.Value, request, actionDescriptor, queryContext);
                         if (queryResult == null && request.ODataProperties().Path == null)
                         {
                             // This is the case in which a regular OData service uses the EnableQuery attribute.
@@ -527,9 +536,7 @@ namespace System.Web.OData
             return queryOptions.ApplyTo(entity, _querySettings);
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
-            Justification = "Response disposed after being sent.")]
-        private object ExecuteQuery(object response, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
+        private ODataQueryContext GetODataQueryContext(object response, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
         {
             Type elementClrType = GetElementType(response, actionDescriptor);
 
@@ -539,10 +546,75 @@ namespace System.Web.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            ODataQueryContext queryContext = new ODataQueryContext(
+            return new ODataQueryContext(
                 model,
                 elementClrType,
-                request.ODataProperties().Path);
+                request.ODataProperties().Path,
+                request.GetConfiguration().GetDefaultQuerySettings());
+        }
+
+        private void GetModelBoundPageSize(ODataQueryContext queryContext, ObjectContent responseContent,
+            HttpRequestMessage request, HttpActionDescriptor actionDescriptor,
+            HttpActionExecutedContext actionExecutedContext)
+        {
+            try
+            {
+                queryContext = GetODataQueryContext(responseContent.Value, request, actionDescriptor);
+            }
+            catch (InvalidOperationException e)
+            {
+                actionExecutedContext.Response = request.CreateErrorResponse(
+                    HttpStatusCode.BadRequest,
+                    Error.Format(SRResources.UriQueryStringInvalid, e.Message),
+                    e);
+                return;
+            }
+
+            ModelBoundQuerySettings querySettings = null;
+            if (queryContext.Path != null)
+            {
+                PropertySegment propertySegment = queryContext.Path.Segments.Last() as PropertySegment;
+                if (propertySegment != null)
+                {
+                    querySettings = EdmLibHelpers.GetModelBoundQuerySettings(propertySegment.Property,
+                        propertySegment.Property.Type.Definition as IEdmStructuredType,
+                        queryContext.Model);
+                }
+                else
+                {
+                    NavigationPropertySegment navigationPropertySegment =
+                        queryContext.Path.Segments.Last() as NavigationPropertySegment;
+                    if (navigationPropertySegment != null)
+                    {
+                        querySettings =
+                            EdmLibHelpers.GetModelBoundQuerySettings(navigationPropertySegment.NavigationProperty,
+                                navigationPropertySegment.NavigationProperty.ToEntityType(),
+                                queryContext.Model);
+                    }
+                }
+            }
+
+            if (querySettings == null)
+            {
+                querySettings = EdmLibHelpers.GetModelBoundQuerySettings(null,
+                    queryContext.ElementType as IEdmStructuredType, queryContext.Model);
+            }
+
+            if (querySettings != null && querySettings.PageSize.HasValue)
+            {
+                _querySettings.ModelBoundPageSize = querySettings.PageSize;
+            }
+        }
+
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
+            Justification = "Response disposed after being sent.")]
+        private object ExecuteQuery(object response, HttpRequestMessage request, HttpActionDescriptor actionDescriptor, ODataQueryContext queryContext)
+        {
+            if (queryContext == null)
+            {
+                queryContext = GetODataQueryContext(response, request, actionDescriptor);
+            }
+
             ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
 
             ValidateQuery(request, queryOptions);
@@ -699,18 +771,18 @@ namespace System.Web.OData
             IEdmEntityType entityType = model.GetEdmType(elementClrType) as IEdmEntityType;
             if (entityType != null)
             {
-                var navigationProperties = entityType.NavigationProperties();
+                ModelBoundQuerySettings querySettings = EdmLibHelpers.GetModelBoundQuerySettings(null, entityType, model);
+                IEnumerable<IEdmNavigationProperty> navigationProperties = entityType.NavigationProperties();
                 if (navigationProperties != null)
                 {
-                    foreach (var navigationProperty in navigationProperties)
-                    {
-                        if (EdmLibHelpers.IsAutoExpand(navigationProperty, model))
-                        {
-                            return true;
-                        }
-                    }
+                    return
+                        navigationProperties.Any(
+                            navigationProperty =>
+                                EdmLibHelpers.IsAutoExpand(navigationProperty, model) ||
+                                querySettings.IsAutomaticExpand(navigationProperty.Name));
                 }
             }
+
             return false;
         }
     }

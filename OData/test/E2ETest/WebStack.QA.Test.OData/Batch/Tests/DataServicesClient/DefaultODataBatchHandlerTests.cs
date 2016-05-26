@@ -108,6 +108,7 @@ namespace WebStack.QA.Test.OData.Batch.Tests.DataServicesClient
             HttpServer server = configuration.Properties["Nuwa.HttpServerKey"] as HttpServer;
 
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute(
                 "batch",
                 "DefaultBatch",

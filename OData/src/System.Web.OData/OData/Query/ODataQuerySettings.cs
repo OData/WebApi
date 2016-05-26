@@ -12,6 +12,7 @@ namespace System.Web.OData.Query
     {
         private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
         private int? _pageSize;
+        private int? _modelBoundPageSize;
 
         /// <summary>
         /// Instantiates a new instance of the <see cref="ODataQuerySettings"/> class
@@ -33,6 +34,31 @@ namespace System.Web.OData.Query
             EnableConstantParameterization = settings.EnableConstantParameterization;
             HandleNullPropagation = settings.HandleNullPropagation;
             PageSize = settings.PageSize;
+            ModelBoundPageSize = settings.ModelBoundPageSize;
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum number of query results to return based on the type or property.
+        /// </summary>
+        /// <value>
+        /// The maximum number of query results to return based on the type or property,
+        /// or <c>null</c> if there is no limit.
+        /// </value>
+        internal int? ModelBoundPageSize
+        {
+            get
+            {
+                return _modelBoundPageSize;
+            }
+            set
+            {
+                if (value.HasValue && value <= 0)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
+                }
+
+                _modelBoundPageSize = value;
+            }
         }
 
         /// <summary>

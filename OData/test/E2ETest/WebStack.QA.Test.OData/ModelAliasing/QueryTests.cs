@@ -29,6 +29,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
         [NuwaConfiguration]
         public static void UpdateConfiguration(HttpConfiguration configuration)
         {
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("convention", "convention", GetConventionModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 

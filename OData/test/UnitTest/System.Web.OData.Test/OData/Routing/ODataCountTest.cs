@@ -25,6 +25,7 @@ namespace System.Web.OData.Routing
         {
             IEdmModel model = GetEdmModel();
             HttpConfiguration configuration = new[] { typeof(DollarCountEntitiesController) }.GetHttpConfiguration();
+            configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("odata", "odata", model);
             var server = new HttpServer(configuration);
             _client = new HttpClient(server);

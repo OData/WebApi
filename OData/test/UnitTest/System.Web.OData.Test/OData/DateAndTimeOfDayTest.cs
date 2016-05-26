@@ -204,6 +204,7 @@ namespace System.Web.OData
         {
             HttpConfiguration config =
                 new[] { typeof(MetadataController), typeof(DateAndTimeOfDayModelsController) }.GetHttpConfiguration();
+            config.Count().OrderBy().Filter().Expand().MaxTop(null);
             config.MapODataServiceRoute("odata", "odata", GetEdmModel());
             return new HttpClient(new HttpServer(config));
         }

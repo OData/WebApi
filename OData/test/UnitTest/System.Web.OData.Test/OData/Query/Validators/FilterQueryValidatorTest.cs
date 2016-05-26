@@ -428,9 +428,9 @@ namespace System.Web.OData.Query.Validators
 
         public FilterQueryValidatorTest()
         {
-            _validator = new MyFilterValidator();
             _context = ValidationTestHelper.CreateCustomerContext();
             _productContext = ValidationTestHelper.CreateDerivedProductsContext();
+            _validator = new MyFilterValidator(_productContext.DefaultQuerySettings);
         }
 
         [Fact]
@@ -1366,6 +1366,11 @@ namespace System.Web.OData.Query.Validators
         private class MyFilterValidator : FilterQueryValidator
         {
             private Dictionary<string, int> _times = new Dictionary<string, int>();
+
+            public MyFilterValidator(DefaultQuerySettings defaultQuerySettings)
+                : base(defaultQuerySettings)
+            {
+            }
 
             public Dictionary<string, int> Times
             {

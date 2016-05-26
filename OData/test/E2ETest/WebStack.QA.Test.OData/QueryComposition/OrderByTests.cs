@@ -28,6 +28,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
         [NuwaConfiguration]
         public static void UpdateConfiguration(HttpConfiguration config)
         {
+            config.Count().Filter().OrderBy().Expand().MaxTop(null);
             config.MapODataServiceRoute("odata", "odata", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 

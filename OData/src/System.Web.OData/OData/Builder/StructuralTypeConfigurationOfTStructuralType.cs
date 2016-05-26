@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Web.Http;
+using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -244,6 +245,211 @@ namespace System.Web.OData.Builder
             PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
 
             _configuration.AddDynamicPropertyDictionary(propertyInfo);
+        }
+
+        /// <summary>
+        /// Sets this property is countable of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Count()
+        {
+            _configuration.QueryConfiguration.SetCount(true);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets whether this property is countable of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Count(QueryOptionSetting setting)
+        {
+            _configuration.QueryConfiguration.SetCount(setting == QueryOptionSetting.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the max value of $top of this structural type that a client can request
+        /// and the maximum number of query results of this structural type to return.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Page(int? maxTopValue, int? pageSizeValue)
+        {
+            _configuration.QueryConfiguration.SetMaxTop(maxTopValue);
+            _configuration.QueryConfiguration.SetPageSize(pageSizeValue);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the properties of this structural enable paging.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Page()
+        {
+            _configuration.QueryConfiguration.SetMaxTop(null);
+            _configuration.QueryConfiguration.SetPageSize(null);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the maximum depth of expand result,
+        /// expandable properties and their <see cref="ExpandType"/> of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Expand(int maxDepth, ExpandType expandType, params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetExpand(properties, maxDepth, expandType);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the expandable properties of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Expand(params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetExpand(properties, null, ExpandType.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the maximum depth of expand result,
+        /// expandable properties of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Expand(int maxDepth, params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetExpand(properties, maxDepth, ExpandType.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the expandable properties and their <see cref="ExpandType"/> of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Expand(ExpandType expandType, params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetExpand(properties, null, expandType);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets <see cref="ExpandType"/> of all properties with maximum depth of expand result of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Expand(ExpandType expandType, int maxDepth)
+        {
+            _configuration.QueryConfiguration.SetExpand(null, maxDepth, expandType);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties expandable with maximum depth of expand result of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Expand(int maxDepth)
+        {
+            _configuration.QueryConfiguration.SetExpand(null, maxDepth, ExpandType.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets <see cref="ExpandType"/> of all properties of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Expand(ExpandType expandType)
+        {
+            _configuration.QueryConfiguration.SetExpand(null, null, expandType);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties expandable of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Expand()
+        {
+            _configuration.QueryConfiguration.SetExpand(null, null, ExpandType.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets sortable properties depends on <see cref="QueryOptionSetting"/> of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> OrderBy(QueryOptionSetting setting, params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetOrderBy(properties, setting == QueryOptionSetting.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets sortable properties of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> OrderBy(params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetOrderBy(properties, true);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets whether all properties of this structural type is sortable.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> OrderBy(QueryOptionSetting setting)
+        {
+            _configuration.QueryConfiguration.SetOrderBy(null, setting == QueryOptionSetting.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties of this structural type is sortable.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> OrderBy()
+        {
+            _configuration.QueryConfiguration.SetOrderBy(null, true);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets filterable properties depends on <see cref="QueryOptionSetting"/> of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Filter(QueryOptionSetting setting, params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetFilter(properties, setting == QueryOptionSetting.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets filterable properties of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Filter(params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetFilter(properties, true);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets whether all properties of this structural type is filterable.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Filter(QueryOptionSetting setting)
+        {
+            _configuration.QueryConfiguration.SetFilter(null, setting == QueryOptionSetting.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties of this structural type is filterable.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Filter()
+        {
+            _configuration.QueryConfiguration.SetFilter(null, true);
+            _configuration.AddedExplicitly = true;
+            return this;
         }
 
         private PrimitivePropertyConfiguration GetPrimitivePropertyConfiguration(Expression propertyExpression, bool optional)

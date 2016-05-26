@@ -48,6 +48,7 @@ namespace WebStack.QA.Test.OData.ForeignKey
 
             configuration.Routes.Clear();
             configuration.GetHttpServer();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute(routeName: "explicit", routePrefix: "explicit",
                 model: ForeignKeyEdmModel.GetExplicitModel(foreignKey: true));
 

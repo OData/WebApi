@@ -34,6 +34,7 @@ namespace WebStack.QA.Test.OData.ETags
         public static void UpdateConfiguration(HttpConfiguration configuration)
         {
             configuration.Routes.Clear();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("odata", "odata", GetEdmModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.MessageHandlers.Add(new ETagMessageHandler());
         }

@@ -238,7 +238,7 @@ namespace System.Web.OData.Query.Validators
             HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$expand=Contacts/Contacts");
             ODataQueryOptions option = new ODataQueryOptions(_context, message);
 
-            Mock<SelectExpandQueryValidator> selectExpandValidator = new Mock<SelectExpandQueryValidator>();
+            Mock<SelectExpandQueryValidator> selectExpandValidator = new Mock<SelectExpandQueryValidator>(new DefaultQuerySettings());
             option.SelectExpand.Validator = selectExpandValidator.Object;
             ODataValidationSettings settings = new ODataValidationSettings();
 

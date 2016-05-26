@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Web.Http;
 using System.Web.Http.Filters;
 using System.Web.OData.Batch;
@@ -43,6 +44,8 @@ namespace System.Web.OData.Extensions
         private const string ContainerBuilderFactoryKey = "System.Web.OData.ContainerBuilderFactoryKey";
 
         private const string RootContainerKey = "System.Web.OData.RootContainerKey";
+        
+        private const string DefaultQuerySettingsKey = "System.Web.OData.DefaultQuerySettings";
 
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
@@ -54,6 +57,146 @@ namespace System.Web.OData.Extensions
         public static void AddODataQueryFilter(this HttpConfiguration configuration)
         {
             AddODataQueryFilter(configuration, new EnableQueryAttribute());
+        }
+
+        /// <summary>
+        /// Sets the <see cref="DefaultQuerySettings"/> in the configuration.
+        /// </summary>
+        public static void SetDefaultQuerySettings(this HttpConfiguration configuration, DefaultQuerySettings defaultQuerySettings)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            if (defaultQuerySettings == null)
+            {
+                throw Error.ArgumentNull("defaultQuerySettings");
+            }
+
+            if (!defaultQuerySettings.MaxTop.HasValue || defaultQuerySettings.MaxTop > 0)
+            {
+                ModelBoundQuerySettings.DefaultModelBoundQuerySettings.MaxTop = defaultQuerySettings.MaxTop;
+            }
+
+            configuration.Properties[DefaultQuerySettingsKey] = defaultQuerySettings;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="DefaultQuerySettings"/> from the configuration.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        public static DefaultQuerySettings GetDefaultQuerySettings(this HttpConfiguration configuration)
+        {
+            object instance;
+            if (!configuration.Properties.TryGetValue(DefaultQuerySettingsKey, out instance))
+            {
+                DefaultQuerySettings defaultQuerySettings = new DefaultQuerySettings();
+                configuration.SetDefaultQuerySettings(defaultQuerySettings);
+                return defaultQuerySettings;
+            }
+
+            return instance as DefaultQuerySettings;
+        }
+
+        /// <summary>
+        /// Sets the MaxTop of <see cref="DefaultQuerySettings"/> in the configuration.
+        /// </summary>
+        public static HttpConfiguration MaxTop(this HttpConfiguration configuration, int? maxTopValue)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.MaxTop = maxTopValue;
+            if (!maxTopValue.HasValue || maxTopValue > 0)
+            {
+                ModelBoundQuerySettings.DefaultModelBoundQuerySettings.MaxTop = maxTopValue;
+            }
+
+            return configuration;
+        }
+
+        /// <summary>
+        /// Sets the EnableExpand of <see cref="DefaultQuerySettings"/> in the configuration,
+        /// depends on <see cref="QueryOptionSetting"/>.
+        /// Todo: change QueryOptionSetting to ExpandType.
+        /// </summary>
+        public static HttpConfiguration Expand(this HttpConfiguration configuration, QueryOptionSetting setting)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableExpand = setting == QueryOptionSetting.Allowed;
+            return configuration;
+        }
+
+        /// <summary>
+        /// Sets the EnableExpand to true of <see cref="DefaultQuerySettings"/> in the configuration.
+        /// </summary>
+        public static HttpConfiguration Expand(this HttpConfiguration configuration)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableExpand = true;
+            return configuration;
+        }
+
+        /// <summary>
+        /// Sets the EnableFilter of <see cref="DefaultQuerySettings"/> in the configuration,
+        /// depends on <see cref="QueryOptionSetting"/>.
+        /// </summary>
+        public static HttpConfiguration Filter(this HttpConfiguration configuration, QueryOptionSetting setting)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableFilter = setting == QueryOptionSetting.Allowed;
+            return configuration;
+        }
+
+        /// <summary>
+        /// Sets the EnableFilter to true of <see cref="DefaultQuerySettings"/> in the configuration.
+        /// </summary>
+        public static HttpConfiguration Filter(this HttpConfiguration configuration)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableFilter = true;
+            return configuration;
+        }
+
+        /// <summary>
+        /// Sets the EnableOrderBy of <see cref="DefaultQuerySettings"/> in the configuration,
+        /// depends on <see cref="QueryOptionSetting"/>.
+        /// </summary>
+        public static HttpConfiguration OrderBy(this HttpConfiguration configuration, QueryOptionSetting setting)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableOrderBy = setting == QueryOptionSetting.Allowed;
+            return configuration;
+        }
+
+        /// <summary>
+        /// Sets the EnableOrderBy to true of <see cref="DefaultQuerySettings"/> in the configuration.
+        /// </summary>
+        public static HttpConfiguration OrderBy(this HttpConfiguration configuration)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableOrderBy = true;
+            return configuration;
+        }
+
+        /// <summary>
+        /// Sets the EnableCount of <see cref="DefaultQuerySettings"/> in the configuration,
+        /// depends on <see cref="QueryOptionSetting"/>.
+        /// </summary>
+        public static HttpConfiguration Count(this HttpConfiguration configuration, QueryOptionSetting setting)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableCount = setting == QueryOptionSetting.Allowed;
+            return configuration;
+        }
+
+        /// <summary>
+        /// Sets the EnableCount to true of <see cref="DefaultQuerySettings"/> in the configuration.
+        /// </summary>
+        public static HttpConfiguration Count(this HttpConfiguration configuration)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableCount = true;
+            return configuration;
         }
 
         /// <summary>

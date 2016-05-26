@@ -26,7 +26,8 @@ namespace System.Web.OData
         /// the given <paramref name="elementClrType"/>.</param>
         /// <param name="elementClrType">The CLR type of the element of the collection being queried.</param>
         /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
-        public ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path)
+        /// <param name="defaultQuerySettings"><see cref="DefaultQuerySettings"/>.</param>
+        public ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path, DefaultQuerySettings defaultQuerySettings)
         {
             if (model == null)
             {
@@ -49,6 +50,7 @@ namespace System.Web.OData
             Model = model;
             Path = path;
             NavigationSource = GetNavigationSource(Model, ElementType, path);
+            DefaultQuerySettings = defaultQuerySettings;
         }
 
         /// <summary>
@@ -76,7 +78,7 @@ namespace System.Web.OData
         }
 
         internal ODataQueryContext(IEdmModel model, Type elementClrType)
-            : this(model, elementClrType, path: null)
+            : this(model, elementClrType, path: null, defaultQuerySettings: null)
         {
         }
 
@@ -84,6 +86,11 @@ namespace System.Web.OData
             : this(model, elementType, path: null)
         {
         }
+
+        /// <summary>
+        /// Gets the given <see cref="DefaultQuerySettings"/>.
+        /// </summary>
+        public DefaultQuerySettings DefaultQuerySettings { get; private set; }
 
         /// <summary>
         /// Gets the given <see cref="IEdmModel"/> that contains the EntitySet.

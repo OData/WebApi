@@ -1044,6 +1044,7 @@ namespace System.Web.OData.Query
             HttpServer server = CreateServer();
             HttpClient client = new HttpClient(server);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
             // Act
@@ -1103,6 +1104,7 @@ namespace System.Web.OData.Query
             builder.EntitySet<MyProduct>("Products");
             builder.EntitySet<ODataQueryOptionTest_EntityModelMultipleKeys>("ODataQueryOptionTest_EntityModelMultipleKeys");
             IEdmModel model = builder.GetEdmModel();
+            configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("odata", "odata", model);
             return new HttpServer(configuration);
         }

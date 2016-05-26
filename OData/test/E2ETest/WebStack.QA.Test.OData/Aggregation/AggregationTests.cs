@@ -25,6 +25,7 @@ namespace WebStack.QA.Test.OData.Aggregation
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("aggregation", "aggregation",
                 AggregationEdmModel.GetEdmModel(configuration));
         }

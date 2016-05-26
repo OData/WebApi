@@ -78,7 +78,8 @@ namespace System.Web.OData
                 ODataQueryContext entitySetContext = new ODataQueryContext(
                     model,
                     entityClrType,
-                    request.ODataProperties().Path);
+                    request.ODataProperties().Path,
+                    request.GetConfiguration().GetDefaultQuerySettings());
 
                 Func<ODataQueryContext, HttpRequestMessage, ODataQueryOptions> createODataQueryOptions =
                     (Func<ODataQueryContext, HttpRequestMessage, ODataQueryOptions>)Descriptor.Properties.GetOrAdd(CreateODataQueryOptionsCtorKey, _ =>

@@ -973,6 +973,7 @@ namespace System.Web.OData.Formatter
                     typeof(MainEntityController), typeof(PeopleController), typeof(EnumCustomersController),
                     typeof(CollectionSerializerCustomersController), typeof(PresidentController)
                 }.GetHttpConfiguration();
+            configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
             configuration.MapODataServiceRoute(model);
             configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
             return configuration;

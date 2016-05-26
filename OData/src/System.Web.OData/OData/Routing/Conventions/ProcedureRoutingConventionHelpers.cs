@@ -79,7 +79,7 @@ namespace System.Web.OData.Routing.Conventions
                     IEdmTypeReference keyType;
                     string newKeyName = GetKeyInfos(keyCount, keyValue.Key, entityType, keyPrefix, out keyType);
 
-                    ODataPathSegmentExtenstions.AddKeyValues(newKeyName, keyValue.Value, keyType,
+                    ODataPathSegmentExtensions.AddKeyValues(newKeyName, keyValue.Value, keyType,
                         controllerContext.RouteData.Values,
                         routingConventionsStore);
                 }
@@ -97,7 +97,7 @@ namespace System.Web.OData.Routing.Conventions
                     object value = ODataUriUtils.ConvertFromUriLiteral(keyValue.Value, ODataVersion.V4, model, keyType);
                     Contract.Assert(value != null);
 
-                    ODataPathSegmentExtenstions.AddKeyValues(newKeyName, value, keyType, controllerContext.RouteData.Values,
+                    ODataPathSegmentExtensions.AddKeyValues(newKeyName, value, keyType, controllerContext.RouteData.Values,
                         routingConventionsStore);
                 }
             }

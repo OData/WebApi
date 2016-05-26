@@ -12,7 +12,7 @@ using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing
 {
-    internal static class ODataPathSegmentExtenstions
+    internal static class ODataPathSegmentExtensions
     {
         public static string TranslateKeyValueToString(this KeySegment segment)
         {

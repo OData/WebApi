@@ -184,6 +184,12 @@ namespace System.Web.Http.OData.Formatter
         public ODataMessageReaderSettings MessageReaderSettings { get; private set; }
 
         /// <summary>
+        /// Gets or sets a method that allows consumers to provide an alternate base
+        /// address for OData Uri.
+        /// </summary>
+        public Func<HttpRequestMessage, Uri> BaseAddressFactory { get; set; }
+
+        /// <summary>
         /// The request message associated with the per-request formatter instance.
         /// </summary>
         internal HttpRequestMessage Request { get; set; }
@@ -345,7 +351,7 @@ namespace System.Web.Http.OData.Formatter
                 try
                 {
                     ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings(MessageReaderSettings);
-                    oDataReaderSettings.BaseUri = GetBaseAddress(Request);
+                    oDataReaderSettings.BaseUri = GetBaseAddressInternal(Request);
 
                     IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders, Request.GetODataContentIdMapping());
                     ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
@@ -438,9 +444,10 @@ namespace System.Web.Http.OData.Formatter
 
             IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream, content.Headers);
 
+            Uri baseUri = GetBaseAddressInternal(Request);
             ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings(MessageWriterSettings)
             {
-                BaseUri = GetBaseAddress(Request),
+                BaseUri = baseUri,
                 Version = _version,
             };
 
@@ -450,7 +457,7 @@ namespace System.Web.Http.OData.Formatter
             // to generate a metadata link.
             if (serializer.ODataPayloadKind != ODataPayloadKind.Error)
             {
-                string metadataLink = urlHelper.CreateODataLink(new MetadataPathSegment());
+                string metadataLink = GetMetadataLink(baseUri, urlHelper);
 
                 if (metadataLink == null)
                 {
@@ -485,6 +492,31 @@ namespace System.Web.Http.OData.Formatter
 
                 serializer.WriteObject(value, type, messageWriter, writeContext);
             }
+        }
+
+        private string GetMetadataLink(Uri baseUri, UrlHelper urlHelper)
+        {
+            Contract.Assert(baseUri != null);
+            Contract.Assert(urlHelper != null);
+
+            string metadataLink;
+
+            if (BaseAddressFactory != null)
+            {
+                string baseAddress = baseUri.ToString();
+                if (baseAddress[baseAddress.Length - 1] != '/')
+                {
+                    baseAddress = baseAddress + '/';
+                }
+
+                metadataLink = baseAddress + new MetadataPathSegment();
+            }
+            else
+            {
+                metadataLink = urlHelper.CreateODataLink(new MetadataPathSegment());
+            }
+
+            return metadataLink;
         }
 
         private static string GetSelectClause(HttpRequestMessage request)
@@ -654,8 +686,37 @@ namespace System.Web.Http.OData.Formatter
                 (type.IsCollection() && type.AsCollection().ElementType().IsEntity());
         }
 
-        private static Uri GetBaseAddress(HttpRequestMessage request)
+        /// <summary>
+        /// Internal method used for selecting the base address to be used with OData uris.
+        /// If the consumer has provided a delegate for overriding our default implementation,
+        /// we call that, otherwise we default to existing behavior below.
+        /// </summary>
+        /// <param name="request">The HttpRequestMessage object for the given request.</param>
+        /// <returns>The base address to be used as part of the service root.</returns>
+        private Uri GetBaseAddressInternal(HttpRequestMessage request)
         {
+            if (BaseAddressFactory != null)
+            {
+                return BaseAddressFactory(request);
+            }
+            else
+            {
+                return ODataMediaTypeFormatter.GetDefaultBaseAddress(request);
+            }
+        }
+
+        /// <summary>
+        /// Returns a base address to be used in the service root when reading or writing OData uris.
+        /// </summary>
+        /// <param name="request">The HttpRequestMessage object for the given request.</param>
+        /// <returns>The base address to be used as part of the service root in the OData uri.</returns>
+        public static Uri GetDefaultBaseAddress(HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
             UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
 
             string baseAddress = urlHelper.CreateODataLink();

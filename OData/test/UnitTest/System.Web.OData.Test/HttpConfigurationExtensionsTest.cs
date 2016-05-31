@@ -14,11 +14,13 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Query;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Moq;
+using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace System.Web.OData
 {
@@ -273,6 +275,40 @@ namespace System.Web.OData
             Assert.Null(pathResolver.UrlConventions);
         }
 
+        [Fact]
+        public void ConfigureServices_Sets_DefaultContainer()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            config.SetupContainer(builder => builder.AddService<IFoo, Foo>(ServiceLifetime.Singleton));
+            config.MapODataServiceRoute("odata", "odata", new EdmModel());
+            IServiceProvider rootContainer = config.GetRootContainer();
+            IFoo foo1 = rootContainer.GetRequiredService<IFoo>();
+            IFoo foo2 = rootContainer.GetRequiredService<IFoo>();
+
+            // Assert
+            Assert.Equal(foo1, foo2);
+        }
+
+        [Fact]
+        public void ConfigureServices_CanSet_CustomContainer()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            config.UseCustomContainerBuilder(() => new DerivedContainerBuilder());
+            config.SetupContainer(builder => builder.AddService<IFoo, Foo>(ServiceLifetime.Singleton));
+            config.MapODataServiceRoute("odata", "odata", new EdmModel());
+            IServiceProvider rootContainer = config.GetRootContainer();
+            IFoo foo = rootContainer.GetRequiredService<IFoo>();
+
+            // Assert
+            Assert.Equal(typeof(Foo2), foo.GetType());
+        }
+
         private static ODataMediaTypeFormatter CreateODataFormatter()
         {
             return new ODataMediaTypeFormatter(new ODataPayloadKind[0]);
@@ -285,5 +321,27 @@ namespace System.Web.OData
             {
             }
         }
+
+        private class DerivedContainerBuilder : DefaultContainerBuilder
+        {
+            public override IContainerBuilder AddService(
+                ServiceLifetime lifetime,
+                Type serviceType,
+                Type implementationType)
+            {
+                if (serviceType == typeof(IFoo))
+                {
+                    return base.AddService(lifetime, serviceType, typeof(Foo2));
+                }
+
+                return base.AddService(lifetime, serviceType, implementationType);
+            }
+        }
+
+        private interface IFoo { }
+
+        private class Foo : IFoo { }
+
+        private class Foo2 : IFoo { }
     }
 }

@@ -1429,6 +1429,24 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The container built by the container builder must not be null..
+        /// </summary>
+        internal static string NullContainer {
+            get {
+                return ResourceManager.GetString("NullContainer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The container builder created by the container builder factory must not be null..
+        /// </summary>
+        internal static string NullContainerBuilder {
+            get {
+                return ResourceManager.GetString("NullContainerBuilder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Collections cannot contain null elements..
         /// </summary>
         internal static string NullElementInCollection {

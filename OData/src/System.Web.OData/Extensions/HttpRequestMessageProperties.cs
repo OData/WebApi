@@ -36,6 +36,7 @@ namespace System.Web.OData.Extensions
         private const string ApplyClauseKey = "System.Web.OData.ApplyClause";
         private const string TotalCountKey = "System.Web.OData.TotalCount";
         private const string TotalCountFuncKey = "System.Web.OData.TotalCountFunc";
+        private const string RequestContainerKey = "System.Web.OData.RequestContainer";
 
         internal const string ODataServiceVersionHeader = "OData-Version";
         internal const string ODataMaxServiceVersionHeader = "OData-MaxVersion";
@@ -268,6 +269,21 @@ namespace System.Web.OData.Extensions
             private set
             {
                 _request.Properties[RoutingConventionsStoreKey] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the dependency injection container for the OData request.
+        /// </summary>
+        public IServiceProvider RequestContainer
+        {
+            get
+            {
+                return GetValueOrNull<IServiceProvider>(RequestContainerKey);
+            }
+            set
+            {
+                _request.Properties[RequestContainerKey] = value;
             }
         }
 

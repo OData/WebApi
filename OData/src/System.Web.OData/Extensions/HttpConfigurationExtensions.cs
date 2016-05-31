@@ -38,6 +38,12 @@ namespace System.Web.OData.Extensions
 
         private const string NullDynamicPropertyKey = "System.Web.OData.NullDynamicPropertyKey";
 
+        private const string ContainerBuilderFactoryKey = "System.Web.OData.ContainerBuilderFactoryKey";
+
+        private const string ContainerSetupActionKey = "System.Web.OData.ContainerConfigureActionKey";
+
+        private const string RootContainerKey = "System.Web.OData.RootContainerKey";
+
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
         /// type. To avoid processing unexpected or malicious queries, use the validation settings on
@@ -290,6 +296,149 @@ namespace System.Web.OData.Extensions
             return defaultSettings;
         }
 
+        internal static IContainerBuilder GetContainerBuilder(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            object value;
+            if (configuration.Properties.TryGetValue(ContainerBuilderFactoryKey, out value))
+            {
+                Func<IContainerBuilder> builderFactory = (Func<IContainerBuilder>)value;
+
+                IContainerBuilder builder = builderFactory();
+                if (builder == null)
+                {
+                    throw Error.InvalidOperation(SRResources.NullContainerBuilder);
+                }
+
+                return builder;
+            }
+
+            return new DefaultContainerBuilder();
+        }
+
+        internal static void SetContainerBuilderFactory(this HttpConfiguration configuration, Func<IContainerBuilder> builderFactory)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            if (builderFactory == null)
+            {
+                throw Error.ArgumentNull("builderFactory");
+            }
+
+            configuration.Properties[ContainerBuilderFactoryKey] = builderFactory;
+        }
+
+        internal static Action<IContainerBuilder> GetContainerSetupAction(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            object value;
+            if (configuration.Properties.TryGetValue(ContainerSetupActionKey, out value))
+            {
+                return (Action<IContainerBuilder>)value;
+            }
+
+            return null;
+        }
+
+        internal static void SetContainerSetupAction(this HttpConfiguration configuration, Action<IContainerBuilder> setupAction)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            if (setupAction == null)
+            {
+                throw Error.ArgumentNull("setupAction");
+            }
+
+            configuration.Properties[ContainerSetupActionKey] = setupAction;
+        }
+
+        internal static IServiceProvider GetRootContainer(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            return configuration.Properties[RootContainerKey] as IServiceProvider;
+        }
+
+        internal static void SetRootContainer(this HttpConfiguration configuration, IServiceProvider container)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            if (container == null)
+            {
+                throw Error.ArgumentNull("container");
+            }
+
+            configuration.Properties[RootContainerKey] = container;
+        }
+
+        /// <summary>
+        /// Specifies a custom container builder.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="builderFactory">The factory to create a container builder.</param>
+        /// <returns>The server configuration.</returns>
+        /// <remarks>TODO: Make this method public after changing reference to ODataLib v7.0.</remarks>
+        internal static HttpConfiguration UseCustomContainerBuilder(this HttpConfiguration configuration, Func<IContainerBuilder> builderFactory)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            if (builderFactory == null)
+            {
+                throw Error.ArgumentNull("builderFactory");
+            }
+
+            configuration.SetContainerBuilderFactory(builderFactory);
+
+            return configuration;
+        }
+
+        /// <summary>
+        /// Adds services to the container.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="setupAction">The action to add the services.</param>
+        /// <returns>The server configuration.</returns>
+        /// <remarks>TODO: Make this method public after changing reference to ODataLib v7.0.</remarks>
+        internal static HttpConfiguration SetupContainer(this HttpConfiguration configuration, Action<IContainerBuilder> setupAction)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            if (setupAction == null)
+            {
+                throw Error.ArgumentNull("configureAction");
+            }
+
+            configuration.SetContainerSetupAction(setupAction);
+
+            return configuration;
+        }
+
         /// <summary>
         /// Maps the specified OData route and the OData route attributes.
         /// </summary>
@@ -382,6 +531,23 @@ namespace System.Web.OData.Extensions
             {
                 throw Error.ArgumentNull("configuration");
             }
+
+            IContainerBuilder builder = configuration.GetContainerBuilder();
+            builder.AddDefaultODataServices();
+
+            Action<IContainerBuilder> setupAction = configuration.GetContainerSetupAction();
+            if (setupAction != null)
+            {
+                setupAction(builder);
+            }
+
+            IServiceProvider rootContainer = builder.BuildContainer();
+            if (rootContainer == null)
+            {
+                throw Error.InvalidOperation(SRResources.NullContainer);
+            }
+
+            configuration.SetRootContainer(rootContainer);
 
             HttpRouteCollection routes = configuration.Routes;
             routePrefix = RemoveTrailingSlash(routePrefix);

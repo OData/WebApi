@@ -53,10 +53,10 @@ namespace System.Web.OData.Routing.Conventions
                 throw Error.ArgumentNull("configuration");
             }
 
-            DefaultODataPathHandler odataPathHanlder = pathTemplateHandler as DefaultODataPathHandler;
-            if (odataPathHanlder != null)
+            DefaultODataPathHandler odataPathHandler = pathTemplateHandler as DefaultODataPathHandler;
+            if (odataPathHandler != null)
             {
-                odataPathHanlder.ResolverSetttings = configuration.GetResolverSettings();
+                odataPathHandler.ResolverSetttings = configuration.GetResolverSettings();
             }
 
             Action<HttpConfiguration> oldInitializer = configuration.Initializer;

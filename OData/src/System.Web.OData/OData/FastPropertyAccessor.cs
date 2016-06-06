@@ -9,15 +9,15 @@ using System.Web.OData.Formatter.Deserialization;
 namespace System.Web.OData
 {
     /// <summary>
-    /// FastPropertyAccessor is a <see cref="PropertyAccessor{TEntityType}"/> that speeds up (compares to reflection)
+    /// FastPropertyAccessor is a <see cref="PropertyAccessor{TStructuralType}"/> that speeds up (compares to reflection)
     /// a Getter and Setter for the PropertyInfo of TEntityType provided via the constructor.
     /// </summary>
-    /// <typeparam name="TEntityType">The type on which the PropertyInfo exists</typeparam>
-    internal class FastPropertyAccessor<TEntityType> : PropertyAccessor<TEntityType> where TEntityType : class
+    /// <typeparam name="TStructuralType">The type on which the PropertyInfo exists</typeparam>
+    internal class FastPropertyAccessor<TStructuralType> : PropertyAccessor<TStructuralType> where TStructuralType : class
     {
         private bool _isCollection;
         private PropertyInfo _property;
-        private Action<TEntityType, object> _setter;
+        private Action<TStructuralType, object> _setter;
         private Func<object, object> _getter;
 
         public FastPropertyAccessor(PropertyInfo property)
@@ -28,35 +28,35 @@ namespace System.Web.OData
 
             if (!_isCollection)
             {
-                _setter = PropertyHelper.MakeFastPropertySetter<TEntityType>(property);
+                _setter = PropertyHelper.MakeFastPropertySetter<TStructuralType>(property);
             }
             _getter = PropertyHelper.MakeFastPropertyGetter(property);
         }
 
-        public override object GetValue(TEntityType entity)
+        public override object GetValue(TStructuralType instance)
         {
-            if (entity == null)
+            if (instance == null)
             {
-                throw Error.ArgumentNull("entity");
+                throw Error.ArgumentNull("instance");
             }
-            return _getter(entity);
+            return _getter(instance);
         }
 
-        public override void SetValue(TEntityType entity, object value)
+        public override void SetValue(TStructuralType instance, object value)
         {
-            if (entity == null)
+            if (instance == null)
             {
-                throw Error.ArgumentNull("entity");
+                throw Error.ArgumentNull("instance");
             }
 
             if (_isCollection)
             {
-                DeserializationHelpers.SetCollectionProperty(entity, _property.Name, edmPropertyType: null,
+                DeserializationHelpers.SetCollectionProperty(instance, _property.Name, edmPropertyType: null,
                     value: value, clearCollection: true);
             }
             else
             {
-                _setter(entity, value);
+                _setter(instance, value);
             }
         }
     }

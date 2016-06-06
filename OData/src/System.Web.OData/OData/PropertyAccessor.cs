@@ -8,10 +8,10 @@ using WebApiResources = System.Web.OData.Properties.SRResources;
 namespace System.Web.OData
 {
     /// <summary>
-    /// Represents a strategy for Getting and Setting a PropertyInfo on <typeparamref name="TEntityType"/>
+    /// Represents a strategy for Getting and Setting a PropertyInfo on <typeparamref name="TStructuralType"/>
     /// </summary>
-    /// <typeparam name="TEntityType">The type that contains the PropertyInfo</typeparam>
-    internal abstract class PropertyAccessor<TEntityType> where TEntityType : class
+    /// <typeparam name="TStructuralType">The type that contains the PropertyInfo</typeparam>
+    internal abstract class PropertyAccessor<TStructuralType> where TStructuralType : class
     {
         protected PropertyAccessor(PropertyInfo property)
         {
@@ -33,7 +33,7 @@ namespace System.Web.OData
             private set;
         }
 
-        public void Copy(TEntityType from, TEntityType to)
+        public void Copy(TStructuralType from, TStructuralType to)
         {
             if (from == null)
             {
@@ -46,8 +46,8 @@ namespace System.Web.OData
             SetValue(to, GetValue(from));
         }
 
-        public abstract object GetValue(TEntityType entity);
+        public abstract object GetValue(TStructuralType instance);
 
-        public abstract void SetValue(TEntityType entity, object value);
+        public abstract void SetValue(TStructuralType instance, object value);
     }
 }

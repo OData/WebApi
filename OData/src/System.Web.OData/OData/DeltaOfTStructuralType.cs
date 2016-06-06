@@ -445,7 +445,7 @@ namespace System.Web.OData
             _allProperties = _propertyCache.GetOrAdd(
                 _entityType,
                 (backingType) => backingType
-                    .GetProperties()
+                    .GetProperties(BindingFlags.Instance | BindingFlags.Public)
                     .Where(p => (p.GetSetMethod() != null || p.PropertyType.IsCollection()) && p.GetGetMethod() != null)
                     .Select<PropertyInfo, PropertyAccessor<TStructuralType>>(p => new FastPropertyAccessor<TStructuralType>(p))
                     .ToDictionary(p => p.Property.Name));

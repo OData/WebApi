@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -12,7 +13,9 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
+using System.Web.SessionState;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -189,14 +192,37 @@ namespace System.Web.OData.Test
             Assert.NotNull(response.Headers.ETag);
         }
 
-        private static HttpRequestMessage SetupRequest(HttpMethod method, string odataPath)
+        [Fact]
+        public void SendAsync_WritesETagToResponseHeaders_InUntyped()
+        {
+            // Arrange
+            IEdmModel model = GetUnTypeEdmModel();
+            HttpRequestMessage request = SetupRequest(HttpMethod.Get, "Customers(3)", model);
+
+            IEdmEntityType entityType = model.SchemaElements.OfType<IEdmEntityType>().First(c => c.Name == "Customer");
+            EdmEntityObject customer = new EdmEntityObject(entityType);
+            customer.TrySetPropertyValue("ID", 3);
+            customer.TrySetPropertyValue("Name", "Sam");
+
+            HttpResponseMessage originalResponse = SetupResponse(HttpStatusCode.OK, typeof(EdmEntityObject), customer);
+            ETagMessageHandler handler = new ETagMessageHandler() { InnerHandler = new TestHandler(originalResponse) };
+
+            // Act
+            HttpResponseMessage response = handler.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response.Headers.ETag);
+            Assert.Equal("\"J1NhbSc=\"", response.Headers.ETag.Tag);
+        }
+
+        private static HttpRequestMessage SetupRequest(HttpMethod method, string odataPath, IEdmModel edmModel = null)
         {
             HttpRequestMessage request;
             HttpConfiguration configuration = new HttpConfiguration();
             request = new HttpRequestMessage(method, "http://host/any");
             request.SetConfiguration(configuration);
             HttpRequestMessageProperties properties = request.ODataProperties();
-            IEdmModel model = SetupModel();
+            IEdmModel model = edmModel ?? SetupModel();
             properties.Model = model;
             properties.PathHandler = new DefaultODataPathHandler();
             properties.Path = properties.PathHandler.Parse(model, "http://localhost/any", odataPath);
@@ -233,6 +259,25 @@ namespace System.Web.OData.Test
             }
 
             IEdmModel model = builder.GetEdmModel();
+            return model;
+        }
+
+        private static IEdmModel GetUnTypeEdmModel()
+        {
+            EdmModel model = new EdmModel();
+
+            // entity type customer
+            EdmEntityType customer = new EdmEntityType("NS", "Customer");
+            customer.AddKeys(customer.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
+            IEdmStructuralProperty customerName = customer.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+            model.AddElement(customer);
+
+            // entity sets
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Default");
+            model.AddElement(container);
+            EdmEntitySet customers = container.AddEntitySet("Customers", customer);
+
+            model.SetOptimisticConcurrencyAnnotation(customers, new[] { customerName });
             return model;
         }
 

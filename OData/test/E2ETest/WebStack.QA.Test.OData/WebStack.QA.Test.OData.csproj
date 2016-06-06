@@ -170,6 +170,7 @@
     <Compile Include="ETags\ETagCurrencyTokenEfContext.cs" />
     <Compile Include="ETags\ETagCurrencyTokenEfContextTest.cs" />
     <Compile Include="ETags\ETagsOtherTypesTest.cs" />
+    <Compile Include="ETags\ETagsUntypedTests.cs" />
     <Compile Include="Formatter\ODataFeedSerializeWithoutNavigationSourceTests.cs" />
     <Compile Include="ODataCountTest\CountController.cs" />
     <Compile Include="ODataCountTest\CountDataModel.cs" />

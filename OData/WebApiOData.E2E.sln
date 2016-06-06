@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "base", "base", "{C015197B-27D3-499F-9A31-63E9E7D58F58}"
 EndProject
@@ -27,6 +27,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.OData", "src\System.Web.OData\System.Web.OData.csproj", "{D23E28F1-CCD0-43E0-8C0D-36731EC91318}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.OData", "src\System.Web.Http.OData\System.Web.Http.OData.csproj", "{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2EB8D1F9-C505-4FA8-8D1C-F167B5B1AB8E}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -88,6 +88,13 @@ namespace System.Web.OData
                 return null;
             }
 
+            IEdmObject edmObject = value as IEdmEntityObject;
+            if (edmObject != null)
+            {
+                IEdmTypeReference edmTypeReference = edmObject.GetEdmType();
+                return edmTypeReference.AsEntity();
+            }
+
             IEdmTypeReference reference = EdmLibHelpers.GetEdmTypeReference(model, value.GetType());
             if (reference != null && reference.Definition.IsOrInheritsFrom(edmType))
             {

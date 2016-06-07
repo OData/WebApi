@@ -78,10 +78,10 @@ namespace System.Web.OData.Query
             Context = context;
             Request = request;
 
-            // Parse the query from request Uri
+            // Parse the query from request Uri, including only keys which look like OData parameters
             RawValues = new ODataRawQueryOptions();
             IDictionary<string, string> queryParameters = 
-                request.GetQueryNameValuePairs().ToDictionary(p => p.Key, p => p.Value);
+                request.GetQueryNameValuePairs().Where(p => p.Key.StartsWith("$")).ToDictionary(p => p.Key, p => p.Value);
             
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,

@@ -716,6 +716,27 @@ namespace System.Web.OData.Query
             Assert.False(ODataQueryOptions.IsSystemQueryOption("$invalidqueryname"));
         }
 
+        [Fact]
+        public void DuplicateUnsupportedQueryParametersIgnored()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+
+            // a simple query with duplicate ignored parameters (key=test)
+            string uri = "http://server/service/Customers?$top=10&test=1&test=2";
+            var message = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri(uri)
+            );
+
+            // Act
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+
+            // Assert
+            Assert.Equal(queryOptions.RawValues.Top, "10");
+        }
+
+
         [Theory]
         [InlineData(1, true)]
         [InlineData(2, true)]

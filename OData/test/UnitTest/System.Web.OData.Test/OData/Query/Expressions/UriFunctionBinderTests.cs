@@ -3,7 +3,7 @@
 
 using System.Reflection;
 using System.Web.OData.Query.Expressions;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Test.OData.Query.Expressions

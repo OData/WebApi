@@ -9,10 +9,9 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
-using System.Web.OData.Routing.Conventions;
 using System.Web.OData.TestCommon.Models;
-using Microsoft.OData.Core.UriParser.Metadata;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 

@@ -9,7 +9,7 @@ using System.Web.Http.Routing;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
-using SelectExpandClause = Microsoft.OData.Core.UriParser.Semantic.SelectExpandClause;
+using SelectExpandClause = Microsoft.OData.UriParser.SelectExpandClause;
 
 namespace System.Web.OData.Formatter.Serialization
 {

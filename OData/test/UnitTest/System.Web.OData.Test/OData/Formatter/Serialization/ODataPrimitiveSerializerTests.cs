@@ -9,9 +9,8 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Extensions;
 using System.Xml.Linq;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 

@@ -12,9 +12,9 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Routing;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using ODataPath = System.Web.OData.Routing.ODataPath;
 
@@ -82,7 +82,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
             {
-                PayloadBaseUri = new Uri("http://localhost/odata"),
+                BaseUri = new Uri("http://localhost/odata"),
                 Version = ODataVersion.V4,
                 ODataUri = new ODataUri { ServiceRoot = new Uri("http://localhost/odata") }
             };

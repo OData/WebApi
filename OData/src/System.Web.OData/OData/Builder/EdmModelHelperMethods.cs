@@ -9,10 +9,8 @@ using System.Reflection;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Expressions;
-using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.OData.Edm.Validation;
+using Microsoft.OData.Edm.Vocabularies;
 
 namespace System.Web.OData.Builder
 {

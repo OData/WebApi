@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Formatter.Serialization

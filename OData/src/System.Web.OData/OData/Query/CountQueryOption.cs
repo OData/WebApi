@@ -4,11 +4,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Validators;
-using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Query
 {

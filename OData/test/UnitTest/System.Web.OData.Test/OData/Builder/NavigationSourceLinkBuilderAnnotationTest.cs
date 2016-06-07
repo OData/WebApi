@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Data.Linq;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
@@ -11,7 +10,6 @@ using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Formatter.Serialization.Models;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Builder

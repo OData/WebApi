@@ -7,12 +7,10 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Properties;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.OData.Core.UriParser.Visitors;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Semantic = Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.UriParser;
+using Semantic = Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Routing
 {

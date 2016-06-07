@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Data.Linq;
 using System.Linq;
 using System.Xml.Linq;
-using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon.Types;
 
 namespace System.Web.OData.Query.Expressions

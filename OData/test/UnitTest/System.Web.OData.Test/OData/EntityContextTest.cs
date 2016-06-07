@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 

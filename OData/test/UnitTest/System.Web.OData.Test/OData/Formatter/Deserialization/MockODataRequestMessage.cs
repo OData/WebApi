@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 
 namespace System.Web.OData.Formatter.Deserialization
 {

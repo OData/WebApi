@@ -4,7 +4,7 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.OData.Builder;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 

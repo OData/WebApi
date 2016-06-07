@@ -8,11 +8,10 @@ using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Routing;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Edm.Library.Values;
+using Microsoft.OData.Edm.Vocabularies;
+using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Moq;
 using ODataPath = System.Web.OData.Routing.ODataPath;
@@ -188,7 +187,7 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.NotNull(serializer);
             var entitySerializer = Assert.IsType<ODataEntityTypeSerializer>(serializer);
             Assert.Equal(entitySerializer.SerializerProvider, serializerProvider);
-            Assert.Equal(entitySerializer.ODataPayloadKind, ODataPayloadKind.Entry);
+            Assert.Equal(entitySerializer.ODataPayloadKind, ODataPayloadKind.Resource);
         }
 
         [Fact]
@@ -220,7 +219,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             Assert.NotNull(serializer);
             var feedSerializer = Assert.IsType<ODataFeedSerializer>(serializer);
-            Assert.Equal(feedSerializer.ODataPayloadKind, ODataPayloadKind.Feed);
+            Assert.Equal(feedSerializer.ODataPayloadKind, ODataPayloadKind.ResourceSet);
         }
 
         [Fact]
@@ -309,8 +308,8 @@ namespace System.Web.OData.Formatter.Serialization
             EdmModel model = new EdmModel();
 
             EdmEnumType enumType = new EdmEnumType("TestModel", "TestEnum");
-            enumType.AddMember(new EdmEnumMember(enumType, "FirstValue", new EdmIntegerConstant(0)));
-            enumType.AddMember(new EdmEnumMember(enumType, "FirstValue", new EdmIntegerConstant(1)));
+            enumType.AddMember(new EdmEnumMember(enumType, "FirstValue", new EdmEnumMemberValue(0)));
+            enumType.AddMember(new EdmEnumMember(enumType, "FirstValue", new EdmEnumMemberValue(1)));
             model.AddElement(enumType);
 
             model.SetAnnotationValue(model.FindDeclaredType("TestModel.TestEnum"), new ClrTypeAnnotation(typeof(TestEnum)));

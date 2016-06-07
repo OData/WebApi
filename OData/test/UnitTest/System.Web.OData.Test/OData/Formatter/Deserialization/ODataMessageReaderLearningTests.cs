@@ -5,9 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Formatter.Serialization
@@ -58,7 +57,7 @@ namespace System.Web.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => reader.CreateODataEntryReader());
+                Assert.Throws<ODataException>(() => reader.CreateODataResourceReader());
             }
         }
 
@@ -74,7 +73,7 @@ namespace System.Web.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => reader.CreateODataEntryReader(null, entityType));
+                Assert.Throws<ODataException>(() => reader.CreateODataResourceReader(null, entityType));
             }
         }
 
@@ -90,7 +89,7 @@ namespace System.Web.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.CreateODataEntryReader(entitySet, null));
+                Assert.DoesNotThrow(() => reader.CreateODataResourceReader(entitySet, null));
             }
         }
 
@@ -105,7 +104,7 @@ namespace System.Web.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => reader.CreateODataFeedReader());
+                Assert.Throws<ODataException>(() => reader.CreateODataResourceSetReader());
             }
         }
 
@@ -121,7 +120,7 @@ namespace System.Web.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => reader.CreateODataFeedReader(entityType));
+                Assert.Throws<ODataException>(() => reader.CreateODataResourceSetReader(entityType));
             }
         }
 
@@ -137,7 +136,7 @@ namespace System.Web.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.CreateODataFeedReader(entitySet, null));
+                Assert.DoesNotThrow(() => reader.CreateODataResourceSetReader(entitySet, null));
             }
         }
 

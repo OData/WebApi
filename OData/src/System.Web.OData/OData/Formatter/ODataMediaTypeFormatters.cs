@@ -7,7 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 
 namespace System.Web.OData.Formatter
 {
@@ -74,8 +74,8 @@ namespace System.Web.OData.Formatter
             ODataMediaTypeFormatter formatter = CreateFormatterWithoutMediaTypes(
                 serializerProvider,
                 deserializerProvider,
-                ODataPayloadKind.Feed,
-                ODataPayloadKind.Entry,
+                ODataPayloadKind.ResourceSet,
+                ODataPayloadKind.Resource,
                 ODataPayloadKind.Property,
                 ODataPayloadKind.EntityReferenceLink,
                 ODataPayloadKind.EntityReferenceLinks,

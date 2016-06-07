@@ -4,7 +4,7 @@
 using System.IO;
 using System.Runtime.Serialization;
 using System.Web.Http;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.TestCommon;
 using Moq;
 

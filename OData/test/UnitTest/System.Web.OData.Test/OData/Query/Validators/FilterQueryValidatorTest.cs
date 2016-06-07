@@ -4,10 +4,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.OData.Query.Expressions;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Query.Validators

@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Properties;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Formatter.Deserialization
@@ -21,7 +21,7 @@ namespace System.Web.OData.Formatter.Deserialization
         /// </summary>
         /// <param name="deserializerProvider">The deserializer provider to use to read inner objects.</param>
         public ODataFeedDeserializer(ODataDeserializerProvider deserializerProvider)
-            : base(ODataPayloadKind.Feed, deserializerProvider)
+            : base(ODataPayloadKind.ResourceSet, deserializerProvider)
         {
         }
 

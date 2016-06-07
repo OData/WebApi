@@ -2,12 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 
 namespace System.Web.OData.Formatter.Deserialization
 {
     /// <summary>
-    /// Encapsulates an <see cref="ODataFeed"/> and the <see cref="ODataEntry"/>'s that are part of it.
+    /// Encapsulates an <see cref="ODataResourceSet"/> and the <see cref="ODataResource"/>'s that are part of it.
     /// </summary>
     public sealed class ODataFeedWithEntries : ODataItemBase
     {
@@ -15,20 +15,20 @@ namespace System.Web.OData.Formatter.Deserialization
         /// Initializes a new instance of <see cref="ODataFeedWithEntries"/>.
         /// </summary>
         /// <param name="item">The wrapped item.</param>
-        public ODataFeedWithEntries(ODataFeed item)
+        public ODataFeedWithEntries(ODataResourceSet item)
             : base(item)
         {
             Entries = new List<ODataEntryWithNavigationLinks>();
         }
 
         /// <summary>
-        /// Gets the wrapped <see cref="ODataFeed"/>.
+        /// Gets the wrapped <see cref="ODataResourceSet"/>.
         /// </summary>
-        public ODataFeed Feed
+        public ODataResourceSet Feed
         {
             get
             {
-                return Item as ODataFeed;
+                return Item as ODataResourceSet;
             }
         }
 

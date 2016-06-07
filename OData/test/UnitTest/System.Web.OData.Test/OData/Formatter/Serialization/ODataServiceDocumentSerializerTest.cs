@@ -3,7 +3,7 @@
 
 using System.IO;
 using System.Runtime.Serialization;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Formatter.Serialization

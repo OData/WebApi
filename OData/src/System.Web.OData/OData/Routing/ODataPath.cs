@@ -6,8 +6,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Web.Http;
 using Microsoft.OData.Edm;
-using ODataPathSegment = Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment;
-using Semantic = Microsoft.OData.Core.UriParser.Semantic;
+using ODataPathSegment = Microsoft.OData.UriParser.ODataPathSegment;
+using Semantic = Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Routing
 {

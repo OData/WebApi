@@ -10,10 +10,9 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Web.OData.Builder;
 using System.Web.OData.TestCommon;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
+using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;
@@ -111,7 +110,7 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             var deserializer = new Mock<ODataEntityDeserializer>(_deserializerProvider);
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry());
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource());
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
             deserializer.CallBase = true;
@@ -138,7 +137,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadEntry_ThrowsArgumentNull_ReadContext()
         {
             var deserializer = new ODataEntityDeserializer(_deserializerProvider);
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry());
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource());
             Assert.ThrowsArgumentNull(
                 () => deserializer.ReadEntry(entry, entityType: _productEdmType, readContext: null),
                 "readContext");
@@ -148,7 +147,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadEntry_ThrowsArgument_ModelMissingFromReadContext()
         {
             var deserializer = new ODataEntityDeserializer(_deserializerProvider);
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = _supplierEdmType.FullName() });
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource { TypeName = _supplierEdmType.FullName() });
 
             Assert.ThrowsArgument(
                 () => deserializer.ReadEntry(entry, _productEdmType, new ODataDeserializerContext()),
@@ -160,7 +159,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadEntry_ThrowsODataException_EntityTypeNotInModel()
         {
             var deserializer = new ODataEntityDeserializer(_deserializerProvider);
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = "MissingType" });
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource { TypeName = "MissingType" });
 
             Assert.Throws<ODataException>(
                 () => deserializer.ReadEntry(entry, _productEdmType, _readContext),
@@ -174,7 +173,7 @@ namespace System.Web.OData.Formatter.Deserialization
             builder.EntityType<BaseType>().Abstract();
             IEdmModel model = builder.GetEdmModel();
             var deserializer = new ODataEntityDeserializer(_deserializerProvider);
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = "System.Web.OData.Formatter.Deserialization.BaseType" });
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource { TypeName = "System.Web.OData.Formatter.Deserialization.BaseType" });
 
             Assert.Throws<ODataException>(
                 () => deserializer.ReadEntry(entry, _productEdmType, new ODataDeserializerContext { Model = model }),
@@ -187,7 +186,7 @@ namespace System.Web.OData.Formatter.Deserialization
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
             deserializerProvider.Setup(d => d.GetEdmTypeDeserializer(It.IsAny<IEdmTypeReference>())).Returns<ODataEdmTypeDeserializer>(null);
             var deserializer = new ODataEntityDeserializer(deserializerProvider.Object);
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = _supplierEdmType.FullName() });
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource { TypeName = _supplierEdmType.FullName() });
 
             Assert.Throws<SerializationException>(
                 () => deserializer.ReadEntry(entry, _productEdmType, _readContext),
@@ -198,10 +197,10 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadEntry_DispatchesToRightDeserializer_IfEntityTypeNameIsDifferent()
         {
             // Arrange
-            Mock<ODataEdmTypeDeserializer> supplierDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.Entry);
+            Mock<ODataEdmTypeDeserializer> supplierDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.Resource);
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
             var deserializer = new ODataEntityDeserializer(deserializerProvider.Object);
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { TypeName = _supplierEdmType.FullName() });
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource { TypeName = _supplierEdmType.FullName() });
 
             deserializerProvider.Setup(d => d.GetEdmTypeDeserializer(It.IsAny<IEdmTypeReference>())).Returns(supplierDeserializer.Object);
             supplierDeserializer
@@ -223,7 +222,7 @@ namespace System.Web.OData.Formatter.Deserialization
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             IEdmEntityTypeReference customerType = EdmLibHelpers.ToEdmTypeReference(model.Customer, isNullable: false).AsEntity();
             ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model.Model, ResourceType = typeof(IEdmObject) };
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource
             {
                 TypeName = model.SpecialCustomer.FullName(),
                 Properties = new ODataProperty[0]
@@ -245,7 +244,7 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             Mock<ODataEntityDeserializer> deserializer = new Mock<ODataEntityDeserializer>(_deserializerProvider);
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { Properties = Enumerable.Empty<ODataProperty>() });
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource { Properties = Enumerable.Empty<ODataProperty>() });
             deserializer.CallBase = true;
             deserializer.Setup(d => d.CreateEntityResource(_productEdmType, _readContext)).Returns(42).Verifiable();
 
@@ -262,7 +261,7 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             Mock<ODataEntityDeserializer> deserializer = new Mock<ODataEntityDeserializer>(_deserializerProvider);
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { Properties = Enumerable.Empty<ODataProperty>() });
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource { Properties = Enumerable.Empty<ODataProperty>() });
             deserializer.CallBase = true;
             deserializer.Setup(d => d.CreateEntityResource(_productEdmType, _readContext)).Returns(42);
             deserializer.Setup(d => d.ApplyStructuralProperties(42, entry, _productEdmType, _readContext)).Verifiable();
@@ -279,7 +278,7 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             Mock<ODataEntityDeserializer> deserializer = new Mock<ODataEntityDeserializer>(_deserializerProvider);
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { Properties = Enumerable.Empty<ODataProperty>() });
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource { Properties = Enumerable.Empty<ODataProperty>() });
             deserializer.CallBase = true;
             deserializer.Setup(d => d.CreateEntityResource(_productEdmType, _readContext)).Returns(42);
             deserializer.Setup(d => d.ApplyNavigationProperties(42, entry, _productEdmType, _readContext)).Verifiable();
@@ -351,7 +350,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 Items = complexValues
             };
 
-            ODataEntry odataEntry = new ODataEntry
+            ODataResource odataEntry = new ODataResource
             {
                 Properties = new[]
                 {
@@ -414,7 +413,7 @@ namespace System.Web.OData.Formatter.Deserialization
             var deserializerProvider = new DefaultODataDeserializerProvider();
             var deserializer = new ODataEntityDeserializer(deserializerProvider);
 
-            ODataEntry odataEntry = new ODataEntry
+            ODataResource odataEntry = new ODataResource
             {
                 Properties = new[]
                 {
@@ -478,7 +477,7 @@ namespace System.Web.OData.Formatter.Deserialization
             var deserializerProvider = new DefaultODataDeserializerProvider();
             var deserializer = new ODataEntityDeserializer(deserializerProvider);
 
-            ODataEntry odataEntry = new ODataEntry
+            ODataResource odataEntry = new ODataResource
             {
                 Properties = new[]
                 {
@@ -608,9 +607,9 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ApplyNavigationProperties_Calls_ApplyNavigationPropertyForEachNavigationLink()
         {
             // Arrange
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry());
-            entry.NavigationLinks.Add(new ODataNavigationLinkWithItems(new ODataNavigationLink()));
-            entry.NavigationLinks.Add(new ODataNavigationLinkWithItems(new ODataNavigationLink()));
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource());
+            entry.NavigationLinks.Add(new ODataNavigationLinkWithItems(new ODataNestedResourceInfo()));
+            entry.NavigationLinks.Add(new ODataNavigationLinkWithItems(new ODataNestedResourceInfo()));
 
             Mock<ODataEntityDeserializer> deserializer = new Mock<ODataEntityDeserializer>(_deserializerProvider);
             deserializer.CallBase = true;
@@ -638,7 +637,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ApplyNavigationProperty_ThrowsArgumentNull_EntityResource()
         {
             var deserializer = new ODataEntityDeserializer(_deserializerProvider);
-            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink());
+            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNestedResourceInfo());
             Assert.ThrowsArgumentNull(
                 () => deserializer.ApplyNavigationProperty(entityResource: null, navigationLinkWrapper: navigationLink,
                     entityType: _productEdmType, readContext: _readContext),
@@ -649,7 +648,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ApplyNavigationProperty_ThrowsODataException_NavigationPropertyNotfound()
         {
             var deserializer = new ODataEntityDeserializer(_deserializerProvider);
-            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "SomeProperty" });
+            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNestedResourceInfo { Name = "SomeProperty" });
 
             Assert.Throws<ODataException>(
                 () => deserializer.ApplyNavigationProperty(42, navigationLink, _productEdmType, _readContext),
@@ -660,8 +659,8 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ApplyNavigationProperty_ThrowsODataException_WhenPatchingNavigationProperty()
         {
             var deserializer = new ODataEntityDeserializer(_deserializerProvider);
-            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Supplier" });
-            navigationLink.NestedItems.Add(new ODataEntryWithNavigationLinks(new ODataEntry()));
+            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNestedResourceInfo { Name = "Supplier" });
+            navigationLink.NestedItems.Add(new ODataEntryWithNavigationLinks(new ODataResource()));
             _readContext.ResourceType = typeof(Delta<Supplier>);
 
             Assert.Throws<ODataException>(
@@ -673,8 +672,8 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ApplyNavigationProperty_ThrowsODataException_WhenPatchingCollectionNavigationProperty()
         {
             var deserializer = new ODataEntityDeserializer(_deserializerProvider);
-            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Products" });
-            navigationLink.NestedItems.Add(new ODataFeedWithEntries(new ODataFeed()));
+            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNestedResourceInfo { Name = "Products" });
+            navigationLink.NestedItems.Add(new ODataFeedWithEntries(new ODataResourceSet()));
             _readContext.ResourceType = typeof(Delta<Supplier>);
 
             Assert.Throws<ODataException>(
@@ -687,11 +686,11 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             IEdmCollectionTypeReference productsType = new EdmCollectionTypeReference(new EdmCollectionType(_productEdmType));
-            Mock<ODataEdmTypeDeserializer> productsDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.Feed);
+            Mock<ODataEdmTypeDeserializer> productsDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.ResourceSet);
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
             var deserializer = new ODataEntityDeserializer(deserializerProvider.Object);
-            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Products" });
-            navigationLink.NestedItems.Add(new ODataFeedWithEntries(new ODataFeed()));
+            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNestedResourceInfo { Name = "Products" });
+            navigationLink.NestedItems.Add(new ODataFeedWithEntries(new ODataResourceSet()));
 
             Supplier supplier = new Supplier();
             IEnumerable products = new[] { new Product { ID = 42 } };
@@ -714,11 +713,11 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ApplyNavigationProperty_Calls_ReadInlineOnEntry()
         {
             // Arrange
-            Mock<ODataEdmTypeDeserializer> supplierDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.Feed);
+            Mock<ODataEdmTypeDeserializer> supplierDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.ResourceSet);
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
             var deserializer = new ODataEntityDeserializer(deserializerProvider.Object);
-            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Supplier" });
-            navigationLink.NestedItems.Add(new ODataEntryWithNavigationLinks(new ODataEntry()));
+            ODataNavigationLinkWithItems navigationLink = new ODataNavigationLinkWithItems(new ODataNestedResourceInfo { Name = "Supplier" });
+            navigationLink.NestedItems.Add(new ODataEntryWithNavigationLinks(new ODataResource()));
 
             Product product = new Product();
             Supplier supplier = new Supplier { ID = 42 };
@@ -746,13 +745,13 @@ namespace System.Web.OData.Formatter.Deserialization
             model.Model.SetAnnotationValue(
                 model.Customer.FindProperty("Orders"),
                 new ClrPropertyInfoAnnotation(typeof(Customer).GetProperty("AliasedOrders")));
-            ODataFeedWithEntries feedWrapper = new ODataFeedWithEntries(new ODataFeed());
+            ODataFeedWithEntries feedWrapper = new ODataFeedWithEntries(new ODataResourceSet());
             feedWrapper.Entries.Add(new ODataEntryWithNavigationLinks(
-                new ODataEntry { Properties = new[] { new ODataProperty { Name = "ID", Value = 42 } } }));
+                new ODataResource { Properties = new[] { new ODataProperty { Name = "ID", Value = 42 } } }));
 
             Customer customer = new Customer();
             ODataNavigationLinkWithItems navLink =
-                new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Orders" });
+                new ODataNavigationLinkWithItems(new ODataNestedResourceInfo { Name = "Orders" });
             navLink.NestedItems.Add(feedWrapper);
 
             ODataDeserializerContext context = new ODataDeserializerContext { Model = model.Model };
@@ -776,11 +775,11 @@ namespace System.Web.OData.Formatter.Deserialization
             model.Model.SetAnnotationValue(
                 model.Order.FindProperty("Customer"),
                 new ClrPropertyInfoAnnotation(typeof(Order).GetProperty("AliasedCustomer")));
-            ODataEntry entry = new ODataEntry { Properties = new[] { new ODataProperty { Name = "ID", Value = 42 } } };
+            ODataResource entry = new ODataResource { Properties = new[] { new ODataProperty { Name = "ID", Value = 42 } } };
 
             Order order = new Order();
             ODataNavigationLinkWithItems navLink =
-                new ODataNavigationLinkWithItems(new ODataNavigationLink { Name = "Customer" });
+                new ODataNavigationLinkWithItems(new ODataNestedResourceInfo { Name = "Customer" });
             navLink.NestedItems.Add(new ODataEntryWithNavigationLinks(entry));
 
             ODataDeserializerContext context = new ODataDeserializerContext { Model = model.Model };
@@ -808,7 +807,7 @@ namespace System.Web.OData.Formatter.Deserialization
             // Arrange
             var deserializer = new Mock<ODataEntityDeserializer>(_deserializerProvider);
             ODataProperty[] properties = new[] { new ODataProperty(), new ODataProperty() };
-            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataEntry { Properties = properties });
+            ODataEntryWithNavigationLinks entry = new ODataEntryWithNavigationLinks(new ODataResource { Properties = properties });
 
             deserializer.CallBase = true;
             deserializer.Setup(d => d.ApplyStructuralProperty(42, properties[0], _productEdmType, _readContext)).Verifiable();

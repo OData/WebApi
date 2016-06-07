@@ -2,13 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Batch;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 
 namespace System.Web.OData.Batch
 {

@@ -2,11 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Web.Configuration;
 using System.Web.OData.Builder;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Edm.Library.Values;
+using Microsoft.OData.Edm.Vocabularies;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -121,10 +119,10 @@ namespace System.Web.OData.Formatter.Serialization
 
             // Enum type simpleEnum
             EdmEnumType simpleEnum = new EdmEnumType("Default", "SimpleEnum");
-            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "First", new EdmIntegerConstant(0)));
-            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Second", new EdmIntegerConstant(1)));
-            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Third", new EdmIntegerConstant(2)));
-            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Fourth", new EdmIntegerConstant(3)));
+            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "First", new EdmEnumMemberValue(0)));
+            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Second", new EdmEnumMemberValue(1)));
+            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Third", new EdmEnumMemberValue(2)));
+            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Fourth", new EdmEnumMemberValue(3)));
             model.AddElement(simpleEnum);
 
             // Customer is an open entity type

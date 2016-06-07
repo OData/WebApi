@@ -11,11 +11,9 @@ using System.Web.OData.Builder;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization.Models;
 using System.Web.OData.TestCommon;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
+using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Query.Expressions

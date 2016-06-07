@@ -10,8 +10,7 @@ using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Edm.Library.Values;
+using Microsoft.OData.Edm.Vocabularies;
 
 namespace System.Web.OData.Builder
 {
@@ -391,7 +390,7 @@ namespace System.Web.OData.Builder
                 }
 
                 EdmEnumMember edmMember = new EdmEnumMember(type, member.Name,
-                    new EdmIntegerConstant(value));
+                    new EdmEnumMemberValue(value));
                 type.AddMember(edmMember);
                 _members[member.MemberInfo] = edmMember;
             }

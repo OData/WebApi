@@ -7,8 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Web.OData.Formatter;
-using Microsoft.OData.Core.UriParser.Aggregation;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser.Aggregation;
 
 namespace System.Web.OData.Query.Expressions
 {

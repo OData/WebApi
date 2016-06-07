@@ -2,9 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Net.Http;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -65,7 +64,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             Assert.NotNull(deserializer);
             ODataEntityDeserializer entityDeserializer = Assert.IsType<ODataEntityDeserializer>(deserializer);
-            Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Entry);
+            Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Resource);
             Assert.Equal(entityDeserializer.DeserializerProvider, deserializerProvider);
         }
 

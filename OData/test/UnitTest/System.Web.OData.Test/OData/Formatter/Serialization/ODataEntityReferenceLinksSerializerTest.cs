@@ -2,12 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.OData.Extensions;
-using System.Xml.Linq;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Formatter.Serialization

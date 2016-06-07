@@ -8,8 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData.Extensions;
-using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData

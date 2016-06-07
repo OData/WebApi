@@ -11,7 +11,6 @@ using System.Web.OData.Formatter.Deserialization;
 using System.Xml;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
-using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Validation;
 
 namespace System.Web.OData

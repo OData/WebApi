@@ -6,9 +6,8 @@ using System.Diagnostics.Contracts;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Xml.Linq;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Formatter.Serialization
 {

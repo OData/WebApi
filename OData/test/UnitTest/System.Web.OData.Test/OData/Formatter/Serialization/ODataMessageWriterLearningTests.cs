@@ -3,9 +3,8 @@
 
 using System.IO;
 using System.Linq;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Formatter.Serialization
@@ -54,7 +53,7 @@ namespace System.Web.OData.Formatter.Serialization
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => writer.CreateODataEntryWriter());
+                Assert.DoesNotThrow(() => writer.CreateODataResourceWriter());
             }
         }
 
@@ -70,7 +69,7 @@ namespace System.Web.OData.Formatter.Serialization
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => writer.CreateODataEntryWriter(entitySet));
+                Assert.DoesNotThrow(() => writer.CreateODataResourceWriter(entitySet));
             }
         }
 
@@ -85,7 +84,7 @@ namespace System.Web.OData.Formatter.Serialization
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => writer.CreateODataFeedWriter());
+                Assert.DoesNotThrow(() => writer.CreateODataResourceSetWriter());
             }
         }
 
@@ -101,7 +100,7 @@ namespace System.Web.OData.Formatter.Serialization
             using (ODataMessageWriter writer = new ODataMessageWriter(response, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => writer.CreateODataFeedWriter(entitySet));
+                Assert.DoesNotThrow(() => writer.CreateODataResourceSetWriter(entitySet));
             }
         }
 

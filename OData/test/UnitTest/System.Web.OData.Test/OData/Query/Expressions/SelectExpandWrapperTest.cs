@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 

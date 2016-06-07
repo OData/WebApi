@@ -11,9 +11,9 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Properties;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter.Deserialization
@@ -106,7 +106,7 @@ namespace System.Web.OData.Formatter.Deserialization
                         payload[parameterName] = collectionDeserializer.ReadInline(value, collectionType, readContext);
                         break;
 
-                    case ODataParameterReaderState.Entry:
+                    case ODataParameterReaderState.Resource:
                         parameterName = reader.Name;
                         parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
                         Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
@@ -114,13 +114,13 @@ namespace System.Web.OData.Formatter.Deserialization
                         IEdmEntityTypeReference entityTypeReference = parameter.Type as IEdmEntityTypeReference;
                         Contract.Assert(entityTypeReference != null);
 
-                        ODataReader entryReader = reader.CreateEntryReader();
+                        ODataReader entryReader = reader.CreateResourceReader();
                         object item = ODataEntityDeserializer.ReadEntryOrFeed(entryReader);
                         ODataEntityDeserializer entityDeserializer = (ODataEntityDeserializer)DeserializerProvider.GetEdmTypeDeserializer(entityTypeReference);
                         payload[parameterName] = entityDeserializer.ReadInline(item, entityTypeReference, readContext);
                         break;
 
-                    case ODataParameterReaderState.Feed:
+                    case ODataParameterReaderState.ResourceSet:
                         parameterName = reader.Name;
                         parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
                         Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
@@ -128,7 +128,7 @@ namespace System.Web.OData.Formatter.Deserialization
                         IEdmCollectionTypeReference feedType = parameter.Type as IEdmCollectionTypeReference;
                         Contract.Assert(feedType != null);
 
-                        ODataReader feedReader = reader.CreateFeedReader();
+                        ODataReader feedReader = reader.CreateResourceSetReader();
                         object feed = ODataEntityDeserializer.ReadEntryOrFeed(feedReader);
                         ODataFeedDeserializer feedDeserializer = (ODataFeedDeserializer)DeserializerProvider.GetEdmTypeDeserializer(feedType);
 

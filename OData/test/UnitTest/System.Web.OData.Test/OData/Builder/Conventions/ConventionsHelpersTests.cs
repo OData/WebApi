@@ -4,7 +4,6 @@
 using System.Linq;
 using System.Web.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 using Moq;

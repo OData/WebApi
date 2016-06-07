@@ -11,8 +11,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Edm.Library.Values;
+using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -362,7 +361,7 @@ namespace System.Web.OData
 
             // enum type color
             EdmEnumType color = new EdmEnumType("NS", "Color");
-            color.AddMember(new EdmEnumMember(color, "Red", new EdmIntegerConstant(0)));
+            color.AddMember(new EdmEnumMember(color, "Red", new EdmEnumMemberValue(0)));
             model.AddElement(color);
             IEdmCollectionTypeReference enumCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(color.ToEdmTypeReference(false)));
 
@@ -680,7 +679,7 @@ namespace System.Web.OData
 
             //Add Color, Colors enum(collection) property
             EdmEnumType colorType = new EdmEnumType("NS", "Color");
-            colorType.AddMember(new EdmEnumMember(colorType, "Red", new EdmIntegerConstant(0)));
+            colorType.AddMember(new EdmEnumMember(colorType, "Red", new EdmEnumMemberValue(0)));
 
             EdmEnumObject color = new EdmEnumObject(colorType, "Red");
             EdmEnumObject color2 = new EdmEnumObject(colorType, "0");

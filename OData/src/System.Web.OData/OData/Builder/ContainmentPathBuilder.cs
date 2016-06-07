@@ -4,8 +4,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Builder

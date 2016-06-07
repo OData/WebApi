@@ -6,7 +6,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Web.Http;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData
 {

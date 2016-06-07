@@ -18,13 +18,11 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
-using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
 using System.Web.OData.TestCommon.Models;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
+using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Moq;
 using Newtonsoft.Json.Linq;
@@ -100,7 +98,7 @@ namespace System.Web.OData.Formatter
                 new KeySegment(new[] {new KeyValuePair<string, object>("ID", 10)}, entitySet.EntityType(), entitySet));
             request.ODataProperties().RouteName = routeName;
 
-            ODataMediaTypeFormatter formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.Entry);
+            ODataMediaTypeFormatter formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.Resource);
 
             // Act
             ObjectContent<WorkItem> content = new ObjectContent<WorkItem>(
@@ -591,9 +589,9 @@ namespace System.Web.OData.Formatter
 
                 return new TheoryDataSet<ODataPath, ODataPayloadKind>
                 {
-                    { new ODataPath(entitySetSegment), ODataPayloadKind.Entry }, // POST ~/entityset
-                    { new ODataPath(entitySetSegment, keyValueSegment), ODataPayloadKind.Entry }, // PUT ~/entityset(key)
-                    { new ODataPath(entitySetSegment, keyValueSegment, navSegment), ODataPayloadKind.Entry }, // PUT ~/entityset(key)/nav
+                    { new ODataPath(entitySetSegment), ODataPayloadKind.Resource }, // POST ~/entityset
+                    { new ODataPath(entitySetSegment, keyValueSegment), ODataPayloadKind.Resource }, // PUT ~/entityset(key)
+                    { new ODataPath(entitySetSegment, keyValueSegment, navSegment), ODataPayloadKind.Resource }, // PUT ~/entityset(key)/nav
                     { new ODataPath(entitySetSegment, keyValueSegment, propertySegment), ODataPayloadKind.Property }
                 };
             }
@@ -626,10 +624,10 @@ namespace System.Web.OData.Formatter
 
                 return new TheoryDataSet<ODataPayloadKind, Type>
                 {
-                    { ODataPayloadKind.Entry , typeof(IEdmEntityObject) },
-                    { ODataPayloadKind.Entry , typeof(TypedEdmEntityObject) },
-                    { ODataPayloadKind.Feed , entityCollectionEdmObjectType },
-                    { ODataPayloadKind.Feed , typeof(IEnumerable<IEdmEntityObject>) },
+                    { ODataPayloadKind.Resource , typeof(IEdmEntityObject) },
+                    { ODataPayloadKind.Resource , typeof(TypedEdmEntityObject) },
+                    { ODataPayloadKind.ResourceSet , entityCollectionEdmObjectType },
+                    { ODataPayloadKind.ResourceSet , typeof(IEnumerable<IEdmEntityObject>) },
                     { ODataPayloadKind.Property , typeof(IEdmComplexObject) },
                     { ODataPayloadKind.Property , typeof(TypedEdmComplexObject) },
                     { ODataPayloadKind.Collection , complexCollectionEdmObjectType },
@@ -713,7 +711,7 @@ namespace System.Web.OData.Formatter
             Mock<IEdmObject> instance = new Mock<IEdmObject>();
             instance.Setup(e => e.GetEdmType()).Returns(edmType);
 
-            Mock<ODataEdmTypeSerializer> serializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Entry);
+            Mock<ODataEdmTypeSerializer> serializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Resource);
             serializer
                 .Setup(s => s.WriteObject(instance.Object, instance.GetType(), It.IsAny<ODataMessageWriter>(), It.IsAny<ODataSerializerContext>()))
                 .Verifiable();
@@ -741,7 +739,7 @@ namespace System.Web.OData.Formatter
         {
             IEdmModel model = CreateModel();
             HttpRequestMessage request = CreateFakeODataRequest(model);
-            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.Entry);
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.Resource);
 
             Assert.Equal(expectedCanWriteTypeResult, formatter.CanWriteType(type));
         }
@@ -768,7 +766,7 @@ namespace System.Web.OData.Formatter
                         },
                     allSelected: false);
 
-            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.Entry);
+            ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.Resource);
 
             // Act
             formatter.WriteToStreamAsync(typeof(SampleType[]), new SampleType[0], stream, content, transportContext: null);

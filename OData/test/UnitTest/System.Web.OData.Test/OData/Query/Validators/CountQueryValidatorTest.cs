@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Web.OData.Builder;
 using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Microsoft.TestCommon.Types;
 

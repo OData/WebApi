@@ -9,9 +9,9 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Aggregation;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using Microsoft.OData.UriParser.Aggregation;
 
 namespace System.Web.OData.Query
 {

@@ -7,9 +7,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Aggregation;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using Microsoft.OData.UriParser.Aggregation;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Query.Expressions

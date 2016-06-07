@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using System.Web.OData.TestCommon;
-using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Routing.Template

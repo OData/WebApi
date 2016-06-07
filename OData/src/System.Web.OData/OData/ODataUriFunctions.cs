@@ -3,7 +3,7 @@
 
 using System.Reflection;
 using System.Web.OData.Query.Expressions;
-using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.UriParser;
 
 namespace System.Web.OData
 {
@@ -16,7 +16,7 @@ namespace System.Web.OData
         /// This is a shortcut of adding the custom FunctionSignature through 'CustomUriFunctions' class and
         /// binding the function name to it's MethodInfo through 'UriFunctionsBinder' class.
         /// See these classes documentations.
-        /// In case of an excpetion, both operations(adding the signature and binding the function) will be undone.
+        /// In case of an exception, both operations(adding the signature and binding the function) will be undone.
         /// </summary>
         /// <param name="functionName">The uri function name that appears in the OData request uri.</param>
         /// <param name="functionSignature">The new custom function signature.</param>

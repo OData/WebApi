@@ -4,7 +4,6 @@
 using System.Web.Http;
 using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 
 namespace System.Web.OData.Builder
 {

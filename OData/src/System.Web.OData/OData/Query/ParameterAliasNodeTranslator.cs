@@ -5,14 +5,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Routing;
-using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.OData.Core.UriParser.Visitors;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Query
 {
     /// <summary>
-    /// This defines a translator to tranlate parameter alias nodes.
+    /// This defines a translator to translate parameter alias nodes.
     /// </summary>
     public class ParameterAliasNodeTranslator : QueryNodeVisitor<QueryNode>
     {

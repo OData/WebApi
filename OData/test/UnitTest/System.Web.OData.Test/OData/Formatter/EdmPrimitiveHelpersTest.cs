@@ -4,8 +4,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Data.Linq;
 using System.Xml.Linq;
-using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Formatter

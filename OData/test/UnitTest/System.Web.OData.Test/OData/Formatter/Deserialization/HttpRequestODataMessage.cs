@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 
 namespace System.Web.OData.Formatter.Deserialization
 {

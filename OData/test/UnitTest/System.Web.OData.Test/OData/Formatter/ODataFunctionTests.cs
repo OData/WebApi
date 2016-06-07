@@ -8,12 +8,10 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
-using System.Web.OData.PublicApi;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Edm.Library.Values;
+using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -204,9 +202,9 @@ namespace System.Web.OData.Formatter
 
             // Enum type "Color"
             EdmEnumType colorEnum = new EdmEnumType("NS", "Color");
-            colorEnum.AddMember(new EdmEnumMember(colorEnum, "Red", new EdmIntegerConstant(0)));
-            colorEnum.AddMember(new EdmEnumMember(colorEnum, "Blue", new EdmIntegerConstant(1)));
-            colorEnum.AddMember(new EdmEnumMember(colorEnum, "Green", new EdmIntegerConstant(2)));
+            colorEnum.AddMember(new EdmEnumMember(colorEnum, "Red", new EdmEnumMemberValue(0)));
+            colorEnum.AddMember(new EdmEnumMember(colorEnum, "Blue", new EdmEnumMemberValue(1)));
+            colorEnum.AddMember(new EdmEnumMember(colorEnum, "Green", new EdmEnumMemberValue(2)));
             model.AddElement(colorEnum);
 
             // complex type "Address"

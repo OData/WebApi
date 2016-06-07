@@ -8,7 +8,6 @@ using System.Web.Http.Controllers;
 using System.Web.OData.Routing.Template;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 

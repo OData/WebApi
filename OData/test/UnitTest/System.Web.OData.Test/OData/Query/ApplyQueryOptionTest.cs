@@ -10,7 +10,7 @@ using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Extensions;
 using System.Web.OData.Query;
 using System.Web.OData.Query.Expressions;
-using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 using Address = System.Web.OData.Builder.TestModels.Address;

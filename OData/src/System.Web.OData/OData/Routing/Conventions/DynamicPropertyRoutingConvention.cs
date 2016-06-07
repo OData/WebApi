@@ -8,8 +8,8 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
-using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Routing.Conventions
 {

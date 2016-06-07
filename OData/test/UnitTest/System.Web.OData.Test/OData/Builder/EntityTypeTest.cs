@@ -6,7 +6,6 @@ using System.Linq;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Builder

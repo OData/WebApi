@@ -11,9 +11,9 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -29,7 +29,7 @@ namespace System.Web.OData.Formatter.Serialization
         /// </summary>
         /// <param name="serializerProvider">The <see cref="ODataSerializerProvider"/> to use to write nested entries.</param>
         public ODataFeedSerializer(ODataSerializerProvider serializerProvider)
-            : base(ODataPayloadKind.Feed, serializerProvider)
+            : base(ODataPayloadKind.ResourceSet, serializerProvider)
         {
         }
 
@@ -52,7 +52,7 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(feedType != null);
 
             IEdmEntityTypeReference entityType = GetEntityType(feedType);
-            ODataWriter writer = messageWriter.CreateODataFeedWriter(entitySet, entityType.EntityDefinition());
+            ODataWriter writer = messageWriter.CreateODataResourceSetWriter(entitySet, entityType.EntityDefinition());
             WriteObjectInline(graph, feedType, writer, writeContext);
         }
 
@@ -96,7 +96,7 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(feedType != null);
 
             IEdmEntityTypeReference elementType = GetEntityType(feedType);
-            ODataFeed feed = CreateODataFeed(enumerable, feedType.AsCollection(), writeContext);
+            ODataResourceSet feed = CreateODataFeed(enumerable, feedType.AsCollection(), writeContext);
             if (feed == null)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Feed));
@@ -105,7 +105,7 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmEntitySetBase entitySet = writeContext.NavigationSource as IEdmEntitySetBase;
             if (entitySet == null)
             {
-                feed.SetSerializationInfo(new ODataFeedAndEntrySerializationInfo
+                feed.SetSerializationInfo(new ODataResourceSerializationInfo
                 {
                     IsFromCollection = true,
                     NavigationSourceEntityTypeName = elementType.FullName(),
@@ -152,16 +152,16 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Create the <see cref="ODataFeed"/> to be written for the given feed instance.
+        /// Create the <see cref="ODataResourceSet"/> to be written for the given feed instance.
         /// </summary>
         /// <param name="feedInstance">The instance representing the feed being written.</param>
         /// <param name="feedType">The EDM type of the feed being written.</param>
         /// <param name="writeContext">The serializer context.</param>
-        /// <returns>The created <see cref="ODataFeed"/> object.</returns>
-        public virtual ODataFeed CreateODataFeed(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
+        /// <returns>The created <see cref="ODataResourceSet"/> object.</returns>
+        public virtual ODataResourceSet CreateODataFeed(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
             ODataSerializerContext writeContext)
         {
-            ODataFeed feed = new ODataFeed();
+            ODataResourceSet feed = new ODataResourceSet();
 
             if (writeContext.NavigationSource != null)
             {

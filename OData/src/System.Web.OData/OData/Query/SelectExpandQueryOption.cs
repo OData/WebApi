@@ -10,10 +10,9 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
-using ODataPathSegment = Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment;
+using Microsoft.OData.UriParser;
+using ODataPathSegment = Microsoft.OData.UriParser.ODataPathSegment;
 
 namespace System.Web.OData.Query
 {

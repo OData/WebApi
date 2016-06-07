@@ -4,8 +4,8 @@
 using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Extensions;
-using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Builder.Conventions
 {

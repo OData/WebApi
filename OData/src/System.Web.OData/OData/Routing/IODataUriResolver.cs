@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Metadata;
+using Microsoft.OData;
+using Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Routing
 {

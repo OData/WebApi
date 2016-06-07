@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -14,11 +13,9 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
-using System.Web.OData.Routing;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
+using Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -32,7 +29,7 @@ namespace System.Web.OData.Formatter.Serialization
 
         /// <inheritdoc />
         public ODataEntityTypeSerializer(ODataSerializerProvider serializerProvider)
-            : base(ODataPayloadKind.Entry, serializerProvider)
+            : base(ODataPayloadKind.Resource, serializerProvider)
         {
         }
 
@@ -62,7 +59,7 @@ namespace System.Web.OData.Formatter.Serialization
                 throw new SerializationException(SRResources.ODataPathMissing);
             }
 
-            ODataWriter writer = messageWriter.CreateODataEntryWriter(navigationSource, path.EdmType as IEdmEntityType);
+            ODataWriter writer = messageWriter.CreateODataResourceWriter(navigationSource, path.EdmType as IEdmEntityType);
             WriteObjectInline(graph, navigationSource.EntityType().ToEdmTypeReference(isNullable: false), writer, writeContext);
         }
 
@@ -130,7 +127,7 @@ namespace System.Web.OData.Formatter.Serialization
             SelectExpandNode selectExpandNode = CreateSelectExpandNode(entityContext);
             if (selectExpandNode != null)
             {
-                ODataEntry entry = CreateEntry(selectExpandNode, entityContext);
+                ODataResource entry = CreateEntry(selectExpandNode, entityContext);
                 if (entry != null)
                 {
                     writer.WriteStart(entry);
@@ -200,7 +197,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             var navigationProperties = new Dictionary<IEdmTypeReference, object>();
             var entityType = expectedType.Definition as EdmEntityType;
-            var entry = new ODataEntry()
+            var entry = new ODataResource()
             {
                 TypeName = expectedType.FullName(),
                 Properties = CreateODataPropertiesFromDynamicType(entityType, graph, navigationProperties)
@@ -241,7 +238,7 @@ namespace System.Web.OData.Formatter.Serialization
             SelectExpandNode selectExpandNode = CreateSelectExpandNode(entityContext);
             if (selectExpandNode != null)
             {
-                ODataEntry entry = CreateEntry(selectExpandNode, entityContext);
+                ODataResource entry = CreateEntry(selectExpandNode, entityContext);
                 if (entry != null)
                 {
                     writer.WriteStart(entry);
@@ -282,12 +279,12 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Creates the <see cref="ODataEntry"/> to be written while writing this entity.
+        /// Creates the <see cref="ODataResource"/> to be written while writing this entity.
         /// </summary>
         /// <param name="selectExpandNode">The <see cref="SelectExpandNode"/> describing the response graph.</param>
         /// <param name="entityContext">The context for the entity instance being written.</param>
-        /// <returns>The created <see cref="ODataEntry"/>.</returns>
-        public virtual ODataEntry CreateEntry(SelectExpandNode selectExpandNode, EntityContext entityContext)
+        /// <returns>The created <see cref="ODataResource"/>.</returns>
+        public virtual ODataResource CreateEntry(SelectExpandNode selectExpandNode, EntityContext entityContext)
         {
             if (selectExpandNode == null)
             {
@@ -300,7 +297,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             string typeName = entityContext.EntityType.FullName();
 
-            ODataEntry entry = new ODataEntry
+            ODataResource entry = new ODataResource
             {
                 TypeName = typeName,
                 Properties = CreateStructuralPropertyBag(selectExpandNode.SelectedStructuralProperties, entityContext),
@@ -421,8 +418,8 @@ namespace System.Web.OData.Formatter.Serialization
         {
             Contract.Assert(entityContext != null);
 
-            IEnumerable<ODataNavigationLink> navigationLinks = CreateNavigationLinks(navigationProperties, entityContext);
-            foreach (ODataNavigationLink navigationLink in navigationLinks)
+            IEnumerable<ODataNestedResourceInfo> navigationLinks = CreateNavigationLinks(navigationProperties, entityContext);
+            foreach (ODataNestedResourceInfo navigationLink in navigationLinks)
             {
                 writer.WriteStart(navigationLink);
                 writer.WriteEnd();
@@ -442,7 +439,7 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 IEdmNavigationProperty navigationProperty = navigationPropertyToExpand.Key;
 
-                ODataNavigationLink navigationLink = CreateNavigationLink(navigationProperty, entityContext);
+                ODataNestedResourceInfo navigationLink = CreateNavigationLink(navigationProperty, entityContext);
                 if (navigationLink != null)
                 {
                     writer.WriteStart(navigationLink);
@@ -473,12 +470,12 @@ namespace System.Web.OData.Formatter.Serialization
                     // it may just be empty.
                     // If a collection of entities can be related, it is represented as a JSON array. An empty
                     // collection of entities (one that contains no entities) is represented as an empty JSON array.
-                    writer.WriteStart(new ODataFeed());
+                    writer.WriteStart(new ODataResourceSet());
                 }
                 else
                 {
                     // If at most one entity can be related, the value is null if no entity is currently related.
-                    writer.WriteStart(entry: null);
+                    writer.WriteStart(resource: null);
                 }
 
                 writer.WriteEnd();
@@ -500,7 +497,7 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
-        private IEnumerable<ODataNavigationLink> CreateNavigationLinks(
+        private IEnumerable<ODataNestedResourceInfo> CreateNavigationLinks(
             IEnumerable<IEdmNavigationProperty> navigationProperties, EntityContext entityContext)
         {
             Contract.Assert(navigationProperties != null);
@@ -508,7 +505,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             foreach (IEdmNavigationProperty navProperty in navigationProperties)
             {
-                ODataNavigationLink navigationLink = CreateNavigationLink(navProperty, entityContext);
+                ODataNestedResourceInfo navigationLink = CreateNavigationLink(navProperty, entityContext);
                 if (navigationLink != null)
                 {
                     yield return navigationLink;
@@ -517,12 +514,12 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Creates the <see cref="ODataNavigationLink"/> to be written while writing this entity.
+        /// Creates the <see cref="ODataNestedResourceInfo"/> to be written while writing this entity.
         /// </summary>
         /// <param name="navigationProperty">The navigation property for which the navigation link is being created.</param>
         /// <param name="entityContext">The context for the entity instance being written.</param>
         /// <returns>The navigation link to be written.</returns>
-        public virtual ODataNavigationLink CreateNavigationLink(IEdmNavigationProperty navigationProperty, EntityContext entityContext)
+        public virtual ODataNestedResourceInfo CreateNavigationLink(IEdmNavigationProperty navigationProperty, EntityContext entityContext)
         {
             if (navigationProperty == null)
             {
@@ -534,7 +531,7 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             ODataSerializerContext writeContext = entityContext.SerializerContext;
-            ODataNavigationLink navigationLink = null;
+            ODataNestedResourceInfo navigationLink = null;
 
             if (writeContext.NavigationSource != null)
             {
@@ -543,7 +540,7 @@ namespace System.Web.OData.Formatter.Serialization
                 NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(writeContext.NavigationSource);
                 Uri navigationUrl = linkBuilder.BuildNavigationLink(entityContext, navigationProperty, writeContext.MetadataLevel);
 
-                navigationLink = new ODataNavigationLink
+                navigationLink = new ODataNestedResourceInfo
                 {
                     IsCollection = propertyType.IsCollection(),
                     Name = navigationProperty.Name,
@@ -809,7 +806,7 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
-        internal static void AddTypeNameAnnotationAsNeeded(ODataEntry entry, IEdmEntityType odataPathType,
+        internal static void AddTypeNameAnnotationAsNeeded(ODataResource entry, IEdmEntityType odataPathType,
             ODataMetadataLevel metadataLevel)
         {
             // ODataLib normally has the caller decide whether or not to serialize properties by leaving properties
@@ -854,7 +851,7 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
-        internal static bool ShouldSuppressTypeNameSerialization(ODataEntry entry, IEdmEntityType edmType,
+        internal static bool ShouldSuppressTypeNameSerialization(ODataResource entry, IEdmEntityType edmType,
             ODataMetadataLevel metadataLevel)
         {
             Contract.Assert(entry != null);

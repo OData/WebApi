@@ -9,7 +9,7 @@ using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
-using ODataPathSegment = Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment;
+using ODataPathSegment = Microsoft.OData.UriParser.ODataPathSegment;
 
 namespace System.Web.OData.Extensions
 {

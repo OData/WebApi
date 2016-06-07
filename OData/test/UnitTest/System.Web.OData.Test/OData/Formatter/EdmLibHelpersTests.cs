@@ -10,7 +10,6 @@ using System.Web.OData.Query.Expressions;
 using System.Web.OData.TestCommon;
 using System.Xml.Linq;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Formatter

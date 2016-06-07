@@ -15,7 +15,7 @@ using System.Web.Http.Routing;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 
 namespace System.Web.OData.Batch
 {
@@ -185,7 +185,7 @@ namespace System.Web.OData.Batch
             ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
             {
                 Version = odataVersion,
-                Indent = true,
+                EnableIndentation = true,
                 DisableMessageStreamDisposal = true,
                 MessageQuotas = messageQuotas
             };

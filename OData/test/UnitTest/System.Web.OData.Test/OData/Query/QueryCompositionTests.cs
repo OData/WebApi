@@ -11,11 +11,9 @@ using System.Web.Http.Filters;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
-using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
-using Microsoft.OData.Core.UriParser.Metadata;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
+using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Query

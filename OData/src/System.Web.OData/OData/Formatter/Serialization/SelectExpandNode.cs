@@ -6,16 +6,15 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Properties;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
     /// Describes the set of structural properties and navigation properties and actions to select and navigation properties to expand while 
-    /// writing an <see cref="ODataEntry"/> in the response.
+    /// writing an <see cref="ODataResource"/> in the response.
     /// </summary>
     public class SelectExpandNode
     {

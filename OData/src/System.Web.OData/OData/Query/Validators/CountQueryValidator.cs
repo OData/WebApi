@@ -6,8 +6,8 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
-using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Query.Validators

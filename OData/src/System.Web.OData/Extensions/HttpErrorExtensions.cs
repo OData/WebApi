@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Web.Http;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 
 namespace System.Web.OData.Extensions
 {

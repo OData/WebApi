@@ -15,7 +15,7 @@ namespace System.Web.OData.Formatter
         {
             var message = new ODataMessageWrapper();
             Assert.ThrowsArgumentNull(
-                () => message.ResolveUrl(new Uri("http://localhost"), null),
+                () => message.ConvertPayloadUri(new Uri("http://localhost"), null),
                 "payloadUri");
         }
 
@@ -24,7 +24,7 @@ namespace System.Web.OData.Formatter
         {
             var message = new ODataMessageWrapper();
 
-            Uri uri = message.ResolveUrl(new Uri("http://localhost"), new Uri("/values", UriKind.Relative));
+            Uri uri = message.ConvertPayloadUri(new Uri("http://localhost"), new Uri("/values", UriKind.Relative));
 
             Assert.Null(uri);
         }
@@ -35,7 +35,7 @@ namespace System.Web.OData.Formatter
             StringContent content = new StringContent(String.Empty);
             var message = new ODataMessageWrapper(new MemoryStream(), content.Headers);
 
-            Uri uri = message.ResolveUrl(new Uri("http://localhost"), new Uri("$1", UriKind.Relative));
+            Uri uri = message.ConvertPayloadUri(new Uri("http://localhost"), new Uri("$1", UriKind.Relative));
 
             Assert.Equal("$1", uri.OriginalString);
         }
@@ -51,7 +51,7 @@ namespace System.Web.OData.Formatter
             };
             var message = new ODataMessageWrapper(new MemoryStream(), content.Headers, contentIdMapping);
 
-            Uri uri = message.ResolveUrl(new Uri("http://localhost"), new Uri("$1", UriKind.Relative));
+            Uri uri = message.ConvertPayloadUri(new Uri("http://localhost"), new Uri("$1", UriKind.Relative));
 
             Assert.Equal("http://localhost/values(1)", uri.OriginalString);
         }

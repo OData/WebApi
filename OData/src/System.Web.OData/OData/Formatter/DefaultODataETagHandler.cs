@@ -7,8 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Web.Http;
 using System.Web.OData.Builder.Conventions;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
+using Microsoft.OData;
 
 namespace System.Web.OData.Formatter
 {

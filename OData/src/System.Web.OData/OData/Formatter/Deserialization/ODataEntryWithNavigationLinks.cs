@@ -2,12 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 
 namespace System.Web.OData.Formatter.Deserialization
 {
     /// <summary>
-    /// Encapuslates an <see cref="ODataEntry"/> and the inner navigation links.
+    /// Encapsulates an <see cref="ODataResource"/> and the inner navigation links.
     /// </summary>
     public sealed class ODataEntryWithNavigationLinks : ODataItemBase
     {
@@ -15,20 +15,20 @@ namespace System.Web.OData.Formatter.Deserialization
         /// Initializes a new instance of <see cref="ODataEntryWithNavigationLinks"/>.
         /// </summary>
         /// <param name="item">The wrapped item.</param>
-        public ODataEntryWithNavigationLinks(ODataEntry item)
+        public ODataEntryWithNavigationLinks(ODataResource item)
             : base(item)
         {
             NavigationLinks = new List<ODataNavigationLinkWithItems>();
         }
 
         /// <summary>
-        /// Gets the wrapped <see cref="ODataEntry"/>.
+        /// Gets the wrapped <see cref="ODataResource"/>.
         /// </summary>
-        public ODataEntry Entry
+        public ODataResource Resource
         {
             get
             {
-                return Item as ODataEntry;
+                return Item as ODataResource;
             }
         }
 

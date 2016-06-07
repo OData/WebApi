@@ -4,7 +4,7 @@
 using System.Web.Http;
 using System.Web.Http.ModelBinding;
 using System.Web.OData.Extensions;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Test

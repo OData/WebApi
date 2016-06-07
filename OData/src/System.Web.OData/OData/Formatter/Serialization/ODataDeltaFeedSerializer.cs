@@ -9,7 +9,7 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Formatter.Serialization
@@ -110,7 +110,7 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(enumerable != null);
             Contract.Assert(feedType != null);
 
-            ODataDeltaFeed deltaFeed = CreateODataDeltaFeed(enumerable, feedType.AsCollection(), writeContext);
+            ODataDeltaResourceSet deltaFeed = CreateODataDeltaFeed(enumerable, feedType.AsCollection(), writeContext);
             if (deltaFeed == null)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, DeltaFeed));
@@ -181,16 +181,16 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Create the <see cref="ODataDeltaFeed"/> to be written for the given feed instance.
+        /// Create the <see cref="ODataDeltaResourceSet"/> to be written for the given feed instance.
         /// </summary>
         /// <param name="feedInstance">The instance representing the feed being written.</param>
         /// <param name="feedType">The EDM type of the feed being written.</param>
         /// <param name="writeContext">The serializer context.</param>
-        /// <returns>The created <see cref="ODataDeltaFeed"/> object.</returns>
-        public virtual ODataDeltaFeed CreateODataDeltaFeed(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
+        /// <returns>The created <see cref="ODataDeltaResourceSet"/> object.</returns>
+        public virtual ODataDeltaResourceSet CreateODataDeltaFeed(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
             ODataSerializerContext writeContext)
         {
-            ODataDeltaFeed feed = new ODataDeltaFeed();
+            ODataDeltaResourceSet feed = new ODataDeltaResourceSet();
 
             if (writeContext.ExpandedEntity == null)
             {

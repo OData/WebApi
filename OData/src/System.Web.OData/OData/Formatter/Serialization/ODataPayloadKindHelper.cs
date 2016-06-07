@@ -2,7 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Web.Http;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -15,9 +15,9 @@ namespace System.Web.OData.Formatter.Serialization
                 || payloadKind == ODataPayloadKind.Collection
                 || payloadKind == ODataPayloadKind.EntityReferenceLink
                 || payloadKind == ODataPayloadKind.EntityReferenceLinks
-                || payloadKind == ODataPayloadKind.Entry
+                || payloadKind == ODataPayloadKind.Resource
                 || payloadKind == ODataPayloadKind.Error
-                || payloadKind == ODataPayloadKind.Feed
+                || payloadKind == ODataPayloadKind.ResourceSet
                 || payloadKind == ODataPayloadKind.MetadataDocument
                 || payloadKind == ODataPayloadKind.Parameter
                 || payloadKind == ODataPayloadKind.Property

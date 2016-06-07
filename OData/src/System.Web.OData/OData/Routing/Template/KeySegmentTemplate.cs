@@ -6,8 +6,8 @@ using System.Diagnostics.Contracts;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing.Conventions;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
+using Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Routing.Template
 {

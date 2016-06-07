@@ -4,8 +4,7 @@
 using System.Diagnostics.Contracts;
 using System.Web.OData.Builder;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Annotations;
-using Microsoft.OData.Edm.Values;
+using Microsoft.OData.Edm.Vocabularies;
 
 namespace System.Web.OData.Formatter.Serialization
 {

@@ -20,9 +20,9 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter
@@ -81,7 +81,7 @@ namespace System.Web.OData.Formatter
             // Maxing out the received message size as we depend on the hosting layer to enforce this limit.
             MessageWriterSettings = new ODataMessageWriterSettings
             {
-                Indent = true,
+                EnableIndentation = true,
                 DisableMessageStreamDisposal = true,
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
                 AutoComputePayloadMetadataInJson = true,
@@ -399,7 +399,7 @@ namespace System.Web.OData.Formatter
 
                 try
                 {
-                    ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings(MessageReaderSettings);
+                    ODataMessageReaderSettings oDataReaderSettings = MessageReaderSettings.Clone();
                     oDataReaderSettings.BaseUri = GetBaseAddressInternal(Request);
 
                     IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders, Request.GetODataContentIdMapping());
@@ -507,11 +507,9 @@ namespace System.Web.OData.Formatter
             }
 
             Uri baseAddress = GetBaseAddressInternal(Request);
-            ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings(MessageWriterSettings)
-            {
-                PayloadBaseUri = baseAddress,
-                Version = _version,
-            };
+            ODataMessageWriterSettings writerSettings = MessageWriterSettings.Clone();
+            writerSettings.BaseUri = baseAddress;
+            writerSettings.Version = _version;
 
             string metadataLink = urlHelper.CreateODataLink(MetadataSegment.Instance);
 
@@ -546,7 +544,7 @@ namespace System.Web.OData.Formatter
                     NavigationSource = targetNavigationSource,
                     Model = model,
                     RootElementName = GetRootElementName(path) ?? "root",
-                    SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
+                    SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.ResourceSet,
                     Path = path,
                     MetadataLevel = ODataMediaTypes.GetMetadataLevel(contentType),
                     SelectExpandClause = Request.ODataProperties().SelectExpandClause
@@ -589,7 +587,7 @@ namespace System.Web.OData.Formatter
                 }
                 else if (typeof(IEdmEntityObject).IsAssignableFrom(elementType))
                 {
-                    return ODataPayloadKind.Feed;
+                    return ODataPayloadKind.ResourceSet;
                 }
                 else if (typeof(IEdmChangedObject).IsAssignableFrom(elementType))
                 {
@@ -604,7 +602,7 @@ namespace System.Web.OData.Formatter
                 }
                 else if (typeof(IEdmEntityObject).IsAssignableFrom(elementType))
                 {
-                    return ODataPayloadKind.Entry;
+                    return ODataPayloadKind.Resource;
                 }
             }
 

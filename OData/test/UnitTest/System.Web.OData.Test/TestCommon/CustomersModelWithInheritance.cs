@@ -4,8 +4,6 @@
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Edm.Library.Values;
 
 namespace System.Web.OData.TestCommon
 {
@@ -17,9 +15,9 @@ namespace System.Web.OData.TestCommon
 
             // Enum type simpleEnum
             EdmEnumType simpleEnum = new EdmEnumType("NS", "SimpleEnum");
-            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "First", new EdmIntegerConstant(0)));
-            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Second", new EdmIntegerConstant(1)));
-            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Third", new EdmIntegerConstant(2)));
+            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "First", new EdmEnumMemberValue(0)));
+            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Second", new EdmEnumMemberValue(1)));
+            simpleEnum.AddMember(new EdmEnumMember(simpleEnum, "Third", new EdmEnumMemberValue(2)));
             model.AddElement(simpleEnum);
 
             // complex type address

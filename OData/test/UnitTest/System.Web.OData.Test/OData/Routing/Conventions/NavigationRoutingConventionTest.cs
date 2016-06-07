@@ -9,8 +9,8 @@ using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.TestCommon;
-using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Moq;
 

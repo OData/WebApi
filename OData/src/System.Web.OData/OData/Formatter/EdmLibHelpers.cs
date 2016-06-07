@@ -16,9 +16,7 @@ using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
 using System.Xml.Linq;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Annotations;
-using Microsoft.OData.Edm.Expressions;
-using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.Spatial;
 

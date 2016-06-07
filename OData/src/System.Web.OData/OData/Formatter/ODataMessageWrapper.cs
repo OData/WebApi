@@ -6,14 +6,14 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 
 namespace System.Web.OData.Formatter
 {
     /// <summary>
     /// Wrapper for IODataRequestMessage and IODataResponseMessage.
     /// </summary>
-    internal class ODataMessageWrapper : IODataRequestMessage, IODataResponseMessage, IODataUrlResolver
+    internal class ODataMessageWrapper : IODataRequestMessage, IODataResponseMessage, IODataPayloadUriConverter
     {
         private Stream _stream;
         private Dictionary<string, string> _headers;
@@ -114,7 +114,7 @@ namespace System.Web.OData.Formatter
             _headers[headerName] = headerValue;
         }
 
-        public Uri ResolveUrl(Uri baseUri, Uri payloadUri)
+        public Uri ConvertPayloadUri(Uri baseUri, Uri payloadUri)
         {
             if (payloadUri == null)
             {

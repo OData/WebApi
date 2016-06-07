@@ -4,9 +4,7 @@
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Properties;
-using System.Web.OData.Routing;
-using Microsoft.OData.Core;
-using Microsoft.OData.Edm;
+using Microsoft.OData;
 
 namespace System.Web.OData.Formatter.Serialization
 {

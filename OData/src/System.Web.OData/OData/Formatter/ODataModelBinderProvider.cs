@@ -22,11 +22,9 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
+using Microsoft.OData.UriParser;
 using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter
@@ -272,7 +270,7 @@ namespace System.Web.OData.Formatter
                 EdmEntitySet tempEntitySet = new EdmEntitySet(readContext.Model.EntityContainer, "temp",
                     collectionType.ElementType().AsEntity().EntityDefinition());
 
-                ODataReader odataReader = oDataMessageReader.CreateODataFeedReader(tempEntitySet,
+                ODataReader odataReader = oDataMessageReader.CreateODataResourceSetReader(tempEntitySet,
                     collectionType.ElementType().AsEntity().EntityDefinition());
                 ODataFeedWithEntries feed =
                     ODataEntityDeserializer.ReadEntryOrFeed(odataReader) as ODataFeedWithEntries;
@@ -320,7 +318,7 @@ namespace System.Web.OData.Formatter
                 EdmEntitySet tempEntitySet = new EdmEntitySet(readContext.Model.EntityContainer, "temp",
                     entityType.EntityDefinition());
 
-                ODataReader entryReader = oDataMessageReader.CreateODataEntryReader(tempEntitySet,
+                ODataReader entryReader = oDataMessageReader.CreateODataResourceReader(tempEntitySet,
                     entityType.EntityDefinition());
 
                 object item = ODataEntityDeserializer.ReadEntryOrFeed(entryReader);
@@ -331,7 +329,7 @@ namespace System.Web.OData.Formatter
                 ODataEntityDeserializer entityDeserializer =
                     (ODataEntityDeserializer)DeserializerProvider.GetEdmTypeDeserializer(entityType);
                 object entity = entityDeserializer.ReadInline(topLevelEntry, entityType, readContext);
-                return CovertEntityId(entity, topLevelEntry.Entry, entityType, readContext);
+                return CovertEntityId(entity, topLevelEntry.Resource, entityType, readContext);
             }
 
             internal static IEnumerable CovertFeedIds(IEnumerable sources, ODataFeedWithEntries feed,
@@ -341,13 +339,13 @@ namespace System.Web.OData.Formatter
                 int i = 0;
                 foreach (object item in sources)
                 {
-                    object newItem = CovertEntityId(item, feed.Entries[i].Entry, entityTypeReference, readContext);
+                    object newItem = CovertEntityId(item, feed.Entries[i].Resource, entityTypeReference, readContext);
                     i++;
                     yield return newItem;
                 }
             }
 
-            internal static object CovertEntityId(object source, ODataEntry entry, IEdmEntityTypeReference entityTypeReference, ODataDeserializerContext readContext)
+            internal static object CovertEntityId(object source, ODataResource entry, IEdmEntityTypeReference entityTypeReference, ODataDeserializerContext readContext)
             {
                 Contract.Assert(entry != null);
                 Contract.Assert(source != null);

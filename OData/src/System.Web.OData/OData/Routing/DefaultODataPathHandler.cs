@@ -10,11 +10,10 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing.Template;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Metadata;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using ODL = Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.UriParser;
+using ODL = Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Routing
 {

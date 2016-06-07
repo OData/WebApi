@@ -17,9 +17,8 @@ using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Query;
 using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.TestCommon;
 using Moq;
 using Newtonsoft.Json.Linq;
@@ -1064,10 +1063,10 @@ namespace System.Web.OData.Formatter
             {
             }
 
-            public override ODataFeed CreateODataFeed(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
+            public override ODataResourceSet CreateODataFeed(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
                 ODataSerializerContext writeContext)
             {
-                ODataFeed feed = base.CreateODataFeed(feedInstance, feedType, writeContext);
+                ODataResourceSet feed = base.CreateODataFeed(feedInstance, feedType, writeContext);
 
                 // Int32
                 ODataPrimitiveValue intValue = new ODataPrimitiveValue(321);
@@ -1104,9 +1103,9 @@ namespace System.Web.OData.Formatter
             {
             }
 
-            public override ODataEntry CreateEntry(SelectExpandNode selectExpandNode, EntityContext entityContext)
+            public override ODataResource CreateEntry(SelectExpandNode selectExpandNode, EntityContext entityContext)
             {
-                ODataEntry entry = base.CreateEntry(selectExpandNode, entityContext);
+                ODataResource entry = base.CreateEntry(selectExpandNode, entityContext);
 
                 // instance annotation on entry
                 ODataPrimitiveValue guidValue = new ODataPrimitiveValue(new Guid("A6E07EAC-AD49-4BF7-A06E-203FF4D4B0D8"));

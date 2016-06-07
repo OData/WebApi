@@ -5,8 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Web.OData.Formatter;
 using System.Xml.Linq;
-using Microsoft.OData.Core;
-using Microsoft.OData.Edm.Library;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Builder

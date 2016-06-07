@@ -7,7 +7,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Query.Expressions
 {

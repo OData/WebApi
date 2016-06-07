@@ -13,7 +13,7 @@ using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Batch;
 using System.Web.OData.Extensions;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Test

@@ -10,11 +10,9 @@ using System.Reflection;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
 using System.Xml.Linq;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
+using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 
 namespace System.Web.OData.Query.Expressions

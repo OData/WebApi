@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Web.Http.Controllers;
-using System.Web.OData.Extensions;
-using Microsoft.OData.Client;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
+using Microsoft.OData.UriParser;
 
 namespace WebStack.QA.Test.OData.Common
 {

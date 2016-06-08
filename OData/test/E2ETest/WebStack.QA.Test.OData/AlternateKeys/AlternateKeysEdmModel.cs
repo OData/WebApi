@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 
 namespace WebStack.QA.Test.OData.AlternateKeys
 {

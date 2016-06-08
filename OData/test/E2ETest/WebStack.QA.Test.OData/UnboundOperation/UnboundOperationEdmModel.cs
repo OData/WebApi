@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System.Linq;
 using System.Web.OData.Builder;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Edm.Library.Expressions;
+using Microsoft.OData.Edm.Vocabularies;
 
 namespace WebStack.QA.Test.OData.UnboundOperation
 {

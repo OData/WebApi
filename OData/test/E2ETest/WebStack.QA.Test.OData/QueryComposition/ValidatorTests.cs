@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -8,7 +11,8 @@ using System.Web.Http;
 using System.Web.OData;
 using System.Web.OData.Query;
 using System.Web.OData.Query.Validators;
-using Microsoft.OData.Core;
+using Microsoft.OData;
+using Microsoft.OData.UriParser;
 using Nuwa;
 using WebStack.QA.Common.XUnit;
 using WebStack.QA.Test.OData.Common;
@@ -137,7 +141,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
     {
         private bool visited = false;
 
-        public override void ValidateSingleValuePropertyAccessNode(Microsoft.OData.Core.UriParser.Semantic.SingleValuePropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
+        public override void ValidateSingleValuePropertyAccessNode(SingleValuePropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
         {
             if (propertyAccessNode.Property.Name == "ID")
             {

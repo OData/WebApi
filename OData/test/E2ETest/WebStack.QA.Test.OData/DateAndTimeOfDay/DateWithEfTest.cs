@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -6,9 +9,8 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Extensions;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Newtonsoft.Json.Linq;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
@@ -37,7 +39,9 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
             IEdmModel model = DateAndTimeOfDayEdmModel.BuildEfPersonEdmModel();
-            model.SetPayloadValueConverter(new MyConverter());
+
+            // TODO: modify it after implement the DI in Web API.
+            // model.SetPayloadValueConverter(new MyConverter());
 
             configuration.Routes.Clear();
             configuration.MapODataServiceRoute("odata", "odata", model);

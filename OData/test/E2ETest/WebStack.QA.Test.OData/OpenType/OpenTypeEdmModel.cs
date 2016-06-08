@@ -1,9 +1,11 @@
-﻿namespace WebStack.QA.Test.OData.OpenType
-{
-    using System.Web.OData.Builder;
-    using Microsoft.OData.Edm;
-    using Microsoft.OData.Edm.Library;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Web.OData.Builder;
+using Microsoft.OData.Edm;
+
+namespace WebStack.QA.Test.OData.OpenType
+{
     internal class OpenComplexTypeEdmModel
     {
         private const string NameSpace = "WebStack.QA.Test.OData.OpenType";

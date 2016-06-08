@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -7,7 +10,7 @@ using System.Web.Http;
 using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Nuwa;
 using WebStack.QA.Common.XUnit;

@@ -1,18 +1,18 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
 using Microsoft.OData.Client;
-using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using WebStack.QA.Instancing;
 using WebStack.QA.Test.OData.Common;
 using WebStack.QA.Test.OData.Common.Controllers;

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.OData;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
@@ -30,7 +30,7 @@ namespace ODataSample.Web.Controllers
             var product = _sampleContext.FindProduct(productId);
             if (product == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(product);
@@ -42,7 +42,7 @@ namespace ODataSample.Web.Controllers
             var product = _sampleContext.FindProduct(productId);
             if (product == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(product.Name);
@@ -54,7 +54,7 @@ namespace ODataSample.Web.Controllers
             var product = _sampleContext.FindProduct(productId);
             if (product == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(product.Price);
@@ -66,7 +66,7 @@ namespace ODataSample.Web.Controllers
             var product = _sampleContext.FindProduct(productId);
             if (product == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(product.ProductId);
@@ -86,7 +86,7 @@ namespace ODataSample.Web.Controllers
         {
             if (!_sampleContext.UpdateProduct(productId, value))
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new NoContentResult();
@@ -98,7 +98,7 @@ namespace ODataSample.Web.Controllers
         {
             if (!_sampleContext.DeleteProduct(productId))
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new NoContentResult();

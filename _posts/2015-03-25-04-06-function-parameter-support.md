@@ -163,7 +163,7 @@ var function = builder.EntityType<Customer>().Collection.Function("EntityFunctio
 function.EntityParameter<Customer>("a1");
 function.CollectionEntityParameter<Customer>("a2"); 
 {% endhighlight %}
-It's better to call `EntityParmeter<T>` and `CollectionEntityParameter<T>` to define entity and collection of entity parameter.
+It's better to call `EntityParameter<T>` and `CollectionEntityParameter<T>` to define entity and collection of entity parameter.
 
 #### Routing
 In the `CustomersController`, add the following method :

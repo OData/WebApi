@@ -123,7 +123,7 @@ var action = builder.EntityType<Customer>().Collection.Action("EntityAction").Re
 action.EntityParameter<Customer>("customer");
 action.CollectionEntityParameter<Customer>("customers"); 
 {% endhighlight %}
-It's better to call `EntityParmeter<T>` and `CollectionEntityParameter<T>` to define entity and collection of entity parameter.
+It's better to call `EntityParameter<T>` and `CollectionEntityParameter<T>` to define entity and collection of entity parameter.
 
 #### Routing
 In the `CustomersController`, add the following method :

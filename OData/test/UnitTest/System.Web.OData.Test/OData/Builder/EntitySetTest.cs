@@ -96,7 +96,7 @@ namespace System.Web.OData.Builder
             Assert.NotNull(model.GetNavigationSourceLinkBuilder(vehiclesEdmSet));
             Assert.Equal(
                 "http://works/",
-                model.GetNavigationSourceLinkBuilder(vehiclesEdmSet).BuildNavigationLink(new EntityContext(), edmNavProperty, ODataMetadataLevel.MinimalMetadata).AbsoluteUri);
+                model.GetNavigationSourceLinkBuilder(vehiclesEdmSet).BuildNavigationLink(new ResourceContext(), edmNavProperty, ODataMetadataLevel.MinimalMetadata).AbsoluteUri);
         }
 
         [Fact]
@@ -236,7 +236,7 @@ namespace System.Web.OData.Builder
                 model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehicles };
-            var entityContext = new EntityContext(serializerContext, motorcycle.AsReference(), new Motorcycle { Name = "Motorcycle1", Model = 2009 });
+            var entityContext = new ResourceContext(serializerContext, motorcycle.AsReference(), new Motorcycle { Name = "Motorcycle1", Model = 2009 });
 
             Uri link = model.GetNavigationSourceLinkBuilder(vehicles).BuildNavigationLink(entityContext, motorcycleManufacturerProperty, ODataMetadataLevel.MinimalMetadata);
 

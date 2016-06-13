@@ -66,7 +66,7 @@ namespace System.Web.OData
             IEdmEntityTypeReference typeReference = GetTypeReference(model, edmType, value);
             if (typeReference != null)
             {
-                EntityContext context = CreateInstanceContext(typeReference, value);
+                ResourceContext context = CreateInstanceContext(typeReference, value);
                 context.EdmModel = model;
                 context.NavigationSource = path.NavigationSource;
                 IETagHandler etagHandler = configuration.GetETagHandler();
@@ -111,7 +111,7 @@ namespace System.Web.OData
         }
 
         private static EntityTagHeaderValue CreateETag(
-            EntityContext entityContext,
+            ResourceContext entityContext,
             IETagHandler handler)
         {
             IEdmModel model = entityContext.EdmModel;
@@ -149,13 +149,13 @@ namespace System.Web.OData
             return null;
         }
 
-        private static EntityContext CreateInstanceContext(IEdmEntityTypeReference reference, object value)
+        private static ResourceContext CreateInstanceContext(IEdmEntityTypeReference reference, object value)
         {
             Contract.Assert(reference != null);
             Contract.Assert(value != null);
 
             ODataSerializerContext serializerCtx = new ODataSerializerContext();
-            return new EntityContext(serializerCtx, reference, value);
+            return new ResourceContext(serializerCtx, reference, value);
         }
 
         // Retrieves the IEdmEntityType from the path only in the case that we are addressing a single entity.

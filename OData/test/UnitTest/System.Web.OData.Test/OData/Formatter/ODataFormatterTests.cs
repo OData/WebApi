@@ -984,20 +984,20 @@ namespace System.Web.OData.Formatter
 
             EntitySetConfiguration<MainEntity> mainSet = builder.EntitySet<MainEntity>("MainEntity");
 
-            Func<EntityContext<MainEntity>, Uri> idLinkFactory = (e) =>
+            Func<ResourceContext<MainEntity>, Uri> idLinkFactory = (e) =>
                 CreateAbsoluteUri("/MainEntity/id/" + e.GetPropertyValue("Id").ToString());
             mainSet.HasIdLink(idLinkFactory, followsConventions: true);
 
             if (!sameLinksForIdAndEdit)
             {
-                Func<EntityContext<MainEntity>, Uri> editLinkFactory =
+                Func<ResourceContext<MainEntity>, Uri> editLinkFactory =
                     (e) => CreateAbsoluteUri("/MainEntity/edit/" + e.GetPropertyValue("Id").ToString());
                 mainSet.HasEditLink(editLinkFactory, followsConventions: false);
             }
 
             if (!sameLinksForEditAndRead)
             {
-                Func<EntityContext<MainEntity>, Uri> readLinkFactory =
+                Func<ResourceContext<MainEntity>, Uri> readLinkFactory =
                     (e) => CreateAbsoluteUri("/MainEntity/read/" + e.GetPropertyValue("Id").ToString());
                 mainSet.HasReadLink(readLinkFactory, followsConventions: false);
             }
@@ -1107,7 +1107,7 @@ namespace System.Web.OData.Formatter
             {
             }
 
-            public override ODataResource CreateEntry(SelectExpandNode selectExpandNode, EntityContext entityContext)
+            public override ODataResource CreateEntry(SelectExpandNode selectExpandNode, ResourceContext entityContext)
             {
                 ODataResource entry = base.CreateEntry(selectExpandNode, entityContext);
 
@@ -1120,7 +1120,7 @@ namespace System.Web.OData.Formatter
                 return entry;
             }
 
-            public override ODataProperty CreateStructuralProperty(IEdmStructuralProperty structuralProperty, EntityContext entityContext)
+            public override ODataProperty CreateStructuralProperty(IEdmStructuralProperty structuralProperty, ResourceContext entityContext)
             {
                 ODataProperty property = base.CreateStructuralProperty(structuralProperty, entityContext);
 

@@ -10,7 +10,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void Ctor_ThrowsArgumentNull_EntityLinkFactory()
         {
-            Assert.ThrowsArgumentNull(() => new OperationLinkBuilder((Func<EntityContext, Uri>)null, true), "linkFactory");
+            Assert.ThrowsArgumentNull(() => new OperationLinkBuilder((Func<ResourceContext, Uri>)null, true), "linkFactory");
         }
 
         [Fact]
@@ -25,7 +25,7 @@ namespace System.Web.OData.Builder
         public void FollowsConventions_IsSpecifiedValue(bool value)
         {
             // Arrange
-            OperationLinkBuilder builder = new OperationLinkBuilder((EntityContext a) => { throw new NotImplementedException(); },
+            OperationLinkBuilder builder = new OperationLinkBuilder((ResourceContext a) => { throw new NotImplementedException(); },
                 followsConventions: value);
 
             // Act
@@ -39,9 +39,9 @@ namespace System.Web.OData.Builder
         public void BuildOperationLink_ForEntity_ReturnsLink()
         {
             // Arrange
-            OperationLinkBuilder builder = new OperationLinkBuilder((EntityContext a) => new Uri("http://localhost:123"),
+            OperationLinkBuilder builder = new OperationLinkBuilder((ResourceContext a) => new Uri("http://localhost:123"),
                 followsConventions: true);
-            EntityContext entityContext = new EntityContext();
+            ResourceContext entityContext = new ResourceContext();
             FeedContext feedContext = new FeedContext();
 
             // Act
@@ -61,7 +61,7 @@ namespace System.Web.OData.Builder
             // Arrange
             OperationLinkBuilder builder = new OperationLinkBuilder((FeedContext a) => new Uri("http://localhost:456"),
                 followsConventions: true);
-            EntityContext entityContext = new EntityContext();
+            ResourceContext entityContext = new ResourceContext();
             FeedContext feedContext = new FeedContext();
 
             // Act

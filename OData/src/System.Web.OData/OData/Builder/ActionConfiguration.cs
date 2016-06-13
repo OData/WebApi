@@ -42,7 +42,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Register a factory that creates actions links.
         /// </summary>
-        public ActionConfiguration HasActionLink(Func<EntityContext, Uri> actionLinkFactory, bool followsConventions)
+        public ActionConfiguration HasActionLink(Func<ResourceContext, Uri> actionLinkFactory, bool followsConventions)
         {
             if (actionLinkFactory == null)
             {
@@ -63,7 +63,7 @@ namespace System.Web.OData.Builder
         /// Retrieves the currently registered action link factory.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
-        public Func<EntityContext, Uri> GetActionLink()
+        public Func<ResourceContext, Uri> GetActionLink()
         {
             if (OperationLinkBuilder == null)
             {

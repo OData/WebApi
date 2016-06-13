@@ -52,7 +52,7 @@ namespace System.Web.OData.Builder
         {
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(_entitySet);
             Assert.DoesNotThrow(
-                () => linkBuilder.BuildIdLink(new EntityContext(), (ODataMetadataLevel)metadataLevel));
+                () => linkBuilder.BuildIdLink(new ResourceContext(), (ODataMetadataLevel)metadataLevel));
         }
 
         [Theory]
@@ -69,7 +69,7 @@ namespace System.Web.OData.Builder
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(_entitySet);
 
             // Act
-            Uri generatedIdLink = linkBuilder.BuildIdLink(new EntityContext(), (ODataMetadataLevel)metadataLevel);
+            Uri generatedIdLink = linkBuilder.BuildIdLink(new ResourceContext(), (ODataMetadataLevel)metadataLevel);
 
             // Assert
             if (linkEmitted)
@@ -96,7 +96,7 @@ namespace System.Web.OData.Builder
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(_entitySet);
 
             // Act
-            Uri generatedEditLink = linkBuilder.BuildEditLink(new EntityContext(), (ODataMetadataLevel)metadataLevel, new Uri("http://selflink"));
+            Uri generatedEditLink = linkBuilder.BuildEditLink(new ResourceContext(), (ODataMetadataLevel)metadataLevel, new Uri("http://selflink"));
 
             // Assert
             Assert.Null(generatedEditLink);
@@ -116,7 +116,7 @@ namespace System.Web.OData.Builder
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(_entitySet);
 
             // Act
-            Uri generatedEditLink = linkBuilder.BuildEditLink(new EntityContext(), metadataLevel, new Uri("http://selflink"));
+            Uri generatedEditLink = linkBuilder.BuildEditLink(new ResourceContext(), metadataLevel, new Uri("http://selflink"));
 
             // Assert
             if (linkEmitted)
@@ -143,7 +143,7 @@ namespace System.Web.OData.Builder
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(_entitySet);
 
             // Act
-            Uri generatedReadLink = linkBuilder.BuildReadLink(new EntityContext(), (ODataMetadataLevel)metadataLevel, new Uri("http://editLink"));
+            Uri generatedReadLink = linkBuilder.BuildReadLink(new ResourceContext(), (ODataMetadataLevel)metadataLevel, new Uri("http://editLink"));
 
             // Assert
             Assert.Null(generatedReadLink);
@@ -163,7 +163,7 @@ namespace System.Web.OData.Builder
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(_entitySet);
 
             // Act
-            Uri generatedReadLink = linkBuilder.BuildReadLink(new EntityContext(), metadataLevel, new Uri("http://editLink"));
+            Uri generatedReadLink = linkBuilder.BuildReadLink(new ResourceContext(), metadataLevel, new Uri("http://editLink"));
 
             // Assert
             if (linkEmitted)
@@ -190,7 +190,7 @@ namespace System.Web.OData.Builder
             linkBuilder.AddNavigationPropertyLinkBuilder(edmNavProperty, new NavigationLinkBuilder((context, property) => new Uri("http://navigationlink"), followsConventions));
 
             // Act
-            Uri generatedNavigationLink = linkBuilder.BuildNavigationLink(new EntityContext(), edmNavProperty, (ODataMetadataLevel)metadataLevel);
+            Uri generatedNavigationLink = linkBuilder.BuildNavigationLink(new ResourceContext(), edmNavProperty, (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.Equal("http://navigationlink/", generatedNavigationLink.AbsoluteUri);
@@ -212,7 +212,7 @@ namespace System.Web.OData.Builder
             linkBuilder.AddNavigationPropertyLinkBuilder(edmNavProperty, new NavigationLinkBuilder((context, property) => new Uri("http://navigationlink"), followsConventions));
 
             // Act
-            Uri generatedNavigationLink = linkBuilder.BuildNavigationLink(new EntityContext(), edmNavProperty, (ODataMetadataLevel)metadataLevel);
+            Uri generatedNavigationLink = linkBuilder.BuildNavigationLink(new ResourceContext(), edmNavProperty, (ODataMetadataLevel)metadataLevel);
 
             // Assert
             Assert.Null(generatedNavigationLink);
@@ -226,7 +226,7 @@ namespace System.Web.OData.Builder
             _entitySet.HasIdLink(new SelfLinkBuilder<Uri>((ctxt) => idLink, followsConventions: false));
 
             // Act
-            var selfLinks = new NavigationSourceLinkBuilderAnnotation(_entitySet).BuildEntitySelfLinks(new EntityContext(), ODataMetadataLevel.MinimalMetadata);
+            var selfLinks = new NavigationSourceLinkBuilderAnnotation(_entitySet).BuildEntitySelfLinks(new ResourceContext(), ODataMetadataLevel.MinimalMetadata);
 
             // Assert
             Assert.Equal(idLink, selfLinks.IdLink);
@@ -245,7 +245,7 @@ namespace System.Web.OData.Builder
             _entitySet.HasEditLink(new SelfLinkBuilder<Uri>((ctxt) => editLink, followsConventions: false));
 
             // Act
-            var selfLinks = new NavigationSourceLinkBuilderAnnotation(_entitySet).BuildEntitySelfLinks(new EntityContext(), ODataMetadataLevel.MinimalMetadata);
+            var selfLinks = new NavigationSourceLinkBuilderAnnotation(_entitySet).BuildEntitySelfLinks(new ResourceContext(), ODataMetadataLevel.MinimalMetadata);
 
             // Assert
             Assert.Null(selfLinks.IdLink);
@@ -264,7 +264,7 @@ namespace System.Web.OData.Builder
             _entitySet.HasReadLink(new SelfLinkBuilder<Uri>((ctxt) => readLink, followsConventions: false));
 
             // Act
-            var selfLinks = new NavigationSourceLinkBuilderAnnotation(_entitySet).BuildEntitySelfLinks(new EntityContext(), ODataMetadataLevel.MinimalMetadata);
+            var selfLinks = new NavigationSourceLinkBuilderAnnotation(_entitySet).BuildEntitySelfLinks(new ResourceContext(), ODataMetadataLevel.MinimalMetadata);
 
             // Assert
             Assert.Null(selfLinks.IdLink);
@@ -279,7 +279,7 @@ namespace System.Web.OData.Builder
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             HttpRequestMessage request = GetODataRequest(model.Model);
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, NavigationSource = model.Customers, Url = request.GetUrlHelper() };
-            EntityContext instanceContext = new EntityContext(serializerContext, model.SpecialCustomer.AsReference(), new { ID = 42 });
+            ResourceContext instanceContext = new ResourceContext(serializerContext, model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(model.Customers, model.Model);
@@ -297,7 +297,7 @@ namespace System.Web.OData.Builder
             IEdmEntitySet specialCustomers = new EdmEntitySet(model.Container, "SpecialCustomers", model.SpecialCustomer);
             HttpRequestMessage request = GetODataRequest(model.Model);
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, NavigationSource = specialCustomers, Url = request.GetUrlHelper() };
-            EntityContext instanceContext = new EntityContext(serializerContext, model.Customer.AsReference(), new { ID = 42 });
+            ResourceContext instanceContext = new ResourceContext(serializerContext, model.Customer.AsReference(), new { ID = 42 });
 
             // Act
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(specialCustomers, model.Model);
@@ -314,7 +314,7 @@ namespace System.Web.OData.Builder
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             HttpRequestMessage request = GetODataRequest(model.Model);
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, NavigationSource = model.Customers, Url = request.GetUrlHelper() };
-            EntityContext instanceContext = new EntityContext(serializerContext, model.Customer.AsReference(), new { ID = 42 });
+            ResourceContext instanceContext = new ResourceContext(serializerContext, model.Customer.AsReference(), new { ID = 42 });
             IEdmNavigationProperty ordersProperty = model.Customer.NavigationProperties().First(p => p.Name == "Orders");
 
             // Act
@@ -333,7 +333,7 @@ namespace System.Web.OData.Builder
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             HttpRequestMessage request = GetODataRequest(model.Model);
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, NavigationSource = model.Customers, Url = request.GetUrlHelper() };
-            EntityContext instanceContext = new EntityContext(serializerContext, model.SpecialCustomer.AsReference(), new { ID = 42 });
+            ResourceContext instanceContext = new ResourceContext(serializerContext, model.SpecialCustomer.AsReference(), new { ID = 42 });
             IEdmNavigationProperty ordersProperty = model.SpecialCustomer.NavigationProperties().First(p => p.Name == "SpecialOrders");
 
             // Act

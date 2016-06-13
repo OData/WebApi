@@ -563,7 +563,7 @@ namespace System.Web.OData.Builder
         /// otherwise, <c>false</c>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
-        public void HasEditLink(Func<EntityContext<TEntityType>, Uri> editLinkFactory, bool followsConventions)
+        public void HasEditLink(Func<ResourceContext<TEntityType>, Uri> editLinkFactory, bool followsConventions)
         {
             if (editLinkFactory == null)
             {
@@ -581,7 +581,7 @@ namespace System.Web.OData.Builder
         /// otherwise, <c>false</c>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
-        public void HasReadLink(Func<EntityContext<TEntityType>, Uri> readLinkFactory, bool followsConventions)
+        public void HasReadLink(Func<ResourceContext<TEntityType>, Uri> readLinkFactory, bool followsConventions)
         {
             if (readLinkFactory == null)
             {
@@ -600,7 +600,7 @@ namespace System.Web.OData.Builder
         /// otherwise, <c>false</c>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
-        public void HasIdLink(Func<EntityContext<TEntityType>, Uri> idLinkFactory, bool followsConventions)
+        public void HasIdLink(Func<ResourceContext<TEntityType>, Uri> idLinkFactory, bool followsConventions)
         {
             if (idLinkFactory == null)
             {
@@ -621,7 +621,7 @@ namespace System.Web.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
         public void HasNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty,
-            Func<EntityContext<TEntityType>, IEdmNavigationProperty, Uri> navigationLinkFactory, bool followsConventions)
+            Func<ResourceContext<TEntityType>, IEdmNavigationProperty, Uri> navigationLinkFactory, bool followsConventions)
         {
             if (navigationProperty == null)
             {
@@ -647,7 +647,7 @@ namespace System.Web.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
         public void HasNavigationPropertiesLink(IEnumerable<NavigationPropertyConfiguration> navigationProperties,
-            Func<EntityContext<TEntityType>, IEdmNavigationProperty, Uri> navigationLinkFactory, bool followsConventions)
+            Func<ResourceContext<TEntityType>, IEdmNavigationProperty, Uri> navigationLinkFactory, bool followsConventions)
         {
             if (navigationProperties == null)
             {
@@ -696,13 +696,13 @@ namespace System.Web.OData.Builder
             return _configuration.FindBinding(navigationConfiguration, autoCreate);
         }
 
-        private static EntityContext<TEntityType> UpCastEntityContext(EntityContext context)
+        private static ResourceContext<TEntityType> UpCastEntityContext(ResourceContext context)
         {
-            return new EntityContext<TEntityType>
+            return new ResourceContext<TEntityType>
             {
                 SerializerContext = context.SerializerContext,
                 EdmObject = context.EdmObject,
-                EntityType = context.EntityType
+                StructuredType = context.StructuredType
             };
         }
     }

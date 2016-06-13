@@ -153,14 +153,14 @@ namespace System.Web.OData
                     if (operation is IEdmAction)
                     {
                         linkBuilder = new OperationLinkBuilder(
-                            (EntityContext entityContext) =>
+                            (ResourceContext entityContext) =>
                                 entityContext.GenerateActionLink(operation),
                             followsConventions: true);
                     }
                     else
                     {
                         linkBuilder = new OperationLinkBuilder(
-                            (EntityContext entityContext) =>
+                            (ResourceContext entityContext) =>
                                 entityContext.GenerateFunctionLink(operation),
                             followsConventions: true);
                     }

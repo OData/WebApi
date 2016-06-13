@@ -500,7 +500,7 @@ namespace System.Web.OData.Builder
             IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault();
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model };
 
-            EntityContext context = new EntityContext(serializerContext, customerType.AsReference(), new Customer { CustomerId = 1 });
+            ResourceContext context = new ResourceContext(serializerContext, customerType.AsReference(), new Customer { CustomerId = 1 });
             IEdmAction rewardAction = Assert.Single(model.SchemaElements.OfType<IEdmAction>()); // Guard
             OperationLinkBuilder actionLinkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(rewardAction);
 
@@ -560,7 +560,7 @@ namespace System.Web.OData.Builder
             IEdmEntitySet entitySet = container.EntitySets().SingleOrDefault();
             ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model, NavigationSource = entitySet, Url = urlHelper };
 
-            EntityContext context = new EntityContext(serializerContext, movieType.AsReference(), new Movie { ID = 1, Name = "Avatar" });
+            ResourceContext context = new ResourceContext(serializerContext, movieType.AsReference(), new Movie { ID = 1, Name = "Avatar" });
             OperationLinkBuilder actionLinkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(watchAction);
 
             //Assert

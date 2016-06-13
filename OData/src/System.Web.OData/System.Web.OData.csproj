@@ -381,8 +381,8 @@
     <Compile Include="OData\Builder\Conventions\EntityTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\IEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfigurationOfTComplexType.cs" />
-    <Compile Include="OData\EntityContextOfTEntityType.cs" />
-    <Compile Include="OData\EntityContext.cs" />
+    <Compile Include="OData\ResourceContextOfTStructuredType.cs" />
+    <Compile Include="OData\ResourceContext.cs" />
     <Compile Include="OData\FastPropertyAccessor.cs" />
     <Compile Include="OData\PerRequestActionValueBinder.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataActionPayloadDeserializer.cs" />

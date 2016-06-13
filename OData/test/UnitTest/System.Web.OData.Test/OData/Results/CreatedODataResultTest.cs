@@ -267,7 +267,7 @@ namespace System.Web.OData.Results
             Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
             linkBuilder.CallBase = true;
             linkBuilder.Setup(
-                b => b.BuildEditLink(It.IsAny<EntityContext>(), ODataMetadataLevel.FullMetadata, null))
+                b => b.BuildEditLink(It.IsAny<ResourceContext>(), ODataMetadataLevel.FullMetadata, null))
                 .Returns(editLink);
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
@@ -339,7 +339,7 @@ namespace System.Web.OData.Results
             // Arrange
             Uri editLink = new Uri("http://edit-link");
             Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
-            linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<EntityContext>(), ODataMetadataLevel.FullMetadata, null))
+            linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<ResourceContext>(), ODataMetadataLevel.FullMetadata, null))
                 .Returns(editLink);
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
@@ -367,7 +367,7 @@ namespace System.Web.OData.Results
             // Arrange
             Uri editLink = new Uri("http://edit-link");
             Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
-            linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<EntityContext>(), ODataMetadataLevel.FullMetadata, null))
+            linkBuilder.Setup(b => b.BuildEditLink(It.IsAny<ResourceContext>(), ODataMetadataLevel.FullMetadata, null))
                 .Returns(editLink);
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
@@ -385,7 +385,7 @@ namespace System.Web.OData.Results
 
             // Assert
             linkBuilder.Verify(
-                (b) => b.BuildEditLink(It.IsAny<EntityContext>(), ODataMetadataLevel.FullMetadata, null),
+                (b) => b.BuildEditLink(It.IsAny<ResourceContext>(), ODataMetadataLevel.FullMetadata, null),
                 Times.Once());
         }
 
@@ -396,7 +396,7 @@ namespace System.Web.OData.Results
             Uri idLink = new Uri("http://id-link");
             Mock<NavigationSourceLinkBuilderAnnotation> linkBuilder = new Mock<NavigationSourceLinkBuilderAnnotation>();
             linkBuilder.CallBase = true;
-            linkBuilder.Setup(b => b.BuildIdLink(It.IsAny<EntityContext>(), ODataMetadataLevel.FullMetadata))
+            linkBuilder.Setup(b => b.BuildIdLink(It.IsAny<ResourceContext>(), ODataMetadataLevel.FullMetadata))
                 .Returns(idLink);
 
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
@@ -416,7 +416,7 @@ namespace System.Web.OData.Results
             // Assert
             Assert.Same(idLink, entityIdHeader);
             linkBuilder.Verify(
-                b => b.BuildIdLink(It.IsAny<EntityContext>(), ODataMetadataLevel.FullMetadata),
+                b => b.BuildIdLink(It.IsAny<ResourceContext>(), ODataMetadataLevel.FullMetadata),
                 Times.Once());
         }
 

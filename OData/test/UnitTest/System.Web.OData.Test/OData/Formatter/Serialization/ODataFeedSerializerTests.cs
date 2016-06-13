@@ -389,7 +389,7 @@ namespace System.Web.OData.Formatter.Serialization
             var result = new object[0];
             IEdmNavigationProperty navProp = _customerSet.EntityType().NavigationProperties().First();
             SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
-            EntityContext entity = new EntityContext
+            ResourceContext entity = new ResourceContext
             {
                 SerializerContext =
                     new ODataSerializerContext { Request = request, NavigationSource = _customerSet, Model = _model }
@@ -413,7 +413,7 @@ namespace System.Web.OData.Formatter.Serialization
             var result = new object[0];
             IEdmNavigationProperty navProp = _customerSet.EntityType().NavigationProperties().First();
             SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
-            EntityContext entity = new EntityContext
+            ResourceContext entity = new ResourceContext
             {
                 SerializerContext =
                     new ODataSerializerContext { Request = request, NavigationSource = _customerSet, Model = _model }
@@ -436,7 +436,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
             SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
             IEdmNavigationProperty ordersProperty = model.Customer.NavigationProperties().First();
-            EntityContext entity = new EntityContext
+            ResourceContext entity = new ResourceContext
             {
                 SerializerContext = new ODataSerializerContext { NavigationSource = model.Customers, Model = model.Model }
             };

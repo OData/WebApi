@@ -169,7 +169,7 @@
     <Compile Include="OData\Formatter\ODataMessageWrapperTest.cs" />
     <Compile Include="OData\Formatter\PresidentController.cs" />
     <Compile Include="OData\Formatter\Serialization\EdmEntityObjectTest.cs" />
-    <Compile Include="OData\EntityContextTest.cs" />
+    <Compile Include="OData\ResourceContextTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\DeserializationHelpersTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataFeedDeserializerTest.cs" />

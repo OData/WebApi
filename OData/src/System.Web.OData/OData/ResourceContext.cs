@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
@@ -13,7 +14,7 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData
 {
     /// <summary>
-    /// An instance of <see cref="EntityContext"/> gets passed to the self link (
+    /// An instance of <see cref="ResourceContext"/> gets passed to the self link (
     /// <see cref="M:NavigationSourceConfiguration.HasIdLink"/>,
     /// <see cref="M:NavigationSourceConfiguration.HasEditLink"/>,
     /// <see cref="M:NavigationSourceConfiguration.HasReadLink"/>
@@ -22,30 +23,30 @@ namespace System.Web.OData
     /// <see cref="M:NavigationSourceConfiguration.HasNavigationPropertiesLink"/>
     /// ) builders and can be used by the link builders to generate links.
     /// </summary>
-    public class EntityContext
+    public class ResourceContext
     {
-        private object _entityInstance;
+        private object _resourceInstance;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityContext"/> class.
+        /// Initializes a new instance of the <see cref="ResourceContext"/> class.
         /// </summary>
-        public EntityContext()
+        public ResourceContext()
         {
             SerializerContext = new ODataSerializerContext();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityContext"/> class.
+        /// Initializes a new instance of the <see cref="ResourceContext"/> class.
         /// </summary>
         /// <param name="serializerContext">The backing <see cref="ODataSerializerContext"/>.</param>
-        /// <param name="entityType">The EDM entity type of this instance context.</param>
-        /// <param name="entityInstance">The object representing the instance of this context.</param>
-        public EntityContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, object entityInstance)
-            : this(serializerContext, entityType, AsEdmEntityObject(entityInstance, entityType, serializerContext.Model))
+        /// <param name="structuredType">The EDM structured type of this instance context.</param>
+        /// <param name="resourceInstance">The object representing the instance of this context.</param>
+        public ResourceContext(ODataSerializerContext serializerContext, IEdmStructuredTypeReference structuredType, object resourceInstance)
+            : this(serializerContext, structuredType, AsEdmResourceObject(resourceInstance, structuredType, serializerContext.Model))
         {
         }
 
-        private EntityContext(ODataSerializerContext serializerContext, IEdmEntityTypeReference entityType, IEdmEntityObject edmObject)
+        private ResourceContext(ODataSerializerContext serializerContext, IEdmStructuredTypeReference structuredType, IEdmStructuredObject edmObject)
         {
             if (serializerContext == null)
             {
@@ -53,7 +54,7 @@ namespace System.Web.OData
             }
 
             SerializerContext = serializerContext;
-            EntityType = entityType.EntityDefinition();
+            StructuredType = structuredType.StructuredDefinition();
             EdmObject = edmObject;
         }
 
@@ -108,36 +109,37 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="IEdmEntityType"/> of this entity instance.
+        /// Gets or sets the <see cref="IEdmStructuredType"/> of this resource instance.
         /// </summary>
-        public IEdmEntityType EntityType { get; set; }
+        public IEdmStructuredType StructuredType { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IEdmEntityObject"/> backing this instance.
+        /// Gets or sets the <see cref="IEdmStructuredObject"/> backing this instance.
         /// </summary>
-        public IEdmEntityObject EdmObject { get; set; }
+        public IEdmStructuredObject EdmObject { get; set; }
 
         /// <summary>
-        /// Gets or sets the value of this entity instance.
+        /// Gets or sets the value of this resource instance.
         /// </summary>
-        public object EntityInstance
+        public object ResourceInstance
         {
             get
             {
-                if (_entityInstance == null)
+                if (_resourceInstance == null)
                 {
-                    _entityInstance = BuildEntityInstance();
+                    _resourceInstance = BuildResourceInstance();
                 }
-                return _entityInstance;
+
+                return _resourceInstance;
             }
             set
             {
-                _entityInstance = value;
+                _resourceInstance = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets a <see cref="UrlHelper"/> that may be used to generate links while serializing this entity
+        /// Gets or sets a <see cref="UrlHelper"/> that may be used to generate links while serializing this resource
         /// instance.
         /// </summary>
         public UrlHelper Url
@@ -181,7 +183,7 @@ namespace System.Web.OData
         {
             if (EdmObject == null)
             {
-                throw Error.InvalidOperation(SRResources.EdmObjectNull, typeof(EntityContext).Name);
+                throw Error.InvalidOperation(SRResources.EdmObjectNull, typeof(ResourceContext).Name);
             }
 
             object value;
@@ -203,27 +205,27 @@ namespace System.Web.OData
             }
         }
 
-        private object BuildEntityInstance()
+        private object BuildResourceInstance()
         {
             if (EdmObject == null)
             {
                 return null;
             }
 
-            TypedEdmEntityObject edmEntityObject = EdmObject as TypedEdmEntityObject;
-            if (edmEntityObject != null)
+            TypedEdmStructuredObject edmStructruredObject = EdmObject as TypedEdmStructuredObject;
+            if (edmStructruredObject != null)
             {
-                return edmEntityObject.Instance;
+                return edmStructruredObject.Instance;
             }
 
-            Type clrType = EdmLibHelpers.GetClrType(EntityType, EdmModel);
+            Type clrType = EdmLibHelpers.GetClrType(StructuredType, EdmModel);
             if (clrType == null)
             {
-                throw new InvalidOperationException(Error.Format(SRResources.MappingDoesNotContainEntityType, EntityType.FullName()));
+                throw new InvalidOperationException(Error.Format(SRResources.MappingDoesNotContainEntityType, StructuredType.FullTypeName()));
             }
 
             object resource = Activator.CreateInstance(clrType);
-            foreach (IEdmStructuralProperty property in EntityType.StructuralProperties())
+            foreach (IEdmStructuralProperty property in StructuredType.StructuralProperties())
             {
                 object value;
                 if (EdmObject.TryGetPropertyValue(property.Name, out value) && value != null)
@@ -242,22 +244,26 @@ namespace System.Web.OData
             return resource;
         }
 
-        private static IEdmEntityObject AsEdmEntityObject(object entityInstance, IEdmEntityTypeReference entityType, IEdmModel model)
+        private static IEdmStructuredObject AsEdmResourceObject(object resourceInstance, IEdmStructuredTypeReference structuredType, IEdmModel model)
         {
-            if (entityType == null)
+            if (structuredType == null)
             {
-                throw Error.ArgumentNull("entityType");
+                throw Error.ArgumentNull("structuredType");
             }
 
-            IEdmEntityObject edmEntityObject = entityInstance as IEdmEntityObject;
-            if (edmEntityObject != null)
+            IEdmStructuredObject edmStructuredObject = resourceInstance as IEdmStructuredObject;
+            if (edmStructuredObject != null)
             {
-                return edmEntityObject;
+                return edmStructuredObject;
             }
-            else
+
+            if (structuredType.IsEntity())
             {
-                return new TypedEdmEntityObject(entityInstance, entityType, model);
+                return new TypedEdmEntityObject(resourceInstance, structuredType.AsEntity(), model);
             }
+
+            Contract.Assert(structuredType.IsComplex());
+            return new TypedEdmComplexObject(resourceInstance, structuredType.AsComplex(), model);
         }
     }
 }

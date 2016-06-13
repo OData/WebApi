@@ -66,7 +66,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Register a factory that creates functions links.
         /// </summary>
-        public FunctionConfiguration HasFunctionLink(Func<EntityContext, Uri> functionLinkFactory, bool followsConventions)
+        public FunctionConfiguration HasFunctionLink(Func<ResourceContext, Uri> functionLinkFactory, bool followsConventions)
         {
             if (functionLinkFactory == null)
             {
@@ -87,7 +87,7 @@ namespace System.Web.OData.Builder
         /// Retrieves the currently registered function link factory.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
-        public Func<EntityContext, Uri> GetFunctionLink()
+        public Func<ResourceContext, Uri> GetFunctionLink()
         {
             if (OperationLinkBuilder == null)
             {

@@ -88,7 +88,7 @@ namespace System.Web.OData.Builder.Conventions
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
             linkBuilder.AddNavigationPropertyLinkBuilder(carManufacturerProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: true), false));
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, carType.AsReference(), new Car { Model = 2009, Name = "Accord" });
+            var entityContext = new ResourceContext(serializerContext, carType.AsReference(), new Car { Model = 2009, Name = "Accord" });
 
             Uri uri = linkBuilder.BuildNavigationLink(entityContext, carManufacturerProperty, ODataMetadataLevel.MinimalMetadata);
 
@@ -147,7 +147,7 @@ namespace System.Web.OData.Builder.Conventions
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
             linkBuilder.AddNavigationPropertyLinkBuilder(carManufacturerProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: false), false));
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, carType.AsReference(), new Car { Model = 2009, Name = "Accord" });
+            var entityContext = new ResourceContext(serializerContext, carType.AsReference(), new Car { Model = 2009, Name = "Accord" });
 
             Uri uri = linkBuilder.BuildNavigationLink(entityContext, carManufacturerProperty, ODataMetadataLevel.MinimalMetadata);
 
@@ -177,7 +177,7 @@ namespace System.Web.OData.Builder.Conventions
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehicleEdmSingleton);
             linkBuilder.AddNavigationPropertyLinkBuilder(carManufacturerProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: false), false));
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehicleEdmSingleton, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, carType.AsReference(), new Car { Model = 2014, Name = "Contoso2014" });
+            var entityContext = new ResourceContext(serializerContext, carType.AsReference(), new Car { Model = 2014, Name = "Contoso2014" });
 
             Uri uri = linkBuilder.BuildNavigationLink(entityContext, carManufacturerProperty, ODataMetadataLevel.MinimalMetadata);
 
@@ -207,7 +207,7 @@ namespace System.Web.OData.Builder.Conventions
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
             linkBuilder.AddNavigationPropertyLinkBuilder(motorcycleManufacturerProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: false), false));
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, sportbikeType.AsReference(), new SportBike { Model = 2009, Name = "Ninja" });
+            var entityContext = new ResourceContext(serializerContext, sportbikeType.AsReference(), new SportBike { Model = 2009, Name = "Ninja" });
 
             Uri uri = linkBuilder.BuildNavigationLink(entityContext, motorcycleManufacturerProperty, ODataMetadataLevel.MinimalMetadata);
 

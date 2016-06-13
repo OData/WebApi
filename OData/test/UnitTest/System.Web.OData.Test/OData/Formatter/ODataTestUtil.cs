@@ -73,7 +73,7 @@ namespace System.Web.OData.Formatter
                     var keys = new[] {new KeyValuePair<string, object>("PerId", context.GetPropertyValue("PerId"))};
                         return new Uri(context.Url.CreateODataLink(
                             new EntitySetSegment(context.NavigationSource as IEdmEntitySet),
-                            new KeySegment(keys, context.EntityType, context.NavigationSource)));
+                            new KeySegment(keys, context.StructuredType as IEdmEntityType, context.NavigationSource)));
                     },
                     followsConventions: false);
 

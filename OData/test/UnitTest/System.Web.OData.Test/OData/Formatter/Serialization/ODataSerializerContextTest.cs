@@ -28,7 +28,7 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmNavigationProperty navProp = new Mock<IEdmNavigationProperty>().Object;
 
             Assert.ThrowsArgumentNull(
-                () => new ODataSerializerContext(entity: null, selectExpandClause: selectExpand, navigationProperty: navProp), "entity");
+                () => new ODataSerializerContext(resource: null, selectExpandClause: selectExpand, navigationProperty: navProp), "resource");
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace System.Web.OData.Formatter.Serialization
                 SkipExpensiveAvailabilityChecks = true,
                 Url = new UrlHelper()
             };
-            EntityContext entity = new EntityContext { SerializerContext = context };
+            ResourceContext entity = new ResourceContext { SerializerContext = context };
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
             IEdmNavigationProperty navProp = model.Customer.NavigationProperties().First();
 
@@ -73,13 +73,13 @@ namespace System.Web.OData.Formatter.Serialization
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
             IEdmNavigationProperty navProp = model.Customer.NavigationProperties().First();
             ODataSerializerContext context = new ODataSerializerContext { NavigationSource = model.Customers, Model = model.Model };
-            EntityContext entity = new EntityContext { SerializerContext = context };
+            ResourceContext resource = new ResourceContext { SerializerContext = context };
 
             // Act
-            ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpand, navProp);
+            ODataSerializerContext nestedContext = new ODataSerializerContext(resource, selectExpand, navProp);
 
             // Assert
-            Assert.Same(entity, nestedContext.ExpandedEntity);
+            Assert.Same(resource, nestedContext.ExpandedResource);
             Assert.Same(navProp, nestedContext.NavigationProperty);
             Assert.Same(selectExpand, nestedContext.SelectExpandClause);
             Assert.Same(model.Orders, nestedContext.NavigationSource);

@@ -31,22 +31,23 @@ namespace System.Web.OData.Formatter.Serialization
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
         /// </summary>
-        /// <param name="entity">The entity whose navigation property is being expanded.</param>
+        /// <param name="resource">The resource whose navigation property is being expanded.</param>
         /// <param name="selectExpandClause">The <see cref="SelectExpandClause"/> for the navigation property being expanded.</param>
         /// <param name="navigationProperty">The navigation property being expanded.</param>
         /// <remarks>This constructor is used to construct the serializer context for writing expanded properties.</remarks>
-        public ODataSerializerContext(EntityContext entity, SelectExpandClause selectExpandClause, IEdmNavigationProperty navigationProperty)
+        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmNavigationProperty navigationProperty)
         {
-            if (entity == null)
+            if (resource == null)
             {
-                throw Error.ArgumentNull("entity");
+                throw Error.ArgumentNull("resource");
             }
+
             if (navigationProperty == null)
             {
                 throw Error.ArgumentNull("navigationProperty");
             }
 
-            ODataSerializerContext context = entity.SerializerContext;
+            ODataSerializerContext context = resource.SerializerContext;
 
             Request = context.Request;
             RequestContext = context.RequestContext;
@@ -59,7 +60,7 @@ namespace System.Web.OData.Formatter.Serialization
             MetadataLevel = context.MetadataLevel;
             Items = context.Items;
 
-            ExpandedEntity = entity;
+            ExpandedResource = resource;
             SelectExpandClause = selectExpandClause;
             NavigationProperty = navigationProperty;
 
@@ -118,9 +119,9 @@ namespace System.Web.OData.Formatter.Serialization
         public SelectExpandClause SelectExpandClause { get; set; }
 
         /// <summary>
-        /// Gets or sets the entity that is being expanded.
+        /// Gets or sets the resource that is being expanded.
         /// </summary>
-        public EntityContext ExpandedEntity { get; set; }
+        public ResourceContext ExpandedResource { get; set; }
 
         /// <summary>
         /// Gets or sets the navigation property being expanded.

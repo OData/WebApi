@@ -28,7 +28,7 @@ namespace System.Web.OData.Builder
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Customers, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
             var idLink = entityContext.GenerateSelfLink(includeCast);
@@ -45,7 +45,7 @@ namespace System.Web.OData.Builder
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Customers, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
             IEdmNavigationProperty ordersProperty = _model.Customer.NavigationProperties().Single();
 
             // Act
@@ -63,7 +63,7 @@ namespace System.Web.OData.Builder
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Mary, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
             var idLink = entityContext.GenerateSelfLink(includeCast);
@@ -80,7 +80,7 @@ namespace System.Web.OData.Builder
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Mary, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
             IEdmNavigationProperty ordersProperty = _model.Customer.NavigationProperties().Single();
 
             // Act
@@ -129,7 +129,7 @@ namespace System.Web.OData.Builder
 
                 Url = GetODataRequest(_model.Model).GetUrlHelper(),
             };
-            var entityContext = new EntityContext(serializerContext, _model.OrderLine.AsReference(), new { ID = 21 });
+            var entityContext = new ResourceContext(serializerContext, _model.OrderLine.AsReference(), new { ID = 21 });
 
             // Act
             Uri uri = entityContext.GenerateNavigationPropertyLink(orderLinesProperty, includeCast);
@@ -170,7 +170,7 @@ namespace System.Web.OData.Builder
                 Url = GetODataRequest(_model.Model).GetUrlHelper(),
             };
 
-            var entityContext = new EntityContext(serializerContext, _model.OrderLine.AsReference(), new { ID = 21 });
+            var entityContext = new ResourceContext(serializerContext, _model.OrderLine.AsReference(), new { ID = 21 });
 
             // Act
             Uri uri = entityContext.GenerateSelfLink(false);
@@ -183,19 +183,19 @@ namespace System.Web.OData.Builder
         public void GenerateSelfLink_ThrowsArgumentNull_EntityContext()
         {
             Assert.ThrowsArgumentNull(
-                () => LinkGenerationHelpers.GenerateSelfLink(entityContext: null, includeCast: false),
-                "entityContext");
+                () => LinkGenerationHelpers.GenerateSelfLink(resourceContext: null, includeCast: false),
+                "resourceContext");
         }
 
         [Fact]
         public void GenerateSelfLink_ThrowsArgument_IfUrlHelperIsNull()
         {
-            EntityContext context = new EntityContext();
+            ResourceContext context = new ResourceContext();
 
             Assert.ThrowsArgument(
                 () => LinkGenerationHelpers.GenerateSelfLink(context, includeCast: false),
-                "entityContext",
-                "The property 'Url' of EntityContext cannot be null.");
+                "resourceContext",
+                "The property 'Url' of ResourceContext cannot be null.");
         }
 
         [Fact]
@@ -204,20 +204,20 @@ namespace System.Web.OData.Builder
             IEdmNavigationProperty navigationProperty = new Mock<IEdmNavigationProperty>().Object;
 
             Assert.ThrowsArgumentNull(
-                () => LinkGenerationHelpers.GenerateNavigationPropertyLink(entityContext: null, navigationProperty: navigationProperty, includeCast: false),
-                "entityContext");
+                () => LinkGenerationHelpers.GenerateNavigationPropertyLink(resourceContext: null, navigationProperty: navigationProperty, includeCast: false),
+                "resourceContext");
         }
 
         [Fact]
         public void GenerateNavigationPropertyLink_ThrowsArgument_IfUrlHelperIsNull()
         {
             IEdmNavigationProperty navigationProperty = new Mock<IEdmNavigationProperty>().Object;
-            EntityContext context = new EntityContext();
+            ResourceContext context = new ResourceContext();
 
             Assert.ThrowsArgument(
                 () => LinkGenerationHelpers.GenerateNavigationPropertyLink(context, navigationProperty, includeCast: false),
-                "entityContext",
-                "The property 'Url' of EntityContext cannot be null.");
+                "resourceContext",
+                "The property 'Url' of ResourceContext cannot be null.");
         }
 
         [Fact]
@@ -325,16 +325,16 @@ namespace System.Web.OData.Builder
         [Fact]
         public void GenerateActionLink_ThrowsArgumentNull_EntityContext()
         {
-            EntityContext entityContext = null;
+            ResourceContext entityContext = null;
             IEdmActionImport action = new Mock<IEdmActionImport>().Object;
 
-            Assert.ThrowsArgumentNull(() => entityContext.GenerateActionLink(action.Action), "entityContext");
+            Assert.ThrowsArgumentNull(() => entityContext.GenerateActionLink(action.Action), "resourceContext");
         }
 
         [Fact]
         public void GenerateActionLink_ThrowsArgumentNull_Action()
         {
-            EntityContext entityContext = new EntityContext();
+            ResourceContext entityContext = new ResourceContext();
 
             Assert.ThrowsArgumentNull(() => entityContext.GenerateActionLink(action: null), "action");
         }
@@ -342,7 +342,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void GenerateActionLink_ThrowsActionNotBoundToEntity_IfActionHasNoParameters()
         {
-            EntityContext entityContext = new EntityContext();
+            ResourceContext entityContext = new ResourceContext();
             Mock<IEdmAction> action = new Mock<IEdmAction>();
             action.Setup(a => a.Parameters).Returns(Enumerable.Empty<IEdmOperationParameter>());
             action.Setup(a => a.Name).Returns("SomeAction");
@@ -359,7 +359,7 @@ namespace System.Web.OData.Builder
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Customers, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.Customer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.Customer.AsReference(), new { ID = 42 });
 
             // Act
             Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer);
@@ -373,7 +373,7 @@ namespace System.Web.OData.Builder
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Customers, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
             Uri link = entityContext.GenerateActionLink(_model.UpgradeSpecialCustomer);
@@ -389,7 +389,7 @@ namespace System.Web.OData.Builder
             IEdmEntitySet specialCustomers = new EdmEntitySet(_model.Container, "SpecialCustomers", _model.SpecialCustomer);
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = specialCustomers, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
             Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer);
@@ -404,7 +404,7 @@ namespace System.Web.OData.Builder
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Mary, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
             Uri link = entityContext.GenerateActionLink(_model.UpgradeSpecialCustomer);
@@ -420,7 +420,7 @@ namespace System.Web.OData.Builder
             IEdmSingleton me = new EdmSingleton(_model.Container, "Me", _model.SpecialCustomer);
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = me, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
             Uri link = entityContext.GenerateActionLink(_model.UpgradeCustomer);
@@ -435,7 +435,7 @@ namespace System.Web.OData.Builder
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.OrderLines, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.OrderLine.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.OrderLine.AsReference(), new { ID = 42 });
 
             // Act
             Uri link = entityContext.GenerateActionLink(_model.Tag);
@@ -552,7 +552,7 @@ namespace System.Web.OData.Builder
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Customers, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.Customer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.Customer.AsReference(), new { ID = 42 });
 
             // Act
             Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded);
@@ -567,7 +567,7 @@ namespace System.Web.OData.Builder
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Customers, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
             Uri link = entityContext.GenerateFunctionLink(_model.IsSpecialCustomerUpgraded);
@@ -583,7 +583,7 @@ namespace System.Web.OData.Builder
             IEdmEntitySet specialCustomers = new EdmEntitySet(_model.Container, "SpecialCustomers", _model.SpecialCustomer);
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = specialCustomers, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
             Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded);
@@ -599,7 +599,7 @@ namespace System.Web.OData.Builder
             // Arrange
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = _model.Mary, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
             Uri link = entityContext.GenerateFunctionLink(_model.IsSpecialCustomerUpgraded);
@@ -615,7 +615,7 @@ namespace System.Web.OData.Builder
             IEdmSingleton me = new EdmSingleton(_model.Container, "Me", _model.SpecialCustomer);
             HttpRequestMessage request = GetODataRequest(_model.Model);
             var serializerContext = new ODataSerializerContext { Model = _model.Model, NavigationSource = me, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
+            var entityContext = new ResourceContext(serializerContext, _model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
             Uri link = entityContext.GenerateFunctionLink(_model.IsCustomerUpgraded);

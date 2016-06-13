@@ -33,7 +33,7 @@ namespace System.Web.OData.Builder
             var productsSet = model.SchemaElements.OfType<IEdmEntityContainer>().Single().EntitySets().Single();
             var productInstance = new EntitySetLinkConfigurationTest_Product { ID = 15 };
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = productsSet };
-            var entityContext = new EntityContext(serializerContext, productType.AsReference(), productInstance);
+            var entityContext = new ResourceContext(serializerContext, productType.AsReference(), productInstance);
             var linkBuilderAnnotation = new NavigationSourceLinkBuilderAnnotation(actor);
 
             // Act
@@ -84,7 +84,7 @@ namespace System.Web.OData.Builder
             var productsSet = model.SchemaElements.OfType<IEdmEntityContainer>().Single().EntitySets().Single();
             var productInstance = new EntitySetLinkConfigurationTest_Product { ID = 15 };
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = productsSet };
-            var entityContext = new EntityContext(serializerContext, productType.AsReference(), productInstance);
+            var entityContext = new ResourceContext(serializerContext, productType.AsReference(), productInstance);
 
             // Act
             var editLink = actor.GetEditLink().Factory(entityContext);

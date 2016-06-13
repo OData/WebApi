@@ -31,7 +31,7 @@ namespace System.Web.OData.Builder.Conventions
             // Assert
             var actionLink = action.GetActionLink();
             Assert.NotNull(actionLink);
-            Assert.IsType<Func<EntityContext, Uri>>(actionLink);
+            Assert.IsType<Func<ResourceContext, Uri>>(actionLink);
 
             Assert.Null(action.GetFeedActionLink());
         }
@@ -57,7 +57,7 @@ namespace System.Web.OData.Builder.Conventions
             IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
             var edmType = model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "Customer");
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = customers, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, edmType.AsReference(), new Customer { Id = 109 });
+            var entityContext = new ResourceContext(serializerContext, edmType.AsReference(), new Customer { Id = 109 });
 
             // Assert
             var edmAction = model.SchemaElements.OfType<IEdmAction>().First(f => f.Name == "MyAction");
@@ -152,7 +152,7 @@ namespace System.Web.OData.Builder.Conventions
             OperationLinkBuilder actionLinkBuilder = model.GetOperationLinkBuilder(edmAction);
 
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = edmCustomers, Url = request.GetUrlHelper() };
-            var entityContext = new EntityContext(serializerContext, edmCustomer.AsReference(), new Customer { Id = 2009 });
+            var entityContext = new ResourceContext(serializerContext, edmCustomer.AsReference(), new Customer { Id = 2009 });
 
             // Assert
             Uri link = actionLinkBuilder.BuildLink(entityContext);

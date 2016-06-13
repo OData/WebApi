@@ -191,7 +191,7 @@ namespace System.Web.OData.Formatter.Serialization
                 }
             }
 
-            if (writeContext.ExpandedEntity == null)
+            if (writeContext.ExpandedResource == null)
             {
                 // If we have more OData format specific information apply it now, only if we are the root feed.
                 PageResult odataFeedAnnotations = feedInstance as PageResult;
@@ -322,12 +322,12 @@ namespace System.Web.OData.Formatter.Serialization
 
         private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize)
         {
-            Contract.Assert(writeContext.ExpandedEntity != null);
+            Contract.Assert(writeContext.ExpandedResource != null);
 
-            IEdmNavigationSource sourceNavigationSource = writeContext.ExpandedEntity.NavigationSource;
+            IEdmNavigationSource sourceNavigationSource = writeContext.ExpandedResource.NavigationSource;
             NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
             Uri navigationLink =
-                linkBuilder.BuildNavigationLink(writeContext.ExpandedEntity, writeContext.NavigationProperty);
+                linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
 
             if (navigationLink != null)
             {

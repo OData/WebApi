@@ -11,7 +11,7 @@ namespace System.Web.OData.Builder
     /// </summary>
     public class OperationLinkBuilder
     {
-        private Func<EntityContext, Uri> _linkFactory; // bound to entity
+        private Func<ResourceContext, Uri> _linkFactory; // bound to entity
         private readonly Func<FeedContext, Uri> _feedLinkFactory; // bound to collection of entity
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace System.Web.OData.Builder
         /// <param name="followsConventions">
         /// A value indicating whether the link factory generates links that follow OData conventions.
         /// </param>
-        public OperationLinkBuilder(Func<EntityContext, Uri> linkFactory, bool followsConventions)
+        public OperationLinkBuilder(Func<ResourceContext, Uri> linkFactory, bool followsConventions)
         {
             if (linkFactory == null)
             {
@@ -51,9 +51,9 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Gets the entity link factory.
+        /// Gets the resource link factory.
         /// </summary>
-        internal Func<EntityContext, Uri> LinkFactory
+        internal Func<ResourceContext, Uri> LinkFactory
         {
             get { return _linkFactory; }
         }
@@ -72,11 +72,11 @@ namespace System.Web.OData.Builder
         public bool FollowsConventions { get; private set; }
 
         /// <summary>
-        /// Builds the operation link for the given entity.
+        /// Builds the operation link for the given resource.
         /// </summary>
-        /// <param name="context">An instance context wrapping the entity instance.</param>
+        /// <param name="context">An instance context wrapping the resource instance.</param>
         /// <returns>The generated link.</returns>
-        public virtual Uri BuildLink(EntityContext context)
+        public virtual Uri BuildLink(ResourceContext context)
         {
             if (_linkFactory == null)
             {

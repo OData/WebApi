@@ -171,14 +171,14 @@ namespace System.Web.OData
                     {
                         linkBuilder =
                             new OperationLinkBuilder(
-                                (FeedContext feedContext) => feedContext.GenerateActionLink(operation),
+                                (ResourceSetContext feedContext) => feedContext.GenerateActionLink(operation),
                                 followsConventions: true);
                     }
                     else
                     {
                         linkBuilder =
                             new OperationLinkBuilder(
-                                (FeedContext feedContext) => feedContext.GenerateFunctionLink(operation),
+                                (ResourceSetContext feedContext) => feedContext.GenerateFunctionLink(operation),
                                 followsConventions: true);
                     }
                 }

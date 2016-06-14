@@ -311,7 +311,7 @@ namespace System.Web.OData.Formatter.Serialization
                 }
             }
 
-            string message = Error.Format(SRResources.CannotWriteType, typeof(ODataFeedSerializer).Name, feedType.FullName());
+            string message = Error.Format(SRResources.CannotWriteType, typeof(ODataResourceSetSerializer).Name, feedType.FullName());
             throw new SerializationException(message);
         }
 

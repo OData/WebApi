@@ -526,7 +526,7 @@ namespace System.Web.OData.Builder
             // Act
             IEdmAction rewardAction = Assert.Single(model.SchemaElements.OfType<IEdmAction>()); // Guard
             OperationLinkBuilder actionLinkBuilder = model.GetAnnotationValue<OperationLinkBuilder>(rewardAction);
-            FeedContext context = new FeedContext();
+            ResourceSetContext context = new ResourceSetContext();
 
             //Assert
             Assert.Equal(expectedUri, reward.GetFeedActionLink()(context));
@@ -593,7 +593,7 @@ namespace System.Web.OData.Builder
             IEdmAction watchAction = Assert.Single(model.SchemaElements.OfType<IEdmAction>()); // Guard
             IEdmEntitySet entitySet = container.EntitySets().SingleOrDefault();
 
-            FeedContext context = new FeedContext
+            ResourceSetContext context = new ResourceSetContext
             {
                 EntitySetBase = entitySet,
                 Url = urlHelper,

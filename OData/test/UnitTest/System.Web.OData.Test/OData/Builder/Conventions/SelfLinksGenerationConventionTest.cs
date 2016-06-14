@@ -22,8 +22,8 @@ namespace System.Web.OData.Builder.Conventions
             // Arrange
             var mockEntityType = new Mock<EntityTypeConfiguration>();
             var mockEntitySet = new Mock<EntitySetConfiguration>();
-            mockEntitySet.Setup(entitySet => entitySet.GetFeedSelfLink()).Returns((Func<FeedContext, Uri>)null).Verifiable();
-            mockEntitySet.Setup(entitySet => entitySet.HasFeedSelfLink(It.IsAny<Func<FeedContext, Uri>>()))
+            mockEntitySet.Setup(entitySet => entitySet.GetFeedSelfLink()).Returns((Func<ResourceSetContext, Uri>)null).Verifiable();
+            mockEntitySet.Setup(entitySet => entitySet.HasFeedSelfLink(It.IsAny<Func<ResourceSetContext, Uri>>()))
                 .Returns(mockEntitySet.Object).Verifiable();
             mockEntitySet.Setup(entitySet => entitySet.EntityType).Returns(mockEntityType.Object);
 
@@ -52,7 +52,7 @@ namespace System.Web.OData.Builder.Conventions
 
             // Assert
             mockEntitySet.Verify();
-            mockEntitySet.Verify(entitySet => entitySet.HasFeedSelfLink(It.IsAny<Func<FeedContext, Uri>>()), Times.Never());
+            mockEntitySet.Verify(entitySet => entitySet.HasFeedSelfLink(It.IsAny<Func<ResourceSetContext, Uri>>()), Times.Never());
         }
 
         [Fact]

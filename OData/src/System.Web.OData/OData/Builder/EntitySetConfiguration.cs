@@ -11,7 +11,7 @@ namespace System.Web.OData.Builder
     /// </summary>
     public class EntitySetConfiguration : NavigationSourceConfiguration
     {
-        private Func<FeedContext, Uri> _feedSelfLinkFactory;
+        private Func<ResourceSetContext, Uri> _feedSelfLinkFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntitySetConfiguration"/> class.
@@ -49,7 +49,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="feedSelfLinkFactory">The builder used to generate the link URL.</param>
         /// <returns>The navigation source configuration currently being configured.</returns>
-        public virtual INavigationSourceConfiguration HasFeedSelfLink(Func<FeedContext, Uri> feedSelfLinkFactory)
+        public virtual INavigationSourceConfiguration HasFeedSelfLink(Func<ResourceSetContext, Uri> feedSelfLinkFactory)
         {
             _feedSelfLinkFactory = feedSelfLinkFactory;
             return this;
@@ -61,7 +61,7 @@ namespace System.Web.OData.Builder
         /// <returns>The link builder.</returns>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate",
             Justification = "Consistent with EF Has/Get pattern")]
-        public virtual Func<FeedContext, Uri> GetFeedSelfLink()
+        public virtual Func<ResourceSetContext, Uri> GetFeedSelfLink()
         {
             return _feedSelfLinkFactory;
         }

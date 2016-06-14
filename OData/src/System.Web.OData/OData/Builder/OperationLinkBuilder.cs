@@ -12,7 +12,7 @@ namespace System.Web.OData.Builder
     public class OperationLinkBuilder
     {
         private Func<ResourceContext, Uri> _linkFactory; // bound to entity
-        private readonly Func<FeedContext, Uri> _feedLinkFactory; // bound to collection of entity
+        private readonly Func<ResourceSetContext, Uri> _feedLinkFactory; // bound to collection of entity
 
         /// <summary>
         /// Create a new <see cref="OperationLinkBuilder"/> based on an entity link factory.
@@ -39,7 +39,7 @@ namespace System.Web.OData.Builder
         /// <param name="followsConventions">
         /// A value indicating whether the action link factory generates links that follow OData conventions.
         /// </param>
-        public OperationLinkBuilder(Func<FeedContext, Uri> linkFactory, bool followsConventions)
+        public OperationLinkBuilder(Func<ResourceSetContext, Uri> linkFactory, bool followsConventions)
         {
             if (linkFactory == null)
             {
@@ -61,7 +61,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Gets the feed link factory.
         /// </summary>
-        internal Func<FeedContext, Uri> FeedLinkFactory
+        internal Func<ResourceSetContext, Uri> FeedLinkFactory
         {
             get { return _feedLinkFactory; }
         }
@@ -91,7 +91,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="context">An feed context wrapping the feed instance.</param>
         /// <returns>The generated link.</returns>
-        public virtual Uri BuildLink(FeedContext context)
+        public virtual Uri BuildLink(ResourceSetContext context)
         {
             if (_feedLinkFactory == null)
             {

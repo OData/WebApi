@@ -25,7 +25,7 @@ namespace System.Web.OData.Formatter.Serialization
         IEdmModel _model;
         IEdmEntitySet _customerSet;
         Customer[] _customers;
-        ODataFeedSerializer _serializer;
+        ODataResourceSetSerializer _serializer;
         IEdmCollectionTypeReference _customersType;
         ODataSerializerContext _writeContext;
 
@@ -58,14 +58,14 @@ namespace System.Web.OData.Formatter.Serialization
         public void Ctor_ThrowsArgumentNull_SerializerProvider()
         {
             Assert.ThrowsArgumentNull(
-                () => new ODataFeedSerializer(serializerProvider: null),
+                () => new ODataResourceSetSerializer(serializerProvider: null),
                 "serializerProvider");
         }
 
         [Fact]
         public void WriteObject_ThrowsArgumentNull_MessageWriter()
         {
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteObject(graph: null, type: null, messageWriter: null, writeContext: new ODataSerializerContext()),
                 "messageWriter");
@@ -74,7 +74,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_ThrowsArgumentNull_WriteContext()
         {
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteObject(graph: null, type: null, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
                 "writeContext");
@@ -85,7 +85,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             object graph = new object();
-            Mock<ODataFeedSerializer> serializer = new Mock<ODataFeedSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataResourceSetSerializer> serializer = new Mock<ODataResourceSetSerializer>(new DefaultODataSerializerProvider());
             serializer.CallBase = true;
             serializer
                 .Setup(s => s.WriteObjectInline(graph, It.Is<IEdmTypeReference>(e => _customersType.IsEquivalentTo(e)),
@@ -102,7 +102,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteObjectInline_ThrowsArgumentNull_Writer()
         {
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteObjectInline(graph: null, expectedType: null, writer: null, writeContext: new ODataSerializerContext()),
                 "writer");
@@ -111,7 +111,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteObjectInline_ThrowsArgumentNull_WriteContext()
         {
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteObjectInline(graph: null, expectedType: null, writer: new Mock<ODataWriter>().Object, writeContext: null),
                 "writeContext");
@@ -120,7 +120,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteObjectInline_ThrowsSerializationException_CannotSerializerNull()
         {
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             Assert.Throws<SerializationException>(
                 () => serializer.WriteObjectInline(graph: null, expectedType: _customersType,
                     writer: new Mock<ODataWriter>().Object, writeContext: _writeContext),
@@ -130,11 +130,11 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteObjectInline_ThrowsSerializationException_IfGraphIsNotEnumerable()
         {
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             Assert.Throws<SerializationException>(
                 () => serializer.WriteObjectInline(graph: 42, expectedType: _customersType,
                     writer: new Mock<ODataWriter>().Object, writeContext: _writeContext),
-                "ODataFeedSerializer cannot write an object of type 'System.Int32'.");
+                "ODataResourceSetSerializer cannot write an object of type 'System.Int32'.");
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             IEnumerable instance = new object[] { null };
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
 
             // Act
             Assert.Throws<SerializationException>(
@@ -158,7 +158,7 @@ namespace System.Web.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage();
             serializerProvider.Setup(s => s.GetODataPayloadSerializer(_model, typeof(int), request)).Returns<ODataSerializer>(null);
             IEnumerable instance = new object[] { 42 };
-            ODataFeedSerializer serializer = new ODataFeedSerializer(serializerProvider.Object);
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(serializerProvider.Object);
 
             // Act
             Assert.Throws<SerializationException>(
@@ -167,13 +167,13 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void WriteObjectInline_Calls_CreateODataFeed()
+        public void WriteObjectInline_Calls_CreateResourceSet()
         {
             // Arrange
             IEnumerable instance = new object[0];
-            Mock<ODataFeedSerializer> serializer = new Mock<ODataFeedSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataResourceSetSerializer> serializer = new Mock<ODataResourceSetSerializer>(new DefaultODataSerializerProvider());
             serializer.CallBase = true;
-            serializer.Setup(s => s.CreateODataFeed(instance, _customersType, _writeContext)).Returns(new ODataResourceSet()).Verifiable();
+            serializer.Setup(s => s.CreateResourceSet(instance, _customersType, _writeContext)).Returns(new ODataResourceSet()).Verifiable();
 
             // Act
             serializer.Object.WriteObjectInline(instance, _customersType, new Mock<ODataWriter>().Object, _writeContext);
@@ -183,13 +183,13 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void WriteObjectInline_Throws_CannotSerializerNull_IfCreateODataFeedReturnsNull()
+        public void WriteObjectInline_Throws_CannotSerializerNull_IfCreateResourceSetReturnsNull()
         {
             // Arrange
             IEnumerable instance = new object[0];
-            Mock<ODataFeedSerializer> serializer = new Mock<ODataFeedSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataResourceSetSerializer> serializer = new Mock<ODataResourceSetSerializer>(new DefaultODataSerializerProvider());
             serializer.CallBase = true;
-            serializer.Setup(s => s.CreateODataFeed(instance, _customersType, _writeContext)).Returns<ODataResourceSet>(null);
+            serializer.Setup(s => s.CreateResourceSet(instance, _customersType, _writeContext)).Returns<ODataResourceSet>(null);
             ODataWriter writer = new Mock<ODataWriter>().Object;
 
             // Act & Assert
@@ -199,14 +199,14 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void WriteObjectInline_Writes_CreateODataFeedOutput()
+        public void WriteObjectInline_Writes_CreateResourceSetOutput()
         {
             // Arrange
             IEnumerable instance = new object[0];
             ODataResourceSet feed = new ODataResourceSet();
-            Mock<ODataFeedSerializer> serializer = new Mock<ODataFeedSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataResourceSetSerializer> serializer = new Mock<ODataResourceSetSerializer>(new DefaultODataSerializerProvider());
             serializer.CallBase = true;
-            serializer.Setup(s => s.CreateODataFeed(instance, _customersType, _writeContext)).Returns(feed);
+            serializer.Setup(s => s.CreateResourceSet(instance, _customersType, _writeContext)).Returns(feed);
             Mock<ODataWriter> writer = new Mock<ODataWriter>();
             writer.Setup(s => s.WriteStart(feed)).Verifiable();
 
@@ -228,7 +228,7 @@ namespace System.Web.OData.Formatter.Serialization
             customerSerializer.Setup(s => s.WriteObjectInline(_customers[0], _customersType.ElementType(), mockWriter.Object, _writeContext)).Verifiable();
             customerSerializer.Setup(s => s.WriteObjectInline(_customers[1], _customersType.ElementType(), mockWriter.Object, _writeContext)).Verifiable();
 
-            _serializer = new ODataFeedSerializer(provider);
+            _serializer = new ODataResourceSetSerializer(provider);
 
             // Act
             _serializer.WriteObjectInline(_customers, _customersType, mockWriter.Object, _writeContext);
@@ -254,7 +254,7 @@ namespace System.Web.OData.Formatter.Serialization
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(edmType)).Returns(customSerializer.Object);
 
-            ODataFeedSerializer serializer = new ODataFeedSerializer(serializerProvider.Object);
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(serializerProvider.Object);
 
             // Act
             serializer.WriteObjectInline(new[] { edmObject.Object }, feedType, mockWriter.Object, _writeContext);
@@ -269,9 +269,9 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             IEnumerable instance = new object[0];
             ODataResourceSet feed = new ODataResourceSet { Count = 1000 };
-            Mock<ODataFeedSerializer> serializer = new Mock<ODataFeedSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataResourceSetSerializer> serializer = new Mock<ODataResourceSetSerializer>(new DefaultODataSerializerProvider());
             serializer.CallBase = true;
-            serializer.Setup(s => s.CreateODataFeed(instance, _customersType, _writeContext)).Returns(feed);
+            serializer.Setup(s => s.CreateResourceSet(instance, _customersType, _writeContext)).Returns(feed);
             var mockWriter = new Mock<ODataWriter>();
 
             mockWriter.Setup(m => m.WriteStart(It.Is<ODataResourceSet>(f => f.Count == 1000))).Verifiable();
@@ -289,9 +289,9 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             IEnumerable instance = new object[0];
             ODataResourceSet feed = new ODataResourceSet { NextPageLink = new Uri("http://nextlink.com/") };
-            Mock<ODataFeedSerializer> serializer = new Mock<ODataFeedSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataResourceSetSerializer> serializer = new Mock<ODataResourceSetSerializer>(new DefaultODataSerializerProvider());
             serializer.CallBase = true;
-            serializer.Setup(s => s.CreateODataFeed(instance, _customersType, _writeContext)).Returns(feed);
+            serializer.Setup(s => s.CreateResourceSet(instance, _customersType, _writeContext)).Returns(feed);
             var mockWriter = new Mock<ODataWriter>();
 
             mockWriter.Setup(m => m.WriteStart(It.Is<ODataResourceSet>(f => f.NextPageLink == null))).Verifiable();
@@ -314,75 +314,75 @@ namespace System.Web.OData.Formatter.Serialization
         public void CreateODataFeed_Sets_CountValueForPageResult()
         {
             // Arrange
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             Uri expectedNextLink = new Uri("http://nextlink.com");
             const long ExpectedCountValue = 1000;
 
             var result = new PageResult<Customer>(_customers, expectedNextLink, ExpectedCountValue);
 
             // Act
-            ODataResourceSet feed = serializer.CreateODataFeed(result, _customersType, new ODataSerializerContext());
+            ODataResourceSet resourceSet = serializer.CreateResourceSet(result, _customersType, new ODataSerializerContext());
 
             // Assert
-            Assert.Equal(ExpectedCountValue, feed.Count);
+            Assert.Equal(ExpectedCountValue, resourceSet.Count);
         }
 
         [Fact]
         public void CreateODataFeed_Sets_NextPageLinkForPageResult()
         {
             // Arrange
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             Uri expectedNextLink = new Uri("http://nextlink.com");
             const long ExpectedCountValue = 1000;
 
             var result = new PageResult<Customer>(_customers, expectedNextLink, ExpectedCountValue);
 
             // Act
-            ODataResourceSet feed = serializer.CreateODataFeed(result, _customersType, new ODataSerializerContext());
+            ODataResourceSet resourceSet = serializer.CreateResourceSet(result, _customersType, new ODataSerializerContext());
 
             // Assert
-            Assert.Equal(expectedNextLink, feed.NextPageLink);
+            Assert.Equal(expectedNextLink, resourceSet.NextPageLink);
         }
 
         [Fact]
         public void CreateODataFeed_Sets_CountValueFromContext()
         {
             // Arrange
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             const long ExpectedCountValue = 1000;
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().TotalCount = ExpectedCountValue;
             var result = new object[0];
 
             // Act
-            ODataResourceSet feed = serializer.CreateODataFeed(result, _customersType, new ODataSerializerContext { Request = request });
+            ODataResourceSet resourceSet = serializer.CreateResourceSet(result, _customersType, new ODataSerializerContext { Request = request });
 
             // Assert
-            Assert.Equal(ExpectedCountValue, feed.Count);
+            Assert.Equal(ExpectedCountValue, resourceSet.Count);
         }
 
         [Fact]
         public void CreateODataFeed_Sets_NextPageLinkFromContext()
         {
             // Arrange
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             Uri expectedNextLink = new Uri("http://nextlink.com");
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().NextLink = expectedNextLink;
             var result = new object[0];
 
             // Act
-            ODataResourceSet feed = serializer.CreateODataFeed(result, _customersType, new ODataSerializerContext { Request = request });
+            ODataResourceSet resourceSet = serializer.CreateResourceSet(result, _customersType, new ODataSerializerContext { Request = request });
 
             // Assert
-            Assert.Equal(expectedNextLink, feed.NextPageLink);
+            Assert.Equal(expectedNextLink, resourceSet.NextPageLink);
         }
 
         [Fact]
         public void CreateODataFeed_Ignores_NextPageLink_ForInnerFeeds()
         {
             // Arrange
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             Uri nextLink = new Uri("http://somelink");
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().NextLink = nextLink;
@@ -397,17 +397,17 @@ namespace System.Web.OData.Formatter.Serialization
             ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpandClause, navProp);
 
             // Act
-            ODataResourceSet feed = serializer.CreateODataFeed(result, _customersType, nestedContext);
+            ODataResourceSet resourceSet = serializer.CreateResourceSet(result, _customersType, nestedContext);
 
             // Assert
-            Assert.Null(feed.NextPageLink);
+            Assert.Null(resourceSet.NextPageLink);
         }
 
         [Fact]
         public void CreateODataFeed_Ignores_CountValue_ForInnerFeeds()
         {
             // Arrange
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().TotalCount = 42;
             var result = new object[0];
@@ -421,10 +421,10 @@ namespace System.Web.OData.Formatter.Serialization
             ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpandClause, navProp);
 
             // Act
-            ODataResourceSet feed = serializer.CreateODataFeed(result, _customersType, nestedContext);
+            ODataResourceSet resourceSet = serializer.CreateResourceSet(result, _customersType, nestedContext);
 
             // Assert
-            Assert.Null(feed.Count);
+            Assert.Null(resourceSet.Count);
         }
 
         [Fact]
@@ -433,7 +433,7 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             IEdmCollectionTypeReference customersType = new EdmCollectionTypeReference(new EdmCollectionType(model.Customer.AsReference()));
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
             IEdmNavigationProperty ordersProperty = model.Customer.NavigationProperties().First();
             ResourceContext entity = new ResourceContext
@@ -452,10 +452,10 @@ namespace System.Web.OData.Formatter.Serialization
             model.Model.SetNavigationSourceLinkBuilder(model.Orders, new NavigationSourceLinkBuilderAnnotation());
 
             // Act
-            ODataResourceSet feed = serializer.CreateODataFeed(orders, _customersType, nestedContext);
+            ODataResourceSet resourceSet = serializer.CreateResourceSet(orders, _customersType, nestedContext);
 
             // Assert
-            Assert.Equal("http://navigation-link/?$skip=1", feed.NextPageLink.AbsoluteUri);
+            Assert.Equal("http://navigation-link/?$skip=1", resourceSet.NextPageLink.AbsoluteUri);
         }
 
         [Fact]
@@ -464,7 +464,7 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             IEdmCollectionTypeReference customersType = new EdmCollectionTypeReference(new EdmCollectionType(model.Customer.AsReference()));
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             ODataSerializerContext context = new ODataSerializerContext
             {
                 NavigationSource = model.Customers,
@@ -477,11 +477,11 @@ namespace System.Web.OData.Formatter.Serialization
             var result = new object[0];
 
             // Act
-            ODataResourceSet feed = serializer.CreateODataFeed(result, customersType, context);
+            ODataResourceSet resourceSet = serializer.CreateResourceSet(result, customersType, context);
 
             // Assert
-            Assert.Equal(1, feed.Actions.Count());
-            Assert.Equal(2, feed.Functions.Count());
+            Assert.Equal(1, resourceSet.Actions.Count());
+            Assert.Equal(2, resourceSet.Functions.Count());
         }
 
         [Theory]
@@ -490,12 +490,12 @@ namespace System.Web.OData.Formatter.Serialization
         public void CreateODataOperation_OmitsOperations_WhenNonFullMetadata(ODataMetadataLevel metadataLevel)
         {
             // Arrange
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
 
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
             IEdmFunction function = new EdmFunction("NS", "Function", returnType, isBound: true, entitySetPathExpression: null, isComposable: false);
 
-            FeedContext feedContext = new FeedContext();
+            ResourceSetContext feedContext = new ResourceSetContext();
             ODataSerializerContext serializerContext = new ODataSerializerContext
             {
                 MetadataLevel = metadataLevel
@@ -516,7 +516,7 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             // Arrange
             string expectedTarget = "aa://Target";
-            ODataFeedSerializer serializer = new ODataFeedSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<FeedCustomer>("Customers");
             var function = builder.EntityType<FeedCustomer>().Collection.Function("MyFunction").Returns<int>();
@@ -529,7 +529,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             UrlHelper url = CreateMetadataLinkFactory(expectedMetadataPrefix);
             HttpRequestMessage request = new HttpRequestMessage();
-            FeedContext feedContext = new FeedContext
+            ResourceSetContext feedContext = new ResourceSetContext
             {
                 EntitySetBase = customers,
                 Request = request,

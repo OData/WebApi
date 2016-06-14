@@ -100,7 +100,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Register a factory that creates feed functions links.
         /// </summary>
-        public FunctionConfiguration HasFeedFunctionLink(Func<FeedContext, Uri> functionLinkFactory, bool followsConventions)
+        public FunctionConfiguration HasFeedFunctionLink(Func<ResourceSetContext, Uri> functionLinkFactory, bool followsConventions)
         {
             if (functionLinkFactory == null)
             {
@@ -123,7 +123,7 @@ namespace System.Web.OData.Builder
         /// Retrieves the currently registered feed function link factory.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
-        public Func<FeedContext, Uri> GetFeedFunctionLink()
+        public Func<ResourceSetContext, Uri> GetFeedFunctionLink()
         {
             if (OperationLinkBuilder == null)
             {

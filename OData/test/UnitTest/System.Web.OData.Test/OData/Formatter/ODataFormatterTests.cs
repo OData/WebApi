@@ -1060,17 +1060,17 @@ namespace System.Web.OData.Formatter
             return request;
         }
 
-        private class CustomFeedSerializer : ODataFeedSerializer
+        private class CustomFeedSerializer : ODataResourceSetSerializer
         {
             public CustomFeedSerializer(ODataSerializerProvider serializerProvider)
                 : base(serializerProvider)
             {
             }
 
-            public override ODataResourceSet CreateODataFeed(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
+            public override ODataResourceSet CreateResourceSet(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
                 ODataSerializerContext writeContext)
             {
-                ODataResourceSet feed = base.CreateODataFeed(feedInstance, feedType, writeContext);
+                ODataResourceSet feed = base.CreateResourceSet(feedInstance, feedType, writeContext);
 
                 // Int32
                 ODataPrimitiveValue intValue = new ODataPrimitiveValue(321);

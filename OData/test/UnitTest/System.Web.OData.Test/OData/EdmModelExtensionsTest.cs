@@ -112,7 +112,7 @@ namespace System.Web.OData
             // Arrange
             IEdmModel model = new EdmModel();
             IEdmFunction function = new Mock<IEdmFunction>().Object;
-            OperationLinkBuilder builder = new OperationLinkBuilder((FeedContext _) => null, followsConventions: false);
+            OperationLinkBuilder builder = new OperationLinkBuilder((ResourceSetContext _) => null, followsConventions: false);
 
             // Act
             model.SetOperationLinkBuilder(function, builder);
@@ -161,7 +161,7 @@ namespace System.Web.OData
             Assert.Null(builder.LinkFactory);
 
             Assert.NotNull(builder.FeedLinkFactory);
-            Assert.IsType<Func<FeedContext, Uri>>(builder.FeedLinkFactory);
+            Assert.IsType<Func<ResourceSetContext, Uri>>(builder.FeedLinkFactory);
         }
 
         [Fact]
@@ -186,7 +186,7 @@ namespace System.Web.OData
             // Arrange
             IEdmModel model = new EdmModel();
             IEdmAction action = new Mock<IEdmAction>().Object;
-            OperationLinkBuilder builder = new OperationLinkBuilder((FeedContext _) => null, followsConventions: false);
+            OperationLinkBuilder builder = new OperationLinkBuilder((ResourceSetContext _) => null, followsConventions: false);
 
             // Act
             model.SetOperationLinkBuilder(action, builder);
@@ -233,7 +233,7 @@ namespace System.Web.OData
             Assert.Null(builder.LinkFactory);
 
             Assert.NotNull(builder.FeedLinkFactory);
-            Assert.IsType<Func<FeedContext, Uri>>(builder.FeedLinkFactory);
+            Assert.IsType<Func<ResourceSetContext, Uri>>(builder.FeedLinkFactory);
         }
 
         [Fact]

@@ -16,7 +16,7 @@ namespace System.Web.OData.Builder
         [Fact]
         public void Ctor_ThrowsArgumentNull_FeedLinkFactory()
         {
-            Assert.ThrowsArgumentNull(() => new OperationLinkBuilder((Func<FeedContext, Uri>)null, true), "linkFactory");
+            Assert.ThrowsArgumentNull(() => new OperationLinkBuilder((Func<ResourceSetContext, Uri>)null, true), "linkFactory");
         }
 
         [Theory]
@@ -42,7 +42,7 @@ namespace System.Web.OData.Builder
             OperationLinkBuilder builder = new OperationLinkBuilder((ResourceContext a) => new Uri("http://localhost:123"),
                 followsConventions: true);
             ResourceContext entityContext = new ResourceContext();
-            FeedContext feedContext = new FeedContext();
+            ResourceSetContext feedContext = new ResourceSetContext();
 
             // Act
             Uri link = builder.BuildLink(entityContext);
@@ -59,10 +59,10 @@ namespace System.Web.OData.Builder
         public void BuildOperationLink_ForFeed_ReturnsLink()
         {
             // Arrange
-            OperationLinkBuilder builder = new OperationLinkBuilder((FeedContext a) => new Uri("http://localhost:456"),
+            OperationLinkBuilder builder = new OperationLinkBuilder((ResourceSetContext a) => new Uri("http://localhost:456"),
                 followsConventions: true);
             ResourceContext entityContext = new ResourceContext();
-            FeedContext feedContext = new FeedContext();
+            ResourceSetContext feedContext = new ResourceSetContext();
 
             // Act
             Uri link = builder.BuildLink(entityContext);

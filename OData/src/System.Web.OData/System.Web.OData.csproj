@@ -392,7 +392,7 @@
     <Compile Include="OData\Formatter\Deserialization\ODataFeedDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataNavigationLinkWithItems.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataPrimitiveDeserializer.cs" />
-    <Compile Include="OData\FeedContext.cs" />
+    <Compile Include="OData\ResourceSetContext.cs" />
     <Compile Include="OData\Formatter\EdmPrimitiveHelpers.cs" />
     <Compile Include="OData\Formatter\EdmTypeReferenceEqualityComparer.cs" />
     <Compile Include="OData\PerRequestParameterBinding.cs" />
@@ -450,7 +450,7 @@
     <Compile Include="OData\Formatter\Serialization\ODataCollectionSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataComplexTypeSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataResourceSerializer.cs" />
-    <Compile Include="OData\Formatter\Serialization\ODataFeedSerializer.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataResourceSetSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataPrimitiveSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerContext.cs" />

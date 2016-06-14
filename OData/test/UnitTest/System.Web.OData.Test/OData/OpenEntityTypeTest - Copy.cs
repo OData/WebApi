@@ -21,7 +21,6 @@ namespace System.Web.OData
     {
         private const string _untypedCustomerRequestRooturl = "http://localhost/odata/UntypedSimpleOpenCustomers";
 
-
         [Theory]
         [InlineData(true)]
         [InlineData(false)]

@@ -76,7 +76,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Register a factory that creates feed actions links.
         /// </summary>
-        public ActionConfiguration HasFeedActionLink(Func<FeedContext, Uri> actionLinkFactory, bool followsConventions)
+        public ActionConfiguration HasFeedActionLink(Func<ResourceSetContext, Uri> actionLinkFactory, bool followsConventions)
         {
             if (actionLinkFactory == null)
             {
@@ -99,7 +99,7 @@ namespace System.Web.OData.Builder
         /// Retrieves the currently registered feed action link factory.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
-        public Func<FeedContext, Uri> GetFeedActionLink()
+        public Func<ResourceSetContext, Uri> GetFeedActionLink()
         {
             if (OperationLinkBuilder == null)
             {

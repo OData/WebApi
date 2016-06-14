@@ -224,18 +224,18 @@ namespace System.Web.OData.Builder
         public void GenerateActionLinkForFeed_ThrowsArgumentNull_FeedContext()
         {
             // Arrange
-            FeedContext feedContext = null;
+            ResourceSetContext feedContext = null;
             IEdmAction action = new Mock<IEdmAction>().Object;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => feedContext.GenerateActionLink(action), "feedContext");
+            Assert.ThrowsArgumentNull(() => feedContext.GenerateActionLink(action), "resourceSetContext");
         }
 
         [Fact]
         public void GenerateActionLinkForFeed_ThrowsArgumentNull_Action()
         {
             // Arrange
-            FeedContext feedContext = new FeedContext();
+            ResourceSetContext feedContext = new ResourceSetContext();
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() => feedContext.GenerateActionLink(action: null), "action");
@@ -245,7 +245,7 @@ namespace System.Web.OData.Builder
         public void GenerateActionLinkForFeed_ThrowsActionNotBoundToCollectionOfEntity_IfActionHasNoParameters()
         {
             // Arrange
-            FeedContext context = new FeedContext();
+            ResourceSetContext context = new ResourceSetContext();
             Mock<IEdmAction> action = new Mock<IEdmAction>();
             action.Setup(a => a.Parameters).Returns(Enumerable.Empty<IEdmOperationParameter>());
             action.Setup(a => a.Name).Returns("SomeAction");
@@ -265,7 +265,7 @@ namespace System.Web.OData.Builder
             IEdmAction action = _model.Model.SchemaElements.OfType<IEdmAction>().First(a => a.Name == "UpgradeAll");
             Assert.NotNull(action); // Guard
 
-            var context = new FeedContext
+            var context = new ResourceSetContext
             {
                 Request = request,
                 EntitySetBase = _model.Customers,
@@ -285,7 +285,7 @@ namespace System.Web.OData.Builder
             HttpRequestMessage request = GetODataRequest(_model.Model);
             IEdmAction action = _model.Model.SchemaElements.OfType<IEdmAction>().First(a => a.Name == "UpgradeSpecialAll");
             Assert.NotNull(action); // Guard
-            var context = new FeedContext
+            var context = new ResourceSetContext
             {
                 Request = request,
                 EntitySetBase = _model.Customers,
@@ -308,7 +308,7 @@ namespace System.Web.OData.Builder
             Assert.NotNull(action); // Guard
             IEdmEntitySet specialCustomers = new EdmEntitySet(_model.Container, "SpecialCustomers", _model.SpecialCustomer);
 
-            var context = new FeedContext
+            var context = new ResourceSetContext
             {
                 Request = request,
                 EntitySetBase = specialCustomers,
@@ -448,7 +448,7 @@ namespace System.Web.OData.Builder
         public void GenerateFunctionLinkForFeed_ThrowsArgumentNull_FeedContext()
         {
             // Arrange
-            FeedContext feedContext = null;
+            ResourceSetContext feedContext = null;
             IEdmFunction function = new Mock<IEdmFunction>().Object;
 
             // Act & Assert
@@ -459,7 +459,7 @@ namespace System.Web.OData.Builder
         public void GenerateFunctionLinkForFeed_ThrowsArgumentNull_Function()
         {
             // Arrange
-            FeedContext feedContext = new FeedContext();
+            ResourceSetContext feedContext = new ResourceSetContext();
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() => feedContext.GenerateFunctionLink(function: null), "function");
@@ -469,7 +469,7 @@ namespace System.Web.OData.Builder
         public void GenerateFunctionLinkForFeed_ThrowsFunctionNotBoundToCollectionOfEntity_IfFunctionHasNoParameters()
         {
             // Arrange
-            FeedContext context = new FeedContext();
+            ResourceSetContext context = new ResourceSetContext();
             Mock<IEdmFunction> function = new Mock<IEdmFunction>();
             function.Setup(a => a.Parameters).Returns(Enumerable.Empty<IEdmOperationParameter>());
             function.Setup(a => a.Name).Returns("SomeFunction");
@@ -489,7 +489,7 @@ namespace System.Web.OData.Builder
             IEdmFunction function = _model.Model.SchemaElements.OfType<IEdmFunction>().First(a => a.Name == "IsAllUpgraded");
             Assert.NotNull(function); // Guard
 
-            var context = new FeedContext
+            var context = new ResourceSetContext
             {
                 Request = request,
                 EntitySetBase = _model.Customers,
@@ -509,7 +509,7 @@ namespace System.Web.OData.Builder
             HttpRequestMessage request = GetODataRequest(_model.Model);
             IEdmFunction function = _model.Model.SchemaElements.OfType<IEdmFunction>().First(a => a.Name == "IsSpecialAllUpgraded");
             Assert.NotNull(function); // Guard
-            var context = new FeedContext
+            var context = new ResourceSetContext
             {
                 Request = request,
                 EntitySetBase = _model.Customers,
@@ -532,7 +532,7 @@ namespace System.Web.OData.Builder
             Assert.NotNull(function); // Guard
             IEdmEntitySet specialCustomers = new EdmEntitySet(_model.Container, "SpecialCustomers", _model.SpecialCustomer);
 
-            var context = new FeedContext
+            var context = new ResourceSetContext
             {
                 Request = request,
                 EntitySetBase = specialCustomers,

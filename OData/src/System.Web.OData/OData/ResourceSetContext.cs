@@ -10,9 +10,9 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData
 {
     /// <summary>
-    /// Contains context information about the feed currently being serialized.
+    /// Contains context information about the resource set currently being serialized.
     /// </summary>
-    public class FeedContext
+    public class ResourceSetContext
     {
         /// <summary>
         /// Gets or sets the HTTP request that caused this instance to be generated.
@@ -38,7 +38,7 @@ namespace System.Web.OData
         /// <summary>
         /// Gets the value of this feed instance.
         /// </summary>
-        public object FeedInstance { get; set; }
+        public object ResourceSetInstance { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IEdmModel"/> to which this instance belongs.

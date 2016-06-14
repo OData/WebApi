@@ -87,7 +87,7 @@ namespace System.Web.OData.Builder.Conventions
             // Assert
             var actionLink = action.GetFeedActionLink();
             Assert.NotNull(actionLink);
-            Assert.IsType<Func<FeedContext, Uri>>(actionLink);
+            Assert.IsType<Func<ResourceSetContext, Uri>>(actionLink);
 
             Assert.Null(action.GetActionLink());
         }
@@ -112,7 +112,7 @@ namespace System.Web.OData.Builder.Conventions
             request.ODataProperties().Model = model;
 
             IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
-            var entityContext = new FeedContext { EntitySetBase = customers, Request = request, Url = request.GetUrlHelper() };
+            var entityContext = new ResourceSetContext { EntitySetBase = customers, Request = request, Url = request.GetUrlHelper() };
 
             // Assert
             var edmAction = model.SchemaElements.OfType<IEdmAction>().First(f => f.Name == "MyAction");

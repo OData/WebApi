@@ -18,17 +18,17 @@ using Microsoft.OData.UriParser;
 namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
-    /// OData serializer for serializing a collection of <see cref="IEdmEntityType" />
+    /// OData serializer for serializing a collection of <see cref="IEdmEntityType" /> and <see cref="IEdmComplexType"/>
     /// </summary>
-    public class ODataFeedSerializer : ODataEdmTypeSerializer
+    public class ODataResourceSetSerializer : ODataEdmTypeSerializer
     {
-        private const string Feed = "feed";
+        private const string ResourceSet = "ResourceSet";
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ODataFeedSerializer"/>.
+        /// Initializes a new instance of <see cref="ODataResourceSetSerializer"/>.
         /// </summary>
         /// <param name="serializerProvider">The <see cref="ODataSerializerProvider"/> to use to write nested entries.</param>
-        public ODataFeedSerializer(ODataSerializerProvider serializerProvider)
+        public ODataResourceSetSerializer(ODataSerializerProvider serializerProvider)
             : base(ODataPayloadKind.ResourceSet, serializerProvider)
         {
         }
@@ -48,12 +48,12 @@ namespace System.Web.OData.Formatter.Serialization
 
             IEdmEntitySetBase entitySet = writeContext.NavigationSource as IEdmEntitySetBase;
 
-            IEdmTypeReference feedType = writeContext.GetEdmType(graph, type);
-            Contract.Assert(feedType != null);
+            IEdmTypeReference resourceSetType = writeContext.GetEdmType(graph, type);
+            Contract.Assert(resourceSetType != null);
 
-            IEdmEntityTypeReference entityType = GetEntityType(feedType);
-            ODataWriter writer = messageWriter.CreateODataResourceSetWriter(entitySet, entityType.EntityDefinition());
-            WriteObjectInline(graph, feedType, writer, writeContext);
+            IEdmStructuredTypeReference resourceType = GetResourceType(resourceSetType);
+            ODataWriter writer = messageWriter.CreateODataResourceSetWriter(entitySet, resourceType.StructuredDefinition());
+            WriteObjectInline(graph, resourceSetType, writer, writeContext);
         }
 
         /// <inheritdoc />
@@ -74,7 +74,7 @@ namespace System.Web.OData.Formatter.Serialization
             }
             if (graph == null)
             {
-                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Feed));
+                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, ResourceSet));
             }
 
             IEnumerable enumerable = graph as IEnumerable; // Data to serialize
@@ -84,28 +84,28 @@ namespace System.Web.OData.Formatter.Serialization
                     Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
             }
 
-            WriteFeed(enumerable, expectedType, writer, writeContext);
+            WriteResourceSet(enumerable, expectedType, writer, writeContext);
         }
 
-        private void WriteFeed(IEnumerable enumerable, IEdmTypeReference feedType, ODataWriter writer,
+        private void WriteResourceSet(IEnumerable enumerable, IEdmTypeReference resourceSetType, ODataWriter writer,
             ODataSerializerContext writeContext)
         {
             Contract.Assert(writer != null);
             Contract.Assert(writeContext != null);
             Contract.Assert(enumerable != null);
-            Contract.Assert(feedType != null);
+            Contract.Assert(resourceSetType != null);
 
-            IEdmEntityTypeReference elementType = GetEntityType(feedType);
-            ODataResourceSet feed = CreateODataFeed(enumerable, feedType.AsCollection(), writeContext);
-            if (feed == null)
+            IEdmStructuredTypeReference elementType = GetResourceType(resourceSetType);
+            ODataResourceSet resourceSet = CreateResourceSet(enumerable, resourceSetType.AsCollection(), writeContext);
+            if (resourceSet == null)
             {
-                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Feed));
+                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, ResourceSet));
             }
 
             IEdmEntitySetBase entitySet = writeContext.NavigationSource as IEdmEntitySetBase;
             if (entitySet == null)
             {
-                feed.SetSerializationInfo(new ODataResourceSerializationInfo
+                resourceSet.SetSerializationInfo(new ODataResourceSerializationInfo
                 {
                     IsFromCollection = true,
                     NavigationSourceEntityTypeName = elementType.FullName(),
@@ -122,10 +122,10 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             // save this for later to support JSON odata.streaming.
-            Uri nextPageLink = feed.NextPageLink;
-            feed.NextPageLink = null;
+            Uri nextPageLink = resourceSet.NextPageLink;
+            resourceSet.NextPageLink = null;
 
-            writer.WriteStart(feed);
+            writer.WriteStart(resourceSet);
 
             foreach (object entry in enumerable)
             {
@@ -137,56 +137,56 @@ namespace System.Web.OData.Formatter.Serialization
                 entrySerializer.WriteObjectInline(entry, elementType, writer, writeContext);
             }
 
-            // Subtle and suprising behavior: If the NextPageLink property is set before calling WriteStart(feed),
+            // Subtle and suprising behavior: If the NextPageLink property is set before calling WriteStart(resourceSet),
             // the next page link will be written early in a manner not compatible with odata.streaming=true. Instead, if
-            // the next page link is not set when calling WriteStart(feed) but is instead set later on that feed
+            // the next page link is not set when calling WriteStart(resourceSet) but is instead set later on that resourceSet
             // object before calling WriteEnd(), the next page link will be written at the end, as required for
             // odata.streaming=true support.
 
             if (nextPageLink != null)
             {
-                feed.NextPageLink = nextPageLink;
+                resourceSet.NextPageLink = nextPageLink;
             }
 
             writer.WriteEnd();
         }
 
         /// <summary>
-        /// Create the <see cref="ODataResourceSet"/> to be written for the given feed instance.
+        /// Create the <see cref="ODataResourceSet"/> to be written for the given resourceSet instance.
         /// </summary>
-        /// <param name="feedInstance">The instance representing the feed being written.</param>
-        /// <param name="feedType">The EDM type of the feed being written.</param>
+        /// <param name="resourceSetInstance">The instance representing the resourceSet being written.</param>
+        /// <param name="resourceSetType">The EDM type of the resourceSet being written.</param>
         /// <param name="writeContext">The serializer context.</param>
         /// <returns>The created <see cref="ODataResourceSet"/> object.</returns>
-        public virtual ODataResourceSet CreateODataFeed(IEnumerable feedInstance, IEdmCollectionTypeReference feedType,
+        public virtual ODataResourceSet CreateResourceSet(IEnumerable resourceSetInstance, IEdmCollectionTypeReference resourceSetType,
             ODataSerializerContext writeContext)
         {
-            ODataResourceSet feed = new ODataResourceSet();
+            ODataResourceSet resourceSet = new ODataResourceSet();
 
             if (writeContext.NavigationSource != null)
             {
-                FeedContext feedContext = new FeedContext
+                ResourceSetContext resourceSetContext = new ResourceSetContext
                 {
                     Request = writeContext.Request,
                     RequestContext = writeContext.RequestContext,
                     EntitySetBase = writeContext.NavigationSource as IEdmEntitySetBase,
                     Url = writeContext.Url,
-                    FeedInstance = feedInstance
+                    ResourceSetInstance = resourceSetInstance
                 };
 
-                IEdmEntityType entityType = GetEntityType(feedType).Definition as IEdmEntityType;
+                IEdmEntityType entityType = GetResourceType(resourceSetType).Definition as IEdmEntityType;
                 var operations = writeContext.Model.GetAvailableOperationsBoundToCollection(entityType);
-                var odataOperations = CreateODataOperations(operations, feedContext, writeContext);
+                var odataOperations = CreateODataOperations(operations, resourceSetContext, writeContext);
                 foreach (var odataOperation in odataOperations)
                 {
                     ODataAction action = odataOperation as ODataAction;
                     if (action != null)
                     {
-                        feed.AddAction(action);
+                        resourceSet.AddAction(action);
                     }
                     else
                     {
-                        feed.AddFunction((ODataFunction)odataOperation);
+                        resourceSet.AddFunction((ODataFunction)odataOperation);
                     }
                 }
             }
@@ -194,60 +194,60 @@ namespace System.Web.OData.Formatter.Serialization
             if (writeContext.ExpandedResource == null)
             {
                 // If we have more OData format specific information apply it now, only if we are the root feed.
-                PageResult odataFeedAnnotations = feedInstance as PageResult;
-                if (odataFeedAnnotations != null)
+                PageResult odataresourceSetAnnotations = resourceSetInstance as PageResult;
+                if (odataresourceSetAnnotations != null)
                 {
-                    feed.Count = odataFeedAnnotations.Count;
-                    feed.NextPageLink = odataFeedAnnotations.NextPageLink;
+                    resourceSet.Count = odataresourceSetAnnotations.Count;
+                    resourceSet.NextPageLink = odataresourceSetAnnotations.NextPageLink;
                 }
                 else if (writeContext.Request != null)
                 {
-                    feed.NextPageLink = writeContext.Request.ODataProperties().NextLink;
+                    resourceSet.NextPageLink = writeContext.Request.ODataProperties().NextLink;
 
                     long? countValue = writeContext.Request.ODataProperties().TotalCount;
                     if (countValue.HasValue)
                     {
-                        feed.Count = countValue.Value;
+                        resourceSet.Count = countValue.Value;
                     }
                 }
             }
             else
             {
-                // nested feed
-                ITruncatedCollection truncatedCollection = feedInstance as ITruncatedCollection;
+                // nested resourceSet
+                ITruncatedCollection truncatedCollection = resourceSetInstance as ITruncatedCollection;
                 if (truncatedCollection != null && truncatedCollection.IsTruncated)
                 {
-                    feed.NextPageLink = GetNestedNextPageLink(writeContext, truncatedCollection.PageSize);
+                    resourceSet.NextPageLink = GetNestedNextPageLink(writeContext, truncatedCollection.PageSize);
                 }
 
-                ICountOptionCollection countOptionCollection = feedInstance as ICountOptionCollection;
+                ICountOptionCollection countOptionCollection = resourceSetInstance as ICountOptionCollection;
                 if (countOptionCollection != null && countOptionCollection.TotalCount != null)
                 {
-                    feed.Count = countOptionCollection.TotalCount;
+                    resourceSet.Count = countOptionCollection.TotalCount;
                 }
             }
 
-            return feed;
+            return resourceSet;
         }
 
         /// <summary>
-        ///  Creates an <see cref="ODataOperation" /> to be written for the given operation and the feed instance.
+        ///  Creates an <see cref="ODataOperation" /> to be written for the given operation and the resourceSet instance.
         /// </summary>
         /// <param name="operation">The OData operation.</param>
-        /// <param name="feedContext">The context for the feed instance being written.</param>
+        /// <param name="resourceSetContext">The context for the resourceSet instance being written.</param>
         /// <param name="writeContext">The serializer context.</param>
         /// <returns>The created operation or null if the operation should not be written.</returns>
         [SuppressMessage("Microsoft.Usage", "CA2234: Pass System.Uri objects instead of strings", Justification = "This overload is equally good")]
-        public virtual ODataOperation CreateODataOperation(IEdmOperation operation, FeedContext feedContext, ODataSerializerContext writeContext)
+        public virtual ODataOperation CreateODataOperation(IEdmOperation operation, ResourceSetContext resourceSetContext, ODataSerializerContext writeContext)
         {
             if (operation == null)
             {
                 throw Error.ArgumentNull("operation");
             }
 
-            if (feedContext == null)
+            if (resourceSetContext == null)
             {
-                throw Error.ArgumentNull("feedContext");
+                throw Error.ArgumentNull("resourceSetContext");
             }
 
             if (writeContext == null)
@@ -271,7 +271,7 @@ namespace System.Web.OData.Formatter.Serialization
                 return null;
             }
 
-            Uri target = builder.BuildLink(feedContext);
+            Uri target = builder.BuildLink(resourceSetContext);
             if (target == null)
             {
                 return null;
@@ -304,15 +304,15 @@ namespace System.Web.OData.Formatter.Serialization
             return odataOperation;
         }
 
-        private IEnumerable<ODataOperation> CreateODataOperations(IEnumerable<IEdmOperation> operations, FeedContext feedContext, ODataSerializerContext writeContext)
+        private IEnumerable<ODataOperation> CreateODataOperations(IEnumerable<IEdmOperation> operations, ResourceSetContext resourceSetContext, ODataSerializerContext writeContext)
         {
             Contract.Assert(operations != null);
-            Contract.Assert(feedContext != null);
+            Contract.Assert(resourceSetContext != null);
             Contract.Assert(writeContext != null);
 
             foreach (IEdmOperation operation in operations)
             {
-                ODataOperation oDataOperation = CreateODataOperation(operation, feedContext, writeContext);
+                ODataOperation oDataOperation = CreateODataOperation(operation, resourceSetContext, writeContext);
                 if (oDataOperation != null)
                 {
                     yield return oDataOperation;
@@ -337,18 +337,18 @@ namespace System.Web.OData.Formatter.Serialization
             return null;
         }
 
-        private static IEdmEntityTypeReference GetEntityType(IEdmTypeReference feedType)
+        private static IEdmStructuredTypeReference GetResourceType(IEdmTypeReference resourceSetType)
         {
-            if (feedType.IsCollection())
+            if (resourceSetType.IsCollection())
             {
-                IEdmTypeReference elementType = feedType.AsCollection().ElementType();
-                if (elementType.IsEntity())
+                IEdmTypeReference elementType = resourceSetType.AsCollection().ElementType();
+                if (elementType.IsEntity() || elementType.IsComplex())
                 {
-                    return elementType.AsEntity();
+                    return elementType.AsStructured();
                 }
             }
 
-            string message = Error.Format(SRResources.CannotWriteType, typeof(ODataFeedSerializer).Name, feedType.FullName());
+            string message = Error.Format(SRResources.CannotWriteType, typeof(ODataResourceSetSerializer).Name, resourceSetType.FullName());
             throw new SerializationException(message);
         }
     }

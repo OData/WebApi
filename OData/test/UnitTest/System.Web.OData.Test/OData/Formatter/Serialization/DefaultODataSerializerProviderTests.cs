@@ -10,7 +10,6 @@ using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Moq;
@@ -218,7 +217,7 @@ namespace System.Web.OData.Formatter.Serialization
             var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, collectionType, request);
 
             Assert.NotNull(serializer);
-            var feedSerializer = Assert.IsType<ODataFeedSerializer>(serializer);
+            var feedSerializer = Assert.IsType<ODataResourceSetSerializer>(serializer);
             Assert.Equal(feedSerializer.ODataPayloadKind, ODataPayloadKind.ResourceSet);
         }
 

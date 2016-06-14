@@ -25,9 +25,10 @@ namespace System.Web.OData.Formatter.Serialization
 
         private static readonly DefaultODataSerializerProvider _instance = new DefaultODataSerializerProvider();
 
-        private readonly ODataFeedSerializer _feedSerializer;
         private readonly ODataDeltaFeedSerializer _deltaFeedSerializer;
         private readonly ODataCollectionSerializer _collectionSerializer;
+
+        private readonly ODataResourceSetSerializer _resourceSetSerializer;
         private readonly ODataResourceSerializer _resourceSerializer;
 
         /// <summary>
@@ -35,9 +36,9 @@ namespace System.Web.OData.Formatter.Serialization
         /// </summary>
         public DefaultODataSerializerProvider()
         {
-            _feedSerializer = new ODataFeedSerializer(this);
             _deltaFeedSerializer = new ODataDeltaFeedSerializer(this);
             _collectionSerializer = new ODataCollectionSerializer(this);
+            _resourceSetSerializer = new ODataResourceSetSerializer(this);
             _resourceSerializer = new ODataResourceSerializer(this);
         }
 
@@ -74,9 +75,9 @@ namespace System.Web.OData.Formatter.Serialization
                     {
                         return _deltaFeedSerializer;
                     }
-                    else if (collectionType.ElementType().IsEntity())
+                    else if (collectionType.ElementType().IsEntity() || collectionType.ElementType().IsComplex())
                     {
-                        return _feedSerializer;
+                        return _resourceSetSerializer;
                     }
                     else
                     {

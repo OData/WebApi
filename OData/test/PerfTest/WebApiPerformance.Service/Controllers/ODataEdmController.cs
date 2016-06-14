@@ -7,8 +7,7 @@ using System.Web.OData;
 using System.Web.OData.Extensions;
 using System.Web.OData.Query;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.UriParser;
 
 namespace WebApiPerformance.Service
 {

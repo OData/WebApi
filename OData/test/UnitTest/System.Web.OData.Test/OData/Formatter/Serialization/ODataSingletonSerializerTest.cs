@@ -46,7 +46,7 @@ namespace System.Web.OData.Formatter.Deserialization
             MemoryStream bufferedStream = new MemoryStream();
 
             // Act
-            ODataEntityTypeSerializer serializer = new ODataEntityTypeSerializer(serializerProvider);
+            ODataResourceSerializer serializer = new ODataResourceSerializer(serializerProvider);
             serializer.WriteObject(boss, typeof(EmployeeModel), GetODataMessageWriter(model, bufferedStream), readContext);
 
             // Assert

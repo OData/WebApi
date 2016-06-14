@@ -20,15 +20,15 @@ using Microsoft.OData.UriParser;
 namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
-    /// ODataSerializer for serializing instances of <see cref="IEdmEntityType"/>
+    /// ODataSerializer for serializing instances of <see cref="IEdmEntityType"/> and <see cref="IEdmComplexType"/>
     /// </summary>
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
-    public class ODataEntityTypeSerializer : ODataEdmTypeSerializer
+    public class ODataResourceSerializer : ODataEdmTypeSerializer
     {
-        private const string Entry = "entry";
+        private const string Resource = "Resource";
 
         /// <inheritdoc />
-        public ODataEntityTypeSerializer(ODataSerializerProvider serializerProvider)
+        public ODataResourceSerializer(ODataSerializerProvider serializerProvider)
             : base(ODataPayloadKind.Resource, serializerProvider)
         {
         }
@@ -48,19 +48,18 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             IEdmNavigationSource navigationSource = writeContext.NavigationSource;
-            if (navigationSource == null)
-            {
-                throw new SerializationException(SRResources.NavigationSourceMissingDuringSerialization);
-            }
-
+            /*
             var path = writeContext.Path;
             if (path == null)
             {
                 throw new SerializationException(SRResources.ODataPathMissing);
             }
+            */
+            IEdmTypeReference edmType = writeContext.GetEdmType(graph, type);
+            Contract.Assert(edmType != null);
 
-            ODataWriter writer = messageWriter.CreateODataResourceWriter(navigationSource, path.EdmType as IEdmEntityType);
-            WriteObjectInline(graph, navigationSource.EntityType().ToEdmTypeReference(isNullable: false), writer, writeContext);
+            ODataWriter writer = messageWriter.CreateODataResourceWriter(navigationSource, edmType.ToStructuredType());
+            WriteObjectInline(graph, edmType, writer, writeContext);
         }
 
         /// <inheritdoc />
@@ -79,11 +78,11 @@ namespace System.Web.OData.Formatter.Serialization
 
             if (graph == null)
             {
-                throw new SerializationException(Error.Format(Properties.SRResources.CannotSerializerNull, Entry));
+                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Resource));
             }
             else
             {
-                WriteEntry(graph, writer, writeContext, expectedType);
+                WriteResource(graph, writer, writeContext, expectedType);
             }
         }
 
@@ -110,27 +109,27 @@ namespace System.Web.OData.Formatter.Serialization
 
             if (graph == null)
             {
-                throw new SerializationException(Error.Format(Properties.SRResources.CannotSerializerNull, Entry));
+                throw new SerializationException(Error.Format(Properties.SRResources.CannotSerializerNull, Resource));
             }
             else
             {
-                WriteDeltaEntry(graph, writer, writeContext);
+                WriteDeltaResource(graph, writer, writeContext);
             }
         }
 
-        private void WriteDeltaEntry(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
+        private void WriteDeltaResource(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
         {
             Contract.Assert(writeContext != null);
 
-            IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
-            ResourceContext resourceContext = new ResourceContext(writeContext, entityType, graph);
+            IEdmStructuredTypeReference structuredType = GetResourceType(graph, writeContext);
+            ResourceContext resourceContext = new ResourceContext(writeContext, structuredType, graph);
             SelectExpandNode selectExpandNode = CreateSelectExpandNode(resourceContext);
             if (selectExpandNode != null)
             {
-                ODataResource entry = CreateEntry(selectExpandNode, resourceContext);
-                if (entry != null)
+                ODataResource resource = CreateResource(selectExpandNode, resourceContext);
+                if (resource != null)
                 {
-                    writer.WriteStart(entry);
+                    writer.WriteStart(resource);
                     //TODO: Need to add support to write Navigation Links using Delta Writer
                     //https://github.com/OData/odata.net/issues/155
                     writer.WriteEnd();
@@ -192,19 +191,19 @@ namespace System.Web.OData.Formatter.Serialization
             return properties;
         }
 
-        private void WriteDynamicTypeEntry(object graph, ODataWriter writer, IEdmTypeReference expectedType,
+        private void WriteDynamicTypeResource(object graph, ODataWriter writer, IEdmTypeReference expectedType,
             ODataSerializerContext writeContext)
         {
             var navigationProperties = new Dictionary<IEdmTypeReference, object>();
             var entityType = expectedType.Definition as EdmEntityType;
-            var entry = new ODataResource()
+            var resource = new ODataResource()
             {
                 TypeName = expectedType.FullName(),
                 Properties = CreateODataPropertiesFromDynamicType(entityType, graph, navigationProperties)
             };
 
-            entry.IsTransient = true;
-            writer.WriteStart(entry);
+            resource.IsTransient = true;
+            writer.WriteStart(resource);
             foreach (IEdmTypeReference type in navigationProperties.Keys)
             {
                 var resourceContext = new ResourceContext(writeContext, expectedType.AsEntity(), graph);
@@ -213,7 +212,7 @@ namespace System.Web.OData.Formatter.Serialization
                 if (navigationLink != null)
                 {
                     writer.WriteStart(navigationLink);
-                    WriteDynamicTypeEntry(navigationProperties[type], writer, type, writeContext);
+                    WriteDynamicTypeResource(navigationProperties[type], writer, type, writeContext);
                     writer.WriteEnd();
                 }
             }
@@ -221,27 +220,28 @@ namespace System.Web.OData.Formatter.Serialization
             writer.WriteEnd();
         }
 
-        private void WriteEntry(object graph, ODataWriter writer, ODataSerializerContext writeContext,
+        private void WriteResource(object graph, ODataWriter writer, ODataSerializerContext writeContext,
             IEdmTypeReference expectedType)
         {
             Contract.Assert(writeContext != null);
 
             if (EdmLibHelpers.IsDynamicTypeWrapper(graph.GetType()))
             {
-                WriteDynamicTypeEntry(graph, writer, expectedType, writeContext);
+                WriteDynamicTypeResource(graph, writer, expectedType, writeContext);
                 return;
             }
 
-            IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
-            ResourceContext resourceContext = new ResourceContext(writeContext, entityType, graph);
+            IEdmStructuredTypeReference structuredType = GetResourceType(graph, writeContext);
+            ResourceContext resourceContext = new ResourceContext(writeContext, structuredType, graph);
 
             SelectExpandNode selectExpandNode = CreateSelectExpandNode(resourceContext);
             if (selectExpandNode != null)
             {
-                ODataResource entry = CreateEntry(selectExpandNode, resourceContext);
-                if (entry != null)
+                ODataResource resource = CreateResource(selectExpandNode, resourceContext);
+                if (resource != null)
                 {
-                    writer.WriteStart(entry);
+                    writer.WriteStart(resource);
+                    WriteNestedProperties(selectExpandNode.SelectedNestedProperties, resourceContext, writer);
                     WriteNavigationLinks(selectExpandNode.SelectedNavigationProperties, resourceContext, writer);
                     WriteExpandedNavigationProperties(selectExpandNode.ExpandedNavigationProperties,
                         resourceContext, writer);
@@ -265,26 +265,26 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             ODataSerializerContext writeContext = resourceContext.SerializerContext;
-            IEdmEntityType entityType = resourceContext.StructuredType as IEdmEntityType;
+            IEdmStructuredType structuredType = resourceContext.StructuredType;
 
             object selectExpandNode;
-            Tuple<SelectExpandClause, IEdmEntityType> key = Tuple.Create(writeContext.SelectExpandClause, entityType);
+            Tuple<SelectExpandClause, IEdmStructuredType> key = Tuple.Create(writeContext.SelectExpandClause, structuredType);
             if (!writeContext.Items.TryGetValue(key, out selectExpandNode))
             {
                 // cache the selectExpandNode so that if we are writing a feed we don't have to construct it again.
-                selectExpandNode = new SelectExpandNode(entityType, writeContext);
+                selectExpandNode = new SelectExpandNode(structuredType, writeContext);
                 writeContext.Items[key] = selectExpandNode;
             }
             return selectExpandNode as SelectExpandNode;
         }
 
         /// <summary>
-        /// Creates the <see cref="ODataResource"/> to be written while writing this entity.
+        /// Creates the <see cref="ODataResource"/> to be written while writing this resource.
         /// </summary>
         /// <param name="selectExpandNode">The <see cref="SelectExpandNode"/> describing the response graph.</param>
-        /// <param name="resourceContext">The context for the entity instance being written.</param>
+        /// <param name="resourceContext">The context for the resource instance being written.</param>
         /// <returns>The created <see cref="ODataResource"/>.</returns>
-        public virtual ODataResource CreateEntry(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
+        public virtual ODataResource CreateResource(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
         {
             if (selectExpandNode == null)
             {
@@ -297,7 +297,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             string typeName = resourceContext.StructuredType.FullTypeName();
 
-            ODataResource entry = new ODataResource
+            ODataResource resource = new ODataResource
             {
                 TypeName = typeName,
                 Properties = CreateStructuralPropertyBag(selectExpandNode.SelectedStructuralProperties, resourceContext),
@@ -312,29 +312,29 @@ namespace System.Web.OData.Formatter.Serialization
                 List<ODataProperty> dynamicProperties = AppendDynamicProperties(resourceContext.EdmObject,
                     (IEdmStructuredTypeReference)structuredTypeReference,
                     resourceContext.SerializerContext,
-                    entry.Properties.ToList(),
+                    resource.Properties.ToList(),
                     selectExpandNode.SelectedDynamicProperties.ToArray());
 
                 if (dynamicProperties != null)
                 {
-                    entry.Properties = entry.Properties.Concat(dynamicProperties);
+                    resource.Properties = resource.Properties.Concat(dynamicProperties);
                 }
             }
 
             IEnumerable<ODataAction> actions = CreateODataActions(selectExpandNode.SelectedActions, resourceContext);
             foreach (ODataAction action in actions)
             {
-                entry.AddAction(action);
+                resource.AddAction(action);
             }
 
             IEnumerable<ODataFunction> functions = CreateODataFunctions(selectExpandNode.SelectedFunctions, resourceContext);
             foreach (ODataFunction function in functions)
             {
-                entry.AddFunction(function);
+                resource.AddFunction(function);
             }
 
-            IEdmEntityType pathType = GetODataPathType(resourceContext.SerializerContext);
-            AddTypeNameAnnotationAsNeeded(entry, pathType, resourceContext.SerializerContext.MetadataLevel);
+            IEdmStructuredType pathType = GetODataPathType(resourceContext.SerializerContext);
+            AddTypeNameAnnotationAsNeeded(resource, pathType, resourceContext.SerializerContext.MetadataLevel);
 
             if (resourceContext.NavigationSource != null)
             {
@@ -346,28 +346,28 @@ namespace System.Web.OData.Formatter.Serialization
 
                     if (selfLinks.IdLink != null)
                     {
-                        entry.Id = selfLinks.IdLink;
+                        resource.Id = selfLinks.IdLink;
                     }
 
                     if (selfLinks.ReadLink != null)
                     {
-                        entry.ReadLink = selfLinks.ReadLink;
+                        resource.ReadLink = selfLinks.ReadLink;
                     }
 
                     if (selfLinks.EditLink != null)
                     {
-                        entry.EditLink = selfLinks.EditLink;
+                        resource.EditLink = selfLinks.EditLink;
                     }
                 }
 
                 string etag = CreateETag(resourceContext);
                 if (etag != null)
                 {
-                    entry.ETag = etag;
+                    resource.ETag = etag;
                 }
             }
 
-            return entry;
+            return resource;
         }
 
         /// <summary>
@@ -426,6 +426,29 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
+        private void WriteNestedProperties(
+            IEnumerable<IEdmStructuralProperty> nestedProperties,
+            ResourceContext resourceContext,
+            ODataWriter writer)
+        {
+            Contract.Assert(nestedProperties != null);
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            foreach (IEdmStructuralProperty nestedProperty in nestedProperties)
+            {
+                ODataNestedResourceInfo nestedResourceInfo  = new ODataNestedResourceInfo
+                {
+                    IsCollection = nestedProperty.Type.IsCollection(),
+                    Name = nestedProperty.Name,
+                };
+
+                writer.WriteStart(nestedResourceInfo);
+                WriteNestedAndExpandedNavigationProperty(nestedProperty, null, resourceContext, writer);
+                writer.WriteEnd();
+            }
+        }
+
         private void WriteExpandedNavigationProperties(
             IDictionary<IEdmNavigationProperty, SelectExpandClause> navigationPropertiesToExpand,
             ResourceContext resourceContext,
@@ -435,36 +458,32 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
-            foreach (KeyValuePair<IEdmNavigationProperty, SelectExpandClause> navigationPropertyToExpand in navigationPropertiesToExpand)
+            foreach (KeyValuePair<IEdmNavigationProperty, SelectExpandClause> navPropertyToExpand in navigationPropertiesToExpand)
             {
-                IEdmNavigationProperty navigationProperty = navigationPropertyToExpand.Key;
+                IEdmNavigationProperty navigationProperty = navPropertyToExpand.Key;
 
                 ODataNestedResourceInfo navigationLink = CreateNavigationLink(navigationProperty, resourceContext);
                 if (navigationLink != null)
                 {
                     writer.WriteStart(navigationLink);
-                    WriteExpandedNavigationProperty(navigationPropertyToExpand, resourceContext, writer);
+                    WriteNestedAndExpandedNavigationProperty(navPropertyToExpand.Key, navPropertyToExpand.Value, resourceContext, writer);
                     writer.WriteEnd();
                 }
             }
         }
 
-        private void WriteExpandedNavigationProperty(
-            KeyValuePair<IEdmNavigationProperty, SelectExpandClause> navigationPropertyToExpand,
+        private void WriteNestedAndExpandedNavigationProperty(IEdmProperty edmProperty, SelectExpandClause selectExpandClause,
             ResourceContext resourceContext,
             ODataWriter writer)
         {
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
-            IEdmNavigationProperty navigationProperty = navigationPropertyToExpand.Key;
-            SelectExpandClause selectExpandClause = navigationPropertyToExpand.Value;
-
-            object propertyValue = resourceContext.GetPropertyValue(navigationProperty.Name);
+            object propertyValue = resourceContext.GetPropertyValue(edmProperty.Name);
 
             if (propertyValue == null)
             {
-                if (navigationProperty.Type.IsCollection())
+                if (edmProperty.Type.IsCollection())
                 {
                     // A navigation property whose Type attribute specifies a collection, the collection always exists,
                     // it may just be empty.
@@ -482,18 +501,18 @@ namespace System.Web.OData.Formatter.Serialization
             }
             else
             {
-                // create the serializer context for the expanded item.
-                ODataSerializerContext nestedWriteContext = new ODataSerializerContext(resourceContext, selectExpandClause, navigationProperty);
+                // create the serializer context for the nested and expanded item.
+                ODataSerializerContext nestedWriteContext = new ODataSerializerContext(resourceContext, selectExpandClause, edmProperty);
 
                 // write object.
-                ODataEdmTypeSerializer serializer = SerializerProvider.GetEdmTypeSerializer(navigationProperty.Type);
+                ODataEdmTypeSerializer serializer = SerializerProvider.GetEdmTypeSerializer(edmProperty.Type);
                 if (serializer == null)
                 {
                     throw new SerializationException(
-                        Error.Format(SRResources.TypeCannotBeSerialized, navigationProperty.Type.ToTraceString(), typeof(ODataMediaTypeFormatter).Name));
+                        Error.Format(SRResources.TypeCannotBeSerialized, edmProperty.Type.ToTraceString(), typeof(ODataMediaTypeFormatter).Name));
                 }
 
-                serializer.WriteObjectInline(propertyValue, navigationProperty.Type, writer, nestedWriteContext);
+                serializer.WriteObjectInline(propertyValue, edmProperty.Type, writer, nestedWriteContext);
             }
         }
 
@@ -784,29 +803,35 @@ namespace System.Web.OData.Formatter.Serialization
             return fragment;
         }
 
-        private static IEdmEntityType GetODataPathType(ODataSerializerContext serializerContext)
+        private static IEdmStructuredType GetODataPathType(ODataSerializerContext serializerContext)
         {
             Contract.Assert(serializerContext != null);
-            if (serializerContext.NavigationProperty != null)
+            if (serializerContext.NestedProperty != null)
             {
                 // we are in an expanded navigation property. use the navigation source to figure out the 
                 // type.
-                return serializerContext.NavigationSource.EntityType();
+                return serializerContext.NestedProperty.Type.AsStructured().StructuredDefinition();
             }
             else
             {
                 // figure out the type from the path.
-                IEdmType edmType = serializerContext.Path.EdmType;
-                if (edmType.TypeKind == EdmTypeKind.Collection)
+                if (serializerContext.Path != null)
                 {
-                    edmType = (edmType as IEdmCollectionType).ElementType.Definition;
+                    IEdmType edmType = serializerContext.Path.EdmType;
+                    if (edmType.TypeKind == EdmTypeKind.Collection)
+                    {
+                        edmType = (edmType as IEdmCollectionType).ElementType.Definition;
+                    }
+
+                    return edmType as IEdmStructuredType;
                 }
 
-                return edmType as IEdmEntityType;
+                return null;
             }
         }
 
-        internal static void AddTypeNameAnnotationAsNeeded(ODataResource entry, IEdmEntityType odataPathType,
+
+        internal static void AddTypeNameAnnotationAsNeeded(ODataResource resource, IEdmStructuredType odataPathType,
             ODataMetadataLevel metadataLevel)
         {
             // ODataLib normally has the caller decide whether or not to serialize properties by leaving properties
@@ -818,17 +843,17 @@ namespace System.Web.OData.Formatter.Serialization
             // minimal metadata mode. However, there have been behavior changes/bugs there in the past, so the safer
             // option is for this class to take control of type name serialization in minimal metadata mode.
 
-            Contract.Assert(entry != null);
+            Contract.Assert(resource != null);
 
             string typeName = null; // Set null to force the type name not to serialize.
 
             // Provide the type name to serialize.
-            if (!ShouldSuppressTypeNameSerialization(entry, odataPathType, metadataLevel))
+            if (!ShouldSuppressTypeNameSerialization(resource, odataPathType, metadataLevel))
             {
-                typeName = entry.TypeName;
+                typeName = resource.TypeName;
             }
 
-            entry.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
+            resource.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
             {
                 TypeName = typeName
             });
@@ -851,10 +876,10 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
-        internal static bool ShouldSuppressTypeNameSerialization(ODataResource entry, IEdmEntityType edmType,
+        internal static bool ShouldSuppressTypeNameSerialization(ODataResource resource, IEdmStructuredType edmType,
             ODataMetadataLevel metadataLevel)
         {
-            Contract.Assert(entry != null);
+            Contract.Assert(resource != null);
 
             switch (metadataLevel)
             {
@@ -867,27 +892,27 @@ namespace System.Web.OData.Formatter.Serialization
                     string pathTypeName = null;
                     if (edmType != null)
                     {
-                        pathTypeName = edmType.FullName();
+                        pathTypeName = edmType.FullTypeName();
                     }
-                    string entryTypeName = entry.TypeName;
-                    return String.Equals(entryTypeName, pathTypeName, StringComparison.Ordinal);
+                    string resourceTypeName = resource.TypeName;
+                    return String.Equals(resourceTypeName, pathTypeName, StringComparison.Ordinal);
             }
         }
 
-        private IEdmEntityTypeReference GetEntityType(object graph, ODataSerializerContext writeContext)
+        private IEdmStructuredTypeReference GetResourceType(object graph, ODataSerializerContext writeContext)
         {
             Contract.Assert(graph != null);
 
             IEdmTypeReference edmType = writeContext.GetEdmType(graph, graph.GetType());
             Contract.Assert(edmType != null);
 
-            if (!edmType.IsEntity())
+            if (!edmType.IsStructured())
             {
                 throw new SerializationException(
                     Error.Format(SRResources.CannotWriteType, GetType().Name, edmType.FullName()));
             }
 
-            return edmType.AsEntity();
+            return edmType.AsStructured();
         }
     }
 }

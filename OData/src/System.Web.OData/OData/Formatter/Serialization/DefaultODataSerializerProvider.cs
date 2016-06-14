@@ -28,8 +28,7 @@ namespace System.Web.OData.Formatter.Serialization
         private readonly ODataFeedSerializer _feedSerializer;
         private readonly ODataDeltaFeedSerializer _deltaFeedSerializer;
         private readonly ODataCollectionSerializer _collectionSerializer;
-        private readonly ODataComplexTypeSerializer _complexTypeSerializer;
-        private readonly ODataEntityTypeSerializer _entityTypeSerializer;
+        private readonly ODataResourceSerializer _resourceSerializer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultODataSerializerProvider"/> class.
@@ -39,8 +38,7 @@ namespace System.Web.OData.Formatter.Serialization
             _feedSerializer = new ODataFeedSerializer(this);
             _deltaFeedSerializer = new ODataDeltaFeedSerializer(this);
             _collectionSerializer = new ODataCollectionSerializer(this);
-            _complexTypeSerializer = new ODataComplexTypeSerializer(this);
-            _entityTypeSerializer = new ODataEntityTypeSerializer(this);
+            _resourceSerializer = new ODataResourceSerializer(this);
         }
 
         /// <summary>
@@ -86,10 +84,8 @@ namespace System.Web.OData.Formatter.Serialization
                     }
 
                 case EdmTypeKind.Complex:
-                    return _complexTypeSerializer;
-
                 case EdmTypeKind.Entity:
-                    return _entityTypeSerializer;
+                    return _resourceSerializer;
 
                 default:
                     return null;

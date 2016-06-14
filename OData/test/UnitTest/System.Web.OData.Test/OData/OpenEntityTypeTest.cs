@@ -21,6 +21,7 @@ namespace System.Web.OData
     {
         private const string _untypedCustomerRequestRooturl = "http://localhost/odata/UntypedSimpleOpenCustomers";
 
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -59,6 +60,34 @@ namespace System.Web.OData
             {
                 Assert.Null(result["Receipt"]);
             }
+        }
+
+        [Fact]
+        public void Get_OpenEntityType2222222222222222222()
+        {
+            // Arrange
+            const string RequestUri = "http://localhost/odata/SimpleOpenCustomers(9)/Address";
+            var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.Equal("http://localhost/odata/$metadata#SimpleOpenCustomers/$entity", result["@odata.context"]);
+            Assert.Equal("#System.Web.OData.SimpleVipCustomer", result["@odata.type"]);
+            Assert.Equal(9, result["CustomerId"]);
+            Assert.Equal("VipCustomer", result["Name"]);
+            Assert.Equal("#Collection(Int32)", result["ListProp@odata.type"]);
+            Assert.Equal(new JArray(new[] { 200, 100, 300, 0, 400 }), result["ListProp"]);
+            Assert.Equal("0001-01-01", result["DateList"][0]);
+            Assert.Equal("9999-12-31", result["DateList"][1]);
         }
 
         [Theory] 
@@ -424,6 +453,18 @@ namespace System.Web.OData
             }
 
             return Ok(customer);
+        }
+
+        public IHttpActionResult GetAddress(int key)
+        {
+            IList<SimpleOpenCustomer> customers = CreateCustomers();
+            SimpleOpenCustomer customer = customers.FirstOrDefault(c => c.CustomerId == key);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(customer.Address);
         }
 
         public IHttpActionResult PostSimpleOpenCustomer([FromBody]SimpleOpenCustomer customer)

@@ -20,8 +20,8 @@ namespace System.Web.OData.Formatter.Serialization
         public void Ctor_ThrowsArgumentNull_EntityType()
         {
             Assert.ThrowsArgumentNull(
-                () => new SelectExpandNode(selectExpandClause: null, entityType: null, model: EdmCoreModel.Instance),
-                "entityType");
+                () => new SelectExpandNode(selectExpandClause: null, structuredType: null, model: EdmCoreModel.Instance),
+                "structuredType");
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.ThrowsArgumentNull(
                 () => new SelectExpandNode(
                     selectExpandClause: null,
-                    entityType: new Mock<IEdmEntityType>().Object,
+                    structuredType: new Mock<IEdmEntityType>().Object,
                     model: null),
                 "model");
         }

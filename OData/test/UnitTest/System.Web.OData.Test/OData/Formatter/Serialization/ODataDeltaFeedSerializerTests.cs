@@ -248,7 +248,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             var mockWriter = new Mock<ODataDeltaWriter>();
 
-            Mock<ODataEntityTypeSerializer> customerSerializer = new Mock<ODataEntityTypeSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataResourceSerializer> customerSerializer = new Mock<ODataResourceSerializer>(new DefaultODataSerializerProvider());
             customerSerializer.Setup(s => s.WriteDeltaObjectInline(edmObject.Object, edmType, mockWriter.Object, _writeContext)).Verifiable();
 
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
@@ -267,7 +267,7 @@ namespace System.Web.OData.Formatter.Serialization
         public void WriteDeltaFeedInline_WritesEachEntityInstance()
         {
             // Arrange
-            Mock<ODataEntityTypeSerializer> customerSerializer = new Mock<ODataEntityTypeSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataResourceSerializer> customerSerializer = new Mock<ODataResourceSerializer>(new DefaultODataSerializerProvider());
             ODataSerializerProvider provider = ODataTestUtil.GetMockODataSerializerProvider(customerSerializer.Object);
             var mockWriter = new Mock<ODataDeltaWriter>();
             customerSerializer.Setup(s => s.WriteDeltaObjectInline(_deltaFeedCustomers[0], _customersType.ElementType(), mockWriter.Object, _writeContext)).Verifiable();

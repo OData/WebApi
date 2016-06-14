@@ -293,7 +293,7 @@ namespace System.Web.OData.Formatter.Serialization
             odataOperation.Metadata = metadata;
 
             // Always omit the title in minimal/no metadata modes.
-            ODataEntityTypeSerializer.EmitTitle(model, operation, odataOperation);
+            ODataResourceSerializer.EmitTitle(model, operation, odataOperation);
 
             // Omit the target in minimal/no metadata modes unless it doesn't follow conventions.
             if (metadataLevel == ODataMetadataLevel.FullMetadata || !builder.FollowsConventions)

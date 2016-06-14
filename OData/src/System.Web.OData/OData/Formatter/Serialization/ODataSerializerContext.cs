@@ -68,6 +68,52 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
+        /// </summary>
+        /// <param name="resource">The resource whose navigation property is being expanded.</param>
+        /// <param name="selectExpandClause">The <see cref="SelectExpandClause"/> for the navigation property being expanded.</param>
+        /// <param name="nestedProperty">The navigation property being expanded.</param>
+        /// <remarks>This constructor is used to construct the serializer context for writing nested and expanded properties.</remarks>
+        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty nestedProperty)
+        {
+            if (resource == null)
+            {
+                throw Error.ArgumentNull("resource");
+            }
+
+            if (nestedProperty == null)
+            {
+                throw Error.ArgumentNull("nestedProperty");
+            }
+
+            ODataSerializerContext context = resource.SerializerContext;
+
+            Request = context.Request;
+            RequestContext = context.RequestContext;
+            Url = context.Url;
+            // NavigationSource = context.NavigationSource;
+            Model = context.Model;
+            Path = context.Path;
+            RootElementName = context.RootElementName;
+            SkipExpensiveAvailabilityChecks = context.SkipExpensiveAvailabilityChecks;
+            MetadataLevel = context.MetadataLevel;
+            Items = context.Items;
+
+            ExpandedResource = resource;
+            SelectExpandClause = selectExpandClause;
+            NestedProperty = nestedProperty;
+
+            NavigationProperty = nestedProperty as IEdmNavigationProperty;
+
+            if (NavigationProperty != null)
+            {
+                // If the previous resource is complex, should travel the ExpandedResource.SerializerContext to get the Navigation source.
+                // So, it's not supported in 7.0.
+                NavigationSource = context.NavigationSource.FindNavigationTarget(NavigationProperty);
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the HTTP Request whose response is being serialized.
         /// </summary>
         public HttpRequestMessage Request { get; set; }
@@ -126,7 +172,13 @@ namespace System.Web.OData.Formatter.Serialization
         /// <summary>
         /// Gets or sets the navigation property being expanded.
         /// </summary>
+        /// TODO: should remove it.
         public IEdmNavigationProperty NavigationProperty { get; set; }
+
+        /// <summary>
+        /// Gets or sets the nested property or navigation property being expanded.
+        /// </summary>
+        public IEdmProperty NestedProperty { get; set; }
 
         /// <summary>
         /// Gets a property bag associated with this context to store any generic data.

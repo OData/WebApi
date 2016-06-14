@@ -305,7 +305,7 @@ namespace System.Web.OData.Formatter
                     Assert.Equal("Could not find a property named 'abc' on type 'System.Web.OData.Formatter.FormatterPerson'.",
                         json["error"]["innererror"]["message"].Value);
 
-                    Assert.Equal("Microsoft.OData.Core.ODataException",
+                    Assert.Equal("Microsoft.OData.ODataException",
                         json["error"]["innererror"]["type"].Value);
                 }
             }
@@ -1100,16 +1100,16 @@ namespace System.Web.OData.Formatter
             }
         }
 
-        private class CustomEntrySerializer : ODataEntityTypeSerializer
+        private class CustomEntrySerializer : ODataResourceSerializer
         {
             public CustomEntrySerializer(ODataSerializerProvider serializerProvider)
                 : base(serializerProvider)
             {
             }
 
-            public override ODataResource CreateEntry(SelectExpandNode selectExpandNode, ResourceContext entityContext)
+            public override ODataResource CreateResource(SelectExpandNode selectExpandNode, ResourceContext entityContext)
             {
-                ODataResource entry = base.CreateEntry(selectExpandNode, entityContext);
+                ODataResource entry = base.CreateResource(selectExpandNode, entityContext);
 
                 // instance annotation on entry
                 ODataPrimitiveValue guidValue = new ODataPrimitiveValue(new Guid("A6E07EAC-AD49-4BF7-A06E-203FF4D4B0D8"));

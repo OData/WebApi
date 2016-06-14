@@ -185,7 +185,7 @@ namespace System.Web.OData.Formatter.Serialization
             var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, typeof(ODataEntityDeserializerTests.Product), request);
 
             Assert.NotNull(serializer);
-            var entitySerializer = Assert.IsType<ODataEntityTypeSerializer>(serializer);
+            var entitySerializer = Assert.IsType<ODataResourceSerializer>(serializer);
             Assert.Equal(entitySerializer.SerializerProvider, serializerProvider);
             Assert.Equal(entitySerializer.ODataPayloadKind, ODataPayloadKind.Resource);
         }

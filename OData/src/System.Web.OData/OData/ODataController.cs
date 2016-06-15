@@ -2,11 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Web.Http;
-using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Web.OData.Extensions;
 using System.Web.OData.Results;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace System.Web.OData
 {
@@ -18,23 +16,6 @@ namespace System.Web.OData
     [ApiExplorerSettings(IgnoreApi = true)]
     public abstract class ODataController : ApiController
     {
-        private IServiceScope requestScope;
-
-        /// <summary>
-        /// Initializes the System.Web.Http.ApiController instance with the specified controllerContext.
-        /// </summary>
-        /// <param name="controllerContext">
-        /// The System.Web.Http.Controllers.HttpControllerContext object that is used for the initialization.
-        /// </param>
-        protected override void Initialize(HttpControllerContext controllerContext)
-        {
-            base.Initialize(controllerContext);
-
-            IServiceProvider rootContainer = controllerContext.Configuration.GetRootContainer();
-            this.requestScope = rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
-            controllerContext.Request.ODataProperties().RequestContainer = this.requestScope.ServiceProvider;
-        }
-
         /// <summary>
         /// Releases the unmanaged resources that are used by the object and, optionally,
         /// releases the managed resources.
@@ -46,7 +27,7 @@ namespace System.Web.OData
         {
             if (disposing)
             {
-                this.requestScope.Dispose();
+                Request.RequestScope().Dispose();
             }
 
             base.Dispose(disposing);

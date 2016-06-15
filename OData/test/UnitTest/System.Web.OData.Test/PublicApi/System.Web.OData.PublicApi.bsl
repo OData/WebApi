@@ -100,6 +100,7 @@ public abstract class System.Web.OData.ODataController : System.Web.Http.ApiCont
 	protected ODataController ()
 
 	protected virtual CreatedODataResult`1 Created (TEntity entity)
+	protected virtual void Dispose (bool disposing)
 	protected virtual UpdatedODataResult`1 Updated (TEntity entity)
 }
 
@@ -178,6 +179,14 @@ public class System.Web.OData.ClrTypeAnnotation {
 	public ClrTypeAnnotation (System.Type clrType)
 
 	System.Type ClrType  { public get; }
+}
+
+public class System.Web.OData.DefaultContainerBuilder : IContainerBuilder {
+	public DefaultContainerBuilder ()
+
+	public virtual Microsoft.OData.IContainerBuilder AddService (Microsoft.OData.ServiceLifetime lifetime, System.Type serviceType, System.Func`2[[System.IServiceProvider],[System.Object]] implementationFactory)
+	public virtual Microsoft.OData.IContainerBuilder AddService (Microsoft.OData.ServiceLifetime lifetime, System.Type serviceType, System.Type implementationType)
+	public virtual System.IServiceProvider BuildContainer ()
 }
 
 [
@@ -685,14 +694,14 @@ public sealed class System.Web.OData.Batch.ODataHttpContentExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Threading.Tasks.Task`1[[Microsoft.OData.ODataMessageReader]] GetODataMessageReaderAsync (System.Net.Http.HttpContent content, Microsoft.OData.ODataMessageReaderSettings settings)
+	public static System.Threading.Tasks.Task`1[[Microsoft.OData.ODataMessageReader]] GetODataMessageReaderAsync (System.Net.Http.HttpContent content, System.IServiceProvider requestContainer, Microsoft.OData.ODataMessageReaderSettings settings)
 
 	[
 	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	ExtensionAttribute(),
 	]
-	public static System.Threading.Tasks.Task`1[[Microsoft.OData.ODataMessageReader]] GetODataMessageReaderAsync (System.Net.Http.HttpContent content, Microsoft.OData.ODataMessageReaderSettings settings, System.Threading.CancellationToken cancellationToken)
+	public static System.Threading.Tasks.Task`1[[Microsoft.OData.ODataMessageReader]] GetODataMessageReaderAsync (System.Net.Http.HttpContent content, System.IServiceProvider requestContainer, Microsoft.OData.ODataMessageReaderSettings settings, System.Threading.CancellationToken cancellationToken)
 }
 
 public class System.Web.OData.Batch.ChangeSetRequestItem : ODataBatchRequestItem, IDisposable {
@@ -746,8 +755,8 @@ public class System.Web.OData.Batch.DefaultODataBatchHandler : ODataBatchHandler
 }
 
 public class System.Web.OData.Batch.ODataBatchContent : System.Net.Http.HttpContent, IDisposable {
-	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] responses)
-	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] responses, Microsoft.OData.ODataMessageWriterSettings writerSettings)
+	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] responses, System.IServiceProvider requestContainer)
+	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] responses, System.IServiceProvider requestContainer, Microsoft.OData.ODataMessageWriterSettings writerSettings)
 
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] Responses  { public get; }
 
@@ -1588,6 +1597,11 @@ public sealed class System.Web.OData.Extensions.HttpConfigurationExtensions {
 	[
 	ExtensionAttribute(),
 	]
+	public static ODataRoute MapODataServiceRoute (System.Web.Http.HttpConfiguration configuration, string routeName, string routePrefix, System.Action`1[[Microsoft.OData.IContainerBuilder]] setupAction)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static ODataRoute MapODataServiceRoute (System.Web.Http.HttpConfiguration configuration, string routeName, string routePrefix, Microsoft.OData.Edm.IEdmModel model, System.Net.Http.HttpMessageHandler defaultHandler)
 
 	[
@@ -1634,6 +1648,11 @@ public sealed class System.Web.OData.Extensions.HttpConfigurationExtensions {
 	ExtensionAttribute(),
 	]
 	public static void SetUrlConventions (System.Web.Http.HttpConfiguration configuration, Microsoft.OData.ODataUrlConventions conventions)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static System.Web.Http.HttpConfiguration UseCustomContainerBuilder (System.Web.Http.HttpConfiguration configuration, System.Func`1[[Microsoft.OData.IContainerBuilder]] builderFactory)
 }
 
 [
@@ -1676,6 +1695,11 @@ public sealed class System.Web.OData.Extensions.HttpRequestMessageExtensions {
 	ExtensionAttribute(),
 	]
 	public static HttpRequestMessageProperties ODataProperties (System.Net.Http.HttpRequestMessage request)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static System.IServiceProvider RequestContainer (System.Net.Http.HttpRequestMessage request)
 }
 
 [
@@ -2274,11 +2298,11 @@ public class System.Web.OData.Results.UpdatedODataResult`1 : IHttpActionResult {
 
 public interface System.Web.OData.Routing.IODataPathHandler {
 	string Link (ODataPath path)
-	ODataPath Parse (Microsoft.OData.Edm.IEdmModel model, string serviceRoot, string odataPath)
+	ODataPath Parse (Microsoft.OData.Edm.IEdmModel model, string serviceRoot, string odataPath, System.IServiceProvider requestContainer)
 }
 
 public interface System.Web.OData.Routing.IODataPathTemplateHandler {
-	ODataPathTemplate ParseTemplate (Microsoft.OData.Edm.IEdmModel model, string odataPathTemplate)
+	ODataPathTemplate ParseTemplate (Microsoft.OData.Edm.IEdmModel model, string odataPathTemplate, System.IServiceProvider requestContainer)
 }
 
 public interface System.Web.OData.Routing.IODataUriResolver {
@@ -2354,8 +2378,8 @@ public class System.Web.OData.Routing.DefaultODataPathHandler : IODataPathHandle
 	Microsoft.OData.ODataUrlConventions UrlConventions  { public virtual get; public virtual set; }
 
 	public virtual string Link (ODataPath path)
-	public virtual ODataPath Parse (Microsoft.OData.Edm.IEdmModel model, string serviceRoot, string odataPath)
-	public virtual ODataPathTemplate ParseTemplate (Microsoft.OData.Edm.IEdmModel model, string odataPathTemplate)
+	public virtual ODataPath Parse (Microsoft.OData.Edm.IEdmModel model, string serviceRoot, string odataPath, System.IServiceProvider requestContainer)
+	public virtual ODataPathTemplate ParseTemplate (Microsoft.OData.Edm.IEdmModel model, string odataPathTemplate, System.IServiceProvider requestContainer)
 }
 
 public class System.Web.OData.Routing.DefaultODataPathValidator : Microsoft.OData.UriParser.PathSegmentHandler {
@@ -2402,10 +2426,11 @@ public class System.Web.OData.Routing.ODataPath {
 }
 
 public class System.Web.OData.Routing.ODataPathRouteConstraint : IHttpRouteConstraint {
-	public ODataPathRouteConstraint (IODataPathHandler pathHandler, Microsoft.OData.Edm.IEdmModel model, string routeName, System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] routingConventions)
+	public ODataPathRouteConstraint (IODataPathHandler pathHandler, Microsoft.OData.Edm.IEdmModel model, string routeName, System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] routingConventions, System.IServiceProvider rootContainer)
 
 	Microsoft.OData.Edm.IEdmModel EdmModel  { public get; }
 	IODataPathHandler PathHandler  { public get; }
+	System.IServiceProvider RootContainer  { public get; }
 	string RouteName  { public get; }
 	System.Collections.ObjectModel.Collection`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] RoutingConventions  { public get; }
 

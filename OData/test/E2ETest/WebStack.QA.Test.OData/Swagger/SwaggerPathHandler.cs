@@ -6,12 +6,12 @@ namespace WebStack.QA.Test.OData.Swagger
 {
     public class SwaggerPathHandler : DefaultODataPathHandler
     {
-        public override ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath)
+        public override ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath, IServiceProvider requestContainer)
         {
             ODataPath path;
             try
             {
-                path = base.Parse(model, serviceRoot, odataPath);
+                path = base.Parse(model, serviceRoot, odataPath, requestContainer);
                 return path;
             }
             catch (Exception)

@@ -282,14 +282,15 @@ namespace System.Web.OData
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            config.SetupContainer(builder => builder.AddService<IFoo, Foo>(ServiceLifetime.Singleton));
-            config.MapODataServiceRoute("odata", "odata", new EdmModel());
+            config.MapODataServiceRoute("odata", "odata", builder =>
+                builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
+                       .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
             IServiceProvider rootContainer = config.GetRootContainer();
-            IFoo foo1 = rootContainer.GetRequiredService<IFoo>();
-            IFoo foo2 = rootContainer.GetRequiredService<IFoo>();
+            ITestService o1 = rootContainer.GetRequiredService<ITestService>();
+            ITestService o2 = rootContainer.GetRequiredService<ITestService>();
 
             // Assert
-            Assert.Equal(foo1, foo2);
+            Assert.Equal(o1, o2);
         }
 
         [Fact]
@@ -300,13 +301,14 @@ namespace System.Web.OData
 
             // Act
             config.UseCustomContainerBuilder(() => new DerivedContainerBuilder());
-            config.SetupContainer(builder => builder.AddService<IFoo, Foo>(ServiceLifetime.Singleton));
-            config.MapODataServiceRoute("odata", "odata", new EdmModel());
+            config.MapODataServiceRoute("odata", "odata", builder =>
+                builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
+                       .AddService<ITestService, TestService>(ServiceLifetime.Singleton));
             IServiceProvider rootContainer = config.GetRootContainer();
-            IFoo foo = rootContainer.GetRequiredService<IFoo>();
+            ITestService testService = rootContainer.GetRequiredService<ITestService>();
 
             // Assert
-            Assert.Equal(typeof(Foo2), foo.GetType());
+            Assert.Equal(typeof(TestService2), testService.GetType());
         }
 
         private static ODataMediaTypeFormatter CreateODataFormatter()
@@ -329,19 +331,19 @@ namespace System.Web.OData
                 Type serviceType,
                 Type implementationType)
             {
-                if (serviceType == typeof(IFoo))
+                if (serviceType == typeof(ITestService))
                 {
-                    return base.AddService(lifetime, serviceType, typeof(Foo2));
+                    return base.AddService(lifetime, serviceType, typeof(TestService2));
                 }
 
                 return base.AddService(lifetime, serviceType, implementationType);
             }
         }
 
-        private interface IFoo { }
+        private interface ITestService { }
 
-        private class Foo : IFoo { }
+        private class TestService : ITestService { }
 
-        private class Foo2 : IFoo { }
+        private class TestService2 : ITestService { }
     }
 }

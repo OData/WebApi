@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing.Template;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -39,8 +40,10 @@ namespace System.Web.OData.Routing
         /// <param name="model">The model to use for path parsing.</param>
         /// <param name="serviceRoot">The service root of the OData path.</param>
         /// <param name="odataPath">The OData path to parse.</param>
+        /// <param name="requestContainer">The dependency injection container for the request.</param>
         /// <returns>A parsed representation of the path, or <c>null</c> if the path does not match the model.</returns>
-        public virtual ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath)
+        public virtual ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath,
+            IServiceProvider requestContainer)
         {
             if (model == null)
             {
@@ -57,7 +60,12 @@ namespace System.Web.OData.Routing
                 throw Error.ArgumentNull("odataPath");
             }
 
-            return Parse(model, serviceRoot, odataPath, template: false);
+            if (requestContainer == null)
+            {
+                throw Error.ArgumentNull("requestContainer");
+            }
+
+            return Parse(model, serviceRoot, odataPath, requestContainer, template: false);
         }
 
         /// <summary>
@@ -65,9 +73,11 @@ namespace System.Web.OData.Routing
         /// </summary>
         /// <param name="model">The model to use for path parsing.</param>
         /// <param name="odataPathTemplate">The OData path template to parse.</param>
+        /// <param name="requestContainer">The dependency injection container for the request.</param>
         /// <returns>A parsed representation of the path template, or <c>null</c> if the path does not match the model.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "odata", Justification = "odata is spelled correctly")]
-        public virtual ODataPathTemplate ParseTemplate(IEdmModel model, string odataPathTemplate)
+        public virtual ODataPathTemplate ParseTemplate(IEdmModel model, string odataPathTemplate,
+            IServiceProvider requestContainer)
         {
             if (model == null)
             {
@@ -79,8 +89,13 @@ namespace System.Web.OData.Routing
                 throw Error.ArgumentNull("odataPathTemplate");
             }
 
-            return Templatify(Parse(model, serviceRoot: null, odataPath: odataPathTemplate, template: true),
-                odataPathTemplate);
+            if (requestContainer == null)
+            {
+                throw Error.ArgumentNull("requestContainer");
+            }
+
+            return Templatify(Parse(model, serviceRoot: null, odataPath: odataPathTemplate,
+                requestContainer: requestContainer, template: true), odataPathTemplate);
         }
 
         /// <summary>
@@ -100,7 +115,7 @@ namespace System.Web.OData.Routing
             return path.ToString();
         }
 
-        private ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath, bool template)
+        private ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath, IServiceProvider requestContainer, bool template)
         {
             ODataUriParser uriParser;
             Uri serviceRootUri = null;
@@ -109,7 +124,7 @@ namespace System.Web.OData.Routing
 
             if (template)
             {
-                uriParser = new ODataUriParser(model, new Uri(odataPath, UriKind.Relative));
+                uriParser = new ODataUriParser(model, new Uri(odataPath, UriKind.Relative), requestContainer);
                 uriParser.EnableUriTemplateParsing = true;
             }
             else
@@ -123,7 +138,7 @@ namespace System.Web.OData.Routing
 
                 fullUri = new Uri(serviceRootUri, odataPath);
                 queryString = fullUri.ParseQueryString();
-                uriParser = new ODataUriParser(model, serviceRootUri, fullUri);
+                uriParser = new ODataUriParser(model, serviceRootUri, fullUri, requestContainer);
             }
 
             if (UriResolver != null)
@@ -187,7 +202,7 @@ namespace System.Web.OData.Routing
                         if (entityIdSegment != null)
                         {
                             // Create another ODataUriParser to parse $id, which is absolute or relative.
-                            ODataUriParser parser = new ODataUriParser(model, serviceRootUri, entityIdSegment.Id);
+                            ODataUriParser parser = new ODataUriParser(model, serviceRootUri, entityIdSegment.Id, requestContainer);
                             id = parser.ParsePath().LastSegment as ODL.KeySegment;
                         }
                     }

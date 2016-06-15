@@ -11,8 +11,7 @@ namespace System.Web.OData
     /// <summary>
     /// The default container builder implementation based on the Microsoft dependency injection framework.
     /// </summary>
-    /// <remarks>TODO: Make this class public after changing reference to ODataLib v7.0.</remarks>
-    internal class DefaultContainerBuilder : IContainerBuilder
+    public class DefaultContainerBuilder : IContainerBuilder
     {
         private readonly IServiceCollection services = new ServiceCollection();
 

@@ -14,81 +14,81 @@ namespace System.Web.OData
         public void AddService_WithImplementationType()
         {
             IContainerBuilder builder = new DefaultContainerBuilder();
-            builder.AddService<IFoo, Foo>(ServiceLifetime.Transient);
+            builder.AddService<ITestService, TestService>(ServiceLifetime.Transient);
             IServiceProvider container = builder.BuildContainer();
 
-            Assert.NotNull(container.GetService<IFoo>());
+            Assert.NotNull(container.GetService<ITestService>());
         }
 
         [Fact]
         public void AddService_WithImplementationFactory()
         {
             IContainerBuilder builder = new DefaultContainerBuilder();
-            builder.AddService<IFoo>(ServiceLifetime.Transient, sp => new Foo());
+            builder.AddService<ITestService>(ServiceLifetime.Transient, sp => new TestService());
             IServiceProvider container = builder.BuildContainer();
 
-            Assert.NotNull(container.GetService<IFoo>());
+            Assert.NotNull(container.GetService<ITestService>());
         }
 
         [Fact]
         public void AddSingletonService_Works()
         {
             IContainerBuilder builder = new DefaultContainerBuilder();
-            builder.AddService<IFoo, Foo>(ServiceLifetime.Singleton);
+            builder.AddService<ITestService, TestService>(ServiceLifetime.Singleton);
             IServiceProvider container = builder.BuildContainer();
 
-            IFoo foo1 = container.GetService<IFoo>();
-            IFoo foo2 = container.GetService<IFoo>();
+            ITestService o1 = container.GetService<ITestService>();
+            ITestService o2 = container.GetService<ITestService>();
 
-            Assert.NotNull(foo1);
-            Assert.Equal(foo1, foo2);
+            Assert.NotNull(o1);
+            Assert.Equal(o1, o2);
         }
 
         [Fact]
         public void AddTransientService_Works()
         {
             IContainerBuilder builder = new DefaultContainerBuilder();
-            builder.AddService<IFoo, Foo>(ServiceLifetime.Transient);
+            builder.AddService<ITestService, TestService>(ServiceLifetime.Transient);
             IServiceProvider container = builder.BuildContainer();
 
-            IFoo foo1 = container.GetService<IFoo>();
-            IFoo foo2 = container.GetService<IFoo>();
+            ITestService o1 = container.GetService<ITestService>();
+            ITestService o2 = container.GetService<ITestService>();
 
-            Assert.NotNull(foo1);
-            Assert.NotNull(foo2);
-            Assert.NotEqual(foo1, foo2);
+            Assert.NotNull(o1);
+            Assert.NotNull(o2);
+            Assert.NotEqual(o1, o2);
         }
 
         [Fact]
         public void AddScopedService_Works()
         {
             IContainerBuilder builder = new DefaultContainerBuilder();
-            builder.AddService<IFoo, Foo>(ServiceLifetime.Scoped);
+            builder.AddService<ITestService, TestService>(ServiceLifetime.Scoped);
             IServiceProvider container = builder.BuildContainer();
 
             IServiceProvider scopedContainer1 = container.GetRequiredService<IServiceScopeFactory>()
                 .CreateScope().ServiceProvider;
-            IFoo foo11 = scopedContainer1.GetService<IFoo>();
-            IFoo foo12 = scopedContainer1.GetService<IFoo>();
+            ITestService o11 = scopedContainer1.GetService<ITestService>();
+            ITestService o12 = scopedContainer1.GetService<ITestService>();
 
-            Assert.NotNull(foo11);
-            Assert.NotNull(foo12);
-            Assert.Equal(foo11, foo12);
+            Assert.NotNull(o11);
+            Assert.NotNull(o12);
+            Assert.Equal(o11, o12);
 
             IServiceProvider scopedContainer2 = container.GetRequiredService<IServiceScopeFactory>()
                 .CreateScope().ServiceProvider;
-            IFoo foo21 = scopedContainer2.GetService<IFoo>();
-            IFoo foo22 = scopedContainer2.GetService<IFoo>();
+            ITestService o21 = scopedContainer2.GetService<ITestService>();
+            ITestService o22 = scopedContainer2.GetService<ITestService>();
 
-            Assert.NotNull(foo21);
-            Assert.NotNull(foo22);
-            Assert.Equal(foo21, foo22);
+            Assert.NotNull(o21);
+            Assert.NotNull(o22);
+            Assert.Equal(o21, o22);
 
-            Assert.NotEqual(foo11, foo21);
+            Assert.NotEqual(o11, o21);
         }
 
-        private interface IFoo { }
+        private interface ITestService { }
 
-        private class Foo : IFoo { }
+        private class TestService : ITestService { }
     }
 }

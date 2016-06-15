@@ -39,9 +39,9 @@ namespace System.Web.OData
         private static HttpClient GetClient(DependencyInjectionModel instance)
         {
             HttpConfiguration config = new[] { typeof(DependencyInjectionModelsController) }.GetHttpConfiguration();
-            config.SetupContainer(builder =>
-                builder.AddService(ServiceLifetime.Singleton, sp => instance));
-            config.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            config.MapODataServiceRoute("odata", "odata", builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => instance)
+                       .AddService(ServiceLifetime.Singleton, sp => GetEdmModel()));
             return new HttpClient(new HttpServer(config));
         }
 
@@ -58,7 +58,7 @@ namespace System.Web.OData
         [EnableQuery]
         public IHttpActionResult Get()
         {
-            IServiceProvider requestContainer = this.Request.ODataProperties().RequestContainer;
+            IServiceProvider requestContainer = this.Request.RequestContainer();
             return Ok(requestContainer.GetRequiredService<DependencyInjectionModel>());
         }
     }

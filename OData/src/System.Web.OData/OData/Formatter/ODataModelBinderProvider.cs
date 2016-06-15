@@ -360,7 +360,8 @@ namespace System.Web.OData.Formatter
 
                 DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
                 string serviceRoot = GetServiceRoot(request);
-                IEnumerable<KeyValuePair<string, object>> keyValues = GetKeys(pathHandler, edmModel, serviceRoot, resource.Id);
+                IEnumerable<KeyValuePair<string, object>> keyValues = GetKeys(pathHandler, edmModel, serviceRoot, resource.Id,
+                    request.RequestContainer());
 
                 IList<IEdmStructuralProperty> keys = entityTypeReference.Key().ToList();
 
@@ -393,9 +394,10 @@ namespace System.Web.OData.Formatter
                     request.ODataProperties().PathHandler, new List<ODataPathSegment>());
             }
 
-            internal static IEnumerable<KeyValuePair<string, object>> GetKeys(DefaultODataPathHandler pathHandler, IEdmModel edmModel, string serviceRoot, Uri uri)
+            internal static IEnumerable<KeyValuePair<string, object>> GetKeys(DefaultODataPathHandler pathHandler,
+                IEdmModel edmModel, string serviceRoot, Uri uri, IServiceProvider requestContainer)
             {
-                ODataPath odataPath = pathHandler.Parse(edmModel, serviceRoot, uri.ToString());
+                ODataPath odataPath = pathHandler.Parse(edmModel, serviceRoot, uri.ToString(), requestContainer);
                 KeySegment segment = odataPath.Segments.OfType<KeySegment>().Last();
                 if (segment == null)
                 {

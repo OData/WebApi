@@ -13,7 +13,7 @@ namespace System.Web.OData.Formatter
     /// <summary>
     /// Wrapper for IODataRequestMessage and IODataResponseMessage.
     /// </summary>
-    internal class ODataMessageWrapper : IODataRequestMessage, IODataResponseMessage, IODataPayloadUriConverter
+    internal class ODataMessageWrapper : IODataRequestMessage, IODataResponseMessage, IODataPayloadUriConverter, IContainerProvider
     {
         private Stream _stream;
         private Dictionary<string, string> _headers;
@@ -92,6 +92,8 @@ namespace System.Web.OData.Formatter
                 throw new NotImplementedException();
             }
         }
+
+        public IServiceProvider Container { get; set; }
 
         public string GetHeader(string headerName)
         {

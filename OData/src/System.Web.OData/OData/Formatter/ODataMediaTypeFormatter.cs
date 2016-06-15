@@ -401,7 +401,10 @@ namespace System.Web.OData.Formatter
                     ODataMessageReaderSettings oDataReaderSettings = MessageReaderSettings.Clone();
                     oDataReaderSettings.BaseUri = GetBaseAddressInternal(Request);
 
-                    IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders, Request.GetODataContentIdMapping());
+                    IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders, Request.GetODataContentIdMapping())
+                    {
+                        Container = Request.RequestContainer()
+                    };
                     ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
 
                     Request.RegisterForDispose(oDataMessageReader);
@@ -499,7 +502,11 @@ namespace System.Web.OData.Formatter
                 annotationFilter = messageWrapper.PreferHeader().AnnotationFilter;
             }
 
-            IODataResponseMessage responseMessage = new ODataMessageWrapper(writeStream, content.Headers);
+            ODataMessageWrapper responseMessageWrapper = new ODataMessageWrapper(writeStream, content.Headers)
+            {
+                Container = Request.RequestContainer()
+            };
+            IODataResponseMessage responseMessage = responseMessageWrapper;
             if (annotationFilter != null)
             {
                 responseMessage.PreferenceAppliedHeader().AnnotationFilter = annotationFilter;
@@ -551,20 +558,6 @@ namespace System.Web.OData.Formatter
 
                 serializer.WriteObject(value, type, messageWriter, writeContext);
             }
-        }
-
-        private static string GetSelectClause(HttpRequestMessage request)
-        {
-            Contract.Assert(request != null);
-
-            if (request.ODataProperties().SelectExpandClause != null)
-            {
-                // Include the $select clause only if it has been applied.
-                IEnumerable<KeyValuePair<string, string>> queryOptions = request.GetQueryNameValuePairs();
-                return queryOptions.Where(kvp => kvp.Key == "$select").Select(kvp => kvp.Value).FirstOrDefault();
-            }
-
-            return null;
         }
 
         /// <summary>

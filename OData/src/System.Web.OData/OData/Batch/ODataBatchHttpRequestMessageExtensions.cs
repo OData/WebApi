@@ -12,6 +12,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Routing;
+using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
@@ -190,7 +191,8 @@ namespace System.Web.OData.Batch
             };
 
             HttpResponseMessage response = request.CreateResponse(HttpStatusCode.OK);
-            response.Content = new ODataBatchContent(responses, writerSettings);
+            IServiceProvider requestContainer = request.RequestContainer();
+            response.Content = new ODataBatchContent(responses, requestContainer, writerSettings);
             return Task.FromResult(response);
         }
 

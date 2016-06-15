@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -16,7 +17,7 @@ namespace System.Web.OData.Test
         [Fact]
         public void Parameter_Constructor()
         {
-            ODataBatchContent batchContent = new ODataBatchContent(new ODataBatchResponseItem[0]);
+            ODataBatchContent batchContent = CreateBatchContent(new ODataBatchResponseItem[0]);
             var contentType = batchContent.Headers.ContentType;
             var boundary = contentType.Parameters.FirstOrDefault(p => String.Equals(p.Name, "boundary", StringComparison.OrdinalIgnoreCase));
             var odataVersion = batchContent.Headers.FirstOrDefault(h => String.Equals(h.Key, HttpRequestMessageProperties.ODataServiceVersionHeader, StringComparison.OrdinalIgnoreCase));
@@ -32,7 +33,7 @@ namespace System.Web.OData.Test
         public void Constructor_Throws_WhenResponsesAreNull()
         {
             Assert.ThrowsArgumentNull(
-                () => new ODataBatchContent(null),
+                () => CreateBatchContent(null),
                 "responses");
         }
 
@@ -40,14 +41,14 @@ namespace System.Web.OData.Test
         public void Constructor_Throws_WhenWriteSettingsIsNull()
         {
             Assert.ThrowsArgumentNull(
-                () => new ODataBatchContent(new ODataBatchResponseItem[0], null),
+                () => CreateBatchContent(new ODataBatchResponseItem[0], null),
                 "writerSettings");
         }
 
         [Fact]
         public void ODataVersionInWriterSetting_IsPropagatedToTheHeader()
         {
-            ODataBatchContent batchContent = new ODataBatchContent(new ODataBatchResponseItem[0], new ODataMessageWriterSettings
+            ODataBatchContent batchContent = CreateBatchContent(new ODataBatchResponseItem[0], new ODataMessageWriterSettings
             {
                 Version = ODataVersion.V4
             });
@@ -60,7 +61,7 @@ namespace System.Web.OData.Test
         [Fact]
         public void SerializeToStreamAsync_WritesODataBatchResponseItems()
         {
-            ODataBatchContent batchContent = new ODataBatchContent(new ODataBatchResponseItem[]
+            ODataBatchContent batchContent = CreateBatchContent(new ODataBatchResponseItem[]
             {
                 new OperationResponseItem(new HttpResponseMessage(HttpStatusCode.OK)),
                 new ChangeSetResponseItem(new HttpResponseMessage[]
@@ -91,14 +92,14 @@ namespace System.Web.OData.Test
                 new MockHttpResponseMessage(),
                 new MockHttpResponseMessage()
             };
-            ODataBatchContent batchContent = new ODataBatchContent(new ODataBatchResponseItem[]
+            ODataBatchContent batchContent = CreateBatchContent(new ODataBatchResponseItem[]
             {
                 new OperationResponseItem(responses[0]),
                 new ChangeSetResponseItem(new HttpResponseMessage[]
                 {
                     responses[1],
                     responses[2]
-                })
+                }),
             });
             HttpResponseMessage batchResponse = new HttpResponseMessage
             {
@@ -111,6 +112,17 @@ namespace System.Web.OData.Test
             {
                 Assert.True(response.IsDisposed);
             }
+        }
+
+        private static ODataBatchContent CreateBatchContent(IEnumerable<ODataBatchResponseItem> responses)
+        {
+            return new ODataBatchContent(responses, DependencyInjectionHelper.BuildContainer(null));
+        }
+
+        private static ODataBatchContent CreateBatchContent(IEnumerable<ODataBatchResponseItem> responses,
+            ODataMessageWriterSettings writerSettings)
+        {
+            return new ODataBatchContent(responses, DependencyInjectionHelper.BuildContainer(null), writerSettings);
         }
     }
 }

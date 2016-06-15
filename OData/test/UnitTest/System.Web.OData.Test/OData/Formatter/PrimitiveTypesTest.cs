@@ -114,6 +114,7 @@ namespace System.Web.OData.Formatter
                 HttpConfiguration config = new HttpConfiguration();
                 config.MapODataServiceRoute("default", "", model);
                 request.SetConfiguration(config);
+                request.SetFakeRequestContainer();
                 request.ODataProperties().RouteName = "default";
                 request.ODataProperties().Model = model;
 

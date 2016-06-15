@@ -17,8 +17,9 @@ namespace System.Web.OData.Routing
         /// </summary>
         /// <param name="model">The model to use for path template parsing.</param>
         /// <param name="odataPathTemplate">The OData path template to parse.</param>
+        /// <param name="requestContainer">The dependency injection container for the request.</param>
         /// <returns>A parsed representation of the template, or <c>null</c> if the template does not match the model.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "odata", Justification = "odata is spelled correctly")]
-        ODataPathTemplate ParseTemplate(IEdmModel model, string odataPathTemplate);
+        ODataPathTemplate ParseTemplate(IEdmModel model, string odataPathTemplate, IServiceProvider requestContainer);
     }
 }

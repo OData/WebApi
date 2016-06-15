@@ -14,9 +14,11 @@ using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace System.Web.OData.Extensions
 {
@@ -39,8 +41,6 @@ namespace System.Web.OData.Extensions
         private const string NullDynamicPropertyKey = "System.Web.OData.NullDynamicPropertyKey";
 
         private const string ContainerBuilderFactoryKey = "System.Web.OData.ContainerBuilderFactoryKey";
-
-        private const string ContainerSetupActionKey = "System.Web.OData.ContainerConfigureActionKey";
 
         private const string RootContainerKey = "System.Web.OData.RootContainerKey";
 
@@ -296,7 +296,7 @@ namespace System.Web.OData.Extensions
             return defaultSettings;
         }
 
-        internal static IContainerBuilder GetContainerBuilder(this HttpConfiguration configuration)
+        internal static IServiceProvider GetRootContainer(this HttpConfiguration configuration)
         {
             if (configuration == null)
             {
@@ -304,23 +304,36 @@ namespace System.Web.OData.Extensions
             }
 
             object value;
-            if (configuration.Properties.TryGetValue(ContainerBuilderFactoryKey, out value))
+            if (configuration.Properties.TryGetValue(RootContainerKey, out value))
             {
-                Func<IContainerBuilder> builderFactory = (Func<IContainerBuilder>)value;
-
-                IContainerBuilder builder = builderFactory();
-                if (builder == null)
-                {
-                    throw Error.InvalidOperation(SRResources.NullContainerBuilder);
-                }
-
-                return builder;
+                return value as IServiceProvider;
             }
 
-            return new DefaultContainerBuilder();
+            throw Error.InvalidOperation(SRResources.NullContainer);
         }
 
-        internal static void SetContainerBuilderFactory(this HttpConfiguration configuration, Func<IContainerBuilder> builderFactory)
+        internal static void SetRootContainer(this HttpConfiguration configuration, IServiceProvider rootContainer)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            if (rootContainer == null)
+            {
+                throw Error.ArgumentNull("rootContainer");
+            }
+
+            configuration.Properties[RootContainerKey] = rootContainer;
+        }
+
+        /// <summary>
+        /// Specifies a custom container builder.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="builderFactory">The factory to create a container builder.</param>
+        /// <returns>The server configuration.</returns>
+        public static HttpConfiguration UseCustomContainerBuilder(this HttpConfiguration configuration, Func<IContainerBuilder> builderFactory)
         {
             if (configuration == null)
             {
@@ -333,110 +346,104 @@ namespace System.Web.OData.Extensions
             }
 
             configuration.Properties[ContainerBuilderFactoryKey] = builderFactory;
-        }
-
-        internal static Action<IContainerBuilder> GetContainerSetupAction(this HttpConfiguration configuration)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            object value;
-            if (configuration.Properties.TryGetValue(ContainerSetupActionKey, out value))
-            {
-                return (Action<IContainerBuilder>)value;
-            }
-
-            return null;
-        }
-
-        internal static void SetContainerSetupAction(this HttpConfiguration configuration, Action<IContainerBuilder> setupAction)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            if (setupAction == null)
-            {
-                throw Error.ArgumentNull("setupAction");
-            }
-
-            configuration.Properties[ContainerSetupActionKey] = setupAction;
-        }
-
-        internal static IServiceProvider GetRootContainer(this HttpConfiguration configuration)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            return configuration.Properties[RootContainerKey] as IServiceProvider;
-        }
-
-        internal static void SetRootContainer(this HttpConfiguration configuration, IServiceProvider container)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            if (container == null)
-            {
-                throw Error.ArgumentNull("container");
-            }
-
-            configuration.Properties[RootContainerKey] = container;
-        }
-
-        /// <summary>
-        /// Specifies a custom container builder.
-        /// </summary>
-        /// <param name="configuration">The server configuration.</param>
-        /// <param name="builderFactory">The factory to create a container builder.</param>
-        /// <returns>The server configuration.</returns>
-        /// <remarks>TODO: Make this method public after changing reference to ODataLib v7.0.</remarks>
-        internal static HttpConfiguration UseCustomContainerBuilder(this HttpConfiguration configuration, Func<IContainerBuilder> builderFactory)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            if (builderFactory == null)
-            {
-                throw Error.ArgumentNull("builderFactory");
-            }
-
-            configuration.SetContainerBuilderFactory(builderFactory);
 
             return configuration;
         }
 
         /// <summary>
-        /// Adds services to the container.
+        /// Maps the specified OData route and the OData route attributes.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        /// <param name="setupAction">The action to add the services.</param>
-        /// <returns>The server configuration.</returns>
-        /// <remarks>TODO: Make this method public after changing reference to ODataLib v7.0.</remarks>
-        internal static HttpConfiguration SetupContainer(this HttpConfiguration configuration, Action<IContainerBuilder> setupAction)
+        /// <param name="routeName">The name of the route to map.</param>
+        /// <param name="routePrefix">The prefix to add to the OData route's path template.</param>
+        /// <param name="setupAction">The setup action to add the services to the root container.</param>
+        /// <returns>The added <see cref="ODataRoute"/>.</returns>
+        public static ODataRoute MapODataServiceRoute(this HttpConfiguration configuration, string routeName,
+            string routePrefix, Action<IContainerBuilder> setupAction)
         {
             if (configuration == null)
             {
                 throw Error.ArgumentNull("configuration");
             }
 
-            if (setupAction == null)
+            // 1) Build and configure the root container.
+            IContainerBuilder builder = configuration.CreateContainerBuilderWithDefaultServices();
+            
+            if (setupAction != null)
             {
-                throw Error.ArgumentNull("configureAction");
+                setupAction(builder);
             }
 
-            configuration.SetContainerSetupAction(setupAction);
+            IServiceProvider rootContainer = builder.BuildContainer();
+            if (rootContainer == null)
+            {
+                throw Error.InvalidOperation(SRResources.NullContainer);
+            }
 
-            return configuration;
+            configuration.SetRootContainer(rootContainer);
+
+            // 2) Resolve the path handler and set URI resolver to it.
+            IODataPathHandler pathHandler = rootContainer.GetRequiredService<IODataPathHandler>();
+
+            // if settings is not on local, use the global configuration settings.
+            ODataUriResolverSettings settings = configuration.GetResolverSettings();
+            IODataUriResolver pathResolver = pathHandler as IODataUriResolver;
+            if (pathResolver != null && pathResolver.UriResolver == null)
+            {
+                pathResolver.UriResolver = settings.UriResolver;
+            }
+
+            if (pathResolver != null && pathResolver.UrlConventions == null)
+            {
+                pathResolver.UrlConventions = settings.UrlConventions;
+            }
+
+            // 3) Resolve some required services and create the route constraint.
+            IEdmModel model = rootContainer.GetRequiredService<IEdmModel>();
+            IList<IODataRoutingConvention> routingConventions =
+                rootContainer.GetServices<IODataRoutingConvention>().ToList();
+            if (routingConventions.Count == 0)
+            {
+                // CANNOT add the routing conventions within AddDefaultWebApiServices because
+                // then user will have no way to replace the whole set of routing conventions
+                // with his own ones.
+                routingConventions = ODataRoutingConventions.CreateDefaultWithAttributeRouting(configuration, model);
+            }
+
+            HttpRouteCollection routes = configuration.Routes;
+            routePrefix = RemoveTrailingSlash(routePrefix);
+            ODataPathRouteConstraint routeConstraint = new ODataPathRouteConstraint(
+                pathHandler, model, routeName, routingConventions, rootContainer);
+
+            // 4) Resolve HTTP handler, create the OData route and register it.
+            ODataRoute route;
+            HttpMessageHandler messageHandler = rootContainer.GetService<HttpMessageHandler>();
+            if (messageHandler != null)
+            {
+                route = new ODataRoute(
+                    routePrefix,
+                    routeConstraint,
+                    defaults: null,
+                    constraints: null,
+                    dataTokens: null,
+                    handler: messageHandler);
+            }
+            else
+            {
+                ODataBatchHandler batchHandler = rootContainer.GetService<ODataBatchHandler>();
+                if (batchHandler != null)
+                {
+                    batchHandler.ODataRouteName = routeName;
+                    string batchTemplate = String.IsNullOrEmpty(routePrefix) ? ODataRouteConstants.Batch
+                        : routePrefix + '/' + ODataRouteConstants.Batch;
+                    routes.MapHttpBatchRoute(routeName + "Batch", batchTemplate, batchHandler);
+                }
+
+                route = new ODataRoute(routePrefix, routeConstraint);
+            }
+
+            routes.Add(routeName, route);
+            return route;
         }
 
         /// <summary>
@@ -450,7 +457,8 @@ namespace System.Web.OData.Extensions
         public static ODataRoute MapODataServiceRoute(this HttpConfiguration configuration, string routeName,
             string routePrefix, IEdmModel model)
         {
-            return MapODataServiceRoute(configuration, routeName, routePrefix, model, batchHandler: null);
+            return configuration.MapODataServiceRoute(routeName, routePrefix, builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => model));
         }
 
         /// <summary>
@@ -466,8 +474,9 @@ namespace System.Web.OData.Extensions
         public static ODataRoute MapODataServiceRoute(this HttpConfiguration configuration, string routeName,
             string routePrefix, IEdmModel model, ODataBatchHandler batchHandler)
         {
-            return MapODataServiceRoute(configuration, routeName, routePrefix, model, new DefaultODataPathHandler(),
-                ODataRoutingConventions.CreateDefaultWithAttributeRouting(configuration, model), batchHandler);
+            return configuration.MapODataServiceRoute(routeName, routePrefix, builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => model)
+                       .AddService(ServiceLifetime.Singleton, sp => batchHandler));
         }
 
         /// <summary>
@@ -483,8 +492,9 @@ namespace System.Web.OData.Extensions
         public static ODataRoute MapODataServiceRoute(this HttpConfiguration configuration, string routeName,
             string routePrefix, IEdmModel model, HttpMessageHandler defaultHandler)
         {
-            return MapODataServiceRoute(configuration, routeName, routePrefix, model, new DefaultODataPathHandler(),
-                ODataRoutingConventions.CreateDefaultWithAttributeRouting(configuration, model), defaultHandler);
+            return configuration.MapODataServiceRoute(routeName, routePrefix, builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => model)
+                       .AddService(ServiceLifetime.Singleton, sp => defaultHandler));
         }
 
         /// <summary>
@@ -503,8 +513,10 @@ namespace System.Web.OData.Extensions
             string routePrefix, IEdmModel model, IODataPathHandler pathHandler,
             IEnumerable<IODataRoutingConvention> routingConventions)
         {
-            return MapODataServiceRoute(configuration, routeName, routePrefix, model, pathHandler, routingConventions,
-                batchHandler: null);
+            return configuration.MapODataServiceRoute(routeName, routePrefix, builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => model)
+                       .AddService(ServiceLifetime.Singleton, sp => pathHandler)
+                       .AddService(ServiceLifetime.Singleton, sp => routingConventions.ToList().AsEnumerable()));
         }
 
         /// <summary>
@@ -527,57 +539,11 @@ namespace System.Web.OData.Extensions
             string routePrefix, IEdmModel model, IODataPathHandler pathHandler,
             IEnumerable<IODataRoutingConvention> routingConventions, ODataBatchHandler batchHandler)
         {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            IContainerBuilder builder = configuration.GetContainerBuilder();
-            builder.AddDefaultODataServices();
-
-            Action<IContainerBuilder> setupAction = configuration.GetContainerSetupAction();
-            if (setupAction != null)
-            {
-                setupAction(builder);
-            }
-
-            IServiceProvider rootContainer = builder.BuildContainer();
-            if (rootContainer == null)
-            {
-                throw Error.InvalidOperation(SRResources.NullContainer);
-            }
-
-            configuration.SetRootContainer(rootContainer);
-
-            HttpRouteCollection routes = configuration.Routes;
-            routePrefix = RemoveTrailingSlash(routePrefix);
-
-            if (batchHandler != null)
-            {
-                batchHandler.ODataRouteName = routeName;
-                string batchTemplate = String.IsNullOrEmpty(routePrefix) ? ODataRouteConstants.Batch
-                    : routePrefix + '/' + ODataRouteConstants.Batch;
-                routes.MapHttpBatchRoute(routeName + "Batch", batchTemplate, batchHandler);
-            }
-
-            // if settings is not on local, use the global configuration settings.
-            ODataUriResolverSettings settings = configuration.GetResolverSettings();
-            IODataUriResolver pathResolver = pathHandler as IODataUriResolver;
-            if (pathResolver != null && pathResolver.UriResolver == null)
-            {
-                pathResolver.UriResolver = settings.UriResolver;
-            }
-
-            if (pathResolver != null && pathResolver.UrlConventions == null)
-            {
-                pathResolver.UrlConventions = settings.UrlConventions;
-            }
-
-            ODataPathRouteConstraint routeConstraint =
-                new ODataPathRouteConstraint(pathHandler, model, routeName, routingConventions);
-            ODataRoute route = new ODataRoute(routePrefix, routeConstraint);
-            routes.Add(routeName, route);
-            return route;
+            return configuration.MapODataServiceRoute(routeName, routePrefix, builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => model)
+                       .AddService(ServiceLifetime.Singleton, sp => pathHandler)
+                       .AddService(ServiceLifetime.Singleton, sp => routingConventions.ToList().AsEnumerable())
+                       .AddService(ServiceLifetime.Singleton, sp => batchHandler));
         }
 
         /// <summary>
@@ -598,54 +564,11 @@ namespace System.Web.OData.Extensions
             string routePrefix, IEdmModel model, IODataPathHandler pathHandler,
             IEnumerable<IODataRoutingConvention> routingConventions, HttpMessageHandler defaultHandler)
         {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            // We have a more specific overload to map batch handlers that creates a different route for the batch
-            // endpoint instead of mapping that handler as the per route handler. Given that HttpMessageHandler is a
-            // base type of ODataBatchHandler, it's possible the compiler will call this overload instead of the one
-            // for the batch handler, so we detect that case and call the appropiate overload for the user.
-            // The case in which the compiler picks the wrong overload is:
-            // HttpRequestMessageHandler batchHandler = new DefaultODataBatchHandler(httpServer);
-            // config.Routes.MapODataServiceRoute("routeName", "routePrefix", model, batchHandler);
-            if (defaultHandler != null)
-            {
-                ODataBatchHandler batchHandler = defaultHandler as ODataBatchHandler;
-                if (batchHandler != null)
-                {
-                    return MapODataServiceRoute(configuration, routeName, routePrefix, model, batchHandler);
-                }
-            }
-
-            HttpRouteCollection routes = configuration.Routes;
-            routePrefix = RemoveTrailingSlash(routePrefix);
-
-            // if setting is not on local, use the global configuration setting.
-            ODataUriResolverSettings settings = configuration.GetResolverSettings();
-            IODataUriResolver pathResolver = pathHandler as IODataUriResolver;
-            if (pathResolver != null && pathResolver.UriResolver == null)
-            {
-                pathResolver.UriResolver = settings.UriResolver;
-            }
-
-            if (pathResolver != null && pathResolver.UrlConventions == null)
-            {
-                pathResolver.UrlConventions = settings.UrlConventions;
-            }
-
-            ODataPathRouteConstraint routeConstraint =
-                new ODataPathRouteConstraint(pathHandler, model, routeName, routingConventions);
-            ODataRoute route = new ODataRoute(
-                routePrefix,
-                routeConstraint,
-                defaults: null,
-                constraints: null,
-                dataTokens: null,
-                handler: defaultHandler);
-            routes.Add(routeName, route);
-            return route;
+            return configuration.MapODataServiceRoute(routeName, routePrefix, builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => model)
+                       .AddService(ServiceLifetime.Singleton, sp => pathHandler)
+                       .AddService(ServiceLifetime.Singleton, sp => routingConventions.ToList().AsEnumerable())
+                       .AddService(ServiceLifetime.Singleton, sp => defaultHandler));
         }
 
         private static string RemoveTrailingSlash(string routePrefix)
@@ -660,6 +583,33 @@ namespace System.Web.OData.Extensions
                 }
             }
             return routePrefix;
+        }
+
+        private static IContainerBuilder CreateContainerBuilderWithDefaultServices(this HttpConfiguration configuration)
+        {
+            IContainerBuilder builder;
+
+            object value;
+            if (configuration.Properties.TryGetValue(ContainerBuilderFactoryKey, out value))
+            {
+                Func<IContainerBuilder> builderFactory = (Func<IContainerBuilder>)value;
+
+                builder = builderFactory();
+                if (builder == null)
+                {
+                    throw Error.InvalidOperation(SRResources.NullContainerBuilder);
+                }
+            }
+            else
+            {
+                builder = new DefaultContainerBuilder();
+            }
+
+            builder.AddService(ServiceLifetime.Singleton, sp => configuration);
+            builder.AddDefaultODataServices();
+            builder.AddDefaultWebApiServices();
+
+            return builder;
         }
     }
 }

@@ -11,6 +11,7 @@ using System.Web.Http.Routing;
 using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
@@ -31,7 +32,8 @@ namespace System.Web.OData.Routing
         /// <param name="model">The EDM model to use for parsing the path.</param>
         /// <param name="routeName">The name of the route this constraint is associated with.</param>
         /// <param name="routingConventions">The OData routing conventions to use for selecting the controller name.</param>
-        public ODataPathRouteConstraint(IODataPathHandler pathHandler, IEdmModel model, string routeName, IEnumerable<IODataRoutingConvention> routingConventions)
+        /// <param name="rootContainer">The root dependency injection container.</param>
+        public ODataPathRouteConstraint(IODataPathHandler pathHandler, IEdmModel model, string routeName, IEnumerable<IODataRoutingConvention> routingConventions, IServiceProvider rootContainer)
         {
             if (pathHandler == null)
             {
@@ -57,6 +59,7 @@ namespace System.Web.OData.Routing
             EdmModel = model;
             RouteName = routeName;
             RoutingConventions = new Collection<IODataRoutingConvention>(routingConventions.ToList());
+            RootContainer = rootContainer;
         }
 
         /// <summary>
@@ -90,6 +93,15 @@ namespace System.Web.OData.Routing
         /// Gets the OData routing conventions to use for selecting the controller name.
         /// </summary>
         public Collection<IODataRoutingConvention> RoutingConventions
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the root dependency injection container.
+        /// </summary>
+        public IServiceProvider RootContainer
         {
             get;
             private set;
@@ -168,7 +180,10 @@ namespace System.Web.OData.Routing
                             serviceRoot = serviceRoot.Substring(0, serviceRoot.Length - 3);
                         }
 
-                        path = PathHandler.Parse(EdmModel, serviceRoot, oDataPathAndQuery);
+                        IServiceScope requestScope = CreateRequestScope();
+                        request.BindRequestScope(requestScope);
+
+                        path = PathHandler.Parse(EdmModel, serviceRoot, oDataPathAndQuery, requestScope.ServiceProvider);
                     }
                     catch (ODataException)
                     {
@@ -296,6 +311,11 @@ namespace System.Web.OData.Routing
                     throw Error.InvalidOperation(SRResources.ODataPathNotFound, uriString, oDataPathString);
                 }
             }
+        }
+
+        private IServiceScope CreateRequestScope()
+        {
+            return RootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
         }
     }
 }

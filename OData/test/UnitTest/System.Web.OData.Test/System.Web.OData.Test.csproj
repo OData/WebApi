@@ -94,6 +94,7 @@
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="HttpRequestMessageExtensionsTest.cs" />
     <Compile Include="HttpErrorExtensionsTest.cs" />
+    <Compile Include="OData\Batch\ODataHttpContentExtensions.cs" />
     <Compile Include="OData\Batch\ODataHttpContentExtensionsTest.cs" />
     <Compile Include="OData\Batch\ODataBatchRequestItemTest.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensionsTest.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="OData\Builder\TestModels\PropertyAlias.cs" />
     <Compile Include="OData\Builder\TestModels\SpecialOrderLine.cs" />
     <Compile Include="OData\ClrPropertyInfoAnnotationTest.cs" />
+    <Compile Include="OData\DependencyInjectionHelper.cs" />
     <Compile Include="OData\DateAndTimeOfDayTest.cs" />
     <Compile Include="OData\DateTimeTest.cs" />
     <Compile Include="OData\DefaultContainerBuilderTests.cs" />
@@ -200,6 +202,7 @@
     <Compile Include="OData\ETagMessageHandlerTest.cs" />
     <Compile Include="OData\ODataNullValueMessageHandlerTest.cs" />
     <Compile Include="OData\Formatter\Serialization\SelectExpandNodeTest.cs" />
+    <Compile Include="OData\ODataPathHandlerExtensions.cs" />
     <Compile Include="OData\ODataSwaggerConverterTest.cs" />
     <Compile Include="OData\ODataSwaggerUtilitiesTest.cs" />
     <Compile Include="OData\ODataUriResolverExtensionTest.cs" />

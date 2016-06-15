@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Batch;
 using System.Web.OData.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 
 namespace System.Web.OData.Batch
@@ -39,6 +40,10 @@ namespace System.Web.OData.Batch
             }
 
             ValidateRequest(request);
+
+            // This scope is for the overall batch request.
+            IServiceScope requestScope = CreateRequestScope();
+            request.BindRequestScope(requestScope);
 
             IList<ODataBatchRequestItem> subRequests = await ParseBatchRequestsAsync(request, cancellationToken);
 
@@ -131,7 +136,7 @@ namespace System.Web.OData.Batch
                 BaseUri = GetBaseUri(request)
             };
 
-            ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(oDataReaderSettings, cancellationToken);
+            ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(request.RequestContainer(), oDataReaderSettings, cancellationToken);
             request.RegisterForDispose(reader);
 
             List<ODataBatchRequestItem> requests = new List<ODataBatchRequestItem>();

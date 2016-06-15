@@ -16,6 +16,7 @@ using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
@@ -28,6 +29,8 @@ namespace System.Web.OData.Extensions
     public static class HttpRequestMessageExtensions
     {
         private const string PropertiesKey = "System.Web.OData.Properties";
+        private const string RequestContainerKey = "System.Web.OData.RequestContainer";
+        private const string RequestScopeKey = "System.Web.OData.RequestScope";
 
         /// <summary>
         /// Gets the <see cref="HttpRequestMessageProperties"/> instance containing OData methods and properties
@@ -218,6 +221,59 @@ namespace System.Web.OData.Extensions
             }
 
             return GetNextPageLink(requestUri, request.GetQueryNameValuePairs(), pageSize);
+        }
+
+        /// <summary>
+        /// Gets the dependency injection container for the OData request.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The dependency injection container.</returns>
+        public static IServiceProvider RequestContainer(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            object value;
+            if (request.Properties.TryGetValue(RequestContainerKey, out value))
+            {
+                return (IServiceProvider)value;
+            }
+
+            return null;
+        }
+
+        internal static IServiceScope RequestScope(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            object value;
+            if (request.Properties.TryGetValue(RequestScopeKey, out value))
+            {
+                return (IServiceScope)value;
+            }
+
+            return null;
+        }
+
+        internal static void BindRequestScope(this HttpRequestMessage request, IServiceScope requestScope)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            if (requestScope == null)
+            {
+                throw Error.ArgumentNull("requestScope");
+            }
+
+            request.Properties[RequestScopeKey] = requestScope;
+            request.Properties[RequestContainerKey] = requestScope.ServiceProvider;
         }
 
         internal static Uri GetNextPageLink(Uri requestUri, int pageSize)

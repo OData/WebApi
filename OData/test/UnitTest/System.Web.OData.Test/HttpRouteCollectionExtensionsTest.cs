@@ -99,24 +99,6 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void MapODataServiceRoute_MapsBatchRouteWhenBatchHandlerIsProvidedToGeneralOverload()
-        {
-            HttpRouteCollection routes = new HttpRouteCollection();
-            HttpConfiguration config = new HttpConfiguration(routes);
-            IEdmModel model = new EdmModel();
-            string routeName = "name";
-            string routePrefix = "prefix";
-
-            HttpMessageHandler batchHandler = new DefaultODataBatchHandler(new HttpServer());
-            config.MapODataServiceRoute(routeName, routePrefix, model, batchHandler);
-
-            IHttpRoute batchRoute = routes["nameBatch"];
-            Assert.NotNull(batchRoute);
-            Assert.Same(batchHandler, batchRoute.Handler);
-            Assert.Equal("prefix/$batch", batchRoute.RouteTemplate);
-        }
-
-        [Fact]
         public void MapODataServiceRoute_MapsHandlerWhenAHandlerIsProvided()
         {
             // Arrange

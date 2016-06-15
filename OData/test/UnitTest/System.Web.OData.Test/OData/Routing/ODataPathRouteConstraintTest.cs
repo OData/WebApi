@@ -20,6 +20,7 @@ namespace System.Web.OData.Routing
         IODataPathHandler _pathHandler = new DefaultODataPathHandler();
         IEnumerable<IODataRoutingConvention> _conventions = ODataRoutingConventions.CreateDefault();
         HttpRequestMessage _request = new HttpRequestMessage();
+        IServiceProvider _requestContainer = DependencyInjectionHelper.BuildContainer(null);
 
         private static IList<string> _stringsWithUnescapedSlashes = new List<string>
         {
@@ -98,7 +99,7 @@ namespace System.Web.OData.Routing
         {
             var values = new Dictionary<string, object>();
 
-            var constraint = new ODataPathRouteConstraint(_pathHandler, _model, _routeName, _conventions);
+            var constraint = CreatePathRouteConstraint();
             Assert.True(constraint.Match(_request, null, null, values, HttpRouteDirection.UriGeneration));
         }
 
@@ -107,7 +108,7 @@ namespace System.Web.OData.Routing
         {
             var values = new Dictionary<string, object>();
 
-            var constraint = new ODataPathRouteConstraint(_pathHandler, _model, _routeName, _conventions);
+            var constraint = CreatePathRouteConstraint();
             Assert.False(constraint.Match(_request, null, null, values, HttpRouteDirection.UriResolution));
         }
 
@@ -121,7 +122,7 @@ namespace System.Web.OData.Routing
             request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
 
             var values = new Dictionary<string, object>() { { "odataPath", "NotAnODataPath" } };
-            var constraint = new ODataPathRouteConstraint(_pathHandler, _model, _routeName, _conventions);
+            var constraint = CreatePathRouteConstraint();
 
             // Act & Assert
             Assert.False(constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution));
@@ -137,7 +138,7 @@ namespace System.Web.OData.Routing
             request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
 
             var values = new Dictionary<string, object>() { { "odataPath", "$metadata" } };
-            var constraint = new ODataPathRouteConstraint(_pathHandler, _model, _routeName, _conventions);
+            var constraint = CreatePathRouteConstraint();
 
             // Act & Assert
             Assert.True(constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution));
@@ -168,7 +169,7 @@ namespace System.Web.OData.Routing
             request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
 
             var pathHandler = new TestPathHandler();
-            var constraint = new ODataPathRouteConstraint(pathHandler, _model, _routeName, _conventions);
+            var constraint = CreatePathRouteConstraint(pathHandler);
             var values = new Dictionary<string, object>
             {
                 { ODataRouteConstants.ODataPath, "$metadata" },
@@ -205,7 +206,7 @@ namespace System.Web.OData.Routing
             request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
 
             var pathHandler = new TestPathHandler();
-            var constraint = new ODataPathRouteConstraint(pathHandler, _model, _routeName, _conventions);
+            var constraint = CreatePathRouteConstraint(pathHandler);
             var values = new Dictionary<string, object>
             {
                 { ODataRouteConstants.ODataPath, "$metadata" },
@@ -246,7 +247,7 @@ namespace System.Web.OData.Routing
             var model = builder.GetEdmModel();
 
             var pathHandler = new TestPathHandler();
-            var constraint = new ODataPathRouteConstraint(pathHandler, model, _routeName, _conventions);
+            var constraint = CreatePathRouteConstraint(pathHandler, model);
             var values = new Dictionary<string, object>
             {
                 { ODataRouteConstants.ODataPath, Uri.UnescapeDataString(oDataPath) },
@@ -290,7 +291,7 @@ namespace System.Web.OData.Routing
             var model = builder.GetEdmModel();
 
             var pathHandler = new TestPathHandler();
-            var constraint = new ODataPathRouteConstraint(pathHandler, model, _routeName, _conventions);
+            var constraint = CreatePathRouteConstraint(pathHandler, model);
             var values = new Dictionary<string, object>
             {
                 { ODataRouteConstants.ODataPath, Uri.UnescapeDataString(oDataPath) },
@@ -307,17 +308,32 @@ namespace System.Web.OData.Routing
             Assert.Equal(oDataPath, pathHandler.ODataPath);
         }
 
+        private ODataPathRouteConstraint CreatePathRouteConstraint()
+        {
+            return CreatePathRouteConstraint(_pathHandler);
+        }
+
+        private ODataPathRouteConstraint CreatePathRouteConstraint(IODataPathHandler pathHandler)
+        {
+            return CreatePathRouteConstraint(pathHandler, _model);
+        }
+
+        private ODataPathRouteConstraint CreatePathRouteConstraint(IODataPathHandler pathHandler, IEdmModel model)
+        {
+            return new ODataPathRouteConstraint(pathHandler, model, _routeName, _conventions, _requestContainer);
+        }
+
         // Wrap a PathHandler to allow us to check serviceRoot the constraint calculates.
         private class TestPathHandler : DefaultODataPathHandler
         {
             public string ServiceRoot { get; private set; }
             public string ODataPath { get; private set; }
 
-            public override ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath)
+            public override ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath, IServiceProvider requestContainer)
             {
                 ServiceRoot = serviceRoot;
                 ODataPath = odataPath;
-                return base.Parse(model, serviceRoot, odataPath);
+                return base.Parse(model, serviceRoot, odataPath, requestContainer);
             }
         }
     }

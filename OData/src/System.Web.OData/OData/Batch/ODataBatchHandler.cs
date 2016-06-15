@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Batch;
+using System.Web.OData.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 
 namespace System.Web.OData.Batch
@@ -16,6 +18,12 @@ namespace System.Web.OData.Batch
     /// </summary>
     public abstract class ODataBatchHandler : HttpBatchHandler
     {
+        // Use Lazy<T> because some batch handlers require to be created with an HttpServer where the root container
+        // relying on the batch handler itself hasn't been created yet, which leads to a dead loop so we postpone the
+        // acquisition of the root container to the time it is actually used. Furthermore even if the batch handler is
+        // concurrently called to handle multiple batch requests, Lazy can ensure thread-safety.
+        private readonly Lazy<IServiceProvider> _rootContainer;
+
         // Maxing out the received message size as we depend on the hosting layer to enforce this limit.
         private ODataMessageQuotas _messageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue };
 
@@ -29,6 +37,7 @@ namespace System.Web.OData.Batch
         protected ODataBatchHandler(HttpServer httpServer)
             : base(httpServer)
         {
+            _rootContainer = new Lazy<IServiceProvider>(() => httpServer.Configuration.GetRootContainer());
         }
 
         /// <summary>
@@ -93,6 +102,11 @@ namespace System.Web.OData.Batch
             }
 
             return request.GetODataBatchBaseUri(ODataRouteName);
+        }
+
+        internal IServiceScope CreateRequestScope()
+        {
+            return _rootContainer.Value.GetRequiredService<IServiceScopeFactory>().CreateScope();
         }
     }
 }

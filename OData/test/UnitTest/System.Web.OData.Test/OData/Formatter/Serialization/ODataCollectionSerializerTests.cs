@@ -174,22 +174,21 @@ namespace System.Web.OData.Formatter.Serialization
         public void CreateODataCollectionValue_CanSerialize_IEdmObjects()
         {
             // Arrange
-            Mock<IEdmComplexObject> edmComplexObject = new Mock<IEdmComplexObject>();
-            IEdmComplexObject[] collection = new IEdmComplexObject[] { edmComplexObject.Object };
+            Mock<IEdmEnumObject> edmEnumObject = new Mock<IEdmEnumObject>();
+            IEdmEnumObject[] collection = { edmEnumObject.Object };
             ODataSerializerContext serializerContext = new ODataSerializerContext();
-            IEdmComplexTypeReference elementType = new EdmComplexTypeReference(new EdmComplexType("NS", "ComplexType"), isNullable: true);
-            edmComplexObject.Setup(s => s.GetEdmType()).Returns(elementType);
-            IEdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType));
+            IEdmEnumTypeReference elementType = new EdmEnumTypeReference(new EdmEnumType("NS", "EnumType"), isNullable: true);
+            edmEnumObject.Setup(s => s.GetEdmType()).Returns(elementType);
 
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
-            Mock<ODataComplexTypeSerializer> elementSerializer = new Mock<ODataComplexTypeSerializer>(MockBehavior.Strict, serializerProvider.Object);
+            Mock<ODataEnumSerializer> elementSerializer = new Mock<ODataEnumSerializer>(MockBehavior.Strict, serializerProvider.Object);
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(elementType)).Returns(elementSerializer.Object);
-            elementSerializer.Setup(s => s.CreateODataComplexValue(collection[0], elementType, serializerContext)).Returns(new ODataComplexValue()).Verifiable();
+            elementSerializer.Setup(s => s.CreateODataEnumValue(collection[0], elementType, serializerContext)).Returns(new ODataEnumValue("1", "NS.EnumType")).Verifiable();
 
             ODataCollectionSerializer serializer = new ODataCollectionSerializer(serializerProvider.Object);
 
             // Act
-            var result = serializer.CreateODataCollectionValue(collection, elementType, serializerContext);
+            serializer.CreateODataCollectionValue(collection, elementType, serializerContext);
 
             // Assert
             elementSerializer.Verify();

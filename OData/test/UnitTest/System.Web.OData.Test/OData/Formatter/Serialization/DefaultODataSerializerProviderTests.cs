@@ -176,13 +176,16 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void GetODataSerializer_Entity()
+        public void GetODataSerializer_Resource_ForEntity()
         {
+            // Arrange
             var serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
+            // Act
             var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, typeof(ODataResourceDeserializerTests.Product), request);
 
+            // Assert
             Assert.NotNull(serializer);
             var entitySerializer = Assert.IsType<ODataResourceSerializer>(serializer);
             Assert.Equal(entitySerializer.SerializerProvider, serializerProvider);
@@ -190,14 +193,18 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void GetODataSerializer_Complex()
+        public void GetODataSerializer_Resource_ForComplex()
         {
+            // Arrange
             var serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
+
+            // Act
             var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, typeof(ODataResourceDeserializerTests.Address), request);
 
+            // Assert
             Assert.NotNull(serializer);
-            var complexSerializer = Assert.IsType<ODataComplexTypeSerializer>(serializer);
+            var complexSerializer = Assert.IsType<ODataResourceSerializer>(serializer);
             Assert.Equal(complexSerializer.SerializerProvider, serializerProvider);
             Assert.Equal(complexSerializer.ODataPayloadKind, ODataPayloadKind.Property);
         }

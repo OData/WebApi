@@ -448,7 +448,6 @@
     <Compile Include="OData\Formatter\Serialization\DefaultODataSerializerProvider.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataCollectionSerializer.cs" />
-    <Compile Include="OData\Formatter\Serialization\ODataComplexTypeSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataResourceSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataResourceSetSerializer.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataPrimitiveSerializer.cs" />

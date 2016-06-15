@@ -391,7 +391,6 @@
     <Compile Include="OData\Formatter\Serialization\Models\Customer.cs" />
     <Compile Include="OData\Formatter\Serialization\Models\Order.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataCollectionSerializerTests.cs" />
-    <Compile Include="OData\Formatter\Serialization\ODataComplexTypeSerializerTests.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityTypeSerializerTests.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataFeedSerializerTests.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataPayloadKindHelperTests.cs" />

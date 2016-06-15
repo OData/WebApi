@@ -2590,14 +2590,6 @@ public class System.Web.OData.Formatter.Deserialization.ODataCollectionDeseriali
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }
 
-public class System.Web.OData.Formatter.Deserialization.ODataComplexTypeDeserializer : ODataEdmTypeDeserializer {
-	public ODataComplexTypeDeserializer (ODataDeserializerProvider deserializerProvider)
-
-	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
-	public virtual object ReadComplexValue (Microsoft.OData.ODataComplexValue complexValue, Microsoft.OData.Edm.IEdmComplexTypeReference complexType, ODataDeserializerContext readContext)
-	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
-}
-
 public class System.Web.OData.Formatter.Deserialization.ODataDeserializerContext {
 	public ODataDeserializerContext ()
 
@@ -2729,14 +2721,6 @@ public class System.Web.OData.Formatter.Serialization.ODataCollectionSerializer 
 	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
 	internal virtual Microsoft.OData.ODataProperty CreateProperty (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, string elementName, ODataSerializerContext writeContext)
 	public void WriteCollection (Microsoft.OData.ODataCollectionWriter writer, object graph, Microsoft.OData.Edm.IEdmTypeReference collectionType, ODataSerializerContext writeContext)
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
-}
-
-public class System.Web.OData.Formatter.Serialization.ODataComplexTypeSerializer : ODataEdmTypeSerializer {
-	public ODataComplexTypeSerializer (ODataSerializerProvider serializerProvider)
-
-	public virtual Microsoft.OData.ODataComplexValue CreateODataComplexValue (object graph, Microsoft.OData.Edm.IEdmComplexTypeReference complexType, ODataSerializerContext writeContext)
-	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 

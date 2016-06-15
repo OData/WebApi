@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData.Builder;
@@ -75,6 +76,9 @@ namespace System.Web.OData
         [PropertyData("NavigationPropertyToTest")]
         public async Task ODataSingleton_WorksOnNavigationProperty(string path, string expectedPayload)
         {
+            // Remove indentation in expect string 
+            expectedPayload = Regex.Replace(expectedPayload, @"\r\n\s*([""{}\]])", "$1");
+
             // Arrange
             string requestUri = BaseAddress + "/odata/" + path;
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);

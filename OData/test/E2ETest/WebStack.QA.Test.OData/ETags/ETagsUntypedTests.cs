@@ -3,6 +3,7 @@
 
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Web.Http;
 using System.Web.OData;
 using System.Web.OData.Extensions;
@@ -59,14 +60,17 @@ namespace WebStack.QA.Test.OData.ETags
         [Fact]
         public void ModelBuilderTest()
         {
-            const string expectMetadata =
-                "        <EntitySet Name=\"ETagUntypedCustomers\" EntityType=\"NS.Customer\">\r\n" +
+            string expectMetadata =
+                "<EntitySet Name=\"ETagUntypedCustomers\" EntityType=\"NS.Customer\">\r\n" +
                 "          <Annotation Term=\"Org.OData.Core.V1.OptimisticConcurrency\">\r\n" +
                 "            <Collection>\r\n" +
                 "              <PropertyPath>Name</PropertyPath>\r\n" +
                 "            </Collection>\r\n" +
                 "          </Annotation>\r\n" +
                 "        </EntitySet>";
+
+            // Remove indentation
+            expectMetadata = Regex.Replace(expectMetadata, @"\r\n\s*<", @"<");
 
             string requestUri = string.Format("{0}/odata/$metadata", this.BaseAddress);
 

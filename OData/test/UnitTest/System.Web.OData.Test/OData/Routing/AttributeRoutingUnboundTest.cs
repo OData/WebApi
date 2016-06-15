@@ -178,7 +178,7 @@ namespace System.Web.OData.Routing
         public async Task AttributeRouting_QueryProperty_AfterCallUnboundFunction()
         {
             // Arrange
-            const string ExpectPayload = "{\r\n  \"@odata.context\":\"http://localhost/$metadata#Edm.String\",\"value\":\"Name 7\"\r\n}";
+            const string ExpectPayload = "{\"@odata.context\":\"http://localhost/$metadata#Edm.String\",\"value\":\"Name 7\"}";
 
             string requestUri = "http://localhost/GetConventionCustomerById(CustomerId=407)/Name";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);

@@ -3,6 +3,7 @@
 
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
@@ -39,9 +40,9 @@ namespace System.Web.OData.Query
         public void ODataSingletonQueryOption_CanSelectDerivedProperty()
         {
             // Arrange
-            const string expectedPayload = "{\r\n" +
-                "  \"@odata.context\":\"http://localhost/odata/$metadata#Me/System.Web.OData.Formatter.Serialization.Models.SpecialCustomer(Birthday)\"," +
-                "\"Birthday\":\"1991-01-12T09:03:40-00:05\"\r\n" +
+            const string expectedPayload = "{" +
+                "\"@odata.context\":\"http://localhost/odata/$metadata#Me/System.Web.OData.Formatter.Serialization.Models.SpecialCustomer(Birthday)\"," +
+                "\"Birthday\":\"1991-01-12T09:03:40-00:05\"" +
                 "}";
 
             string requestUri = "http://localhost/odata/Me/System.Web.OData.Formatter.Serialization.Models.SpecialCustomer?$select=Birthday";
@@ -60,6 +61,9 @@ namespace System.Web.OData.Query
         {
             // Arrange
             string expectedPayload = Resources.SingletonSelectAndExpand;
+
+            // Remove indentation in expect string
+            expectedPayload = Regex.Replace(expectedPayload, @"\r\n\s*([""{}\]])", "$1");
 
             // Act
             string respsoneString = _client.GetStringAsync(

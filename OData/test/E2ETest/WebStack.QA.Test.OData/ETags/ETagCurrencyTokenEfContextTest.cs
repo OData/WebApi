@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
@@ -60,6 +61,8 @@ namespace WebStack.QA.Test.OData.ETags
 "    }\r\n" +
 "  ]\r\n" +
 "}";
+            // Remove indentation
+            expect = Regex.Replace(expect, @"\r\n\s*([""{}\]])", "$1");
 
             expect = expect.Replace("{XXXX}", string.Format("{0}/odata/$metadata#Dominios(ServerAutenticazione(Id,RECVER))", BaseAddress.ToLowerInvariant()));
 

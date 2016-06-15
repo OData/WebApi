@@ -81,7 +81,6 @@ namespace System.Web.OData.Formatter
             // Maxing out the received message size as we depend on the hosting layer to enforce this limit.
             MessageWriterSettings = new ODataMessageWriterSettings
             {
-                EnableIndentation = true,
                 DisableMessageStreamDisposal = true,
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
                 AutoComputePayloadMetadataInJson = true,

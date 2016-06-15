@@ -29,32 +29,32 @@ namespace System.Web.OData
             // Arrange
             const string Uri = "http://localhost/odata/$metadata";
             const string Expected =
-                "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
-                "<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">\r\n" +
-                "  <edmx:DataServices>\r\n" +
-                "    <Schema Namespace=\"System.Web.OData.Builder.TestModels\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">\r\n" +
-                "      <EntityType Name=\"DateTimeModel\">\r\n" +
-                "        <Key>\r\n" +
-                "          <PropertyRef Name=\"Id\" />\r\n" +
-                "        </Key>\r\n" +
-                "        <Property Name=\"Id\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
-                "        <Property Name=\"BirthdayA\" Type=\"Edm.DateTimeOffset\" Nullable=\"false\" />\r\n" +
-                "        <Property Name=\"BirthdayB\" Type=\"Edm.DateTimeOffset\" />\r\n" +
-                "        <Property Name=\"BirthdayC\" Type=\"Collection(Edm.DateTimeOffset)\" Nullable=\"false\" />\r\n" +
-                "        <Property Name=\"BirthdayD\" Type=\"Collection(Edm.DateTimeOffset)\" />\r\n" +
-                "      </EntityType>\r\n" +
-                "    </Schema>\r\n" +
-                "    <Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">\r\n" +
-                "      <Function Name=\"CalcBirthday\" IsBound=\"true\">\r\n" +
-                "        <Parameter Name=\"bindingParameter\" Type=\"System.Web.OData.Builder.TestModels.DateTimeModel\" />\r\n" +
-                "        <Parameter Name=\"dto\" Type=\"Edm.DateTimeOffset\" Nullable=\"false\" />\r\n" +
-                "        <ReturnType Type=\"Edm.DateTimeOffset\" Nullable=\"false\" />\r\n" +
-                "      </Function>\r\n" +
-                "      <EntityContainer Name=\"Container\">\r\n" +
-                "        <EntitySet Name=\"DateTimeModels\" EntityType=\"System.Web.OData.Builder.TestModels.DateTimeModel\" />\r\n" +
-                "      </EntityContainer>\r\n" +
-                "    </Schema>\r\n" +
-                "  </edmx:DataServices>\r\n" +
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+                "<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">" +
+                "<edmx:DataServices>" +
+                "<Schema Namespace=\"System.Web.OData.Builder.TestModels\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                    "<EntityType Name=\"DateTimeModel\">" +
+                        "<Key>" +
+                            "<PropertyRef Name=\"Id\" />" +
+                        "</Key>" +
+                        "<Property Name=\"Id\" Type=\"Edm.Int32\" Nullable=\"false\" />" +
+                        "<Property Name=\"BirthdayA\" Type=\"Edm.DateTimeOffset\" Nullable=\"false\" />" +
+                        "<Property Name=\"BirthdayB\" Type=\"Edm.DateTimeOffset\" />" +
+                        "<Property Name=\"BirthdayC\" Type=\"Collection(Edm.DateTimeOffset)\" Nullable=\"false\" />" +
+                        "<Property Name=\"BirthdayD\" Type=\"Collection(Edm.DateTimeOffset)\" />" +
+                    "</EntityType>" +
+                "</Schema>" +
+                "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                    "<Function Name=\"CalcBirthday\" IsBound=\"true\">" +
+                        "<Parameter Name=\"bindingParameter\" Type=\"System.Web.OData.Builder.TestModels.DateTimeModel\" />" +
+                        "<Parameter Name=\"dto\" Type=\"Edm.DateTimeOffset\" Nullable=\"false\" />" +
+                        "<ReturnType Type=\"Edm.DateTimeOffset\" Nullable=\"false\" />" +
+                    "</Function>" +
+                    "<EntityContainer Name=\"Container\">" +
+                        "<EntitySet Name=\"DateTimeModels\" EntityType=\"System.Web.OData.Builder.TestModels.DateTimeModel\" />" +
+                    "</EntityContainer>" +
+                "</Schema>" +
+                "</edmx:DataServices>" +
                 "</edmx:Edmx>";
             HttpClient client = GetClient(timeZoneInfo: null);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, Uri);
@@ -98,8 +98,8 @@ namespace System.Web.OData
         public void CanQuerySingleEntity_WithDateTimeProperties_CustomTimeZoneInfo()
         {
             // Arrange
-            const string Expected = "  ],\"BirthdayD@odata.type\":\"#Collection(DateTimeOffset)\",\"BirthdayD\":[\r\n" +
-               "    \"2018-12-31T12:12:30-08:00\",null,\"2015-04-30T13:12:30-07:00\"\r\n";
+            const string Expected = "],\"BirthdayD@odata.type\":\"#Collection(DateTimeOffset)\",\"BirthdayD\":[" +
+               "\"2018-12-31T12:12:30-08:00\",null,\"2015-04-30T13:12:30-07:00\"";
 
             const string Uri = "http://localhost/odata/DateTimeModels(2)";
             HttpClient client = GetClient(_pacificStandard);
@@ -119,11 +119,11 @@ namespace System.Web.OData
         public void CanSelect_OnDateTimeProperty()
         {
             // Arrange
-            const string Expected = "{\r\n" +
-                "  \"@odata.context\":\"http://localhost/odata/$metadata#DateTimeModels(BirthdayB,BirthdayC)/$entity\"," +
-                "\"BirthdayB\":\"2015-04-01T04:12:30+08:00\",\"BirthdayC\":[\r\n" +
-                "    \"2018-01-01T04:12:30+08:00\",\"2015-04-01T04:12:30+08:00\",\"2015-01-04T04:12:30+08:00\"\r\n" +
-                "  ]\r\n" +
+            const string Expected = "{" +
+                "\"@odata.context\":\"http://localhost/odata/$metadata#DateTimeModels(BirthdayB,BirthdayC)/$entity\"," +
+                "\"BirthdayB\":\"2015-04-01T04:12:30+08:00\",\"BirthdayC\":[" +
+                "\"2018-01-01T04:12:30+08:00\",\"2015-04-01T04:12:30+08:00\",\"2015-01-04T04:12:30+08:00\"" +
+                "]" +
                 "}";
             const string Uri = @"http://localhost/odata/DateTimeModels(3)?$select=BirthdayB,BirthdayC";
             HttpClient client = GetClient(_chinaStandard);
@@ -297,10 +297,10 @@ namespace System.Web.OData
         {
             // Arrange
             const string Expected =
-                "{\r\n" +
-                "  \"@odata.context\":\"http://localhost/odata/$metadata#Collection(Edm.DateTimeOffset)\",\"value\":[\r\n" +
-                "    \"2019-01-01T04:12:30+08:00\",null,\"2015-05-01T04:12:30+08:00\"\r\n" +
-                "  ]\r\n" +
+                "{" +
+                "\"@odata.context\":\"http://localhost/odata/$metadata#Collection(Edm.DateTimeOffset)\",\"value\":[" +
+                "\"2019-01-01T04:12:30+08:00\",null,\"2015-05-01T04:12:30+08:00\"" +
+                "]" +
                 "}";
 
             const string Uri = "http://localhost/odata/DateTimeModels(2)/BirthdayD";
@@ -320,9 +320,9 @@ namespace System.Web.OData
         {
             // Arrange
             const string Expected =
-                "{\r\n" +
-                "  \"@odata.context\":\"http://localhost/odata/$metadata#Edm.DateTimeOffset\"," +
-                "\"value\":\"1978-11-14T16:12:00-08:00\"\r\n" +
+                "{"+
+                "\"@odata.context\":\"http://localhost/odata/$metadata#Edm.DateTimeOffset\"," +
+                "\"value\":\"1978-11-14T16:12:00-08:00\"" +
                 "}";
             const string Uri =
                 "http://localhost/odata/DateTimeModels(2)/Default.CalcBirthday(dto=2012-12-22T01:02:03Z)";

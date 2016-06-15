@@ -4,6 +4,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
@@ -56,7 +57,7 @@ namespace WebStack.QA.Test.OData.AlternateKeys
         [Fact]
         public async Task AlteranteKeysMetadata()
         {
-            const string expect = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
+            string expect = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
 "<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">\r\n" +
 "  <edmx:DataServices>\r\n" +
 "    <Schema Namespace=\"NS\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">\r\n" +
@@ -179,6 +180,10 @@ namespace WebStack.QA.Test.OData.AlternateKeys
 "    </Schema>\r\n" +
 "  </edmx:DataServices>\r\n" +
 "</edmx:Edmx>";
+
+            // Remove indentation
+            expect = Regex.Replace(expect, @"\r\n\s*<", @"<");
+
             var requestUri = string.Format("{0}/odata/$metadata", this.BaseAddress);
             HttpResponseMessage response = await Client.GetAsync(requestUri);
 
@@ -192,8 +197,8 @@ namespace WebStack.QA.Test.OData.AlternateKeys
         public async Task QueryEntityWithSingleAlternateKeysWorks()
         {
             // query with alternate keys
-            string expect = "{\r\n" +
-                            "  \"@odata.context\":\"{XXXX}\",\"value\":\"special-SSN\"\r\n" +
+            string expect = "{" +
+                            "\"@odata.context\":\"{XXXX}\",\"value\":\"special-SSN\"" +
                             "}";
             expect = expect.Replace("{XXXX}", string.Format("{0}/odata/$metadata#Edm.String", BaseAddress.ToLowerInvariant()));
 
@@ -318,8 +323,8 @@ namespace WebStack.QA.Test.OData.AlternateKeys
         [Fact]
         public async Task CanUpdateEntityWithSingleAlternateKeys()
         {
-            string expect = "{\r\n" +
-                            "  \"@odata.context\":\"{XXXX}\",\"ID\":6,\"Name\":\"Updated Customer Name\",\"SSN\":\"SSN-6-T-006\"\r\n" +
+            string expect = "{" +
+                            "\"@odata.context\":\"{XXXX}\",\"ID\":6,\"Name\":\"Updated Customer Name\",\"SSN\":\"SSN-6-T-006\"" +
                             "}";
             expect = expect.Replace("{XXXX}", string.Format("{0}/odata/$metadata#Customers/$entity", BaseAddress.ToLowerInvariant()));
 

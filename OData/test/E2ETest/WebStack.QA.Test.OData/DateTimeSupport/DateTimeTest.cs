@@ -102,10 +102,10 @@ namespace WebStack.QA.Test.OData.DateTimeSupport
         {
             await ResetDatasource();
 
-            string expect = "{\r\n" + 
-                            "  \"@odata.context\":\"{XXXX}\",\"FileId\":6,\"Name\":\"FileName\",\"CreatedDate\":\"2014-12-30T15:01:03-08:00\",\"DeleteDate\":null,\"ModifiedDates\":[\r\n" + 
-                            "    \"2014-12-24T01:02:03-08:00\"\r\n" + 
-                            "  ]\r\n" +  
+            string expect = "{" + 
+                            "\"@odata.context\":\"{XXXX}\",\"FileId\":6,\"Name\":\"FileName\",\"CreatedDate\":\"2014-12-30T15:01:03-08:00\",\"DeleteDate\":null,\"ModifiedDates\":[" + 
+                            "\"2014-12-24T01:02:03-08:00\"" + 
+                            "]" +  
                             "}";
             expect = expect.Replace("{XXXX}", string.Format("{0}/{1}/$metadata#Files/$entity", BaseAddress.ToLowerInvariant(), mode));
 

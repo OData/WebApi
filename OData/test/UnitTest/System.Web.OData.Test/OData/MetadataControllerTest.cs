@@ -231,18 +231,18 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             const string expect =
-                "        <Property Name=\"FkSupplierId\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
-                "        <Property Name=\"FkSupplier2Id\" Type=\"Edm.String\" Nullable=\"false\" />\r\n" +
-                "        <Property Name=\"FkSupplier3Id\" Type=\"Edm.Int32\" />\r\n" +
-                "        <NavigationProperty Name=\"Supplier\" Type=\"System.Web.OData.Formatter.FkSupplier\" Nullable=\"false\">\r\n" +
-                "          <ReferentialConstraint Property=\"FkSupplierId\" ReferencedProperty=\"Id\" />\r\n" +
-                "        </NavigationProperty>\r\n" +
-                "        <NavigationProperty Name=\"Supplier2\" Type=\"System.Web.OData.Formatter.FkSupplier2\" Nullable=\"false\">\r\n" +
-                "          <ReferentialConstraint Property=\"FkSupplier2Id\" ReferencedProperty=\"Id\" />\r\n" +
-                "        </NavigationProperty>\r\n" +
-                "        <NavigationProperty Name=\"Supplier3\" Type=\"System.Web.OData.Formatter.FkSupplier3\">\r\n" +
-                "          <ReferentialConstraint Property=\"FkSupplier3Id\" ReferencedProperty=\"Id\" />\r\n" +
-                "        </NavigationProperty>";
+                "<Property Name=\"FkSupplierId\" Type=\"Edm.Int32\" Nullable=\"false\" />" +
+                "<Property Name=\"FkSupplier2Id\" Type=\"Edm.String\" Nullable=\"false\" />" +
+                "<Property Name=\"FkSupplier3Id\" Type=\"Edm.Int32\" />" +
+                "<NavigationProperty Name=\"Supplier\" Type=\"System.Web.OData.Formatter.FkSupplier\" Nullable=\"false\">" +
+                    "<ReferentialConstraint Property=\"FkSupplierId\" ReferencedProperty=\"Id\" />" +
+                "</NavigationProperty>" +
+                "<NavigationProperty Name=\"Supplier2\" Type=\"System.Web.OData.Formatter.FkSupplier2\" Nullable=\"false\">" +
+                    "<ReferentialConstraint Property=\"FkSupplier2Id\" ReferencedProperty=\"Id\" />" +
+                "</NavigationProperty>" +
+                "<NavigationProperty Name=\"Supplier3\" Type=\"System.Web.OData.Formatter.FkSupplier3\">" +
+                    "<ReferentialConstraint Property=\"FkSupplier3Id\" ReferencedProperty=\"Id\" />" +
+                "</NavigationProperty>";
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<FkProduct3>("Products");
@@ -326,11 +326,11 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             const string expect =
-                "        <Property Name=\"CustomerId\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
-                "        <NavigationProperty Name=\"Customer\" Type=\"System.Web.OData.Formatter.ForeignCustomer\" Nullable=\"false\">\r\n" +
-                "          <OnDelete Action=\"Cascade\" />\r\n" +
-                "          <ReferentialConstraint Property=\"CustomerId\" ReferencedProperty=\"ForeignCustomerId\" />\r\n" +
-                "        </NavigationProperty>";
+                "<Property Name=\"CustomerId\" Type=\"Edm.Int32\" Nullable=\"false\" />" +
+                "<NavigationProperty Name=\"Customer\" Type=\"System.Web.OData.Formatter.ForeignCustomer\" Nullable=\"false\">" +
+                    "<OnDelete Action=\"Cascade\" />" +
+                    "<ReferentialConstraint Property=\"CustomerId\" ReferencedProperty=\"ForeignCustomerId\" />" +
+                "</NavigationProperty>";
 
             ODataModelBuilder builder = new ODataModelBuilder();
             builder.EntityType<ForeignCustomer>().HasKey(c => c.ForeignCustomerId).HasMany(c => c.Orders);
@@ -361,10 +361,10 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             const string expect =
-                "        <NavigationProperty Name=\"Customer\" Type=\"System.Web.OData.Formatter.MultiForeignCustomer\" Nullable=\"false\">\r\n" +
-                "          <ReferentialConstraint Property=\"CustomerForeignKey1\" ReferencedProperty=\"CustomerId1\" />\r\n" +
-                "          <ReferentialConstraint Property=\"CustomerForeignKey2\" ReferencedProperty=\"CustomerId2\" />\r\n" +
-                "        </NavigationProperty>";
+                "<NavigationProperty Name=\"Customer\" Type=\"System.Web.OData.Formatter.MultiForeignCustomer\" Nullable=\"false\">" +
+                    "<ReferentialConstraint Property=\"CustomerForeignKey1\" ReferencedProperty=\"CustomerId1\" />" +
+                    "<ReferentialConstraint Property=\"CustomerForeignKey2\" ReferencedProperty=\"CustomerId2\" />" +
+                "</NavigationProperty>";
 
             ODataModelBuilder builder = new ODataModelBuilder();
             builder.EntityType<MultiForeignCustomer>().HasKey(c => new {c.CustomerId1, c.CustomerId2}).HasMany(c => c.Orders);
@@ -395,9 +395,9 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             const string expect =
-                "        <NavigationProperty Name=\"DerivedProp\" Type=\"System.Web.OData.Formatter.DerivedPrincipalEntity\">\r\n" +
-                "          <ReferentialConstraint Property=\"DerivedPrincipalEntityId\" ReferencedProperty=\"Id\" />\r\n" +
-                "        </NavigationProperty>";
+                "<NavigationProperty Name=\"DerivedProp\" Type=\"System.Web.OData.Formatter.DerivedPrincipalEntity\">" +
+                    "<ReferentialConstraint Property=\"DerivedPrincipalEntityId\" ReferencedProperty=\"Id\" />" +
+                "</NavigationProperty>";
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<DerivedPrincipalEntity>("Principals");
@@ -450,10 +450,10 @@ namespace System.Web.OData.Builder
                 });
 
             const string expect =
-                "        <Property Name=\"CustomerForeignKey\" Type=\"Edm.Int32\" />\r\n" +
-                "        <NavigationProperty Name=\"Customer\" Type=\"DefaultNamespace.Customer\" Partner=\"Orders\">\r\n" +
-                "          <ReferentialConstraint Property=\"CustomerForeignKey\" ReferencedProperty=\"CustomerId\" />\r\n" +
-                "        </NavigationProperty>";
+                "<Property Name=\"CustomerForeignKey\" Type=\"Edm.Int32\" />" +
+                "<NavigationProperty Name=\"Customer\" Type=\"DefaultNamespace.Customer\" Partner=\"Orders\">" +
+                    "<ReferentialConstraint Property=\"CustomerForeignKey\" ReferencedProperty=\"CustomerId\" />" +
+                "</NavigationProperty>";
 
             HttpConfiguration config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
             HttpServer server = new HttpServer(config);
@@ -521,22 +521,22 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             const string expectMetadata =
-@"<?xml version='1.0' encoding='utf-8'?>
-<edmx:Edmx Version='4.0' xmlns:edmx='http://docs.oasis-open.org/odata/ns/edmx'>
-  <edmx:DataServices>
-    <Schema Namespace='System.Web.OData.Formatter' xmlns='http://docs.oasis-open.org/odata/ns/edm'>
-      <ComplexType Name='ComplexBaseType'>
-        <Property Name='BaseProperty' Type='Edm.String' />
-      </ComplexType>
-      <ComplexType Name='ComplexDerivedOpenType' BaseType='System.Web.OData.Formatter.ComplexBaseType' OpenType='true'>
-        <Property Name='DerivedProperty' Type='Edm.String' />
-      </ComplexType>
-    </Schema>
-    <Schema Namespace='Default' xmlns='http://docs.oasis-open.org/odata/ns/edm'>
-      <EntityContainer Name='Container' />
-    </Schema>
-  </edmx:DataServices>
-</edmx:Edmx>";
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+            "<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">" +
+            "<edmx:DataServices>" +
+                "<Schema Namespace=\"System.Web.OData.Formatter\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                    "<ComplexType Name=\"ComplexBaseType\">" +
+                        "<Property Name=\"BaseProperty\" Type=\"Edm.String\" />" +
+                    "</ComplexType>" +
+                    "<ComplexType Name=\"ComplexDerivedOpenType\" BaseType=\"System.Web.OData.Formatter.ComplexBaseType\" OpenType=\"true\">" +
+                        "<Property Name=\"DerivedProperty\" Type=\"Edm.String\" />" +
+                    "</ComplexType>" +
+                "</Schema>" +
+                "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                    "<EntityContainer Name=\"Container\" />" +
+                "</Schema>" +
+            "</edmx:DataServices>" +
+            "</edmx:Edmx>";
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.ComplexType<ComplexBaseType>();
             IEdmModel model = builder.GetEdmModel();
@@ -560,21 +560,20 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             const string expectMetadata =
-@"<Schema Namespace='Default' xmlns='http://docs.oasis-open.org/odata/ns/edm'>
-      <Action Name='NullableAction' IsBound='true'>
-        <Parameter Name='bindingParameter' Type='System.Web.OData.Formatter.FormatterPerson' />
-        <Parameter Name='param' Type='Edm.String' Unicode='false' />
-        <ReturnType Type='System.Web.OData.Formatter.FormatterAddress' />
-      </Action>
-      <Action Name='NonNullableAction' IsBound='true'>
-        <Parameter Name='bindingParameter' Type='System.Web.OData.Formatter.FormatterPerson' />
-        <Parameter Name='param' Type='Edm.String' Nullable='false' Unicode='false' />
-        <ReturnType Type='System.Web.OData.Formatter.FormatterAddress' Nullable='false' />
-      </Action>
-      <EntityContainer Name='Container' />
-    </Schema>
-  </edmx:DataServices>
-</edmx:Edmx>";
+            "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                "<Action Name=\"NullableAction\" IsBound=\"true\">" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"System.Web.OData.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" Unicode=\"false\" />" +
+                    "<ReturnType Type=\"System.Web.OData.Formatter.FormatterAddress\" />" +
+                "</Action>" +
+                "<Action Name=\"NonNullableAction\" IsBound=\"true\">" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"System.Web.OData.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" Nullable=\"false\" Unicode=\"false\" />" +
+                    "<ReturnType Type=\"System.Web.OData.Formatter.FormatterAddress\" Nullable=\"false\" />" +
+                "</Action>" +
+                "<EntityContainer Name=\"Container\" /></Schema>" +
+            "</edmx:DataServices>" +
+            "</edmx:Edmx>";
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             EntityTypeConfiguration<FormatterPerson> person = builder.EntityType<FormatterPerson>();
@@ -598,7 +597,8 @@ namespace System.Web.OData.Builder
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains(expectMetadata.Replace("'", "\""), response.Content.ReadAsStringAsync().Result);
+            var result = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains(expectMetadata.Replace("'", "\""), result);
         }
 
         [Fact]
@@ -606,21 +606,21 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             const string expectMetadata =
-@"<Schema Namespace='Default' xmlns='http://docs.oasis-open.org/odata/ns/edm'>
-      <Function Name='NullableFunction' IsBound='true'>
-        <Parameter Name='bindingParameter' Type='System.Web.OData.Formatter.FormatterPerson' />
-        <Parameter Name='param' Type='Edm.String' Unicode='false' />
-        <ReturnType Type='System.Web.OData.Formatter.FormatterAddress' />
-      </Function>
-      <Function Name='NonNullableFunction' IsBound='true'>
-        <Parameter Name='bindingParameter' Type='System.Web.OData.Formatter.FormatterPerson' />
-        <Parameter Name='param' Type='Edm.String' Nullable='false' Unicode='false' />
-        <ReturnType Type='System.Web.OData.Formatter.FormatterAddress' Nullable='false' />
-      </Function>
-      <EntityContainer Name='Container' />
-    </Schema>
-  </edmx:DataServices>
-</edmx:Edmx>";
+            "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                "<Function Name=\"NullableFunction\" IsBound=\"true\">" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"System.Web.OData.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" Unicode=\"false\" />" +
+                    "<ReturnType Type=\"System.Web.OData.Formatter.FormatterAddress\" />" +
+                "</Function>" +
+                "<Function Name=\"NonNullableFunction\" IsBound=\"true\">" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"System.Web.OData.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" Nullable=\"false\" Unicode=\"false\" />" +
+                    "<ReturnType Type=\"System.Web.OData.Formatter.FormatterAddress\" Nullable=\"false\" />" +
+                "</Function>" +
+                "<EntityContainer Name=\"Container\" />" +
+            "</Schema>" +
+            "</edmx:DataServices>" +
+            "</edmx:Edmx>";
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             EntityTypeConfiguration<FormatterPerson> person = builder.EntityType<FormatterPerson>();
@@ -652,9 +652,9 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             const string expectMetadata =
-"      <EntityType Name=\"AbstractEntityType\" Abstract=\"true\">\r\n" +
-"        <Property Name=\"IntProperty\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
-"      </EntityType>";
+            "<EntityType Name=\"AbstractEntityType\" Abstract=\"true\">" +
+                "<Property Name=\"IntProperty\" Type=\"Edm.Int32\" Nullable=\"false\" />" +
+            "</EntityType>";
 
             ODataModelBuilder builder = new ODataModelBuilder();
             builder.EntityType<AbstractEntityType>().Abstract().Property(a => a.IntProperty);
@@ -682,23 +682,23 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             const string expectMetadata =
-"    <Schema Namespace=\"System.Web.OData.Formatter\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">\r\n" +
-"      <EntityType Name=\"AbstractEntityType\" Abstract=\"true\">\r\n" +
-"        <Property Name=\"IntProperty\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
-"      </EntityType>\r\n" +
-"      <EntityType Name=\"SubEntityType\" BaseType=\"System.Web.OData.Formatter.AbstractEntityType\">\r\n" +
-"        <Key>\r\n" +
-"          <PropertyRef Name=\"SubKey\" />\r\n" +
-"        </Key>\r\n" +
-"        <Property Name=\"SubKey\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
-"      </EntityType>\r\n" +
-"      <EntityType Name=\"AnotherSubEntityType\" BaseType=\"System.Web.OData.Formatter.AbstractEntityType\">\r\n" +
-"        <Key>\r\n" +
-"          <PropertyRef Name=\"AnotherKey\" />\r\n" +
-"        </Key>\r\n" +
-"        <Property Name=\"AnotherKey\" Type=\"Edm.Double\" Nullable=\"false\" />\r\n" +
-"      </EntityType>\r\n" +
-"    </Schema>";
+            "<Schema Namespace=\"System.Web.OData.Formatter\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                "<EntityType Name=\"AbstractEntityType\" Abstract=\"true\">" +
+                    "<Property Name=\"IntProperty\" Type=\"Edm.Int32\" Nullable=\"false\" />" +
+                "</EntityType>" +
+                "<EntityType Name=\"SubEntityType\" BaseType=\"System.Web.OData.Formatter.AbstractEntityType\">" +
+                    "<Key>" +
+                        "<PropertyRef Name=\"SubKey\" />" +
+                    "</Key>" +
+                    "<Property Name=\"SubKey\" Type=\"Edm.Int32\" Nullable=\"false\" />" +
+                "</EntityType>" +
+                "<EntityType Name=\"AnotherSubEntityType\" BaseType=\"System.Web.OData.Formatter.AbstractEntityType\">" +
+                    "<Key>" +
+                        "<PropertyRef Name=\"AnotherKey\" />" +
+                    "</Key>" +
+                    "<Property Name=\"AnotherKey\" Type=\"Edm.Double\" Nullable=\"false\" />" +
+                "</EntityType>" +
+            "</Schema>";
 
             ODataModelBuilder builder = new ODataModelBuilder();
             builder.EntityType<AbstractEntityType>().Abstract().Property(a => a.IntProperty);
@@ -727,13 +727,13 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             const string expectMetadata =
-                "      <EntityType Name=\"EnumModel\">\r\n" +
-                "        <Key>\r\n" +
-                "          <PropertyRef Name=\"Simple\" />\r\n" +
-                "        </Key>\r\n" +
-                "        <Property Name=\"Simple\" Type=\"NS.SimpleEnum\" Nullable=\"false\" />\r\n" +
-                "      </EntityType>\r\n" +
-                "      <EnumType Name=\"SimpleEnum\" />";
+                "<EntityType Name=\"EnumModel\">" +
+                    "<Key>" +
+                        "<PropertyRef Name=\"Simple\" />" +
+                    "</Key>" +
+                    "<Property Name=\"Simple\" Type=\"NS.SimpleEnum\" Nullable=\"false\" />" +
+                "</EntityType>" +
+                "<EnumType Name=\"SimpleEnum\" />";
 
             ODataModelBuilder builder = new ODataModelBuilder();
             builder.EntityType<EnumModel>().HasKey(e => e.Simple).Namespace = "NS";
@@ -761,14 +761,14 @@ namespace System.Web.OData.Builder
         {
             // Arrange
             const string expectMetadata =
-                "        <EntitySet Name=\"Customers\" EntityType=\"System.Web.OData.Formatter.CustomerWithConcurrencyAttribute\">\r\n" +
-                "          <Annotation Term=\"Org.OData.Core.V1.OptimisticConcurrency\">\r\n" +
-                "            <Collection>\r\n" +
-                "              <PropertyPath>Name</PropertyPath>\r\n" +
-                "              <PropertyPath>Birthday</PropertyPath>\r\n" +
-                "            </Collection>\r\n" +
-                "          </Annotation>\r\n" +
-                "        </EntitySet>";
+                "<EntitySet Name=\"Customers\" EntityType=\"System.Web.OData.Formatter.CustomerWithConcurrencyAttribute\">" +
+                    "<Annotation Term=\"Org.OData.Core.V1.OptimisticConcurrency\">" +
+                        "<Collection>" +
+                            "<PropertyPath>Name</PropertyPath>" +
+                            "<PropertyPath>Birthday</PropertyPath>" +
+                        "</Collection>" +
+                    "</Annotation>" +
+                "</EntitySet>";
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<CustomerWithConcurrencyAttribute>("Customers");

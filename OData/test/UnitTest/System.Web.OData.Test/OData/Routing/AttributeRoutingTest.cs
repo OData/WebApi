@@ -96,7 +96,7 @@ namespace System.Web.OData.Routing
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal("{\r\n  \"@odata.context\":\"http://localhost/$metadata#Edm.Int32\",\"value\":56\r\n}",
+            Assert.Equal("{\"@odata.context\":\"http://localhost/$metadata#Edm.Int32\",\"value\":56}",
                 responseString);
         }
 

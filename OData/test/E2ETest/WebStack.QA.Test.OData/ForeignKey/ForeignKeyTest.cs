@@ -4,6 +4,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
@@ -102,6 +103,8 @@ namespace WebStack.QA.Test.OData.ForeignKey
                             "          <OnDelete Action=\"Cascade\" />\r\n" + 
                             "          <ReferentialConstraint Property=\"CustomerId\" ReferencedProperty=\"Id\" />\r\n" + 
                             "        </NavigationProperty>";
+            // Remove indentation
+            expect = Regex.Replace(expect, @"\r\n\s*<", @"<");
 
             string requestUri = string.Format("{0}/{1}/$metadata", this.BaseAddress, modelMode);
             HttpResponseMessage response = await Client.GetAsync(requestUri);

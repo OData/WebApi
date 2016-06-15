@@ -185,7 +185,6 @@ namespace System.Web.OData.Batch
             ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
             {
                 Version = odataVersion,
-                EnableIndentation = true,
                 DisableMessageStreamDisposal = true,
                 MessageQuotas = messageQuotas
             };

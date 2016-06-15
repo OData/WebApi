@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Web.Http;
 using System.Web.Http.Tracing;
 using System.Web.OData.Builder;
@@ -343,6 +344,9 @@ namespace System.Web.OData.Formatter
         [InlineData("Property.*,Hello.*", "PeopleWithMultipleAnnotations.json")]
         public void CustomSerializerWorks_ForInstanceAnnotationsFilter(string filter, string expect)
         {
+            // Remove indentation in expect string 
+            expect = Regex.Replace(Resources.GetString(expect), @"\r\n\s*([""{}\]])", "$1");
+
             // Arrange
             HttpConfiguration configuration = CreateConfiguration();
             configuration.Formatters.InsertRange(0,
@@ -360,7 +364,7 @@ namespace System.Web.OData.Formatter
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Console.WriteLine(response.Content.ReadAsStringAsync().Result);
-            Assert.Equal(Resources.GetString(expect), response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(expect, response.Content.ReadAsStringAsync().Result);
         }
 
         [Theory]

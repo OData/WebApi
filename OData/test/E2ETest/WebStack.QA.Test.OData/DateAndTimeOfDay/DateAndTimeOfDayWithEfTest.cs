@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData;
@@ -53,7 +54,7 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
         {
             // Arrange
             string Uri = BaseAddress + "/odata/$metadata";
-            const string Expected = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
+            string expected = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
 "<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">\r\n" +
 "  <edmx:DataServices>\r\n" +
 "    <Schema Namespace=\"WebStack.QA.Test.OData.DateAndTimeOfDay\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">\r\n" +
@@ -79,6 +80,9 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
 "  </edmx:DataServices>\r\n" +
 "</edmx:Edmx>";
 
+            // Remove indentation
+            expected = Regex.Replace(expected, @"\r\n\s*<", @"<");
+
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, Uri);
 
             // Act
@@ -86,7 +90,7 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(Expected, response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(expected, response.Content.ReadAsStringAsync().Result);
         }
 
         [Fact]

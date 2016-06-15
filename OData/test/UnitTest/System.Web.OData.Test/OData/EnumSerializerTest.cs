@@ -120,8 +120,8 @@ namespace System.Web.OData
         {
             // Arrange
             const string expect =
-                "{\r\n" +
-                "  \"@odata.context\":\"http://localhost/odata/$metadata#Edm.Boolean\",\"value\":true\r\n" +
+                "{" +
+                "\"@odata.context\":\"http://localhost/odata/$metadata#Edm.Boolean\",\"value\":true" +
                 "}";
 
             HttpConfiguration config = new[] { typeof(NullableEnumValueController) }.GetHttpConfiguration();
@@ -143,8 +143,8 @@ namespace System.Web.OData
         {
             // Arrange
             const string expect =
-                "{\r\n" +
-                "  \"@odata.context\":\"http://localhost/odata/$metadata#Edm.Boolean\",\"value\":false\r\n" +
+                "{" +
+                "\"@odata.context\":\"http://localhost/odata/$metadata#Edm.Boolean\",\"value\":false" +
                 "}";
 
             HttpConfiguration config = new[] { typeof(NullableEnumValueController) }.GetHttpConfiguration();

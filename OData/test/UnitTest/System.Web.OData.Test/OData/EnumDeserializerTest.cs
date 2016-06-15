@@ -139,8 +139,8 @@ namespace System.Web.OData
         {
             // Arrange
             var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
-            var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
-            ODataComplexValue complexValue = new ODataComplexValue
+            var deserializer = new ODataResourceDeserializer(deserializerProvider);
+            ODataResource resourceValue = new ODataResource
             {
                 Properties = new[]
                 { 
@@ -154,7 +154,9 @@ namespace System.Web.OData
             IEdmComplexTypeReference enumComplexTypeReference = model.GetEdmTypeReference(typeof(EnumComplexWithNullableEnum)).AsComplex();
 
             // Act
-            var enumComplexWithNullableEnum = deserializer.ReadComplexValue(complexValue, enumComplexTypeReference, readContext) as EnumComplexWithNullableEnum;
+            var enumComplexWithNullableEnum =
+                deserializer.ReadResource(new ODataResourceWrapper(resourceValue), enumComplexTypeReference, readContext)
+                    as EnumComplexWithNullableEnum;
 
             // Assert
             Assert.NotNull(enumComplexWithNullableEnum);
@@ -166,8 +168,8 @@ namespace System.Web.OData
         {
             // Arrange
             var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
-            var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
-            ODataComplexValue complexValue = new ODataComplexValue
+            var deserializer = new ODataResourceDeserializer(deserializerProvider);
+            ODataResource resourceValue = new ODataResource
             {
                 Properties = new[]
                 { 
@@ -181,7 +183,7 @@ namespace System.Web.OData
             IEdmComplexTypeReference enumComplexTypeReference = model.GetEdmTypeReference(typeof(EnumComplexWithRequiredEnum)).AsComplex();
 
             // Act
-            var enumComplexWithRequiredEnum = deserializer.ReadComplexValue(complexValue, enumComplexTypeReference, readContext) as EnumComplexWithRequiredEnum;
+            var enumComplexWithRequiredEnum = deserializer.ReadResource(new ODataResourceWrapper(resourceValue), enumComplexTypeReference, readContext) as EnumComplexWithRequiredEnum;
 
             // Assert
             Assert.NotNull(enumComplexWithRequiredEnum);
@@ -197,8 +199,8 @@ namespace System.Web.OData
         {
             // Arrange
             var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
-            var deserializer = new ODataComplexTypeDeserializer(deserializerProvider);
-            ODataComplexValue complexValue = new ODataComplexValue
+            var deserializer = new ODataResourceDeserializer(deserializerProvider);
+            ODataResource resourceValue = new ODataResource
             {
                 Properties = new[]
                 { 
@@ -212,7 +214,7 @@ namespace System.Web.OData
             IEdmComplexTypeReference enumComplexTypeReference = model.GetEdmTypeReference(typeof(EnumComplexWithRequiredEnum)).AsComplex();
 
             // Act
-            var enumComplexWithRequiredEnum = deserializer.ReadComplexValue(complexValue, enumComplexTypeReference, readContext) as EnumComplexWithRequiredEnum;
+            var enumComplexWithRequiredEnum = deserializer.ReadResource(new ODataResourceWrapper(resourceValue), enumComplexTypeReference, readContext) as EnumComplexWithRequiredEnum;
 
             // Assert
             Assert.NotNull(enumComplexWithRequiredEnum);

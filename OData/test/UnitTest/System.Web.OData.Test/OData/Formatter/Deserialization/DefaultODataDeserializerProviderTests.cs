@@ -54,14 +54,17 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void GetODataDeserializer_Entity()
+        public void GetODataDeserializer_Resource_ForEntity()
         {
+            // Arrange
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
+            // Act
             ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(_edmModel,
                 typeof(ODataResourceDeserializerTests.Product), request);
 
+            // Assert
             Assert.NotNull(deserializer);
             ODataResourceDeserializer entityDeserializer = Assert.IsType<ODataResourceDeserializer>(deserializer);
             Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Resource);
@@ -69,17 +72,20 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         [Fact]
-        public void GetODataDeserializer_Complex()
+        public void GetODataDeserializer_Resource_ForComplex()
         {
+            // Arrange
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
+            // Act
             ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(_edmModel,
                 typeof(ODataResourceDeserializerTests.Address), request);
 
+            // Assert
             Assert.NotNull(deserializer);
-            ODataComplexTypeDeserializer complexDeserializer = Assert.IsType<ODataComplexTypeDeserializer>(deserializer);
-            Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Property);
+            ODataResourceDeserializer complexDeserializer = Assert.IsType<ODataResourceDeserializer>(deserializer);
+            Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Resource);
             Assert.Equal(complexDeserializer.DeserializerProvider, deserializerProvider);
         }
 

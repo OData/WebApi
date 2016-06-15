@@ -139,20 +139,7 @@ namespace System.Web.OData.Formatter
                 IEdmTypeReference edmTypeReference = parameterValue.EdmType;
                 ODataDeserializerContext readContext = BuildDeserializerContext(actionContext, bindingContext, edmTypeReference);
 
-                // complex value
-                ODataComplexValue complexValue = oDataValue as ODataComplexValue;
-                if (complexValue != null)
-                {
-                    IEdmComplexTypeReference edmComplexType = edmTypeReference.AsComplex();
-                    Contract.Assert(edmComplexType != null);
-
-                    ODataComplexTypeDeserializer deserializer =
-                        (ODataComplexTypeDeserializer)DeserializerProvider.GetEdmTypeDeserializer(edmComplexType);
-
-                    return deserializer.ReadInline(complexValue, edmComplexType, readContext);
-                }
-
-                // collection of primitive, enum, complex
+                // collection of primitive, enum
                 ODataCollectionValue collectionValue = oDataValue as ODataCollectionValue;
                 if (collectionValue != null)
                 {

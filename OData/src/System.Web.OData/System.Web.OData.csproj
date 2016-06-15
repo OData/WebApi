@@ -430,7 +430,6 @@
     <Compile Include="OData\Formatter\ODataMessageWrapper.cs" />
     <Compile Include="OData\ClrTypeAnnotation.cs" />
     <Compile Include="OData\Formatter\Deserialization\DefaultODataDeserializerProvider.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataComplexTypeDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEdmTypeDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerProvider.cs" />

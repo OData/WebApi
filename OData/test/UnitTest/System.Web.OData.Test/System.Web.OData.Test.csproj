@@ -372,7 +372,6 @@
     <Compile Include="OData\DeltaTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\DefaultODataDeserializerProviderTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\MockODataRequestMessage.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataComplexTypeDeserializerTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataResourceDeserializerTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntityReferenceLinkDeserializerTests.cs" />
     <Compile Include="TestCommon\Models\TestDataModels.cs" />

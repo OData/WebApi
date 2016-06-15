@@ -17,10 +17,9 @@ namespace System.Web.OData.Formatter.Deserialization
         private static readonly ODataEnumDeserializer _enumDeserializer = new ODataEnumDeserializer();
 
         private readonly ODataActionPayloadDeserializer _actionPayloadDeserializer;
-        private readonly ODataEntityDeserializer _entityDeserializer;
-        private readonly ODataFeedDeserializer _feedDeserializer;
+        private readonly ODataResourceDeserializer _resourceDeserializer;
+        private readonly ODataResourceSetDeserializer _resourceSetDeserializer;
         private readonly ODataCollectionDeserializer _collectionDeserializer;
-        private readonly ODataComplexTypeDeserializer _complexDeserializer;
 
         private static readonly DefaultODataDeserializerProvider _instance = new DefaultODataDeserializerProvider();
 
@@ -30,10 +29,9 @@ namespace System.Web.OData.Formatter.Deserialization
         public DefaultODataDeserializerProvider()
         {
             _actionPayloadDeserializer = new ODataActionPayloadDeserializer(this);
-            _entityDeserializer = new ODataEntityDeserializer(this);
-            _feedDeserializer = new ODataFeedDeserializer(this);
+            _resourceDeserializer = new ODataResourceDeserializer(this);
+            _resourceSetDeserializer = new ODataResourceSetDeserializer(this);
             _collectionDeserializer = new ODataCollectionDeserializer(this);
-            _complexDeserializer = new ODataComplexTypeDeserializer(this);
         }
 
         /// <summary>
@@ -58,7 +56,8 @@ namespace System.Web.OData.Formatter.Deserialization
             switch (edmType.TypeKind())
             {
                 case EdmTypeKind.Entity:
-                    return _entityDeserializer;
+                case EdmTypeKind.Complex:
+                    return _resourceDeserializer;
 
                 case EdmTypeKind.Enum:
                     return _enumDeserializer;
@@ -66,14 +65,11 @@ namespace System.Web.OData.Formatter.Deserialization
                 case EdmTypeKind.Primitive:
                     return _primitiveDeserializer;
 
-                case EdmTypeKind.Complex:
-                    return _complexDeserializer;
-
                 case EdmTypeKind.Collection:
                     IEdmCollectionTypeReference collectionType = edmType.AsCollection();
-                    if (collectionType.ElementType().IsEntity())
+                    if (collectionType.ElementType().IsEntity() || collectionType.ElementType().IsComplex())
                     {
-                        return _feedDeserializer;
+                        return _resourceSetDeserializer;
                     }
                     else
                     {

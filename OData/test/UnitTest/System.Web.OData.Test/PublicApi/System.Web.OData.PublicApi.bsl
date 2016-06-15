@@ -358,32 +358,6 @@ public class System.Web.OData.EnableQueryAttribute : System.Web.Http.Filters.Act
 	public virtual void ValidateQuery (System.Net.Http.HttpRequestMessage request, ODataQueryOptions queryOptions)
 }
 
-public class System.Web.OData.EntityContext {
-	public EntityContext ()
-	public EntityContext (ODataSerializerContext serializerContext, Microsoft.OData.Edm.IEdmEntityTypeReference entityType, object entityInstance)
-
-	Microsoft.OData.Edm.IEdmModel EdmModel  { public get; public set; }
-	IEdmEntityObject EdmObject  { public get; public set; }
-	object EntityInstance  { public get; public set; }
-	Microsoft.OData.Edm.IEdmEntityType EntityType  { public get; public set; }
-	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; public set; }
-	System.Net.Http.HttpRequestMessage Request  { public get; public set; }
-	ODataSerializerContext SerializerContext  { public get; public set; }
-	bool SkipExpensiveAvailabilityChecks  { public get; public set; }
-	System.Web.Http.Routing.UrlHelper Url  { public get; public set; }
-
-	public object GetPropertyValue (string propertyName)
-}
-
-public class System.Web.OData.EntityContext`1 : EntityContext {
-	public EntityContext`1 ()
-
-	[
-	ObsoleteAttribute(),
-	]
-	TEntityType EntityInstance  { public get; public set; }
-}
-
 public class System.Web.OData.ETagMessageHandler : System.Net.Http.DelegatingHandler, IDisposable {
 	public ETagMessageHandler ()
 
@@ -392,17 +366,6 @@ public class System.Web.OData.ETagMessageHandler : System.Net.Http.DelegatingHan
 	AsyncStateMachineAttribute(),
 	]
 	protected virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] SendAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-}
-
-public class System.Web.OData.FeedContext {
-	public FeedContext ()
-
-	Microsoft.OData.Edm.IEdmModel EdmModel  { public get; public set; }
-	Microsoft.OData.Edm.IEdmEntitySetBase EntitySetBase  { public get; public set; }
-	object FeedInstance  { public get; public set; }
-	System.Net.Http.HttpRequestMessage Request  { public get; public set; }
-	System.Web.Http.Controllers.HttpRequestContext RequestContext  { public get; public set; }
-	System.Web.Http.Routing.UrlHelper Url  { public get; public set; }
 }
 
 public class System.Web.OData.MetadataController : ODataController, IDisposable, IHttpController {
@@ -521,6 +484,43 @@ public class System.Web.OData.QueryableRestrictionsAnnotation {
 	public QueryableRestrictionsAnnotation (QueryableRestrictions restrictions)
 
 	QueryableRestrictions Restrictions  { public get; }
+}
+
+public class System.Web.OData.ResourceContext {
+	public ResourceContext ()
+	public ResourceContext (ODataSerializerContext serializerContext, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, object resourceInstance)
+
+	Microsoft.OData.Edm.IEdmModel EdmModel  { public get; public set; }
+	IEdmStructuredObject EdmObject  { public get; public set; }
+	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; public set; }
+	System.Net.Http.HttpRequestMessage Request  { public get; public set; }
+	object ResourceInstance  { public get; public set; }
+	ODataSerializerContext SerializerContext  { public get; public set; }
+	bool SkipExpensiveAvailabilityChecks  { public get; public set; }
+	Microsoft.OData.Edm.IEdmStructuredType StructuredType  { public get; public set; }
+	System.Web.Http.Routing.UrlHelper Url  { public get; public set; }
+
+	public object GetPropertyValue (string propertyName)
+}
+
+public class System.Web.OData.ResourceContext`1 : ResourceContext {
+	public ResourceContext`1 ()
+
+	[
+	ObsoleteAttribute(),
+	]
+	TStructuredType ResourceInstance  { public get; public set; }
+}
+
+public class System.Web.OData.ResourceSetContext {
+	public ResourceSetContext ()
+
+	Microsoft.OData.Edm.IEdmModel EdmModel  { public get; public set; }
+	Microsoft.OData.Edm.IEdmEntitySetBase EntitySetBase  { public get; public set; }
+	System.Net.Http.HttpRequestMessage Request  { public get; public set; }
+	System.Web.Http.Controllers.HttpRequestContext RequestContext  { public get; public set; }
+	object ResourceSetInstance  { public get; public set; }
+	System.Web.Http.Routing.UrlHelper Url  { public get; public set; }
 }
 
 [
@@ -1057,32 +1057,32 @@ public sealed class System.Web.OData.Builder.LinkGenerationHelpers {
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Uri GenerateActionLink (EntityContext entityContext, Microsoft.OData.Edm.IEdmOperation action)
+	public static System.Uri GenerateActionLink (ResourceContext resourceContext, Microsoft.OData.Edm.IEdmOperation action)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Uri GenerateActionLink (FeedContext feedContext, Microsoft.OData.Edm.IEdmOperation action)
+	public static System.Uri GenerateActionLink (ResourceSetContext feedContext, Microsoft.OData.Edm.IEdmOperation action)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Uri GenerateFunctionLink (EntityContext entityContext, Microsoft.OData.Edm.IEdmOperation function)
+	public static System.Uri GenerateFunctionLink (ResourceContext resourceContext, Microsoft.OData.Edm.IEdmOperation function)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Uri GenerateFunctionLink (FeedContext feedContext, Microsoft.OData.Edm.IEdmOperation function)
+	public static System.Uri GenerateFunctionLink (ResourceSetContext resourceSetContext, Microsoft.OData.Edm.IEdmOperation function)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Uri GenerateNavigationPropertyLink (EntityContext entityContext, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, bool includeCast)
+	public static System.Uri GenerateNavigationPropertyLink (ResourceContext resourceContext, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, bool includeCast)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Uri GenerateSelfLink (EntityContext entityContext, bool includeCast)
+	public static System.Uri GenerateSelfLink (ResourceContext resourceContext, bool includeCast)
 }
 
 [
@@ -1120,10 +1120,10 @@ public class System.Web.OData.Builder.ActionConfiguration : OperationConfigurati
 	bool IsSideEffecting  { public virtual get; }
 	OperationKind Kind  { public virtual get; }
 
-	public System.Func`2[[System.Web.OData.EntityContext],[System.Uri]] GetActionLink ()
-	public System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] GetFeedActionLink ()
-	public ActionConfiguration HasActionLink (System.Func`2[[System.Web.OData.EntityContext],[System.Uri]] actionLinkFactory, bool followsConventions)
-	public ActionConfiguration HasFeedActionLink (System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] actionLinkFactory, bool followsConventions)
+	public System.Func`2[[System.Web.OData.ResourceContext],[System.Uri]] GetActionLink ()
+	public System.Func`2[[System.Web.OData.ResourceSetContext],[System.Uri]] GetFeedActionLink ()
+	public ActionConfiguration HasActionLink (System.Func`2[[System.Web.OData.ResourceContext],[System.Uri]] actionLinkFactory, bool followsConventions)
+	public ActionConfiguration HasFeedActionLink (System.Func`2[[System.Web.OData.ResourceSetContext],[System.Uri]] actionLinkFactory, bool followsConventions)
 	public ActionConfiguration Returns ()
 	public ActionConfiguration Returns (System.Type clrReturnType)
 	public ActionConfiguration ReturnsCollection ()
@@ -1213,13 +1213,13 @@ public class System.Web.OData.Builder.EntitySetConfiguration : NavigationSourceC
 	public EntitySetConfiguration (ODataModelBuilder modelBuilder, System.Type entityClrType, string name)
 	public EntitySetConfiguration (ODataModelBuilder modelBuilder, EntityTypeConfiguration entityType, string name)
 
-	public virtual System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] GetFeedSelfLink ()
-	public virtual INavigationSourceConfiguration HasFeedSelfLink (System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] feedSelfLinkFactory)
+	public virtual System.Func`2[[System.Web.OData.ResourceSetContext],[System.Uri]] GetFeedSelfLink ()
+	public virtual INavigationSourceConfiguration HasFeedSelfLink (System.Func`2[[System.Web.OData.ResourceSetContext],[System.Uri]] feedSelfLinkFactory)
 }
 
 public class System.Web.OData.Builder.EntitySetConfiguration`1 : NavigationSourceConfiguration`1 {
-	public virtual void HasFeedSelfLink (System.Func`2[[System.Web.OData.FeedContext],[System.String]] feedSelfLinkFactory)
-	public virtual void HasFeedSelfLink (System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] feedSelfLinkFactory)
+	public virtual void HasFeedSelfLink (System.Func`2[[System.Web.OData.ResourceSetContext],[System.String]] feedSelfLinkFactory)
+	public virtual void HasFeedSelfLink (System.Func`2[[System.Web.OData.ResourceSetContext],[System.Uri]] feedSelfLinkFactory)
 }
 
 public class System.Web.OData.Builder.EntityTypeConfiguration : StructuralTypeConfiguration, IEdmTypeConfiguration {
@@ -1326,10 +1326,10 @@ public class System.Web.OData.Builder.FunctionConfiguration : OperationConfigura
 	bool SupportedInFilter  { public get; public set; }
 	bool SupportedInOrderBy  { public get; public set; }
 
-	public System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] GetFeedFunctionLink ()
-	public System.Func`2[[System.Web.OData.EntityContext],[System.Uri]] GetFunctionLink ()
-	public FunctionConfiguration HasFeedFunctionLink (System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] functionLinkFactory, bool followsConventions)
-	public FunctionConfiguration HasFunctionLink (System.Func`2[[System.Web.OData.EntityContext],[System.Uri]] functionLinkFactory, bool followsConventions)
+	public System.Func`2[[System.Web.OData.ResourceSetContext],[System.Uri]] GetFeedFunctionLink ()
+	public System.Func`2[[System.Web.OData.ResourceContext],[System.Uri]] GetFunctionLink ()
+	public FunctionConfiguration HasFeedFunctionLink (System.Func`2[[System.Web.OData.ResourceSetContext],[System.Uri]] functionLinkFactory, bool followsConventions)
+	public FunctionConfiguration HasFunctionLink (System.Func`2[[System.Web.OData.ResourceContext],[System.Uri]] functionLinkFactory, bool followsConventions)
 	public FunctionConfiguration Returns ()
 	public FunctionConfiguration Returns (System.Type clrReturnType)
 	public FunctionConfiguration ReturnsCollection ()
@@ -1351,9 +1351,9 @@ public class System.Web.OData.Builder.LowerCamelCaser {
 }
 
 public class System.Web.OData.Builder.NavigationLinkBuilder {
-	public NavigationLinkBuilder (System.Func`3[[System.Web.OData.EntityContext],[Microsoft.OData.Edm.IEdmNavigationProperty],[System.Uri]] navigationLinkFactory, bool followsConventions)
+	public NavigationLinkBuilder (System.Func`3[[System.Web.OData.ResourceContext],[Microsoft.OData.Edm.IEdmNavigationProperty],[System.Uri]] navigationLinkFactory, bool followsConventions)
 
-	System.Func`3[[System.Web.OData.EntityContext],[Microsoft.OData.Edm.IEdmNavigationProperty],[System.Uri]] Factory  { public get; }
+	System.Func`3[[System.Web.OData.ResourceContext],[Microsoft.OData.Edm.IEdmNavigationProperty],[System.Uri]] Factory  { public get; }
 	bool FollowsConventions  { public get; }
 }
 
@@ -1394,11 +1394,11 @@ public class System.Web.OData.Builder.NavigationSourceLinkBuilderAnnotation {
 	public NavigationSourceLinkBuilderAnnotation (Microsoft.OData.Edm.IEdmNavigationSource navigationSource, System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] idLinkBuilder, System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] editLinkBuilder, System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] readLinkBuilder)
 
 	public void AddNavigationPropertyLinkBuilder (Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, NavigationLinkBuilder linkBuilder)
-	public virtual System.Uri BuildEditLink (EntityContext instanceContext, ODataMetadataLevel metadataLevel, System.Uri idLink)
-	public virtual EntitySelfLinks BuildEntitySelfLinks (EntityContext instanceContext, ODataMetadataLevel metadataLevel)
-	public virtual System.Uri BuildIdLink (EntityContext instanceContext, ODataMetadataLevel metadataLevel)
-	public virtual System.Uri BuildNavigationLink (EntityContext instanceContext, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, ODataMetadataLevel metadataLevel)
-	public virtual System.Uri BuildReadLink (EntityContext instanceContext, ODataMetadataLevel metadataLevel, System.Uri editLink)
+	public virtual System.Uri BuildEditLink (ResourceContext instanceContext, ODataMetadataLevel metadataLevel, System.Uri idLink)
+	public virtual EntitySelfLinks BuildEntitySelfLinks (ResourceContext instanceContext, ODataMetadataLevel metadataLevel)
+	public virtual System.Uri BuildIdLink (ResourceContext instanceContext, ODataMetadataLevel metadataLevel)
+	public virtual System.Uri BuildNavigationLink (ResourceContext instanceContext, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, ODataMetadataLevel metadataLevel)
+	public virtual System.Uri BuildReadLink (ResourceContext instanceContext, ODataMetadataLevel metadataLevel, System.Uri editLink)
 }
 
 public class System.Web.OData.Builder.NonbindingParameterConfiguration : ParameterConfiguration {
@@ -1463,13 +1463,13 @@ public class System.Web.OData.Builder.ODataModelBuilder {
 }
 
 public class System.Web.OData.Builder.OperationLinkBuilder {
-	public OperationLinkBuilder (System.Func`2[[System.Web.OData.EntityContext],[System.Uri]] linkFactory, bool followsConventions)
-	public OperationLinkBuilder (System.Func`2[[System.Web.OData.FeedContext],[System.Uri]] linkFactory, bool followsConventions)
+	public OperationLinkBuilder (System.Func`2[[System.Web.OData.ResourceContext],[System.Uri]] linkFactory, bool followsConventions)
+	public OperationLinkBuilder (System.Func`2[[System.Web.OData.ResourceSetContext],[System.Uri]] linkFactory, bool followsConventions)
 
 	bool FollowsConventions  { public get; }
 
-	public virtual System.Uri BuildLink (EntityContext context)
-	public virtual System.Uri BuildLink (FeedContext context)
+	public virtual System.Uri BuildLink (ResourceContext context)
+	public virtual System.Uri BuildLink (ResourceSetContext context)
 }
 
 public class System.Web.OData.Builder.PrimitivePropertyConfiguration : StructuralPropertyConfiguration {
@@ -2555,6 +2555,16 @@ public abstract class System.Web.OData.Formatter.Deserialization.ODataItemBase {
 	Microsoft.OData.ODataItem Item  { public get; }
 }
 
+[
+ExtensionAttribute(),
+]
+public sealed class System.Web.OData.Formatter.Deserialization.ODataReaderExtensions {
+	[
+	ExtensionAttribute(),
+	]
+	public static ODataItemBase ReadResourceOrResourceSet (Microsoft.OData.ODataReader reader)
+}
+
 public class System.Web.OData.Formatter.Deserialization.DefaultODataDeserializerProvider : ODataDeserializerProvider {
 	public DefaultODataDeserializerProvider ()
 
@@ -2599,20 +2609,6 @@ public class System.Web.OData.Formatter.Deserialization.ODataDeserializerContext
 	System.Type ResourceType  { public get; public set; }
 }
 
-public class System.Web.OData.Formatter.Deserialization.ODataEntityDeserializer : ODataEdmTypeDeserializer {
-	public ODataEntityDeserializer (ODataDeserializerProvider deserializerProvider)
-
-	public virtual void ApplyNavigationProperties (object entityResource, ODataEntryWithNavigationLinks entryWrapper, Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
-	public virtual void ApplyNavigationProperty (object entityResource, ODataNavigationLinkWithItems navigationLinkWrapper, Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
-	public virtual void ApplyStructuralProperties (object entityResource, ODataEntryWithNavigationLinks entryWrapper, Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
-	public virtual void ApplyStructuralProperty (object entityResource, Microsoft.OData.ODataProperty structuralProperty, Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
-	public virtual object CreateEntityResource (Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
-	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
-	public virtual object ReadEntry (ODataEntryWithNavigationLinks entryWrapper, Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
-	public static ODataItemBase ReadEntryOrFeed (Microsoft.OData.ODataReader reader)
-	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
-}
-
 public class System.Web.OData.Formatter.Deserialization.ODataEntityReferenceLinkBase : ODataItemBase {
 	public ODataEntityReferenceLinkBase (Microsoft.OData.ODataEntityReferenceLink item)
 
@@ -2632,13 +2628,6 @@ public class System.Web.OData.Formatter.Deserialization.ODataEnumDeserializer : 
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }
 
-public class System.Web.OData.Formatter.Deserialization.ODataFeedDeserializer : ODataEdmTypeDeserializer {
-	public ODataFeedDeserializer (ODataDeserializerProvider deserializerProvider)
-
-	public virtual System.Collections.IEnumerable ReadFeed (ODataFeedWithEntries feed, Microsoft.OData.Edm.IEdmEntityTypeReference elementType, ODataDeserializerContext readContext)
-	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
-}
-
 public class System.Web.OData.Formatter.Deserialization.ODataPrimitiveDeserializer : ODataEdmTypeDeserializer {
 	public ODataPrimitiveDeserializer ()
 
@@ -2647,25 +2636,46 @@ public class System.Web.OData.Formatter.Deserialization.ODataPrimitiveDeserializ
 	public virtual object ReadPrimitive (Microsoft.OData.ODataProperty primitiveProperty, ODataDeserializerContext readContext)
 }
 
-public sealed class System.Web.OData.Formatter.Deserialization.ODataEntryWithNavigationLinks : ODataItemBase {
-	public ODataEntryWithNavigationLinks (Microsoft.OData.ODataResource item)
+public class System.Web.OData.Formatter.Deserialization.ODataResourceDeserializer : ODataEdmTypeDeserializer {
+	public ODataResourceDeserializer (ODataDeserializerProvider deserializerProvider)
 
-	System.Collections.Generic.IList`1[[System.Web.OData.Formatter.Deserialization.ODataNavigationLinkWithItems]] NavigationLinks  { public get; }
-	Microsoft.OData.ODataResource Resource  { public get; }
+	public virtual void ApplyNestedProperties (object resource, ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
+	public virtual void ApplyNestedProperty (object resource, ODataNestedResourceInfoWrapper resourceInfoWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
+	public virtual void ApplyStructuralProperties (object resource, ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
+	public virtual void ApplyStructuralProperty (object resource, Microsoft.OData.ODataProperty structuralProperty, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
+	public virtual object CreateResourceInstance (Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
+	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
+	public virtual object ReadResource (ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 }
 
-public sealed class System.Web.OData.Formatter.Deserialization.ODataFeedWithEntries : ODataItemBase {
-	public ODataFeedWithEntries (Microsoft.OData.ODataResourceSet item)
+public class System.Web.OData.Formatter.Deserialization.ODataResourceSetDeserializer : ODataEdmTypeDeserializer {
+	public ODataResourceSetDeserializer (ODataDeserializerProvider deserializerProvider)
 
-	System.Collections.Generic.IList`1[[System.Web.OData.Formatter.Deserialization.ODataEntryWithNavigationLinks]] Entries  { public get; }
-	Microsoft.OData.ODataResourceSet Feed  { public get; }
+	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
+	public virtual System.Collections.IEnumerable ReadResourceSet (ODataResourceSetWrapper resourceSet, Microsoft.OData.Edm.IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
 }
 
-public sealed class System.Web.OData.Formatter.Deserialization.ODataNavigationLinkWithItems : ODataItemBase {
-	public ODataNavigationLinkWithItems (Microsoft.OData.ODataNestedResourceInfo item)
+public sealed class System.Web.OData.Formatter.Deserialization.ODataNestedResourceInfoWrapper : ODataItemBase {
+	public ODataNestedResourceInfoWrapper (Microsoft.OData.ODataNestedResourceInfo item)
 
 	System.Collections.Generic.IList`1[[System.Web.OData.Formatter.Deserialization.ODataItemBase]] NestedItems  { public get; }
 	Microsoft.OData.ODataNestedResourceInfo NestedResourceInfo  { public get; }
+}
+
+public sealed class System.Web.OData.Formatter.Deserialization.ODataResourceSetWrapper : ODataItemBase {
+	public ODataResourceSetWrapper (Microsoft.OData.ODataResourceSet item)
+
+	System.Collections.Generic.IList`1[[System.Web.OData.Formatter.Deserialization.ODataResourceWrapper]] Resources  { public get; }
+	Microsoft.OData.ODataResourceSet ResourceSet  { public get; }
+}
+
+public sealed class System.Web.OData.Formatter.Deserialization.ODataResourceWrapper : ODataItemBase {
+	public ODataResourceWrapper (Microsoft.OData.ODataResource item)
+
+	System.Collections.Generic.IList`1[[System.Web.OData.Formatter.Deserialization.ODataNestedResourceInfoWrapper]] NestedResourceInfos  { public get; }
+	Microsoft.OData.ODataResource Resource  { public get; }
 }
 
 public abstract class System.Web.OData.Formatter.Serialization.ODataEdmTypeSerializer : ODataSerializer {
@@ -2753,21 +2763,6 @@ public class System.Web.OData.Formatter.Serialization.ODataEntityReferenceLinksS
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
-public class System.Web.OData.Formatter.Serialization.ODataEntityTypeSerializer : ODataEdmTypeSerializer {
-	public ODataEntityTypeSerializer (ODataSerializerProvider serializerProvider)
-
-	public virtual Microsoft.OData.ODataResource CreateEntry (SelectExpandNode selectExpandNode, EntityContext entityContext)
-	public virtual string CreateETag (EntityContext entityContext)
-	public virtual Microsoft.OData.ODataNestedResourceInfo CreateNavigationLink (Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, EntityContext entityContext)
-	public virtual Microsoft.OData.ODataAction CreateODataAction (Microsoft.OData.Edm.IEdmAction action, EntityContext entityContext)
-	public virtual Microsoft.OData.ODataFunction CreateODataFunction (Microsoft.OData.Edm.IEdmFunction function, EntityContext entityContext)
-	public virtual SelectExpandNode CreateSelectExpandNode (EntityContext entityContext)
-	public virtual Microsoft.OData.ODataProperty CreateStructuralProperty (Microsoft.OData.Edm.IEdmStructuralProperty structuralProperty, EntityContext entityContext)
-	public virtual void WriteDeltaObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
-	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
-}
-
 public class System.Web.OData.Formatter.Serialization.ODataEnumSerializer : ODataEdmTypeSerializer {
 	public ODataEnumSerializer ()
 
@@ -2780,15 +2775,6 @@ public class System.Web.OData.Formatter.Serialization.ODataErrorSerializer : ODa
 	public ODataErrorSerializer ()
 
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
-}
-
-public class System.Web.OData.Formatter.Serialization.ODataFeedSerializer : ODataEdmTypeSerializer {
-	public ODataFeedSerializer (ODataSerializerProvider serializerProvider)
-
-	public virtual Microsoft.OData.ODataResourceSet CreateODataFeed (System.Collections.IEnumerable feedInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference feedType, ODataSerializerContext writeContext)
-	public virtual Microsoft.OData.ODataOperation CreateODataOperation (Microsoft.OData.Edm.IEdmOperation operation, FeedContext feedContext, ODataSerializerContext writeContext)
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
-	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataMetadataSerializer : ODataSerializer {
@@ -2811,16 +2797,42 @@ public class System.Web.OData.Formatter.Serialization.ODataRawValueSerializer : 
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
+public class System.Web.OData.Formatter.Serialization.ODataResourceSerializer : ODataEdmTypeSerializer {
+	public ODataResourceSerializer (ODataSerializerProvider serializerProvider)
+
+	public virtual string CreateETag (ResourceContext resourceContext)
+	public virtual Microsoft.OData.ODataNestedResourceInfo CreateNavigationLink (Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, ResourceContext resourceContext)
+	public virtual Microsoft.OData.ODataAction CreateODataAction (Microsoft.OData.Edm.IEdmAction action, ResourceContext resourceContext)
+	public virtual Microsoft.OData.ODataFunction CreateODataFunction (Microsoft.OData.Edm.IEdmFunction function, ResourceContext resourceContext)
+	public virtual Microsoft.OData.ODataResource CreateResource (SelectExpandNode selectExpandNode, ResourceContext resourceContext)
+	public virtual SelectExpandNode CreateSelectExpandNode (ResourceContext resourceContext)
+	public virtual Microsoft.OData.ODataProperty CreateStructuralProperty (Microsoft.OData.Edm.IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
+	public virtual void WriteDeltaObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+}
+
+public class System.Web.OData.Formatter.Serialization.ODataResourceSetSerializer : ODataEdmTypeSerializer {
+	public ODataResourceSetSerializer (ODataSerializerProvider serializerProvider)
+
+	public virtual Microsoft.OData.ODataOperation CreateODataOperation (Microsoft.OData.Edm.IEdmOperation operation, ResourceSetContext resourceSetContext, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataResourceSet CreateResourceSet (System.Collections.IEnumerable resourceSetInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference resourceSetType, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+}
+
 public class System.Web.OData.Formatter.Serialization.ODataSerializerContext {
 	public ODataSerializerContext ()
-	public ODataSerializerContext (EntityContext entity, Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty)
+	public ODataSerializerContext (ResourceContext resource, Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty)
+	public ODataSerializerContext (ResourceContext resource, Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmProperty nestedProperty)
 
-	EntityContext ExpandedEntity  { public get; public set; }
+	ResourceContext ExpandedResource  { public get; public set; }
 	System.Collections.Generic.IDictionary`2[[System.Object],[System.Object]] Items  { public get; }
 	ODataMetadataLevel MetadataLevel  { public get; public set; }
 	Microsoft.OData.Edm.IEdmModel Model  { public get; public set; }
 	Microsoft.OData.Edm.IEdmNavigationProperty NavigationProperty  { public get; public set; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; public set; }
+	Microsoft.OData.Edm.IEdmProperty NestedProperty  { public get; public set; }
 	ODataPath Path  { public get; public set; }
 	System.Net.Http.HttpRequestMessage Request  { public get; public set; }
 	System.Web.Http.Controllers.HttpRequestContext RequestContext  { public get; public set; }
@@ -2838,8 +2850,8 @@ public class System.Web.OData.Formatter.Serialization.ODataServiceDocumentSerial
 
 public class System.Web.OData.Formatter.Serialization.SelectExpandNode {
 	public SelectExpandNode ()
-	public SelectExpandNode (Microsoft.OData.Edm.IEdmEntityType entityType, ODataSerializerContext writeContext)
-	public SelectExpandNode (Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmEntityType entityType, Microsoft.OData.Edm.IEdmModel model)
+	public SelectExpandNode (Microsoft.OData.Edm.IEdmStructuredType structuredType, ODataSerializerContext writeContext)
+	public SelectExpandNode (Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmStructuredType structuredType, Microsoft.OData.Edm.IEdmModel model)
 
 	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmNavigationProperty],[Microsoft.OData.UriParser.SelectExpandClause]] ExpandedNavigationProperties  { public get; }
 	bool SelectAllDynamicProperties  { public get; }
@@ -2847,7 +2859,10 @@ public class System.Web.OData.Formatter.Serialization.SelectExpandNode {
 	System.Collections.Generic.ISet`1[[System.String]] SelectedDynamicProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmFunction]] SelectedFunctions  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmNavigationProperty]] SelectedNavigationProperties  { public get; }
+	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] SelectedNestedProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] SelectedStructuralProperties  { public get; }
+
+	public static void GetStructuralProperties (Microsoft.OData.Edm.IEdmStructuredType structuredType, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] structuralProperties, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] nestedStructuralProperties)
 }
 
 public class System.Web.OData.Query.Expressions.DynamicTypeWrapper {

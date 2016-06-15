@@ -1240,15 +1240,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot find navigation property &apos;{0}&apos; on the entity type &apos;{1}&apos;..
-        /// </summary>
-        internal static string NavigationPropertyNotfound {
-            get {
-                return ResourceManager.GetString("NavigationPropertyNotfound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The declaring entity type &apos;{0}&apos; of the given navigation property is not a part of the entity type &apos;{1}&apos; hierarchy of the entity set or singleton &apos;{2}&apos;..
         /// </summary>
         internal static string NavigationPropertyNotInHierarchy {
@@ -1290,6 +1281,15 @@ namespace System.Web.OData.Properties {
         internal static string NestedCollectionsNotSupported {
             get {
                 return ResourceManager.GetString("NestedCollectionsNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot find nested property &apos;{0}&apos; on the resource type &apos;{1}&apos;..
+        /// </summary>
+        internal static string NestedPropertyNotfound {
+            get {
+                return ResourceManager.GetString("NestedPropertyNotfound", resourceCulture);
             }
         }
         
@@ -2032,20 +2032,20 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is not a collection of type {1}. Only entity collections are supported..
-        /// </summary>
-        internal static string TypeMustBeEntityCollection {
-            get {
-                return ResourceManager.GetString("TypeMustBeEntityCollection", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The type &apos;{0}&apos; must be an enum or Nullable&lt;T&gt; where T is an enum type..
         /// </summary>
         internal static string TypeMustBeEnumOrNullableEnum {
             get {
                 return ResourceManager.GetString("TypeMustBeEnumOrNullableEnum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is not a resource set type. Only resource set are supported..
+        /// </summary>
+        internal static string TypeMustBeResourceSet {
+            get {
+                return ResourceManager.GetString("TypeMustBeResourceSet", resourceCulture);
             }
         }
         

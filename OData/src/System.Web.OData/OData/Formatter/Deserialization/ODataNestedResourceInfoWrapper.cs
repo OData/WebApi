@@ -10,16 +10,16 @@ namespace System.Web.OData.Formatter.Deserialization
     /// Encapsulates an <see cref="ODataNestedResourceInfo"/> and the list of nested items.
     /// </summary>
     /// <remarks>
-    /// A navigation link for a singleton navigation property can only contain one item - either ODataEntry or ODataEntityReferenceLink.
-    /// A navigation link for a collection navigation property can contain any number of items - each is either ODataFeed or ODataEntityReferenceLink.
+    /// A nested resource info for a singleton nested property can only contain one item - either ODataResource or ODataEntityReferenceLink.
+    /// A nested resource info for a collection nested property can contain any number of items - each is either ODataResource or ODataEntityReferenceLink.
     /// </remarks>
-    public sealed class ODataNavigationLinkWithItems : ODataItemBase
+    public sealed class ODataNestedResourceInfoWrapper : ODataItemBase
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ODataNavigationLinkWithItems"/>.
+        /// Initializes a new instance of <see cref="ODataNestedResourceInfoWrapper"/>.
         /// </summary>
         /// <param name="item">The wrapped item.</param>
-        public ODataNavigationLinkWithItems(ODataNestedResourceInfo item)
+        public ODataNestedResourceInfoWrapper(ODataNestedResourceInfo item)
             : base(item)
         {
             NestedItems = new List<ODataItemBase>();
@@ -37,7 +37,7 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         /// <summary>
-        /// Gets the nested items that are part of this navigation link.
+        /// Gets the nested items that are part of this nested resource info.
         /// </summary>
         public IList<ODataItemBase> NestedItems { get; private set; }
     }

@@ -131,6 +131,47 @@ namespace System.Web.OData
             Assert.NotNull(resultArray[4]["Token"]); //customer 4 has a token
         }
 
+        [Fact]
+        public void Post_OpenEntityType()
+        {
+            // Arrange
+            const string Payload = "{" +
+              "\"@odata.context\":\"http://localhost/odata/$metadata#Customers/$entity\"," +
+              "\"Id\":6,\"Name\":\"Sam\"," +
+              "\"Location\":{" +
+                "\"Street\":\"Street 6\",\"City\":\"City 6\"" +
+              "}," +
+              "\"Locations\": [" +
+              "  {" +
+              "    \"@odata.type\": \"#System.Web.OData.Address\"," +
+              "    \"City\": \"City 2 L1\"," +
+              "    \"Street\": \"Street 2 L1\"" +
+              "  }," +
+              "  {" +
+              "    \"@odata.type\": \"#System.Web.OData.Address\"," +
+              "    \"City\": \"City 2 L2\"," +
+              "    \"Street\": \"Street 2 L2\"" +
+              "  }" +
+              "]" +
+            "}";
+
+            const string RequestUri = "http://localhost/odata/Customers";
+
+            var configuration = new[] { typeof(CustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
+            request.Content = new StringContent(Payload);
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+        }
+
         private static IEdmModel GetEdmModel()
         {
             ODataModelBuilder builder = new ODataConventionModelBuilder();
@@ -196,6 +237,12 @@ namespace System.Web.OData
                 }
 
                 return Ok(customer.Locations);
+            }
+
+            public IHttpActionResult PostCustomer([FromBody]Customer customer)
+            {
+                Assert.Equal("Sam", customer.Name);
+                return Ok();
             }
 
             private static IList<Customer> CreateCustomers()

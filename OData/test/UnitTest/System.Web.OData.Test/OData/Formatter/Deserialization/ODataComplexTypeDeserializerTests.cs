@@ -19,7 +19,7 @@ namespace System.Web.OData.Formatter.Deserialization
     public class ODataComplexTypeDeserializerTests
     {
         private IEdmModel _edmModel = EdmTestHelpers.GetModel();
-        private IEdmComplexTypeReference _addressEdmType = EdmTestHelpers.GetModel().GetEdmTypeReference(typeof(ODataEntityDeserializerTests.Address)).AsComplex();
+        private IEdmComplexTypeReference _addressEdmType = EdmTestHelpers.GetModel().GetEdmTypeReference(typeof(ODataResourceDeserializerTests.Address)).AsComplex();
 
         [Fact]
         public void Ctor_ThrowsArgumentNull_DeserializerProvider()
@@ -137,7 +137,7 @@ namespace System.Web.OData.Formatter.Deserialization
             ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = _edmModel };
 
             // Act
-            var address = deserializer.ReadComplexValue(complexValue, _addressEdmType, readContext) as ODataEntityDeserializerTests.Address;
+            var address = deserializer.ReadComplexValue(complexValue, _addressEdmType, readContext) as ODataResourceDeserializerTests.Address;
 
             // Assert
             Assert.NotNull(address);
@@ -514,7 +514,7 @@ namespace System.Web.OData.Formatter.Deserialization
             var resource = ODataComplexTypeDeserializer.CreateResource(_addressEdmType, context);
 
             // Assert
-            Assert.IsType<ODataEntityDeserializerTests.Address>(resource);
+            Assert.IsType<ODataResourceDeserializerTests.Address>(resource);
         }
 
         [Fact]
@@ -524,11 +524,11 @@ namespace System.Web.OData.Formatter.Deserialization
             ODataDeserializerContext readContext = new ODataDeserializerContext
             {
                 Model = _edmModel,
-                ResourceType = typeof(Delta<ODataEntityDeserializerTests.Address>)
+                ResourceType = typeof(Delta<ODataResourceDeserializerTests.Address>)
             };
 
             // Act & Assert
-            Assert.IsType<Delta<ODataEntityDeserializerTests.Address>>(
+            Assert.IsType<Delta<ODataResourceDeserializerTests.Address>>(
                 ODataComplexTypeDeserializer.CreateResource(_addressEdmType, readContext));
         }
 
@@ -539,14 +539,14 @@ namespace System.Web.OData.Formatter.Deserialization
             ODataDeserializerContext readContext = new ODataDeserializerContext
             {
                 Model = _edmModel,
-                ResourceType = typeof(Delta<ODataEntityDeserializerTests.Address>)
+                ResourceType = typeof(Delta<ODataResourceDeserializerTests.Address>)
             };
             var structuralProperties = _addressEdmType.StructuralProperties().Select(p => p.Name);
 
             // Act
-            Delta<ODataEntityDeserializerTests.Address> resource =
+            Delta<ODataResourceDeserializerTests.Address> resource =
                 ODataComplexTypeDeserializer.CreateResource(_addressEdmType, readContext) as
-                    Delta<ODataEntityDeserializerTests.Address>;
+                    Delta<ODataResourceDeserializerTests.Address>;
 
             // Assert
             Assert.NotNull(resource);
@@ -595,16 +595,16 @@ namespace System.Web.OData.Formatter.Deserialization
             ODataDeserializerContext readContext = new ODataDeserializerContext
             {
                 Model = _edmModel,
-                ResourceType = typeof(ODataEntityDeserializerTests.Address)
+                ResourceType = typeof(ODataResourceDeserializerTests.Address)
             };
 
             // Act
             object value = deserializer.Read(GetODataMessageReader(GetODataMessage(content), _edmModel),
-                typeof(ODataEntityDeserializerTests.Address), readContext);
+                typeof(ODataResourceDeserializerTests.Address), readContext);
 
             // Assert
 
-            ODataEntityDeserializerTests.Address address = Assert.IsType<ODataEntityDeserializerTests.Address>(value);
+            ODataResourceDeserializerTests.Address address = Assert.IsType<ODataResourceDeserializerTests.Address>(value);
             Assert.NotNull(address);
 
             Assert.Equal("MyStreet", address.Street);

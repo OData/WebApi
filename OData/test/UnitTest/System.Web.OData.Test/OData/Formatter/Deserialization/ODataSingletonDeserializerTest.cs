@@ -63,7 +63,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 "\"EmployeeId\":789," +
                 "\"EmployeeName\":\"John Hark\"}";
 
-            ODataEntityDeserializer deserializer = new ODataEntityDeserializer(_deserializerProvider);
+            ODataResourceDeserializer deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             // Act
             EmployeeModel employee = deserializer.Read(

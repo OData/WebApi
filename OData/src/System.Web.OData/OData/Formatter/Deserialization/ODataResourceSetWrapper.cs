@@ -9,22 +9,22 @@ namespace System.Web.OData.Formatter.Deserialization
     /// <summary>
     /// Encapsulates an <see cref="ODataResourceSet"/> and the <see cref="ODataResource"/>'s that are part of it.
     /// </summary>
-    public sealed class ODataFeedWithEntries : ODataItemBase
+    public sealed class ODataResourceSetWrapper : ODataItemBase
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ODataFeedWithEntries"/>.
+        /// Initializes a new instance of <see cref="ODataResourceSetWrapper"/>.
         /// </summary>
         /// <param name="item">The wrapped item.</param>
-        public ODataFeedWithEntries(ODataResourceSet item)
+        public ODataResourceSetWrapper(ODataResourceSet item)
             : base(item)
         {
-            Entries = new List<ODataEntryWithNavigationLinks>();
+            Resources = new List<ODataResourceWrapper>();
         }
 
         /// <summary>
         /// Gets the wrapped <see cref="ODataResourceSet"/>.
         /// </summary>
-        public ODataResourceSet Feed
+        public ODataResourceSet ResourceSet
         {
             get
             {
@@ -33,8 +33,8 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         /// <summary>
-        /// Gets the nested entries of this feed.
+        /// Gets the nested resources of this ResourceSet.
         /// </summary>
-        public IList<ODataEntryWithNavigationLinks> Entries { get; private set; }
+        public IList<ODataResourceWrapper> Resources { get; private set; }
     }
 }

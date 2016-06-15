@@ -114,10 +114,10 @@ namespace System.Web.OData.Formatter.Deserialization
                         IEdmEntityTypeReference entityTypeReference = parameter.Type as IEdmEntityTypeReference;
                         Contract.Assert(entityTypeReference != null);
 
-                        ODataReader entryReader = reader.CreateResourceReader();
-                        object item = ODataEntityDeserializer.ReadEntryOrFeed(entryReader);
-                        ODataEntityDeserializer entityDeserializer = (ODataEntityDeserializer)DeserializerProvider.GetEdmTypeDeserializer(entityTypeReference);
-                        payload[parameterName] = entityDeserializer.ReadInline(item, entityTypeReference, readContext);
+                        ODataReader resourceReader = reader.CreateResourceReader();
+                        object item = resourceReader.ReadResourceOrResourceSet();
+                        ODataResourceDeserializer resourceDeserializer = (ODataResourceDeserializer)DeserializerProvider.GetEdmTypeDeserializer(entityTypeReference);
+                        payload[parameterName] = resourceDeserializer.ReadInline(item, entityTypeReference, readContext);
                         break;
 
                     case ODataParameterReaderState.ResourceSet:
@@ -125,16 +125,16 @@ namespace System.Web.OData.Formatter.Deserialization
                         parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
                         Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
 
-                        IEdmCollectionTypeReference feedType = parameter.Type as IEdmCollectionTypeReference;
-                        Contract.Assert(feedType != null);
+                        IEdmCollectionTypeReference resourceSetType = parameter.Type as IEdmCollectionTypeReference;
+                        Contract.Assert(resourceSetType != null);
 
-                        ODataReader feedReader = reader.CreateResourceSetReader();
-                        object feed = ODataEntityDeserializer.ReadEntryOrFeed(feedReader);
-                        ODataFeedDeserializer feedDeserializer = (ODataFeedDeserializer)DeserializerProvider.GetEdmTypeDeserializer(feedType);
+                        ODataReader resourceSetReader = reader.CreateResourceSetReader();
+                        object feed = resourceSetReader.ReadResourceOrResourceSet();
+                        ODataResourceSetDeserializer resourceSetDeserializer = (ODataResourceSetDeserializer)DeserializerProvider.GetEdmTypeDeserializer(resourceSetType);
 
-                        object result = feedDeserializer.ReadInline(feed, feedType, readContext);
+                        object result = resourceSetDeserializer.ReadInline(feed, resourceSetType, readContext);
 
-                        IEdmTypeReference elementTypeReference = feedType.ElementType();
+                        IEdmTypeReference elementTypeReference = resourceSetType.ElementType();
                         Contract.Assert(elementTypeReference.IsEntity());
 
                         IEnumerable enumerable = result as IEnumerable;
@@ -142,7 +142,7 @@ namespace System.Web.OData.Formatter.Deserialization
                         {
                             if (readContext.IsUntyped)
                             {
-                                EdmEntityObjectCollection entityCollection = new EdmEntityObjectCollection(feedType);
+                                EdmEntityObjectCollection entityCollection = new EdmEntityObjectCollection(resourceSetType);
                                 foreach (EdmEntityObject entityObject in enumerable)
                                 {
                                     entityCollection.Add(entityObject);

@@ -169,7 +169,7 @@
     <Compile Include="OData\Formatter\ODataMessageWrapperTest.cs" />
     <Compile Include="OData\Formatter\PresidentController.cs" />
     <Compile Include="OData\Formatter\Serialization\EdmEntityObjectTest.cs" />
-    <Compile Include="OData\OpenEntityTypeTest - Copy.cs" />
+    <Compile Include="OData\OpenEntityTypeTest.cs" />
     <Compile Include="OData\ResourceContextTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\DeserializationHelpersTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerTest.cs" />
@@ -373,7 +373,7 @@
     <Compile Include="OData\Formatter\Deserialization\DefaultODataDeserializerProviderTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\MockODataRequestMessage.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataComplexTypeDeserializerTests.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataEntityDeserializerTests.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataResourceDeserializerTests.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntityReferenceLinkDeserializerTests.cs" />
     <Compile Include="TestCommon\Models\TestDataModels.cs" />
     <Compile Include="OData\Formatter\ODataFormatterTests.cs" />

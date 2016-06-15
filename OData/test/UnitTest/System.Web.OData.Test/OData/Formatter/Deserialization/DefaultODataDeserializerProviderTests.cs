@@ -60,10 +60,10 @@ namespace System.Web.OData.Formatter.Deserialization
             HttpRequestMessage request = new HttpRequestMessage();
 
             ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(_edmModel,
-                typeof(ODataEntityDeserializerTests.Product), request);
+                typeof(ODataResourceDeserializerTests.Product), request);
 
             Assert.NotNull(deserializer);
-            ODataEntityDeserializer entityDeserializer = Assert.IsType<ODataEntityDeserializer>(deserializer);
+            ODataResourceDeserializer entityDeserializer = Assert.IsType<ODataResourceDeserializer>(deserializer);
             Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Resource);
             Assert.Equal(entityDeserializer.DeserializerProvider, deserializerProvider);
         }
@@ -75,7 +75,7 @@ namespace System.Web.OData.Formatter.Deserialization
             HttpRequestMessage request = new HttpRequestMessage();
 
             ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(_edmModel,
-                typeof(ODataEntityDeserializerTests.Address), request);
+                typeof(ODataResourceDeserializerTests.Address), request);
 
             Assert.NotNull(deserializer);
             ODataComplexTypeDeserializer complexDeserializer = Assert.IsType<ODataComplexTypeDeserializer>(deserializer);
@@ -90,9 +90,9 @@ namespace System.Web.OData.Formatter.Deserialization
             HttpRequestMessage request = new HttpRequestMessage();
 
             ODataDeserializer firstCallDeserializer = deserializerProvider.GetODataDeserializer(_edmModel,
-                typeof(ODataEntityDeserializerTests.Supplier), request);
+                typeof(ODataResourceDeserializerTests.Supplier), request);
             ODataDeserializer secondCallDeserializer = deserializerProvider.GetODataDeserializer(_edmModel,
-                typeof(ODataEntityDeserializerTests.Supplier), request);
+                typeof(ODataResourceDeserializerTests.Supplier), request);
 
             Assert.Same(firstCallDeserializer, secondCallDeserializer);
         }

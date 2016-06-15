@@ -181,7 +181,7 @@ namespace System.Web.OData.Formatter.Serialization
             var serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
-            var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, typeof(ODataEntityDeserializerTests.Product), request);
+            var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, typeof(ODataResourceDeserializerTests.Product), request);
 
             Assert.NotNull(serializer);
             var entitySerializer = Assert.IsType<ODataResourceSerializer>(serializer);
@@ -194,7 +194,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             var serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
-            var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, typeof(ODataEntityDeserializerTests.Address), request);
+            var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, typeof(ODataResourceDeserializerTests.Address), request);
 
             Assert.NotNull(serializer);
             var complexSerializer = Assert.IsType<ODataComplexTypeSerializer>(serializer);
@@ -203,12 +203,12 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Theory]
-        [InlineData(typeof(ODataEntityDeserializerTests.Supplier[]))]
-        [InlineData(typeof(IEnumerable<ODataEntityDeserializerTests.Supplier>))]
-        [InlineData(typeof(ICollection<ODataEntityDeserializerTests.Supplier>))]
-        [InlineData(typeof(IList<ODataEntityDeserializerTests.Supplier>))]
-        [InlineData(typeof(List<ODataEntityDeserializerTests.Supplier>))]
-        [InlineData(typeof(PageResult<ODataEntityDeserializerTests.Supplier>))]
+        [InlineData(typeof(ODataResourceDeserializerTests.Supplier[]))]
+        [InlineData(typeof(IEnumerable<ODataResourceDeserializerTests.Supplier>))]
+        [InlineData(typeof(ICollection<ODataResourceDeserializerTests.Supplier>))]
+        [InlineData(typeof(IList<ODataResourceDeserializerTests.Supplier>))]
+        [InlineData(typeof(List<ODataResourceDeserializerTests.Supplier>))]
+        [InlineData(typeof(PageResult<ODataResourceDeserializerTests.Supplier>))]
         public void GetODataSerializer_Feed(Type collectionType)
         {
             var serializerProvider = new DefaultODataSerializerProvider();
@@ -228,7 +228,7 @@ namespace System.Web.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage();
 
             var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel,
-                typeof(IEnumerable<ODataEntityDeserializerTests.Address>), request);
+                typeof(IEnumerable<ODataResourceDeserializerTests.Address>), request);
 
             Assert.NotNull(serializer);
             var collectionSerializer = Assert.IsType<ODataCollectionSerializer>(serializer);
@@ -261,9 +261,9 @@ namespace System.Web.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage();
 
             ODataSerializer firstCallSerializer = serializerProvider.GetODataPayloadSerializer(_edmModel,
-                typeof(ODataEntityDeserializerTests.Supplier), request);
+                typeof(ODataResourceDeserializerTests.Supplier), request);
             ODataSerializer secondCallSerializer = serializerProvider.GetODataPayloadSerializer(_edmModel,
-                typeof(ODataEntityDeserializerTests.Supplier), request);
+                typeof(ODataResourceDeserializerTests.Supplier), request);
 
             Assert.Same(firstCallSerializer, secondCallSerializer);
         }

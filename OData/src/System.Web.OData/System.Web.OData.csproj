@@ -87,6 +87,7 @@
     <Compile Include="OData\Builder\CapabilitiesVocabularyConstants.cs" />
     <Compile Include="OData\Builder\CapabilitiesVocabularyExtensionMethods.cs" />
     <Compile Include="OData\Builder\CapabilitiesNavigationType.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataReaderExtensions.cs" />
     <Compile Include="OData\ODataSwaggerUtilities.cs" />
     <Compile Include="OData\ODataSwaggerConverter.cs" />
     <Compile Include="OData\EdmEnumObjectCollection.cs" />
@@ -387,10 +388,10 @@
     <Compile Include="OData\PerRequestActionValueBinder.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataActionPayloadDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataCollectionDeserializer.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataEntryWithNavigationLinks.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataFeedWithEntries.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataFeedDeserializer.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataNavigationLinkWithItems.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataResourceWrapper.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataResourceSetWrapper.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataResourceSetDeserializer.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataNestedResourceInfoWrapper.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataPrimitiveDeserializer.cs" />
     <Compile Include="OData\ResourceSetContext.cs" />
     <Compile Include="OData\Formatter\EdmPrimitiveHelpers.cs" />
@@ -434,7 +435,7 @@
     <Compile Include="OData\Formatter\Deserialization\ODataEdmTypeDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerProvider.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerContext.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataEntityDeserializer.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataResourceDeserializer.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataEntityReferenceLinkDeserializer.cs" />
     <Compile Include="OData\Formatter\EdmLibHelpers.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinkSerializer.cs" />

@@ -7,18 +7,18 @@ using Microsoft.OData;
 namespace System.Web.OData.Formatter.Deserialization
 {
     /// <summary>
-    /// Encapsulates an <see cref="ODataResource"/> and the inner navigation links.
+    /// Encapsulates an <see cref="ODataResource"/> and the inner nested resource infos.
     /// </summary>
-    public sealed class ODataEntryWithNavigationLinks : ODataItemBase
+    public sealed class ODataResourceWrapper : ODataItemBase
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ODataEntryWithNavigationLinks"/>.
+        /// Initializes a new instance of <see cref="ODataResourceWrapper"/>.
         /// </summary>
         /// <param name="item">The wrapped item.</param>
-        public ODataEntryWithNavigationLinks(ODataResource item)
+        public ODataResourceWrapper(ODataResource item)
             : base(item)
         {
-            NavigationLinks = new List<ODataNavigationLinkWithItems>();
+            NestedResourceInfos = new List<ODataNestedResourceInfoWrapper>();
         }
 
         /// <summary>
@@ -33,8 +33,8 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         /// <summary>
-        /// Gets the inner navigation links.
+        /// Gets the inner nested resource infos.
         /// </summary>
-        public IList<ODataNavigationLinkWithItems> NavigationLinks { get; private set; }
+        public IList<ODataNestedResourceInfoWrapper> NestedResourceInfos { get; private set; }
     }
 }

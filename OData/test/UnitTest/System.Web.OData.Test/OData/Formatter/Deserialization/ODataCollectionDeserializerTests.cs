@@ -153,7 +153,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadCollectionValue_Throws_IfElementTypeCannotBeDeserialized()
         {
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
-            deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_addressType)).Returns<ODataEntityDeserializer>(null);
+            deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_addressType)).Returns<ODataResourceDeserializer>(null);
             var deserializer = new ODataCollectionDeserializer(deserializerProvider.Object);
 
             Assert.Throws<SerializationException>(

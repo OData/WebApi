@@ -272,17 +272,17 @@ namespace System.Web.OData.Formatter
 
                 ODataReader odataReader = oDataMessageReader.CreateODataResourceSetReader(tempEntitySet,
                     collectionType.ElementType().AsEntity().EntityDefinition());
-                ODataFeedWithEntries feed =
-                    ODataEntityDeserializer.ReadEntryOrFeed(odataReader) as ODataFeedWithEntries;
+                ODataResourceSetWrapper resourceSet =
+                    odataReader.ReadResourceOrResourceSet() as ODataResourceSetWrapper;
 
-                ODataFeedDeserializer feedDeserializer =
-                    (ODataFeedDeserializer)DeserializerProvider.GetEdmTypeDeserializer(collectionType);
+                ODataResourceSetDeserializer resourceSetDeserializer =
+                    (ODataResourceSetDeserializer)DeserializerProvider.GetEdmTypeDeserializer(collectionType);
 
-                object result = feedDeserializer.ReadInline(feed, collectionType, readContext);
+                object result = resourceSetDeserializer.ReadInline(resourceSet, collectionType, readContext);
                 IEnumerable enumerable = result as IEnumerable;
                 if (enumerable != null)
                 {
-                    IEnumerable newEnumerable = CovertFeedIds(enumerable, feed, collectionType, readContext);
+                    IEnumerable newEnumerable = CovertFeedIds(enumerable, resourceSet, collectionType, readContext);
                     if (readContext.IsUntyped)
                     {
                         EdmEntityObjectCollection entityCollection =
@@ -321,25 +321,25 @@ namespace System.Web.OData.Formatter
                 ODataReader entryReader = oDataMessageReader.CreateODataResourceReader(tempEntitySet,
                     entityType.EntityDefinition());
 
-                object item = ODataEntityDeserializer.ReadEntryOrFeed(entryReader);
+                object item = entryReader.ReadResourceOrResourceSet();
 
-                ODataEntryWithNavigationLinks topLevelEntry = item as ODataEntryWithNavigationLinks;
-                Contract.Assert(topLevelEntry != null);
+                ODataResourceWrapper topLevelResource = item as ODataResourceWrapper;
+                Contract.Assert(topLevelResource != null);
 
-                ODataEntityDeserializer entityDeserializer =
-                    (ODataEntityDeserializer)DeserializerProvider.GetEdmTypeDeserializer(entityType);
-                object entity = entityDeserializer.ReadInline(topLevelEntry, entityType, readContext);
-                return CovertEntityId(entity, topLevelEntry.Resource, entityType, readContext);
+                ODataResourceDeserializer entityDeserializer =
+                    (ODataResourceDeserializer)DeserializerProvider.GetEdmTypeDeserializer(entityType);
+                object entity = entityDeserializer.ReadInline(topLevelResource, entityType, readContext);
+                return CovertEntityId(entity, topLevelResource.Resource, entityType, readContext);
             }
 
-            internal static IEnumerable CovertFeedIds(IEnumerable sources, ODataFeedWithEntries feed,
+            internal static IEnumerable CovertFeedIds(IEnumerable sources, ODataResourceSetWrapper resourceSet,
                 IEdmCollectionTypeReference collectionType, ODataDeserializerContext readContext)
             {
                 IEdmEntityTypeReference entityTypeReference = collectionType.ElementType().AsEntity();
                 int i = 0;
                 foreach (object item in sources)
                 {
-                    object newItem = CovertEntityId(item, feed.Entries[i].Resource, entityTypeReference, readContext);
+                    object newItem = CovertEntityId(item, resourceSet.Resources[i].Resource, entityTypeReference, readContext);
                     i++;
                     yield return newItem;
                 }

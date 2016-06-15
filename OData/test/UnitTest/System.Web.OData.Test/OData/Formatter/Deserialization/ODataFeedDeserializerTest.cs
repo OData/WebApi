@@ -30,25 +30,25 @@ namespace System.Web.OData.Formatter.Deserialization
         public void Ctor_ThrowsArgumentNull_DeserializerProvider()
         {
             Assert.ThrowsArgumentNull(
-                () => new ODataFeedDeserializer(deserializerProvider: null),
+                () => new ODataResourceSetDeserializer(deserializerProvider: null),
                 "deserializerProvider");
         }
 
         [Fact]
         public void ReadInline_ReturnsNull_IfItemIsNull()
         {
-            var deserializer = new ODataFeedDeserializer(new DefaultODataDeserializerProvider());
+            var deserializer = new ODataResourceSetDeserializer(new DefaultODataDeserializerProvider());
             Assert.Null(deserializer.ReadInline(item: null, edmType: _customersType, readContext: new ODataDeserializerContext()));
         }
 
         [Fact]
         public void ReadInline_Throws_ArgumentMustBeOfType()
         {
-            var deserializer = new ODataFeedDeserializer(new DefaultODataDeserializerProvider());
+            var deserializer = new ODataResourceSetDeserializer(new DefaultODataDeserializerProvider());
             Assert.ThrowsArgument(
                 () => deserializer.ReadInline(item: 42, edmType: _customersType, readContext: new ODataDeserializerContext()),
                 "item",
-                "The argument must be of type 'ODataFeedWithEntries'.");
+                "The argument must be of type 'ODataResourceSetWrapper'.");
         }
 
         [Fact]
@@ -56,13 +56,13 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
-            Mock<ODataFeedDeserializer> deserializer = new Mock<ODataFeedDeserializer>(deserializerProvider);
-            ODataFeedWithEntries feedWrapper = new ODataFeedWithEntries(new ODataResourceSet());
+            Mock<ODataResourceSetDeserializer> deserializer = new Mock<ODataResourceSetDeserializer>(deserializerProvider);
+            ODataResourceSetWrapper feedWrapper = new ODataResourceSetWrapper(new ODataResourceSet());
             ODataDeserializerContext readContext = new ODataDeserializerContext();
             IEnumerable expectedResult = new object[0];
 
             deserializer.CallBase = true;
-            deserializer.Setup(f => f.ReadFeed(feedWrapper, _customerType, readContext)).Returns(expectedResult).Verifiable();
+            deserializer.Setup(f => f.ReadResourceSet(feedWrapper, _customerType, readContext)).Returns(expectedResult).Verifiable();
 
             // Act
             var result = deserializer.Object.ReadInline(feedWrapper, _customersType, readContext);
@@ -76,14 +76,14 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadFeed_Throws_TypeCannotBeDeserialized()
         {
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
-            ODataFeedDeserializer deserializer = new ODataFeedDeserializer(deserializerProvider.Object);
-            ODataFeedWithEntries feedWrapper = new ODataFeedWithEntries(new ODataResourceSet());
+            ODataResourceSetDeserializer deserializer = new ODataResourceSetDeserializer(deserializerProvider.Object);
+            ODataResourceSetWrapper feedWrapper = new ODataResourceSetWrapper(new ODataResourceSet());
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
             deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_customerType)).Returns<ODataEdmTypeDeserializer>(null);
 
             Assert.Throws<SerializationException>(
-                () => deserializer.ReadFeed(feedWrapper, _customerType, readContext).GetEnumerator().MoveNext(),
+                () => deserializer.ReadResourceSet(feedWrapper, _customerType, readContext).GetEnumerator().MoveNext(),
                 "'System.Web.OData.TestCommon.Models.Customer' cannot be deserialized using the ODataMediaTypeFormatter.");
         }
 
@@ -93,18 +93,18 @@ namespace System.Web.OData.Formatter.Deserialization
             // Arrange
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
             Mock<ODataEdmTypeDeserializer> entityDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.Resource);
-            ODataFeedDeserializer deserializer = new ODataFeedDeserializer(deserializerProvider.Object);
-            ODataFeedWithEntries feedWrapper = new ODataFeedWithEntries(new ODataResourceSet());
-            feedWrapper.Entries.Add(new ODataEntryWithNavigationLinks(new ODataResource { Id = new Uri("http://a1/") }));
-            feedWrapper.Entries.Add(new ODataEntryWithNavigationLinks(new ODataResource { Id = new Uri("http://a2/") }));
+            ODataResourceSetDeserializer deserializer = new ODataResourceSetDeserializer(deserializerProvider.Object);
+            ODataResourceSetWrapper resourceSetWrapper = new ODataResourceSetWrapper(new ODataResourceSet());
+            resourceSetWrapper.Resources.Add(new ODataResourceWrapper(new ODataResource { Id = new Uri("http://a1/") }));
+            resourceSetWrapper.Resources.Add(new ODataResourceWrapper(new ODataResource { Id = new Uri("http://a2/") }));
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
             deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_customerType)).Returns(entityDeserializer.Object);
-            entityDeserializer.Setup(d => d.ReadInline(feedWrapper.Entries[0], _customerType, readContext)).Returns("entry1").Verifiable();
-            entityDeserializer.Setup(d => d.ReadInline(feedWrapper.Entries[1], _customerType, readContext)).Returns("entry2").Verifiable();
+            entityDeserializer.Setup(d => d.ReadInline(resourceSetWrapper.Resources[0], _customerType, readContext)).Returns("entry1").Verifiable();
+            entityDeserializer.Setup(d => d.ReadInline(resourceSetWrapper.Resources[1], _customerType, readContext)).Returns("entry2").Verifiable();
 
             // Act
-            var result = deserializer.ReadFeed(feedWrapper, _customerType, readContext);
+            var result = deserializer.ReadResourceSet(resourceSetWrapper, _customerType, readContext);
 
             // Assert
             Assert.Equal(new[] { "entry1", "entry2" }, result.OfType<String>());

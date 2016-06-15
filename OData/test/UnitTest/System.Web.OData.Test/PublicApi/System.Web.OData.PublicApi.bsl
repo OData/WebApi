@@ -24,7 +24,7 @@ public interface System.Web.OData.IEdmComplexObject : IEdmObject, IEdmStructured
 
 public interface System.Web.OData.IEdmDeltaDeletedEntityObject : IEdmChangedObject, IEdmObject, IEdmStructuredObject {
 	string Id  { public abstract get; public abstract set; }
-	Microsoft.OData.Core.DeltaDeletedEntryReason Reason  { public abstract get; public abstract set; }
+	Microsoft.OData.DeltaDeletedEntryReason Reason  { public abstract get; public abstract set; }
 }
 
 public interface System.Web.OData.IEdmDeltaDeletedLink : IEdmChangedObject, IEdmDeltaLinkBase, IEdmObject, IEdmStructuredObject {
@@ -164,8 +164,8 @@ public sealed class System.Web.OData.EdmTypeExtensions {
 }
 
 public sealed class System.Web.OData.ODataUriFunctions {
-	public static void AddCustomUriFunction (string functionName, Microsoft.OData.Core.UriParser.FunctionSignatureWithReturnType functionSignature, System.Reflection.MethodInfo methodInfo)
-	public static bool RemoveCustomUriFunction (string functionName, Microsoft.OData.Core.UriParser.FunctionSignatureWithReturnType functionSignature, System.Reflection.MethodInfo methodInfo)
+	public static void AddCustomUriFunction (string functionName, Microsoft.OData.UriParser.FunctionSignatureWithReturnType functionSignature, System.Reflection.MethodInfo methodInfo)
+	public static bool RemoveCustomUriFunction (string functionName, Microsoft.OData.UriParser.FunctionSignatureWithReturnType functionSignature, System.Reflection.MethodInfo methodInfo)
 }
 
 public class System.Web.OData.ClrPropertyInfoAnnotation {
@@ -244,7 +244,7 @@ public class System.Web.OData.EdmDeltaDeletedEntityObject : EdmEntityObject, IDy
 
 	EdmDeltaEntityKind DeltaKind  { public virtual get; }
 	string Id  { public virtual get; public virtual set; }
-	Microsoft.OData.Core.DeltaDeletedEntryReason Reason  { public virtual get; public virtual set; }
+	Microsoft.OData.DeltaDeletedEntryReason Reason  { public virtual get; public virtual set; }
 }
 
 [
@@ -409,7 +409,7 @@ public class System.Web.OData.MetadataController : ODataController, IDisposable,
 	public MetadataController ()
 
 	public Microsoft.OData.Edm.IEdmModel GetMetadata ()
-	public Microsoft.OData.Core.ODataServiceDocument GetServiceDocument ()
+	public Microsoft.OData.ODataServiceDocument GetServiceDocument ()
 }
 
 public class System.Web.OData.NullEdmComplexObject : IEdmComplexObject, IEdmObject, IEdmStructuredObject {
@@ -553,7 +553,7 @@ public sealed class System.Web.OData.ODataRoutingAttribute : System.Attribute, _
 public abstract class System.Web.OData.Batch.ODataBatchHandler : System.Web.Http.Batch.HttpBatchHandler, IDisposable {
 	protected ODataBatchHandler (System.Web.Http.HttpServer httpServer)
 
-	Microsoft.OData.Core.ODataMessageQuotas MessageQuotas  { public get; }
+	Microsoft.OData.ODataMessageQuotas MessageQuotas  { public get; }
 	string ODataRouteName  { public get; public set; }
 
 	public virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] CreateResponseMessageAsync (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] responses, System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
@@ -582,14 +582,14 @@ public abstract class System.Web.OData.Batch.ODataBatchResponseItem : IDisposabl
 	public virtual void Dispose ()
 	protected abstract void Dispose (bool disposing)
 	internal virtual bool IsResponseSuccessful ()
-	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.Core.ODataBatchWriter writer, System.Net.Http.HttpResponseMessage response)
+	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, System.Net.Http.HttpResponseMessage response)
 	[
 	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
-	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.Core.ODataBatchWriter writer, System.Net.Http.HttpResponseMessage response, System.Threading.CancellationToken cancellationToken)
+	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, System.Net.Http.HttpResponseMessage response, System.Threading.CancellationToken cancellationToken)
 
-	public abstract System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.Core.ODataBatchWriter writer, System.Threading.CancellationToken cancellationToken)
+	public abstract System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, System.Threading.CancellationToken cancellationToken)
 }
 
 [
@@ -646,34 +646,34 @@ public sealed class System.Web.OData.Batch.ODataBatchReaderExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Threading.Tasks.Task`1[[System.Net.Http.HttpRequestMessage]] ReadChangeSetOperationRequestAsync (Microsoft.OData.Core.ODataBatchReader reader, System.Guid batchId, System.Guid changeSetId, bool bufferContentStream)
+	public static System.Threading.Tasks.Task`1[[System.Net.Http.HttpRequestMessage]] ReadChangeSetOperationRequestAsync (Microsoft.OData.ODataBatchReader reader, System.Guid batchId, System.Guid changeSetId, bool bufferContentStream)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Threading.Tasks.Task`1[[System.Net.Http.HttpRequestMessage]] ReadChangeSetOperationRequestAsync (Microsoft.OData.Core.ODataBatchReader reader, System.Guid batchId, System.Guid changeSetId, bool bufferContentStream, System.Threading.CancellationToken cancellationToken)
+	public static System.Threading.Tasks.Task`1[[System.Net.Http.HttpRequestMessage]] ReadChangeSetOperationRequestAsync (Microsoft.OData.ODataBatchReader reader, System.Guid batchId, System.Guid changeSetId, bool bufferContentStream, System.Threading.CancellationToken cancellationToken)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[System.Net.Http.HttpRequestMessage]]]] ReadChangeSetRequestAsync (Microsoft.OData.Core.ODataBatchReader reader, System.Guid batchId)
+	public static System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[System.Net.Http.HttpRequestMessage]]]] ReadChangeSetRequestAsync (Microsoft.OData.ODataBatchReader reader, System.Guid batchId)
 
 	[
 	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	ExtensionAttribute(),
 	]
-	public static System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[System.Net.Http.HttpRequestMessage]]]] ReadChangeSetRequestAsync (Microsoft.OData.Core.ODataBatchReader reader, System.Guid batchId, System.Threading.CancellationToken cancellationToken)
+	public static System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[System.Net.Http.HttpRequestMessage]]]] ReadChangeSetRequestAsync (Microsoft.OData.ODataBatchReader reader, System.Guid batchId, System.Threading.CancellationToken cancellationToken)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Threading.Tasks.Task`1[[System.Net.Http.HttpRequestMessage]] ReadOperationRequestAsync (Microsoft.OData.Core.ODataBatchReader reader, System.Guid batchId, bool bufferContentStream)
+	public static System.Threading.Tasks.Task`1[[System.Net.Http.HttpRequestMessage]] ReadOperationRequestAsync (Microsoft.OData.ODataBatchReader reader, System.Guid batchId, bool bufferContentStream)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Threading.Tasks.Task`1[[System.Net.Http.HttpRequestMessage]] ReadOperationRequestAsync (Microsoft.OData.Core.ODataBatchReader reader, System.Guid batchId, bool bufferContentStream, System.Threading.CancellationToken cancellationToken)
+	public static System.Threading.Tasks.Task`1[[System.Net.Http.HttpRequestMessage]] ReadOperationRequestAsync (Microsoft.OData.ODataBatchReader reader, System.Guid batchId, bool bufferContentStream, System.Threading.CancellationToken cancellationToken)
 }
 
 [
@@ -684,14 +684,14 @@ public sealed class System.Web.OData.Batch.ODataHttpContentExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Threading.Tasks.Task`1[[Microsoft.OData.Core.ODataMessageReader]] GetODataMessageReaderAsync (System.Net.Http.HttpContent content, Microsoft.OData.Core.ODataMessageReaderSettings settings)
+	public static System.Threading.Tasks.Task`1[[Microsoft.OData.ODataMessageReader]] GetODataMessageReaderAsync (System.Net.Http.HttpContent content, Microsoft.OData.ODataMessageReaderSettings settings)
 
 	[
 	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	ExtensionAttribute(),
 	]
-	public static System.Threading.Tasks.Task`1[[Microsoft.OData.Core.ODataMessageReader]] GetODataMessageReaderAsync (System.Net.Http.HttpContent content, Microsoft.OData.Core.ODataMessageReaderSettings settings, System.Threading.CancellationToken cancellationToken)
+	public static System.Threading.Tasks.Task`1[[Microsoft.OData.ODataMessageReader]] GetODataMessageReaderAsync (System.Net.Http.HttpContent content, Microsoft.OData.ODataMessageReaderSettings settings, System.Threading.CancellationToken cancellationToken)
 }
 
 public class System.Web.OData.Batch.ChangeSetRequestItem : ODataBatchRequestItem, IDisposable {
@@ -719,7 +719,7 @@ public class System.Web.OData.Batch.ChangeSetResponseItem : ODataBatchResponseIt
 	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
-	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.Core.ODataBatchWriter writer, System.Threading.CancellationToken cancellationToken)
+	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, System.Threading.CancellationToken cancellationToken)
 }
 
 public class System.Web.OData.Batch.DefaultODataBatchHandler : ODataBatchHandler, IDisposable {
@@ -746,7 +746,7 @@ public class System.Web.OData.Batch.DefaultODataBatchHandler : ODataBatchHandler
 
 public class System.Web.OData.Batch.ODataBatchContent : System.Net.Http.HttpContent, IDisposable {
 	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] responses)
-	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] responses, Microsoft.OData.Core.ODataMessageWriterSettings writerSettings)
+	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] responses, Microsoft.OData.ODataMessageWriterSettings writerSettings)
 
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] Responses  { public get; }
 
@@ -781,7 +781,7 @@ public class System.Web.OData.Batch.OperationResponseItem : ODataBatchResponseIt
 
 	protected virtual void Dispose (bool disposing)
 	internal virtual bool IsResponseSuccessful ()
-	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.Core.ODataBatchWriter writer, System.Threading.CancellationToken cancellationToken)
+	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, System.Threading.CancellationToken cancellationToken)
 }
 
 public class System.Web.OData.Batch.UnbufferedODataBatchHandler : ODataBatchHandler, IDisposable {
@@ -791,13 +791,13 @@ public class System.Web.OData.Batch.UnbufferedODataBatchHandler : ODataBatchHand
 	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
-	public virtual System.Threading.Tasks.Task`1[[System.Web.OData.Batch.ODataBatchResponseItem]] ExecuteChangeSetAsync (Microsoft.OData.Core.ODataBatchReader batchReader, System.Guid batchId, System.Net.Http.HttpRequestMessage originalRequest, System.Threading.CancellationToken cancellationToken)
+	public virtual System.Threading.Tasks.Task`1[[System.Web.OData.Batch.ODataBatchResponseItem]] ExecuteChangeSetAsync (Microsoft.OData.ODataBatchReader batchReader, System.Guid batchId, System.Net.Http.HttpRequestMessage originalRequest, System.Threading.CancellationToken cancellationToken)
 
 	[
 	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
-	public virtual System.Threading.Tasks.Task`1[[System.Web.OData.Batch.ODataBatchResponseItem]] ExecuteOperationAsync (Microsoft.OData.Core.ODataBatchReader batchReader, System.Guid batchId, System.Net.Http.HttpRequestMessage originalRequest, System.Threading.CancellationToken cancellationToken)
+	public virtual System.Threading.Tasks.Task`1[[System.Web.OData.Batch.ODataBatchResponseItem]] ExecuteOperationAsync (Microsoft.OData.ODataBatchReader batchReader, System.Guid batchId, System.Net.Http.HttpRequestMessage originalRequest, System.Threading.CancellationToken cancellationToken)
 
 	[
 	DebuggerStepThroughAttribute(),
@@ -1627,12 +1627,12 @@ public sealed class System.Web.OData.Extensions.HttpConfigurationExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static void SetUriResolver (System.Web.Http.HttpConfiguration configuration, Microsoft.OData.Core.UriParser.Metadata.ODataUriResolver uriResolver)
+	public static void SetUriResolver (System.Web.Http.HttpConfiguration configuration, Microsoft.OData.UriParser.ODataUriResolver uriResolver)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static void SetUrlConventions (System.Web.Http.HttpConfiguration configuration, Microsoft.OData.Core.UriParser.ODataUrlConventions conventions)
+	public static void SetUrlConventions (System.Web.Http.HttpConfiguration configuration, Microsoft.OData.ODataUrlConventions conventions)
 }
 
 [
@@ -1643,7 +1643,7 @@ public sealed class System.Web.OData.Extensions.HttpErrorExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static Microsoft.OData.Core.ODataError CreateODataError (System.Web.Http.HttpError httpError)
+	public static Microsoft.OData.ODataError CreateODataError (System.Web.Http.HttpError httpError)
 }
 
 [
@@ -1654,7 +1654,7 @@ public sealed class System.Web.OData.Extensions.HttpRequestMessageExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Net.Http.HttpResponseMessage CreateErrorResponse (System.Net.Http.HttpRequestMessage request, System.Net.HttpStatusCode statusCode, Microsoft.OData.Core.ODataError oDataError)
+	public static System.Net.Http.HttpResponseMessage CreateErrorResponse (System.Net.Http.HttpRequestMessage request, System.Net.HttpStatusCode statusCode, Microsoft.OData.ODataError oDataError)
 
 	[
 	ExtensionAttribute(),
@@ -1685,21 +1685,21 @@ public sealed class System.Web.OData.Extensions.UrlHelperExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static string CreateODataLink (System.Web.Http.Routing.UrlHelper urlHelper, Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment[] segments)
+	public static string CreateODataLink (System.Web.Http.Routing.UrlHelper urlHelper, Microsoft.OData.UriParser.ODataPathSegment[] segments)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static string CreateODataLink (System.Web.Http.Routing.UrlHelper urlHelper, System.Collections.Generic.IList`1[[Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment]] segments)
+	public static string CreateODataLink (System.Web.Http.Routing.UrlHelper urlHelper, System.Collections.Generic.IList`1[[Microsoft.OData.UriParser.ODataPathSegment]] segments)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static string CreateODataLink (System.Web.Http.Routing.UrlHelper urlHelper, string routeName, IODataPathHandler pathHandler, System.Collections.Generic.IList`1[[Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment]] segments)
+	public static string CreateODataLink (System.Web.Http.Routing.UrlHelper urlHelper, string routeName, IODataPathHandler pathHandler, System.Collections.Generic.IList`1[[Microsoft.OData.UriParser.ODataPathSegment]] segments)
 }
 
 public class System.Web.OData.Extensions.HttpRequestMessageProperties {
-	Microsoft.OData.Core.UriParser.Aggregation.ApplyClause ApplyClause  { public get; public set; }
+	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public get; public set; }
 	Microsoft.OData.Edm.IEdmModel Model  { public get; public set; }
 	System.Uri NextLink  { public get; public set; }
 	ODataPath Path  { public get; public set; }
@@ -1707,7 +1707,7 @@ public class System.Web.OData.Extensions.HttpRequestMessageProperties {
 	string RouteName  { public get; public set; }
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] RoutingConventions  { public get; public set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public get; }
-	Microsoft.OData.Core.UriParser.Semantic.SelectExpandClause SelectExpandClause  { public get; public set; }
+	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public get; public set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public get; public set; }
 }
 
@@ -1725,7 +1725,7 @@ public interface System.Web.OData.Formatter.IETagHandler {
 public abstract class System.Web.OData.Formatter.ODataRawValueMediaTypeMapping : System.Net.Http.Formatting.MediaTypeMapping {
 	protected ODataRawValueMediaTypeMapping (string mediaType)
 
-	protected abstract bool IsMatch (Microsoft.OData.Core.UriParser.Semantic.PropertySegment propertySegment)
+	protected abstract bool IsMatch (Microsoft.OData.UriParser.PropertySegment propertySegment)
 	public virtual double TryMatchMediaType (System.Net.Http.HttpRequestMessage request)
 }
 
@@ -1763,7 +1763,7 @@ public class System.Web.OData.Formatter.ETag`1 : ETag, IDynamicMetaObjectProvide
 public class System.Web.OData.Formatter.ODataBinaryValueMediaTypeMapping : ODataRawValueMediaTypeMapping {
 	public ODataBinaryValueMediaTypeMapping ()
 
-	protected virtual bool IsMatch (Microsoft.OData.Core.UriParser.Semantic.PropertySegment propertySegment)
+	protected virtual bool IsMatch (Microsoft.OData.UriParser.PropertySegment propertySegment)
 }
 
 public class System.Web.OData.Formatter.ODataCountMediaTypeMapping : System.Net.Http.Formatting.MediaTypeMapping {
@@ -1775,19 +1775,19 @@ public class System.Web.OData.Formatter.ODataCountMediaTypeMapping : System.Net.
 public class System.Web.OData.Formatter.ODataEnumValueMediaTypeMapping : ODataRawValueMediaTypeMapping {
 	public ODataEnumValueMediaTypeMapping ()
 
-	protected virtual bool IsMatch (Microsoft.OData.Core.UriParser.Semantic.PropertySegment propertySegment)
+	protected virtual bool IsMatch (Microsoft.OData.UriParser.PropertySegment propertySegment)
 }
 
 public class System.Web.OData.Formatter.ODataMediaTypeFormatter : System.Net.Http.Formatting.MediaTypeFormatter {
-	public ODataMediaTypeFormatter (System.Collections.Generic.IEnumerable`1[[Microsoft.OData.Core.ODataPayloadKind]] payloadKinds)
-	public ODataMediaTypeFormatter (ODataDeserializerProvider deserializerProvider, ODataSerializerProvider serializerProvider, System.Collections.Generic.IEnumerable`1[[Microsoft.OData.Core.ODataPayloadKind]] payloadKinds)
+	public ODataMediaTypeFormatter (System.Collections.Generic.IEnumerable`1[[Microsoft.OData.ODataPayloadKind]] payloadKinds)
+	public ODataMediaTypeFormatter (ODataDeserializerProvider deserializerProvider, ODataSerializerProvider serializerProvider, System.Collections.Generic.IEnumerable`1[[Microsoft.OData.ODataPayloadKind]] payloadKinds)
 
 	System.Func`2[[System.Net.Http.HttpRequestMessage],[System.Uri]] BaseAddressFactory  { public get; public set; }
 	ODataDeserializerProvider DeserializerProvider  { public get; }
-	Microsoft.OData.Core.ODataMessageQuotas MessageReaderQuotas  { public get; }
-	Microsoft.OData.Core.ODataMessageReaderSettings MessageReaderSettings  { public get; }
-	Microsoft.OData.Core.ODataMessageQuotas MessageWriterQuotas  { public get; }
-	Microsoft.OData.Core.ODataMessageWriterSettings MessageWriterSettings  { public get; }
+	Microsoft.OData.ODataMessageQuotas MessageReaderQuotas  { public get; }
+	Microsoft.OData.ODataMessageReaderSettings MessageReaderSettings  { public get; }
+	Microsoft.OData.ODataMessageQuotas MessageWriterQuotas  { public get; }
+	Microsoft.OData.ODataMessageWriterSettings MessageWriterSettings  { public get; }
 	ODataSerializerProvider SerializerProvider  { public get; }
 
 	public virtual bool CanReadType (System.Type type)
@@ -1808,7 +1808,7 @@ public class System.Web.OData.Formatter.ODataModelBinderProvider : System.Web.Ht
 public class System.Web.OData.Formatter.ODataPrimitiveValueMediaTypeMapping : ODataRawValueMediaTypeMapping {
 	public ODataPrimitiveValueMediaTypeMapping ()
 
-	protected virtual bool IsMatch (Microsoft.OData.Core.UriParser.Semantic.PropertySegment propertySegment)
+	protected virtual bool IsMatch (Microsoft.OData.UriParser.PropertySegment propertySegment)
 }
 
 public class System.Web.OData.Formatter.QueryStringMediaTypeMapping : System.Net.Http.Formatting.MediaTypeMapping {
@@ -1929,17 +1929,17 @@ public interface System.Web.OData.Query.ITruncatedCollection : IEnumerable {
 }
 
 public abstract class System.Web.OData.Query.OrderByNode {
-	protected OrderByNode (Microsoft.OData.Core.UriParser.OrderByDirection direction)
+	protected OrderByNode (Microsoft.OData.UriParser.OrderByDirection direction)
 
-	Microsoft.OData.Core.UriParser.OrderByDirection Direction  { public get; }
+	Microsoft.OData.UriParser.OrderByDirection Direction  { public get; }
 
-	public static System.Collections.Generic.IList`1[[System.Web.OData.Query.OrderByNode]] CreateCollection (Microsoft.OData.Core.UriParser.Semantic.OrderByClause orderByClause)
+	public static System.Collections.Generic.IList`1[[System.Web.OData.Query.OrderByNode]] CreateCollection (Microsoft.OData.UriParser.OrderByClause orderByClause)
 }
 
 public class System.Web.OData.Query.ApplyQueryOption {
-	public ApplyQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
+	public ApplyQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
 
-	Microsoft.OData.Core.UriParser.Aggregation.ApplyClause ApplyClause  { public get; }
+	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public get; }
 	ODataQueryContext Context  { public get; }
 	string RawValue  { public get; }
 	System.Type ResultClrType  { public get; }
@@ -1949,7 +1949,7 @@ public class System.Web.OData.Query.ApplyQueryOption {
 }
 
 public class System.Web.OData.Query.CountQueryOption {
-	public CountQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
+	public CountQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
 
 	ODataQueryContext Context  { public get; }
 	string RawValue  { public get; }
@@ -1961,10 +1961,10 @@ public class System.Web.OData.Query.CountQueryOption {
 }
 
 public class System.Web.OData.Query.FilterQueryOption {
-	public FilterQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
+	public FilterQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
 
 	ODataQueryContext Context  { public get; }
-	Microsoft.OData.Core.UriParser.Semantic.FilterClause FilterClause  { public get; }
+	Microsoft.OData.UriParser.FilterClause FilterClause  { public get; }
 	string RawValue  { public get; }
 	FilterQueryValidator Validator  { public get; public set; }
 
@@ -2063,29 +2063,29 @@ public class System.Web.OData.Query.ODataValidationSettings {
 }
 
 public class System.Web.OData.Query.OrderByItNode : OrderByNode {
-	public OrderByItNode (Microsoft.OData.Core.UriParser.OrderByDirection direction)
+	public OrderByItNode (Microsoft.OData.UriParser.OrderByDirection direction)
 }
 
 public class System.Web.OData.Query.OrderByOpenPropertyNode : OrderByNode {
-	public OrderByOpenPropertyNode (Microsoft.OData.Core.UriParser.Semantic.OrderByClause orderByClause)
+	public OrderByOpenPropertyNode (Microsoft.OData.UriParser.OrderByClause orderByClause)
 
-	Microsoft.OData.Core.UriParser.Semantic.OrderByClause OrderByClause  { public get; }
+	Microsoft.OData.UriParser.OrderByClause OrderByClause  { public get; }
 	string PropertyName  { public get; }
 }
 
 public class System.Web.OData.Query.OrderByPropertyNode : OrderByNode {
-	public OrderByPropertyNode (Microsoft.OData.Core.UriParser.Semantic.OrderByClause orderByClause)
-	public OrderByPropertyNode (Microsoft.OData.Edm.IEdmProperty property, Microsoft.OData.Core.UriParser.OrderByDirection direction)
+	public OrderByPropertyNode (Microsoft.OData.UriParser.OrderByClause orderByClause)
+	public OrderByPropertyNode (Microsoft.OData.Edm.IEdmProperty property, Microsoft.OData.UriParser.OrderByDirection direction)
 
-	Microsoft.OData.Core.UriParser.Semantic.OrderByClause OrderByClause  { public get; }
+	Microsoft.OData.UriParser.OrderByClause OrderByClause  { public get; }
 	Microsoft.OData.Edm.IEdmProperty Property  { public get; }
 }
 
 public class System.Web.OData.Query.OrderByQueryOption {
-	public OrderByQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
+	public OrderByQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
 
 	ODataQueryContext Context  { public get; }
-	Microsoft.OData.Core.UriParser.Semantic.OrderByClause OrderByClause  { public get; }
+	Microsoft.OData.UriParser.OrderByClause OrderByClause  { public get; }
 	System.Collections.Generic.IList`1[[System.Web.OData.Query.OrderByNode]] OrderByNodes  { public get; }
 	string RawValue  { public get; }
 	OrderByQueryValidator Validator  { public get; public set; }
@@ -2097,34 +2097,34 @@ public class System.Web.OData.Query.OrderByQueryOption {
 	public void Validate (ODataValidationSettings validationSettings)
 }
 
-public class System.Web.OData.Query.ParameterAliasNodeTranslator : Microsoft.OData.Core.UriParser.Visitors.QueryNodeVisitor`1[[Microsoft.OData.Core.UriParser.Semantic.QueryNode]] {
-	public ParameterAliasNodeTranslator (System.Collections.Generic.IDictionary`2[[System.String],[Microsoft.OData.Core.UriParser.Semantic.SingleValueNode]] parameterAliasNodes)
+public class System.Web.OData.Query.ParameterAliasNodeTranslator : Microsoft.OData.UriParser.QueryNodeVisitor`1[[Microsoft.OData.UriParser.QueryNode]] {
+	public ParameterAliasNodeTranslator (System.Collections.Generic.IDictionary`2[[System.String],[Microsoft.OData.UriParser.SingleValueNode]] parameterAliasNodes)
 
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.AllNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.AnyNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.BinaryOperatorNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.CollectionFunctionCallNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.CollectionNavigationNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.CollectionOpenPropertyAccessNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.CollectionPropertyAccessNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.CollectionPropertyCastNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.ConstantNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.ConvertNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.EntityCollectionCastNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.EntityCollectionFunctionCallNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.EntityRangeVariableReferenceNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.NamedFunctionParameterNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.NonentityRangeVariableReferenceNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.ParameterAliasNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.SearchTermNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.SingleEntityCastNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.SingleEntityFunctionCallNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.SingleNavigationNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.SingleValueCastNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.SingleValueFunctionCallNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.SingleValueOpenPropertyAccessNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.SingleValuePropertyAccessNode nodeIn)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.QueryNode Visit (Microsoft.OData.Core.UriParser.Semantic.UnaryOperatorNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.AllNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.AnyNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.BinaryOperatorNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.CollectionFunctionCallNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.CollectionNavigationNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.CollectionOpenPropertyAccessNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.CollectionPropertyAccessNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.CollectionPropertyCastNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.ConstantNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.ConvertNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.EntityCollectionCastNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.EntityCollectionFunctionCallNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.EntityRangeVariableReferenceNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.NamedFunctionParameterNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.NonentityRangeVariableReferenceNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.ParameterAliasNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.SearchTermNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.SingleEntityCastNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.SingleEntityFunctionCallNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.SingleNavigationNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.SingleValueCastNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.SingleValueFunctionCallNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.SingleValuePropertyAccessNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.UnaryOperatorNode nodeIn)
 }
 
 public class System.Web.OData.Query.QueryFilterProvider : IFilterProvider {
@@ -2136,13 +2136,13 @@ public class System.Web.OData.Query.QueryFilterProvider : IFilterProvider {
 }
 
 public class System.Web.OData.Query.SelectExpandQueryOption {
-	public SelectExpandQueryOption (string select, string expand, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
+	public SelectExpandQueryOption (string select, string expand, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
 
 	ODataQueryContext Context  { public get; }
 	int LevelsMaxLiteralExpansionDepth  { public get; public set; }
 	string RawExpand  { public get; }
 	string RawSelect  { public get; }
-	Microsoft.OData.Core.UriParser.Semantic.SelectExpandClause SelectExpandClause  { public get; }
+	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public get; }
 	SelectExpandQueryValidator Validator  { public get; public set; }
 
 	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable queryable, ODataQuerySettings settings)
@@ -2153,7 +2153,7 @@ public class System.Web.OData.Query.SelectExpandQueryOption {
 }
 
 public class System.Web.OData.Query.SkipQueryOption {
-	public SkipQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
+	public SkipQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
 
 	ODataQueryContext Context  { public get; }
 	string RawValue  { public get; }
@@ -2166,7 +2166,7 @@ public class System.Web.OData.Query.SkipQueryOption {
 }
 
 public class System.Web.OData.Query.TopQueryOption {
-	public TopQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
+	public TopQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
 
 	ODataQueryContext Context  { public get; }
 	string RawValue  { public get; }
@@ -2281,8 +2281,8 @@ public interface System.Web.OData.Routing.IODataPathTemplateHandler {
 }
 
 public interface System.Web.OData.Routing.IODataUriResolver {
-	Microsoft.OData.Core.UriParser.Metadata.ODataUriResolver UriResolver  { public abstract get; public abstract set; }
-	Microsoft.OData.Core.UriParser.ODataUrlConventions UrlConventions  { public abstract get; public abstract set; }
+	Microsoft.OData.UriParser.ODataUriResolver UriResolver  { public abstract get; public abstract set; }
+	Microsoft.OData.ODataUrlConventions UrlConventions  { public abstract get; public abstract set; }
 }
 
 [
@@ -2292,22 +2292,22 @@ public sealed class System.Web.OData.Routing.ODataParameterHelper {
 	[
 	ExtensionAttribute(),
 	]
-	public static object GetParameterValue (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment, string parameterName)
+	public static object GetParameterValue (Microsoft.OData.UriParser.OperationImportSegment segment, string parameterName)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static object GetParameterValue (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment, string parameterName)
+	public static object GetParameterValue (Microsoft.OData.UriParser.OperationSegment segment, string parameterName)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static bool TryGetParameterValue (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment, string parameterName, out System.Object& parameterValue)
+	public static bool TryGetParameterValue (Microsoft.OData.UriParser.OperationImportSegment segment, string parameterName, out System.Object& parameterValue)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static bool TryGetParameterValue (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment, string parameterName, out System.Object& parameterValue)
+	public static bool TryGetParameterValue (Microsoft.OData.UriParser.OperationSegment segment, string parameterName, out System.Object& parameterValue)
 }
 
 public sealed class System.Web.OData.Routing.ODataRouteConstants {
@@ -2349,32 +2349,32 @@ public sealed class System.Web.OData.Routing.ODataSegmentKinds {
 public class System.Web.OData.Routing.DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler, IODataUriResolver {
 	public DefaultODataPathHandler ()
 
-	Microsoft.OData.Core.UriParser.Metadata.ODataUriResolver UriResolver  { public virtual get; public virtual set; }
-	Microsoft.OData.Core.UriParser.ODataUrlConventions UrlConventions  { public virtual get; public virtual set; }
+	Microsoft.OData.UriParser.ODataUriResolver UriResolver  { public virtual get; public virtual set; }
+	Microsoft.OData.ODataUrlConventions UrlConventions  { public virtual get; public virtual set; }
 
 	public virtual string Link (ODataPath path)
 	public virtual ODataPath Parse (Microsoft.OData.Edm.IEdmModel model, string serviceRoot, string odataPath)
 	public virtual ODataPathTemplate ParseTemplate (Microsoft.OData.Edm.IEdmModel model, string odataPathTemplate)
 }
 
-public class System.Web.OData.Routing.DefaultODataPathValidator : Microsoft.OData.Core.UriParser.Visitors.PathSegmentHandler {
+public class System.Web.OData.Routing.DefaultODataPathValidator : Microsoft.OData.UriParser.PathSegmentHandler {
 	public DefaultODataPathValidator (Microsoft.OData.Edm.IEdmModel model)
 
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.BatchSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.CountSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.MetadataSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.PropertySegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.SingletonSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.TypeSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.ValueSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.BatchSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.CountSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.EntitySetSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.KeySegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.MetadataSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.NavigationPropertyLinkSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.NavigationPropertySegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.OpenPropertySegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.OperationImportSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.OperationSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.PathTemplateSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.PropertySegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.SingletonSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.TypeSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.ValueSegment segment)
 	public virtual void Handle (UnresolvedPathSegment segment)
 }
 
@@ -2389,13 +2389,13 @@ public class System.Web.OData.Routing.ODataActionSelector : IHttpActionSelector 
 ODataPathParameterBindingAttribute(),
 ]
 public class System.Web.OData.Routing.ODataPath {
-	public ODataPath (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment[] segments)
-	public ODataPath (System.Collections.Generic.IEnumerable`1[[Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment]] segments)
+	public ODataPath (Microsoft.OData.UriParser.ODataPathSegment[] segments)
+	public ODataPath (System.Collections.Generic.IEnumerable`1[[Microsoft.OData.UriParser.ODataPathSegment]] segments)
 
 	Microsoft.OData.Edm.IEdmType EdmType  { public get; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; }
 	string PathTemplate  { public virtual get; }
-	System.Collections.ObjectModel.ReadOnlyCollection`1[[Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment]] Segments  { public get; }
+	System.Collections.ObjectModel.ReadOnlyCollection`1[[Microsoft.OData.UriParser.ODataPathSegment]] Segments  { public get; }
 
 	public virtual string ToString ()
 }
@@ -2412,51 +2412,51 @@ public class System.Web.OData.Routing.ODataPathRouteConstraint : IHttpRouteConst
 	protected virtual string SelectControllerName (ODataPath path, System.Net.Http.HttpRequestMessage request)
 }
 
-public class System.Web.OData.Routing.ODataPathSegmentHandler : Microsoft.OData.Core.UriParser.Visitors.PathSegmentHandler {
+public class System.Web.OData.Routing.ODataPathSegmentHandler : Microsoft.OData.UriParser.PathSegmentHandler {
 	public ODataPathSegmentHandler ()
 
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; }
 	string PathLiteral  { public get; }
 	string PathTemplate  { public get; }
 
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.BatchSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.CountSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.MetadataSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.PropertySegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.SingletonSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.TypeSegment segment)
-	public virtual void Handle (Microsoft.OData.Core.UriParser.Semantic.ValueSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.BatchSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.CountSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.EntitySetSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.KeySegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.MetadataSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.NavigationPropertyLinkSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.NavigationPropertySegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.OpenPropertySegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.OperationImportSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.OperationSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.PathTemplateSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.PropertySegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.SingletonSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.TypeSegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.ValueSegment segment)
 	public virtual void Handle (UnresolvedPathSegment segment)
-	public virtual void HandleODataPathSegment (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment segment)
+	public virtual void HandleODataPathSegment (Microsoft.OData.UriParser.ODataPathSegment segment)
 }
 
-public class System.Web.OData.Routing.ODataPathSegmentTranslator : Microsoft.OData.Core.UriParser.Visitors.PathSegmentTranslator`1[[Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment]] {
-	public ODataPathSegmentTranslator (Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IDictionary`2[[System.String],[Microsoft.OData.Core.UriParser.Semantic.SingleValueNode]] parameterAliasNodes)
+public class System.Web.OData.Routing.ODataPathSegmentTranslator : Microsoft.OData.UriParser.PathSegmentTranslator`1[[Microsoft.OData.UriParser.ODataPathSegment]] {
+	public ODataPathSegmentTranslator (Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IDictionary`2[[System.String],[Microsoft.OData.UriParser.SingleValueNode]] parameterAliasNodes)
 
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.BatchSegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.CountSegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.MetadataSegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.PropertySegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.SingletonSegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.TypeSegment segment)
-	public virtual Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment Translate (Microsoft.OData.Core.UriParser.Semantic.ValueSegment segment)
-	public static System.Collections.Generic.IEnumerable`1[[Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment]] Translate (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Core.UriParser.Semantic.ODataPath path, System.Collections.Generic.IDictionary`2[[System.String],[Microsoft.OData.Core.UriParser.Semantic.SingleValueNode]] parameterAliasNodes)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.BatchSegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.CountSegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.EntitySetSegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.KeySegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.MetadataSegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.NavigationPropertyLinkSegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.NavigationPropertySegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.OpenPropertySegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.OperationImportSegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.OperationSegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.PathTemplateSegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.PropertySegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.SingletonSegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.TypeSegment segment)
+	public virtual Microsoft.OData.UriParser.ODataPathSegment Translate (Microsoft.OData.UriParser.ValueSegment segment)
+	public static System.Collections.Generic.IEnumerable`1[[Microsoft.OData.UriParser.ODataPathSegment]] Translate (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.UriParser.ODataPath path, System.Collections.Generic.IDictionary`2[[System.String],[Microsoft.OData.UriParser.SingleValueNode]] parameterAliasNodes)
 }
 
 public class System.Web.OData.Routing.ODataRoute : System.Web.Http.Routing.HttpRoute, IHttpRoute {
@@ -2480,19 +2480,19 @@ public class System.Web.OData.Routing.ODataVersionConstraint : IHttpRouteConstra
 	public ODataVersionConstraint ()
 
 	bool IsRelaxedMatch  { public get; public set; }
-	Microsoft.OData.Core.ODataVersion Version  { public get; }
+	Microsoft.OData.ODataVersion Version  { public get; }
 
 	public virtual bool Match (System.Net.Http.HttpRequestMessage request, System.Web.Http.Routing.IHttpRoute route, string parameterName, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values, System.Web.Http.Routing.HttpRouteDirection routeDirection)
 }
 
-public class System.Web.OData.Routing.UnresolvedPathSegment : Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment {
+public class System.Web.OData.Routing.UnresolvedPathSegment : Microsoft.OData.UriParser.ODataPathSegment {
 	public UnresolvedPathSegment (string segmentValue)
 
 	Microsoft.OData.Edm.IEdmType EdmType  { public virtual get; }
 	string SegmentKind  { public virtual get; }
 	string SegmentValue  { public get; }
 
-	public virtual void HandleWith (Microsoft.OData.Core.UriParser.Visitors.PathSegmentHandler handler)
+	public virtual void HandleWith (Microsoft.OData.UriParser.PathSegmentHandler handler)
 	public virtual string ToString ()
 	public virtual T TranslateWith (PathSegmentTranslator`1 translator)
 }
@@ -2526,11 +2526,11 @@ public sealed class System.Web.OData.Routing.ODataRoutePrefixAttribute : System.
 }
 
 public abstract class System.Web.OData.Formatter.Deserialization.ODataDeserializer {
-	protected ODataDeserializer (Microsoft.OData.Core.ODataPayloadKind payloadKind)
+	protected ODataDeserializer (Microsoft.OData.ODataPayloadKind payloadKind)
 
-	Microsoft.OData.Core.ODataPayloadKind ODataPayloadKind  { public get; }
+	Microsoft.OData.ODataPayloadKind ODataPayloadKind  { public get; }
 
-	public virtual object Read (Microsoft.OData.Core.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 }
 
 public abstract class System.Web.OData.Formatter.Deserialization.ODataDeserializerProvider {
@@ -2541,8 +2541,8 @@ public abstract class System.Web.OData.Formatter.Deserialization.ODataDeserializ
 }
 
 public abstract class System.Web.OData.Formatter.Deserialization.ODataEdmTypeDeserializer : ODataDeserializer {
-	protected ODataEdmTypeDeserializer (Microsoft.OData.Core.ODataPayloadKind payloadKind)
-	protected ODataEdmTypeDeserializer (Microsoft.OData.Core.ODataPayloadKind payloadKind, ODataDeserializerProvider deserializerProvider)
+	protected ODataEdmTypeDeserializer (Microsoft.OData.ODataPayloadKind payloadKind)
+	protected ODataEdmTypeDeserializer (Microsoft.OData.ODataPayloadKind payloadKind, ODataDeserializerProvider deserializerProvider)
 
 	ODataDeserializerProvider DeserializerProvider  { public get; }
 
@@ -2550,9 +2550,9 @@ public abstract class System.Web.OData.Formatter.Deserialization.ODataEdmTypeDes
 }
 
 public abstract class System.Web.OData.Formatter.Deserialization.ODataItemBase {
-	protected ODataItemBase (Microsoft.OData.Core.ODataItem item)
+	protected ODataItemBase (Microsoft.OData.ODataItem item)
 
-	Microsoft.OData.Core.ODataItem Item  { public get; }
+	Microsoft.OData.ODataItem Item  { public get; }
 }
 
 public class System.Web.OData.Formatter.Deserialization.DefaultODataDeserializerProvider : ODataDeserializerProvider {
@@ -2569,22 +2569,22 @@ public class System.Web.OData.Formatter.Deserialization.ODataActionPayloadDeseri
 
 	ODataDeserializerProvider DeserializerProvider  { public get; }
 
-	public virtual object Read (Microsoft.OData.Core.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 }
 
 public class System.Web.OData.Formatter.Deserialization.ODataCollectionDeserializer : ODataEdmTypeDeserializer {
 	public ODataCollectionDeserializer (ODataDeserializerProvider deserializerProvider)
 
-	public virtual object Read (Microsoft.OData.Core.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
-	public virtual System.Collections.IEnumerable ReadCollectionValue (Microsoft.OData.Core.ODataCollectionValue collectionValue, Microsoft.OData.Edm.IEdmTypeReference elementType, ODataDeserializerContext readContext)
+	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	public virtual System.Collections.IEnumerable ReadCollectionValue (Microsoft.OData.ODataCollectionValue collectionValue, Microsoft.OData.Edm.IEdmTypeReference elementType, ODataDeserializerContext readContext)
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }
 
 public class System.Web.OData.Formatter.Deserialization.ODataComplexTypeDeserializer : ODataEdmTypeDeserializer {
 	public ODataComplexTypeDeserializer (ODataDeserializerProvider deserializerProvider)
 
-	public virtual object Read (Microsoft.OData.Core.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
-	public virtual object ReadComplexValue (Microsoft.OData.Core.ODataComplexValue complexValue, Microsoft.OData.Edm.IEdmComplexTypeReference complexType, ODataDeserializerContext readContext)
+	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	public virtual object ReadComplexValue (Microsoft.OData.ODataComplexValue complexValue, Microsoft.OData.Edm.IEdmComplexTypeReference complexType, ODataDeserializerContext readContext)
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }
 
@@ -2605,30 +2605,30 @@ public class System.Web.OData.Formatter.Deserialization.ODataEntityDeserializer 
 	public virtual void ApplyNavigationProperties (object entityResource, ODataEntryWithNavigationLinks entryWrapper, Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
 	public virtual void ApplyNavigationProperty (object entityResource, ODataNavigationLinkWithItems navigationLinkWrapper, Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
 	public virtual void ApplyStructuralProperties (object entityResource, ODataEntryWithNavigationLinks entryWrapper, Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
-	public virtual void ApplyStructuralProperty (object entityResource, Microsoft.OData.Core.ODataProperty structuralProperty, Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
+	public virtual void ApplyStructuralProperty (object entityResource, Microsoft.OData.ODataProperty structuralProperty, Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
 	public virtual object CreateEntityResource (Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
-	public virtual object Read (Microsoft.OData.Core.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 	public virtual object ReadEntry (ODataEntryWithNavigationLinks entryWrapper, Microsoft.OData.Edm.IEdmEntityTypeReference entityType, ODataDeserializerContext readContext)
-	public static ODataItemBase ReadEntryOrFeed (Microsoft.OData.Core.ODataReader reader)
+	public static ODataItemBase ReadEntryOrFeed (Microsoft.OData.ODataReader reader)
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }
 
 public class System.Web.OData.Formatter.Deserialization.ODataEntityReferenceLinkBase : ODataItemBase {
-	public ODataEntityReferenceLinkBase (Microsoft.OData.Core.ODataEntityReferenceLink item)
+	public ODataEntityReferenceLinkBase (Microsoft.OData.ODataEntityReferenceLink item)
 
-	Microsoft.OData.Core.ODataEntityReferenceLink EntityReferenceLink  { public get; }
+	Microsoft.OData.ODataEntityReferenceLink EntityReferenceLink  { public get; }
 }
 
 public class System.Web.OData.Formatter.Deserialization.ODataEntityReferenceLinkDeserializer : ODataDeserializer {
 	public ODataEntityReferenceLinkDeserializer ()
 
-	public virtual object Read (Microsoft.OData.Core.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 }
 
 public class System.Web.OData.Formatter.Deserialization.ODataEnumDeserializer : ODataEdmTypeDeserializer {
 	public ODataEnumDeserializer ()
 
-	public virtual object Read (Microsoft.OData.Core.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }
 
@@ -2642,49 +2642,49 @@ public class System.Web.OData.Formatter.Deserialization.ODataFeedDeserializer : 
 public class System.Web.OData.Formatter.Deserialization.ODataPrimitiveDeserializer : ODataEdmTypeDeserializer {
 	public ODataPrimitiveDeserializer ()
 
-	public virtual object Read (Microsoft.OData.Core.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
-	public virtual object ReadPrimitive (Microsoft.OData.Core.ODataProperty primitiveProperty, ODataDeserializerContext readContext)
+	public virtual object ReadPrimitive (Microsoft.OData.ODataProperty primitiveProperty, ODataDeserializerContext readContext)
 }
 
 public sealed class System.Web.OData.Formatter.Deserialization.ODataEntryWithNavigationLinks : ODataItemBase {
-	public ODataEntryWithNavigationLinks (Microsoft.OData.Core.ODataEntry item)
+	public ODataEntryWithNavigationLinks (Microsoft.OData.ODataResource item)
 
-	Microsoft.OData.Core.ODataEntry Entry  { public get; }
 	System.Collections.Generic.IList`1[[System.Web.OData.Formatter.Deserialization.ODataNavigationLinkWithItems]] NavigationLinks  { public get; }
+	Microsoft.OData.ODataResource Resource  { public get; }
 }
 
 public sealed class System.Web.OData.Formatter.Deserialization.ODataFeedWithEntries : ODataItemBase {
-	public ODataFeedWithEntries (Microsoft.OData.Core.ODataFeed item)
+	public ODataFeedWithEntries (Microsoft.OData.ODataResourceSet item)
 
 	System.Collections.Generic.IList`1[[System.Web.OData.Formatter.Deserialization.ODataEntryWithNavigationLinks]] Entries  { public get; }
-	Microsoft.OData.Core.ODataFeed Feed  { public get; }
+	Microsoft.OData.ODataResourceSet Feed  { public get; }
 }
 
 public sealed class System.Web.OData.Formatter.Deserialization.ODataNavigationLinkWithItems : ODataItemBase {
-	public ODataNavigationLinkWithItems (Microsoft.OData.Core.ODataNavigationLink item)
+	public ODataNavigationLinkWithItems (Microsoft.OData.ODataNestedResourceInfo item)
 
-	Microsoft.OData.Core.ODataNavigationLink NavigationLink  { public get; }
 	System.Collections.Generic.IList`1[[System.Web.OData.Formatter.Deserialization.ODataItemBase]] NestedItems  { public get; }
+	Microsoft.OData.ODataNestedResourceInfo NestedResourceInfo  { public get; }
 }
 
 public abstract class System.Web.OData.Formatter.Serialization.ODataEdmTypeSerializer : ODataSerializer {
-	protected ODataEdmTypeSerializer (Microsoft.OData.Core.ODataPayloadKind payloadKind)
-	protected ODataEdmTypeSerializer (Microsoft.OData.Core.ODataPayloadKind payloadKind, ODataSerializerProvider serializerProvider)
+	protected ODataEdmTypeSerializer (Microsoft.OData.ODataPayloadKind payloadKind)
+	protected ODataEdmTypeSerializer (Microsoft.OData.ODataPayloadKind payloadKind, ODataSerializerProvider serializerProvider)
 
 	ODataSerializerProvider SerializerProvider  { public get; }
 
-	public virtual Microsoft.OData.Core.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
-	internal virtual Microsoft.OData.Core.ODataProperty CreateProperty (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, string elementName, ODataSerializerContext writeContext)
-	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.Core.ODataWriter writer, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+	internal virtual Microsoft.OData.ODataProperty CreateProperty (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, string elementName, ODataSerializerContext writeContext)
+	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 }
 
 public abstract class System.Web.OData.Formatter.Serialization.ODataSerializer {
-	protected ODataSerializer (Microsoft.OData.Core.ODataPayloadKind payloadKind)
+	protected ODataSerializer (Microsoft.OData.ODataPayloadKind payloadKind)
 
-	Microsoft.OData.Core.ODataPayloadKind ODataPayloadKind  { public get; }
+	Microsoft.OData.ODataPayloadKind ODataPayloadKind  { public get; }
 
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public abstract class System.Web.OData.Formatter.Serialization.ODataSerializerProvider {
@@ -2714,106 +2714,106 @@ public class System.Web.OData.Formatter.Serialization.EntitySelfLinks {
 public class System.Web.OData.Formatter.Serialization.ODataCollectionSerializer : ODataEdmTypeSerializer {
 	public ODataCollectionSerializer (ODataSerializerProvider serializerProvider)
 
-	protected static void AddTypeNameAnnotationAsNeeded (Microsoft.OData.Core.ODataCollectionValue value, ODataMetadataLevel metadataLevel)
-	public virtual Microsoft.OData.Core.ODataCollectionValue CreateODataCollectionValue (System.Collections.IEnumerable enumerable, Microsoft.OData.Edm.IEdmTypeReference elementType, ODataSerializerContext writeContext)
-	public virtual Microsoft.OData.Core.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
-	internal virtual Microsoft.OData.Core.ODataProperty CreateProperty (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, string elementName, ODataSerializerContext writeContext)
-	public void WriteCollection (Microsoft.OData.Core.ODataCollectionWriter writer, object graph, Microsoft.OData.Edm.IEdmTypeReference collectionType, ODataSerializerContext writeContext)
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	protected static void AddTypeNameAnnotationAsNeeded (Microsoft.OData.ODataCollectionValue value, ODataMetadataLevel metadataLevel)
+	public virtual Microsoft.OData.ODataCollectionValue CreateODataCollectionValue (System.Collections.IEnumerable enumerable, Microsoft.OData.Edm.IEdmTypeReference elementType, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+	internal virtual Microsoft.OData.ODataProperty CreateProperty (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, string elementName, ODataSerializerContext writeContext)
+	public void WriteCollection (Microsoft.OData.ODataCollectionWriter writer, object graph, Microsoft.OData.Edm.IEdmTypeReference collectionType, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataComplexTypeSerializer : ODataEdmTypeSerializer {
 	public ODataComplexTypeSerializer (ODataSerializerProvider serializerProvider)
 
-	public virtual Microsoft.OData.Core.ODataComplexValue CreateODataComplexValue (object graph, Microsoft.OData.Edm.IEdmComplexTypeReference complexType, ODataSerializerContext writeContext)
-	public virtual Microsoft.OData.Core.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataComplexValue CreateODataComplexValue (object graph, Microsoft.OData.Edm.IEdmComplexTypeReference complexType, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataDeltaFeedSerializer : ODataEdmTypeSerializer {
 	public ODataDeltaFeedSerializer (ODataSerializerProvider serializerProvider)
 
-	public virtual Microsoft.OData.Core.ODataDeltaFeed CreateODataDeltaFeed (System.Collections.IEnumerable feedInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference feedType, ODataSerializerContext writeContext)
-	public virtual void WriteDeltaDeletedEntry (object graph, Microsoft.OData.Core.ODataDeltaWriter writer, ODataSerializerContext writeContext)
-	public virtual void WriteDeltaDeletedLink (object graph, Microsoft.OData.Core.ODataDeltaWriter writer, ODataSerializerContext writeContext)
-	public virtual void WriteDeltaFeedInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.Core.ODataDeltaWriter writer, ODataSerializerContext writeContext)
-	public virtual void WriteDeltaLink (object graph, Microsoft.OData.Core.ODataDeltaWriter writer, ODataSerializerContext writeContext)
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataDeltaResourceSet CreateODataDeltaFeed (System.Collections.IEnumerable feedInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference feedType, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaDeletedEntry (object graph, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaDeletedLink (object graph, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaFeedInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaLink (object graph, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataEntityReferenceLinkSerializer : ODataSerializer {
 	public ODataEntityReferenceLinkSerializer ()
 
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataEntityReferenceLinksSerializer : ODataSerializer {
 	public ODataEntityReferenceLinksSerializer ()
 
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataEntityTypeSerializer : ODataEdmTypeSerializer {
 	public ODataEntityTypeSerializer (ODataSerializerProvider serializerProvider)
 
-	public virtual Microsoft.OData.Core.ODataEntry CreateEntry (SelectExpandNode selectExpandNode, EntityContext entityContext)
+	public virtual Microsoft.OData.ODataResource CreateEntry (SelectExpandNode selectExpandNode, EntityContext entityContext)
 	public virtual string CreateETag (EntityContext entityContext)
-	public virtual Microsoft.OData.Core.ODataNavigationLink CreateNavigationLink (Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, EntityContext entityContext)
-	public virtual Microsoft.OData.Core.ODataAction CreateODataAction (Microsoft.OData.Edm.IEdmAction action, EntityContext entityContext)
-	public virtual Microsoft.OData.Core.ODataFunction CreateODataFunction (Microsoft.OData.Edm.IEdmFunction function, EntityContext entityContext)
+	public virtual Microsoft.OData.ODataNestedResourceInfo CreateNavigationLink (Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, EntityContext entityContext)
+	public virtual Microsoft.OData.ODataAction CreateODataAction (Microsoft.OData.Edm.IEdmAction action, EntityContext entityContext)
+	public virtual Microsoft.OData.ODataFunction CreateODataFunction (Microsoft.OData.Edm.IEdmFunction function, EntityContext entityContext)
 	public virtual SelectExpandNode CreateSelectExpandNode (EntityContext entityContext)
-	public virtual Microsoft.OData.Core.ODataProperty CreateStructuralProperty (Microsoft.OData.Edm.IEdmStructuralProperty structuralProperty, EntityContext entityContext)
-	public virtual void WriteDeltaObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.Core.ODataDeltaWriter writer, ODataSerializerContext writeContext)
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
-	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.Core.ODataWriter writer, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataProperty CreateStructuralProperty (Microsoft.OData.Edm.IEdmStructuralProperty structuralProperty, EntityContext entityContext)
+	public virtual void WriteDeltaObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataEnumSerializer : ODataEdmTypeSerializer {
 	public ODataEnumSerializer ()
 
-	public virtual Microsoft.OData.Core.ODataEnumValue CreateODataEnumValue (object graph, Microsoft.OData.Edm.IEdmEnumTypeReference enumType, ODataSerializerContext writeContext)
-	public virtual Microsoft.OData.Core.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataEnumValue CreateODataEnumValue (object graph, Microsoft.OData.Edm.IEdmEnumTypeReference enumType, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataErrorSerializer : ODataSerializer {
 	public ODataErrorSerializer ()
 
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataFeedSerializer : ODataEdmTypeSerializer {
 	public ODataFeedSerializer (ODataSerializerProvider serializerProvider)
 
-	public virtual Microsoft.OData.Core.ODataFeed CreateODataFeed (System.Collections.IEnumerable feedInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference feedType, ODataSerializerContext writeContext)
-	public virtual Microsoft.OData.Core.ODataOperation CreateODataOperation (Microsoft.OData.Edm.IEdmOperation operation, FeedContext feedContext, ODataSerializerContext writeContext)
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
-	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.Core.ODataWriter writer, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataResourceSet CreateODataFeed (System.Collections.IEnumerable feedInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference feedType, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataOperation CreateODataOperation (Microsoft.OData.Edm.IEdmOperation operation, FeedContext feedContext, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataMetadataSerializer : ODataSerializer {
 	public ODataMetadataSerializer ()
 
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataPrimitiveSerializer : ODataEdmTypeSerializer {
 	public ODataPrimitiveSerializer ()
 
-	public virtual Microsoft.OData.Core.ODataPrimitiveValue CreateODataPrimitiveValue (object graph, Microsoft.OData.Edm.IEdmPrimitiveTypeReference primitiveType, ODataSerializerContext writeContext)
-	public virtual Microsoft.OData.Core.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataPrimitiveValue CreateODataPrimitiveValue (object graph, Microsoft.OData.Edm.IEdmPrimitiveTypeReference primitiveType, ODataSerializerContext writeContext)
+	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataRawValueSerializer : ODataSerializer {
 	public ODataRawValueSerializer ()
 
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.ODataSerializerContext {
 	public ODataSerializerContext ()
-	public ODataSerializerContext (EntityContext entity, Microsoft.OData.Core.UriParser.Semantic.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty)
+	public ODataSerializerContext (EntityContext entity, Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty)
 
 	EntityContext ExpandedEntity  { public get; public set; }
 	System.Collections.Generic.IDictionary`2[[System.Object],[System.Object]] Items  { public get; }
@@ -2825,7 +2825,7 @@ public class System.Web.OData.Formatter.Serialization.ODataSerializerContext {
 	System.Net.Http.HttpRequestMessage Request  { public get; public set; }
 	System.Web.Http.Controllers.HttpRequestContext RequestContext  { public get; public set; }
 	string RootElementName  { public get; public set; }
-	Microsoft.OData.Core.UriParser.Semantic.SelectExpandClause SelectExpandClause  { public get; public set; }
+	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public get; public set; }
 	bool SkipExpensiveAvailabilityChecks  { public get; public set; }
 	System.Web.Http.Routing.UrlHelper Url  { public get; public set; }
 }
@@ -2833,15 +2833,15 @@ public class System.Web.OData.Formatter.Serialization.ODataSerializerContext {
 public class System.Web.OData.Formatter.Serialization.ODataServiceDocumentSerializer : ODataSerializer {
 	public ODataServiceDocumentSerializer ()
 
-	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.Core.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class System.Web.OData.Formatter.Serialization.SelectExpandNode {
 	public SelectExpandNode ()
 	public SelectExpandNode (Microsoft.OData.Edm.IEdmEntityType entityType, ODataSerializerContext writeContext)
-	public SelectExpandNode (Microsoft.OData.Core.UriParser.Semantic.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmEntityType entityType, Microsoft.OData.Edm.IEdmModel model)
+	public SelectExpandNode (Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmEntityType entityType, Microsoft.OData.Edm.IEdmModel model)
 
-	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmNavigationProperty],[Microsoft.OData.Core.UriParser.Semantic.SelectExpandClause]] ExpandedNavigationProperties  { public get; }
+	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmNavigationProperty],[Microsoft.OData.UriParser.SelectExpandClause]] ExpandedNavigationProperties  { public get; }
 	bool SelectAllDynamicProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmAction]] SelectedActions  { public get; }
 	System.Collections.Generic.ISet`1[[System.String]] SelectedDynamicProperties  { public get; }
@@ -2870,23 +2870,23 @@ public class System.Web.OData.Query.Validators.FilterQueryValidator {
 	public FilterQueryValidator ()
 
 	public virtual void Validate (FilterQueryOption filterQueryOption, ODataValidationSettings settings)
-	public virtual void ValidateAllNode (Microsoft.OData.Core.UriParser.Semantic.AllNode allNode, ODataValidationSettings settings)
-	public virtual void ValidateAnyNode (Microsoft.OData.Core.UriParser.Semantic.AnyNode anyNode, ODataValidationSettings settings)
-	public virtual void ValidateArithmeticOperator (Microsoft.OData.Core.UriParser.Semantic.BinaryOperatorNode binaryNode, ODataValidationSettings settings)
-	public virtual void ValidateBinaryOperatorNode (Microsoft.OData.Core.UriParser.Semantic.BinaryOperatorNode binaryOperatorNode, ODataValidationSettings settings)
-	public virtual void ValidateCollectionPropertyAccessNode (Microsoft.OData.Core.UriParser.Semantic.CollectionPropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
-	public virtual void ValidateConstantNode (Microsoft.OData.Core.UriParser.Semantic.ConstantNode constantNode, ODataValidationSettings settings)
-	public virtual void ValidateConvertNode (Microsoft.OData.Core.UriParser.Semantic.ConvertNode convertNode, ODataValidationSettings settings)
-	public virtual void ValidateEntityCollectionCastNode (Microsoft.OData.Core.UriParser.Semantic.EntityCollectionCastNode entityCollectionCastNode, ODataValidationSettings settings)
-	public virtual void ValidateLogicalOperator (Microsoft.OData.Core.UriParser.Semantic.BinaryOperatorNode binaryNode, ODataValidationSettings settings)
-	public virtual void ValidateNavigationPropertyNode (Microsoft.OData.Core.UriParser.Semantic.QueryNode sourceNode, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, ODataValidationSettings settings)
-	public virtual void ValidateQueryNode (Microsoft.OData.Core.UriParser.Semantic.QueryNode node, ODataValidationSettings settings)
-	public virtual void ValidateRangeVariable (Microsoft.OData.Core.UriParser.Semantic.RangeVariable rangeVariable, ODataValidationSettings settings)
-	public virtual void ValidateSingleEntityCastNode (Microsoft.OData.Core.UriParser.Semantic.SingleEntityCastNode singleEntityCastNode, ODataValidationSettings settings)
-	public virtual void ValidateSingleEntityFunctionCallNode (Microsoft.OData.Core.UriParser.Semantic.SingleEntityFunctionCallNode node, ODataValidationSettings settings)
-	public virtual void ValidateSingleValueFunctionCallNode (Microsoft.OData.Core.UriParser.Semantic.SingleValueFunctionCallNode node, ODataValidationSettings settings)
-	public virtual void ValidateSingleValuePropertyAccessNode (Microsoft.OData.Core.UriParser.Semantic.SingleValuePropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
-	public virtual void ValidateUnaryOperatorNode (Microsoft.OData.Core.UriParser.Semantic.UnaryOperatorNode unaryOperatorNode, ODataValidationSettings settings)
+	public virtual void ValidateAllNode (Microsoft.OData.UriParser.AllNode allNode, ODataValidationSettings settings)
+	public virtual void ValidateAnyNode (Microsoft.OData.UriParser.AnyNode anyNode, ODataValidationSettings settings)
+	public virtual void ValidateArithmeticOperator (Microsoft.OData.UriParser.BinaryOperatorNode binaryNode, ODataValidationSettings settings)
+	public virtual void ValidateBinaryOperatorNode (Microsoft.OData.UriParser.BinaryOperatorNode binaryOperatorNode, ODataValidationSettings settings)
+	public virtual void ValidateCollectionPropertyAccessNode (Microsoft.OData.UriParser.CollectionPropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
+	public virtual void ValidateConstantNode (Microsoft.OData.UriParser.ConstantNode constantNode, ODataValidationSettings settings)
+	public virtual void ValidateConvertNode (Microsoft.OData.UriParser.ConvertNode convertNode, ODataValidationSettings settings)
+	public virtual void ValidateEntityCollectionCastNode (Microsoft.OData.UriParser.EntityCollectionCastNode entityCollectionCastNode, ODataValidationSettings settings)
+	public virtual void ValidateLogicalOperator (Microsoft.OData.UriParser.BinaryOperatorNode binaryNode, ODataValidationSettings settings)
+	public virtual void ValidateNavigationPropertyNode (Microsoft.OData.UriParser.QueryNode sourceNode, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, ODataValidationSettings settings)
+	public virtual void ValidateQueryNode (Microsoft.OData.UriParser.QueryNode node, ODataValidationSettings settings)
+	public virtual void ValidateRangeVariable (Microsoft.OData.UriParser.RangeVariable rangeVariable, ODataValidationSettings settings)
+	public virtual void ValidateSingleEntityCastNode (Microsoft.OData.UriParser.SingleEntityCastNode singleEntityCastNode, ODataValidationSettings settings)
+	public virtual void ValidateSingleEntityFunctionCallNode (Microsoft.OData.UriParser.SingleEntityFunctionCallNode node, ODataValidationSettings settings)
+	public virtual void ValidateSingleValueFunctionCallNode (Microsoft.OData.UriParser.SingleValueFunctionCallNode node, ODataValidationSettings settings)
+	public virtual void ValidateSingleValuePropertyAccessNode (Microsoft.OData.UriParser.SingleValuePropertyAccessNode propertyAccessNode, ODataValidationSettings settings)
+	public virtual void ValidateUnaryOperatorNode (Microsoft.OData.UriParser.UnaryOperatorNode unaryOperatorNode, ODataValidationSettings settings)
 }
 
 public class System.Web.OData.Query.Validators.ODataQueryValidator {
@@ -3020,67 +3020,67 @@ public class System.Web.OData.Routing.Conventions.UnmappedRequestRoutingConventi
 public abstract class System.Web.OData.Routing.Template.ODataPathSegmentTemplate {
 	protected ODataPathSegmentTemplate ()
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 
 public class System.Web.OData.Routing.Template.EntitySetSegmentTemplate : ODataPathSegmentTemplate {
-	public EntitySetSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment segment)
+	public EntitySetSegmentTemplate (Microsoft.OData.UriParser.EntitySetSegment segment)
 
-	Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment Segment  { public get; }
+	Microsoft.OData.UriParser.EntitySetSegment Segment  { public get; }
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 
 public class System.Web.OData.Routing.Template.KeySegmentTemplate : ODataPathSegmentTemplate {
-	public KeySegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
+	public KeySegmentTemplate (Microsoft.OData.UriParser.KeySegment segment)
 
 	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ParameterMappings  { public get; }
-	Microsoft.OData.Core.UriParser.Semantic.KeySegment Segment  { public get; public set; }
+	Microsoft.OData.UriParser.KeySegment Segment  { public get; public set; }
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 
 public class System.Web.OData.Routing.Template.NavigationPropertyLinkSegmentTemplate : ODataPathSegmentTemplate {
-	public NavigationPropertyLinkSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
+	public NavigationPropertyLinkSegmentTemplate (Microsoft.OData.UriParser.NavigationPropertyLinkSegment segment)
 
-	Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment Segment  { public get; }
+	Microsoft.OData.UriParser.NavigationPropertyLinkSegment Segment  { public get; }
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 
 public class System.Web.OData.Routing.Template.NavigationPropertySegmentTemplate : ODataPathSegmentTemplate {
-	public NavigationPropertySegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
+	public NavigationPropertySegmentTemplate (Microsoft.OData.UriParser.NavigationPropertySegment segment)
 
-	Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment Segment  { public get; }
+	Microsoft.OData.UriParser.NavigationPropertySegment Segment  { public get; }
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 
 public class System.Web.OData.Routing.Template.ODataPathSegmentTemplate`1 : ODataPathSegmentTemplate {
 	public ODataPathSegmentTemplate`1 ()
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 
-public class System.Web.OData.Routing.Template.ODataPathSegmentTemplateTranslator : Microsoft.OData.Core.UriParser.Visitors.PathSegmentTranslator`1[[System.Web.OData.Routing.Template.ODataPathSegmentTemplate]] {
+public class System.Web.OData.Routing.Template.ODataPathSegmentTemplateTranslator : Microsoft.OData.UriParser.PathSegmentTranslator`1[[System.Web.OData.Routing.Template.ODataPathSegmentTemplate]] {
 	public ODataPathSegmentTemplateTranslator ()
 
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.BatchReferenceSegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.BatchSegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.CountSegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.MetadataSegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.PropertySegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.SingletonSegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.TypeSegment segment)
-	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.Core.UriParser.Semantic.ValueSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.BatchReferenceSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.BatchSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.CountSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.EntitySetSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.KeySegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.MetadataSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.NavigationPropertyLinkSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.NavigationPropertySegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.OpenPropertySegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.OperationImportSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.OperationSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.PathTemplateSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.PropertySegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.SingletonSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.TypeSegment segment)
+	public virtual ODataPathSegmentTemplate Translate (Microsoft.OData.UriParser.ValueSegment segment)
 }
 
 public class System.Web.OData.Routing.Template.ODataPathTemplate {
@@ -3094,62 +3094,62 @@ public class System.Web.OData.Routing.Template.ODataPathTemplate {
 }
 
 public class System.Web.OData.Routing.Template.OpenPropertySegmentTemplate : ODataPathSegmentTemplate {
-	public OpenPropertySegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
+	public OpenPropertySegmentTemplate (Microsoft.OData.UriParser.OpenPropertySegment segment)
 
-	Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment Segment  { public get; }
+	Microsoft.OData.UriParser.OpenPropertySegment Segment  { public get; }
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 
 public class System.Web.OData.Routing.Template.OperationImportSegmentTemplate : ODataPathSegmentTemplate {
-	public OperationImportSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
+	public OperationImportSegmentTemplate (Microsoft.OData.UriParser.OperationImportSegment segment)
 
 	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ParameterMappings  { public get; }
-	Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment Segment  { public get; }
+	Microsoft.OData.UriParser.OperationImportSegment Segment  { public get; }
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 
 public class System.Web.OData.Routing.Template.OperationSegmentTemplate : ODataPathSegmentTemplate {
-	public OperationSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)
+	public OperationSegmentTemplate (Microsoft.OData.UriParser.OperationSegment segment)
 
 	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ParameterMappings  { public get; }
-	Microsoft.OData.Core.UriParser.Semantic.OperationSegment Segment  { public get; }
+	Microsoft.OData.UriParser.OperationSegment Segment  { public get; }
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 
 public class System.Web.OData.Routing.Template.PathTemplateSegmentTemplate : ODataPathSegmentTemplate {
-	public PathTemplateSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment segment)
+	public PathTemplateSegmentTemplate (Microsoft.OData.UriParser.PathTemplateSegment segment)
 
 	string PropertyName  { public get; }
 	string SegmentName  { public get; }
-	Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment TemplateSegment  { public get; }
+	Microsoft.OData.UriParser.PathTemplateSegment TemplateSegment  { public get; }
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 
 public class System.Web.OData.Routing.Template.PropertySegmentTemplate : ODataPathSegmentTemplate {
-	public PropertySegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.PropertySegment segment)
+	public PropertySegmentTemplate (Microsoft.OData.UriParser.PropertySegment segment)
 
-	Microsoft.OData.Core.UriParser.Semantic.PropertySegment Segment  { public get; }
+	Microsoft.OData.UriParser.PropertySegment Segment  { public get; }
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 
 public class System.Web.OData.Routing.Template.SingletonSegmentTemplate : ODataPathSegmentTemplate {
-	public SingletonSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.SingletonSegment segment)
+	public SingletonSegmentTemplate (Microsoft.OData.UriParser.SingletonSegment segment)
 
-	Microsoft.OData.Core.UriParser.Semantic.SingletonSegment Segment  { public get; }
+	Microsoft.OData.UriParser.SingletonSegment Segment  { public get; }
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 
 public class System.Web.OData.Routing.Template.TypeSegmentTemplate : ODataPathSegmentTemplate {
-	public TypeSegmentTemplate (Microsoft.OData.Core.UriParser.Semantic.TypeSegment segment)
+	public TypeSegmentTemplate (Microsoft.OData.UriParser.TypeSegment segment)
 
-	Microsoft.OData.Core.UriParser.Semantic.TypeSegment Segment  { public get; }
+	Microsoft.OData.UriParser.TypeSegment Segment  { public get; }
 
-	public virtual bool TryMatch (Microsoft.OData.Core.UriParser.Semantic.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
 

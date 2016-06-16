@@ -76,7 +76,8 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
                                 .FirstOrDefault();
                 // bug 1985: Make the internal constructor as public in BoundActionPathSegment
                 //segments.Add(new BoundActionPathSegment(action));
-                string link = eic.Url.CreateODataLink("CustomActionConventions", eic.Request.ODataProperties().PathHandler, segments);
+                var pathHandler = (IODataPathHandler)eic.Request.RequestContainer().GetService(typeof(IODataPathHandler));
+                string link = eic.Url.CreateODataLink("CustomActionConventions", pathHandler, segments);
                 link += "/" + action.FullName();
                 return new Uri(link);
             };
@@ -104,7 +105,8 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
                                     .FirstOrDefault();
                     // bug 1985: Make the internal constructor as public in BoundActionPathSegment
                     //segments.Add(new BoundActionPathSegment(action));
-                    string link = eic.Url.CreateODataLink("CustomActionConventions", eic.Request.ODataProperties().PathHandler, segments);
+                    var pathHandler = (IODataPathHandler)eic.Request.RequestContainer().GetService(typeof(IODataPathHandler));
+                    string link = eic.Url.CreateODataLink("CustomActionConventions", pathHandler, segments);
                     link += "/" + action.FullName();
                     return new Uri(link);
                 }
@@ -128,7 +130,8 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
                                 .FirstOrDefault();
                 // bug 1985: Make the internal constructor as public in BoundActionPathSegment
                 //segments.Add(new BoundActionPathSegment(action));
-                string link = eic.Url.CreateODataLink("CustomActionConventions", eic.Request.ODataProperties().PathHandler, segments);
+                var pathHandler = (IODataPathHandler)eic.Request.RequestContainer().GetService(typeof(IODataPathHandler));
+                string link = eic.Url.CreateODataLink("CustomActionConventions", pathHandler, segments);
                 link += "/" + action.FullName();
                 return new Uri(link);
             };
@@ -157,7 +160,8 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
                                     .FirstOrDefault();
                     // bug 1985: Make the internal constructor as public in BoundActionPathSegment
                     //segments.Add(new BoundActionPathSegment(action));
-                    string link = eic.Url.CreateODataLink("CustomActionConventions", eic.Request.ODataProperties().PathHandler, segments);
+                    var pathHandler = (IODataPathHandler)eic.Request.RequestContainer().GetService(typeof(IODataPathHandler));
+                    string link = eic.Url.CreateODataLink("CustomActionConventions", pathHandler, segments);
                     link += "/" + action.FullName();
                     return new Uri(link);
                 }

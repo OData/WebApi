@@ -8,7 +8,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.OData.Formatter;
-using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -27,7 +26,6 @@ namespace System.Web.OData.Extensions
         // and those of the v3 assembly.
         private const string ModelKey = "System.Web.OData.Model";
         private const string NextLinkKey = "System.Web.OData.NextLink";
-        private const string PathHandlerKey = "System.Web.OData.PathHandler";
         private const string PathKey = "System.Web.OData.Path";
         private const string RouteNameKey = "System.Web.OData.RouteName";
         private const string RoutingConventionsStoreKey = "System.Web.OData.RoutingConventionsStore";
@@ -110,29 +108,6 @@ namespace System.Web.OData.Extensions
             set
             {
                 _request.Properties[RoutingConventionsKey] = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the <see cref="IODataPathHandler"/> for generating links.
-        /// </summary>
-        /// <value>A default <see cref="IODataPathHandler"/> implementation if previously <c>null</c>.</value>
-        public IODataPathHandler PathHandler
-        {
-            get
-            {
-                IODataPathHandler pathHandler = GetValueOrNull<IODataPathHandler>(PathHandlerKey);
-                if (pathHandler == null)
-                {
-                    pathHandler = new DefaultODataPathHandler();
-                    PathHandler = pathHandler;
-                }
-
-                return pathHandler;
-            }
-            set
-            {
-                _request.Properties[PathHandlerKey] = value;
             }
         }
 

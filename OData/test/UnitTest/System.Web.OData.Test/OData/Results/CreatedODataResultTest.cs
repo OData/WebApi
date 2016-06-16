@@ -435,6 +435,7 @@ namespace System.Web.OData.Results
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             request.ODataProperties().RouteName = routeName;
             return request;
         }

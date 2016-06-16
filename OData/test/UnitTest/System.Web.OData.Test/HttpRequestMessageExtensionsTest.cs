@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Hosting;
@@ -11,13 +10,11 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization.Models;
-using System.Web.OData.Routing;
 using System.Web.OData.TestCommon;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
-using Moq;
 using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Net.Http
@@ -46,32 +43,6 @@ namespace System.Net.Http
 
             // Assert
             Assert.Same(model, newModel);
-        }
-
-        [Fact]
-        public void PathHandlerGetter_ReturnsDefaultPathHandlerByDefault()
-        {
-            HttpRequestMessage request = new HttpRequestMessage();
-            IEdmModel model = new EdmModel();
-            request.ODataProperties().Model = model;
-
-            var pathHandler = request.ODataProperties().PathHandler;
-
-            Assert.NotNull(pathHandler);
-            Assert.IsType<DefaultODataPathHandler>(pathHandler);
-        }
-
-        [Fact]
-        public void PathHandlerGetter_Returns_PathHandlerSetter()
-        {
-            HttpRequestMessage request = new HttpRequestMessage();
-            IODataPathHandler parser = new Mock<IODataPathHandler>().Object;
-
-            // Act
-            request.ODataProperties().PathHandler = parser;
-
-            // Assert
-            Assert.Same(parser, request.ODataProperties().PathHandler);
         }
 
         [Theory]

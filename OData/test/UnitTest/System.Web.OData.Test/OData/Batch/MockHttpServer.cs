@@ -13,7 +13,7 @@ namespace System.Web.OData.Test
         private Func<HttpRequestMessage, Task<HttpResponseMessage>> _action;
 
         public MockHttpServer(Func<HttpRequestMessage, HttpResponseMessage> action)
-            : base(DependencyInjectionHelper.CreateConfigurationWithContainer())
+            : base(DependencyInjectionHelper.CreateConfigurationWithRootContainer())
         {
             _action = request =>
             {
@@ -22,7 +22,7 @@ namespace System.Web.OData.Test
         }
 
         public MockHttpServer(Func<HttpRequestMessage, Task<HttpResponseMessage>> action)
-            : base(DependencyInjectionHelper.CreateConfigurationWithContainer())
+            : base(DependencyInjectionHelper.CreateConfigurationWithRootContainer())
         {
             _action = action;
         }

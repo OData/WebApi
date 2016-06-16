@@ -8,6 +8,7 @@ using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 
@@ -17,10 +18,10 @@ namespace System.Web.OData.Routing
     {
         IEdmModel _model = new ODataConventionModelBuilder().GetEdmModel();
         string _routeName = "name";
-        IODataPathHandler _pathHandler = new DefaultODataPathHandler();
         IEnumerable<IODataRoutingConvention> _conventions = ODataRoutingConventions.CreateDefault();
         HttpRequestMessage _request = new HttpRequestMessage();
         IServiceProvider _requestContainer = DependencyInjectionHelper.BuildContainer(null);
+        IODataPathHandler _pathHandler;
 
         private static IList<string> _stringsWithUnescapedSlashes = new List<string>
         {
@@ -47,6 +48,11 @@ namespace System.Web.OData.Routing
             { "Unicode%E1%BF%BCTitlecase%E1%BF%BCChar" },       // "UnicodeῼTitlecaseῼChar", class Lt
             { "Unicode%E0%A4%83Combining%E0%A4%83Char" },       // "UnicodeःCombiningःChar", class Mc
         };
+
+        public ODataPathRouteConstraintTest()
+        {
+            _pathHandler = _requestContainer.GetRequiredService<IODataPathHandler>();
+        }
 
         public static TheoryDataSet<string> PrefixStrings
         {
@@ -147,7 +153,7 @@ namespace System.Web.OData.Routing
             Assert.Same(_model, request.ODataProperties().Model);
             Assert.Same(_routeName, request.ODataProperties().RouteName);
             Assert.Equal(_conventions, request.ODataProperties().RoutingConventions);
-            Assert.Same(_pathHandler, request.ODataProperties().PathHandler);
+            Assert.Same(_pathHandler, request.RequestContainer().GetRequiredService<IODataPathHandler>());
         }
 
         [Theory]

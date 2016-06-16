@@ -236,8 +236,10 @@ namespace System.Web.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");
             request.ODataProperties().Model = GetSampleModel();
             HttpConfiguration configuration = new HttpConfiguration();
+            configuration.SetFakeRootContainer();
             configuration.Routes.MapFakeODataRoute();
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             request.SetFakeODataRouteName();
             return request;
         }

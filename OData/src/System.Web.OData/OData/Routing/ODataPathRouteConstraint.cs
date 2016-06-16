@@ -194,7 +194,6 @@ namespace System.Web.OData.Routing
                     {
                         // Set all the properties we need for routing, querying, formatting
                         request.ODataProperties().Model = EdmModel;
-                        request.ODataProperties().PathHandler = PathHandler;
                         request.ODataProperties().Path = path;
                         request.ODataProperties().RouteName = RouteName;
                         request.ODataProperties().RoutingConventions = RoutingConventions;

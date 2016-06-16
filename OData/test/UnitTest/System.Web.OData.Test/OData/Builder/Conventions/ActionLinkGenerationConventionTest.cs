@@ -52,6 +52,7 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:123");
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             request.ODataProperties().RouteName = "odata";
 
             IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
@@ -108,6 +109,7 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:123");
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             request.ODataProperties().RouteName = "odata";
             request.ODataProperties().Model = model;
 

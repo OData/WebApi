@@ -184,7 +184,9 @@ namespace System.Web.OData
             request.ODataProperties().Model = GetSampleModel();
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Routes.MapFakeODataRoute();
+            configuration.SetFakeRootContainer();
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             request.SetFakeODataRouteName();
             return request;
         }

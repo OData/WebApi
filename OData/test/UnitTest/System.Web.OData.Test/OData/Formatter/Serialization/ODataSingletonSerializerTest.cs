@@ -11,7 +11,6 @@ using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization;
-using System.Web.OData.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -67,7 +66,6 @@ namespace System.Web.OData.Formatter.Deserialization
             config.MapODataServiceRoute("odata", "odata", model);
             HttpRequestMessage request = new HttpRequestMessage();
             request.SetConfiguration(config);
-            request.ODataProperties().PathHandler = new DefaultODataPathHandler();
             request.ODataProperties().RouteName = "odata";
             request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath(new[] { new SingletonSegment(singleton) });

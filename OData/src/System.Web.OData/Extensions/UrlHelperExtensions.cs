@@ -9,6 +9,7 @@ using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using ODataPathSegment = Microsoft.OData.UriParser.ODataPathSegment;
 
 namespace System.Web.OData.Extensions
@@ -52,7 +53,7 @@ namespace System.Web.OData.Extensions
                 throw Error.InvalidOperation(SRResources.RequestMustHaveODataRouteName);
             }
 
-            IODataPathHandler pathHandler = request.ODataProperties().PathHandler;
+            IODataPathHandler pathHandler = request.RequestContainer().GetRequiredService<IODataPathHandler>();
             return CreateODataLink(urlHelper, routeName, pathHandler, segments);
         }
 

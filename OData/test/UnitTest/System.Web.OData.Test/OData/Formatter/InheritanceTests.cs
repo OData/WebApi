@@ -313,6 +313,7 @@ namespace System.Web.OData.Formatter
                 .Parse(_model, "http://any/", GetODataPath(request.RequestUri.AbsoluteUri));
             request.ODataProperties().Model = _model;
             request.SetFakeODataRouteName();
+            request.SetFakeRequestContainer();
         }
 
         private static IEdmModel GetEdmModel()

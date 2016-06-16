@@ -13,6 +13,7 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
@@ -217,13 +218,16 @@ namespace System.Web.OData.Test
         {
             HttpRequestMessage request;
             HttpConfiguration configuration = new HttpConfiguration();
+            configuration.SetFakeRootContainer();
             request = new HttpRequestMessage(method, "http://host/any");
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             HttpRequestMessageProperties properties = request.ODataProperties();
             IEdmModel model = edmModel ?? SetupModel();
             properties.Model = model;
-            properties.PathHandler = new DefaultODataPathHandler();
-            properties.Path = properties.PathHandler.Parse(model, "http://localhost/any", odataPath);
+            properties.Path = request.RequestContainer()
+                .GetRequiredService<IODataPathHandler>()
+                .Parse(model, "http://localhost/any", odataPath);
             return request;
         }
 

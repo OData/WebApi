@@ -485,6 +485,7 @@ namespace System.Web.OData
                 config.MapODataServiceRoute("default", "", model);
                 request.ODataProperties().RouteName = "default";
                 request.SetConfiguration(config);
+                request.SetFakeRequestContainer();
                 request.ODataProperties().Model = model;
                 request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));
                 IEnumerable<MediaTypeFormatter> perRequestFormatters = odataFormatters.Select(
@@ -538,6 +539,7 @@ namespace System.Web.OData
                 config.MapODataServiceRoute("default", "", model);
                 request.ODataProperties().RouteName = "default";
                 request.SetConfiguration(config);
+                request.SetFakeRequestContainer();
                 request.ODataProperties().Model = model;
                 request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));
                 IEnumerable<MediaTypeFormatter> perRequestFormatters = odataFormatters.Select(

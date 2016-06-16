@@ -92,6 +92,7 @@ namespace System.Web.OData.Formatter
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, null, model);
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             request.ODataProperties().Model = model;
             IEdmEntitySet entitySet = model.EntityContainer.EntitySets().Single();
             request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet),
@@ -120,6 +121,7 @@ namespace System.Web.OData.Formatter
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, routePrefix, model);
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath();
             request.ODataProperties().RouteName = routeName;
@@ -142,8 +144,10 @@ namespace System.Web.OData.Formatter
             IEdmModel model = new ODataConventionModelBuilder().GetEdmModel();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
             HttpConfiguration configuration = new HttpConfiguration();
+            configuration.SetFakeRootContainer();
             configuration.Routes.MapHttpRoute("OData", "{param}");
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath();
             request.ODataProperties().RouteName = "OData";
@@ -190,6 +194,7 @@ namespace System.Web.OData.Formatter
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.MapODataServiceRoute(routeName, routePrefix, model);
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath();
             request.ODataProperties().RouteName = routeName;
@@ -226,6 +231,7 @@ namespace System.Web.OData.Formatter
             IEdmModel model = new EdmModel();
             configuration.MapODataServiceRoute(routeName, routePrefix, model);
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             request.ODataProperties().Model = model;
             request.ODataProperties().RouteName = routeName;
 
@@ -885,8 +891,10 @@ namespace System.Web.OData.Formatter
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
             request.ODataProperties().Model = model;
             HttpConfiguration configuration = new HttpConfiguration();
+            configuration.SetFakeRootContainer();
             configuration.Routes.MapFakeODataRoute();
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             request.ODataProperties().Path =
                 new ODataPath(new EntitySetSegment(model.EntityContainer.EntitySets().Single()));
             request.SetFakeODataRouteName();

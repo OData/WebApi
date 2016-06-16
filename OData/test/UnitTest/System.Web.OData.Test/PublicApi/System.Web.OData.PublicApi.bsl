@@ -1728,7 +1728,6 @@ public class System.Web.OData.Extensions.HttpRequestMessageProperties {
 	Microsoft.OData.Edm.IEdmModel Model  { public get; public set; }
 	System.Uri NextLink  { public get; public set; }
 	ODataPath Path  { public get; public set; }
-	IODataPathHandler PathHandler  { public get; public set; }
 	string RouteName  { public get; public set; }
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] RoutingConventions  { public get; public set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public get; }

@@ -36,7 +36,7 @@ namespace WebStack.QA.Test.OData.Common.Controllers
         {
             get
             {
-                return this.Request.ODataProperties().PathHandler;
+                return (IODataPathHandler)this.Request.RequestContainer().GetService(typeof(IODataPathHandler));
             }
         }
 

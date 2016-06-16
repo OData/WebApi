@@ -54,6 +54,7 @@ namespace System.Web.OData.Formatter.Serialization
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, null, GetSampleModel());
             request.SetConfiguration(configuration);
+            request.SetFakeRequestContainer();
             IEdmEntitySet entitySet = _model.EntityContainer.FindEntitySet("employees");
             request.ODataProperties().Model = _model;
             request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));

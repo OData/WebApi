@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -22,6 +21,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -391,7 +391,8 @@ namespace System.Web.OData.Formatter
             {
                 return request.GetUrlHelper().CreateODataLink(
                     request.ODataProperties().RouteName,
-                    request.ODataProperties().PathHandler, new List<ODataPathSegment>());
+                    request.RequestContainer().GetRequiredService<IODataPathHandler>(),
+                    new List<ODataPathSegment>());
             }
 
             internal static IEnumerable<KeyValuePair<string, object>> GetKeys(DefaultODataPathHandler pathHandler,

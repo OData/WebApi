@@ -1808,8 +1808,6 @@ public class System.Web.OData.Formatter.ODataMediaTypeFormatter : System.Net.Htt
 
 	System.Func`2[[System.Net.Http.HttpRequestMessage],[System.Uri]] BaseAddressFactory  { public get; public set; }
 	ODataDeserializerProvider DeserializerProvider  { public get; }
-	Microsoft.OData.ODataMessageQuotas MessageReaderQuotas  { public get; }
-	Microsoft.OData.ODataMessageReaderSettings MessageReaderSettings  { public get; }
 	Microsoft.OData.ODataMessageQuotas MessageWriterQuotas  { public get; }
 	Microsoft.OData.ODataMessageWriterSettings MessageWriterSettings  { public get; }
 	ODataSerializerProvider SerializerProvider  { public get; }

@@ -299,6 +299,7 @@ namespace System.Web.OData.Test
                     }
                 }
             };
+            batchRequest.SetFakeRequestContainer();
 
             IList<ODataBatchRequestItem> requests = batchHandler.ParseBatchRequestsAsync(batchRequest, CancellationToken.None).Result;
 
@@ -331,6 +332,7 @@ namespace System.Web.OData.Test
             batchRequest.Properties.Add("foo", "bar");
             batchRequest.SetRouteData(new HttpRouteData(new HttpRoute()));
             batchRequest.RegisterForDispose(new StringContent(String.Empty));
+            batchRequest.SetFakeRequestContainer();
 
             IList<ODataBatchRequestItem> requests = batchHandler.ParseBatchRequestsAsync(batchRequest, CancellationToken.None).Result;
 

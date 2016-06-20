@@ -20,6 +20,7 @@ using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.TestCommon;
 using System.Web.OData.TestCommon.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -498,9 +499,11 @@ namespace System.Web.OData.Formatter
         public void MessageReaderSettings_Property()
         {
             var formatter = CreateFormatter();
+            var messageReaderSettings = formatter.Request.RequestContainer()
+                .GetRequiredService<ODataMessageReaderSettings>();
 
-            Assert.NotNull(formatter.MessageReaderSettings);
-            Assert.True(formatter.MessageReaderSettings.DisableMessageStreamDisposal);
+            Assert.NotNull(messageReaderSettings);
+            Assert.True(messageReaderSettings.DisableMessageStreamDisposal);
         }
 
         [Fact]
@@ -517,9 +520,11 @@ namespace System.Web.OData.Formatter
         public void MessageReaderQuotas_Property_RoundTrip()
         {
             var formatter = CreateFormatter();
-            formatter.MessageReaderQuotas.MaxNestingDepth = 42;
+            var messageReaderQuotas = formatter.Request.RequestContainer()
+                .GetRequiredService<ODataMessageReaderSettings>().MessageQuotas;
+            messageReaderQuotas.MaxNestingDepth = 42;
 
-            Assert.Equal(42, formatter.MessageReaderQuotas.MaxNestingDepth);
+            Assert.Equal(42, messageReaderQuotas.MaxNestingDepth);
         }
 
         [Fact]
@@ -535,14 +540,18 @@ namespace System.Web.OData.Formatter
         public void Default_ReceiveMessageSize_Is_MaxedOut()
         {
             var formatter = CreateFormatter();
-            Assert.Equal(Int64.MaxValue, formatter.MessageReaderQuotas.MaxReceivedMessageSize);
+            var messageReaderQuotas = formatter.Request.RequestContainer()
+                .GetRequiredService<ODataMessageReaderSettings>().MessageQuotas;
+            Assert.Equal(Int64.MaxValue, messageReaderQuotas.MaxReceivedMessageSize);
         }
 
         [Fact]
         public void MessageReaderQuotas_Is_Passed_To_ODataLib()
         {
             ODataMediaTypeFormatter formatter = CreateFormatter();
-            formatter.MessageReaderSettings.MessageQuotas.MaxReceivedMessageSize = 1;
+            var messageReaderQuotas = formatter.Request.RequestContainer()
+                .GetRequiredService<ODataMessageReaderSettings>().MessageQuotas;
+            messageReaderQuotas.MaxReceivedMessageSize = 1;
 
             HttpContent content = new StringContent("{ 'Number' : '42' }");
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");

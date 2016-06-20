@@ -129,12 +129,9 @@ namespace System.Web.OData.Batch
                 throw Error.ArgumentNull("request");
             }
 
-            ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings
-            {
-                DisableMessageStreamDisposal = true,
-                MessageQuotas = MessageQuotas,
-                BaseUri = GetBaseUri(request)
-            };
+            ODataMessageReaderSettings oDataReaderSettings =
+                request.RequestContainer().GetRequiredService<ODataMessageReaderSettings>();
+            oDataReaderSettings.BaseUri = GetBaseUri(request);
 
             ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(request.RequestContainer(), oDataReaderSettings, cancellationToken);
             request.RegisterForDispose(reader);

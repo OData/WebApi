@@ -80,7 +80,7 @@ namespace System.Web.OData.Test
                     }
                 }
             };
-            batchRequest.SetConfiguration(new HttpConfiguration());
+            batchRequest.SetFakeRequestContainer();
 
             // Act
             var response = batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None).Result;
@@ -125,7 +125,7 @@ namespace System.Web.OData.Test
                     }
                 }
             };
-            batchRequest.SetConfiguration(new HttpConfiguration());
+            batchRequest.SetFakeRequestContainer();
 
             // Act
             var response = batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None).Result;
@@ -166,7 +166,7 @@ namespace System.Web.OData.Test
                     }
                 }
             };
-            batchRequest.SetConfiguration(new HttpConfiguration());
+            batchRequest.SetFakeRequestContainer();
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
@@ -224,8 +224,10 @@ namespace System.Web.OData.Test
                 }
             };
             var enableContinueOnErrorconfig = new HttpConfiguration();
+            enableContinueOnErrorconfig.SetFakeRootContainer();
             enableContinueOnErrorconfig.EnableContinueOnErrorHeader();
             batchRequest.SetConfiguration(enableContinueOnErrorconfig);
+            batchRequest.SetFakeRequestContainer();
             HttpRequestMessage batchRequestWithPrefContinueOnError = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
             {
                 Content = new MultipartContent("mixed")
@@ -247,11 +249,12 @@ namespace System.Web.OData.Test
             if (enableContinueOnError)
             {
                 batchRequestWithPrefContinueOnError.SetConfiguration(enableContinueOnErrorconfig);
+                batchRequestWithPrefContinueOnError.SetFakeRequestContainer();
                 batchRequestWithPrefContinueOnError.Headers.Add("prefer", "odata.continue-on-error");
             }
             else
             {
-                batchRequestWithPrefContinueOnError.SetConfiguration(new HttpConfiguration());
+                batchRequestWithPrefContinueOnError.SetFakeRequestContainer();
             }
 
             // Act

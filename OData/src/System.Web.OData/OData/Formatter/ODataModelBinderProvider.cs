@@ -224,7 +224,8 @@ namespace System.Web.OData.Formatter
                 }
 
                 HttpRequestMessage request = readContext.Request;
-                ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings();
+                ODataMessageReaderSettings oDataReaderSettings =
+                    request.RequestContainer().GetRequiredService<ODataMessageReaderSettings>();
 
                 using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(valueString)))
                 {

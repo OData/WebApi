@@ -37,12 +37,9 @@ namespace System.Web.OData.Batch
 
             ValidateRequest(request);
 
-            ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings
-            {
-                DisableMessageStreamDisposal = true,
-                MessageQuotas = MessageQuotas,
-                BaseUri = GetBaseUri(request)
-            };
+            ODataMessageReaderSettings oDataReaderSettings =
+                request.RequestContainer().GetRequiredService<ODataMessageReaderSettings>();
+            oDataReaderSettings.BaseUri = GetBaseUri(request);
 
             // This scope is for the overall batch request.
             IServiceScope requestScope = CreateRequestScope();

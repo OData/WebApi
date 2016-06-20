@@ -18,6 +18,11 @@ namespace System.Web.OData.Extensions
             }
 
             builder.AddService<IODataPathHandler, DefaultODataPathHandler>(ServiceLifetime.Singleton);
+            builder.AddServicePrototype(new ODataMessageReaderSettings
+            {
+                DisableMessageStreamDisposal = true,
+                MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
+            });
 
             return builder;
         }

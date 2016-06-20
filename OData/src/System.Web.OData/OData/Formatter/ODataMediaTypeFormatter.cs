@@ -20,6 +20,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -85,11 +86,6 @@ namespace System.Web.OData.Formatter
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
                 AutoComputePayloadMetadataInJson = true,
             };
-            MessageReaderSettings = new ODataMessageReaderSettings
-            {
-                DisableMessageStreamDisposal = true,
-                MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
-            };
 
             _version = HttpRequestMessageProperties.DefaultODataVersion;
         }
@@ -123,7 +119,6 @@ namespace System.Web.OData.Formatter
             _deserializerProvider = formatter._deserializerProvider;
             _payloadKinds = formatter._payloadKinds;
             MessageWriterSettings = formatter.MessageWriterSettings;
-            MessageReaderSettings = formatter.MessageReaderSettings;
 
             // Parameter 2: version
             _version = version;
@@ -155,17 +150,6 @@ namespace System.Web.OData.Formatter
         }
 
         /// <summary>
-        /// Gets the <see cref="ODataMessageQuotas"/> that this formatter uses on the read side.
-        /// </summary>
-        public ODataMessageQuotas MessageReaderQuotas
-        {
-            get
-            {
-                return MessageReaderSettings.MessageQuotas;
-            }
-        }
-
-        /// <summary>
         /// Gets the <see cref="ODataMessageQuotas"/> that this formatter uses on the write side.
         /// </summary>
         public ODataMessageQuotas MessageWriterQuotas
@@ -180,11 +164,6 @@ namespace System.Web.OData.Formatter
         /// Gets the <see cref="ODataMessageWriterSettings"/> to be used while writing responses.
         /// </summary>
         public ODataMessageWriterSettings MessageWriterSettings { get; private set; }
-
-        /// <summary>
-        /// Gets the <see cref="ODataMessageReaderSettings"/> to be used while reading requests.
-        /// </summary>
-        public ODataMessageReaderSettings MessageReaderSettings { get; private set; }
 
         /// <summary>
         /// Gets or sets a method that allows consumers to provide an alternate base
@@ -398,7 +377,8 @@ namespace System.Web.OData.Formatter
 
                 try
                 {
-                    ODataMessageReaderSettings oDataReaderSettings = MessageReaderSettings.Clone();
+                    ODataMessageReaderSettings oDataReaderSettings =
+                        Request.RequestContainer().GetRequiredService<ODataMessageReaderSettings>();
                     oDataReaderSettings.BaseUri = GetBaseAddressInternal(Request);
 
                     IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders, Request.GetODataContentIdMapping())

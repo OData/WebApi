@@ -48,7 +48,7 @@ namespace System.Web.OData.Routing.Template
             // Arrange
             PathTemplateSegment pathTemplateSegment = new PathTemplateSegment("{pName:dynamicproperty}");
             PathTemplateSegmentTemplate template = new PathTemplateSegmentTemplate(pathTemplateSegment);
-            OpenPropertySegment segment = new OpenPropertySegment("property");
+            DynamicPathSegment segment = new DynamicPathSegment("property");
 
             // Act
             Dictionary<string, object> values = new Dictionary<string, object>();

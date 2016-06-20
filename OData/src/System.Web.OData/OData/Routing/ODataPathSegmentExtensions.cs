@@ -138,14 +138,14 @@ namespace System.Web.OData.Routing
             return segment.LiteralText;
         }
 
-        public static string ToUriLiteral(this OpenPropertySegment segment)
+        public static string ToUriLiteral(this DynamicPathSegment segment)
         {
             if (segment == null)
             {
                 throw Error.ArgumentNull("segment");
             }
 
-            return segment.PropertyName;
+            return segment.Identifier;
         }
 
         public static string ToUriLiteral(this NavigationPropertySegment segment)

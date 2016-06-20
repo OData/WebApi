@@ -40,7 +40,7 @@ namespace System.Web.OData.Routing.Conventions
             }
 
             string actionName = null;
-            OpenPropertySegment dynamicPropertSegment = null;
+            DynamicPathSegment dynamicPropertSegment = null;
 
             switch (odataPath.PathTemplate)
             {
@@ -48,7 +48,7 @@ namespace System.Web.OData.Routing.Conventions
                 case "~/entityset/key/cast/dynamicproperty":
                 case "~/singleton/dynamicproperty":
                 case "~/singleton/cast/dynamicproperty":
-                    dynamicPropertSegment = odataPath.Segments.Last() as OpenPropertySegment;
+                    dynamicPropertSegment = odataPath.Segments.Last() as DynamicPathSegment;
                     if (dynamicPropertSegment == null)
                     {
                         return null;
@@ -64,7 +64,7 @@ namespace System.Web.OData.Routing.Conventions
                 case "~/entityset/key/cast/property/dynamicproperty":
                 case "~/singleton/property/dynamicproperty":
                 case "~/singleton/cast/property/dynamicproperty":
-                    dynamicPropertSegment = odataPath.Segments.Last() as OpenPropertySegment;
+                    dynamicPropertSegment = odataPath.Segments.Last() as DynamicPathSegment;
                     if (dynamicPropertSegment == null)
                     {
                         return null;
@@ -100,9 +100,9 @@ namespace System.Web.OData.Routing.Conventions
                     controllerContext.AddKeyValueToRouteData(keyValueSegment);
                 }
 
-                controllerContext.RouteData.Values[ODataRouteConstants.DynamicProperty] = dynamicPropertSegment.PropertyName;
+                controllerContext.RouteData.Values[ODataRouteConstants.DynamicProperty] = dynamicPropertSegment.Identifier;
                 var key = ODataParameterValue.ParameterValuePrefix + ODataRouteConstants.DynamicProperty;
-                var value = new ODataParameterValue(dynamicPropertSegment.PropertyName, EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
+                var value = new ODataParameterValue(dynamicPropertSegment.Identifier, EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
                 controllerContext.RouteData.Values[key] = value;
                 controllerContext.Request.ODataProperties().RoutingConventionsStore[key] = value;
                 return actionName;

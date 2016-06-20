@@ -202,10 +202,10 @@ namespace System.Web.OData.Formatter.Serialization
                         continue;
                     }
 
-                    OpenPropertySegment openPropertySegment = segment as OpenPropertySegment;
-                    if (openPropertySegment != null)
+                    DynamicPathSegment dynamicPathSegment = segment as DynamicPathSegment;
+                    if (dynamicPathSegment != null)
                     {
-                        SelectedDynamicProperties.Add(openPropertySegment.PropertyName);
+                        SelectedDynamicProperties.Add(dynamicPathSegment.Identifier);
                         continue;
                     }
                     throw new ODataException(Error.Format(SRResources.SelectionTypeNotSupported, segment.GetType().Name));
@@ -271,7 +271,7 @@ namespace System.Web.OData.Formatter.Serialization
             if (!(lastSegment is NavigationPropertySegment
                 || lastSegment is PropertySegment
                 || lastSegment is OperationSegment
-                || lastSegment is OpenPropertySegment))
+                || lastSegment is DynamicPathSegment))
             {
                 throw new ODataException(SRResources.UnsupportedSelectExpandPath);
             }

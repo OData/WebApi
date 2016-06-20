@@ -107,7 +107,7 @@ namespace System.Web.OData.Routing
         /// </summary>
         /// <param name="segment">the segment to Translate</param>
         /// <returns>Translated odata path segment.</returns>
-        public override ODataPathSegment Translate(OpenPropertySegment segment)
+        public override ODataPathSegment Translate(DynamicPathSegment segment)
         {
             return segment;
         }

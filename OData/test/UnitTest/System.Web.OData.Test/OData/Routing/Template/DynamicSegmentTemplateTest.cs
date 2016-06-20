@@ -7,21 +7,21 @@ using Microsoft.TestCommon;
 
 namespace System.Web.OData.Routing.Template
 {
-    public class OpenPropertySegmentTemplateTest
+    public class DynamicSegmentTemplateTest
     {
         [Fact]
         public void Ctor_ThrowsArgumentNull_OpenPropertySegment()
         {
             // Assert
-            Assert.ThrowsArgumentNull(() => new OpenPropertySegmentTemplate(segment: null), "segment");
+            Assert.ThrowsArgumentNull(() => new DynamicSegmentTemplate(segment: null), "segment");
         }
 
         [Fact]
         public void TryMatch_AlwaysTrueWhenParameterName()
         {
             // Arrange
-            OpenPropertySegmentTemplate template = new OpenPropertySegmentTemplate(new OpenPropertySegment("{parameter}"));
-            OpenPropertySegment segment = new OpenPropertySegment("property");
+            DynamicSegmentTemplate template = new DynamicSegmentTemplate(new DynamicPathSegment("{parameter}"));
+            DynamicPathSegment segment = new DynamicPathSegment("property");
 
             // Act
             Dictionary<string, object> values = new Dictionary<string, object>();
@@ -39,8 +39,8 @@ namespace System.Web.OData.Routing.Template
         public void TryMatch_ConditionalWhenPropertyName(bool isSamePropertyName, string propertName)
         {
             // Arrange
-            OpenPropertySegmentTemplate template = new OpenPropertySegmentTemplate(new OpenPropertySegment("matchingproperty"));
-            OpenPropertySegment segment = new OpenPropertySegment(propertName);
+            DynamicSegmentTemplate template = new DynamicSegmentTemplate(new DynamicPathSegment("matchingproperty"));
+            DynamicPathSegment segment = new DynamicPathSegment(propertName);
 
             // Act
             Dictionary<string, object> values = new Dictionary<string, object>();

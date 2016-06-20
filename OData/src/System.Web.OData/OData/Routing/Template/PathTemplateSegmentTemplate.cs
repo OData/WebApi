@@ -75,7 +75,7 @@ namespace System.Web.OData.Routing.Template
         public override bool TryMatch(ODataPathSegment pathSegment, IDictionary<string, object> values)
         {
             // So far, we only support the dynamic property segment template
-            OpenPropertySegment openPropertySegment = pathSegment as OpenPropertySegment;
+            DynamicPathSegment openPropertySegment = pathSegment as DynamicPathSegment;
             if (openPropertySegment == null)
             {
                 return false;
@@ -85,14 +85,14 @@ namespace System.Web.OData.Routing.Template
             // using the name from the template as the key.
             if (TreatPropertyNameAsParameterName)
             {
-                values[PropertyName] = openPropertySegment.PropertyName;
+                values[PropertyName] = openPropertySegment.Identifier;
                 values[ODataParameterValue.ParameterValuePrefix + PropertyName] =
-                    new ODataParameterValue(openPropertySegment.PropertyName,
+                    new ODataParameterValue(openPropertySegment.Identifier,
                         EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
                 return true;
             }
 
-            if (PropertyName == openPropertySegment.PropertyName)
+            if (PropertyName == openPropertySegment.Identifier)
             {
                 return true;
             }

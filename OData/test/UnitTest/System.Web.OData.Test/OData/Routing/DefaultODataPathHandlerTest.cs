@@ -608,7 +608,7 @@ namespace System.Web.OData.Routing
 
             // Assert
             Assert.NotNull(segment);
-            OpenPropertySegment openPropertySegment = Assert.IsType<OpenPropertySegment>(segment);
+            DynamicPathSegment openPropertySegment = Assert.IsType<DynamicPathSegment>(segment);
             Assert.Equal("Foo", openPropertySegment.ToUriLiteral());
 
             Assert.Null(path.NavigationSource);

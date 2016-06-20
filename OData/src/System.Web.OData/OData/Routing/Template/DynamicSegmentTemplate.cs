@@ -12,15 +12,15 @@ using Microsoft.OData.UriParser;
 namespace System.Web.OData.Routing.Template
 {
     /// <summary>
-    /// Represents a template that can match a <see cref="OpenPropertySegment"/>.
+    /// Represents a template that can match a <see cref="DynamicPathSegment"/>.
     /// </summary>
-    public class OpenPropertySegmentTemplate : ODataPathSegmentTemplate
+    public class DynamicSegmentTemplate : ODataPathSegmentTemplate
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenPropertySegmentTemplate"/> class.
+        /// Initializes a new instance of the <see cref="DynamicSegmentTemplate"/> class.
         /// </summary>
         /// <param name="segment">The open property segment</param>
-        public OpenPropertySegmentTemplate(OpenPropertySegment segment)
+        public DynamicSegmentTemplate(DynamicPathSegment segment)
         {
             if (segment == null)
             {
@@ -29,7 +29,7 @@ namespace System.Web.OData.Routing.Template
 
             Segment = segment;
 
-            PropertyName = segment.PropertyName;
+            PropertyName = segment.Identifier;
             TreatPropertyNameAsParameterName = false;
 
             if (RoutingConventionHelpers.IsRouteParameter(PropertyName))
@@ -40,7 +40,7 @@ namespace System.Web.OData.Routing.Template
                 if (String.IsNullOrEmpty(PropertyName))
                 {
                     throw new ODataException(
-                        Error.Format(SRResources.EmptyParameterAlias, PropertyName, segment.PropertyName));
+                        Error.Format(SRResources.EmptyParameterAlias, PropertyName, segment.Identifier));
                 }
             }
         }
@@ -48,7 +48,7 @@ namespace System.Web.OData.Routing.Template
         /// <summary>
         /// Gets or sets the open property segment.
         /// </summary>
-        public OpenPropertySegment Segment { get; private set; }
+        public DynamicPathSegment Segment { get; private set; }
 
         /// <summary>
         /// The parameter name of the dynamic property.
@@ -63,7 +63,7 @@ namespace System.Web.OData.Routing.Template
         /// <inheritdoc/>
         public override bool TryMatch(ODataPathSegment pathSegment, IDictionary<string, object> values)
         {
-            OpenPropertySegment other = pathSegment as OpenPropertySegment;
+            DynamicPathSegment other = pathSegment as DynamicPathSegment;
             if (other == null)
             {
                 return false;
@@ -73,14 +73,14 @@ namespace System.Web.OData.Routing.Template
             // using the name from the template as the key.
             if (TreatPropertyNameAsParameterName)
             {
-                values[PropertyName] = other.PropertyName;
+                values[PropertyName] = other.Identifier;
                 values[ODataParameterValue.ParameterValuePrefix + PropertyName] =
-                    new ODataParameterValue(other.PropertyName,
+                    new ODataParameterValue(other.Identifier,
                         EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
                 return true;
             }
 
-            if (PropertyName == other.PropertyName)
+            if (PropertyName == other.Identifier)
             {
                 return true;
             }

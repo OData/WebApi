@@ -331,7 +331,7 @@ namespace System.Web.OData.Query.Expressions
                 return true;
             }
 
-            return selectExpandClause.SelectedItems.OfType<PathSelectItem>().Any(x => x.SelectedPath.LastSegment is OpenPropertySegment);
+            return selectExpandClause.SelectedItems.OfType<PathSelectItem>().Any(x => x.SelectedPath.LastSegment is DynamicPathSegment);
         }
 
         private Expression CreateTotalCountExpression(Expression source, ExpandedNavigationSelectItem expandItem)

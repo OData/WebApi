@@ -78,7 +78,7 @@ namespace System.Web.OData.Routing
         /// Handle a OpenPropertySegment
         /// </summary>
         /// <param name="segment">the segment to Handle</param>
-        public override void Handle(OpenPropertySegment segment)
+        public override void Handle(DynamicPathSegment segment)
         {
         }
 

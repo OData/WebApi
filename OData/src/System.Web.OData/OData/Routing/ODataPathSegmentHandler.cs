@@ -140,13 +140,13 @@ namespace System.Web.OData.Routing
         /// Handle a OpenPropertySegment
         /// </summary>
         /// <param name="segment">the segment to Handle</param>
-        public override void Handle(OpenPropertySegment segment)
+        public override void Handle(DynamicPathSegment segment)
         {
             _navigationSource = null;
 
             _pathTemplate.Add(ODataSegmentKinds.DynamicProperty); // dynamic property
 
-            _pathUriLiteral.Add(segment.PropertyName);
+            _pathUriLiteral.Add(segment.Identifier);
         }
 
         /// <summary>

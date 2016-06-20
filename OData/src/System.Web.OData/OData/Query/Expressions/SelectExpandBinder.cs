@@ -133,7 +133,7 @@ namespace System.Web.OData.Query.Expressions
                 Type castType = EdmLibHelpers.GetClrType(declaringType, _model);
                 if (castType == null)
                 {
-                    throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType, declaringType.FullName()));
+                    throw new ODataException(Error.Format(SRResources.MappingDoesNotContainResourceType, declaringType.FullName()));
                 }
 
                 if (!castType.IsAssignableFrom(originalType))
@@ -177,7 +177,7 @@ namespace System.Web.OData.Query.Expressions
                 Type castType = EdmLibHelpers.GetClrType(declaringType, _model);
                 if (castType == null)
                 {
-                    throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType,
+                    throw new ODataException(Error.Format(SRResources.MappingDoesNotContainResourceType,
                         declaringType.FullName()));
                 }
 
@@ -195,7 +195,7 @@ namespace System.Web.OData.Query.Expressions
                 Type clrElementType = EdmLibHelpers.GetClrType(edmElementType, _model);
                 if (clrElementType == null)
                 {
-                    throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType,
+                    throw new ODataException(Error.Format(SRResources.MappingDoesNotContainResourceType,
                         edmElementType.FullName()));
                 }
 
@@ -605,7 +605,7 @@ namespace System.Web.OData.Query.Expressions
                     Type clrType = EdmLibHelpers.GetClrType(derivedTypes[i], model);
                     if (clrType == null)
                     {
-                        throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType, derivedTypes[0].FullName()));
+                        throw new ODataException(Error.Format(SRResources.MappingDoesNotContainResourceType, derivedTypes[0].FullName()));
                     }
 
                     expression = Expression.Condition(

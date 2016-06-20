@@ -88,6 +88,7 @@
     <Compile Include="OData\Builder\CapabilitiesVocabularyExtensionMethods.cs" />
     <Compile Include="OData\Builder\CapabilitiesNavigationType.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataReaderExtensions.cs" />
+    <Compile Include="OData\Formatter\EdmObjectHelper.cs" />
     <Compile Include="OData\ODataSwaggerUtilities.cs" />
     <Compile Include="OData\ODataSwaggerConverter.cs" />
     <Compile Include="OData\EdmEnumObjectCollection.cs" />

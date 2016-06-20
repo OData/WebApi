@@ -36,12 +36,12 @@ namespace System.Web.OData.Formatter
         private const string EntityValue2 = "{\"@odata.type\":\"%23NS.SpecialCustomer\",\"Id\":92,\"Name\":\"Mike\",\"Location\":" + ComplexValue2 + ",\"Title\":\"883F50C5-F554-4C49-98EA-F7CACB41658C\"}";
 
         private const string EntityValue = "(customer=@p)?@p=" + EntityValue1;
-        private const string CollectionEntity = "(customers=@p)?@p={\"value\":[" + EntityValue1 + "," + EntityValue2 + "]}";
+        private const string CollectionEntity = "(customers=@p)?@p=[" + EntityValue1 + "," + EntityValue2 + "]";
 
         private const string EntityReference = "(customer=@p)?@p={\"@odata.id\":\"http://localhost/odata/FCustomers(8)\"}";
 
         private const string EntityReferences =
-            "(customers=@p)?@p={\"value\":[{\"@odata.id\":\"http://localhost/odata/FCustomers(81)\"},{\"@odata.id\":\"http://localhost/odata/FCustomers(82)/NS.SpecialCustomer\"}]}";
+            "(customers=@p)?@p=[{\"@odata.id\":\"http://localhost/odata/FCustomers(81)\"},{\"@odata.id\":\"http://localhost/odata/FCustomers(82)/NS.SpecialCustomer\"}]";
 
         private readonly HttpClient _client;
 

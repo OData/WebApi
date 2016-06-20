@@ -259,20 +259,11 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An instance of the abstract complex type &apos;{0}&apos; was found. Abstract complex types cannot be instantiated..
+        ///   Looks up a localized string similar to An instance of the abstract resource type &apos;{0}&apos; was found. Abstract resource types cannot be instantiated..
         /// </summary>
-        internal static string CannotInstantiateAbstractComplexType {
+        internal static string CannotInstantiateAbstractResourceType {
             get {
-                return ResourceManager.GetString("CannotInstantiateAbstractComplexType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to An instance of the abstract entity type &apos;{0}&apos; was found. Abstract entity types cannot be instantiated..
-        /// </summary>
-        internal static string CannotInstantiateAbstractEntityType {
-            get {
-                return ResourceManager.GetString("CannotInstantiateAbstractEntityType", resourceCulture);
+                return ResourceManager.GetString("CannotInstantiateAbstractResourceType", resourceCulture);
             }
         }
         
@@ -385,15 +376,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot find the complex type &apos;{0}&apos; in the model..
-        /// </summary>
-        internal static string ComplexTypeNotInModel {
-            get {
-                return ResourceManager.GetString("ComplexTypeNotInModel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The complex type &apos;{0}&apos; refers to the entity type &apos;{1}&apos; through the property &apos;{2}&apos;..
         /// </summary>
         internal static string ComplexTypeRefersToEntityType {
@@ -493,7 +475,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The name of dynamic property &apos;{0}&apos; was already used as the declared property name of open complex type &apos;{1}&apos;..
+        ///   Looks up a localized string similar to The name of dynamic property &apos;{0}&apos; was already used as the declared property name of open type &apos;{1}&apos;..
         /// </summary>
         internal static string DynamicPropertyNameAlreadyUsedAsDeclaredPropertyName {
             get {
@@ -633,15 +615,6 @@ namespace System.Web.OData.Properties {
         internal static string EntityTypeMismatch {
             get {
                 return ResourceManager.GetString("EntityTypeMismatch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Cannot find the entity type &apos;{0}&apos; in the model..
-        /// </summary>
-        internal static string EntityTypeNotInModel {
-            get {
-                return ResourceManager.GetString("EntityTypeNotInModel", resourceCulture);
             }
         }
         
@@ -1024,11 +997,11 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The provided mapping does not contain an entry for the entity type &apos;{0}&apos;..
+        ///   Looks up a localized string similar to The provided mapping does not contain a resource for the resource type &apos;{0}&apos;..
         /// </summary>
-        internal static string MappingDoesNotContainEntityType {
+        internal static string MappingDoesNotContainResourceType {
             get {
-                return ResourceManager.GetString("MappingDoesNotContainEntityType", resourceCulture);
+                return ResourceManager.GetString("MappingDoesNotContainResourceType", resourceCulture);
             }
         }
         
@@ -1816,7 +1789,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The request must have an associated EDM model. Consider using the extension method HttpConfiguration.Routes.MapODataServiceRoute to register a route that parses the OData URI and attaches the model information..
+        ///   Looks up a localized string similar to The request must have an associated EDM model. Consider using the extension method HttpConfiguration.MapODataServiceRoute to register a route that parses the OData URI and attaches the model information..
         /// </summary>
         internal static string RequestMustHaveModel {
             get {
@@ -1848,6 +1821,15 @@ namespace System.Web.OData.Properties {
         internal static string RequestUriTooShortForODataPath {
             get {
                 return ResourceManager.GetString("RequestUriTooShortForODataPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot find the resource type &apos;{0}&apos; in the model..
+        /// </summary>
+        internal static string ResourceTypeNotInModel {
+            get {
+                return ResourceManager.GetString("ResourceTypeNotInModel", resourceCulture);
             }
         }
         

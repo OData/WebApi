@@ -110,14 +110,12 @@ namespace System.Web.OData.Formatter.Deserialization
                         parameterName = reader.Name;
                         parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
                         Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
-
-                        IEdmEntityTypeReference entityTypeReference = parameter.Type as IEdmEntityTypeReference;
-                        Contract.Assert(entityTypeReference != null);
+                        Contract.Assert(parameter.Type.IsStructured());
 
                         ODataReader resourceReader = reader.CreateResourceReader();
                         object item = resourceReader.ReadResourceOrResourceSet();
-                        ODataResourceDeserializer resourceDeserializer = (ODataResourceDeserializer)DeserializerProvider.GetEdmTypeDeserializer(entityTypeReference);
-                        payload[parameterName] = resourceDeserializer.ReadInline(item, entityTypeReference, readContext);
+                        ODataResourceDeserializer resourceDeserializer = (ODataResourceDeserializer)DeserializerProvider.GetEdmTypeDeserializer(parameter.Type);
+                        payload[parameterName] = resourceDeserializer.ReadInline(item, parameter.Type, readContext);
                         break;
 
                     case ODataParameterReaderState.ResourceSet:
@@ -135,20 +133,14 @@ namespace System.Web.OData.Formatter.Deserialization
                         object result = resourceSetDeserializer.ReadInline(feed, resourceSetType, readContext);
 
                         IEdmTypeReference elementTypeReference = resourceSetType.ElementType();
-                        Contract.Assert(elementTypeReference.IsEntity());
+                        Contract.Assert(elementTypeReference.IsStructured());
 
                         IEnumerable enumerable = result as IEnumerable;
                         if (enumerable != null)
                         {
                             if (readContext.IsUntyped)
                             {
-                                EdmEntityObjectCollection entityCollection = new EdmEntityObjectCollection(resourceSetType);
-                                foreach (EdmEntityObject entityObject in enumerable)
-                                {
-                                    entityCollection.Add(entityObject);
-                                }
-
-                                payload[parameterName] = entityCollection;
+                                payload[parameterName] = enumerable.ConvertToEdmObject(resourceSetType);
                             }
                             else
                             {

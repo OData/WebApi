@@ -1,13 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Net.Http;
-using System.Reflection;
 using System.Web.Http;
-using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -84,102 +79,6 @@ namespace System.Web.OData.Formatter.Serialization
                 Name = elementName,
                 Value = CreateODataValue(graph, expectedType, writeContext)
             };
-        }
-
-        internal List<ODataProperty> AppendDynamicProperties(object source, IEdmStructuredTypeReference structuredType,
-            ODataSerializerContext writeContext, List<ODataProperty> declaredProperties,
-            string[] selectedDynamicProperties)
-        {
-            Contract.Assert(source != null);
-            Contract.Assert(structuredType != null);
-            Contract.Assert(writeContext != null);
-            Contract.Assert(writeContext.Model != null);
-
-            bool nullDynamicPropertyEnabled = false;
-            if (writeContext.Request != null)
-            {
-                HttpConfiguration configuration = writeContext.Request.GetConfiguration();
-                if (configuration != null)
-                {
-                    nullDynamicPropertyEnabled = configuration.HasEnabledNullDynamicProperty();
-                }
-            }
-
-            PropertyInfo dynamicPropertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(
-                structuredType.StructuredDefinition(), writeContext.Model);
-
-            IEdmStructuredObject structuredObject = source as IEdmStructuredObject;
-            object value;
-            IDelta delta = source as IDelta;
-            if (delta == null)
-            { 
-                if (dynamicPropertyInfo == null || structuredObject == null ||
-                    !structuredObject.TryGetPropertyValue(dynamicPropertyInfo.Name, out value) || value == null)
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                value = ((EdmStructuredObject)structuredObject).TryGetDynamicProperties();
-            }
-
-            IDictionary<string, object> dynamicPropertyDictionary = (IDictionary<string, object>)value;
-
-            // Build a HashSet to store the declared property names.
-            // It is used to make sure the dynamic property name is different from all declared property names.
-            HashSet<string> declaredPropertyNameSet = new HashSet<string>(declaredProperties.Select(p => p.Name));
-            List<ODataProperty> dynamicProperties = new List<ODataProperty>();
-            IEnumerable<KeyValuePair<string, object>> dynamicPropertiesToSelect =
-                dynamicPropertyDictionary.Where(
-                    x => !selectedDynamicProperties.Any() || selectedDynamicProperties.Contains(x.Key));
-            foreach (KeyValuePair<string, object> dynamicProperty in dynamicPropertiesToSelect)
-            {
-                if (String.IsNullOrEmpty(dynamicProperty.Key))
-                {
-                    continue;
-                }
-
-                if (dynamicProperty.Value == null)
-                {
-                    if (nullDynamicPropertyEnabled)
-                    {
-                        dynamicProperties.Add(new ODataProperty
-                        {
-                            Name = dynamicProperty.Key,
-                            Value = new ODataNullValue()
-                        });
-                    }
-
-                    continue;
-                }
-
-                if (declaredPropertyNameSet.Contains(dynamicProperty.Key))
-                {
-                    throw Error.InvalidOperation(SRResources.DynamicPropertyNameAlreadyUsedAsDeclaredPropertyName,
-                        dynamicProperty.Key, structuredType.FullName());
-                }
-
-                IEdmTypeReference edmTypeReference = writeContext.GetEdmType(dynamicProperty.Value,
-                    dynamicProperty.Value.GetType());
-                if (edmTypeReference == null)
-                {
-                    throw Error.NotSupported(SRResources.TypeOfDynamicPropertyNotSupported,
-                        dynamicProperty.Value.GetType().FullName, dynamicProperty.Key);
-                }
-
-                ODataEdmTypeSerializer propertySerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
-                if (propertySerializer == null)
-                {
-                    throw Error.NotSupported(SRResources.DynamicPropertyCannotBeSerialized, dynamicProperty.Key,
-                        edmTypeReference.FullName());
-                }
-
-                dynamicProperties.Add(propertySerializer.CreateProperty(
-                    dynamicProperty.Value, edmTypeReference, dynamicProperty.Key, writeContext));
-            }
-
-            return dynamicProperties;
         }
     }
 }

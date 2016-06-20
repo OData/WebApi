@@ -59,7 +59,7 @@ namespace System.Web.OData.Builder
 
             Assert.Throws<InvalidOperationException>(() => controller.GetMetadata(),
                 "The request must have an associated EDM model. Consider using the extension method " +
-                "HttpConfiguration.Routes.MapODataServiceRoute to register a route that parses the OData URI and " +
+                "HttpConfiguration.MapODataServiceRoute to register a route that parses the OData URI and " +
                 "attaches the model information.");
         }
 

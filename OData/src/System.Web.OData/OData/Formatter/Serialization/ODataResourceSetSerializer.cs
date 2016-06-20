@@ -18,7 +18,7 @@ using Microsoft.OData.UriParser;
 namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
-    /// OData serializer for serializing a collection of <see cref="IEdmEntityType" /> and <see cref="IEdmComplexType"/>
+    /// OData serializer for serializing a collection of <see cref="IEdmEntityType" /> or <see cref="IEdmComplexType"/>
     /// </summary>
     public class ODataResourceSetSerializer : ODataEdmTypeSerializer
     {
@@ -114,8 +114,8 @@ namespace System.Web.OData.Formatter.Serialization
                 });
             }
 
-            ODataEdmTypeSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType);
-            if (entrySerializer == null)
+            ODataEdmTypeSerializer resourceSerializer = SerializerProvider.GetEdmTypeSerializer(elementType);
+            if (resourceSerializer == null)
             {
                 throw new SerializationException(
                     Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
@@ -127,14 +127,14 @@ namespace System.Web.OData.Formatter.Serialization
 
             writer.WriteStart(resourceSet);
 
-            foreach (object entry in enumerable)
+            foreach (object item in enumerable)
             {
-                if (entry == null)
+                if (item == null)
                 {
                     throw new SerializationException(SRResources.NullElementInCollection);
                 }
 
-                entrySerializer.WriteObjectInline(entry, elementType, writer, writeContext);
+                resourceSerializer.WriteObjectInline(item, elementType, writer, writeContext);
             }
 
             // Subtle and suprising behavior: If the NextPageLink property is set before calling WriteStart(resourceSet),

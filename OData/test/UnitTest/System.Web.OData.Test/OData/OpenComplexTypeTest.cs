@@ -65,8 +65,9 @@ namespace System.Web.OData
               "\"@odata.context\":\"http://localhost/odata/$metadata#OpenCustomers/$entity\"," +
               "\"CustomerId\":6,\"Name\":\"FirstName 6\"," +
               "\"Address\":{" +
-                "\"Street\":\"Street 6\",\"City\":\"City 6\",\"Country\":\"Earth\",\"Token@odata.type\":\"#Guid\"," +
+                "\"Street\":\"Street 6\",\"City\":\"City 6\",\"Country@odata.type\":\"#String\",\"Country\":\"Earth\",\"Token@odata.type\":\"#Guid\"," +
                 "\"Token\":\"4DB52263-4382-4BCB-A63E-3129C1B5FA0D\"," +
+                "\"Number@odata.type\":\"#Int32\"," +
                 "\"Number\":990," +
                 "\"BirthTime@odata.type\":\"#TimeOfDay\"," +
                 "\"BirthTime\":\"11:12:13.0140000\"" +
@@ -99,12 +100,12 @@ namespace System.Web.OData
         public void OpenComplexType_PutComplexTypeProperty()
         {
             // Arrange
-            const string payload = "{\"value\":{" +
+            const string payload = "{" +
               "\"Street\":\"UpdatedStreet\"," +
               "\"City\":\"UpdatedCity\"," +
               "\"Publish@odata.type\":\"#Date\"," +
               "\"Publish\":\"2016-02-02\"" +
-            "}}";
+            "}";
 
             const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
 
@@ -127,13 +128,13 @@ namespace System.Web.OData
         public void OpenComplexType_PatchComplexTypeProperty()
         {
             // Arrange
-            const string payload = "{\"value\":{" +
+            const string payload = "{" +
               "\"Street\":\"UpdatedStreet\"," +
               "\"Token@odata.type\":\"#Guid\"," +
               "\"Token\":\"2E724E81-8462-4BA0-B920-DC87A61C8EA3\"," +
               "\"BirthDay@odata.type\":\"#Date\"," +
               "\"BirthDay\":\"2016-01-29\"" +
-            "}}";
+            "}";
 
             const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
 

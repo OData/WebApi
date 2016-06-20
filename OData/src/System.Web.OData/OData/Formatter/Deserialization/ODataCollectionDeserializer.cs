@@ -59,6 +59,7 @@ namespace System.Web.OData.Formatter.Deserialization
             {
                 return null;
             }
+
             if (edmType == null)
             {
                 throw Error.ArgumentNull("edmType");
@@ -85,23 +86,9 @@ namespace System.Web.OData.Formatter.Deserialization
             IEnumerable result = ReadCollectionValue(collection, elementType, readContext);
             if (result != null)
             {
-                if (readContext.IsUntyped && elementType.IsComplex())
+                if (readContext.IsUntyped && elementType.IsEnum())
                 {
-                    EdmComplexObjectCollection complexCollection = new EdmComplexObjectCollection(collectionType);
-                    foreach (EdmComplexObject complexObject in result)
-                    {
-                        complexCollection.Add(complexObject);
-                    }
-                    return complexCollection;
-                }
-                else if (readContext.IsUntyped && elementType.IsEnum())
-                {
-                    EdmEnumObjectCollection enumCollection = new EdmEnumObjectCollection(collectionType);
-                    foreach (EdmEnumObject enumObject in result)
-                    {
-                        enumCollection.Add(enumObject);
-                    }
-                    return enumCollection;
+                    return result.ConvertToEdmObject(collectionType);
                 } 
                 else
                 {
@@ -139,15 +126,15 @@ namespace System.Web.OData.Formatter.Deserialization
                     Error.Format(SRResources.TypeCannotBeDeserialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
             }
 
-            foreach (object entry in collectionValue.Items)
+            foreach (object item in collectionValue.Items)
             {
                 if (elementType.IsPrimitive())
                 {
-                    yield return entry;
+                    yield return item;
                 }
                 else
                 {
-                    yield return deserializer.ReadInline(entry, elementType, readContext);
+                    yield return deserializer.ReadInline(item, elementType, readContext);
                 }
             }
         }

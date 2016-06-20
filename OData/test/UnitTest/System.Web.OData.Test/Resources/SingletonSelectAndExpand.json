@@ -1,5 +1,5 @@
 ﻿{
-  "@odata.context":"http://localhost/odata/$metadata#Me(Orders,Orders(Name))","@odata.type":"#System.Web.OData.Formatter.Serialization.Models.SpecialCustomer","Orders":[
+  "@odata.context":"http://localhost/odata/$metadata#Me/System.Web.OData.Formatter.Serialization.Models.SpecialCustomer(Orders,Orders(Name))","@odata.type":"#System.Web.OData.Formatter.Serialization.Models.SpecialCustomer","Orders":[
     {
       "Name":"Order #0"
     },{

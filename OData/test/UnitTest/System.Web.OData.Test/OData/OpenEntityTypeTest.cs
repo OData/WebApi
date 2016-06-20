@@ -10,6 +10,7 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
@@ -41,7 +42,7 @@ namespace System.Web.OData
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Assert.Equal("http://localhost/odata/$metadata#SimpleOpenCustomers/$entity", result["@odata.context"]);
+            Assert.Equal("http://localhost/odata/$metadata#SimpleOpenCustomers/System.Web.OData.SimpleVipCustomer/$entity", result["@odata.context"]);
             Assert.Equal("#System.Web.OData.SimpleVipCustomer", result["@odata.type"]);
             Assert.Equal(9, result["CustomerId"]);
             Assert.Equal("VipCustomer", result["Name"]);
@@ -58,34 +59,6 @@ namespace System.Web.OData
             {
                 Assert.Null(result["Receipt"]);
             }
-        }
-
-        [Fact]
-        public void Get_OpenEntityType2222222222222222222()
-        {
-            // Arrange
-            const string RequestUri = "http://localhost/odata/SimpleOpenCustomers(9)/Address";
-            var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
-
-            HttpClient client = new HttpClient(new HttpServer(configuration));
-
-            // Act
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
-            HttpResponseMessage response = client.SendAsync(request).Result;
-
-            // Assert
-            Assert.True(response.IsSuccessStatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Assert.Equal("http://localhost/odata/$metadata#SimpleOpenCustomers/$entity", result["@odata.context"]);
-            Assert.Equal("#System.Web.OData.SimpleVipCustomer", result["@odata.type"]);
-            Assert.Equal(9, result["CustomerId"]);
-            Assert.Equal("VipCustomer", result["Name"]);
-            Assert.Equal("#Collection(Int32)", result["ListProp@odata.type"]);
-            Assert.Equal(new JArray(new[] { 200, 100, 300, 0, 400 }), result["ListProp"]);
-            Assert.Equal("0001-01-01", result["DateList"][0]);
-            Assert.Equal("9999-12-31", result["DateList"][1]);
         }
 
         [Theory] 
@@ -238,7 +211,9 @@ namespace System.Web.OData
                 "\"Token\":\"4DB52263-4382-4BCB-A63E-3129C1B5FA0D\"," +
                 "\"Number\":990" +
               "}," +
-              "\"Website\": \"WebSite #6\",\"Country\":\"My Dynamic Country\",\"Token@odata.type\":\"#Guid\",\"Token\":\"2c1f450a-a2a7-4fe1-a25d-4d9332fc0694\"," +
+              "\"Website\": \"WebSite #6\"," +
+              "\"Country@odata.type\":\"#String\",\"Country\":\"My Dynamic Country\"," + // odata.type is necessary, otherwise it will get an ODataUntypedValue
+              "\"Token@odata.type\":\"#Guid\",\"Token\":\"2c1f450a-a2a7-4fe1-a25d-4d9332fc0694\"," +
               "\"DoubleList@odata.type\":\"#Collection(Double)\"," +
               "\"DoubleList\":[5.5, 4.4, 3.3]" +
             "}";
@@ -265,8 +240,8 @@ namespace System.Web.OData
         { 
             // Arrange
             const string Payload = "{" + 
-              "\"@odata.context\":\"http://localhost/odata/$metadata#UntypedSimpleOpenCustomer/$entity\"," +
-              "\"CustomerId\":6,\"Name\":\"FirstName 6\"," +
+              "\"@odata.context\":\"http://localhost/odata/$metadata#UntypedSimpleOpenCustomers/$entity\"," +
+              "\"CustomerId\":6,\"Name@odata.type\":\"#String\",\"Name\":\"FirstName 6\"," +
               "\"Address\":{" +
                 "\"@odata.type\":\"#NS.Address\",\"Street\":\"Street 6\",\"City\":\"City 6\"" +
               "}," + 
@@ -282,7 +257,6 @@ namespace System.Web.OData
               "\"FavoriteColors@odata.type\":\"#Collection(NS.Color)\"," +
               "\"FavoriteColors\":[\"0\", \"1\"]" +
             "}";
-
 
             var configuration = new[] { typeof(UntypedSimpleOpenCustomersController) }.GetHttpConfiguration();
             configuration.MapODataServiceRoute("odata", "odata", GetUntypedEdmModel());
@@ -698,7 +672,7 @@ namespace System.Web.OData
 
             Assert.NotNull(cityValue);
             Assert.Equal(typeof(String), cityType);
-            Assert.Equal("City 6", cityValue);
+            Assert.Equal("\"City 6\"", cityValue); // It reads as ODataUntypedValue, and the RawValue is the string with the ""
 
             return Ok(customer);
         }

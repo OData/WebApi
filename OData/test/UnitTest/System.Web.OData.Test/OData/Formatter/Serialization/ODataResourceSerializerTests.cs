@@ -23,7 +23,7 @@ using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace System.Web.OData.Formatter.Serialization
 {
-    public class ODataEntityTypeSerializerTests
+    public class ODataResourceSerializerTests
     {
         private IEdmModel _model;
         private IEdmEntitySet _customerSet;
@@ -40,7 +40,7 @@ namespace System.Web.OData.Formatter.Serialization
         private IEdmEntityTypeReference _specialOrderType;
         private ODataPath _path;
 
-        public ODataEntityTypeSerializerTests()
+        public ODataResourceSerializerTests()
         {
             _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
 
@@ -101,15 +101,6 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.ThrowsArgumentNull(
                 () => _serializer.WriteObject(graph: _customer, type: typeof(Customer), messageWriter: messageWriter, writeContext: null),
                 "writeContext");
-        }
-
-        [Fact]
-        public void WriteObject_ThrowsSerializationException_WhenEntitySetIsMissingInWriteContext()
-        {
-            ODataMessageWriter messageWriter = new ODataMessageWriter(new Mock<IODataRequestMessage>().Object);
-            Assert.Throws<SerializationException>(
-                () => _serializer.WriteObject(graph: _customer, type: typeof(Customer), messageWriter: messageWriter, writeContext: new ODataSerializerContext()),
-                "The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to serialize the payload.");
         }
 
         [Fact]
@@ -174,7 +165,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void WriteObjectInline_Calls_CreateEntry()
+        public void WriteObjectInline_Calls_CreateResource()
         {
             // Arrange
             SelectExpandNode selectExpandNode = new SelectExpandNode();
@@ -193,7 +184,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void WriteObjectInline_WritesODataEntryFrom_CreateEntry()
+        public void WriteObjectInline_WritesODataEntryFrom_CreateResource()
         {
             // Arrange
             ODataResource entry = new ODataResource();
@@ -582,7 +573,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateEntry_ThrowsArgumentNull_SelectExpandNode()
+        public void CreateResource_ThrowsArgumentNull_SelectExpandNode()
         {
             Assert.ThrowsArgumentNull(
                 () => _serializer.CreateResource(selectExpandNode: null, resourceContext: _entityContext),
@@ -590,7 +581,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateEntry_ThrowsArgumentNull_EntityContext()
+        public void CreateResource_ThrowsArgumentNull_EntityContext()
         {
             Assert.ThrowsArgumentNull(
                 () => _serializer.CreateResource(new SelectExpandNode(), resourceContext: null),
@@ -598,7 +589,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateEntry_Calls_CreateStructuralProperty_ForEachSelectedStructuralProperty()
+        public void CreateResource_Calls_CreateStructuralProperty_ForEachSelectedStructuralProperty()
         {
             // Arrange
             SelectExpandNode selectExpandNode = new SelectExpandNode
@@ -627,7 +618,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateEntry_SetsETagToNull_IfRequestIsNull()
+        public void CreateResource_SetsETagToNull_IfRequestIsNull()
         {
             // Arrange
             SelectExpandNode selectExpandNode = new SelectExpandNode
@@ -653,7 +644,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateEntry_SetsETagToNull_IfModelDontHaveConcurrencyProperty()
+        public void CreateResource_SetsETagToNull_IfModelDontHaveConcurrencyProperty()
         {
             // Arrange
             IEdmEntitySet orderSet = _model.EntityContainer.FindEntitySet("Orders");
@@ -694,7 +685,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateEntry_SetsEtagToNotNull_IfWithConcurrencyProperty()
+        public void CreateResource_SetsEtagToNotNull_IfWithConcurrencyProperty()
         {
             // Arrange
             Mock<IEdmStructuralProperty> mockConcurrencyProperty = new Mock<IEdmStructuralProperty>();
@@ -732,7 +723,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateEntry_IgnoresProperty_IfCreateStructuralPropertyReturnsNull()
+        public void CreateResource_IgnoresProperty_IfCreateStructuralPropertyReturnsNull()
         {
             // Arrange
             SelectExpandNode selectExpandNode = new SelectExpandNode
@@ -755,7 +746,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateEntry_Calls_CreateODataAction_ForEachSelectAction()
+        public void CreateResource_Calls_CreateODataAction_ForEachSelectAction()
         {
             // Arrange
             ODataAction[] actions = new ODataAction[] { new ODataAction(), new ODataAction() };
@@ -778,7 +769,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateEntry_Works_ToAppendDynamicProperties_ForOpenEntityType()
+        public void CreateResource_Works_ToAppendDynamicProperties_ForOpenEntityType()
         {
             // Arrange
             IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
@@ -830,55 +821,48 @@ namespace System.Web.OData.Formatter.Serialization
             customer.CustomerProperties.Add("ListProperty", new List<int>{5,4,3,2,1});
             customer.CustomerProperties.Add("DateTimeProperty", new DateTime(2014, 10, 24));
 
-            ResourceContext entityContext = new ResourceContext(writeContext,
+            ResourceContext resourceContext = new ResourceContext(writeContext,
                 customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
 
             // Act
-            ODataResource entry = serializer.CreateResource(selectExpandNode, entityContext);
+            ODataResource resource = serializer.CreateResource(selectExpandNode, resourceContext);
 
             // Assert
-            Assert.Equal(entry.TypeName, "Default.Customer");
-            Assert.Equal(7, entry.Properties.Count());
+            Assert.Equal(resource.TypeName, "Default.Customer");
+            Assert.Equal(6, resource.Properties.Count());
 
             // Verify the declared properties
-            ODataProperty street = Assert.Single(entry.Properties.Where(p => p.Name == "CustomerId"));
+            ODataProperty street = Assert.Single(resource.Properties.Where(p => p.Name == "CustomerId"));
             Assert.Equal(991, street.Value);
 
-            ODataProperty city = Assert.Single(entry.Properties.Where(p => p.Name == "Name"));
+            ODataProperty city = Assert.Single(resource.Properties.Where(p => p.Name == "Name"));
             Assert.Equal("Name #991", city.Value);
 
             // Verify the nested open complex property
-            ODataProperty address = Assert.Single(entry.Properties.Where(p => p.Name == "Address"));
-            ODataComplexValue addressComplexValue = Assert.IsType<ODataComplexValue>(address.Value);
-            ODataProperty addressDynamicProperty =
-                Assert.Single(addressComplexValue.Properties.Where(p => p.Name == "ArrayProperty"));
-            ODataCollectionValue addressCollectionValue =
-                Assert.IsType<ODataCollectionValue>(addressDynamicProperty.Value);
-            Assert.Equal(new[] { "15", "14", "13" }, addressCollectionValue.Items.OfType<string>().ToList());
-            Assert.Equal("Collection(Edm.String)", addressCollectionValue.TypeName);
+            Assert.Empty(resource.Properties.Where(p => p.Name == "Address"));
 
             // Verify the dynamic properties
-            ODataProperty enumProperty = Assert.Single(entry.Properties.Where(p => p.Name == "EnumProperty"));
+            ODataProperty enumProperty = Assert.Single(resource.Properties.Where(p => p.Name == "EnumProperty"));
             ODataEnumValue enumValue = Assert.IsType<ODataEnumValue>(enumProperty.Value);
             Assert.Equal("Fourth", enumValue.Value);
             Assert.Equal("Default.SimpleEnum", enumValue.TypeName);
 
-            ODataProperty guidProperty = Assert.Single(entry.Properties.Where(p => p.Name == "GuidProperty"));
+            ODataProperty guidProperty = Assert.Single(resource.Properties.Where(p => p.Name == "GuidProperty"));
             Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), guidProperty.Value);
 
-            ODataProperty listProperty = Assert.Single(entry.Properties.Where(p => p.Name == "ListProperty"));
+            ODataProperty listProperty = Assert.Single(resource.Properties.Where(p => p.Name == "ListProperty"));
             ODataCollectionValue collectionValue = Assert.IsType<ODataCollectionValue>(listProperty.Value);
             Assert.Equal(new List<int>{5,4,3,2,1}, collectionValue.Items.OfType<int>().ToList());
             Assert.Equal("Collection(Edm.Int32)", collectionValue.TypeName);
 
-            ODataProperty dateTimeProperty = Assert.Single(entry.Properties.Where(p => p.Name == "DateTimeProperty"));
+            ODataProperty dateTimeProperty = Assert.Single(resource.Properties.Where(p => p.Name == "DateTimeProperty"));
             Assert.Equal(new DateTimeOffset(new DateTime(2014, 10, 24)), dateTimeProperty.Value);
         }
 
         [Theory]
-        [InlineData(true, 5)]
-        [InlineData(false, 4)]
-        public void CreateEntry_Works_ToAppendNullDynamicProperties_ForOpenEntityType(bool enableNullDynamicProperty, int count)
+        [InlineData(true, 4)]
+        [InlineData(false, 3)]
+        public void CreateResource_Works_ToAppendNullDynamicProperties_ForOpenEntityType(bool enableNullDynamicProperty, int count)
         {
             // Arrange
             IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
@@ -938,34 +922,27 @@ namespace System.Web.OData.Formatter.Serialization
                 customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
 
             // Act
-            ODataResource entry = serializer.CreateResource(selectExpandNode, entityContext);
+            ODataResource resource = serializer.CreateResource(selectExpandNode, entityContext);
 
             // Assert
-            Assert.Equal(entry.TypeName, "Default.Customer");
-            Assert.Equal(count, entry.Properties.Count());
+            Assert.Equal(resource.TypeName, "Default.Customer");
+            Assert.Equal(count, resource.Properties.Count());
 
             // Verify the declared properties
-            ODataProperty street = Assert.Single(entry.Properties.Where(p => p.Name == "CustomerId"));
+            ODataProperty street = Assert.Single(resource.Properties.Where(p => p.Name == "CustomerId"));
             Assert.Equal(991, street.Value);
 
-            ODataProperty city = Assert.Single(entry.Properties.Where(p => p.Name == "Name"));
+            ODataProperty city = Assert.Single(resource.Properties.Where(p => p.Name == "Name"));
             Assert.Equal("Name #991", city.Value);
 
             // Verify the nested open complex property
-            ODataProperty address = Assert.Single(entry.Properties.Where(p => p.Name == "Address"));
-            ODataComplexValue addressComplexValue = Assert.IsType<ODataComplexValue>(address.Value);
-            ODataProperty addressDynamicProperty =
-                Assert.Single(addressComplexValue.Properties.Where(p => p.Name == "ArrayProperty"));
-            ODataCollectionValue addressCollectionValue =
-                Assert.IsType<ODataCollectionValue>(addressDynamicProperty.Value);
-            Assert.Equal(new[] { "15", "14", "13" }, addressCollectionValue.Items.OfType<string>().ToList());
-            Assert.Equal("Collection(Edm.String)", addressCollectionValue.TypeName);
+            Assert.Empty(resource.Properties.Where(p => p.Name == "Address"));
 
             // Verify the dynamic properties
-            ODataProperty guidProperty = Assert.Single(entry.Properties.Where(p => p.Name == "GuidProperty"));
+            ODataProperty guidProperty = Assert.Single(resource.Properties.Where(p => p.Name == "GuidProperty"));
             Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), guidProperty.Value);
 
-            ODataProperty nullProperty = entry.Properties.SingleOrDefault(p => p.Name == "NullProperty");
+            ODataProperty nullProperty = resource.Properties.SingleOrDefault(p => p.Name == "NullProperty");
             if (enableNullDynamicProperty)
             {
                 Assert.NotNull(nullProperty);
@@ -1095,7 +1072,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateEntry_UsesCorrectTypeName()
+        public void CreateResource_UsesCorrectTypeName()
         {
             ResourceContext instanceContext =
                 new ResourceContext { StructuredType = _customerType.EntityDefinition(), SerializerContext = _writeContext };
@@ -1129,7 +1106,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateEntry_WritesCorrectIdLink()
+        public void CreateResource_WritesCorrectIdLink()
         {
             // Arrange
             ResourceContext instanceContext = new ResourceContext
@@ -1278,19 +1255,19 @@ namespace System.Web.OData.Formatter.Serialization
         [InlineData("DoesNotMatch1", "DoesNotMatch2", TestODataMetadataLevel.MinimalMetadata, false)]
         [InlineData("MatchingType", "MatchingType", TestODataMetadataLevel.NoMetadata, true)]
         [InlineData("DoesNotMatch1", "DoesNotMatch2", TestODataMetadataLevel.NoMetadata, true)]
-        public void ShouldSuppressTypeNameSerialization(string entryType, string entitySetType,
+        public void ShouldSuppressTypeNameSerialization(string resourceType, string entitySetType,
             TestODataMetadataLevel metadataLevel, bool expectedResult)
         {
             // Arrange
-            ODataResource entry = new ODataResource
+            ODataResource resource = new ODataResource
             {
                 // The caller uses a namespace-qualified name, which this test leaves empty.
-                TypeName = "." + entryType
+                TypeName = "NS." + resourceType
             };
             IEdmEntityType edmType = CreateEntityTypeWithName(entitySetType);
 
             // Act
-            bool actualResult = ODataResourceSerializer.ShouldSuppressTypeNameSerialization(entry, edmType,
+            bool actualResult = ODataResourceSerializer.ShouldSuppressTypeNameSerialization(resource, edmType,
                 (ODataMetadataLevel)metadataLevel);
 
             // Assert
@@ -1883,9 +1860,12 @@ namespace System.Web.OData.Formatter.Serialization
 
         private static IEdmEntityType CreateEntityTypeWithName(string typeName)
         {
+            IEdmEntityType entityType = new EdmEntityType("NS", typeName);
+            return entityType;
+            /*
             Mock<IEdmEntityType> entityTypeMock = new Mock<IEdmEntityType>();
             entityTypeMock.Setup(o => o.Name).Returns(typeName);
-            return entityTypeMock.Object;
+            return entityTypeMock.Object;*/
         }
 
         private static IEdmDirectValueAnnotationsManager CreateFakeAnnotationsManager()

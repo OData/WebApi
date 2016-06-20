@@ -38,7 +38,7 @@ namespace System.Web.OData.Formatter.Deserialization
             Contract.Assert(edmType != null);
 
             // TODO: is it ok to read the top level collection of entity?
-            if (!edmType.IsStructured())
+            if (!(edmType.IsCollection() && edmType.AsCollection().ElementType().IsStructured()))
             {
                 throw Error.Argument("edmType", SRResources.ArgumentMustBeOfType, EdmTypeKind.Complex + " or " + EdmTypeKind.Entity);
             }
@@ -95,9 +95,9 @@ namespace System.Web.OData.Formatter.Deserialization
                     Error.Format(SRResources.TypeCannotBeDeserialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
             }
 
-            foreach (ODataResourceWrapper entry in resourceSet.Resources)
+            foreach (ODataResourceWrapper resourceWrapper in resourceSet.Resources)
             {
-                yield return deserializer.ReadInline(entry, elementType, readContext);
+                yield return deserializer.ReadInline(resourceWrapper, elementType, readContext);
             }
         }
     }

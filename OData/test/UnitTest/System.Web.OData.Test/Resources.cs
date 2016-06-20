@@ -40,14 +40,6 @@ namespace System.Web.OData
             }
         }
 
-        public static string EnumComplexType
-        {
-            get
-            {
-                return GetString("EnumComplexType.json");
-            }
-        }
-
         public static string FeedOfEmployee
         {
             get

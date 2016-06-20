@@ -570,7 +570,7 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("editLinkFactory");
             }
 
-            _configuration.HasEditLink(new SelfLinkBuilder<Uri>((entity) => editLinkFactory(UpCastEntityContext(entity)), followsConventions));
+            _configuration.HasEditLink(new SelfLinkBuilder<Uri>((context) => editLinkFactory(UpCastEntityContext(context)), followsConventions));
         }
 
         /// <summary>
@@ -588,8 +588,8 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("readLinkFactory");
             }
 
-            _configuration.HasReadLink(new SelfLinkBuilder<Uri>((entity) =>
-                readLinkFactory(UpCastEntityContext(entity)), followsConventions));
+            _configuration.HasReadLink(new SelfLinkBuilder<Uri>((context) =>
+                readLinkFactory(UpCastEntityContext(context)), followsConventions));
         }
 
         /// <summary>
@@ -607,8 +607,8 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("idLinkFactory");
             }
 
-            _configuration.HasIdLink(new SelfLinkBuilder<Uri>((entity) =>
-                idLinkFactory(UpCastEntityContext(entity)), followsConventions));
+            _configuration.HasIdLink(new SelfLinkBuilder<Uri>((context) =>
+                idLinkFactory(UpCastEntityContext(context)), followsConventions));
         }
 
         /// <summary>
@@ -633,8 +633,8 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("navigationLinkFactory");
             }
 
-            _configuration.HasNavigationPropertyLink(navigationProperty, new NavigationLinkBuilder((entity, property) =>
-                navigationLinkFactory(UpCastEntityContext(entity), property), followsConventions));
+            _configuration.HasNavigationPropertyLink(navigationProperty, new NavigationLinkBuilder((context, property) =>
+                navigationLinkFactory(UpCastEntityContext(context), property), followsConventions));
         }
 
         /// <summary>

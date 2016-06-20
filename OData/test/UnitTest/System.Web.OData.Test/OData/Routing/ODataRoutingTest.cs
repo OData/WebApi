@@ -300,9 +300,8 @@ namespace System.Web.OData.Routing
                     // Feed (Collection of entity)
                     {
                         "GET", "RoutingCustomers(10)/Default.CollectionEntityTypeFunction(products=@p)" +
-                               "?@p={\"value\":[{\"@odata.type\":\"System.Web.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}," +
-                               "{\"@odata.type\":\"System.Web.OData.Routing.SpecialProduct\",\"ID\":9,\"Name\":\"Phone\",\"Value\":9}" +
-                               "]}",
+                               "?@p=[{\"@odata.type\":\"System.Web.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}," +
+                               "{\"@odata.type\":\"System.Web.OData.Routing.SpecialProduct\",\"ID\":9,\"Name\":\"Phone\",\"Value\":9}]",
                         "CollectionEntityTypeFunction(products={2})"
                     },
                 };
@@ -318,7 +317,7 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "RoutingCustomers(11)/Default.EntityTypeFunction(product=@p)?@p={\"@odata.id\":\"http://localhost/Products(5)\"}",
             "EntityTypeFunctionWithEntityReference(ID=5,Name=--)")]
         [InlineData("GET", "RoutingCustomers(11)/Default.CollectionEntityTypeFunction(products=@p)" +
-            "?@p={\"value\":[{\"@odata.id\":\"http://localhost/Products(5)\"},{\"@odata.id\":\"http://localhost/Products(6)\"}]}",
+            "?@p=[{\"@odata.id\":\"http://localhost/Products(5)\"},{\"@odata.id\":\"http://localhost/Products(6)\"}]",
             "CollectionEntityTypeFunctionWithEntityReference(products=[{ID=5,Name=--},{ID=6,Name=--}])")]
         public async Task RoutesCorrectly(string httpMethod, string uri, string expectedResponse)
         {
@@ -366,7 +365,7 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "RoutingCustomers(11)/Default.EntityTypeFunction(product=@p)?@p={\"@odata.id\":\"http://localhost/MyRoot/odata/Products(5)\"}",
             "EntityTypeFunctionWithEntityReference(ID=5,Name=--)")]
         [InlineData("GET", "RoutingCustomers(11)/Default.CollectionEntityTypeFunction(products=@p)" +
-            "?@p={\"value\":[{\"@odata.id\":\"http://localhost/MyRoot/odata/Products(5)\"},{\"@odata.id\":\"http://localhost/MyRoot/odata/Products(6)\"}]}",
+            "?@p=[{\"@odata.id\":\"http://localhost/MyRoot/odata/Products(5)\"},{\"@odata.id\":\"http://localhost/MyRoot/odata/Products(6)\"}]",
             "CollectionEntityTypeFunctionWithEntityReference(products=[{ID=5,Name=--},{ID=6,Name=--}])")]
         public async Task RoutesCorrectly_WithFixedPrefix(string httpMethod, string uri, string unused)
         {
@@ -400,7 +399,7 @@ namespace System.Web.OData.Routing
         [InlineData("GET", "RoutingCustomers(11)/Default.EntityTypeFunction(product=@p)?@p={\"@odata.id\":\"http://localhost/parameter/Products(5)\"}",
             "EntityTypeFunctionWithEntityReference(ID=5,Name=--)")]
         [InlineData("GET", "RoutingCustomers(11)/Default.CollectionEntityTypeFunction(products=@p)" +
-            "?@p={\"value\":[{\"@odata.id\":\"http://localhost/parameter/Products(5)\"},{\"@odata.id\":\"http://localhost/parameter/Products(6)\"}]}",
+            "?@p=[{\"@odata.id\":\"http://localhost/parameter/Products(5)\"},{\"@odata.id\":\"http://localhost/parameter/Products(6)\"}]",
             "CollectionEntityTypeFunctionWithEntityReference(products=[{ID=5,Name=--},{ID=6,Name=--}])")]
         public async Task RoutesCorrectly_WithParameterizedPrefix(string httpMethod, string uri, string unused)
         {

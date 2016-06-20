@@ -161,7 +161,7 @@ namespace System.Web.OData.Results
             IEdmTypeReference edmType = model.GetEdmTypeReference(entityType);
             if (edmType == null)
             {
-                throw Error.InvalidOperation(SRResources.EntityTypeNotInModel, entityType.FullName);
+                throw Error.InvalidOperation(SRResources.ResourceTypeNotInModel, entityType.FullName);
             }
             if (!edmType.IsEntity())
             {

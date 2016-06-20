@@ -165,8 +165,8 @@ namespace System.Web.OData.Formatter
                     return EdmPrimitiveHelpers.ConvertPrimitiveValue(oDataValue, bindingContext.ModelType);
                 }
 
-                // Entity, Feed, Entity Reference or collection of entity reference
-                return ConvertFeedOrEntry(oDataValue, edmTypeReference, readContext);
+                // Resource, ResourceSet, Entity Reference or collection of entity reference
+                return ConvertResourceOrResourceSet(oDataValue, edmTypeReference, readContext);
             }
 
             internal static object ConvertCollection(ODataCollectionValue collectionValue, IEdmTypeReference edmTypeReference,
@@ -213,7 +213,7 @@ namespace System.Web.OData.Formatter
                 return null;
             }
 
-            internal static object ConvertFeedOrEntry(object oDataValue, IEdmTypeReference edmTypeReference, ODataDeserializerContext readContext)
+            internal static object ConvertResourceOrResourceSet(object oDataValue, IEdmTypeReference edmTypeReference, ODataDeserializerContext readContext)
             {
                 string valueString = oDataValue as string;
                 Contract.Assert(valueString != null);
@@ -240,25 +240,30 @@ namespace System.Web.OData.Formatter
 
                         if (edmTypeReference.IsCollection())
                         {
-                            return ConvertFeed(oDataMessageReader, edmTypeReference, readContext);
+                            return ConvertResourceSet(oDataMessageReader, edmTypeReference, readContext);
                         }
                         else
                         {
-                            return ConvertEntity(oDataMessageReader, edmTypeReference, readContext);
+                            return ConvertResource(oDataMessageReader, edmTypeReference, readContext);
                         }
                     }
                 }
             }
 
-            internal static object ConvertFeed(ODataMessageReader oDataMessageReader, IEdmTypeReference edmTypeReference, ODataDeserializerContext readContext)
+            internal static object ConvertResourceSet(ODataMessageReader oDataMessageReader, IEdmTypeReference edmTypeReference, ODataDeserializerContext readContext)
             {
                 IEdmCollectionTypeReference collectionType = edmTypeReference.AsCollection();
 
-                EdmEntitySet tempEntitySet = new EdmEntitySet(readContext.Model.EntityContainer, "temp",
-                    collectionType.ElementType().AsEntity().EntityDefinition());
+                EdmEntitySet tempEntitySet = null;
+                if (collectionType.ElementType().IsEntity())
+                {
+                    tempEntitySet = new EdmEntitySet(readContext.Model.EntityContainer, "temp",
+                        collectionType.ElementType().AsEntity().EntityDefinition());
+                }
 
-                ODataReader odataReader = oDataMessageReader.CreateODataResourceSetReader(tempEntitySet,
-                    collectionType.ElementType().AsEntity().EntityDefinition());
+                // TODO: Sam xu, can we use the parameter-less overload
+                ODataReader odataReader = oDataMessageReader.CreateODataUriParameterResourceSetReader(tempEntitySet,
+                    collectionType.ElementType().AsStructured().StructuredDefinition());
                 ODataResourceSetWrapper resourceSet =
                     odataReader.ReadResourceOrResourceSet() as ODataResourceSetWrapper;
 
@@ -269,17 +274,15 @@ namespace System.Web.OData.Formatter
                 IEnumerable enumerable = result as IEnumerable;
                 if (enumerable != null)
                 {
-                    IEnumerable newEnumerable = CovertFeedIds(enumerable, resourceSet, collectionType, readContext);
+                    IEnumerable newEnumerable = enumerable;
+                    if (collectionType.ElementType().IsEntity())
+                    {
+                        newEnumerable = CovertResourceSetIds(enumerable, resourceSet, collectionType, readContext);
+                    }
+
                     if (readContext.IsUntyped)
                     {
-                        EdmEntityObjectCollection entityCollection =
-                            new EdmEntityObjectCollection(collectionType);
-                        foreach (EdmEntityObject entity in newEnumerable)
-                        {
-                            entityCollection.Add(entity);
-                        }
-
-                        return entityCollection;
+                        return newEnumerable.ConvertToEdmObject(collectionType);
                     }
                     else
                     {
@@ -297,47 +300,57 @@ namespace System.Web.OData.Formatter
                 return null;
             }
 
-            internal static object ConvertEntity(ODataMessageReader oDataMessageReader, IEdmTypeReference edmTypeReference,
+            internal static object ConvertResource(ODataMessageReader oDataMessageReader, IEdmTypeReference edmTypeReference,
                 ODataDeserializerContext readContext)
             {
-                IEdmEntityTypeReference entityType = edmTypeReference.AsEntity();
+                EdmEntitySet tempEntitySet = null;
+                if (edmTypeReference.IsEntity())
+                {
+                    IEdmEntityTypeReference entityType = edmTypeReference.AsEntity();
+                    tempEntitySet = new EdmEntitySet(readContext.Model.EntityContainer, "temp", entityType.EntityDefinition());
+                }
 
-                EdmEntitySet tempEntitySet = new EdmEntitySet(readContext.Model.EntityContainer, "temp",
-                    entityType.EntityDefinition());
+                // TODO: Sam xu, can we use the parameter-less overload
+                ODataReader resourceReader = oDataMessageReader.CreateODataUriParameterResourceReader(tempEntitySet,
+                    edmTypeReference.ToStructuredType());
 
-                ODataReader entryReader = oDataMessageReader.CreateODataResourceReader(tempEntitySet,
-                    entityType.EntityDefinition());
-
-                object item = entryReader.ReadResourceOrResourceSet();
+                object item = resourceReader.ReadResourceOrResourceSet();
 
                 ODataResourceWrapper topLevelResource = item as ODataResourceWrapper;
                 Contract.Assert(topLevelResource != null);
 
                 ODataResourceDeserializer entityDeserializer =
-                    (ODataResourceDeserializer)DeserializerProvider.GetEdmTypeDeserializer(entityType);
-                object entity = entityDeserializer.ReadInline(topLevelResource, entityType, readContext);
-                return CovertEntityId(entity, topLevelResource.Resource, entityType, readContext);
+                    (ODataResourceDeserializer)DeserializerProvider.GetEdmTypeDeserializer(edmTypeReference);
+                object value = entityDeserializer.ReadInline(topLevelResource, edmTypeReference, readContext);
+
+                if (edmTypeReference.IsEntity())
+                {
+                    IEdmEntityTypeReference entityType = edmTypeReference.AsEntity();
+                    return CovertResourceId(value, topLevelResource.Resource, entityType, readContext);
+                }
+
+                return value;
             }
 
-            internal static IEnumerable CovertFeedIds(IEnumerable sources, ODataResourceSetWrapper resourceSet,
+            internal static IEnumerable CovertResourceSetIds(IEnumerable sources, ODataResourceSetWrapper resourceSet,
                 IEdmCollectionTypeReference collectionType, ODataDeserializerContext readContext)
             {
                 IEdmEntityTypeReference entityTypeReference = collectionType.ElementType().AsEntity();
                 int i = 0;
                 foreach (object item in sources)
                 {
-                    object newItem = CovertEntityId(item, resourceSet.Resources[i].Resource, entityTypeReference, readContext);
+                    object newItem = CovertResourceId(item, resourceSet.Resources[i].Resource, entityTypeReference, readContext);
                     i++;
                     yield return newItem;
                 }
             }
 
-            internal static object CovertEntityId(object source, ODataResource entry, IEdmEntityTypeReference entityTypeReference, ODataDeserializerContext readContext)
+            internal static object CovertResourceId(object source, ODataResource resource, IEdmEntityTypeReference entityTypeReference, ODataDeserializerContext readContext)
             {
-                Contract.Assert(entry != null);
+                Contract.Assert(resource != null);
                 Contract.Assert(source != null);
 
-                if (entry.Id == null || entry.Properties.Any())
+                if (resource.Id == null || resource.Properties.Any())
                 {
                     return source;
                 }
@@ -347,7 +360,7 @@ namespace System.Web.OData.Formatter
 
                 DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
                 string serviceRoot = GetServiceRoot(request);
-                IEnumerable<KeyValuePair<string, object>> keyValues = GetKeys(pathHandler, edmModel, serviceRoot, entry.Id);
+                IEnumerable<KeyValuePair<string, object>> keyValues = GetKeys(pathHandler, edmModel, serviceRoot, resource.Id);
 
                 IList<IEdmStructuralProperty> keys = entityTypeReference.Key().ToList();
 

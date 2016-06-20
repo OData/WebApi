@@ -14,10 +14,10 @@ namespace System.Web.OData.Formatter.Serialization
     public class ODataMessageReaderLearningTests
     {
         [Fact]
-        public void TestCreateODataCollectionReader_InJsonLight_WithoutTypeReference_Throws()
+        public void TestCreateODataCollectionReader_WithoutTypeReference_Throws()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest();
+            IODataRequestMessage request = CreateRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
 
@@ -29,13 +29,12 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestCreateODataCollectionReader_InJsonLight_WithTypeReference_DoesNotThrow()
+        public void TestCreateODataCollectionReader_WithTypeReference_DoesNotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest();
+            IODataRequestMessage request = CreateRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
-            IEdmOperationImport producingOperationImport = model.EntityContainer.OperationImports().First();
             IEdmTypeReference expectedItemTypeReference = new EdmPrimitiveTypeReference(
                 EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32), false);
 
@@ -47,25 +46,25 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestCreateODataEntryReader_InJsonLight_WithoutEntitySetOrType_Throws()
+        public void TestCreateODataResourceReader_WithoutEntitySetOrType_DoesNotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest();
+            IODataRequestMessage request = CreateRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => reader.CreateODataResourceReader());
+                Assert.DoesNotThrow(() => reader.CreateODataResourceReader());
             }
         }
 
         [Fact]
-        public void TestCreateODataEntryReader_InJsonLight_WithEntityTypeButWithoutSet_Throws()
+        public void TestCreateODataResourceReader_WithEntityTypeButWithoutSet_Throws()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest();
+            IODataRequestMessage request = CreateRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
             IEdmEntityType entityType = model.EntityContainer.EntitySets().First().EntityType();
@@ -78,10 +77,26 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestCreateODataEntryReader_InJsonLight_WithEntitySetButWithoutType_DoesNotThrow()
+        public void TestCreateODataResourceReader_WithComplexTypeButWithoutSet_DoesnotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest();
+            IODataRequestMessage request = CreateRequest();
+            ODataMessageReaderSettings settings = CreateSettings();
+            IEdmModel model = CreateModel();
+            IEdmComplexType complexType = model.SchemaElements.OfType<IEdmComplexType>().First();
+
+            using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
+            {
+                // Act & Assert
+                Assert.DoesNotThrow(() => reader.CreateODataResourceReader(null, complexType));
+            }
+        }
+
+        [Fact]
+        public void TestCreateODataResourceReader_WithEntitySetButWithoutType_DoesNotThrow()
+        {
+            // Arrange
+            IODataRequestMessage request = CreateRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
             IEdmEntitySet entitySet = model.EntityContainer.EntitySets().First();
@@ -94,25 +109,25 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestCreateODataFeedReader_InJsonLight_WithoutEntitySetOrType_Throws()
+        public void TestCreateODataResourceSetReader_WithoutEntitySetOrType_DoesNotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest();
+            IODataRequestMessage request = CreateRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => reader.CreateODataResourceSetReader());
+                Assert.DoesNotThrow(() => reader.CreateODataResourceSetReader());
             }
         }
 
         [Fact]
-        public void TestCreateODataFeedReader_InJsonLight_WithEntityTypeButWithoutSet_Throws()
+        public void TestCreateODataResourceSetReader_WithEntityTypeButWithoutSet_Throws()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest();
+            IODataRequestMessage request = CreateRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
             IEdmEntityType entityType = model.EntityContainer.EntitySets().First().EntityType();
@@ -125,10 +140,26 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestCreateODataFeedReader_InJsonLight_WithEntitySetButWithoutType_DoesNotThrow()
+        public void TestCreateODataResourceSetReader_WithComplexTypeButWithoutSet_DoesNotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest();
+            IODataRequestMessage request = CreateRequest();
+            ODataMessageReaderSettings settings = CreateSettings();
+            IEdmModel model = CreateModel();
+            IEdmComplexType complexType = model.SchemaElements.OfType<IEdmComplexType>().First();
+
+            using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
+            {
+                // Act & Assert
+                Assert.DoesNotThrow(() => reader.CreateODataResourceSetReader(complexType));
+            }
+        }
+
+        [Fact]
+        public void TestCreateODataResourceSetReader_WithEntitySetButWithoutType_DoesNotThrow()
+        {
+            // Arrange
+            IODataRequestMessage request = CreateRequest();
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
             IEdmEntitySet entitySet = model.EntityContainer.EntitySets().First();
@@ -141,10 +172,10 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestReadEntityReferenceLink_InJsonLight_WithoutNavigationProperty_Throws()
+        public void TestReadEntityReferenceLink_WithoutNavigationProperty_Throws()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest("{\"odata.id\":\"aa:b\"}");
+            IODataRequestMessage request = CreateRequest("{\"odata.id\":\"aa:b\"}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
 
@@ -156,10 +187,10 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestReadEntityReferenceLink_InJsonLight_WithNavigationProperty_DoesNotThrow()
+        public void TestReadEntityReferenceLink_WithNavigationProperty_DoesNotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest("{\"@odata.id\":\"aa:b\"}");
+            IODataRequestMessage request = CreateRequest("{\"@odata.id\":\"aa:b\"}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
 
@@ -171,10 +202,10 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestReadProperty_InJsonLight_WithoutStructuralPropertyOrTypeReference_DoesNotThrows()
+        public void TestReadProperty_WithoutStructuralPropertyOrTypeReference_DoesNotThrows()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest("{\"value\":1}");
+            IODataRequestMessage request = CreateRequest("{\"value\":1}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
 
@@ -186,10 +217,10 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestReadProperty_InJsonLight_WithStructuralProperty_DoesNotThrow()
+        public void TestReadProperty_WithStructuralProperty_DoesNotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest("{\"value\":1}");
+            IODataRequestMessage request = CreateRequest("{\"value\":1}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
             IEdmStructuralProperty property = model.EntityContainer.EntitySets().First().EntityType().StructuralProperties().First();
@@ -202,10 +233,10 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void TestReadProperty_InJsonLight_WithTypeReference_DoesNotThrow()
+        public void TestReadProperty_WithTypeReference_DoesNotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateJsonLightRequest("{\"value\":1}");
+            IODataRequestMessage request = CreateRequest("{\"value\":1}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
             IEdmTypeReference expectedPropertyTypeReference = new EdmPrimitiveTypeReference(
@@ -218,7 +249,7 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
-        private static IODataRequestMessage CreateJsonLightRequest()
+        private static IODataRequestMessage CreateRequest()
         {
             HttpContentHeaders headers;
 
@@ -232,7 +263,7 @@ namespace System.Web.OData.Formatter.Serialization
             return new ODataMessageWrapper(Stream.Null, headers);
         }
 
-        private static IODataRequestMessage CreateJsonLightRequest(string body)
+        private static IODataRequestMessage CreateRequest(string body)
         {
             HttpContent content = new StringContent(body);
             HttpContentHeaders headers = content.Headers;
@@ -244,6 +275,10 @@ namespace System.Web.OData.Formatter.Serialization
         private static IEdmModel CreateModel()
         {
             var model = new EdmModel();
+
+            var addressType = new EdmComplexType("Default", "Address");
+            addressType.AddStructuralProperty("Street", EdmPrimitiveTypeKind.String);
+            model.AddElement(addressType);
 
             var orderType = new EdmEntityType("Default", "Order");
             orderType.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32);

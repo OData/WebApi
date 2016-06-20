@@ -98,16 +98,16 @@ namespace System.Web.OData.Builder
 
         /// <summary>
         /// Generates an action link following the OData URL conventions for the action <paramref name="action"/> and bound to the
-        /// collection of entity represented by <paramref name="feedContext"/>.
+        /// collection of entity represented by <paramref name="resourceSetContext"/>.
         /// </summary>
-        /// <param name="feedContext">The <see cref="ResourceSetContext"/> representing the feed for which the action link needs to be generated.</param>
+        /// <param name="resourceSetContext">The <see cref="ResourceSetContext"/> representing the feed for which the action link needs to be generated.</param>
         /// <param name="action">The action for which the action link needs to be generated.</param>
         /// <returns>The generated action link following OData URL conventions.</returns>
-        public static Uri GenerateActionLink(this ResourceSetContext feedContext, IEdmOperation action)
+        public static Uri GenerateActionLink(this ResourceSetContext resourceSetContext, IEdmOperation action)
         {
-            if (feedContext == null)
+            if (resourceSetContext == null)
             {
-                throw Error.ArgumentNull("feedContext");
+                throw Error.ArgumentNull("resourceSetContext");
             }
 
             if (action == null)
@@ -123,7 +123,7 @@ namespace System.Web.OData.Builder
                 throw Error.Argument("action", SRResources.ActionNotBoundToCollectionOfEntity, action.Name);
             }
 
-            return GenerateActionLink(feedContext, bindingParameter.Type, action);
+            return GenerateActionLink(resourceSetContext, bindingParameter.Type, action);
         }
 
         internal static Uri GenerateActionLink(this ResourceSetContext feedContext, string bindingParameterType,

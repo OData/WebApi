@@ -13,7 +13,7 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData.Formatter.Serialization
 {
     /// <summary>
-    /// ODataSerializer for serializing collection of Entities or Complex types or primitives.
+    /// ODataSerializer for serializing collection of primitive or enum types.
     /// </summary>
     public class ODataCollectionSerializer : ODataEdmTypeSerializer
     {

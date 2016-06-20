@@ -50,12 +50,14 @@ namespace System.Web.OData.Query.Expressions
         [Fact]
         public void GetEdmType_ThrowsODataException_IfTypeFromTypeNameIsNotFoundInModel()
         {
+            // Arrange
             _modelID = ModelContainer.GetModelID(EdmCoreModel.Instance);
             SelectExpandWrapper<int> wrapper = new SelectExpandWrapper<int> { TypeName = _model.Customer.FullName(), ModelID = _modelID };
 
+            // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => wrapper.GetEdmType(),
-                "Cannot find the entity type 'NS.Customer' in the model.");
+                "Cannot find the resource type 'NS.Customer' in the model.");
         }
 
         [Fact]

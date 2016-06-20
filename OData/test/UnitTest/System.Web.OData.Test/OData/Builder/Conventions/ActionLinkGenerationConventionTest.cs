@@ -57,14 +57,14 @@ namespace System.Web.OData.Builder.Conventions
             IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
             var edmType = model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "Customer");
             var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = customers, Url = request.GetUrlHelper() };
-            var entityContext = new ResourceContext(serializerContext, edmType.AsReference(), new Customer { Id = 109 });
+            var resourceContext = new ResourceContext(serializerContext, edmType.AsReference(), new Customer { Id = 109 });
 
             // Assert
             var edmAction = model.SchemaElements.OfType<IEdmAction>().First(f => f.Name == "MyAction");
             Assert.NotNull(edmAction);
 
             OperationLinkBuilder actionLinkBuilder = model.GetOperationLinkBuilder(edmAction);
-            Uri link = actionLinkBuilder.BuildLink(entityContext);
+            Uri link = actionLinkBuilder.BuildLink(resourceContext);
 
             Assert.Equal("http://localhost:123/odata/Customers(109)/Default.MyAction", link.AbsoluteUri);
         }

@@ -173,7 +173,7 @@
     <Compile Include="OData\ResourceContextTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\DeserializationHelpersTest.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerTest.cs" />
-    <Compile Include="OData\Formatter\Deserialization\ODataFeedDeserializerTest.cs" />
+    <Compile Include="OData\Formatter\Deserialization\ODataResourceSetDeserializerTest.cs" />
     <Compile Include="OData\Formatter\ODataRawValueMediaTypeMappingTests.cs" />
     <Compile Include="OData\Formatter\ODataValueExtensionsTest.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataEntityReferenceLinksSerializerTest.cs" />
@@ -194,7 +194,6 @@
     <Compile Include="OData\ODataSwaggerUtilitiesTest.cs" />
     <Compile Include="OData\ODataUriResolverExtensionTest.cs" />
     <Compile Include="OData\FunctionActionAdvertisedTest.cs" />
-    <Compile Include="OData\ResourceSetSerializerAndDeserializerTest.cs" />
     <Compile Include="OData\PerRequestContentNegotiatorTest.cs" />
     <Compile Include="OData\ODataRoutingAttributeTest.cs" />
     <Compile Include="OData\Formatter\HttpRequestMessageExtensions.cs" />
@@ -391,8 +390,8 @@
     <Compile Include="OData\Formatter\Serialization\Models\Customer.cs" />
     <Compile Include="OData\Formatter\Serialization\Models\Order.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataCollectionSerializerTests.cs" />
-    <Compile Include="OData\Formatter\Serialization\ODataEntityTypeSerializerTests.cs" />
-    <Compile Include="OData\Formatter\Serialization\ODataFeedSerializerTests.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataResourceSerializerTests.cs" />
+    <Compile Include="OData\Formatter\Serialization\ODataResourceSetSerializerTests.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataPayloadKindHelperTests.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataPrimitiveSerializerTests.cs" />
     <Compile Include="TestCommon\EdmTestHelpers.cs" />
@@ -441,7 +440,6 @@
     <EmbeddedResource Include="Resources\DecimalFullMetadata.json" />
     <EmbeddedResource Include="Resources\DoubleFullMetadata.json" />
     <EmbeddedResource Include="Resources\EmployeeEntry.json" />
-    <EmbeddedResource Include="Resources\EnumComplexType.json" />
     <EmbeddedResource Include="Resources\FeedOfEmployee.json" />
     <EmbeddedResource Include="Resources\GuidFullMetadata.json" />
     <EmbeddedResource Include="Resources\Int16FullMetadata.json" />

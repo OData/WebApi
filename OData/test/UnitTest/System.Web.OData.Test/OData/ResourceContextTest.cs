@@ -21,12 +21,15 @@ namespace System.Web.OData
         [Fact]
         public void EmptyCtor_InitializesProperty_SerializerContext()
         {
+            // Arrange
             var context = new ResourceContext();
+
+            // Act & Assert
             Assert.NotNull(context.SerializerContext);
         }
 
         [Fact]
-        public void Property_EntityInstance_RoundTrips()
+        public void Property_ResourceInstance_RoundTrips()
         {
             Assert.Reflection.Property(_context, (c) => c.ResourceInstance, null, allowNull: true, roundTripTestValue: _entityInstance);
         }
@@ -38,7 +41,7 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void Property_EntitySet_RoundTrips()
+        public void Property_NavigationSource_RoundTrips()
         {
             Assert.Reflection.Property(_context, (c) => c.NavigationSource, null, allowNull: true, roundTripTestValue: new Mock<IEdmEntitySet>().Object);
         }
@@ -62,7 +65,7 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void Property__RoundTrips()
+        public void Property_SkipExpensiveAvailabilityChecks_RoundTrips()
         {
             Assert.Reflection.BooleanProperty(_context, (c) => c.SkipExpensiveAvailabilityChecks, false);
         }
@@ -76,11 +79,13 @@ namespace System.Web.OData
         [Fact]
         public void GetPropertyValue_ThrowsInvalidOperation_IfPropertyIsNotFound()
         {
+            // Arrange
             IEdmEntityTypeReference entityType = new EdmEntityTypeReference(new EdmEntityType("NS", "Name"), isNullable: false);
             Mock<IEdmStructuredObject> edmObject = new Mock<IEdmStructuredObject>();
             edmObject.Setup(o => o.GetEdmType()).Returns(entityType);
             ResourceContext instanceContext = new ResourceContext(_serializerContext, entityType, edmObject.Object);
 
+            // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => instanceContext.GetPropertyValue("NotPresentProperty"),
                 "The EDM instance of type '[NS.Name Nullable=False]' is missing the property 'NotPresentProperty'.");
@@ -89,17 +94,20 @@ namespace System.Web.OData
         [Fact]
         public void GetPropertyValue_ThrowsInvalidOperation_IfEdmObjectIsNull()
         {
+            // Arrange
             ResourceContext instanceContext = new ResourceContext();
+
+            // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => instanceContext.GetPropertyValue("SomeProperty"),
-                "The property 'EdmObject' of EntityContext cannot be null.");
+                "The property 'EdmObject' of ResourceContext cannot be null.");
         }
 
         [Fact]
         public void GetPropertyValue_ThrowsInvalidOperation_IfEdmObjectGetEdmTypeReturnsNull()
         {
             // Arrange
-            object outObject = null;
+            object outObject;
             Mock<IEdmEntityObject> mock = new Mock<IEdmEntityObject>();
             mock.Setup(o => o.TryGetPropertyValue(It.IsAny<string>(), out outObject)).Returns(false).Verifiable();
             mock.Setup(o => o.GetEdmType()).Returns<IEdmTypeReference>(null).Verifiable();
@@ -114,7 +122,7 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void Property_EntityInstance_CanBeBuiltFromIEdmObject()
+        public void Property_ResourceInstance_CanBeBuiltFromIEdmObject_ForEntity()
         {
             // Arrange
             EdmEntityType edmType = new EdmEntityType("NS", "Name");
@@ -138,7 +146,31 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void Property_EntityInstance_EdmObjectHasCollectionProperty()
+        public void Property_ResourceInstance_CanBeBuiltFromIEdmObject_ForComplex()
+        {
+            // Arrange
+            EdmComplexType edmType = new EdmComplexType("NS", "Name");
+            edmType.AddStructuralProperty("Property", EdmPrimitiveTypeKind.Int32);
+            EdmModel model = new EdmModel();
+            model.AddElement(edmType);
+            model.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(typeof(TestEntity)));
+            Mock<IEdmComplexObject> edmObject = new Mock<IEdmComplexObject>();
+            object propertyValue = 42;
+            edmObject.Setup(e => e.TryGetPropertyValue("Property", out propertyValue)).Returns(true);
+            edmObject.Setup(e => e.GetEdmType()).Returns(new EdmComplexTypeReference(edmType, isNullable: false));
+
+            ResourceContext entityContext = new ResourceContext { EdmModel = model, EdmObject = edmObject.Object, StructuredType = edmType };
+
+            // Act
+            object resource = entityContext.ResourceInstance;
+
+            // Assert
+            TestEntity testEntity = Assert.IsType<TestEntity>(resource);
+            Assert.Equal(42, testEntity.Property);
+        }
+
+        [Fact]
+        public void Property_ResourceInstance_EdmObjectHasCollectionProperty_ForEntityCollection()
         {
             // Arrange
             EdmEntityType edmType = new EdmEntityType("NS", "Name");
@@ -165,33 +197,67 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void Property_EntityInstance_ThrowsInvalidOp_EntityTypeDoesNotHaveAMapping()
+        public void Property_ResourceInstance_EdmObjectHasCollectionProperty_ForComplexCollection()
         {
+            // Arrange
+            EdmComplexType edmType = new EdmComplexType("NS", "Name");
+            edmType.AddStructuralProperty(
+                "CollectionProperty",
+                new EdmCollectionTypeReference(
+                    new EdmCollectionType(EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false))));
+            EdmModel model = new EdmModel();
+            model.AddElement(edmType);
+            model.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(typeof(TestEntity)));
+            Mock<IEdmComplexObject> edmObject = new Mock<IEdmComplexObject>();
+            object propertyValue = new List<int> { 42 };
+            edmObject.Setup(e => e.TryGetPropertyValue("CollectionProperty", out propertyValue)).Returns(true);
+            edmObject.Setup(e => e.GetEdmType()).Returns(new EdmComplexTypeReference(edmType, isNullable: false));
+
+            ResourceContext entityContext = new ResourceContext { EdmModel = model, EdmObject = edmObject.Object, StructuredType = edmType };
+
+            // Act
+            object resource = entityContext.ResourceInstance;
+
+            // Assert
+            TestEntity testEntity = Assert.IsType<TestEntity>(resource);
+            Assert.Equal(new[] { 42 }, testEntity.CollectionProperty);
+        }
+
+        [Fact]
+        public void Property_ResourceInstance_ThrowsInvalidOp_ResourceTypeDoesNotHaveAMapping()
+        {
+            // Arrange
             EdmEntityType entityType = new EdmEntityType("NS", "Name");
             EdmModel model = new EdmModel();
             IEdmEntityObject instance = new Mock<IEdmEntityObject>().Object;
             ResourceContext entityContext = new ResourceContext { StructuredType = entityType, EdmModel = model, EdmObject = instance };
 
+            // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => entityContext.ResourceInstance, "The provided mapping does not contain an entry for the entity type 'NS.Name'.");
+                () => entityContext.ResourceInstance, "The provided mapping does not contain a resource for the resource type 'NS.Name'.");
         }
 
         [Fact]
-        public void Property_EntityInstance_ReturnsNullWhenEdmObjectIsNull()
+        public void Property_ResourceInstance_ReturnsNullWhenEdmObjectIsNull()
         {
+            // Arrange
             ResourceContext entityContext = new ResourceContext { EdmObject = null };
+
+            // Act & Assert
             Assert.Null(entityContext.ResourceInstance);
         }
 
         [Fact]
-        public void Property_EntityInstance_ReturnsEdmStructuredObjectInstance()
+        public void Property_ResourceInstance_ReturnsEdmStructuredObjectInstance()
         {
+            // Arrange
             object instance = new object();
             IEdmEntityTypeReference entityType = new Mock<IEdmEntityTypeReference>().Object;
             IEdmModel edmModel = new Mock<IEdmModel>().Object;
             ResourceContext entityContext =
                 new ResourceContext { EdmObject = new TypedEdmEntityObject(instance, entityType, edmModel) };
 
+            // Act & Assert
             Assert.Same(instance, entityContext.ResourceInstance);
         }
 

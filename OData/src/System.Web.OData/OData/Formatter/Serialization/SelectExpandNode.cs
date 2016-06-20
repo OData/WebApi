@@ -3,8 +3,10 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -25,7 +27,7 @@ namespace System.Web.OData.Formatter.Serialization
         public SelectExpandNode()
         {
             SelectedStructuralProperties = new HashSet<IEdmStructuralProperty>();
-            SelectedNestedProperties = new HashSet<IEdmStructuralProperty>();
+            SelectedComplexProperties = new HashSet<IEdmStructuralProperty>();
             SelectedNavigationProperties = new HashSet<IEdmNavigationProperty>();
             ExpandedNavigationProperties = new Dictionary<IEdmNavigationProperty, SelectExpandClause>();
             SelectedActions = new HashSet<IEdmAction>();
@@ -35,7 +37,7 @@ namespace System.Web.OData.Formatter.Serialization
 
         /// <summary>
         /// Creates a new instance of the <see cref="SelectExpandNode"/> class describing the set of structural properties,
-        /// navigation properties, and actions to select and expand for the given <paramref name="writeContext"/>.
+        /// nested properties, navigation properties, and actions to select and expand for the given <paramref name="writeContext"/>.
         /// </summary>
         /// <param name="structuredType">The structural type of the resource that would be written.</param>
         /// <param name="writeContext">The serializer context to be used while creating the collection.</param>
@@ -47,11 +49,11 @@ namespace System.Web.OData.Formatter.Serialization
 
         /// <summary>
         /// Creates a new instance of the <see cref="SelectExpandNode"/> class describing the set of structural properties,
-        /// navigation properties, and actions to select and expand for the given <paramref name="selectExpandClause"/>.
+        /// nested properties, navigation properties, and actions to select and expand for the given <paramref name="selectExpandClause"/>.
         /// </summary>
         /// <param name="selectExpandClause">The parsed $select and $expand query options.</param>
         /// <param name="structuredType">The structural type of the resource that would be written.</param>
-        /// <param name="model">The <see cref="IEdmModel"/> that contains the given entity type.</param>
+        /// <param name="model">The <see cref="IEdmModel"/> that contains the given structural type.</param>
         public SelectExpandNode(SelectExpandClause selectExpandClause, IEdmStructuredType structuredType, IEdmModel model)
             : this()
         {
@@ -69,8 +71,8 @@ namespace System.Web.OData.Formatter.Serialization
             HashSet<IEdmStructuralProperty> allStructuralProperties = new HashSet<IEdmStructuralProperty>();
 
             // So far, it includes all properties of complex and collection of complex
-            HashSet<IEdmStructuralProperty> allNestedStructuralProperties = new HashSet<IEdmStructuralProperty>();
-            GetStructuralProperties(structuredType, allStructuralProperties, allNestedStructuralProperties);
+            HashSet<IEdmStructuralProperty> allComplexStructuralProperties = new HashSet<IEdmStructuralProperty>();
+            GetStructuralProperties(structuredType, allStructuralProperties, allComplexStructuralProperties);
 
             // So far, it includes all navigation properties
             HashSet<IEdmNavigationProperty> allNavigationProperties;
@@ -94,7 +96,7 @@ namespace System.Web.OData.Formatter.Serialization
             if (selectExpandClause == null)
             {
                 SelectedStructuralProperties = allStructuralProperties;
-                SelectedNestedProperties = allNestedStructuralProperties;
+                SelectedComplexProperties = allComplexStructuralProperties;
                 SelectedNavigationProperties = allNavigationProperties;
                 SelectedActions = allActions;
                 SelectedFunctions = allFunctions;
@@ -105,7 +107,7 @@ namespace System.Web.OData.Formatter.Serialization
                 if (selectExpandClause.AllSelected)
                 {
                     SelectedStructuralProperties = allStructuralProperties;
-                    SelectedNestedProperties = allNestedStructuralProperties;
+                    SelectedComplexProperties = allComplexStructuralProperties;
                     SelectedNavigationProperties = allNavigationProperties;
                     SelectedActions = allActions;
                     SelectedFunctions = allFunctions;
@@ -113,7 +115,7 @@ namespace System.Web.OData.Formatter.Serialization
                 }
                 else
                 {
-                    BuildSelections(selectExpandClause, allStructuralProperties, allNestedStructuralProperties, allNavigationProperties, allActions, allFunctions);
+                    BuildSelections(selectExpandClause, allStructuralProperties, allComplexStructuralProperties, allNavigationProperties, allActions, allFunctions);
                     SelectAllDynamicProperties = false;
                 }
 
@@ -125,7 +127,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Gets the list of EDM structural properties to be included in the response.
+        /// Gets the list of EDM structural properties (primitive, enum or collection of them) to be included in the response.
         /// </summary>
         public ISet<IEdmStructuralProperty> SelectedStructuralProperties { get; private set; }
 
@@ -140,9 +142,9 @@ namespace System.Web.OData.Formatter.Serialization
         public IDictionary<IEdmNavigationProperty, SelectExpandClause> ExpandedNavigationProperties { get; private set; }
 
         /// <summary>
-        /// Gets the list of EDM nested properties to be included in the response.
+        /// Gets the list of EDM nested properties (complex or collection of complex) to be included in the response.
         /// </summary>
-        public ISet<IEdmStructuralProperty> SelectedNestedProperties { get; private set; }
+        public ISet<IEdmStructuralProperty> SelectedComplexProperties { get; private set; }
 
         /// <summary>
         /// Gets the list of dynamic properties to select.
@@ -198,7 +200,6 @@ namespace System.Web.OData.Formatter.Serialization
                 }
 
                 PathSelectItem pathSelectItem = selectItem as PathSelectItem;
-
                 if (pathSelectItem != null)
                 {
                     ValidatePathIsSupported(pathSelectItem.SelectedPath);
@@ -223,10 +224,9 @@ namespace System.Web.OData.Formatter.Serialization
                         {
                             SelectedStructuralProperties.Add(structuralProperty);
                         }
-
-                        if (allNestedProperties.Contains(structuralProperty))
+                        else if (allNestedProperties.Contains(structuralProperty))
                         {
-                            SelectedNestedProperties.Add(structuralProperty);
+                            SelectedComplexProperties.Add(structuralProperty);
                         }
                         continue;
                     }
@@ -251,7 +251,7 @@ namespace System.Web.OData.Formatter.Serialization
                 if (wildCardSelectItem != null)
                 {
                     SelectedStructuralProperties = allStructuralProperties;
-                    SelectedNestedProperties = allNestedProperties;
+                    SelectedComplexProperties = allNestedProperties;
                     SelectedNavigationProperties = allNavigationProperties;
                     continue;
                 }
@@ -315,7 +315,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Separate the structural properties into to parts:
+        /// Separate the structural properties into two parts:
         /// 1. Complex and collection of complex are nested structural properties.
         /// 2. Others are non-nested structural properties.
         /// </summary>

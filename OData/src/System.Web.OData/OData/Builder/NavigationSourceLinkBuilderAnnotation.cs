@@ -55,7 +55,7 @@ namespace System.Web.OData.Builder
             foreach (IEdmNavigationProperty navigationProperty in elementType.NavigationProperties())
             {
                 Func<ResourceContext, IEdmNavigationProperty, Uri> navigationLinkFactory =
-                    (entityContext, navProperty) => entityContext.GenerateNavigationPropertyLink(navProperty, includeCast: false);
+                    (resourceContext, navProperty) => resourceContext.GenerateNavigationPropertyLink(navProperty, includeCast: false);
                 AddNavigationPropertyLinkBuilder(navigationProperty, new NavigationLinkBuilder(navigationLinkFactory, followsConventions: true));
             }
 
@@ -67,13 +67,13 @@ namespace System.Web.OData.Builder
                 {
                     derivedTypesDefineNavigationProperty = true;
                     Func<ResourceContext, IEdmNavigationProperty, Uri> navigationLinkFactory =
-                    (entityContext, navProperty) => entityContext.GenerateNavigationPropertyLink(navProperty, includeCast: true);
+                    (resourceContext, navProperty) => resourceContext.GenerateNavigationPropertyLink(navProperty, includeCast: true);
                     AddNavigationPropertyLinkBuilder(navigationProperty, new NavigationLinkBuilder(navigationLinkFactory, followsConventions: true));
                 }
             }
 
             Func<ResourceContext, Uri> selfLinkFactory =
-                (entityContext) => entityContext.GenerateSelfLink(includeCast: derivedTypesDefineNavigationProperty);
+                (resourceContext) => resourceContext.GenerateSelfLink(includeCast: derivedTypesDefineNavigationProperty);
             _idLinkBuilder = new SelfLinkBuilder<Uri>(selfLinkFactory, followsConventions: true);
         }
 

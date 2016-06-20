@@ -421,14 +421,16 @@ namespace System.Web.OData.Query.Expressions
         [Fact]
         public void CreatePropertyNameExpression_ThrowsODataException_IfMappingTypeIsNotFoundInModel()
         {
+            // Arrange
             _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.SpecialCustomer, null);
 
             Expression customer = Expression.Constant(new Customer());
             IEdmNavigationProperty specialOrdersProperty = _model.SpecialCustomer.DeclaredNavigationProperties().Single();
 
+            // Act & Assert
             Assert.Throws<ODataException>(
                 () => _binder.CreatePropertyNameExpression(_model.Customer, specialOrdersProperty, customer),
-                "The provided mapping does not contain an entry for the entity type 'NS.SpecialCustomer'.");
+                "The provided mapping does not contain a resource for the resource type 'NS.SpecialCustomer'.");
         }
 
         [Fact]
@@ -470,13 +472,15 @@ namespace System.Web.OData.Query.Expressions
         [Fact]
         public void CreatePropertyValueExpression_ThrowsODataException_IfMappingTypeIsNotFoundInModel()
         {
+            // Arrange
             _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.SpecialCustomer, null);
             Expression customer = Expression.Constant(new Customer());
             IEdmNavigationProperty specialOrdersProperty = _model.SpecialCustomer.DeclaredNavigationProperties().Single();
 
+            // Act & Assert
             Assert.Throws<ODataException>(
                 () => _binder.CreatePropertyValueExpression(_model.Customer, specialOrdersProperty, customer),
-                "The provided mapping does not contain an entry for the entity type 'NS.SpecialCustomer'.");
+                "The provided mapping does not contain a resource for the resource type 'NS.SpecialCustomer'.");
         }
 
         [Fact]
@@ -547,7 +551,7 @@ namespace System.Web.OData.Query.Expressions
             // Act & Assert
             Assert.Throws<ODataException>(
                 () => _binder.CreatePropertyValueExpressionWithFilter(_model.Customer, ordersProperty, customer, filterCaluse),
-                "The provided mapping does not contain an entry for the entity type 'NS.Order'.");
+                "The provided mapping does not contain a resource for the resource type 'NS.Order'.");
         }
 
         [Fact]
@@ -653,7 +657,7 @@ namespace System.Web.OData.Query.Expressions
             // Act & Assert
             Assert.Throws<ODataException>(
                 () => SelectExpandBinder.CreateTypeNameExpression(source, baseType, model),
-                "The provided mapping does not contain an entry for the entity type 'NS.DerivedType'.");
+                "The provided mapping does not contain a resource for the resource type 'NS.DerivedType'.");
         }
 
         [Fact]

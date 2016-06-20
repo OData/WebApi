@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Web.Http;
@@ -174,6 +177,16 @@ namespace System.Web.OData
         }
 
         /// <summary>
+        /// Gets or sets the dynamic complex or collection of complex properties should be nested in this instance.
+        /// </summary>
+        /// <remarks>
+        /// The key is the dynamic property name.
+        /// The value is the dynamic property value.
+        /// </remarks>
+        [SuppressMessage("Microsoft.Usage", "CA2227:EnableSetterForProperty", Justification = "Enable setter for dictionary property")]
+        public IDictionary<string, object> DynamicComplexProperties { get; set; }
+
+        /// <summary>
         /// Gets the value of the property with the given name from the <see cref="IEdmObject"/> of this instance if present; throws if the property is
         /// not present.
         /// </summary>
@@ -221,7 +234,7 @@ namespace System.Web.OData
             Type clrType = EdmLibHelpers.GetClrType(StructuredType, EdmModel);
             if (clrType == null)
             {
-                throw new InvalidOperationException(Error.Format(SRResources.MappingDoesNotContainEntityType, StructuredType.FullTypeName()));
+                throw new InvalidOperationException(Error.Format(SRResources.MappingDoesNotContainResourceType, StructuredType.FullTypeName()));
             }
 
             object resource = Activator.CreateInstance(clrType);

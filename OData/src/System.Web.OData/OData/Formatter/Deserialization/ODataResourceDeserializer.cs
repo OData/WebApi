@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -136,12 +137,12 @@ namespace System.Web.OData.Formatter.Deserialization
                 IEdmStructuredType actualType = model.FindType(resourceWrapper.Resource.TypeName) as IEdmStructuredType;
                 if (actualType == null)
                 {
-                    throw new ODataException(Error.Format(SRResources.EntityTypeNotInModel, resourceWrapper.Resource.TypeName));
+                    throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, resourceWrapper.Resource.TypeName));
                 }
 
                 if (actualType.IsAbstract)
                 {
-                    string message = Error.Format(SRResources.CannotInstantiateAbstractEntityType, resourceWrapper.Resource.TypeName);
+                    string message = Error.Format(SRResources.CannotInstantiateAbstractResourceType, resourceWrapper.Resource.TypeName);
                     throw new ODataException(message);
                 }
 
@@ -220,7 +221,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 if (clrType == null)
                 {
                     throw new ODataException(
-                        Error.Format(SRResources.MappingDoesNotContainEntityType, structuredType.FullName()));
+                        Error.Format(SRResources.MappingDoesNotContainResourceType, structuredType.FullName()));
                 }
 
                 if (readContext.IsDeltaOfT)
@@ -292,8 +293,12 @@ namespace System.Web.OData.Formatter.Deserialization
             IEdmProperty edmProperty = structuredType.FindProperty(resourceInfoWrapper.NestedResourceInfo.Name);
             if (edmProperty == null)
             {
-                throw new ODataException(
-                    Error.Format(SRResources.NestedPropertyNotfound, resourceInfoWrapper.NestedResourceInfo.Name, structuredType.FullName()));
+                if (!structuredType.IsOpen())
+                {
+                    throw new ODataException(
+                        Error.Format(SRResources.NestedPropertyNotfound, resourceInfoWrapper.NestedResourceInfo.Name,
+                            structuredType.FullName()));
+                }
             }
 
             foreach (ODataItemBase childItem in resourceInfoWrapper.NestedItems)
@@ -308,7 +313,16 @@ namespace System.Web.OData.Formatter.Deserialization
                 ODataResourceSetWrapper resourceSetWrapper = childItem as ODataResourceSetWrapper;
                 if (resourceSetWrapper != null)
                 {
-                    ApplyResourceSetInNestedProperty(edmProperty, resource, resourceSetWrapper, readContext);
+                    if (edmProperty == null)
+                    {
+                        ApplyDynamicResourceSetInNestedProperty(resourceInfoWrapper.NestedResourceInfo.Name,
+                            resource, structuredType, resourceSetWrapper, readContext);
+                    }
+                    else
+                    {
+                        ApplyResourceSetInNestedProperty(edmProperty, resource, resourceSetWrapper, readContext);
+                    }
+
                     continue;
                 }
 
@@ -316,7 +330,15 @@ namespace System.Web.OData.Formatter.Deserialization
                 ODataResourceWrapper resourceWrapper = (ODataResourceWrapper)childItem;
                 if (resourceWrapper != null)
                 {
-                    ApplyResourceInNestedProperty(edmProperty, resource, resourceWrapper, readContext);
+                    if (edmProperty == null)
+                    {
+                        ApplyDynamicResourceInNestedProperty(resourceInfoWrapper.NestedResourceInfo.Name, resource,
+                            structuredType, resourceWrapper, readContext);
+                    }
+                    else
+                    {
+                        ApplyResourceInNestedProperty(edmProperty, resource, resourceWrapper, readContext);
+                    }
                 }
             }
         }
@@ -365,11 +387,11 @@ namespace System.Web.OData.Formatter.Deserialization
             DeserializationHelpers.ApplyProperty(structuralProperty, structuredType, resource, DeserializerProvider, readContext);
         }
 
-        private void ApplyResourceProperties(object entityResource, ODataResourceWrapper resourceWrapper,
+        private void ApplyResourceProperties(object resource, ODataResourceWrapper resourceWrapper,
             IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
         {
-            ApplyStructuralProperties(entityResource, resourceWrapper, structuredType, readContext);
-            ApplyNestedProperties(entityResource, resourceWrapper, structuredType, readContext);
+            ApplyStructuralProperties(resource, resourceWrapper, structuredType, readContext);
+            ApplyNestedProperties(resource, resourceWrapper, structuredType, readContext);
         }
 
         private void ApplyResourceInNestedProperty(IEdmProperty nestedProperty, object resource,
@@ -390,14 +412,41 @@ namespace System.Web.OData.Formatter.Deserialization
                 }
             }
 
-            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(nestedProperty.Type);
+            object value = ReadNestedResourceInline(resourceWrapper, nestedProperty.Type, readContext);
+
+            string propertyName = EdmLibHelpers.GetClrPropertyName(nestedProperty, readContext.Model);
+            DeserializationHelpers.SetProperty(resource, propertyName, value);
+        }
+
+        private void ApplyDynamicResourceInNestedProperty(string propertyName, object resource, IEdmStructuredTypeReference resourceStructuredType,
+            ODataResourceWrapper resourceWrapper, ODataDeserializerContext readContext)
+        {
+            Contract.Assert(resource != null);
+            Contract.Assert(readContext != null);
+
+            IEdmSchemaType elementType = readContext.Model.FindDeclaredType(resourceWrapper.Resource.TypeName);
+            IEdmTypeReference edmTypeReference = elementType.ToEdmTypeReference(true);
+
+            object value = ReadNestedResourceInline(resourceWrapper, edmTypeReference, readContext);
+
+            DeserializationHelpers.SetDynamicProperty(resource, propertyName, value,
+                resourceStructuredType.StructuredDefinition(), readContext.Model);
+        }
+
+        private object ReadNestedResourceInline(ODataResourceWrapper resourceWrapper, IEdmTypeReference edmType, ODataDeserializerContext readContext)
+        {
+            Contract.Assert(resourceWrapper != null);
+            Contract.Assert(edmType != null);
+            Contract.Assert(readContext != null);
+
+            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(edmType);
             if (deserializer == null)
             {
                 throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized,
-                    nestedProperty.Type.FullName(), typeof(ODataMediaTypeFormatter)));
+                    edmType.FullName(), typeof(ODataMediaTypeFormatter)));
             }
 
-            IEdmStructuredTypeReference structuredType = nestedProperty.Type.AsStructured();
+            IEdmStructuredTypeReference structuredType = edmType.AsStructured();
 
             var nestedReadContext = new ODataDeserializerContext
             {
@@ -423,16 +472,13 @@ namespace System.Web.OData.Formatter.Deserialization
                 if (clrType == null)
                 {
                     throw new ODataException(
-                        Error.Format(SRResources.MappingDoesNotContainEntityType, structuredType.FullName()));
+                        Error.Format(SRResources.MappingDoesNotContainResourceType, structuredType.FullName()));
                 }
 
                 nestedReadContext.ResourceType = clrType;
             }
 
-            object value = deserializer.ReadInline(resourceWrapper, nestedProperty.Type, nestedReadContext);
-
-            string propertyName = EdmLibHelpers.GetClrPropertyName(nestedProperty, readContext.Model);
-            DeserializationHelpers.SetProperty(resource, propertyName, value);
+            return deserializer.ReadInline(resourceWrapper, edmType, nestedReadContext);
         }
 
         private void ApplyResourceSetInNestedProperty(IEdmProperty nestedProperty, object resource,
@@ -453,16 +499,91 @@ namespace System.Web.OData.Formatter.Deserialization
                 }
             }
 
-            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(nestedProperty.Type);
-            if (deserializer == null)
-            {
-                throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized,
-                    nestedProperty.Type.FullName(), typeof(ODataMediaTypeFormatter)));
-            }
-            object value = deserializer.ReadInline(resourceSetWrapper, nestedProperty.Type, readContext);
+            object value = ReadNestedResourceSetInline(resourceSetWrapper, nestedProperty.Type, readContext);
 
             string propertyName = EdmLibHelpers.GetClrPropertyName(nestedProperty, readContext.Model);
             DeserializationHelpers.SetCollectionProperty(resource, nestedProperty, value, propertyName);
+        }
+
+        private void ApplyDynamicResourceSetInNestedProperty(string propertyName, object resource, IEdmStructuredTypeReference structuredType,
+            ODataResourceSetWrapper resourceSetWrapper, ODataDeserializerContext readContext)
+        {
+            Contract.Assert(resource != null);
+            Contract.Assert(readContext != null);
+
+            IEdmSchemaType elementType =
+                readContext.Model.FindDeclaredType(resourceSetWrapper.Resources.First().Resource.TypeName);
+
+            IEdmTypeReference edmTypeReference = elementType.ToEdmTypeReference(true);
+            EdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(edmTypeReference));
+
+            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(collectionType);
+            if (deserializer == null)
+            {
+                throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized,
+                    collectionType.FullName(), typeof(ODataMediaTypeFormatter)));
+            }
+
+            IEnumerable value = ReadNestedResourceSetInline(resourceSetWrapper, collectionType, readContext) as IEnumerable;
+            object result = value;
+            if (value != null)
+            {
+                if (readContext.IsUntyped)
+                {
+                    result = value.ConvertToEdmObject(collectionType);
+                }
+            }
+
+            DeserializationHelpers.SetDynamicProperty(resource, structuredType, EdmTypeKind.Collection, propertyName,
+                result, collectionType, readContext.Model);
+        }
+
+        private object ReadNestedResourceSetInline(ODataResourceSetWrapper resourceSetWrapper, IEdmTypeReference edmType,
+            ODataDeserializerContext readContext)
+        {
+            Contract.Assert(resourceSetWrapper != null);
+            Contract.Assert(edmType != null);
+            Contract.Assert(readContext != null);
+
+            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(edmType);
+            if (deserializer == null)
+            {
+                throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized,
+                    edmType.FullName(), typeof(ODataMediaTypeFormatter)));
+            }
+
+            IEdmStructuredTypeReference structuredType = edmType.AsCollection().ElementType().AsStructured();
+            var nestedReadContext = new ODataDeserializerContext
+            {
+                Path = readContext.Path,
+                Model = readContext.Model,
+            };
+
+            if (readContext.IsUntyped)
+            {
+                if (structuredType.IsEntity())
+                {
+                    nestedReadContext.ResourceType = typeof(EdmEntityObjectCollection);
+                }
+                else
+                {
+                    nestedReadContext.ResourceType = typeof(EdmComplexObjectCollection);
+                }
+            }
+            else
+            {
+                Type clrType = EdmLibHelpers.GetClrType(structuredType, readContext.Model);
+
+                if (clrType == null)
+                {
+                    throw new ODataException(
+                        Error.Format(SRResources.MappingDoesNotContainResourceType, structuredType.FullName()));
+                }
+
+                nestedReadContext.ResourceType = typeof(List<>).MakeGenericType(clrType);
+            }
+
+            return deserializer.ReadInline(resourceSetWrapper, edmType, nestedReadContext);
         }
     }
 }

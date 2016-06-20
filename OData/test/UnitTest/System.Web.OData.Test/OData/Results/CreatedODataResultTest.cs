@@ -198,7 +198,7 @@ namespace System.Web.OData.Results
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(),
                 "The request must have an associated EDM model. Consider using the extension method " +
-                "HttpConfiguration.Routes.MapODataServiceRoute to register a route that parses the OData URI and " +
+                "HttpConfiguration.MapODataServiceRoute to register a route that parses the OData URI and " +
                 "attaches the model information.");
         }
 
@@ -217,6 +217,7 @@ namespace System.Web.OData.Results
         [Fact]
         public void GenerateLocationHeader_ThrowsEntitySetMissingDuringSerialization_IfODataPathEntitySetIsNull()
         {
+            // Arrange
             ODataPath path = new ODataPath();
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Model = EdmCoreModel.Instance;
@@ -231,6 +232,7 @@ namespace System.Web.OData.Results
         [Fact]
         public void GenerateLocationHeader_ThrowsEntityTypeNotInModel_IfContentTypeIsNotThereInModel()
         {
+            // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
@@ -240,7 +242,7 @@ namespace System.Web.OData.Results
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(),
-                "Cannot find the entity type 'System.Web.OData.Results.CreatedODataResultTest+TestEntity' in the model.");
+                "Cannot find the resource type 'System.Web.OData.Results.CreatedODataResultTest+TestEntity' in the model.");
         }
 
         [Fact]

@@ -22,7 +22,7 @@ namespace System.Web.OData
 {
     /// <summary>
     /// Defines a <see cref="HttpMessageHandler"/> to add an ETag header value to an OData response when the response 
-    /// is a single entity that has an ETag defined.
+    /// is a single resource that has an ETag defined.
     /// </summary>
     public class ETagMessageHandler : DelegatingHandler
     {
@@ -111,11 +111,11 @@ namespace System.Web.OData
         }
 
         private static EntityTagHeaderValue CreateETag(
-            ResourceContext entityContext,
+            ResourceContext resourceContext,
             IETagHandler handler)
         {
-            IEdmModel model = entityContext.EdmModel;
-            IEdmEntitySet entitySet = entityContext.NavigationSource as IEdmEntitySet;
+            IEdmModel model = resourceContext.EdmModel;
+            IEdmEntitySet entitySet = resourceContext.NavigationSource as IEdmEntitySet;
 
             IEnumerable<IEdmStructuralProperty> concurrencyProperties;
             if (model != null && entitySet != null)
@@ -130,7 +130,7 @@ namespace System.Web.OData
             IDictionary<string, object> properties = new Dictionary<string, object>();
             foreach (IEdmStructuralProperty etagProperty in concurrencyProperties)
             {
-                properties.Add(etagProperty.Name, entityContext.GetPropertyValue(etagProperty.Name));
+                properties.Add(etagProperty.Name, resourceContext.GetPropertyValue(etagProperty.Name));
             }
             EntityTagHeaderValue etagHeaderValue = handler.CreateETag(properties);
             return etagHeaderValue;

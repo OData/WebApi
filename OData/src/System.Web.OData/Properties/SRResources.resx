@@ -258,8 +258,8 @@
   <data name="DeserializerDoesNotSupportRead" xml:space="preserve">
     <value>'{0}' does not support Read.</value>
   </data>
-  <data name="MappingDoesNotContainEntityType" xml:space="preserve">
-    <value>The provided mapping does not contain an entry for the entity type '{0}'.</value>
+  <data name="MappingDoesNotContainResourceType" xml:space="preserve">
+    <value>The provided mapping does not contain a resource for the resource type '{0}'.</value>
   </data>
   <data name="ManyToManyNavigationPropertyMustReturnCollection" xml:space="preserve">
     <value>The property '{0}' on the type '{1}' is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections.</value>
@@ -381,11 +381,8 @@
   <data name="FunctionNotSupportedOnEnum" xml:space="preserve">
     <value>The '{0}' function cannot be applied to an enumeration-typed argument.</value>
   </data>
-  <data name="CannotInstantiateAbstractEntityType" xml:space="preserve">
-    <value>An instance of the abstract entity type '{0}' was found. Abstract entity types cannot be instantiated.</value>
-  </data>
-  <data name="CannotInstantiateAbstractComplexType" xml:space="preserve">
-    <value>An instance of the abstract complex type '{0}' was found. Abstract complex types cannot be instantiated.</value>
+  <data name="CannotInstantiateAbstractResourceType" xml:space="preserve">
+    <value>An instance of the abstract resource type '{0}' was found. Abstract resource types cannot be instantiated.</value>
   </data>
   <data name="NullElementInCollection" xml:space="preserve">
     <value>Collections cannot contain null elements.</value>
@@ -502,7 +499,7 @@
     <value>The OData formatter requires an attached request in order to deserialize. Controller classes must derive from ODataController or be marked with ODataFormattingAttribute. Custom parameter bindings must call GetPerRequestFormatterInstance on each formatter and use these per-request instances.</value>
   </data>
   <data name="RequestMustHaveModel" xml:space="preserve">
-    <value>The request must have an associated EDM model. Consider using the extension method HttpConfiguration.Routes.MapODataServiceRoute to register a route that parses the OData URI and attaches the model information.</value>
+    <value>The request must have an associated EDM model. Consider using the extension method HttpConfiguration.MapODataServiceRoute to register a route that parses the OData URI and attaches the model information.</value>
   </data>
   <data name="QueryGetModelMustNotReturnNull" xml:space="preserve">
     <value>A model is required for querying. Consider implementing the EnableQueryAttribute.GetModel method never to return a null value.</value>
@@ -525,11 +522,8 @@
   <data name="TypeCannotBeDeserialized" xml:space="preserve">
     <value>'{0}' cannot be deserialized using the {1}.</value>
   </data>
-  <data name="EntityTypeNotInModel" xml:space="preserve">
-    <value>Cannot find the entity type '{0}' in the model.</value>
-  </data>
-  <data name="ComplexTypeNotInModel" xml:space="preserve">
-    <value>Cannot find the complex type '{0}' in the model.</value>
+  <data name="ResourceTypeNotInModel" xml:space="preserve">
+    <value>Cannot find the resource type '{0}' in the model.</value>
   </data>
   <data name="ModelMissingFromReadContext" xml:space="preserve">
     <value>The EDM model is missing on the read context. The model is required on the read context to deserialize the payload.</value>
@@ -761,7 +755,7 @@
     <value>Found more than one dynamic property container in type '{0}'. Each open type must have at most one dynamic property container.</value>
   </data>
   <data name="DynamicPropertyNameAlreadyUsedAsDeclaredPropertyName" xml:space="preserve">
-    <value>The name of dynamic property '{0}' was already used as the declared property name of open complex type '{1}'.</value>
+    <value>The name of dynamic property '{0}' was already used as the declared property name of open type '{1}'.</value>
   </data>
   <data name="DuplicateDynamicPropertyNameFound" xml:space="preserve">
     <value>Duplicate dynamic property name '{0}' found in open type '{1}'. Each dynamic property name must be unique.</value>

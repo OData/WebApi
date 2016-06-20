@@ -153,16 +153,14 @@ namespace System.Web.OData
                     if (operation is IEdmAction)
                     {
                         linkBuilder = new OperationLinkBuilder(
-                            (ResourceContext entityContext) =>
-                                entityContext.GenerateActionLink(operation),
-                            followsConventions: true);
+                            (ResourceContext resourceContext) =>
+                                resourceContext.GenerateActionLink(operation), followsConventions: true);
                     }
                     else
                     {
                         linkBuilder = new OperationLinkBuilder(
-                            (ResourceContext entityContext) =>
-                                entityContext.GenerateFunctionLink(operation),
-                            followsConventions: true);
+                            (ResourceContext resourceContext) =>
+                                resourceContext.GenerateFunctionLink(operation), followsConventions: true);
                     }
                 }
                 else if (operation.Parameters.First().Type.IsCollection())
@@ -171,15 +169,15 @@ namespace System.Web.OData
                     {
                         linkBuilder =
                             new OperationLinkBuilder(
-                                (ResourceSetContext feedContext) => feedContext.GenerateActionLink(operation),
-                                followsConventions: true);
+                                (ResourceSetContext reseourceSetContext) =>
+                                    reseourceSetContext.GenerateActionLink(operation), followsConventions: true);
                     }
                     else
                     {
                         linkBuilder =
                             new OperationLinkBuilder(
-                                (ResourceSetContext feedContext) => feedContext.GenerateFunctionLink(operation),
-                                followsConventions: true);
+                                (ResourceSetContext reseourceSetContext) =>
+                                    reseourceSetContext.GenerateFunctionLink(operation), followsConventions: true);
                     }
                 }
             }

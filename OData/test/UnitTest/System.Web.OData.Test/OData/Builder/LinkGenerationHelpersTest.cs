@@ -235,10 +235,10 @@ namespace System.Web.OData.Builder
         public void GenerateActionLinkForFeed_ThrowsArgumentNull_Action()
         {
             // Arrange
-            ResourceSetContext feedContext = new ResourceSetContext();
+            ResourceSetContext resourceSetContext = new ResourceSetContext();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => feedContext.GenerateActionLink(action: null), "action");
+            Assert.ThrowsArgumentNull(() => resourceSetContext.GenerateActionLink(action: null), "action");
         }
 
         [Fact]
@@ -445,14 +445,14 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void GenerateFunctionLinkForFeed_ThrowsArgumentNull_FeedContext()
+        public void GenerateFunctionLinkForFeed_ThrowsArgumentNull_ResourceSetContext()
         {
             // Arrange
-            ResourceSetContext feedContext = null;
+            ResourceSetContext resourceSetContext = null;
             IEdmFunction function = new Mock<IEdmFunction>().Object;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => feedContext.GenerateFunctionLink(function), "feedContext");
+            Assert.ThrowsArgumentNull(() => resourceSetContext.GenerateFunctionLink(function), "resourceSetContext");
         }
 
         [Fact]

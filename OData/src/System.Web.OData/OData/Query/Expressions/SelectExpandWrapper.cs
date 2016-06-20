@@ -58,7 +58,7 @@ namespace System.Web.OData.Query.Expressions
                 IEdmEntityType entityType = model.FindDeclaredType(TypeName) as IEdmEntityType;
                 if (entityType == null)
                 {
-                    throw Error.InvalidOperation(SRResources.EntityTypeNotInModel, TypeName);
+                    throw Error.InvalidOperation(SRResources.ResourceTypeNotInModel, TypeName);
                 }
 
                 return new EdmEntityTypeReference(entityType, isNullable: false);

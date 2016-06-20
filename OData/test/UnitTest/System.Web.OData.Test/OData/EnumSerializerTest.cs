@@ -43,7 +43,9 @@ namespace System.Web.OData
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => new ODataEnumSerializer().WriteObject(graph, type, messageWriter, writeContext),
+                () =>
+                    new ODataEnumSerializer(new DefaultODataSerializerProvider()).WriteObject(graph, type, messageWriter,
+                        writeContext),
                 "messageWriter");
         }
 
@@ -60,7 +62,7 @@ namespace System.Web.OData
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => new ODataEnumSerializer().WriteObject(graph, type, messageWriter, writeContext),
+                () => new ODataEnumSerializer(new DefaultODataSerializerProvider()).WriteObject(graph, type, messageWriter, writeContext),
                 "writeContext");
         }
 
@@ -77,7 +79,7 @@ namespace System.Web.OData
 
             // Act & Assert
             Assert.ThrowsArgument(
-                () => new ODataEnumSerializer().WriteObject(graph, type, messageWriter, writeContext),
+                () => new ODataEnumSerializer(new DefaultODataSerializerProvider()).WriteObject(graph, type, messageWriter, writeContext),
                 "writeContext",
                 "The 'RootElementName' property is required on 'ODataSerializerContext'.");
         }
@@ -92,7 +94,7 @@ namespace System.Web.OData
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => new ODataEnumSerializer().CreateODataValue(graph, expectedType, writeContext),
+                () => new ODataEnumSerializer(new DefaultODataSerializerProvider()).CreateODataValue(graph, expectedType, writeContext),
                 "ODataEnumSerializer cannot write an object of type 'Edm.Int32'.");
         }
 
@@ -100,6 +102,10 @@ namespace System.Web.OData
         public void EnumTypeSerializerTestForOData()
         {
             // Arrange
+            string enumComplexPayload = @"{
+  ""@odata.type"":""#System.Web.OData.EnumComplex"",""RequiredColor"":""Red, Blue"",""NullableColor"":null,""UndefinedColor"":""123""
+}";
+
             ODataMediaTypeFormatter formatter = GetFormatter();
             ObjectContent<EnumComplex> content = new ObjectContent<EnumComplex>(
                 new EnumComplex()
@@ -112,7 +118,7 @@ namespace System.Web.OData
                 ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
 
             // Act & Assert
-            JsonAssert.Equal(Resources.EnumComplexType, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(enumComplexPayload, content.ReadAsStringAsync().Result);
         }
 
         [Fact]
@@ -163,7 +169,7 @@ namespace System.Web.OData
 
         private static ODataMediaTypeFormatter GetFormatter()
         {
-            var formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property })
+            var formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Resource })
             {
                 Request = GetSampleRequest()
             };

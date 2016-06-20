@@ -21,7 +21,6 @@ namespace System.Web.OData.Formatter.Serialization
         private static readonly ODataMetadataSerializer _metadataSerializer = new ODataMetadataSerializer();
         private static readonly ODataRawValueSerializer _rawValueSerializer = new ODataRawValueSerializer();
         private static readonly ODataPrimitiveSerializer _primitiveSerializer = new ODataPrimitiveSerializer();
-        private static readonly ODataEnumSerializer _enumSerializer = new ODataEnumSerializer();
 
         private static readonly DefaultODataSerializerProvider _instance = new DefaultODataSerializerProvider();
 
@@ -30,6 +29,8 @@ namespace System.Web.OData.Formatter.Serialization
 
         private readonly ODataResourceSetSerializer _resourceSetSerializer;
         private readonly ODataResourceSerializer _resourceSerializer;
+
+        private readonly ODataEnumSerializer _enumSerializer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultODataSerializerProvider"/> class.
@@ -40,6 +41,7 @@ namespace System.Web.OData.Formatter.Serialization
             _collectionSerializer = new ODataCollectionSerializer(this);
             _resourceSetSerializer = new ODataResourceSetSerializer(this);
             _resourceSerializer = new ODataResourceSerializer(this);
+            _enumSerializer = new ODataEnumSerializer(this);
         }
 
         /// <summary>

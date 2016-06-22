@@ -510,10 +510,12 @@ namespace System.Web.OData.Formatter
         public void MessageWriterSettings_Property()
         {
             var formatter = CreateFormatter();
+            var messageWriterSettings = formatter.Request.RequestContainer()
+                .GetRequiredService<ODataMessageWriterSettings>();
 
-            Assert.NotNull(formatter.MessageWriterSettings);
-            Assert.True(formatter.MessageWriterSettings.DisableMessageStreamDisposal);
-            Assert.True(formatter.MessageWriterSettings.AutoComputePayloadMetadataInJson);
+            Assert.NotNull(messageWriterSettings);
+            Assert.True(messageWriterSettings.DisableMessageStreamDisposal);
+            Assert.True(messageWriterSettings.AutoComputePayloadMetadataInJson);
         }
 
         [Fact]
@@ -531,9 +533,11 @@ namespace System.Web.OData.Formatter
         public void MessageWriterQuotas_Property_RoundTrip()
         {
             var formatter = CreateFormatter();
-            formatter.MessageWriterQuotas.MaxNestingDepth = 42;
+            var messageWriterSettings = formatter.Request.RequestContainer()
+                .GetRequiredService<ODataMessageWriterSettings>();
+            messageWriterSettings.MessageQuotas.MaxNestingDepth = 42;
 
-            Assert.Equal(42, formatter.MessageWriterQuotas.MaxNestingDepth);
+            Assert.Equal(42, messageWriterSettings.MessageQuotas.MaxNestingDepth);
         }
 
         [Fact]

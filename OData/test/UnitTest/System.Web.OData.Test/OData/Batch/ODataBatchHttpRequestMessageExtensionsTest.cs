@@ -95,6 +95,7 @@ namespace System.Web.OData.Test
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
+            request.SetFakeRequestContainer();
             var responses = new ODataBatchResponseItem[] { };
             var quotas = new ODataMessageQuotas();
 

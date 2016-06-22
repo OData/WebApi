@@ -23,6 +23,12 @@ namespace System.Web.OData.Extensions
                 DisableMessageStreamDisposal = true,
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
             });
+            builder.AddServicePrototype(new ODataMessageWriterSettings
+            {
+                DisableMessageStreamDisposal = true,
+                MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
+                AutoComputePayloadMetadataInJson = true,
+            });
 
             return builder;
         }

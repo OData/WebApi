@@ -42,8 +42,10 @@ namespace System.Web.OData.Test
         public void CreateResponseMessageAsync_Throws_IfResponsesAreNull()
         {
             UnbufferedODataBatchHandler batchHandler = new UnbufferedODataBatchHandler(new HttpServer());
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetFakeRequestContainer();
             Assert.ThrowsArgumentNull(
-                () => batchHandler.CreateResponseMessageAsync(null, new HttpRequestMessage(), CancellationToken.None).Wait(),
+                () => batchHandler.CreateResponseMessageAsync(null, request, CancellationToken.None).Wait(),
                 "responses");
         }
 

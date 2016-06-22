@@ -756,7 +756,6 @@ public class System.Web.OData.Batch.DefaultODataBatchHandler : ODataBatchHandler
 
 public class System.Web.OData.Batch.ODataBatchContent : System.Net.Http.HttpContent, IDisposable {
 	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] responses, System.IServiceProvider requestContainer)
-	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] responses, System.IServiceProvider requestContainer, Microsoft.OData.ODataMessageWriterSettings writerSettings)
 
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchResponseItem]] Responses  { public get; }
 
@@ -1808,8 +1807,6 @@ public class System.Web.OData.Formatter.ODataMediaTypeFormatter : System.Net.Htt
 
 	System.Func`2[[System.Net.Http.HttpRequestMessage],[System.Uri]] BaseAddressFactory  { public get; public set; }
 	ODataDeserializerProvider DeserializerProvider  { public get; }
-	Microsoft.OData.ODataMessageQuotas MessageWriterQuotas  { public get; }
-	Microsoft.OData.ODataMessageWriterSettings MessageWriterSettings  { public get; }
 	ODataSerializerProvider SerializerProvider  { public get; }
 
 	public virtual bool CanReadType (System.Type type)

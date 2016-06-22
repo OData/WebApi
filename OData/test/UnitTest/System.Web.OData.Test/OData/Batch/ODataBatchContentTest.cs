@@ -38,20 +38,9 @@ namespace System.Web.OData.Test
         }
 
         [Fact]
-        public void Constructor_Throws_WhenWriteSettingsIsNull()
-        {
-            Assert.ThrowsArgumentNull(
-                () => CreateBatchContent(new ODataBatchResponseItem[0], null),
-                "writerSettings");
-        }
-
-        [Fact]
         public void ODataVersionInWriterSetting_IsPropagatedToTheHeader()
         {
-            ODataBatchContent batchContent = CreateBatchContent(new ODataBatchResponseItem[0], new ODataMessageWriterSettings
-            {
-                Version = ODataVersion.V4
-            });
+            ODataBatchContent batchContent = CreateBatchContent(new ODataBatchResponseItem[0]);
             var odataVersion = batchContent.Headers.FirstOrDefault(h => String.Equals(h.Key, HttpRequestMessageProperties.ODataServiceVersionHeader, StringComparison.OrdinalIgnoreCase));
 
             Assert.NotNull(odataVersion);
@@ -117,12 +106,6 @@ namespace System.Web.OData.Test
         private static ODataBatchContent CreateBatchContent(IEnumerable<ODataBatchResponseItem> responses)
         {
             return new ODataBatchContent(responses, DependencyInjectionHelper.BuildContainer(null));
-        }
-
-        private static ODataBatchContent CreateBatchContent(IEnumerable<ODataBatchResponseItem> responses,
-            ODataMessageWriterSettings writerSettings)
-        {
-            return new ODataBatchContent(responses, DependencyInjectionHelper.BuildContainer(null), writerSettings);
         }
     }
 }

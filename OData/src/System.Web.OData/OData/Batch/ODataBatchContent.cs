@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 
 namespace System.Web.OData.Batch
@@ -30,31 +31,15 @@ namespace System.Web.OData.Batch
         /// <param name="responses">The batch responses.</param>
         /// <param name="requestContainer">The dependency injection container for the request.</param>
         public ODataBatchContent(IEnumerable<ODataBatchResponseItem> responses, IServiceProvider requestContainer)
-            : this(responses, requestContainer, new ODataMessageWriterSettings())
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ODataBatchContent"/> class.
-        /// </summary>
-        /// <param name="writerSettings">The <see cref="ODataMessageWriterSettings"/>.</param>
-        /// <param name="responses">The batch responses.</param>
-        /// <param name="requestContainer">The dependency injection container for the request.</param>
-        public ODataBatchContent(IEnumerable<ODataBatchResponseItem> responses, IServiceProvider requestContainer,
-            ODataMessageWriterSettings writerSettings)
         {
             if (responses == null)
             {
                 throw Error.ArgumentNull("responses");
             }
-            if (writerSettings == null)
-            {
-                throw Error.ArgumentNull("writerSettings");
-            }
 
             Responses = responses;
             _requestContainer = requestContainer;
-            _writerSettings = writerSettings;
+            _writerSettings = requestContainer.GetRequiredService<ODataMessageWriterSettings>();
             Headers.ContentType = MediaTypeHeaderValue.Parse(String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}", Guid.NewGuid()));
             ODataVersion version = _writerSettings.Version ?? HttpRequestMessageProperties.DefaultODataVersion;
             Headers.TryAddWithoutValidation(HttpRequestMessageProperties.ODataServiceVersionHeader, ODataUtils.ODataVersionToString(version));

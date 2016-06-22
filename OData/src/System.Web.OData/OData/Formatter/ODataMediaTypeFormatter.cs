@@ -79,14 +79,6 @@ namespace System.Web.OData.Formatter
             _serializerProvider = serializerProvider;
             _payloadKinds = payloadKinds;
 
-            // Maxing out the received message size as we depend on the hosting layer to enforce this limit.
-            MessageWriterSettings = new ODataMessageWriterSettings
-            {
-                DisableMessageStreamDisposal = true,
-                MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
-                AutoComputePayloadMetadataInJson = true,
-            };
-
             _version = HttpRequestMessageProperties.DefaultODataVersion;
         }
 
@@ -118,7 +110,6 @@ namespace System.Web.OData.Formatter
             _serializerProvider = formatter._serializerProvider;
             _deserializerProvider = formatter._deserializerProvider;
             _payloadKinds = formatter._payloadKinds;
-            MessageWriterSettings = formatter.MessageWriterSettings;
 
             // Parameter 2: version
             _version = version;
@@ -148,22 +139,6 @@ namespace System.Web.OData.Formatter
                 return _deserializerProvider;
             }
         }
-
-        /// <summary>
-        /// Gets the <see cref="ODataMessageQuotas"/> that this formatter uses on the write side.
-        /// </summary>
-        public ODataMessageQuotas MessageWriterQuotas
-        {
-            get
-            {
-                return MessageWriterSettings.MessageQuotas;
-            }
-        }
-
-        /// <summary>
-        /// Gets the <see cref="ODataMessageWriterSettings"/> to be used while writing responses.
-        /// </summary>
-        public ODataMessageWriterSettings MessageWriterSettings { get; private set; }
 
         /// <summary>
         /// Gets or sets a method that allows consumers to provide an alternate base
@@ -493,7 +468,8 @@ namespace System.Web.OData.Formatter
             }
 
             Uri baseAddress = GetBaseAddressInternal(Request);
-            ODataMessageWriterSettings writerSettings = MessageWriterSettings.Clone();
+            ODataMessageWriterSettings writerSettings =
+                Request.RequestContainer().GetRequiredService<ODataMessageWriterSettings>();
             writerSettings.BaseUri = baseAddress;
             writerSettings.Version = _version;
 

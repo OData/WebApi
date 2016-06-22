@@ -16,6 +16,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 
 namespace System.Web.OData.Batch
@@ -183,16 +184,14 @@ namespace System.Web.OData.Batch
             Contract.Assert(request != null);
 
             ODataVersion odataVersion = ODataMediaTypeFormatter.GetODataResponseVersion(request);
-            ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
-            {
-                Version = odataVersion,
-                DisableMessageStreamDisposal = true,
-                MessageQuotas = messageQuotas
-            };
+            IServiceProvider requestContainer = request.RequestContainer();
+            ODataMessageWriterSettings writerSettings =
+                requestContainer.GetRequiredService<ODataMessageWriterSettings>();
+            writerSettings.Version = odataVersion;
+            writerSettings.MessageQuotas = messageQuotas;
 
             HttpResponseMessage response = request.CreateResponse(HttpStatusCode.OK);
-            IServiceProvider requestContainer = request.RequestContainer();
-            response.Content = new ODataBatchContent(responses, requestContainer, writerSettings);
+            response.Content = new ODataBatchContent(responses, requestContainer);
             return Task.FromResult(response);
         }
 

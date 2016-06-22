@@ -39,8 +39,10 @@ namespace System.Web.OData.Test
         public void CreateResponseMessageAsync_Throws_IfResponsesAreNull()
         {
             DefaultODataBatchHandler batchHandler = new DefaultODataBatchHandler(new HttpServer());
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetFakeRequestContainer();
             Assert.ThrowsArgumentNull(
-                () => batchHandler.CreateResponseMessageAsync(null, new HttpRequestMessage(), CancellationToken.None).Wait(),
+                () => batchHandler.CreateResponseMessageAsync(null, request, CancellationToken.None).Wait(),
                 "responses");
         }
 
@@ -61,8 +63,10 @@ namespace System.Web.OData.Test
             {
                 new OperationResponseItem(new HttpResponseMessage(HttpStatusCode.OK))
             };
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.SetFakeRequestContainer();
 
-            HttpResponseMessage response = batchHandler.CreateResponseMessageAsync(responses, new HttpRequestMessage(), CancellationToken.None).Result;
+            HttpResponseMessage response = batchHandler.CreateResponseMessageAsync(responses, request, CancellationToken.None).Result;
 
             var batchContent = Assert.IsType<ODataBatchContent>(response.Content);
             Assert.Equal(1, batchContent.Responses.Count());

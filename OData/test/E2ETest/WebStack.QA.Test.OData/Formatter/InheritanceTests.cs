@@ -216,7 +216,7 @@ namespace WebStack.QA.Test.OData.Formatter
                             entityContext.EdmObject.TryGetPropertyValue("Id", out id);
                             return new Uri(entityContext.Url.CreateODataLink(
                                 new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
-                                new KeySegment(new[] { new KeyValuePair<string, object>("Id", id)}, entityContext.EntityType, null),
+                                new KeySegment(new[] { new KeyValuePair<string, object>("Id", id)}, entityContext.StructuredType as IEdmEntityType, null),
                                 new NavigationPropertySegment(navigationProperty, null)));
                         },
                         false);

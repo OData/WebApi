@@ -49,12 +49,12 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             var alwaysAvailableActionBaseType = baseEntitySet.EntityType.Action("AlwaysAvailableActionBaseType");
             var transientActionBaseType = baseEntitySet.EntityType.Action("TransientActionBaseType");
 
-            Func<EntityContext, Uri> transientActionBaseTypeLinkFactory = eic =>
+            Func<ResourceContext, Uri> transientActionBaseTypeLinkFactory = eic =>
             {
                 IEdmEntityType baseType = eic.EdmModel.FindType(typeof(BaseEntity).FullName) as IEdmEntityType;
                 object id;
                 eic.EdmObject.TryGetPropertyValue("Id", out id);
-                if (!eic.EntityType.IsOrInheritsFrom(baseType) || (int)id % 2 == 1)
+                if (!eic.StructuredType.IsOrInheritsFrom(baseType) || (int)id % 2 == 1)
                 {
                     return null;
                 }
@@ -68,7 +68,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
 
                     var segments = new List<ODataPathSegment>();
                     segments.Add(new EntitySetSegment(eic.NavigationSource as IEdmEntitySet));
-                    segments.Add(new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, eic.EntityType, null));
+                    segments.Add(new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, eic.StructuredType as IEdmEntityType, null));
                     string link = eic.Url.CreateODataLink("Actions", eic.Request.ODataProperties().PathHandler, segments);
                     link += "/" + action.FullName();
                     return new Uri(link);
@@ -79,12 +79,12 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             var derivedEntityType = builder.EntityType<DerivedEntity>().DerivesFrom<BaseEntity>();
             var alwaysAvailableActionDerivedType = derivedEntityType.Action("AlwaysAvailableActionDerivedType");
             var transientActionDerivedType = derivedEntityType.Action("TransientActionDerivedType");
-            Func<EntityContext, Uri> transientActionDerivedTypeLinkFactory = eic =>
+            Func<ResourceContext, Uri> transientActionDerivedTypeLinkFactory = eic =>
             {
                 IEdmEntityType derivedType = eic.EdmModel.FindType(typeof(DerivedEntity).FullName) as IEdmEntityType;
                 object id;
                 eic.EdmObject.TryGetPropertyValue("Id", out id);
-                if (!eic.EntityType.IsOrInheritsFrom(derivedType) || (int)id % 2 == 1)
+                if (!eic.StructuredType.IsOrInheritsFrom(derivedType) || (int)id % 2 == 1)
                 {
                     return null;
                 }
@@ -98,7 +98,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
 
                     var segments = new List<ODataPathSegment>();
                     segments.Add(new EntitySetSegment(eic.NavigationSource as IEdmEntitySet));
-                    segments.Add(new KeySegment(new[] {new KeyValuePair<string, object>("Id", id)}, eic.EntityType, null));
+                    segments.Add(new KeySegment(new[] {new KeyValuePair<string, object>("Id", id)}, eic.StructuredType as IEdmEntityType, null));
                     segments.Add(new TypeSegment(derivedType, null));
                     // bug 1985: Make the internal constructor as public in BoundActionPathSegment
                     //segments.Add(new BoundActionPathSegment(action));

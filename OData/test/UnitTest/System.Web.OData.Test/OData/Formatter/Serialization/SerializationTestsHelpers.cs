@@ -20,11 +20,10 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance.GetPrimitive(
                 EdmPrimitiveTypeKind.String,
                 isNullable: true);
-            customerType.AddStructuralProperty(
+            IEdmStructuralProperty city = customerType.AddStructuralProperty(
                 "City",
                 primitiveTypeReference,
-                defaultValue: null,
-                concurrencyMode: EdmConcurrencyMode.Fixed);
+                defaultValue: null);
             model.AddElement(customerType);
 
             var specialCustomerType = new EdmEntityType("Default", "SpecialCustomer", customerType);
@@ -84,6 +83,7 @@ namespace System.Web.OData.Formatter.Serialization
             // Add Entity set
             var container = new EdmEntityContainer("Default", "Container");
             var customerSet = container.AddEntitySet("Customers", customerType);
+            model.SetOptimisticConcurrencyAnnotation(customerSet, new[] { city });
             var orderSet = container.AddEntitySet("Orders", orderType);
             customerSet.AddNavigationTarget(customerType.NavigationProperties().Single(np => np.Name == "Orders"), orderSet);
             customerSet.AddNavigationTarget(

@@ -65,13 +65,13 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
             return builder.GetEdmModel();
         }
 
-        private static Func<EntityContext, Uri> link = entityContext =>
+        private static Func<ResourceContext, Uri> link = entityContext =>
             {
                 object id;
                 entityContext.EdmObject.TryGetPropertyValue("Id", out id);
                 string uri = entityContext.Url.CreateODataLink(
                                 new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
-                                new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, entityContext.EntityType, null));
+                                new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, entityContext.StructuredType as IEdmEntityType, null));
                 return new Uri(uri);
             };
     }

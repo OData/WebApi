@@ -689,7 +689,6 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             Mock<IEdmStructuralProperty> mockConcurrencyProperty = new Mock<IEdmStructuralProperty>();
-            mockConcurrencyProperty.SetupGet(s => s.ConcurrencyMode).Returns(EdmConcurrencyMode.Fixed);
             mockConcurrencyProperty.SetupGet(s => s.Name).Returns("City");
             SelectExpandNode selectExpandNode = new SelectExpandNode
             {
@@ -716,10 +715,10 @@ namespace System.Web.OData.Formatter.Serialization
             _entityContext.Request = request;
 
             // Act
-            ODataResource entry = serializer.Object.CreateResource(selectExpandNode, _entityContext);
+            ODataResource resource = serializer.Object.CreateResource(selectExpandNode, _entityContext);
 
             // Assert
-            Assert.Equal(etagHeaderValue.ToString(), entry.ETag);
+            Assert.Equal(etagHeaderValue.ToString(), resource.ETag);
         }
 
         [Fact]

@@ -52,7 +52,7 @@ namespace WebStack.QA.Test.OData.ForeignKey
                 entityContext.EdmObject.TryGetPropertyValue("Id", out id);
                 string uri = entityContext.Url.CreateODataLink(
                     new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
-                    new KeySegment(new[] { new KeyValuePair<string, object>("Id", id)}, entityContext.EntityType, null));
+                    new KeySegment(new[] { new KeyValuePair<string, object>("Id", id)}, entityContext.StructuredType as IEdmEntityType, null));
                 return new Uri(uri);
             }, true);
 
@@ -62,7 +62,7 @@ namespace WebStack.QA.Test.OData.ForeignKey
                 entityContext.EdmObject.TryGetPropertyValue("OrderId", out id);
                 string uri = entityContext.Url.CreateODataLink(
                     new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
-                    new KeySegment(new[] { new KeyValuePair<string, object>("OrderId", id) }, entityContext.EntityType, null));
+                    new KeySegment(new[] { new KeyValuePair<string, object>("OrderId", id) }, entityContext.StructuredType as IEdmEntityType, null));
                 return new Uri(uri);
             }, true);
 
@@ -75,7 +75,7 @@ namespace WebStack.QA.Test.OData.ForeignKey
                     entityContext.EdmObject.TryGetPropertyValue("Id", out id);
                     string uri = entityContext.Url.CreateODataLink(
                         new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
-                        new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, entityContext.EntityType, null),
+                        new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, entityContext.StructuredType as IEdmEntityType, null),
                         new NavigationPropertySegment(navigationProperty, null));
                     return new Uri(uri);
                 }, true);
@@ -88,7 +88,7 @@ namespace WebStack.QA.Test.OData.ForeignKey
                     entityContext.EdmObject.TryGetPropertyValue("OrderId", out id);
                     string uri = entityContext.Url.CreateODataLink(
                         new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
-                        new KeySegment(new[] { new KeyValuePair<string, object>("OrderId", id) }, entityContext.EntityType, null),
+                        new KeySegment(new[] { new KeyValuePair<string, object>("OrderId", id) }, entityContext.StructuredType as IEdmEntityType, null),
                         new NavigationPropertySegment(navigationProperty, null));
                     return new Uri(uri);
                 }, true);

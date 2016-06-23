@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Moq;
@@ -47,7 +50,8 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 .Property(typeof(int?), "Count", new ConcurrencyCheckAttribute());
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntityType(type);
+            var entityType = builder.AddEntityType(type);
+            builder.AddEntitySet("EntitySet", entityType);
 
             // Act
             IEdmModel model = builder.GetEdmModel();
@@ -59,28 +63,45 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 "Count",
                 EdmPrimitiveTypeKind.Int32,
                 isNullable: true);
-            Assert.Equal(EdmConcurrencyMode.Fixed, property.ConcurrencyMode); 
+            IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet("EntitySet");
+            Assert.NotNull(entitySet);
+
+            IEnumerable<IEdmStructuralProperty> currencyProperties = model.GetConcurrencyProperties(entitySet);
+            IEdmStructuralProperty currencyProperty = Assert.Single(currencyProperties);
+            Assert.Same(property, currencyProperty);
         }
 
         [Fact]
         public void ConcurrencyCheckAttributeEdmPropertyConvention_DoesnotOverwriteExistingConfiguration()
         {
+            // Arrange
             MockType type =
                 new MockType("Entity")
                 .Property(typeof(int), "ID")
                 .Property(typeof(int), "Count", new ConcurrencyCheckAttribute());
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.AddEntityType(type).AddProperty(type.GetProperty("Count")).IsOptional();
+            var entityType = builder.AddEntityType(type);
+            entityType.AddProperty(type.GetProperty("Count")).IsOptional();
+            builder.AddEntitySet("EntitySet", entityType);
 
+            // Act
             IEdmModel model = builder.GetEdmModel();
+
+            // Assert
             IEdmEntityType entity = model.AssertHasEntityType(type);
             IEdmStructuralProperty property = entity.AssertHasPrimitiveProperty(
                 model,
                 "Count",
                 EdmPrimitiveTypeKind.Int32,
                 isNullable: true);
-            Assert.Equal(EdmConcurrencyMode.Fixed, property.ConcurrencyMode);
+
+            IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet("EntitySet");
+            Assert.NotNull(entitySet);
+
+            IEnumerable<IEdmStructuralProperty> currencyProperties = model.GetConcurrencyProperties(entitySet);
+            IEdmStructuralProperty currencyProperty = Assert.Single(currencyProperties);
+            Assert.Same(property, currencyProperty);
         }
     }
 }

@@ -66,7 +66,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             var oneToOneParentSet = builder.EntitySet<OneToOneParent>("OneToOneParent");
             var oneToOneParentEntity = oneToOneParentSet.EntityType;
             NavigationPropertyConfiguration childProperty = oneToOneParentEntity.HasOptional(x => x.Child);
-            Func<EntityContext<OneToOneParent>, IEdmNavigationProperty, Uri> linkFactory = (eic, np) => new Uri("http://localhost:50000/CustomNavigationProperty");
+            Func<ResourceContext<OneToOneParent>, IEdmNavigationProperty, Uri> linkFactory = (eic, np) => new Uri("http://localhost:50000/CustomNavigationProperty");
             oneToOneParentSet.HasNavigationPropertyLink(childProperty, linkFactory, false);
             return builder.GetEdmModel();
         }

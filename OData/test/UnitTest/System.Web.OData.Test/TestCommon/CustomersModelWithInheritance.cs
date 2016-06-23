@@ -52,8 +52,7 @@ namespace System.Web.OData.TestCommon
             var city = customer.AddStructuralProperty(
                 "City",
                 primitiveTypeReference,
-                defaultValue: null,
-                concurrencyMode: EdmConcurrencyMode.Fixed);
+                defaultValue: null);
             model.AddElement(customer);
 
             // derived entity type special customer

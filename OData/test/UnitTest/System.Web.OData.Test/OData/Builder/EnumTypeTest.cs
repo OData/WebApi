@@ -230,16 +230,23 @@ namespace System.Web.OData.Builder
             var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>().Add_Color_EnumType();
             var entityTypeConfiguration = builder.EntityType<EntityTypeWithEnumTypePropertyTestModel>();
             entityTypeConfiguration.EnumProperty(c => c.RequiredColor).IsOptional().IsConcurrencyToken();
+            builder.EntitySet<EntityTypeWithEnumTypePropertyTestModel>("EntitySet");
 
             // Act
             var model = builder.GetEdmModel();
             var complexType = model.SchemaElements.OfType<IEdmStructuredType>().Single();
-            IEdmStructuralProperty requiredColor = complexType.Properties().SingleOrDefault(p => p.Name == "RequiredColor") as IEdmStructuralProperty;
+            IEdmStructuralProperty requiredColor =
+                complexType.Properties().SingleOrDefault(p => p.Name == "RequiredColor") as IEdmStructuralProperty;
+            IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet("EntitySet");
 
             // Assert
             Assert.NotNull(requiredColor);
             Assert.True(requiredColor.Type.IsNullable);
-            Assert.Equal(EdmConcurrencyMode.Fixed, requiredColor.ConcurrencyMode);
+
+            Assert.NotNull(entitySet);
+            IEnumerable<IEdmStructuralProperty> currencyProperties = model.GetConcurrencyProperties(entitySet);
+            IEdmStructuralProperty currencyProperty = Assert.Single(currencyProperties);
+            Assert.Same(requiredColor, currencyProperty);
         }
 
         [Fact]

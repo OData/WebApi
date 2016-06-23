@@ -36,7 +36,7 @@
         <Property Name="Name" Type="Edm.String" />
         <Property Name="Address" Type="ODataDemo.Address" />
         <Property Name="Location" Type="Edm.GeographyPoint" SRID="Variable" />
-        <Property Name="Concurrency" Type="Edm.Int32" ConcurrencyMode="Fixed" Nullable="false" />
+        <Property Name="Concurrency" Type="Edm.Int32" Nullable="false" />
         <NavigationProperty Name="Products" Type="Collection(ODataDemo.Product)" Partner="Supplier" />
       </EntityType>
       <ComplexType Name="Address">
@@ -60,6 +60,11 @@
         </EntitySet>
         <EntitySet Name="Suppliers" EntityType="ODataDemo.Supplier">
           <NavigationPropertyBinding Path="Products" Target="Products" />
+          <Annotation Term="Org.OData.Core.V1.OptimisticConcurrency">
+            <Collection>
+              <PropertyPath>Concurrency</PropertyPath>
+            </Collection>
+          </Annotation>
         </EntitySet>
         <FunctionImport Name="GetProductsByRating" Function="ODataDemo.GetProductsByRating" EntitySet="Products" IncludeInServiceDocument="true" />
       </EntityContainer>

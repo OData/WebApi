@@ -158,17 +158,10 @@ namespace System.Web.OData.Builder
                             typeKind,
                             primitiveProperty.OptionalProperty);
 
-                        // Set concurrency token if is entity type, and concurrency token is true
-                        EdmConcurrencyMode concurrencyMode = EdmConcurrencyMode.None;
-                        if (config.Kind == EdmTypeKind.Entity && primitiveProperty.ConcurrencyToken)
-                        {
-                            concurrencyMode = EdmConcurrencyMode.Fixed;
-                        }
                         edmProperty = type.AddStructuralProperty(
                             primitiveProperty.Name,
                             primitiveTypeReference,
-                            defaultValue: null,
-                            concurrencyMode: concurrencyMode);
+                            defaultValue: null);
                         break;
 
                     case PropertyKind.Complex:
@@ -185,7 +178,7 @@ namespace System.Web.OData.Builder
                         break;
 
                     case PropertyKind.Enum:
-                        edmProperty = CreateStructuralTypeEnumPropertyBody(type, config, (EnumPropertyConfiguration)property);
+                        edmProperty = CreateStructuralTypeEnumPropertyBody(type, (EnumPropertyConfiguration)property);
                         break;
 
                     default:
@@ -247,7 +240,7 @@ namespace System.Web.OData.Builder
                 new EdmCollectionTypeReference(new EdmCollectionType(elementTypeReference)));
         }
 
-        private IEdmProperty CreateStructuralTypeEnumPropertyBody(EdmStructuredType type, StructuralTypeConfiguration config, EnumPropertyConfiguration enumProperty)
+        private IEdmProperty CreateStructuralTypeEnumPropertyBody(EdmStructuredType type, EnumPropertyConfiguration enumProperty)
         {
             Type enumPropertyType = TypeHelper.GetUnderlyingTypeOrSelf(enumProperty.RelatedClrType);
             IEdmType edmType = GetEdmType(enumPropertyType);
@@ -260,18 +253,10 @@ namespace System.Web.OData.Builder
             IEdmEnumType enumType = (IEdmEnumType)edmType;
             IEdmTypeReference enumTypeReference = new EdmEnumTypeReference(enumType, enumProperty.OptionalProperty);
 
-            // Set concurrency token if is entity type, and concurrency token is true
-            EdmConcurrencyMode enumConcurrencyMode = EdmConcurrencyMode.None;
-            if (config.Kind == EdmTypeKind.Entity && enumProperty.ConcurrencyToken)
-            {
-                enumConcurrencyMode = EdmConcurrencyMode.Fixed;
-            }
-
             return type.AddStructuralProperty(
                 enumProperty.Name,
                 enumTypeReference,
-                defaultValue: null,
-                concurrencyMode: enumConcurrencyMode);
+                defaultValue: null);
         }
 
         private void CreateComplexTypeBody(EdmComplexType type, ComplexTypeConfiguration config)

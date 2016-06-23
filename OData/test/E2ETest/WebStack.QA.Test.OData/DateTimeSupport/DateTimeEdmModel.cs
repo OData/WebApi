@@ -59,13 +59,13 @@ namespace WebStack.QA.Test.OData.DateTimeSupport
             builder.Action("ResetDataSource");
         }
 
-        private static Func<EntityContext, Uri> link = entityContext =>
+        private static Func<ResourceContext, Uri> link = entityContext =>
         {
             object id;
             entityContext.EdmObject.TryGetPropertyValue("FileId", out id);
             string uri = entityContext.Url.CreateODataLink(
                             new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
-                            new KeySegment(new[] { new KeyValuePair<string, object>("FileId", id) }, entityContext.EntityType, null));
+                            new KeySegment(new[] { new KeyValuePair<string, object>("FileId", id) }, entityContext.StructuredType as IEdmEntityType, null));
             return new Uri(uri);
         };
     }

@@ -354,7 +354,7 @@ namespace System.Web.OData.Builder.Conventions
         {
             // Arrange
             var modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.EntitySet<ProductWithETagAttribute>("Products");
+            modelBuilder.EntitySet<ProductWithConcurrencyCheckAttribute>("Products");
 
             // Act
             var model = modelBuilder.GetEdmModel();
@@ -362,16 +362,21 @@ namespace System.Web.OData.Builder.Conventions
             // Assert
             Assert.Equal(model.SchemaElements.OfType<IEdmSchemaType>().Count(), 1);
 
-            var product = model.AssertHasEntitySet(entitySetName: "Products", mappedEntityClrType: typeof(ProductWithETagAttribute));
+            var product = model.AssertHasEntitySet(entitySetName: "Products",
+                mappedEntityClrType: typeof(ProductWithConcurrencyCheckAttribute));
             Assert.Equal(2, product.StructuralProperties().Count());
             Assert.Equal(0, product.NavigationProperties().Count());
             product.AssertHasKey(model, "ID", EdmPrimitiveTypeKind.Int32);
-            IEdmStructuralProperty idProperty =
-                product.AssertHasPrimitiveProperty(model, "ID", EdmPrimitiveTypeKind.Int32, isNullable: false);
-            Assert.Equal(EdmConcurrencyMode.None, idProperty.ConcurrencyMode);
+
             IEdmStructuralProperty nameProperty =
                 product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
-            Assert.Equal(EdmConcurrencyMode.Fixed, nameProperty.ConcurrencyMode);
+
+            IEdmEntitySet products = model.EntityContainer.FindEntitySet("Products");
+            Assert.NotNull(products);
+
+            IEnumerable<IEdmStructuralProperty> currencyProperties = model.GetConcurrencyProperties(products);
+            IEdmStructuralProperty currencyProperty = Assert.Single(currencyProperties);
+            Assert.Same(currencyProperty, nameProperty);
         }
 
         [Fact]
@@ -379,7 +384,7 @@ namespace System.Web.OData.Builder.Conventions
         {
             // Arrange
             var modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.EntitySet<ProductWithETagAttribute>("Products");
+            modelBuilder.EntitySet<ProductWithConcurrencyCheckAttribute>("Products");
 
             // Act
             var model = modelBuilder.GetEdmModel();
@@ -419,7 +424,13 @@ namespace System.Web.OData.Builder.Conventions
             var product = model.AssertHasEntitySet(entitySetName: "Products", mappedEntityClrType: typeof(ProductWithTimestampAttribute));
             IEdmStructuralProperty nameProperty =
                 product.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
-            Assert.Equal(EdmConcurrencyMode.Fixed, nameProperty.ConcurrencyMode);
+
+            IEdmEntitySet products = model.EntityContainer.FindEntitySet("Products");
+            Assert.NotNull(products);
+
+            IEnumerable<IEdmStructuralProperty> currencyProperties = model.GetConcurrencyProperties(products);
+            IEdmStructuralProperty currencyProperty = Assert.Single(currencyProperties);
+            Assert.Same(currencyProperty, nameProperty);
         }
 
         [Fact]
@@ -3092,7 +3103,7 @@ namespace System.Web.OData.Builder.Conventions
         public string[] Aliases { get; set; }
     }
 
-    public class ProductWithETagAttribute
+    public class ProductWithConcurrencyCheckAttribute
     {
         public int ID { get; set; }
 

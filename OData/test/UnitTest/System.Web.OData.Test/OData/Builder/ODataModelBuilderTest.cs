@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.TestCommon;
 using System.Web.OData.TestCommon.Models;
@@ -198,6 +199,7 @@ namespace System.Web.OData.Builder
             customer.HasKey(c => c.Id);
             customer.Property(c => c.Id);
             customer.Property(c => c.Name).IsConcurrencyToken();
+            builder.EntitySet<Customer>("Customers");
 
             // Act
             IEdmModel model = builder.GetEdmModel();
@@ -206,7 +208,13 @@ namespace System.Web.OData.Builder
             IEdmEntityType type = model.AssertHasEntityType(typeof(Customer));
             IEdmStructuralProperty property =
                 type.AssertHasPrimitiveProperty(model, "Name", EdmPrimitiveTypeKind.String, isNullable: true);
-            Assert.Equal(EdmConcurrencyMode.Fixed, property.ConcurrencyMode);
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+            Assert.NotNull(customers);
+
+            IEnumerable<IEdmStructuralProperty> currencyProperties = model.GetConcurrencyProperties(customers);
+            IEdmStructuralProperty currencyProperty = Assert.Single(currencyProperties);
+            Assert.Same(property, currencyProperty);
         }
 
         [Fact]

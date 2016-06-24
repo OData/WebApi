@@ -129,11 +129,10 @@ namespace System.Web.OData.Batch
                 throw Error.ArgumentNull("request");
             }
 
-            ODataMessageReaderSettings oDataReaderSettings =
-                request.RequestContainer().GetRequiredService<ODataMessageReaderSettings>();
-            oDataReaderSettings.BaseUri = GetBaseUri(request);
+            IServiceProvider requestContainer = request.RequestContainer();
+            requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri = GetBaseUri(request);
 
-            ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(request.RequestContainer(), oDataReaderSettings, cancellationToken);
+            ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(requestContainer, cancellationToken);
             request.RegisterForDispose(reader);
 
             List<ODataBatchRequestItem> requests = new List<ODataBatchRequestItem>();

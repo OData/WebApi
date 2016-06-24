@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData.Formatter;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 
 namespace System.Web.OData.Batch
@@ -23,13 +24,11 @@ namespace System.Web.OData.Batch
         /// </summary>
         /// <param name="requestContainer">The dependency injection container for the request.</param>
         /// <param name="content">The <see cref="HttpContent"/>.</param>
-        /// <param name="settings">The <see cref="ODataMessageReaderSettings"/>.</param>
         /// <returns>A task object that produces an <see cref="ODataMessageReader"/> when completed.</returns>
         public static Task<ODataMessageReader> GetODataMessageReaderAsync(this HttpContent content,
-            IServiceProvider requestContainer,
-            ODataMessageReaderSettings settings)
+            IServiceProvider requestContainer)
         {
-            return GetODataMessageReaderAsync(content, requestContainer, settings, CancellationToken.None);
+            return GetODataMessageReaderAsync(content, requestContainer, CancellationToken.None);
         }
 
         /// <summary>
@@ -37,11 +36,10 @@ namespace System.Web.OData.Batch
         /// </summary>
         /// <param name="requestContainer">The dependency injection container for the request.</param>
         /// <param name="content">The <see cref="HttpContent"/>.</param>
-        /// <param name="settings">The <see cref="ODataMessageReaderSettings"/>.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A task object that produces an <see cref="ODataMessageReader"/> when completed.</returns>
         public static async Task<ODataMessageReader> GetODataMessageReaderAsync(this HttpContent content,
-            IServiceProvider requestContainer, ODataMessageReaderSettings settings, CancellationToken cancellationToken)
+            IServiceProvider requestContainer, CancellationToken cancellationToken)
         {
             if (content == null)
             {
@@ -55,6 +53,7 @@ namespace System.Web.OData.Batch
             {
                 Container = requestContainer
             };
+            ODataMessageReaderSettings settings = requestContainer.GetRequiredService<ODataMessageReaderSettings>();
             ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, settings);
             return oDataMessageReader;
         }

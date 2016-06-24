@@ -815,10 +815,11 @@ namespace System.Web.OData.Formatter.Serialization
                 },
                 CustomerProperties = new Dictionary<string, object>()
             };
+            DateTime dateTime = new DateTime(2014, 10, 24, 0, 0, 0, DateTimeKind.Utc);
             customer.CustomerProperties.Add("EnumProperty", SimpleEnum.Fourth);
             customer.CustomerProperties.Add("GuidProperty", new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"));
             customer.CustomerProperties.Add("ListProperty", new List<int>{5,4,3,2,1});
-            customer.CustomerProperties.Add("DateTimeProperty", new DateTime(2014, 10, 24));
+            customer.CustomerProperties.Add("DateTimeProperty", dateTime);
 
             ResourceContext resourceContext = new ResourceContext(writeContext,
                 customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
@@ -855,7 +856,7 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.Equal("Collection(Edm.Int32)", collectionValue.TypeName);
 
             ODataProperty dateTimeProperty = Assert.Single(resource.Properties.Where(p => p.Name == "DateTimeProperty"));
-            Assert.Equal(new DateTimeOffset(new DateTime(2014, 10, 24)), dateTimeProperty.Value);
+            Assert.Equal(new DateTimeOffset(dateTime), dateTimeProperty.Value);
         }
 
         [Theory]

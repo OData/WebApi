@@ -112,7 +112,7 @@ namespace WebStack.QA.Test.OData.Formatter
                     new object[] { ErrorType.ThrowHttpResponseExceptionInAction, HttpStatusCode.NotFound, "ThrowHttpResponseExceptionInAction" },
                     new object[] { ErrorType.ResponseErrorResponseInAction, HttpStatusCode.NotFound, "ResponseErrorResponseInAction" },
                     new object[] { ErrorType.ResponseHttpErrorResponseInAction, HttpStatusCode.NotFound, "ResponseHttpErrorResponseInAction" },
-                    new object[] { ErrorType.QueryableThrowException, HttpStatusCode.InternalServerError, "Cannot serialize a null 'entry'." },
+                    new object[] { ErrorType.QueryableThrowException, HttpStatusCode.InternalServerError, "Cannot serialize a null 'Resource'." },
                     new object[] { ErrorType.NotSupportGetException, HttpStatusCode.MethodNotAllowed, "The requested resource does not support http method 'GET'." },
                     new object[] { ErrorType.ActionNotFound, HttpStatusCode.NotFound, "No HTTP resource was found that matches the request URI" },
                     new object[] { ErrorType.ReturnODataErrorResponseInAction, HttpStatusCode.InternalServerError, "ReturnODataErrorResponseInActionException" },
@@ -263,7 +263,7 @@ namespace WebStack.QA.Test.OData.Formatter
                     new object[] { ErrorType.ThrowExceptionInAction, HttpStatusCode.InternalServerError, "ThrowExceptionInAction" },
                     new object[] { ErrorType.ThrowHttpResponseExceptionInAction, HttpStatusCode.NotFound, "ThrowHttpResponseExceptionInAction" },
                     new object[] { ErrorType.ResponseErrorResponseInAction, HttpStatusCode.NotFound, "ResponseErrorResponseInAction" },
-                    new object[] { ErrorType.QueryableThrowException, HttpStatusCode.InternalServerError, "Cannot serialize a null 'entry'." },
+                    new object[] { ErrorType.QueryableThrowException, HttpStatusCode.InternalServerError, "Cannot serialize a null 'Resource'." },
                     new object[] { ErrorType.ReturnODataErrorResponseInAction, HttpStatusCode.InternalServerError, "ReturnODataErrorResponseInActionException" },
                     new object[] { ErrorType.ModelStateError, HttpStatusCode.BadRequest, "Requested value 'NotExistType' was not found." }
                 };

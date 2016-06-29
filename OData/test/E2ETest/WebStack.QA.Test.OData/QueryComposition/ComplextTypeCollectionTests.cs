@@ -64,7 +64,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
             JObject result = JObject.Parse(responseContent);
 
-            Assert.Equal("XXX/odata/$metadata#Collection(WebStack.QA.Test.OData.QueryComposition.ComplexTypeCollectionTests_PersonInfo)".Replace("XXX", BaseAddress.ToLowerInvariant()),
+            Assert.Equal("XXX/odata/$metadata#ComplextTypeCollectionTests_Persons(1)/PersonInfos".Replace("XXX", BaseAddress.ToLowerInvariant()),
                 result["@odata.context"]);
 
             Assert.Equal("XXX/odata/ComplextTypeCollectionTests_Persons%281%29/PersonInfos?$skip=2".Replace("XXX", BaseAddress.ToLowerInvariant()),

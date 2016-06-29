@@ -749,7 +749,7 @@
             var city = result["Address"]["City"].ToString();
             Assert.Equal("City 11", city);
             var country = result["Address"]["Country"].ToString();
-            Assert.Equal("Country 11", country);
+            Assert.Equal("\"Country 11\"", country);
         }
 
         #endregion

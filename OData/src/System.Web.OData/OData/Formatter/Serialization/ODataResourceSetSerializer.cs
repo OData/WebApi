@@ -131,10 +131,18 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 if (item == null)
                 {
-                    throw new SerializationException(SRResources.NullElementInCollection);
-                }
+                    if (elementType.IsEntity())
+                    {
+                        throw new SerializationException(SRResources.NullElementInCollection);
+                    }
 
-                resourceSerializer.WriteObjectInline(item, elementType, writer, writeContext);
+                    writer.WriteStart(resource: null);
+                    writer.WriteEnd();
+                }
+                else
+                {
+                    resourceSerializer.WriteObjectInline(item, elementType, writer, writeContext);
+                }
             }
 
             // Subtle and suprising behavior: If the NextPageLink property is set before calling WriteStart(resourceSet),

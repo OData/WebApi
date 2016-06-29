@@ -365,7 +365,7 @@ namespace WebStack.QA.Test.OData.UnboundOperation
                 "{\"Street\":\"Zi Xin Rd.\",\"City\":\"Shanghai\",\"ZipCode\":\"2001100\"}",
                 "[{\"Street\":\"Zi Xin Rd.\",\"City\":\"Shanghai\",\"ZipCode\":\"2001100\"}]",
                 "{\"@odata.type\":\"%23{NAMESPACE}.ConventionCustomer\",\"ID\":7,\"Name\":\"Tony\"}",
-                "{\"value\":[{\"@odata.type\":\"%23{NAMESPACE}.ConventionCustomer\",\"ID\":7,\"Name\":\"Tony\"}]}"
+                "[{\"@odata.type\":\"%23{NAMESPACE}.ConventionCustomer\",\"ID\":7,\"Name\":\"Tony\"}]"
                 );
             requestUri = requestUri.Replace("{NAMESPACE}", EdmSchemaNamespace);
 

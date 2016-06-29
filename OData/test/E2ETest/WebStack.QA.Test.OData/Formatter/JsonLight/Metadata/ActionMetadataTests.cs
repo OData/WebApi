@@ -252,7 +252,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             string expectedDerivedTypeTargetUrl = BaseAddress.ToLowerInvariant() + "/Actions/BaseEntity(9)/WebStack.QA.Test.OData.Formatter.JsonLight.Metadata.Model.DerivedEntity/Default.AlwaysAvailableActionDerivedType";
             string expectedAlwaysAvailableDerivedTypeActionName = "AlwaysAvailableActionDerivedType";
             string expectedAlwaysAvailableDerivedTypeActionContainer = "#Default." + expectedAlwaysAvailableDerivedTypeActionName;
-            string expectedContextUrl = BaseAddress.ToLowerInvariant() + "/Actions/$metadata#BaseEntity/$entity";
+            string expectedContextUrl = BaseAddress.ToLowerInvariant() + "/Actions/$metadata#BaseEntity/WebStack.QA.Test.OData.Formatter.JsonLight.Metadata.Model.DerivedEntity/$entity";
             JObject container;
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             request.SetAcceptHeader(acceptHeader);

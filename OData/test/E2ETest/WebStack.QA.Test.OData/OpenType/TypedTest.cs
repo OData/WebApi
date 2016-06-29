@@ -1339,7 +1339,7 @@
 
             var account = client.Accounts.Where(a => a.Id == 1).Single();
             Assert.Equal("New City", account.Address.City);
-            Assert.Equal("New Country", account.Address.Country);
+            Assert.Equal("\"New Country\"", account.Address.Country);
         }
 
         #endregion

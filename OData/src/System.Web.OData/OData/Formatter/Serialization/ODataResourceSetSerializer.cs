@@ -169,7 +169,10 @@ namespace System.Web.OData.Formatter.Serialization
         public virtual ODataResourceSet CreateResourceSet(IEnumerable resourceSetInstance, IEdmCollectionTypeReference resourceSetType,
             ODataSerializerContext writeContext)
         {
-            ODataResourceSet resourceSet = new ODataResourceSet();
+            ODataResourceSet resourceSet = new ODataResourceSet
+            {
+                TypeName = resourceSetType.FullName()
+            };
 
             if (writeContext.NavigationSource != null)
             {

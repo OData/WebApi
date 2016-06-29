@@ -20,14 +20,14 @@ namespace System.Web.OData.Extensions
             builder.AddService<IODataPathHandler, DefaultODataPathHandler>(ServiceLifetime.Singleton);
             builder.AddServicePrototype(new ODataMessageReaderSettings
             {
-                DisableMessageStreamDisposal = true,
+                EnableMessageStreamDisposal = false,
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
             });
             builder.AddServicePrototype(new ODataMessageWriterSettings
             {
-                DisableMessageStreamDisposal = true,
+                EnableMessageStreamDisposal = false,
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
-                AutoComputePayloadMetadataInJson = true,
+                AutoComputePayloadMetadata = true,
             });
 
             return builder;

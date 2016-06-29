@@ -503,7 +503,7 @@ namespace System.Web.OData.Formatter
                 .GetRequiredService<ODataMessageReaderSettings>();
 
             Assert.NotNull(messageReaderSettings);
-            Assert.True(messageReaderSettings.DisableMessageStreamDisposal);
+            Assert.False(messageReaderSettings.EnableMessageStreamDisposal);
         }
 
         [Fact]
@@ -514,8 +514,8 @@ namespace System.Web.OData.Formatter
                 .GetRequiredService<ODataMessageWriterSettings>();
 
             Assert.NotNull(messageWriterSettings);
-            Assert.True(messageWriterSettings.DisableMessageStreamDisposal);
-            Assert.True(messageWriterSettings.AutoComputePayloadMetadataInJson);
+            Assert.False(messageWriterSettings.EnableMessageStreamDisposal);
+            Assert.True(messageWriterSettings.AutoComputePayloadMetadata);
         }
 
         [Fact]

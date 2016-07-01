@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.OData.Routing
 {
@@ -14,7 +15,6 @@ namespace Microsoft.AspNetCore.OData.Routing
     {
         private readonly string _routePrefix;
         private readonly IEdmModel _model;
-        private readonly IRouter m = new MvcRouteHandler();
 
         public ODataRoute(string routePrefix, IEdmModel model)
         {
@@ -46,6 +46,7 @@ namespace Microsoft.AspNetCore.OData.Routing
                 context.HttpContext.ODataPathHandler().Parse(_model, "http://service-root/", remaining.ToString());
             context.HttpContext.ODataProperties().IsValidODataRequest = true;
 
+            var m = context.HttpContext.RequestServices.GetRequiredService<MvcRouteHandler>();
             await m.RouteAsync(context);
             
         }

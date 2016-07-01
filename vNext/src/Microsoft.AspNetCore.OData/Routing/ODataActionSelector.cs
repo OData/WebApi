@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace Microsoft.AspNetCore.OData.Routing
 {
@@ -30,14 +32,27 @@ namespace Microsoft.AspNetCore.OData.Routing
             return true;
         }
 
-        public ActionDescriptor Select(RouteContext context)
+        public IReadOnlyList<ActionDescriptor> SelectCandidates(RouteContext context)
         {
             if (context.HttpContext.ODataProperties().IsValidODataRequest)
             {
-                return _convention.SelectAction(context);
+                var list = new List<ActionDescriptor>
+                {
+                    _convention.SelectAction(context)
+                };
+                return list.AsReadOnly();
             }
 
-            return _selector.Select(context);
+            return _selector.SelectCandidates(context);
+        }
+
+        public ActionDescriptor SelectBestCandidate(RouteContext context, IReadOnlyList<ActionDescriptor> candidates)
+        {
+            if (context.HttpContext.ODataProperties().IsValidODataRequest)
+            {
+                return candidates.First();
+            }
+            return _selector.SelectBestCandidate(context, candidates);
         }
     }
 }

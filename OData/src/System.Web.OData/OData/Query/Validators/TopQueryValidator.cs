@@ -38,9 +38,19 @@ namespace System.Web.OData.Query.Validators
             }
 
             int maxTop;
+            IEdmProperty property = null;
+            IEdmStructuredType structuredType = topQueryOption.Context.ElementType as IEdmStructuredType;
+            if (topQueryOption.Context.Path != null)
+            {
+                string name;
+                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(topQueryOption.Context.Path.Segments, out property,
+                    out structuredType,
+                    out name);
+            }
+
             if (EdmLibHelpers.IsTopLimitExceeded(
-                null,
-                topQueryOption.Context.ElementType as IEdmStructuredType,
+                property,
+                structuredType,
                 topQueryOption.Context.Model,
                 topQueryOption.Value, topQueryOption.Context.DefaultQuerySettings, 
                 out maxTop))

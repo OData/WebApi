@@ -82,8 +82,12 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.PageAttributeTest
         [Theory]
         [InlineData(CustomerBaseUrl + "?$expand=Orders($top=3)", HttpStatusCode.BadRequest)]
         [InlineData(OrderBaseUrl + "?$expand=Customers($top=10)", HttpStatusCode.OK)]
+        [InlineData(CustomerBaseUrl + "(1)/Orders?$top=3", HttpStatusCode.BadRequest)]
+        [InlineData(OrderBaseUrl + "(1)/Customers?$top=10", HttpStatusCode.OK)]
         [InlineData(ModelBoundCustomerBaseUrl + "?$expand=Orders($top=3)", HttpStatusCode.BadRequest)]
         [InlineData(ModelBoundOrderBaseUrl + "?$expand=Customers($top=10)", HttpStatusCode.OK)]
+        [InlineData(ModelBoundCustomerBaseUrl + "(1)/Orders?$top=3", HttpStatusCode.BadRequest)]
+        [InlineData(ModelBoundOrderBaseUrl + "(1)/Customers?$top=10", HttpStatusCode.OK)]
         public void MaxTopOnProperty(string url, HttpStatusCode statusCode)
         {
             // MaxTop on property override on entity type
@@ -124,7 +128,9 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.PageAttributeTest
 
         [Theory]
         [InlineData(CustomerBaseUrl, "?$expand=Orders")]
+        [InlineData(CustomerBaseUrl, "(1)/Orders")]
         [InlineData(ModelBoundCustomerBaseUrl, "?$expand=Orders")]
+        [InlineData(ModelBoundCustomerBaseUrl, "(1)/Orders")]
         public void PageSizeOnProperty(string url, string expand)
         {
             string queryUrl = string.Format(url + expand, BaseAddress);
@@ -136,7 +142,7 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.PageAttributeTest
             string result = response.Content.ReadAsStringAsync().Result;
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Contains(string.Format(url, "") + "(1)/Orders?$skip=1", result);
+            Assert.Contains("Orders?$skip=1", result);
         }
     }
 }

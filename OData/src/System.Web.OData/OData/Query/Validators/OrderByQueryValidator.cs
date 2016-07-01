@@ -63,7 +63,7 @@ namespace System.Web.OData.Query.Validators
                 }
             }
 
-            OrderByModelLimitationsValidator validator = new OrderByModelLimitationsValidator(orderByOption.Context.Model, _defaultQuerySettings.EnableOrderBy);
+            OrderByModelLimitationsValidator validator = new OrderByModelLimitationsValidator(orderByOption.Context, _defaultQuerySettings.EnableOrderBy);
             bool explicitAllowedProperties = validationSettings.AllowedOrderByProperties.Count > 0;
 
             foreach (OrderByNode node in orderByOption.OrderByNodes)
@@ -117,11 +117,22 @@ namespace System.Web.OData.Query.Validators
         {
             private readonly IEdmModel _model;
             private readonly bool _enableOrderBy;
+            private IEdmProperty _property;
+            private IEdmStructuredType _structuredType;
 
-            public OrderByModelLimitationsValidator(IEdmModel model, bool enableOrderBy)
+            public OrderByModelLimitationsValidator(ODataQueryContext context, bool enableOrderBy)
             {
-                _model = model;
+                _model = context.Model;
                 _enableOrderBy = enableOrderBy;
+
+                if (context.Path != null)
+                {
+                    string name;
+                    EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(context.Path.Segments,
+                        out _property,
+                        out _structuredType,
+                        out name);
+                }
             }
 
             // Visits the expression to find the first node if any, that is not sortable and throws
@@ -140,10 +151,11 @@ namespace System.Web.OData.Query.Validators
 
             public override SingleValueNode Visit(SingleValuePropertyAccessNode nodeIn)
             {
-                if (EdmLibHelpers.IsNotSortable(nodeIn.Property, _model, _enableOrderBy))
+                if (EdmLibHelpers.IsNotSortable(nodeIn.Property, _property, _structuredType, _model, _enableOrderBy))
                 {
                     return nodeIn;
                 }
+
                 if (nodeIn.Source != null)
                 {
                     return nodeIn.Source.Accept(this);
@@ -153,10 +165,12 @@ namespace System.Web.OData.Query.Validators
 
             public override SingleValueNode Visit(SingleNavigationNode nodeIn)
             {
-                if (EdmLibHelpers.IsNotSortable(nodeIn.NavigationProperty, _model, _enableOrderBy))
+                if (EdmLibHelpers.IsNotSortable(nodeIn.NavigationProperty, _property, _structuredType, _model,
+                    _enableOrderBy))
                 {
                     return nodeIn;
                 }
+
                 if (nodeIn.Source != null)
                 {
                     return nodeIn.Source.Accept(this);

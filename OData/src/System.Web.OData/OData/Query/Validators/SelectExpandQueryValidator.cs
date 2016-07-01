@@ -2,11 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
-using System.Web.Http.Routing;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using Microsoft.OData;
@@ -22,14 +20,14 @@ namespace System.Web.OData.Query.Validators
     {
         private readonly DefaultQuerySettings _defaultQuerySettings;
         private readonly FilterQueryValidator _filterQueryValidator;
+        private SelectExpandQueryOption _selectExpandQueryOption;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SelectExpandQueryValidator" /> class.
         /// </summary>>
         public SelectExpandQueryValidator()
+            : this(new DefaultQuerySettings())
         {
-            _defaultQuerySettings = new DefaultQuerySettings();
-            _filterQueryValidator = new FilterQueryValidator();
         }
 
         /// <summary>
@@ -40,7 +38,7 @@ namespace System.Web.OData.Query.Validators
         public SelectExpandQueryValidator(DefaultQuerySettings defaultQuerySettings)
         {
             _defaultQuerySettings = defaultQuerySettings;
-            _filterQueryValidator = new FilterQueryValidator(defaultQuerySettings);
+            _filterQueryValidator = new FilterQueryValidator(_defaultQuerySettings);
         }
 
         /// <summary>
@@ -60,9 +58,8 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("validationSettings");
             }
 
-            IEdmModel model = selectExpandQueryOption.Context.Model;
-            ValidateRestrictions(null, 0, selectExpandQueryOption.SelectExpandClause, model,
-                selectExpandQueryOption.Context.ElementType, null, validationSettings);
+            _selectExpandQueryOption = selectExpandQueryOption;
+            ValidateRestrictions(null, 0, selectExpandQueryOption.SelectExpandClause, null, validationSettings);
 
             if (validationSettings.MaxExpansionDepth > 0)
             {
@@ -165,13 +162,15 @@ namespace System.Web.OData.Query.Validators
             }
         }
 
-        private void ValidateOrderByInExpand(IEdmModel edmModel, OrderByClause orderByClause)
+        private void ValidateOrderByInExpand(IEdmProperty property, IEdmStructuredType structuredType,
+            IEdmModel edmModel, OrderByClause orderByClause)
         {
             if (orderByClause != null)
             {
                 SingleValuePropertyAccessNode node = orderByClause.Expression as SingleValuePropertyAccessNode;
                 if (node != null &&
-                    EdmLibHelpers.IsNotSortable(node.Property, edmModel, _defaultQuerySettings.EnableOrderBy))
+                    EdmLibHelpers.IsNotSortable(node.Property, property, structuredType, edmModel,
+                        _defaultQuerySettings.EnableOrderBy))
                 {
                     throw new ODataException(Error.Format(SRResources.NotSortablePropertyUsedInOrderBy,
                         node.Property.Name));
@@ -242,14 +241,13 @@ namespace System.Web.OData.Query.Validators
         }
 
         private void ValidateRestrictions(
-            int? remainDepth, 
-            int currentDepth, 
+            int? remainDepth,
+            int currentDepth,
             SelectExpandClause selectExpandClause,
-            IEdmModel edmModel, 
-            IEdmType edmType, 
             IEdmNavigationProperty navigationProperty,
             ODataValidationSettings validationSettings)
         {
+            IEdmModel edmModel = _selectExpandQueryOption.Context.Model;
             int? depth = remainDepth;
             if (remainDepth < 0)
             {
@@ -275,16 +273,29 @@ namespace System.Web.OData.Query.Validators
                     {
                         ValidateTopInExpand(property, property.ToEntityType(), edmModel, expandItem.TopOption);
                         ValidateCountInExpand(property, property.ToEntityType(), edmModel, expandItem.CountOption);
-                        ValidateOrderByInExpand(edmModel, expandItem.OrderByOption);
+                        ValidateOrderByInExpand(property, property.ToEntityType(), edmModel, expandItem.OrderByOption);
                         ValidateFilterInExpand(edmModel, expandItem.FilterOption, validationSettings);
 
                         bool isExpandable;
                         ExpandConfiguration expandConfiguration;
-                        if (edmType != null)
+                        if (navigationProperty == null)
                         {
+                            IEdmProperty pathProperty = null;
+                            IEdmStructuredType pathStructuredType =
+                                _selectExpandQueryOption.Context.ElementType as IEdmStructuredType;
+                            if (_selectExpandQueryOption.Context.Path != null)
+                            {
+                                string name;
+                                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(
+                                    _selectExpandQueryOption.Context.Path.Segments,
+                                    out pathProperty,
+                                    out pathStructuredType,
+                                    out name);
+                            }
+
                             isExpandable = EdmLibHelpers.IsExpandable(property.Name,
-                                null,
-                                edmType as IEdmStructuredType, 
+                                pathProperty,
+                                pathStructuredType,
                                 edmModel,
                                 out expandConfiguration);
                             if (isExpandable && expandConfiguration.MaxDepth > 0)
@@ -330,7 +341,7 @@ namespace System.Web.OData.Query.Validators
                         }
                     }
 
-                    ValidateRestrictions(remainDepth, currentDepth + 1, expandItem.SelectAndExpand, edmModel, null, property,
+                    ValidateRestrictions(remainDepth, currentDepth + 1, expandItem.SelectAndExpand, property,
                         validationSettings);
                     remainDepth = depth;
                 }

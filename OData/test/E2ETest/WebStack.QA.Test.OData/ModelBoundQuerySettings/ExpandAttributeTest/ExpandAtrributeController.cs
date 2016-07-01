@@ -15,6 +15,27 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.ExpandAttributeTest
             return _customers;
         }
 
+        [EnableQuery]
+        public List<Order> GetOrders(int key)
+        {
+            Generate();
+            return _customers[key].Orders;
+        }
+
+        [EnableQuery]
+        public Order GetOrder(int key)
+        {
+            Generate();
+            return _customers[key].Order;
+        }
+
+        [EnableQuery]
+        public Customer GetFriend(int key)
+        {
+            Generate();
+            return _customers[key];
+        }
+
         public void Generate()
         {
             _customers = new List<Customer>();
@@ -67,6 +88,13 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.ExpandAttributeTest
         {
             Generate();
             return _orders;
+        }
+
+        [EnableQuery]
+        public List<Customer> GetCustomers2(int key)
+        {
+            Generate();
+            return _orders[key].Customers2;
         }
 
         public void Generate()

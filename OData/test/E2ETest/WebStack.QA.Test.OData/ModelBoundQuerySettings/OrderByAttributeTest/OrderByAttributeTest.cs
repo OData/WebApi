@@ -4,7 +4,6 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Extensions;
-using System.Web.OData.Query;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
@@ -66,6 +65,15 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest
         [InlineData(OrderBaseUrl + "?$orderby=Name", HttpStatusCode.OK)]
         [InlineData(OrderBaseUrl + "?$orderby=Id", HttpStatusCode.BadRequest)]
         [InlineData(OrderBaseUrl + "?$orderby=Id,Name", HttpStatusCode.BadRequest)]
+        [InlineData(OrderBaseUrl +
+            "/WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest.SpecialOrder?$orderby=Name",
+            HttpStatusCode.BadRequest)]
+        [InlineData(OrderBaseUrl +
+            "/WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest.SpecialOrder?$orderby=Price",
+            HttpStatusCode.OK)]
+        [InlineData(OrderBaseUrl +
+            "/WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest.SpecialOrder?$orderby=SpecialName",
+            HttpStatusCode.OK)]
         [InlineData(OrderBaseUrl + "?$expand=Cars($orderby=Id,Name)", HttpStatusCode.OK)]
         [InlineData(OrderBaseUrl + "?$expand=Cars($orderby=CarNumber)", HttpStatusCode.BadRequest)]
         [InlineData(CarBaseUrl + "?$orderby=Id,Name", HttpStatusCode.OK)]
@@ -75,6 +83,15 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest
         [InlineData(ModelBoundOrderBaseUrl + "?$orderby=Name", HttpStatusCode.OK)]
         [InlineData(ModelBoundOrderBaseUrl + "?$orderby=Id", HttpStatusCode.BadRequest)]
         [InlineData(ModelBoundOrderBaseUrl + "?$orderby=Id,Name", HttpStatusCode.BadRequest)]
+        [InlineData(ModelBoundOrderBaseUrl +
+            "/WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest.SpecialOrder?$orderby=Name",
+            HttpStatusCode.BadRequest)]
+        [InlineData(ModelBoundOrderBaseUrl +
+            "/WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest.SpecialOrder?$orderby=Price",
+            HttpStatusCode.OK)]
+        [InlineData(ModelBoundOrderBaseUrl +
+            "/WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest.SpecialOrder?$orderby=SpecialName",
+            HttpStatusCode.OK)]
         [InlineData(ModelBoundOrderBaseUrl + "?$expand=Cars($orderby=Id,Name)", HttpStatusCode.OK)]
         [InlineData(ModelBoundOrderBaseUrl + "?$expand=Cars($orderby=CarNumber)", HttpStatusCode.BadRequest)]
         [InlineData(ModelBoundCarBaseUrl + "?$orderby=Id,Name", HttpStatusCode.OK)]

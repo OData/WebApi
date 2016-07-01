@@ -67,6 +67,7 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.PageAttributeTest
 
             builder.EntitySet<Order>("Orders");
             builder.EntityType<Order>().HasMany(p => p.Customers).Page();
+            builder.EntityType<SpecialOrder>().Page(5, null);
             IEdmModel model = builder.GetEdmModel();
             return model;
         }

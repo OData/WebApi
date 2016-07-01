@@ -25,6 +25,8 @@ namespace System.Web.OData.Query.Validators
         private int _currentAnyAllExpressionDepth;
         private int _currentNodeCount;
         private readonly DefaultQuerySettings _defaultQuerySettings;
+        private IEdmProperty _property;
+        private IEdmStructuredType _structuredType;
 
         private IEdmModel _model;
         
@@ -64,6 +66,15 @@ namespace System.Web.OData.Query.Validators
             if (settings == null)
             {
                 throw Error.ArgumentNull("settings");
+            }
+
+            if (filterQueryOption.Context.Path != null)
+            {
+                string name;
+                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(filterQueryOption.Context.Path.Segments,
+                    out _property,
+                    out _structuredType,
+                    out name);
             }
 
             Validate(filterQueryOption.FilterClause, settings, filterQueryOption.Context.Model);
@@ -342,9 +353,11 @@ namespace System.Web.OData.Query.Validators
             }
 
             // Check whether the property is not filterable
-            if (EdmLibHelpers.IsNotFilterable(navigationProperty, _model, _defaultQuerySettings.EnableFilter))
+            if (EdmLibHelpers.IsNotFilterable(navigationProperty, _property, _structuredType, _model,
+                _defaultQuerySettings.EnableFilter))
             {
-                throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, navigationProperty.Name));
+                throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter,
+                    navigationProperty.Name));
             }
 
             // recursion
@@ -401,7 +414,8 @@ namespace System.Web.OData.Query.Validators
 
             // Check whether the property is filterable.
             IEdmProperty property = propertyAccessNode.Property;
-            if (EdmLibHelpers.IsNotFilterable(property, _model, _defaultQuerySettings.EnableFilter))
+            if (EdmLibHelpers.IsNotFilterable(property, _property, _structuredType, _model,
+                _defaultQuerySettings.EnableFilter))
             {
                 throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, property.Name));
             }
@@ -432,7 +446,8 @@ namespace System.Web.OData.Query.Validators
 
             // Check whether the property is filterable.
             IEdmProperty property = propertyAccessNode.Property;
-            if (EdmLibHelpers.IsNotFilterable(property, _model, _defaultQuerySettings.EnableFilter))
+            if (EdmLibHelpers.IsNotFilterable(property, _property, _structuredType, _model,
+                _defaultQuerySettings.EnableFilter))
             {
                 throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, property.Name));
             }

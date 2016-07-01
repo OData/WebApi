@@ -59,61 +59,26 @@ namespace System.Web.OData.Query.Validators
 
             if (path != null && path.Segments.Count > 0)
             {
-                ODataPathSegment lastSegment = path.Segments.Last();
-
-                if (lastSegment is CountSegment && path.Segments.Count > 1)
-                {
-                    ValidateCount(path.Segments[path.Segments.Count - 2], countQueryOption.Context.Model);
-                }
-                else
-                {
-                    ValidateCount(lastSegment, countQueryOption.Context.Model);
-                }
-            }
-        }
-
-        private void ValidateCount(ODataPathSegment segment, IEdmModel model)
-        {
-            Contract.Assert(segment != null);
-            Contract.Assert(model != null);
-
-            NavigationPropertySegment navigationPathSegment = segment as NavigationPropertySegment;
-            if (navigationPathSegment != null)
-            {
-                if (EdmLibHelpers.IsNotCountable(navigationPathSegment.NavigationProperty,
-                    navigationPathSegment.NavigationProperty.ToEntityType(), model,
+                IEdmProperty property;
+                IEdmStructuredType structuredType;
+                string name;
+                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(path.Segments, out property, out structuredType, out name);
+                if (EdmLibHelpers.IsNotCountable(property, structuredType,
+                    countQueryOption.Context.Model,
                     _defaultQuerySettings.EnableCount))
                 {
-                    throw new InvalidOperationException(Error.Format(
-                        SRResources.NotCountablePropertyUsedForCount,
-                        navigationPathSegment.NavigationProperty.Name));
-                }
-                return;
-            }
-
-            PropertySegment propertyAccessPathSegment = segment as PropertySegment;
-            if (propertyAccessPathSegment != null)
-            {
-                if (EdmLibHelpers.IsNotCountable(propertyAccessPathSegment.Property,
-                    propertyAccessPathSegment.Property.Type.Definition as IEdmStructuredType, model,
-                    _defaultQuerySettings.EnableCount))
-                {
-                    throw new InvalidOperationException(Error.Format(
-                        SRResources.NotCountablePropertyUsedForCount,
-                        propertyAccessPathSegment.Property.Name));
-                }
-            }
-
-            EntitySetSegment entitySetSegment = segment as EntitySetSegment;
-            if (entitySetSegment != null)
-            {
-                if (EdmLibHelpers.IsNotCountable(null, entitySetSegment.EntitySet.EntityType() as IEdmStructuredType,
-                    model,
-                    _defaultQuerySettings.EnableCount))
-                {
-                    throw new InvalidOperationException(Error.Format(
-                        SRResources.NotCountableEntitySetUsedForCount,
-                        entitySetSegment.EntitySet.Name));
+                    if (property == null)
+                    {
+                        throw new InvalidOperationException(Error.Format(
+                            SRResources.NotCountableEntitySetUsedForCount,
+                            name));
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(Error.Format(
+                            SRResources.NotCountablePropertyUsedForCount,
+                            name));
+                    }
                 }
             }
         }

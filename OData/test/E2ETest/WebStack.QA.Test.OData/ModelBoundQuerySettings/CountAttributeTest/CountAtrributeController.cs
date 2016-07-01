@@ -18,19 +18,15 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest
         [EnableQuery]
         public List<Order> GetOrders(int key)
         {
-            List<Order> orders = new List<Order>();
-            for (int i = 1; i < 10; i++)
-            {
-                var order = new Order
-                {
-                    Id = i,
-                    Name = "Order" + i,
-                };
+            Generate();
+            return _customers[key].Orders;
+        }
 
-                orders.Add(order);
-            }
-
-            return orders;
+        [EnableQuery]
+        public List<Order> GetCountableOrders(int key)
+        {
+            Generate();
+            return _customers[key].CountableOrders;
         }
 
         [EnableQuery]
@@ -40,6 +36,23 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest
             for (int i = 1; i < 10; i++)
             {
                 var address = new Address
+                {
+                    Name = "Address" + i
+                };
+
+                addresses.Add(address);
+            }
+
+            return addresses;
+        }
+
+        [EnableQuery]
+        public List<Address2> GetAddresses2(int key)
+        {
+            List<Address2> addresses = new List<Address2>();
+            for (int i = 1; i < 10; i++)
+            {
+                var address = new Address2
                 {
                     Name = "Address" + i
                 };
@@ -96,6 +109,7 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest
     public class OrdersController : ODataController
     {
         private List<Order> _orders;
+        private List<SpecialOrder> _specialOrders;
         
         [EnableQuery(MaxExpansionDepth = 6)]
         public List<Order> Get()
@@ -104,10 +118,18 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest
             return _orders;
         }
 
+        [EnableQuery]
+        public List<SpecialOrder> GetFromSpecialOrder()
+        {
+            Generate();
+            return _specialOrders;
+        }
+
         public void Generate()
         {
             if (_orders == null)
             {
+                _specialOrders = new List<SpecialOrder>();
                 _orders = new List<Order>();
                 for (int i = 1; i < 10; i++)
                 {
@@ -118,6 +140,13 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest
                     };
 
                     _orders.Add(order);
+                    var specialOrder = new SpecialOrder
+                    {
+                        Id = i,
+                        SpecialName = "Special Order" + i
+                    };
+
+                    _specialOrders.Add(specialOrder);
                 }
             }
         }

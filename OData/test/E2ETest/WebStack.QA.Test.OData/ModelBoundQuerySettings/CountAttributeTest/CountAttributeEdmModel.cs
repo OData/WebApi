@@ -18,6 +18,8 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest
 
         public List<Address> Addresses { get; set; }
 
+        public List<Address2> Addresses2 { get; set; }
+
         public List<Order> CountableOrders { get; set; } 
     }
 
@@ -31,7 +33,21 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest
         public int Price { get; set; }
     }
 
+    [Count(Disabled = true)]
+    public class SpecialOrder : Order
+    {
+        public string SpecialName { get; set; }
+    }
+
     public class Address
+    {
+        public string Name { get; set; }
+
+        public string Street { get; set; }
+    }
+
+    [Count]
+    public class Address2
     {
         public string Name { get; set; }
 
@@ -56,6 +72,8 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest
                 .EntityType.HasMany(p => p.Orders)
                 .Count(QueryOptionSetting.Disabled);
             builder.EntitySet<Order>("Orders").EntityType.Count();
+            builder.EntityType<SpecialOrder>().Count(QueryOptionSetting.Disabled);
+            builder.ComplexType<Address2>().Count();
             IEdmModel model = builder.GetEdmModel();
             return model;
         }

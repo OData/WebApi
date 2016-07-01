@@ -4,7 +4,6 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Extensions;
-using System.Web.OData.Query;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
@@ -36,13 +35,11 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest
         }
 
         [Theory]
-        [InlineData(CustomerBaseUrl + "?$count=true")]
-        [InlineData(CustomerBaseUrl + "(1)/Orders?$count=true")]
-        [InlineData(CustomerBaseUrl + "(1)/Addresses?$count=true")]
-        [InlineData(ModelBoundCustomerBaseUrl + "?$count=true")]
-        [InlineData(ModelBoundCustomerBaseUrl + "(1)/Orders?$count=true")]
-        [InlineData(ModelBoundCustomerBaseUrl + "(1)/Addresses?$count=true")]
-        public void NonCountByDefault(string entitySetUrl)
+        [InlineData(CustomerBaseUrl + "?$count=true", "entity set 'Customers'")]
+        [InlineData(CustomerBaseUrl + "(1)/Addresses?$count=true", "property 'Addresses'")]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$count=true", "entity set 'Customers'")]
+        [InlineData(ModelBoundCustomerBaseUrl + "(1)/Addresses?$count=true", "property 'Addresses'")]
+        public void NonCountByDefault(string entitySetUrl, string error)
         {
             string queryUrl =
                 string.Format(
@@ -56,15 +53,27 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest
             string result = response.Content.ReadAsStringAsync().Result;
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.Contains("cannot be used for $count", result);
+            Assert.Contains(error + " cannot be used for $count", result);
         }
 
         [Theory]
-        [InlineData(OrderBaseUrl + "?$count=true")]
-        [InlineData(CustomerBaseUrl + "?$expand=CountableOrders($count=true)")]
-        [InlineData(ModelBoundOrderBaseUrl + "?$count=true")]
-        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=CountableOrders($count=true)")]
-        public void CountOnEntityType(string url)
+        [InlineData(OrderBaseUrl + "?$count=true", HttpStatusCode.OK, "")]
+        [InlineData(CustomerBaseUrl + "?$expand=CountableOrders($count=true)", HttpStatusCode.OK, "")]
+        [InlineData(CustomerBaseUrl + "(1)/CountableOrders?$count=true", HttpStatusCode.OK, "")]
+        [InlineData(CustomerBaseUrl + "(1)/Addresses2?$count=true", HttpStatusCode.OK, "")]
+        [InlineData(OrderBaseUrl +
+            "/WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest.SpecialOrder?$count=true",
+            HttpStatusCode.BadRequest,
+            "entity set 'Orders/WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest.SpecialOrder'")]
+        [InlineData(ModelBoundOrderBaseUrl + "?$count=true", HttpStatusCode.OK, "")]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=CountableOrders($count=true)", HttpStatusCode.OK, "")]
+        [InlineData(ModelBoundCustomerBaseUrl + "(1)/CountableOrders?$count=true", HttpStatusCode.OK, "")]
+        [InlineData(ModelBoundCustomerBaseUrl + "(1)/Addresses2?$count=true", HttpStatusCode.OK, "")]
+        [InlineData(ModelBoundOrderBaseUrl +
+            "/WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest.SpecialOrder?$count=true",
+            HttpStatusCode.BadRequest,
+            "entity set 'Orders/WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest.SpecialOrder'")]
+        public void CountOnStructuredType(string url, HttpStatusCode statusCode, string error)
         {
             string queryUrl =
                 string.Format(
@@ -77,14 +86,23 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest
             HttpResponseMessage response = client.SendAsync(request).Result;
             string result = response.Content.ReadAsStringAsync().Result;
 
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Contains("odata.count", result);
+            Assert.Equal(statusCode, response.StatusCode);
+            if (statusCode == HttpStatusCode.OK)
+            {
+                Assert.Contains("odata.count", result);
+            }
+            else
+            {
+                Assert.Contains(error + " cannot be used for $count", result);
+            }
         }
 
         [Theory]
-        [InlineData(CustomerBaseUrl + "?$expand=Orders($count=true)")]
-        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=Orders($count=true)")]
-        public void CountOnProperty(string url)
+        [InlineData(CustomerBaseUrl + "(1)/Orders?$count=true", "property 'Orders'")]
+        [InlineData(CustomerBaseUrl + "?$expand=Orders($count=true)", "property 'Orders'")]
+        [InlineData(ModelBoundCustomerBaseUrl + "(1)/Orders?$count=true", "property 'Orders'")]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=Orders($count=true)", "property 'Orders'")]
+        public void CountOnProperty(string url, string error)
         {
             string queryUrl =
                 string.Format(
@@ -95,8 +113,10 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CountAttributeTest
             HttpClient client = new HttpClient();
 
             HttpResponseMessage response = client.SendAsync(request).Result;
+            string result = response.Content.ReadAsStringAsync().Result;
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Contains(error + " cannot be used for $count", result);
         }
     }
 }

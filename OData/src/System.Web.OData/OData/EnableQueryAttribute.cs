@@ -570,36 +570,18 @@ namespace System.Web.OData
                 return;
             }
 
-            ModelBoundQuerySettings querySettings = null;
+            IEdmProperty property = null;
+            IEdmStructuredType structuredType = queryContext.ElementType as IEdmStructuredType;
             if (queryContext.Path != null)
             {
-                PropertySegment propertySegment = queryContext.Path.Segments.Last() as PropertySegment;
-                if (propertySegment != null)
-                {
-                    querySettings = EdmLibHelpers.GetModelBoundQuerySettings(propertySegment.Property,
-                        propertySegment.Property.Type.Definition as IEdmStructuredType,
-                        queryContext.Model);
-                }
-                else
-                {
-                    NavigationPropertySegment navigationPropertySegment =
-                        queryContext.Path.Segments.Last() as NavigationPropertySegment;
-                    if (navigationPropertySegment != null)
-                    {
-                        querySettings =
-                            EdmLibHelpers.GetModelBoundQuerySettings(navigationPropertySegment.NavigationProperty,
-                                navigationPropertySegment.NavigationProperty.ToEntityType(),
-                                queryContext.Model);
-                    }
-                }
+                string name;
+                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(queryContext.Path.Segments, out property,
+                    out structuredType,
+                    out name);
             }
 
-            if (querySettings == null)
-            {
-                querySettings = EdmLibHelpers.GetModelBoundQuerySettings(null,
-                    queryContext.ElementType as IEdmStructuredType, queryContext.Model);
-            }
-
+            ModelBoundQuerySettings querySettings = EdmLibHelpers.GetModelBoundQuerySettings(property, structuredType,
+                queryContext.Model);
             if (querySettings != null && querySettings.PageSize.HasValue)
             {
                 _querySettings.ModelBoundPageSize = querySettings.PageSize;

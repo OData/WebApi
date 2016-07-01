@@ -33,6 +33,12 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
         public List<Car> Cars { get; set; }
     }
 
+    [Filter("Name", Disabled = true)]
+    public class SpecialOrder : Order
+    {
+        public string SpecialName { get; set; }
+    }
+
     [Filter("Id")]
     [Filter(Disabled = true)]
     [Filter("Name")]
@@ -73,6 +79,11 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
                 .EntityType.Filter("Name")
                 .Filter(QueryOptionSetting.Disabled)
                 .Filter("Id");
+            // Need call API just like Order for SepcialOrder because model bound API doesn't support inheritance
+            builder.EntityType<SpecialOrder>()
+                .Filter()
+                .Filter(QueryOptionSetting.Disabled, "Id")
+                .Filter(QueryOptionSetting.Disabled, "Name");
             IEdmModel model = builder.GetEdmModel();
             return model;
         }

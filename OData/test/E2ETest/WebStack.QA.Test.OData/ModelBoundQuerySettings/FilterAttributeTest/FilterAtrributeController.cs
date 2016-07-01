@@ -55,6 +55,7 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
     public class OrdersController : ODataController
     {
         private List<Order> _orders;
+        private List<SpecialOrder> _specialOrders;
         
         [EnableQuery(MaxExpansionDepth = 6)]
         public List<Order> Get()
@@ -63,10 +64,18 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
             return _orders;
         }
 
+        [EnableQuery]
+        public List<SpecialOrder> GetFromSpecialOrder()
+        {
+            Generate();
+            return _specialOrders;
+        }
+
         public void Generate()
         {
             if (_orders == null)
             {
+                _specialOrders = new List<SpecialOrder>();
                 _orders = new List<Order>();
                 for (int i = 1; i < 10; i++)
                 {
@@ -93,6 +102,13 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
                     };
 
                     _orders.Add(order);
+                    var specialOrder = new SpecialOrder
+                    {
+                        Id = i,
+                        SpecialName = "Special Order" + i
+                    };
+
+                    _specialOrders.Add(specialOrder);
                 }
             }
         }

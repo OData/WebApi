@@ -71,7 +71,7 @@ namespace System.Web.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writeContext");
             }
 
-            if (graph == null)
+            if (graph == null || graph is NullEdmComplexObject)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Resource));
             }
@@ -104,7 +104,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             if (graph == null)
             {
-                throw new SerializationException(Error.Format(Properties.SRResources.CannotSerializerNull, Resource));
+                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Resource));
             }
             else
             {
@@ -315,7 +315,14 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             IEdmStructuredType pathType = GetODataPathType(resourceContext.SerializerContext);
-            AddTypeNameAnnotationAsNeeded(resource, pathType, resourceContext.SerializerContext.MetadataLevel);
+            if (resourceContext.StructuredType.TypeKind == EdmTypeKind.Complex)
+            {
+                AddTypeNameAnnotationAsNeededForComplex(resource, resourceContext.SerializerContext.MetadataLevel);
+            }
+            else
+            {
+                AddTypeNameAnnotationAsNeeded(resource, pathType, resourceContext.SerializerContext.MetadataLevel);
+            }
 
             if (resourceContext.NavigationSource != null)
             {
@@ -542,16 +549,16 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
-            foreach (IEdmStructuralProperty nestedProperty in complexProperties)
+            foreach (IEdmStructuralProperty complexProperty in complexProperties)
             {
                 ODataNestedResourceInfo nestedResourceInfo  = new ODataNestedResourceInfo
                 {
-                    IsCollection = nestedProperty.Type.IsCollection(),
-                    Name = nestedProperty.Name
+                    IsCollection = complexProperty.Type.IsCollection(),
+                    Name = complexProperty.Name
                 };
 
                 writer.WriteStart(nestedResourceInfo);
-                WriteComplexAndExpandedNavigationProperty(nestedProperty, null, resourceContext, writer);
+                WriteComplexAndExpandedNavigationProperty(complexProperty, null, resourceContext, writer);
                 writer.WriteEnd();
             }
         }
@@ -569,7 +576,7 @@ namespace System.Web.OData.Formatter.Serialization
             foreach (var dynamicComplexProperty in resourceContext.DynamicComplexProperties)
             {
                 // If the dynamic property is "null", it should be treated ahead by creating an ODataProperty with ODataNullValue.
-                // However, it's safety to skip the following dynamic property.
+                // However, it's safety here to skip the null dynamic property.
                 if (String.IsNullOrEmpty(dynamicComplexProperty.Key) || dynamicComplexProperty.Value == null)
                 {
                     continue;
@@ -651,7 +658,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             object propertyValue = resourceContext.GetPropertyValue(edmProperty.Name);
 
-            if (propertyValue == null)
+            if (propertyValue == null || propertyValue is NullEdmComplexObject)
             {
                 if (edmProperty.Type.IsCollection())
                 {
@@ -659,7 +666,10 @@ namespace System.Web.OData.Formatter.Serialization
                     // it may just be empty.
                     // If a collection of complex or entities can be related, it is represented as a JSON array. An empty
                     // collection of resources (one that contains no resource) is represented as an empty JSON array.
-                    writer.WriteStart(new ODataResourceSet());
+                    writer.WriteStart(new ODataResourceSet
+                    {
+                        TypeName = edmProperty.Type.FullName()
+                    });
                 }
                 else
                 {
@@ -1038,6 +1048,66 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 TypeName = typeName
             });
+        }
+
+        internal static void AddTypeNameAnnotationAsNeededForComplex(ODataResource resource, ODataMetadataLevel metadataLevel)
+        {
+            // ODataLib normally has the caller decide whether or not to serialize properties by leaving properties
+            // null when values should not be serialized. The TypeName property is different and should always be
+            // provided to ODataLib to enable model validation. A separate annotation is used to decide whether or not
+            // to serialize the type name (a null value prevents serialization).
+            Contract.Assert(resource != null);
+
+            // Only add an annotation if we want to override ODataLib's default type name serialization behavior.
+            if (ShouldAddTypeNameAnnotationForComplex(metadataLevel))
+            {
+                string typeName;
+
+                // Provide the type name to serialize (or null to force it not to serialize).
+                if (ShouldSuppressTypeNameSerializationForComplex(metadataLevel))
+                {
+                    typeName = null;
+                }
+                else
+                {
+                    typeName = resource.TypeName;
+                }
+
+                resource.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
+                {
+                    TypeName = typeName
+                });
+            }
+        }
+
+        internal static bool ShouldAddTypeNameAnnotationForComplex(ODataMetadataLevel metadataLevel)
+        {
+            switch (metadataLevel)
+            {
+                // For complex types, the default behavior matches the requirements for minimal metadata mode, so no
+                // annotation is necessary.
+                case ODataMetadataLevel.MinimalMetadata:
+                    return false;
+                // In other cases, this class must control the type name serialization behavior.
+                case ODataMetadataLevel.FullMetadata:
+                case ODataMetadataLevel.NoMetadata:
+                default: // All values already specified; just keeping the compiler happy.
+                    return true;
+            }
+        }
+
+        internal static bool ShouldSuppressTypeNameSerializationForComplex(ODataMetadataLevel metadataLevel)
+        {
+            Contract.Assert(metadataLevel != ODataMetadataLevel.MinimalMetadata);
+
+            switch (metadataLevel)
+            {
+                case ODataMetadataLevel.NoMetadata:
+                    return true;
+                case ODataMetadataLevel.FullMetadata:
+                default: // All values already specified; just keeping the compiler happy.
+                    return false;
+            }
         }
 
         internal static bool ShouldOmitOperation(IEdmOperation operation, OperationLinkBuilder builder,

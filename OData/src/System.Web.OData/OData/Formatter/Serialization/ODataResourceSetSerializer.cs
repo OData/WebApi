@@ -129,13 +129,14 @@ namespace System.Web.OData.Formatter.Serialization
 
             foreach (object item in enumerable)
             {
-                if (item == null)
+                if (item == null || item is NullEdmComplexObject)
                 {
                     if (elementType.IsEntity())
                     {
                         throw new SerializationException(SRResources.NullElementInCollection);
                     }
 
+                    // for null complex element, it can be serialized as "null" in the collection.
                     writer.WriteStart(resource: null);
                     writer.WriteEnd();
                 }
@@ -145,7 +146,7 @@ namespace System.Web.OData.Formatter.Serialization
                 }
             }
 
-            // Subtle and suprising behavior: If the NextPageLink property is set before calling WriteStart(resourceSet),
+            // Subtle and surprising behavior: If the NextPageLink property is set before calling WriteStart(resourceSet),
             // the next page link will be written early in a manner not compatible with odata.streaming=true. Instead, if
             // the next page link is not set when calling WriteStart(resourceSet) but is instead set later on that resourceSet
             // object before calling WriteEnd(), the next page link will be written at the end, as required for
@@ -205,11 +206,11 @@ namespace System.Web.OData.Formatter.Serialization
             if (writeContext.ExpandedResource == null)
             {
                 // If we have more OData format specific information apply it now, only if we are the root feed.
-                PageResult odataresourceSetAnnotations = resourceSetInstance as PageResult;
-                if (odataresourceSetAnnotations != null)
+                PageResult odataResourceSetAnnotations = resourceSetInstance as PageResult;
+                if (odataResourceSetAnnotations != null)
                 {
-                    resourceSet.Count = odataresourceSetAnnotations.Count;
-                    resourceSet.NextPageLink = odataresourceSetAnnotations.NextPageLink;
+                    resourceSet.Count = odataResourceSetAnnotations.Count;
+                    resourceSet.NextPageLink = odataResourceSetAnnotations.NextPageLink;
                 }
                 else if (writeContext.Request != null)
                 {

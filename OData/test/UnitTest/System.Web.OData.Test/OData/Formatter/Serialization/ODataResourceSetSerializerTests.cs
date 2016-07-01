@@ -2,6 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
@@ -17,6 +19,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Moq;
+using Newtonsoft.Json.Linq;
 
 namespace System.Web.OData.Formatter.Serialization
 {
@@ -27,13 +30,17 @@ namespace System.Web.OData.Formatter.Serialization
         Customer[] _customers;
         ODataResourceSetSerializer _serializer;
         IEdmCollectionTypeReference _customersType;
+        IEdmCollectionTypeReference _addressesType;
         ODataSerializerContext _writeContext;
 
         public ODataResourceSetSerializerTests()
         {
             _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
             _customerSet = _model.EntityContainer.FindEntitySet("Customers");
+            IEdmComplexType addressType = _model.SchemaElements.OfType<IEdmComplexType>()
+                .First(c => c.Name == "Address");
             _model.SetAnnotationValue(_customerSet.EntityType(), new ClrTypeAnnotation(typeof(Customer)));
+            _model.SetAnnotationValue(addressType, new ClrTypeAnnotation(typeof(Address)));
             _customers = new[] {
                 new Customer()
                 {
@@ -50,7 +57,7 @@ namespace System.Web.OData.Formatter.Serialization
             };
 
             _customersType = _model.GetEdmTypeReference(typeof(Customer[])).AsCollection();
-
+            _addressesType = _model.GetEdmTypeReference(typeof(Address[])).AsCollection();
             _writeContext = new ODataSerializerContext() { NavigationSource = _customerSet, Model = _model };
         }
 
@@ -100,6 +107,98 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void WriteObject_CanWriteTopLevelResourceSetContainsNullComplexElement()
+        {
+            // Arrange
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
+            MemoryStream stream = new MemoryStream();
+            IODataResponseMessage message = new ODataMessageWrapper(stream);
+
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings
+            {
+                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
+            };
+            settings.SetContentType(ODataFormat.Json);
+
+            ODataMessageWriter writer = new ODataMessageWriter(message, settings);
+            IList<Address> addresses = new[]
+            {
+                new Address { City = "Redmond" },
+                null,
+                new Address { City = "Shanghai" }
+            };
+
+            ODataSerializerContext writeContext = new ODataSerializerContext { Model = _model };
+
+            // Act
+            serializer.WriteObject(addresses, typeof(IList<Address>), writer, writeContext);
+            stream.Seek(0, SeekOrigin.Begin);
+            string result = new StreamReader(stream).ReadToEnd();
+
+            // Assert
+            Assert.Equal("{\"@odata.context\":\"http://any/$metadata#Collection(Default.Address)\"," +
+                "\"value\":[" +
+                  "{\"Street\":null,\"City\":\"Redmond\",\"State\":null,\"Country\":null,\"ZipCode\":null}," +
+                  "null," +
+                  "{\"Street\":null,\"City\":\"Shanghai\",\"State\":null,\"Country\":null,\"ZipCode\":null}" +
+                  "]}", result);
+        }
+
+        [Fact]
+        public void WriteObject_CanWrite_TopLevelResourceSet_ContainsEmptyCollectionOfDynamicComplexElement()
+        {
+            // Arrange
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
+            MemoryStream stream = new MemoryStream();
+            IODataResponseMessage message = new ODataMessageWrapper(stream);
+
+            ODataMessageWriterSettings settings = new ODataMessageWriterSettings
+            {
+                ODataUri = new ODataUri { ServiceRoot = new Uri("http://any/"), }
+            };
+            settings.SetContentType(ODataFormat.Json);
+
+            ODataMessageWriter writer = new ODataMessageWriter(message, settings);
+            IList<SimpleOpenAddress> addresses = new[]
+            {
+                new SimpleOpenAddress
+                {
+                    City = "Redmond",
+                    Street = "Microsoft Rd",
+                    Properties = new Dictionary<string, object>
+                    {
+                        { "StringProp", "abc" },
+                        { "Locations", new SimpleOpenAddress[] {} } // empty collection of complex
+                    }
+                }
+            };
+
+            var builder = new ODataConventionModelBuilder();
+            builder.ComplexType<SimpleOpenAddress>();
+            IEdmModel model = builder.GetEdmModel();
+            ODataSerializerContext writeContext = new ODataSerializerContext { Model = model };
+
+            // Act
+            serializer.WriteObject(addresses, typeof(IList<SimpleOpenAddress>), writer, writeContext);
+            stream.Seek(0, SeekOrigin.Begin);
+            string result = JObject.Parse(new StreamReader(stream).ReadToEnd()).ToString();
+
+            // Assert
+            Assert.Equal(@"{
+  ""@odata.context"": ""http://any/$metadata#Collection(System.Web.OData.SimpleOpenAddress)"",
+  ""value"": [
+    {
+      ""Street"": ""Microsoft Rd"",
+      ""City"": ""Redmond"",
+      ""StringProp"": ""abc"",
+      ""Locations@odata.type"": ""#Collection(System.Web.OData.SimpleOpenAddress)"",
+      ""Locations"": []
+    }
+  ]
+}", result);
+        }
+
+        [Fact]
         public void WriteObjectInline_ThrowsArgumentNull_Writer()
         {
             ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
@@ -144,10 +243,22 @@ namespace System.Web.OData.Formatter.Serialization
             IEnumerable instance = new object[] { null };
             ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
 
-            // Act
+            // Act & Assert
             Assert.Throws<SerializationException>(
                 () => serializer.WriteObjectInline(instance, _customersType, new Mock<ODataWriter>().Object, _writeContext),
                 "Collections cannot contain null elements.");
+        }
+
+        [Fact]
+        public void WriteObjectInline_DoesnotThrow_NullElementInCollection_IfResourceSetContainsNullComplexElement()
+        {
+            // Arrange
+            IEnumerable instance = new object[] { null };
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
+            ODataSerializerContext writeContext = new ODataSerializerContext { NavigationSource = null, Model = _model };
+
+            // Act & Assert
+            Assert.DoesNotThrow(() => serializer.WriteObjectInline(instance, _addressesType, new Mock<ODataWriter>().Object, writeContext));
         }
 
         [Fact]
@@ -160,7 +271,7 @@ namespace System.Web.OData.Formatter.Serialization
             IEnumerable instance = new object[] { 42 };
             ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(serializerProvider.Object);
 
-            // Act
+            // Act & Assert
             Assert.Throws<SerializationException>(
                 () => serializer.WriteObjectInline(instance, _customersType, new Mock<ODataWriter>().Object, _writeContext),
                 "'Default.Customer' cannot be serialized using the ODataMediaTypeFormatter.");

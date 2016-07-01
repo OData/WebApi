@@ -1862,10 +1862,6 @@ namespace System.Web.OData.Formatter.Serialization
         {
             IEdmEntityType entityType = new EdmEntityType("NS", typeName);
             return entityType;
-            /*
-            Mock<IEdmEntityType> entityTypeMock = new Mock<IEdmEntityType>();
-            entityTypeMock.Setup(o => o.Name).Returns(typeName);
-            return entityTypeMock.Object;*/
         }
 
         private static IEdmDirectValueAnnotationsManager CreateFakeAnnotationsManager()

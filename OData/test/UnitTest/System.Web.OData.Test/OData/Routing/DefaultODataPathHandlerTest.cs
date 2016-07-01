@@ -1484,13 +1484,14 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("(address=@p)?@p={\"@odata.type\":\"System.Web.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"}")]
-        [InlineData("(address={\"@odata.type\":\"System.Web.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"})")]
-        public void CanParse_ComplexTypeAsFunctionParameter(string parameterValue)
+        [InlineData(
+            "(address=@p)?@p={\"@odata.type\":\"System.Web.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"}"
+            )]
+        public void CanParse_ComplexTypeAsFunctionParameterInAlias(string parameterValue)
         {
             // Arrange & Act
-            ODataPath path = _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Default.CanMoveToAddress" + parameterValue);
-            bool parameterAlias = parameterValue.Contains("?@");
+            ODataPath path = _parser.Parse(_model, _serviceRoot,
+                "RoutingCustomers(1)/Default.CanMoveToAddress" + parameterValue);
 
             // Assert
             Assert.Equal("~/entityset/key/function", path.PathTemplate);
@@ -1499,29 +1500,16 @@ namespace System.Web.OData.Routing
 
             object value = operationSegment.GetParameterValue("address");
 
-            if (parameterAlias)
-            {
-                string address = Assert.IsType<string>(parameterValue);
-                Assert.Equal(parameterValue, address);
-            }
-            else
-            {
-                // ODL 7.0 can parse the inline complex value, but it returns the ODataComplexValue
-                // It will be removed later. Please update the test cases after updated to the new ODL version.
-                ODataComplexValue address = Assert.IsType<ODataComplexValue>(value);
+            string address = Assert.IsType<string>(parameterValue);
+            Assert.Equal(parameterValue, address);
+        }
 
-                Assert.Equal("System.Web.OData.Routing.Address", address.TypeName);
-
-                Assert.Equal(2, address.Properties.Count());
-
-                ODataProperty streetProperty = address.Properties.FirstOrDefault(p => p.Name == "Street");
-                Assert.NotNull(streetProperty);
-                Assert.Equal("NE 24th St.", streetProperty.Value);
-
-                ODataProperty cityProperty = address.Properties.FirstOrDefault(p => p.Name == "City");
-                Assert.NotNull(cityProperty);
-                Assert.Equal("Redmond", cityProperty.Value);
-            }
+        [Theory]
+        [InlineData("(address={\"@odata.type\":\"System.Web.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"})")]
+        public void ParseComplexTypeAsFunctionParameterInlineThrows(string parameterValue)
+        {
+            // Arrange & Act
+            Assert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Default.CanMoveToAddress" + parameterValue));
         }
 
         // Complex as inline parameter value should not be supported. But, So far it's supported in ODL.

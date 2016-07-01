@@ -103,7 +103,7 @@ namespace System.Web.OData
         {
             // Arrange
             string enumComplexPayload = @"{
-  ""@odata.type"":""#System.Web.OData.EnumComplex"",""RequiredColor"":""Red, Blue"",""NullableColor"":null,""UndefinedColor"":""123""
+  ""@odata.context"":""http://localhost/$metadata#System.Web.OData.EnumComplex"",""RequiredColor"":""Red, Blue"",""NullableColor"":null,""UndefinedColor"":""123""
 }";
 
             ODataMediaTypeFormatter formatter = GetFormatter();

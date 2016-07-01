@@ -154,10 +154,10 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             ActionDescriptor actionDescriptor = null;
 
             // Find all the matching methods
-            foreach (var descriptor in provider.ActionDescriptors.Items)
+            foreach (var descriptor in provider.ActionDescriptors.Items.OfType<ControllerActionDescriptor>())
             {
-                if (string.Equals(descriptor.Name, methodName, StringComparison.OrdinalIgnoreCase)
-                    && ((ControllerActionDescriptor)descriptor).ControllerName == controllerName)
+                if (string.Equals(descriptor.ActionName, methodName, StringComparison.OrdinalIgnoreCase)
+                    && descriptor.ControllerName == controllerName)
                 {
                     methodDescriptor.Add(descriptor);
                 }

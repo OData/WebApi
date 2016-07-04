@@ -1,5 +1,5 @@
 {
-  "version": "6.0.0-alpha1-rtm",
+  "version": "6.0.0-alpha1-rtm-*",
   "description": "Microsoft.AspNetCore.OData",
 
   "dependencies": {
@@ -17,6 +17,7 @@
         "System.Runtime.Serialization": "4.0.0.0",
         "System.Xml.Linq": "4.0.0.0"
       }
-    }
+    },
+    "net452": {}
   }
 }

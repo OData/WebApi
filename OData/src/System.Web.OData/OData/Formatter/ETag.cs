@@ -61,7 +61,10 @@ namespace System.Web.OData.Formatter
         /// </summary>
         public bool IsAny { get; set; }
 
-        internal bool IsIfNoneMatch { get; set; }
+        /// <summary>
+        /// Gets or sets whether If-None-Match set in the request header.
+        /// </summary>
+        public bool IsIfNoneMatch { get; set; }
 
         internal IDictionary<string, object> ConcurrencyProperties
         {

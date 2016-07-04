@@ -1871,6 +1871,7 @@ public class System.Web.OData.Formatter.ETag : System.Dynamic.DynamicObject, IDy
 
 	System.Type EntityType  { public get; public set; }
 	bool IsAny  { public get; public set; }
+	bool IsIfNoneMatch  { public get; public set; }
 	bool IsWellFormed  { public get; public set; }
 	object Item [string key] { public get; public set; }
 

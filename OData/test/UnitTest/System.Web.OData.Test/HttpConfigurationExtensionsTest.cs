@@ -311,6 +311,24 @@ namespace System.Web.OData
             Assert.Equal(typeof(TestService2), testService.GetType());
         }
 
+        [Fact]
+        public void ConfigureServices_CanSet_QueryConfiguration()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+
+            // Act
+            config.Filter().Count(QueryOptionSetting.Disabled).Expand().OrderBy().MaxTop(10);
+            DefaultQuerySettings defaultQuerySettings = config.GetDefaultQuerySettings();
+
+            // Assert
+            Assert.Equal(true, defaultQuerySettings.EnableFilter);
+            Assert.Equal(false, defaultQuerySettings.EnableCount);
+            Assert.Equal(true, defaultQuerySettings.EnableExpand);
+            Assert.Equal(true, defaultQuerySettings.EnableOrderBy);
+            Assert.Equal(10, defaultQuerySettings.MaxTop);
+        }
+
         private static ODataMediaTypeFormatter CreateODataFormatter()
         {
             return new ODataMediaTypeFormatter(new ODataPayloadKind[0]);

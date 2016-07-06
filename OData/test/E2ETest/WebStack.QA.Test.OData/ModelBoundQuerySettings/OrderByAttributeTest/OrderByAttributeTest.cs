@@ -40,10 +40,10 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest
         [Theory]
         [InlineData(CustomerBaseUrl + "?$orderby=Id")]
         [InlineData(CustomerBaseUrl + "?$orderby=Id,Name")]
-        [InlineData(OrderBaseUrl + "?$expand=Customers($orderby=Id,Name)")]
+        [InlineData(OrderBaseUrl + "?$expand=UnSortableCustomers($orderby=Id,Name)")]
         [InlineData(ModelBoundCustomerBaseUrl + "?$orderby=Id")]
         [InlineData(ModelBoundCustomerBaseUrl + "?$orderby=Id,Name")]
-        [InlineData(ModelBoundOrderBaseUrl + "?$expand=Customers($orderby=Id,Name)")]
+        [InlineData(ModelBoundOrderBaseUrl + "?$expand=UnSortableCustomers($orderby=Id,Name)")]
         public void NonSortableByDefault(string url)
         {
             string queryUrl =
@@ -78,8 +78,6 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest
         [InlineData(OrderBaseUrl + "?$expand=Cars($orderby=CarNumber)", HttpStatusCode.BadRequest)]
         [InlineData(CarBaseUrl + "?$orderby=Id,Name", HttpStatusCode.OK)]
         [InlineData(CarBaseUrl + "?$orderby=CarNumber", HttpStatusCode.BadRequest)]
-        [InlineData(CustomerBaseUrl + "?$expand=Orders($orderby=Name)", HttpStatusCode.OK)]
-        [InlineData(CustomerBaseUrl + "?$expand=Orders($orderby=Id)", HttpStatusCode.BadRequest)]
         [InlineData(ModelBoundOrderBaseUrl + "?$orderby=Name", HttpStatusCode.OK)]
         [InlineData(ModelBoundOrderBaseUrl + "?$orderby=Id", HttpStatusCode.BadRequest)]
         [InlineData(ModelBoundOrderBaseUrl + "?$orderby=Id,Name", HttpStatusCode.BadRequest)]
@@ -96,9 +94,40 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest
         [InlineData(ModelBoundOrderBaseUrl + "?$expand=Cars($orderby=CarNumber)", HttpStatusCode.BadRequest)]
         [InlineData(ModelBoundCarBaseUrl + "?$orderby=Id,Name", HttpStatusCode.OK)]
         [InlineData(ModelBoundCarBaseUrl + "?$orderby=CarNumber", HttpStatusCode.BadRequest)]
-        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=Orders($orderby=Name)", HttpStatusCode.OK)]
-        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=Orders($orderby=Id)", HttpStatusCode.BadRequest)]
         public void OrderByOnEntityType(string entitySetUrl, HttpStatusCode statusCode)
+        {
+            string queryUrl =
+                string.Format(
+                    entitySetUrl,
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = client.SendAsync(request).Result;
+            string result = response.Content.ReadAsStringAsync().Result;
+
+            Assert.Equal(statusCode, response.StatusCode);
+            if (statusCode == HttpStatusCode.BadRequest)
+            {
+                Assert.Contains("cannot be used in the $orderby query option.", result);
+            }
+        }
+
+        [Theory]
+        [InlineData(OrderBaseUrl + "?$expand=Customers($orderby=Id,Name)", HttpStatusCode.OK)]
+        [InlineData(OrderBaseUrl + "(1)/Customers?$orderby=Id,Name", HttpStatusCode.OK)]
+        [InlineData(CustomerBaseUrl + "?$expand=Orders($orderby=Name)", HttpStatusCode.BadRequest)]
+        [InlineData(CustomerBaseUrl + "(1)/Orders?$orderby=Name", HttpStatusCode.BadRequest)]
+        [InlineData(CustomerBaseUrl + "?$expand=Orders($orderby=Id)", HttpStatusCode.OK)]
+        [InlineData(CustomerBaseUrl + "(1)/Orders?$orderby=Id", HttpStatusCode.OK)]
+        [InlineData(ModelBoundOrderBaseUrl + "?$expand=Customers($orderby=Id,Name)", HttpStatusCode.OK)]
+        [InlineData(ModelBoundOrderBaseUrl + "(1)/Customers?$orderby=Id,Name", HttpStatusCode.OK)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=Orders($orderby=Name)", HttpStatusCode.BadRequest)]
+        [InlineData(ModelBoundCustomerBaseUrl + "(1)/Orders?$orderby=Name", HttpStatusCode.BadRequest)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=Orders($orderby=Id)", HttpStatusCode.OK)]
+        [InlineData(ModelBoundCustomerBaseUrl + "(1)/Orders?$orderby=Id", HttpStatusCode.OK)]
+        public void OrderByOnProperty(string entitySetUrl, HttpStatusCode statusCode)
         {
             string queryUrl =
                 string.Format(

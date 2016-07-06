@@ -98,6 +98,14 @@ namespace System.Web.OData.Query.Validators
             ValidateQueryNode(filterClause.Expression, settings);
         }
 
+        internal virtual void Validate(IEdmProperty property, IEdmStructuredType structuredType,
+            FilterClause filterClause, ODataValidationSettings settings, IEdmModel model)
+        {
+            _property = property;
+            _structuredType = structuredType;
+            Validate(filterClause, settings, model);
+        }
+
         /// <summary>
         /// Override this method to restrict the 'all' query inside the filter query.
         /// </summary>

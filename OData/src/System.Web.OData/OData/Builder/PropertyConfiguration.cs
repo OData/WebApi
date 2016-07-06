@@ -256,101 +256,6 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Sets the max value of $top of this property that a client can request
-        /// and the maximum number of query results of this property to return.
-        /// </summary>
-        public PropertyConfiguration Page(int? maxTopValue, int? pageSizeValue)
-        {
-            QueryConfiguration.SetMaxTop(maxTopValue);
-            QueryConfiguration.SetPageSize(pageSizeValue);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets this property enable paging.
-        /// </summary>
-        public PropertyConfiguration Page()
-        {
-            QueryConfiguration.SetMaxTop(null);
-            QueryConfiguration.SetPageSize(null);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the maximum depth of expand result,
-        /// expandable properties and their <see cref="ExpandType"/> of this property.
-        /// </summary>
-        public PropertyConfiguration Expand(int maxDepth, ExpandType expandType, params string[] properties)
-        {
-            QueryConfiguration.SetExpand(properties, maxDepth, expandType);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the expandable properties of this property.
-        /// </summary>
-        public PropertyConfiguration Expand(params string[] properties)
-        {
-            QueryConfiguration.SetExpand(properties, null, ExpandType.Allowed);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the maximum depth of expand result,
-        /// expandable properties of this property.
-        /// </summary>
-        public PropertyConfiguration Expand(int maxDepth, params string[] properties)
-        {
-            QueryConfiguration.SetExpand(properties, maxDepth, ExpandType.Allowed);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the expandable properties and their <see cref="ExpandType"/> of this property.
-        /// </summary>
-        public PropertyConfiguration Expand(ExpandType expandType, params string[] properties)
-        {
-            QueryConfiguration.SetExpand(properties, null, expandType);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets <see cref="ExpandType"/> of all properties with maximum depth of expand result.
-        /// </summary>
-        public PropertyConfiguration Expand(ExpandType expandType, int maxDepth)
-        {
-            QueryConfiguration.SetExpand(null, maxDepth, expandType);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets all properties expandable with maximum depth of expand result.
-        /// </summary>
-        public PropertyConfiguration Expand(int maxDepth)
-        {
-            QueryConfiguration.SetExpand(null, maxDepth, ExpandType.Allowed);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets <see cref="ExpandType"/> of all properties.
-        /// </summary>
-        public PropertyConfiguration Expand(ExpandType expandType)
-        {
-            QueryConfiguration.SetExpand(null, null, expandType);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets all properties expandable.
-        /// </summary>
-        public PropertyConfiguration Expand()
-        {
-            QueryConfiguration.SetExpand(null, null, ExpandType.Allowed);
-            return this;
-        }
-
-        /// <summary>
         /// Sets this property is countable.
         /// </summary>
         public PropertyConfiguration Count()
@@ -365,6 +270,78 @@ namespace System.Web.OData.Builder
         public PropertyConfiguration Count(QueryOptionSetting queryOptionSetting)
         {
             QueryConfiguration.SetCount(queryOptionSetting == QueryOptionSetting.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets sortable properties depends on <see cref="QueryOptionSetting"/> of this property.
+        /// </summary>
+        public PropertyConfiguration OrderBy(QueryOptionSetting setting, params string[] properties)
+        {
+            QueryConfiguration.SetOrderBy(properties, setting == QueryOptionSetting.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets sortable properties of this property.
+        /// </summary>
+        public PropertyConfiguration OrderBy(params string[] properties)
+        {
+            QueryConfiguration.SetOrderBy(properties, true);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets whether all properties of this property is sortable.
+        /// </summary>
+        public PropertyConfiguration OrderBy(QueryOptionSetting setting)
+        {
+            QueryConfiguration.SetOrderBy(null, setting == QueryOptionSetting.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties of this property is sortable.
+        /// </summary>
+        public PropertyConfiguration OrderBy()
+        {
+            QueryConfiguration.SetOrderBy(null, true);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets filterable properties depends on <see cref="QueryOptionSetting"/> of this property.
+        /// </summary>
+        public PropertyConfiguration Filter(QueryOptionSetting setting, params string[] properties)
+        {
+            QueryConfiguration.SetFilter(properties, setting == QueryOptionSetting.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets filterable properties of this property.
+        /// </summary>
+        public PropertyConfiguration Filter(params string[] properties)
+        {
+            QueryConfiguration.SetFilter(properties, true);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets whether all properties of this property is filterable.
+        /// </summary>
+        public PropertyConfiguration Filter(QueryOptionSetting setting)
+        {
+            QueryConfiguration.SetFilter(null, setting == QueryOptionSetting.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties of this property is filterable.
+        /// </summary>
+        public PropertyConfiguration Filter()
+        {
+            QueryConfiguration.SetFilter(null, true);
             return this;
         }
     }

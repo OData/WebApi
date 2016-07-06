@@ -264,17 +264,15 @@ namespace System.Web.OData.Builder
             PropertyConfiguration property = new PrimitivePropertyConfiguration(propertyInfo.Object, structuralType);
             
             // Act
-            property.Page(10, 20);
-            property.Expand(5, ExpandType.Automatic, "a");
             property.Count();
+            property.OrderBy("A", "B");
+            property.Filter(QueryOptionSetting.Disabled);
 
             // Assert
-            Assert.Equal(10, property.QueryConfiguration.ModelBoundQuerySettings.MaxTop);
-            Assert.Equal(20, property.QueryConfiguration.ModelBoundQuerySettings.PageSize);
             Assert.Equal(true, property.QueryConfiguration.ModelBoundQuerySettings.Countable);
-            Assert.Equal(ExpandType.Automatic,
-                property.QueryConfiguration.ModelBoundQuerySettings.ExpandConfigurations["a"].ExpandType);
-            Assert.Equal(5, property.QueryConfiguration.ModelBoundQuerySettings.ExpandConfigurations["a"].MaxDepth);
+            Assert.Equal(true, property.QueryConfiguration.ModelBoundQuerySettings.OrderByConfigurations["A"]);
+            Assert.Equal(true, property.QueryConfiguration.ModelBoundQuerySettings.OrderByConfigurations["B"]);
+            Assert.Equal(false, property.QueryConfiguration.ModelBoundQuerySettings.DefaultEnableFilter);
         }
     }
 }

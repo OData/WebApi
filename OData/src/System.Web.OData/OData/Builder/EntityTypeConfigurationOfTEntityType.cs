@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -312,6 +313,111 @@ namespace System.Web.OData.Builder
             FunctionConfiguration function = _configuration.ModelBuilder.Function(name);
             function.SetBindingParameter(BindingParameterConfiguration.DefaultBindingParameterName, _configuration);
             return function;
+        }
+
+        /// <summary>
+        /// Sets the max value of $top of this entity type that a client can request
+        /// and the maximum number of query results of this entity type to return.
+        /// </summary>
+        public EntityTypeConfiguration<TEntityType> Page(int? maxTopValue, int? pageSizeValue)
+        {
+            _configuration.QueryConfiguration.SetMaxTop(maxTopValue);
+            _configuration.QueryConfiguration.SetPageSize(pageSizeValue);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the properties of this entity type enable paging.
+        /// </summary>
+        public EntityTypeConfiguration<TEntityType> Page()
+        {
+            _configuration.QueryConfiguration.SetMaxTop(null);
+            _configuration.QueryConfiguration.SetPageSize(null);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the maximum depth of expand result,
+        /// expandable properties and their <see cref="ExpandType"/> of this entity type.
+        /// </summary>
+        public EntityTypeConfiguration<TEntityType> Expand(int maxDepth, ExpandType expandType, params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetExpand(properties, maxDepth, expandType);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the expandable properties of this entity type.
+        /// </summary>
+        public EntityTypeConfiguration<TEntityType> Expand(params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetExpand(properties, null, ExpandType.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the maximum depth of expand result,
+        /// expandable properties of this entity type.
+        /// </summary>
+        public EntityTypeConfiguration<TEntityType> Expand(int maxDepth, params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetExpand(properties, maxDepth, ExpandType.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the expandable properties and their <see cref="ExpandType"/> of this entity type.
+        /// </summary>
+        public EntityTypeConfiguration<TEntityType> Expand(ExpandType expandType, params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetExpand(properties, null, expandType);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets <see cref="ExpandType"/> of all properties with maximum depth of expand result of this eneity type.
+        /// </summary>
+        public EntityTypeConfiguration<TEntityType> Expand(ExpandType expandType, int maxDepth)
+        {
+            _configuration.QueryConfiguration.SetExpand(null, maxDepth, expandType);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties expandable with maximum depth of expand result of this entity type.
+        /// </summary>
+        public EntityTypeConfiguration<TEntityType> Expand(int maxDepth)
+        {
+            _configuration.QueryConfiguration.SetExpand(null, maxDepth, ExpandType.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets <see cref="ExpandType"/> of all properties of this entity type.
+        /// </summary>
+        public EntityTypeConfiguration<TEntityType> Expand(ExpandType expandType)
+        {
+            _configuration.QueryConfiguration.SetExpand(null, null, expandType);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties expandable of this entity type.
+        /// </summary>
+        public EntityTypeConfiguration<TEntityType> Expand()
+        {
+            _configuration.QueryConfiguration.SetExpand(null, null, ExpandType.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
         }
 
         internal NavigationPropertyConfiguration GetOrCreateNavigationProperty(Expression navigationPropertyExpression, EdmMultiplicity multiplicity)

@@ -11,7 +11,7 @@ namespace System.Web.OData.Query
     /// Represents an <see cref="Attribute"/> that can be placed on a class to specify that
     /// whether the $orderby can be applied on those properties.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
     [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments",
         Justification = "Don't want those argument to be retrievable")]
     public sealed class OrderByAttribute : Attribute

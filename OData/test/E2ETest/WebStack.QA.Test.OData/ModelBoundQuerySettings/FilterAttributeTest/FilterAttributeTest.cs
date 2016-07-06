@@ -40,10 +40,10 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
         [Theory]
         [InlineData(CustomerBaseUrl + "?$filter=Id eq 1")]
         [InlineData(CustomerBaseUrl + "?$filter=Id eq 1 and Name eq 'test'")]
-        [InlineData(OrderBaseUrl + "?$expand=Customers($filter=Id eq 1)")]
+        [InlineData(OrderBaseUrl + "?$expand=UnFilterableCustomers($filter=Id eq 1)")]
         [InlineData(ModelBoundCustomerBaseUrl + "?$filter=Id eq 1")]
         [InlineData(ModelBoundCustomerBaseUrl + "?$filter=Id eq 1 and Name eq 'test'")]
-        [InlineData(ModelBoundOrderBaseUrl + "?$expand=Customers($filter=Id eq 1)")]
+        [InlineData(ModelBoundOrderBaseUrl + "?$expand=UnFilterableCustomers($filter=Id eq 1)")]
         public void NonFilterableByDefault(string url)
         {
             string queryUrl =
@@ -78,8 +78,6 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
         [InlineData(OrderBaseUrl + "?$expand=Cars($filter=CarNumber eq 1)", HttpStatusCode.BadRequest)]
         [InlineData(CarBaseUrl + "?$filter=Id eq 1 and Name eq 'test'", HttpStatusCode.OK)]
         [InlineData(CarBaseUrl + "?$filter=CarNumber eq 1", HttpStatusCode.BadRequest)]
-        [InlineData(CustomerBaseUrl + "?$expand=Orders($filter=Name eq 'test')", HttpStatusCode.OK)]
-        [InlineData(CustomerBaseUrl + "?$expand=Orders($filter=Id eq 1)", HttpStatusCode.BadRequest)]
         [InlineData(ModelBoundOrderBaseUrl + "?$filter=Name eq 'test'", HttpStatusCode.OK)]
         [InlineData(ModelBoundOrderBaseUrl + "?$filter=Id eq 1", HttpStatusCode.BadRequest)]
         [InlineData(ModelBoundOrderBaseUrl + "?$filter=Id eq 1 and Name eq 'test'", HttpStatusCode.BadRequest)]
@@ -96,9 +94,40 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
         [InlineData(ModelBoundOrderBaseUrl + "?$expand=Cars($filter=CarNumber eq 1)", HttpStatusCode.BadRequest)]
         [InlineData(ModelBoundCarBaseUrl + "?$filter=Id eq 1 and Name eq 'test'", HttpStatusCode.OK)]
         [InlineData(ModelBoundCarBaseUrl + "?$filter=CarNumber eq 1", HttpStatusCode.BadRequest)]
-        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=Orders($filter=Name eq 'test')", HttpStatusCode.OK)]
-        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=Orders($filter=Id eq 1)", HttpStatusCode.BadRequest)]
         public void FilterOnEntityType(string entitySetUrl, HttpStatusCode statusCode)
+        {
+            string queryUrl =
+                string.Format(
+                    entitySetUrl,
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = client.SendAsync(request).Result;
+            string result = response.Content.ReadAsStringAsync().Result;
+
+            Assert.Equal(statusCode, response.StatusCode);
+            if (statusCode == HttpStatusCode.BadRequest)
+            {
+                Assert.Contains("cannot be used in the $filter query option.", result);
+            }
+        }
+
+        [Theory]
+        [InlineData(OrderBaseUrl + "?$expand=Customers($filter=Id eq 1 and Name eq 'test')", HttpStatusCode.OK)]
+        [InlineData(OrderBaseUrl + "(1)/Customers?$filter=Id eq 1 and Name eq 'test'", HttpStatusCode.OK)]
+        [InlineData(CustomerBaseUrl + "?$expand=Orders($filter=Name eq 'test')", HttpStatusCode.BadRequest)]
+        [InlineData(CustomerBaseUrl + "(1)/Orders?$filter=Name eq 'test'", HttpStatusCode.BadRequest)]
+        [InlineData(CustomerBaseUrl + "?$expand=Orders($filter=Id eq 1)", HttpStatusCode.OK)]
+        [InlineData(CustomerBaseUrl + "(1)/Orders?$filter=Id eq 1", HttpStatusCode.OK)]
+        [InlineData(ModelBoundOrderBaseUrl + "?$expand=Customers($filter=Id eq 1 and Name eq 'test')", HttpStatusCode.OK)]
+        [InlineData(ModelBoundOrderBaseUrl + "(1)/Customers?$filter=Id eq 1 and Name eq 'test'", HttpStatusCode.OK)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=Orders($filter=Name eq 'test')", HttpStatusCode.BadRequest)]
+        [InlineData(ModelBoundCustomerBaseUrl + "(1)/Orders?$filter=Name eq 'test'", HttpStatusCode.BadRequest)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=Orders($filter=Id eq 1)", HttpStatusCode.OK)]
+        [InlineData(ModelBoundCustomerBaseUrl + "(1)/Orders?$filter=Id eq 1", HttpStatusCode.OK)]
+        public void FilterOnProperty(string entitySetUrl, HttpStatusCode statusCode)
         {
             string queryUrl =
                 string.Format(

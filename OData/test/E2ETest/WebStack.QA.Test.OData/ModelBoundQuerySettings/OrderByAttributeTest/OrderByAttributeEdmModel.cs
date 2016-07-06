@@ -15,6 +15,7 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest
 
         public Address Address { get; set; }
 
+        [OrderBy("Id")]
         public List<Order> Orders { get; set; }
     }
 
@@ -28,7 +29,10 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest
 
         public int Price { get; set; }
 
+        [OrderBy]
         public List<Customer> Customers { get; set; }
+
+        public List<Customer> UnSortableCustomers { get; set; }
 
         public List<Car> Cars { get; set; }
     }
@@ -75,11 +79,16 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest
         {
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<Customer>("Customers");
+            builder.EntityType<Customer>().HasMany(c => c.Orders).OrderBy("Id");
+
             builder.EntitySet<Order>("Orders").EntityType.OrderBy().OrderBy(QueryOptionSetting.Disabled, "Id");
+            builder.EntityType<Order>().HasMany(o => o.Customers).OrderBy();
+
             builder.EntitySet<Car>("Cars")
                 .EntityType.OrderBy("Name")
                 .OrderBy(QueryOptionSetting.Disabled)
                 .OrderBy("Id");
+
             // Need call API just like Order for SepcialOrder because model bound API doesn't support inheritance
             builder.EntityType<SpecialOrder>()
                 .OrderBy()

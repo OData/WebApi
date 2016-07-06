@@ -472,11 +472,19 @@ namespace System.Web.OData.Formatter
                     mergedQuerySettings.Countable = propertyTypeQuerySettings.Countable;
                 }
 
-                mergedQuerySettings.CopyOrderByConfigurations(propertyTypeQuerySettings.OrderByConfigurations);
-                mergedQuerySettings.DefaultEnableOrderBy = propertyTypeQuerySettings.DefaultEnableOrderBy;
+                if (mergedQuerySettings.OrderByConfigurations.Count == 0 &&
+                    !mergedQuerySettings.DefaultEnableOrderBy.HasValue)
+                {
+                    mergedQuerySettings.CopyOrderByConfigurations(propertyTypeQuerySettings.OrderByConfigurations);
+                    mergedQuerySettings.DefaultEnableOrderBy = propertyTypeQuerySettings.DefaultEnableOrderBy;
+                }
 
-                mergedQuerySettings.CopyFilterConfigurations(propertyTypeQuerySettings.FilterConfigurations);
-                mergedQuerySettings.DefaultEnableFilter = propertyTypeQuerySettings.DefaultEnableFilter;
+                if (mergedQuerySettings.FilterConfigurations.Count == 0 &&
+                    !mergedQuerySettings.DefaultEnableFilter.HasValue)
+                {
+                    mergedQuerySettings.CopyFilterConfigurations(propertyTypeQuerySettings.FilterConfigurations);
+                    mergedQuerySettings.DefaultEnableFilter = propertyTypeQuerySettings.DefaultEnableFilter;
+                }
 
                 if (mergedQuerySettings.ExpandConfigurations.Count == 0 &&
                     !mergedQuerySettings.DefaultExpandType.HasValue)

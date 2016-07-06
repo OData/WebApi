@@ -14,9 +14,9 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         }
 
         /// <summary>
-        /// Set whether the $filter can be applied on those properties.
+        /// Set whether the $filter can be applied on those properties of this structural type.
         /// </summary>
-        /// <param name="edmTypeConfiguration">The edm type to configure.</param>
+        /// <param name="edmTypeConfiguration">The structural type to configure.</param>
         /// <param name="model">The edm model that this type belongs to.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on this type.</param>
         public override void Apply(StructuralTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model,
@@ -46,17 +46,8 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 {
                     foreach (var property in filterAttribute.FilterConfigurations.Keys)
                     {
-                        if (querySettings.FilterConfigurations.ContainsKey(property))
-                        {
-                            querySettings.FilterConfigurations[property] =
-                                filterAttribute.FilterConfigurations[property];
-                        }
-                        else
-                        {
-                            querySettings.FilterConfigurations.Add(
-                                property,
-                                filterAttribute.FilterConfigurations[property]);
-                        }
+                        querySettings.FilterConfigurations[property] =
+                            filterAttribute.FilterConfigurations[property];
                     }
                 }
 

@@ -1,20 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Web.Http;
 using System.Web.OData.Query;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
-    internal class ExpandAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PropertyConfiguration>
+    internal class ExpandAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<NavigationPropertyConfiguration>
     {
         public ExpandAttributeEdmPropertyConvention()
             : base(attribute => attribute.GetType() == typeof(ExpandAttribute), allowMultiple: true)
         {
         }
 
-        public override void Apply(PropertyConfiguration edmProperty,
+        public override void Apply(NavigationPropertyConfiguration edmProperty,
             StructuralTypeConfiguration structuralTypeConfiguration,
             Attribute attribute,
             ODataConventionModelBuilder model)
@@ -36,18 +35,8 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 {
                     foreach (var property in expandAttribute.ExpandConfigurations.Keys)
                     {
-                        if (
-                            querySettings.ExpandConfigurations.ContainsKey(
-                                property))
-                        {
-                            querySettings.ExpandConfigurations[property] =
-                                expandAttribute.ExpandConfigurations[property];
-                        }
-                        else
-                        {
-                            querySettings.ExpandConfigurations.Add(property,
-                                expandAttribute.ExpandConfigurations[property]);
-                        }
+                        querySettings.ExpandConfigurations[property] =
+                            expandAttribute.ExpandConfigurations[property];
                     }
                 }
 

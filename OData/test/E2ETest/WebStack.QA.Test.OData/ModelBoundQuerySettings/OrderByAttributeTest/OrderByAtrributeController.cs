@@ -15,6 +15,13 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest
             return _customers;
         }
 
+        [EnableQuery]
+        public List<Order> GetOrders(int key)
+        {
+            Generate();
+            return _customers[key].Orders;
+        }
+
         public void Generate()
         {
             _customers = new List<Customer>();
@@ -62,6 +69,13 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest
         {
             Generate();
             return _orders;
+        }
+
+        [EnableQuery]
+        public List<Customer> GetCustomers(int key)
+        {
+            Generate();
+            return _orders[key].Customers;
         }
 
         [EnableQuery]

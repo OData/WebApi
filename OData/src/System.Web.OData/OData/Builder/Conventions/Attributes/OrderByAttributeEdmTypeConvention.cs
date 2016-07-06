@@ -14,9 +14,9 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         }
 
         /// <summary>
-        /// Set whether the $orderby can be applied on those properties.
+        /// Set whether the $orderby can be applied on those properties of this structural type.
         /// </summary>
-        /// <param name="edmTypeConfiguration">The edm type to configure.</param>
+        /// <param name="edmTypeConfiguration">The structural type to configure.</param>
         /// <param name="model">The edm model that this type belongs to.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on this type.</param>
         public override void Apply(StructuralTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model,
@@ -46,17 +46,8 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 {
                     foreach (var property in orderByAttribute.OrderByConfigurations.Keys)
                     {
-                        if (querySettings.OrderByConfigurations.ContainsKey(property))
-                        {
-                            querySettings.OrderByConfigurations[property] =
-                                orderByAttribute.OrderByConfigurations[property];
-                        }
-                        else
-                        {
-                            querySettings.OrderByConfigurations.Add(
-                                property,
-                                orderByAttribute.OrderByConfigurations[property]);
-                        }
+                        querySettings.OrderByConfigurations[property] =
+                            orderByAttribute.OrderByConfigurations[property];
                     }
                 }
 

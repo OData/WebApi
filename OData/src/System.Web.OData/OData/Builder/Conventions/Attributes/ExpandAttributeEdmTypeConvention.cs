@@ -6,7 +6,7 @@ using System.Web.OData.Query;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
-    internal class ExpandAttributeEdmTypeConvention : AttributeEdmTypeConvention<StructuralTypeConfiguration>
+    internal class ExpandAttributeEdmTypeConvention : AttributeEdmTypeConvention<EntityTypeConfiguration>
     {
         public ExpandAttributeEdmTypeConvention()
             : base(attribute => attribute.GetType() == typeof(ExpandAttribute), allowMultiple: true)
@@ -14,12 +14,12 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         }
 
         /// <summary>
-        /// Set the <see cref="ExpandConfiguration"/>s of navigation properties.
+        /// Set the <see cref="ExpandConfiguration"/>s of navigation properties of this entity type.
         /// </summary>
-        /// <param name="edmTypeConfiguration">The edm type to configure.</param>
+        /// <param name="edmTypeConfiguration">The entity type to configure.</param>
         /// <param name="model">The edm model that this type belongs to.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on this type.</param>
-        public override void Apply(StructuralTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model,
+        public override void Apply(EntityTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model,
             Attribute attribute)
         {
             if (edmTypeConfiguration == null)
@@ -46,17 +46,8 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 {
                     foreach (var property in expandAttribute.ExpandConfigurations.Keys)
                     {
-                        if (querySettings.ExpandConfigurations.ContainsKey(property))
-                        {
-                            querySettings.ExpandConfigurations[property] =
-                                expandAttribute.ExpandConfigurations[property];
-                        }
-                        else
-                        {
-                            querySettings.ExpandConfigurations.Add(
-                                property,
-                                expandAttribute.ExpandConfigurations[property]);
-                        }
+                        querySettings.ExpandConfigurations[property] =
+                            expandAttribute.ExpandConfigurations[property];
                     }
                 }
 

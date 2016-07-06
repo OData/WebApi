@@ -15,6 +15,7 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
 
         public Address Address { get; set; }
 
+        [Filter("Id")]
         public List<Order> Orders { get; set; }
     }
 
@@ -28,7 +29,10 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
 
         public int Price { get; set; }
 
+        [Filter]
         public List<Customer> Customers { get; set; }
+
+        public List<Customer> UnFilterableCustomers { get; set; }
 
         public List<Car> Cars { get; set; }
     }
@@ -74,7 +78,11 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
         {
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<Customer>("Customers");
+            builder.EntityType<Customer>().HasMany(c => c.Orders).Filter("Id");
+
             builder.EntitySet<Order>("Orders").EntityType.Filter().Filter(QueryOptionSetting.Disabled, "Id");
+            builder.EntityType<Order>().HasMany(o => o.Customers).Filter();
+
             builder.EntitySet<Car>("Cars")
                 .EntityType.Filter("Name")
                 .Filter(QueryOptionSetting.Disabled)

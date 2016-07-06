@@ -85,6 +85,8 @@
     <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\CountAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\CountAttributeEdmTypeConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\FilterAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\OrderByAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ExpandAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ExpandAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\FilterAttributeEdmTypeConvention.cs" />

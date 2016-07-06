@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
+using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
@@ -248,6 +249,101 @@ namespace System.Web.OData.Builder
             }
 
             _referentialConstraint.Add(constraint);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the max value of $top of this property that a client can request
+        /// and the maximum number of query results of this property to return.
+        /// </summary>
+        public NavigationPropertyConfiguration Page(int? maxTopValue, int? pageSizeValue)
+        {
+            QueryConfiguration.SetMaxTop(maxTopValue);
+            QueryConfiguration.SetPageSize(pageSizeValue);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets this navigation property enable paging.
+        /// </summary>
+        public NavigationPropertyConfiguration Page()
+        {
+            QueryConfiguration.SetMaxTop(null);
+            QueryConfiguration.SetPageSize(null);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the maximum depth of expand result,
+        /// expandable properties and their <see cref="ExpandType"/> of this navigation property.
+        /// </summary>
+        public NavigationPropertyConfiguration Expand(int maxDepth, ExpandType expandType, params string[] properties)
+        {
+            QueryConfiguration.SetExpand(properties, maxDepth, expandType);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the expandable properties of this navigation property.
+        /// </summary>
+        public NavigationPropertyConfiguration Expand(params string[] properties)
+        {
+            QueryConfiguration.SetExpand(properties, null, ExpandType.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the maximum depth of expand result,
+        /// expandable properties of this navigation property.
+        /// </summary>
+        public NavigationPropertyConfiguration Expand(int maxDepth, params string[] properties)
+        {
+            QueryConfiguration.SetExpand(properties, maxDepth, ExpandType.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the expandable properties and their <see cref="ExpandType"/> of this navigation property.
+        /// </summary>
+        public NavigationPropertyConfiguration Expand(ExpandType expandType, params string[] properties)
+        {
+            QueryConfiguration.SetExpand(properties, null, expandType);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets <see cref="ExpandType"/> of all properties with maximum depth of expand result.
+        /// </summary>
+        public NavigationPropertyConfiguration Expand(ExpandType expandType, int maxDepth)
+        {
+            QueryConfiguration.SetExpand(null, maxDepth, expandType);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties expandable with maximum depth of expand result.
+        /// </summary>
+        public NavigationPropertyConfiguration Expand(int maxDepth)
+        {
+            QueryConfiguration.SetExpand(null, maxDepth, ExpandType.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets <see cref="ExpandType"/> of all properties.
+        /// </summary>
+        public NavigationPropertyConfiguration Expand(ExpandType expandType)
+        {
+            QueryConfiguration.SetExpand(null, null, expandType);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties expandable.
+        /// </summary>
+        public NavigationPropertyConfiguration Expand()
+        {
+            QueryConfiguration.SetExpand(null, null, ExpandType.Allowed);
             return this;
         }
 

@@ -178,12 +178,12 @@ namespace System.Web.OData.Query.Validators
             }
         }
 
-        private void ValidateFilterInExpand(IEdmModel edmModel, FilterClause filterClause,
-            ODataValidationSettings validationSettings)
+        private void ValidateFilterInExpand(IEdmProperty property, IEdmStructuredType structuredType, IEdmModel edmModel,
+            FilterClause filterClause, ODataValidationSettings validationSettings)
         {
             if (filterClause != null)
             {
-                _filterQueryValidator.Validate(filterClause, validationSettings, edmModel);
+                _filterQueryValidator.Validate(property, structuredType, filterClause, validationSettings, edmModel);
             }
         }
 
@@ -274,7 +274,7 @@ namespace System.Web.OData.Query.Validators
                         ValidateTopInExpand(property, property.ToEntityType(), edmModel, expandItem.TopOption);
                         ValidateCountInExpand(property, property.ToEntityType(), edmModel, expandItem.CountOption);
                         ValidateOrderByInExpand(property, property.ToEntityType(), edmModel, expandItem.OrderByOption);
-                        ValidateFilterInExpand(edmModel, expandItem.FilterOption, validationSettings);
+                        ValidateFilterInExpand(property, property.ToEntityType(), edmModel, expandItem.FilterOption, validationSettings);
 
                         bool isExpandable;
                         ExpandConfiguration expandConfiguration;

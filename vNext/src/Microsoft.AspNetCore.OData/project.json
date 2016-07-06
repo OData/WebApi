@@ -3,14 +3,22 @@
   "description": "Microsoft.AspNetCore.OData",
 
   "dependencies": {
-    "Microsoft.OData.Core": "6.14.0",
-    "Microsoft.OData.Edm": "6.14.0",
-    "Microsoft.Spatial": "6.14.0",
     "Microsoft.AspNetCore.Mvc": "1.0.0",
-    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0"
+    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0",
+    "Microsoft.OData.Core": "6.15.0",
+    "Microsoft.OData.Edm": "6.15.0",
+    "Microsoft.Spatial": "6.15.0",
+    "NETStandard.Library": "1.6.0"
   },
 
   "frameworks": {
+    "netstandard1.6": {
+      "imports": [ "dnxcore50", "portable-net45+win8" ],
+      "dependencies": {
+        "System.Linq.Queryable": "4.0.1"
+      }
+    },
+
     "net451": {
       "frameworkAssemblies": {
         "System.ComponentModel.DataAnnotations": "4.0.0.0",
@@ -18,6 +26,7 @@
         "System.Xml.Linq": "4.0.0.0"
       }
     },
+
     "net452": {}
   }
 }

@@ -6,14 +6,14 @@ using System.Web.OData.Query;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
-    internal class ExpandAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<NavigationPropertyConfiguration>
+    internal class ExpandAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PropertyConfiguration>
     {
         public ExpandAttributeEdmPropertyConvention()
             : base(attribute => attribute.GetType() == typeof(ExpandAttribute), allowMultiple: true)
         {
         }
-
-        public override void Apply(NavigationPropertyConfiguration edmProperty,
+        
+        public override void Apply(PropertyConfiguration edmProperty,
             StructuralTypeConfiguration structuralTypeConfiguration,
             Attribute attribute,
             ODataConventionModelBuilder model)

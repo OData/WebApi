@@ -6,7 +6,7 @@ using System.Web.OData.Query;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
-    internal class ExpandAttributeEdmTypeConvention : AttributeEdmTypeConvention<EntityTypeConfiguration>
+    internal class ExpandAttributeEdmTypeConvention : AttributeEdmTypeConvention<StructuralTypeConfiguration>
     {
         public ExpandAttributeEdmTypeConvention()
             : base(attribute => attribute.GetType() == typeof(ExpandAttribute), allowMultiple: true)
@@ -14,12 +14,12 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         }
 
         /// <summary>
-        /// Set the <see cref="ExpandConfiguration"/>s of navigation properties of this entity type.
+        /// Set the <see cref="ExpandConfiguration"/>s of navigation properties of this structural type.
         /// </summary>
         /// <param name="edmTypeConfiguration">The entity type to configure.</param>
         /// <param name="model">The edm model that this type belongs to.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on this type.</param>
-        public override void Apply(EntityTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model,
+        public override void Apply(StructuralTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model,
             Attribute attribute)
         {
             if (edmTypeConfiguration == null)

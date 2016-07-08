@@ -267,8 +267,15 @@ namespace System.Web.OData.Builder
             property.Count();
             property.OrderBy("A", "B");
             property.Filter(QueryOptionSetting.Disabled);
+            property.Page(10, 20);
+            property.Expand(5, ExpandType.Automatic, "a");
 
             // Assert
+            Assert.Equal(ExpandType.Automatic,
+                property.QueryConfiguration.ModelBoundQuerySettings.ExpandConfigurations["a"].ExpandType);
+            Assert.Equal(5, property.QueryConfiguration.ModelBoundQuerySettings.ExpandConfigurations["a"].MaxDepth);
+            Assert.Equal(10, property.QueryConfiguration.ModelBoundQuerySettings.MaxTop);
+            Assert.Equal(20, property.QueryConfiguration.ModelBoundQuerySettings.PageSize);
             Assert.Equal(true, property.QueryConfiguration.ModelBoundQuerySettings.Countable);
             Assert.Equal(true, property.QueryConfiguration.ModelBoundQuerySettings.OrderByConfigurations["A"]);
             Assert.Equal(true, property.QueryConfiguration.ModelBoundQuerySettings.OrderByConfigurations["B"]);

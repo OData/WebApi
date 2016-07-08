@@ -6,7 +6,7 @@ using System.Web.OData.Query;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
-    internal class PageAttributeEdmTypeConvention : AttributeEdmTypeConvention<EntityTypeConfiguration>
+    internal class PageAttributeEdmTypeConvention : AttributeEdmTypeConvention<StructuralTypeConfiguration>
     {
         public PageAttributeEdmTypeConvention()
             : base(attribute => attribute.GetType() == typeof(PageAttribute), allowMultiple: false)
@@ -16,10 +16,10 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// <summary>
         /// Set page size of the entity type.
         /// </summary>
-        /// <param name="edmTypeConfiguration">The entity type to configure.</param>
+        /// <param name="edmTypeConfiguration">The structural type to configure.</param>
         /// <param name="model">The edm model that this type belongs to.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on this type.</param>
-        public override void Apply(EntityTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model,
+        public override void Apply(StructuralTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model,
             Attribute attribute)
         {
             if (edmTypeConfiguration == null)

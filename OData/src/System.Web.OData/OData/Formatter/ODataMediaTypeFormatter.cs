@@ -149,7 +149,7 @@ namespace System.Web.OData.Formatter
         /// <summary>
         /// The request message associated with the per-request formatter instance.
         /// </summary>
-        internal HttpRequestMessage Request { get; set; }
+        public HttpRequestMessage Request { get; set; }
 
         /// <inheritdoc/>
         public override MediaTypeFormatter GetPerRequestFormatterInstance(Type type, HttpRequestMessage request, MediaTypeHeaderValue mediaType)

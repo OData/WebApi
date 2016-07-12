@@ -1919,6 +1919,7 @@ public class System.Web.OData.Formatter.ODataMediaTypeFormatter : System.Net.Htt
 
 	System.Func`2[[System.Net.Http.HttpRequestMessage],[System.Uri]] BaseAddressFactory  { public get; public set; }
 	ODataDeserializerProvider DeserializerProvider  { public get; }
+	System.Net.Http.HttpRequestMessage Request  { public get; public set; }
 	ODataSerializerProvider SerializerProvider  { public get; }
 
 	public virtual bool CanReadType (System.Type type)

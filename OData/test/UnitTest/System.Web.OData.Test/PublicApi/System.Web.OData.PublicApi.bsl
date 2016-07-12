@@ -1832,6 +1832,7 @@ public class System.Web.OData.Formatter.ODataMediaTypeFormatter : System.Net.Htt
 	Microsoft.OData.Core.ODataMessageReaderSettings MessageReaderSettings  { public get; }
 	Microsoft.OData.Core.ODataMessageQuotas MessageWriterQuotas  { public get; }
 	Microsoft.OData.Core.ODataMessageWriterSettings MessageWriterSettings  { public get; }
+	System.Net.Http.HttpRequestMessage Request  { public get; public set; }
 	ODataSerializerProvider SerializerProvider  { public get; }
 
 	public virtual bool CanReadType (System.Type type)

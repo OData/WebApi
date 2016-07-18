@@ -146,7 +146,8 @@ namespace WebStack.QA.Test.OData.QueryComposition
         {
             ODataQueryOptionsController controller = new ODataQueryOptionsController();
 
-            ODataQueryContext context = new ODataQueryContext(GetEdmModel(), typeof(ODataQueryOptions_Todo), path: null, defaultQuerySettings: null);
+            ODataQueryContext context = new ODataQueryContext(GetEdmModel(), typeof(ODataQueryOptions_Todo), path: null,
+                requestContainer: null);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$orderby=Name desc");
             ODataQueryOptions<ODataQueryOptions_Todo> options = new ODataQueryOptions<ODataQueryOptions_Todo>(context, request);
             var result = controller.OptionsOnString(options);
@@ -158,7 +159,8 @@ namespace WebStack.QA.Test.OData.QueryComposition
         {
             ODataQueryOptionsController controller = new ODataQueryOptionsController();
 
-            ODataQueryContext context = new ODataQueryContext(new ODataConventionModelBuilder().GetEdmModel(), typeof(string), path: null, defaultQuerySettings: null);
+            ODataQueryContext context = new ODataQueryContext(new ODataConventionModelBuilder().GetEdmModel(),
+                typeof(string), path: null, requestContainer: null);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$top=1");
             ODataQueryOptions<string> options = new ODataQueryOptions<string>(context, request);
             var result = controller.OptionsWithString(options);

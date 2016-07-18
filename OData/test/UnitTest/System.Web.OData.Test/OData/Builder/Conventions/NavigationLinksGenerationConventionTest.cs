@@ -83,7 +83,6 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
-            request.SetFakeRequestContainer();
             request.ODataProperties().RouteName = routeName;
 
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
@@ -143,7 +142,6 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
-            request.SetFakeRequestContainer();
             request.ODataProperties().RouteName = routeName;
 
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
@@ -174,7 +172,6 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
-            request.SetFakeRequestContainer();
             request.ODataProperties().RouteName = routeName;
 
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehicleEdmSingleton);
@@ -205,7 +202,6 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
-            request.SetFakeRequestContainer();
             request.ODataProperties().RouteName = routeName;
 
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);

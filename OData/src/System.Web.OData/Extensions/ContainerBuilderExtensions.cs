@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Web.Http;
+using System.Web.OData.Query.Validators;
 using System.Web.OData.Routing;
 using Microsoft.OData;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
@@ -29,6 +30,7 @@ namespace System.Web.OData.Extensions
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
                 AutoComputePayloadMetadata = true,
             });
+            builder.AddService<CountQueryValidator>(ServiceLifetime.Scoped);
 
             return builder;
         }

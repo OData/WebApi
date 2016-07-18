@@ -4,8 +4,8 @@
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
+using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace System.Web.OData
 {
@@ -35,10 +35,12 @@ namespace System.Web.OData
 
         public static void SetFakeRootContainer(this HttpConfiguration configuration)
         {
-            configuration.SetRootContainer(BuildContainer(null));
+            configuration.SetRootContainer(BuildContainer(builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => configuration)
+                       .AddService(ServiceLifetime.Singleton, sp => configuration.GetDefaultQuerySettings())));
         }
 
-        public static void SetFakeRequestContainer(this HttpRequestMessage request)
+        public static void SetFakeRootContainer(this HttpRequestMessage request)
         {
             HttpConfiguration configuration = request.GetConfiguration();
             if (configuration == null)
@@ -46,10 +48,6 @@ namespace System.Web.OData
                 configuration = CreateConfigurationWithRootContainer();
                 request.SetConfiguration(configuration);
             }
-
-            IServiceScope requestScope =
-                configuration.GetRootContainer().GetRequiredService<IServiceScopeFactory>().CreateScope();
-            request.BindRequestScope(requestScope);
         }
     }
 }

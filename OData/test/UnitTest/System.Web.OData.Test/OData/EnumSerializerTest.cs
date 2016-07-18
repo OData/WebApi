@@ -186,7 +186,6 @@ namespace System.Web.OData
             configuration.Routes.MapFakeODataRoute();
             configuration.SetFakeRootContainer();
             request.SetConfiguration(configuration);
-            request.SetFakeRequestContainer();
             request.SetFakeODataRouteName();
             return request;
         }

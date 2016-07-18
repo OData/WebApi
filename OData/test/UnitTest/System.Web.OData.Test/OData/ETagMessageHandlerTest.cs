@@ -221,7 +221,6 @@ namespace System.Web.OData.Test
             configuration.SetFakeRootContainer();
             request = new HttpRequestMessage(method, "http://host/any");
             request.SetConfiguration(configuration);
-            request.SetFakeRequestContainer();
             HttpRequestMessageProperties properties = request.ODataProperties();
             IEdmModel model = edmModel ?? SetupModel();
             properties.Model = model;

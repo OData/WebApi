@@ -269,7 +269,8 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
                 return BadRequest("The key isn't the one posted to the customer");
             }
 
-            ODataQueryContext context = new ODataQueryContext(Request.ODataProperties().Model, CustomerType, path: null);
+            ODataQueryContext context = new ODataQueryContext(Request.ODataProperties().Model, CustomerType, path: null,
+                requestContainer: null);
             ODataQueryOptions query = new ODataQueryOptions(context, Request);
             if (query.SelectExpand != null)
             {

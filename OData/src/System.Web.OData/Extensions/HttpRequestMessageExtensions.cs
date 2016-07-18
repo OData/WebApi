@@ -241,10 +241,18 @@ namespace System.Web.OData.Extensions
                 return (IServiceProvider)value;
             }
 
-            return null;
+            HttpConfiguration configuration = request.GetConfiguration();
+            IServiceProvider rootContainer = configuration.GetRootContainer();
+            IServiceScope requestScope = rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
+            IServiceProvider requestContainer = requestScope.ServiceProvider;
+
+            request.Properties[RequestScopeKey] = requestScope;
+            request.Properties[RequestContainerKey] = requestContainer;
+
+            return requestContainer;
         }
 
-        internal static IServiceScope RequestScope(this HttpRequestMessage request)
+        internal static void DisposeRequestContainer(this HttpRequestMessage request)
         {
             if (request == null)
             {
@@ -254,26 +262,11 @@ namespace System.Web.OData.Extensions
             object value;
             if (request.Properties.TryGetValue(RequestScopeKey, out value))
             {
-                return (IServiceScope)value;
+                IServiceScope requestScope = (IServiceScope)value;
+                Contract.Assert(requestScope != null);
+
+                requestScope.Dispose();
             }
-
-            return null;
-        }
-
-        internal static void BindRequestScope(this HttpRequestMessage request, IServiceScope requestScope)
-        {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
-            if (requestScope == null)
-            {
-                throw Error.ArgumentNull("requestScope");
-            }
-
-            request.Properties[RequestScopeKey] = requestScope;
-            request.Properties[RequestContainerKey] = requestScope.ServiceProvider;
         }
 
         internal static Uri GetNextPageLink(Uri requestUri, int pageSize)

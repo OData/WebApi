@@ -9,6 +9,7 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using System.Web.OData.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData
@@ -26,24 +27,20 @@ namespace System.Web.OData
         /// the given <paramref name="elementClrType"/>.</param>
         /// <param name="elementClrType">The CLR type of the element of the collection being queried.</param>
         /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
-        /// <param name="defaultQuerySettings"><see cref="DefaultQuerySettings"/>.</param>
         /// <param name="requestContainer">The request container.</param>
-        public ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path, DefaultQuerySettings defaultQuerySettings, IServiceProvider requestContainer)
-            : this(model, elementClrType, path, defaultQuerySettings)
+        public ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path, IServiceProvider requestContainer)
+            : this(model, elementClrType, path)
         {
-            RequestContainer = requestContainer;
+            InitializeWithRequestContainer(requestContainer);
         }
 
-        /// <summary>
-        /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" />, element CLR type,
-        /// and <see cref="ODataPath" />.
-        /// </summary>
-        /// <param name="model">The EdmModel that includes the <see cref="IEdmType"/> corresponding to
-        /// the given <paramref name="elementClrType"/>.</param>
-        /// <param name="elementClrType">The CLR type of the element of the collection being queried.</param>
-        /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
-        /// <param name="defaultQuerySettings"><see cref="DefaultQuerySettings"/>.</param>
         internal ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path, DefaultQuerySettings defaultQuerySettings)
+            : this(model, elementClrType, path)
+        {
+            DefaultQuerySettings = defaultQuerySettings;
+        }
+
+        internal ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path)
         {
             if (model == null)
             {
@@ -66,7 +63,6 @@ namespace System.Web.OData
             Model = model;
             Path = path;
             NavigationSource = GetNavigationSource(Model, ElementType, path);
-            DefaultQuerySettings = defaultQuerySettings;
         }
 
         /// <summary>
@@ -76,6 +72,13 @@ namespace System.Web.OData
         /// <param name="model">The EDM model the given EDM type belongs to.</param>
         /// <param name="elementType">The EDM type of the element of the collection being queried.</param>
         /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
+        /// <param name="requestContainer">The request container.</param>
+        public ODataQueryContext(IEdmModel model, IEdmType elementType, ODataPath path, IServiceProvider requestContainer)
+            : this(model, elementType, path)
+        {
+            InitializeWithRequestContainer(requestContainer);
+        }
+
         internal ODataQueryContext(IEdmModel model, IEdmType elementType, ODataPath path)
         {
             if (model == null)
@@ -94,7 +97,7 @@ namespace System.Web.OData
         }
 
         internal ODataQueryContext(IEdmModel model, Type elementClrType)
-            : this(model, elementClrType, path: null, defaultQuerySettings: null)
+            : this(model, elementClrType, path: null)
         {
         }
 
@@ -159,6 +162,14 @@ namespace System.Web.OData
                 entityContainer.EntitySets().Where(e => e.EntityType() == elementType).ToList();
 
             return (matchedNavigationSources.Count != 1) ? null : matchedNavigationSources[0];
+        }
+
+        private void InitializeWithRequestContainer(IServiceProvider requestContainer)
+        {
+            RequestContainer = requestContainer;
+            DefaultQuerySettings = requestContainer == null
+                ? null
+                : requestContainer.GetRequiredService<DefaultQuerySettings>();
         }
     }
 }

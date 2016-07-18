@@ -43,7 +43,7 @@ namespace System.Web.OData.Test
         {
             UnbufferedODataBatchHandler batchHandler = new UnbufferedODataBatchHandler(new HttpServer());
             HttpRequestMessage request = new HttpRequestMessage();
-            request.SetFakeRequestContainer();
+            request.SetFakeRootContainer();
             Assert.ThrowsArgumentNull(
                 () => batchHandler.CreateResponseMessageAsync(null, request, CancellationToken.None).Wait(),
                 "responses");
@@ -82,7 +82,7 @@ namespace System.Web.OData.Test
                     }
                 }
             };
-            batchRequest.SetFakeRequestContainer();
+            batchRequest.SetFakeRootContainer();
 
             // Act
             var response = batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None).Result;
@@ -127,7 +127,7 @@ namespace System.Web.OData.Test
                     }
                 }
             };
-            batchRequest.SetFakeRequestContainer();
+            batchRequest.SetFakeRootContainer();
 
             // Act
             var response = batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None).Result;
@@ -168,7 +168,7 @@ namespace System.Web.OData.Test
                     }
                 }
             };
-            batchRequest.SetFakeRequestContainer();
+            batchRequest.SetFakeRootContainer();
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
@@ -229,7 +229,6 @@ namespace System.Web.OData.Test
             enableContinueOnErrorconfig.SetFakeRootContainer();
             enableContinueOnErrorconfig.EnableContinueOnErrorHeader();
             batchRequest.SetConfiguration(enableContinueOnErrorconfig);
-            batchRequest.SetFakeRequestContainer();
             HttpRequestMessage batchRequestWithPrefContinueOnError = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
             {
                 Content = new MultipartContent("mixed")
@@ -251,12 +250,11 @@ namespace System.Web.OData.Test
             if (enableContinueOnError)
             {
                 batchRequestWithPrefContinueOnError.SetConfiguration(enableContinueOnErrorconfig);
-                batchRequestWithPrefContinueOnError.SetFakeRequestContainer();
                 batchRequestWithPrefContinueOnError.Headers.Add("prefer", "odata.continue-on-error");
             }
             else
             {
-                batchRequestWithPrefContinueOnError.SetFakeRequestContainer();
+                batchRequestWithPrefContinueOnError.SetFakeRootContainer();
             }
 
             // Act

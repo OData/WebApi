@@ -66,6 +66,7 @@ namespace System.Web.OData.Query
             ODataQueryParameterBindingAttribute attribute = new ODataQueryParameterBindingAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
+            config.SetFakeRootContainer();
             request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerLowLevel", typeof(CustomerHighLevelController));
@@ -180,6 +181,7 @@ namespace System.Web.OData.Query
                 HttpMethod.Get,
                 "http://localhost/Customer/?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
+            config.SetFakeRootContainer();
             request.SetConfiguration(config);
 
             // Get EDM model, and set path to request.

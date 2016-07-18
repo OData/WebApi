@@ -151,7 +151,6 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
-            request.SetFakeRequestContainer();
             request.ODataProperties().RouteName = routeName;
 
             return request;

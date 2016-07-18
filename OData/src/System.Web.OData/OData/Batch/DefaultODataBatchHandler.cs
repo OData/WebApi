@@ -41,10 +41,6 @@ namespace System.Web.OData.Batch
 
             ValidateRequest(request);
 
-            // This scope is for the overall batch request.
-            IServiceScope requestScope = CreateRequestScope();
-            request.BindRequestScope(requestScope);
-
             IList<ODataBatchRequestItem> subRequests = await ParseBatchRequestsAsync(request, cancellationToken);
 
             string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(request);

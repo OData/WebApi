@@ -239,7 +239,6 @@ namespace System.Web.OData.Formatter.Serialization
             configuration.SetFakeRootContainer();
             configuration.Routes.MapFakeODataRoute();
             request.SetConfiguration(configuration);
-            request.SetFakeRequestContainer();
             request.SetFakeODataRouteName();
             return request;
         }

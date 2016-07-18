@@ -4,6 +4,7 @@
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using ODataPath = System.Web.OData.Routing.ODataPath;
 
@@ -16,14 +17,6 @@ namespace System.Web.OData.Query.Validators
     public class CountQueryValidator
     {
         private readonly DefaultQuerySettings _defaultQuerySettings;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CountQueryValidator" /> class.
-        /// </summary>>
-        public CountQueryValidator()
-        {
-            _defaultQuerySettings = new DefaultQuerySettings();
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CountQueryValidator" /> class based on
@@ -78,6 +71,18 @@ namespace System.Web.OData.Query.Validators
                     }
                 }
             }
+        }
+
+        internal static CountQueryValidator GetCountQueryValidator(ODataQueryContext context)
+        {
+            if (context == null)
+            {
+                return new CountQueryValidator(new DefaultQuerySettings());
+            }
+
+            return context.RequestContainer == null
+                ? new CountQueryValidator(context.DefaultQuerySettings)
+                : context.RequestContainer.GetRequiredService<CountQueryValidator>();
         }
     }
 }

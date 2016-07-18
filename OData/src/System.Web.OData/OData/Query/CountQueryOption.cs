@@ -7,6 +7,7 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Validators;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Query
@@ -44,7 +45,7 @@ namespace System.Web.OData.Query
 
             Context = context;
             RawValue = rawValue;
-            Validator = new CountQueryValidator(context.DefaultQuerySettings);
+            Validator = CountQueryValidator.GetCountQueryValidator(context);
             _queryOptionParser = queryOptionParser;
         }
 
@@ -63,7 +64,7 @@ namespace System.Web.OData.Query
 
             Context = context;
             RawValue = rawValue;
-            Validator = new CountQueryValidator(context.DefaultQuerySettings);
+            Validator = CountQueryValidator.GetCountQueryValidator(context);
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,
@@ -99,9 +100,9 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Gets or sets the $count query validator.
+        /// Gets the $count query validator.
         /// </summary>
-        public CountQueryValidator Validator { get; set; }
+        public CountQueryValidator Validator { get; private set; }
 
         /// <summary>
         /// Validate the count query based on the given <paramref name="validationSettings"/>.

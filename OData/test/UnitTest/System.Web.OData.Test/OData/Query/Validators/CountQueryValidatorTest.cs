@@ -12,7 +12,7 @@ namespace System.Web.OData.Query.Validators
 {
     public class CountQueryValidatorTest
     {
-        private readonly CountQueryValidator _validator = new CountQueryValidator();
+        private readonly CountQueryValidator _validator = CountQueryValidator.GetCountQueryValidator(null);
 
         [Fact]
         public void Validate_Throws_NullOption()

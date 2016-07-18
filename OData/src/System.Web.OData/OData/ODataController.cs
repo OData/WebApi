@@ -25,9 +25,9 @@ namespace System.Web.OData
         /// </param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            if (disposing && Request != null)
             {
-                Request.RequestScope().Dispose();
+                Request.DisposeRequestContainer();
             }
 
             base.Dispose(disposing);

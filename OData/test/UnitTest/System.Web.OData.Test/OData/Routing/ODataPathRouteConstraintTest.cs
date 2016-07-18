@@ -20,7 +20,7 @@ namespace System.Web.OData.Routing
         string _routeName = "name";
         IEnumerable<IODataRoutingConvention> _conventions = ODataRoutingConventions.CreateDefault();
         HttpRequestMessage _request = new HttpRequestMessage();
-        IServiceProvider _requestContainer = DependencyInjectionHelper.BuildContainer(null);
+        IServiceProvider _rootContainer = DependencyInjectionHelper.BuildContainer(null);
         IODataPathHandler _pathHandler;
 
         private static IList<string> _stringsWithUnescapedSlashes = new List<string>
@@ -51,7 +51,7 @@ namespace System.Web.OData.Routing
 
         public ODataPathRouteConstraintTest()
         {
-            _pathHandler = _requestContainer.GetRequiredService<IODataPathHandler>();
+            _pathHandler = _rootContainer.GetRequiredService<IODataPathHandler>();
         }
 
         public static TheoryDataSet<string> PrefixStrings
@@ -125,7 +125,9 @@ namespace System.Web.OData.Routing
             var request = new HttpRequestMessage(HttpMethod.Get, "http://any/NotAnODataPath");
             HttpRouteCollection httpRouteCollection = new HttpRouteCollection();
             httpRouteCollection.Add(_routeName, new HttpRoute());
-            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
+            var configuration = new HttpConfiguration(httpRouteCollection);
+            configuration.SetFakeRootContainer();
+            request.SetConfiguration(configuration);
 
             var values = new Dictionary<string, object>() { { "odataPath", "NotAnODataPath" } };
             var constraint = CreatePathRouteConstraint();
@@ -141,7 +143,9 @@ namespace System.Web.OData.Routing
             var request = new HttpRequestMessage(HttpMethod.Get, "http://any/odata/$metadata");
             HttpRouteCollection httpRouteCollection = new HttpRouteCollection();
             httpRouteCollection.Add(_routeName, new HttpRoute());
-            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
+            var configuration = new HttpConfiguration(httpRouteCollection);
+            configuration.SetRootContainer(_rootContainer);
+            request.SetConfiguration(configuration);
 
             var values = new Dictionary<string, object>() { { "odataPath", "$metadata" } };
             var constraint = CreatePathRouteConstraint();
@@ -172,7 +176,9 @@ namespace System.Web.OData.Routing
             {
                 { _routeName, new HttpRoute() },
             };
-            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
+            var configuration = new HttpConfiguration(httpRouteCollection);
+            configuration.SetFakeRootContainer();
+            request.SetConfiguration(configuration);
 
             var pathHandler = new TestPathHandler();
             var constraint = CreatePathRouteConstraint(pathHandler);
@@ -209,7 +215,9 @@ namespace System.Web.OData.Routing
             {
                 { _routeName, new HttpRoute() },
             };
-            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
+            var configuration = new HttpConfiguration(httpRouteCollection);
+            configuration.SetFakeRootContainer();
+            request.SetConfiguration(configuration);
 
             var pathHandler = new TestPathHandler();
             var constraint = CreatePathRouteConstraint(pathHandler);
@@ -246,7 +254,9 @@ namespace System.Web.OData.Routing
             {
                 { _routeName, new HttpRoute() },
             };
-            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
+            var configuration = new HttpConfiguration(httpRouteCollection);
+            configuration.SetFakeRootContainer();
+            request.SetConfiguration(configuration);
 
             var builder = new ODataModelBuilder();
             builder.Function("Unbound").Returns<string>().Parameter<string>("p0");
@@ -290,7 +300,9 @@ namespace System.Web.OData.Routing
             {
                 { _routeName, new HttpRoute() },
             };
-            request.SetConfiguration(new HttpConfiguration(httpRouteCollection));
+            var configuration = new HttpConfiguration(httpRouteCollection);
+            configuration.SetFakeRootContainer();
+            request.SetConfiguration(configuration);
 
             var builder = new ODataModelBuilder();
             builder.Function("Unbound").Returns<string>().Parameter<string>("p0");
@@ -326,7 +338,7 @@ namespace System.Web.OData.Routing
 
         private ODataPathRouteConstraint CreatePathRouteConstraint(IODataPathHandler pathHandler, IEdmModel model)
         {
-            return new ODataPathRouteConstraint(pathHandler, model, _routeName, _conventions, _requestContainer);
+            return new ODataPathRouteConstraint(pathHandler, model, _routeName, _conventions);
         }
 
         // Wrap a PathHandler to allow us to check serviceRoot the constraint calculates.

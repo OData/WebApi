@@ -73,7 +73,6 @@ namespace System.Web.OData.Formatter
                 "http://localhost/WorkItems(10)/ID"))
             {
                 request.SetConfiguration(configuration);
-                request.SetFakeRequestContainer();
                 IEdmProperty property =
                     model.EntityContainer.EntitySets().Single().EntityType().Properties().First();
                 request.ODataProperties().Model = model;
@@ -115,7 +114,6 @@ namespace System.Web.OData.Formatter
                 HttpConfiguration config = new HttpConfiguration();
                 config.MapODataServiceRoute("default", "", model);
                 request.SetConfiguration(config);
-                request.SetFakeRequestContainer();
                 request.ODataProperties().RouteName = "default";
                 request.ODataProperties().Model = model;
 

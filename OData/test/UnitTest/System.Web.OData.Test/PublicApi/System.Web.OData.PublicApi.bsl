@@ -419,7 +419,8 @@ public class System.Web.OData.ODataNullValueMessageHandler : System.Net.Http.Del
 }
 
 public class System.Web.OData.ODataQueryContext {
-	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, System.Type elementClrType, ODataPath path, DefaultQuerySettings defaultQuerySettings, System.IServiceProvider requestContainer)
+	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Edm.IEdmType elementType, ODataPath path, System.IServiceProvider requestContainer)
+	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, System.Type elementClrType, ODataPath path, System.IServiceProvider requestContainer)
 
 	DefaultQuerySettings DefaultQuerySettings  { public get; }
 	System.Type ElementClrType  { public get; }
@@ -2096,7 +2097,7 @@ public class System.Web.OData.Query.CountQueryOption {
 
 	ODataQueryContext Context  { public get; }
 	string RawValue  { public get; }
-	CountQueryValidator Validator  { public get; public set; }
+	CountQueryValidator Validator  { public get; }
 	bool Value  { public get; }
 
 	public System.Nullable`1[[System.Int64]] GetEntityCount (System.Linq.IQueryable query)
@@ -2634,11 +2635,10 @@ public class System.Web.OData.Routing.ODataPath {
 }
 
 public class System.Web.OData.Routing.ODataPathRouteConstraint : IHttpRouteConstraint {
-	public ODataPathRouteConstraint (IODataPathHandler pathHandler, Microsoft.OData.Edm.IEdmModel model, string routeName, System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] routingConventions, System.IServiceProvider rootContainer)
+	public ODataPathRouteConstraint (IODataPathHandler pathHandler, Microsoft.OData.Edm.IEdmModel model, string routeName, System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] routingConventions)
 
 	Microsoft.OData.Edm.IEdmModel EdmModel  { public get; }
 	IODataPathHandler PathHandler  { public get; }
-	System.IServiceProvider RootContainer  { public get; }
 	string RouteName  { public get; }
 	System.Collections.ObjectModel.Collection`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] RoutingConventions  { public get; }
 
@@ -3094,7 +3094,6 @@ public class System.Web.OData.Query.Expressions.DynamicTypeWrapper {
 }
 
 public class System.Web.OData.Query.Validators.CountQueryValidator {
-	public CountQueryValidator ()
 	public CountQueryValidator (DefaultQuerySettings defaultQuerySettings)
 
 	public virtual void Validate (CountQueryOption countQueryOption, ODataValidationSettings validationSettings)

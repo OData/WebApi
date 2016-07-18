@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Web.Http;
 using System.Web.Http.Filters;
 using System.Web.OData.Batch;
@@ -556,7 +555,7 @@ namespace System.Web.OData.Extensions
             HttpRouteCollection routes = configuration.Routes;
             routePrefix = RemoveTrailingSlash(routePrefix);
             ODataPathRouteConstraint routeConstraint = new ODataPathRouteConstraint(
-                pathHandler, model, routeName, routingConventions, rootContainer);
+                pathHandler, model, routeName, routingConventions);
 
             // 4) Resolve HTTP handler, create the OData route and register it.
             ODataRoute route;
@@ -749,6 +748,7 @@ namespace System.Web.OData.Extensions
             }
 
             builder.AddService(ServiceLifetime.Singleton, sp => configuration);
+            builder.AddService(ServiceLifetime.Singleton, sp => configuration.GetDefaultQuerySettings());
             builder.AddDefaultODataServices();
             builder.AddDefaultWebApiServices();
 

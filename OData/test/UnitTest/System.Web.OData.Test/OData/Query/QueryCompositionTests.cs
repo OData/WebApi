@@ -203,6 +203,7 @@ namespace System.Web.OData.Query
                 typeof(QueryCompositionCategoryController), typeof(QueryCompositionAnonymousTypesController)
             };
             HttpConfiguration config = controllers.GetHttpConfiguration();
+            config.SetFakeRootContainer();
             config.Routes.MapHttpRoute("default", "{controller}/{key}", new { key = RouteParameter.Optional });
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 

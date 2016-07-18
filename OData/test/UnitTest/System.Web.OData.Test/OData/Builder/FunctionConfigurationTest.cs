@@ -619,7 +619,6 @@ namespace System.Web.OData.Builder
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, null, model);
             request.SetConfiguration(configuration);
-            request.SetFakeRequestContainer();
             request.ODataProperties().RouteName = routeName;
             UrlHelper urlHelper = new UrlHelper(request);
 
@@ -655,7 +654,6 @@ namespace System.Web.OData.Builder
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, null, model);
             request.SetConfiguration(configuration);
-            request.SetFakeRequestContainer();
             request.ODataProperties().RouteName = routeName;
             request.ODataProperties().Model = model;
 

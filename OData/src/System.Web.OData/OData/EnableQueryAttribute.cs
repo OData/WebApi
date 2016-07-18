@@ -550,7 +550,6 @@ namespace System.Web.OData
                 model,
                 elementClrType,
                 request.ODataProperties().Path,
-                request.GetConfiguration().GetDefaultQuerySettings(),
                 request.RequestContainer());
         }
 

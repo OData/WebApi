@@ -37,9 +37,7 @@ namespace System.Web.OData.Batch
 
             ValidateRequest(request);
 
-            // This scope is for the overall batch request.
-            IServiceScope requestScope = CreateRequestScope();
-            request.BindRequestScope(requestScope);
+            // This container is for the overall batch request.
             IServiceProvider requestContainer = request.RequestContainer();
             requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri = GetBaseUri(request);
 

@@ -27,7 +27,23 @@ namespace System.Web.OData
         /// <param name="elementClrType">The CLR type of the element of the collection being queried.</param>
         /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
         /// <param name="defaultQuerySettings"><see cref="DefaultQuerySettings"/>.</param>
-        public ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path, DefaultQuerySettings defaultQuerySettings)
+        /// <param name="requestContainer">The request container.</param>
+        public ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path, DefaultQuerySettings defaultQuerySettings, IServiceProvider requestContainer)
+            : this(model, elementClrType, path, defaultQuerySettings)
+        {
+            RequestContainer = requestContainer;
+        }
+
+        /// <summary>
+        /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" />, element CLR type,
+        /// and <see cref="ODataPath" />.
+        /// </summary>
+        /// <param name="model">The EdmModel that includes the <see cref="IEdmType"/> corresponding to
+        /// the given <paramref name="elementClrType"/>.</param>
+        /// <param name="elementClrType">The CLR type of the element of the collection being queried.</param>
+        /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
+        /// <param name="defaultQuerySettings"><see cref="DefaultQuerySettings"/>.</param>
+        internal ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path, DefaultQuerySettings defaultQuerySettings)
         {
             if (model == null)
             {
@@ -60,7 +76,7 @@ namespace System.Web.OData
         /// <param name="model">The EDM model the given EDM type belongs to.</param>
         /// <param name="elementType">The EDM type of the element of the collection being queried.</param>
         /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
-        public ODataQueryContext(IEdmModel model, IEdmType elementType, ODataPath path)
+        internal ODataQueryContext(IEdmModel model, IEdmType elementType, ODataPath path)
         {
             if (model == null)
             {
@@ -116,6 +132,11 @@ namespace System.Web.OData
         /// Gets the <see cref="ODataPath"/>.
         /// </summary>
         public ODataPath Path { get; private set; }
+
+        /// <summary>
+        /// Gets the request container.
+        /// </summary>
+        public IServiceProvider RequestContainer { get; private set; }
 
         private static IEdmNavigationSource GetNavigationSource(IEdmModel model, IEdmType elementType, ODataPath odataPath)
         {

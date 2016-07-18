@@ -419,8 +419,7 @@ public class System.Web.OData.ODataNullValueMessageHandler : System.Net.Http.Del
 }
 
 public class System.Web.OData.ODataQueryContext {
-	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Edm.IEdmType elementType, ODataPath path)
-	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, System.Type elementClrType, ODataPath path, DefaultQuerySettings defaultQuerySettings)
+	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, System.Type elementClrType, ODataPath path, DefaultQuerySettings defaultQuerySettings, System.IServiceProvider requestContainer)
 
 	DefaultQuerySettings DefaultQuerySettings  { public get; }
 	System.Type ElementClrType  { public get; }
@@ -428,6 +427,7 @@ public class System.Web.OData.ODataQueryContext {
 	Microsoft.OData.Edm.IEdmModel Model  { public get; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; }
 	ODataPath Path  { public get; }
+	System.IServiceProvider RequestContainer  { public get; }
 }
 
 public class System.Web.OData.ODataSwaggerConverter {

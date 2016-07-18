@@ -550,7 +550,8 @@ namespace System.Web.OData
                 model,
                 elementClrType,
                 request.ODataProperties().Path,
-                request.GetConfiguration().GetDefaultQuerySettings());
+                request.GetConfiguration().GetDefaultQuerySettings(),
+                request.RequestContainer());
         }
 
         private void GetModelBoundPageSize(ODataQueryContext queryContext, ObjectContent responseContent,

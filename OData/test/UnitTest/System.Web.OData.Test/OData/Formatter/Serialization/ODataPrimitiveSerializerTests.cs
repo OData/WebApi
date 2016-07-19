@@ -50,7 +50,6 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 return new TheoryDataSet<object, string, string>
                 {
-                    { null, "Edm.Null", "true" },
                     { (char)'1', "Edm.String", "\"1\"" },
                     { (char[]) new char[] {'1' }, "Edm.String", "\"1\"" },
                     { (UInt16)1, "Edm.Int32", "1" },
@@ -69,7 +68,6 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 return new TheoryDataSet<object, string, string>
                 {
-                    { null, "Edm.Null", "true" },
                     { "1", "Edm.String", "\"1\"" },
                     { true, "Edm.Boolean", "true" },
                     { (Byte)1, "Edm.Byte", "1" },
@@ -333,7 +331,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataPrimitiveSerializer.AddTypeNameAnnotationAsNeeded(primitive, edmPrimitiveType, ODataMetadataLevel.FullMetadata);
 
             // Assert
-            SerializationTypeNameAnnotation annotation = primitive.GetAnnotation<SerializationTypeNameAnnotation>();
+            ODataTypeAnnotation annotation = primitive.TypeAnnotation;
             Assert.NotNull(annotation); // Guard
             Assert.Equal("Edm.Int16", annotation.TypeName);
         }

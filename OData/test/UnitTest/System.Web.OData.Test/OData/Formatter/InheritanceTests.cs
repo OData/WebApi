@@ -248,8 +248,8 @@ namespace System.Web.OData.Formatter
                 .OperationImports()
                 .Single(f => f.Name == "PostMotorcycle_When_Expecting_Car") as IEdmActionImport;
             Assert.NotNull(action);
-            IEdmEntitySet actionEntitySet;
-            action.TryGetStaticEntitySet(out actionEntitySet);
+            IEdmEntitySetBase actionEntitySet;
+            action.TryGetStaticEntitySet(_model, out actionEntitySet);
             context.Path = new ODataPath(new OperationImportSegment(new[] { action }, actionEntitySet, null));
 
             // Act & Assert

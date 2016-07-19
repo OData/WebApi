@@ -17,9 +17,9 @@ namespace System.Web.OData.Routing
         ODataUriResolver UriResolver { get; set; }
 
         /// <summary>
-        /// Gets or Sets the <see cref="ODataUrlConventions"/> to use while parsing, specifically
+        /// Gets or Sets the <see cref="ODataUrlKeyDelimiter"/> to use while parsing, specifically
         /// whether to recognize keys as segments or not.
         /// </summary>
-        ODataUrlConventions UrlConventions { get; set; }
+        ODataUrlKeyDelimiter UrlKeyDelimiter { get; set; }
     }
 }

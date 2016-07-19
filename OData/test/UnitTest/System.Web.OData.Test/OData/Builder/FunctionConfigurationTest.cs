@@ -419,10 +419,7 @@ namespace System.Web.OData.Builder
             Assert.Equal("FunctionName", function.Name);
             Assert.NotNull(function.ReturnType);
             Assert.NotNull(functionImport.EntitySet);
-            Assert.Equal("Customers", (functionImport.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.Name);
-            Assert.Equal(
-                typeof(Customer).FullName,
-                (functionImport.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.EntityType().FullName());
+            Assert.Equal("Customers", (functionImport.EntitySet as IEdmPathExpression).Path);
             Assert.Empty(function.Parameters);
         }
 

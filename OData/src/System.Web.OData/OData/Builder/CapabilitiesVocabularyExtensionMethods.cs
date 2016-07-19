@@ -103,15 +103,14 @@ namespace System.Web.OData.Builder
                         CapabilitiesVocabularyConstants.NavigationPropertyRestrictionNavigationProperty,
                         new EdmNavigationPropertyPathExpression(p.Item1.Name)),
                     new EdmPropertyConstructor(CapabilitiesVocabularyConstants.NavigationRestrictionsNavigability,
-                        new EdmEnumMemberReferenceExpression(navigationType.Members.Single(m => m.Name == name)))
+                        new EdmEnumMemberExpression(navigationType.Members.Single(m => m.Name == name)))
                 });
             });
 
             IList<IEdmPropertyConstructor> properties = new List<IEdmPropertyConstructor>
             {
                 new EdmPropertyConstructor(CapabilitiesVocabularyConstants.NavigationRestrictionsNavigability,
-                    new EdmEnumMemberReferenceExpression(
-                        navigationType.Members.Single(m => m.Name == type))),
+                    new EdmEnumMemberExpression(navigationType.Members.Single(m => m.Name == type))),
 
                 new EdmPropertyConstructor(CapabilitiesVocabularyConstants.NavigationRestrictionsRestrictedProperties,
                     new EdmCollectionExpression(propertiesExpression))
@@ -255,11 +254,11 @@ namespace System.Web.OData.Builder
             Contract.Assert(model != null);
             Contract.Assert(target != null);
 
-            IEdmValueTerm term = model.FindValueTerm(qualifiedName);
+            IEdmTerm term = model.FindTerm(qualifiedName);
             if (term != null)
             {
                 IEdmRecordExpression record = new EdmRecordExpression(properties);
-                EdmAnnotation annotation = new EdmAnnotation(target, term, record);
+                EdmVocabularyAnnotation annotation = new EdmVocabularyAnnotation(target, term, record);
                 annotation.SetSerializationLocation(model, EdmVocabularyAnnotationSerializationLocation.Inline);
                 model.SetVocabularyAnnotation(annotation);
             }

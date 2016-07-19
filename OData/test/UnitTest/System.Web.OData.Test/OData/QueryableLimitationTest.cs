@@ -197,7 +197,7 @@ namespace System.Web.OData
 
             // Assert
             // Remove the following condition after updating to ODL 6.13.
-            if (_model.FindValueTerm(CapabilitiesVocabularyConstants.CountRestrictions) != null)
+            if (_model.FindTerm(CapabilitiesVocabularyConstants.CountRestrictions) != null)
             {
                 Assert.Equal(expect, responseString);
             }

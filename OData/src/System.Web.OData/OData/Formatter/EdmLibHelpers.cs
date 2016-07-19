@@ -726,8 +726,8 @@ namespace System.Web.OData.Formatter
 
             IList<IEdmStructuralProperty> results = new List<IEdmStructuralProperty>();
             IEdmEntityType entityType = entitySet.EntityType();
-            var annotations = model.FindVocabularyAnnotations<IEdmValueAnnotation>(entitySet, CoreVocabularyModel.ConcurrencyTerm);
-            IEdmValueAnnotation annotation = annotations.FirstOrDefault();
+            var annotations = model.FindVocabularyAnnotations<IEdmVocabularyAnnotation>(entitySet, CoreVocabularyModel.ConcurrencyTerm);
+            IEdmVocabularyAnnotation annotation = annotations.FirstOrDefault();
             if (annotation != null)
             {
                 IEdmCollectionExpression properties = annotation.Value as IEdmCollectionExpression;
@@ -740,7 +740,7 @@ namespace System.Web.OData.Formatter
                         {
                             // So far, we only consider the single path, because only the direct properties from declaring type are used.
                             // However we have an issue tracking on: https://github.com/OData/WebApi/issues/472
-                            string propertyName = pathExpression.Path.Single();
+                            string propertyName = pathExpression.PathSegments.First();
                             IEdmProperty edmProperty = entityType.FindProperty(propertyName);
                             IEdmStructuralProperty structuralProperty = edmProperty as IEdmStructuralProperty;
                             if (structuralProperty != null)

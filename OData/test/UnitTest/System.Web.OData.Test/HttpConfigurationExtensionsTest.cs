@@ -245,23 +245,23 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void SetUrlConvension_Sets_UrlConvension()
+        public void SetUrlKeyDelimiter_Sets_UrlKeyDelimiter()
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            config.SetUrlConventions(ODataUrlConventions.ODataSimplified);
+            config.SetUrlKeyDelimiter(ODataUrlKeyDelimiter.Slash);
             ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
             var pathResolver = route.PathRouteConstraint.PathHandler as IODataUriResolver;
 
             // Assert
             Assert.NotNull(pathResolver);
-            Assert.Equal(pathResolver.UrlConventions, ODataUrlConventions.ODataSimplified);
+            Assert.Equal(pathResolver.UrlKeyDelimiter, ODataUrlKeyDelimiter.Slash);
         }
 
         [Fact]
-        public void SetUrlConvension_Sets_DefaultValue()
+        public void SetUrlKeyDelimiter_Sets_DefaultValue()
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
@@ -272,7 +272,7 @@ namespace System.Web.OData
 
             // Assert
             Assert.NotNull(pathResolver);
-            Assert.Null(pathResolver.UrlConventions);
+            Assert.Null(pathResolver.UrlKeyDelimiter);
         }
 
         [Fact]

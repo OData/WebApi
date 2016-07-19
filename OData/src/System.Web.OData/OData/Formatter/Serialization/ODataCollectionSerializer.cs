@@ -234,10 +234,7 @@ namespace System.Web.OData.Formatter.Serialization
                     typeName = value.TypeName;
                 }
 
-                value.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
-                {
-                    TypeName = typeName
-                });
+                value.TypeAnnotation = new ODataTypeAnnotation(typeName);
             }
         }
 

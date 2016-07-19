@@ -35,7 +35,7 @@ namespace System.Web.OData
             {
                 IEdmModel edmModel;
                 IEnumerable<EdmError> edmErrors;
-                if (EdmxReader.TryParse(XmlReader.Create(new StringReader(GetEdmx())), out edmModel, out edmErrors))
+                if (CsdlReader.TryParse(XmlReader.Create(new StringReader(GetEdmx())), out edmModel, out edmErrors))
                 {
                     _model = edmModel;
                     _model.SetAnnotationValue<ClrTypeAnnotation>(_model.FindDeclaredType("ODataDemo.Product"), new ClrTypeAnnotation(typeof(ODataResourceDeserializerTests.Product)));

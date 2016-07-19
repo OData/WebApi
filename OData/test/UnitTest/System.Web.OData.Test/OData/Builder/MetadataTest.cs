@@ -158,7 +158,7 @@ namespace System.Web.OData.Builder
             StringWriter writer = new StringWriter();
             var xwriter = XmlWriter.Create(writer);
             IEnumerable<EdmError> errors;
-            if (EdmxWriter.TryWriteEdmx(model, xwriter, EdmxTarget.OData, out errors))
+            if (CsdlWriter.TryWriteCsdl(model, xwriter, CsdlTarget.OData, out errors))
             {
                 xwriter.Flush();
                 return writer.ToString();

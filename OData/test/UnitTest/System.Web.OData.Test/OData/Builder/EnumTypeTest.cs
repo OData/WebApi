@@ -265,8 +265,8 @@ namespace System.Web.OData.Builder
             var entityset = model.FindDeclaredEntitySet("EnumEntities");
             Assert.NotNull(entityset);
 
-            var annotations = model.FindVocabularyAnnotations<IEdmValueAnnotation>(entityset, CoreVocabularyModel.ConcurrencyTerm);
-            IEdmValueAnnotation concurrencyAnnotation = Assert.Single(annotations);
+            var annotations = model.FindVocabularyAnnotations<IEdmVocabularyAnnotation>(entityset, CoreVocabularyModel.ConcurrencyTerm);
+            IEdmVocabularyAnnotation concurrencyAnnotation = Assert.Single(annotations);
 
             IEdmCollectionExpression properties = concurrencyAnnotation.Value as IEdmCollectionExpression;
             Assert.NotNull(properties);
@@ -275,7 +275,7 @@ namespace System.Web.OData.Builder
             var element = properties.Elements.First() as IEdmPathExpression;
             Assert.NotNull(element);
 
-            string path = Assert.Single(element.Path);
+            string path = Assert.Single(element.PathSegments);
             Assert.Equal("RequiredColor", path);
         }
 

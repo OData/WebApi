@@ -1224,7 +1224,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataResourceSerializer.AddTypeNameAnnotationAsNeeded(entry, _customerType.EntityDefinition(), ODataMetadataLevel.MinimalMetadata);
 
             // Assert
-            SerializationTypeNameAnnotation annotation = entry.GetAnnotation<SerializationTypeNameAnnotation>();
+            ODataTypeAnnotation annotation = entry.TypeAnnotation;
             Assert.NotNull(annotation); // Guard
             Assert.Equal(expectedTypeName, annotation.TypeName);
         }
@@ -1243,7 +1243,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataResourceSerializer.AddTypeNameAnnotationAsNeeded(entry, model.SpecialCustomer, ODataMetadataLevel.MinimalMetadata);
 
             // Assert
-            SerializationTypeNameAnnotation annotation = entry.GetAnnotation<SerializationTypeNameAnnotation>();
+            ODataTypeAnnotation annotation = entry.TypeAnnotation;
             Assert.NotNull(annotation); // Guard
             Assert.Null(annotation.TypeName);
         }

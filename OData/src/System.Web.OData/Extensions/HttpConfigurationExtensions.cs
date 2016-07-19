@@ -369,11 +369,11 @@ namespace System.Web.OData.Extensions
         }
 
         /// <summary>
-        /// Set the UrlConventions in DefaultODataPathHandler.
+        /// Set the UrlKeyDelimiter in DefaultODataPathHandler.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        /// <param name="conventions">The <see cref="ODataUrlConventions"/></param>
-        public static void SetUrlConventions(this HttpConfiguration configuration, ODataUrlConventions conventions)
+        /// <param name="urlKeyDelimiter">The <see cref="ODataUrlKeyDelimiter"/></param>
+        public static void SetUrlKeyDelimiter(this HttpConfiguration configuration, ODataUrlKeyDelimiter urlKeyDelimiter)
         {
             if (configuration == null)
             {
@@ -381,7 +381,7 @@ namespace System.Web.OData.Extensions
             }
 
             ODataUriResolverSettings settings = configuration.GetResolverSettings();
-            settings.UrlConventions = conventions;
+            settings.UrlKeyDelimiter = urlKeyDelimiter;
         }
 
         /// <summary>
@@ -535,9 +535,9 @@ namespace System.Web.OData.Extensions
                 pathResolver.UriResolver = settings.UriResolver;
             }
 
-            if (pathResolver != null && pathResolver.UrlConventions == null)
+            if (pathResolver != null && pathResolver.UrlKeyDelimiter == null)
             {
-                pathResolver.UrlConventions = settings.UrlConventions;
+                pathResolver.UrlKeyDelimiter = settings.UrlKeyDelimiter;
             }
 
             // 3) Resolve some required services and create the route constraint.

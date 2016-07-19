@@ -472,6 +472,7 @@ namespace System.Web.OData.Formatter
                 Request.RequestContainer().GetRequiredService<ODataMessageWriterSettings>();
             writerSettings.BaseUri = baseAddress;
             writerSettings.Version = _version;
+            writerSettings.Validations = writerSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
 
             string metadataLink = urlHelper.CreateODataLink(MetadataSegment.Instance);
 

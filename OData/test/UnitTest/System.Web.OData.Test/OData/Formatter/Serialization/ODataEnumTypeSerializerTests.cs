@@ -21,7 +21,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataEnumSerializer.AddTypeNameAnnotationAsNeeded(enumValue, enumType, ODataMetadataLevel.MinimalMetadata);
 
             // Assert
-            SerializationTypeNameAnnotation annotation = enumValue.GetAnnotation<SerializationTypeNameAnnotation>();
+            ODataTypeAnnotation annotation = enumValue.TypeAnnotation;
             Assert.Null(annotation);
         }
 
@@ -37,7 +37,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataEnumSerializer.AddTypeNameAnnotationAsNeeded(enumValue, enumType, ODataMetadataLevel.FullMetadata);
 
             // Assert
-            SerializationTypeNameAnnotation annotation = enumValue.GetAnnotation<SerializationTypeNameAnnotation>();
+            ODataTypeAnnotation annotation = enumValue.TypeAnnotation;
             Assert.NotNull(annotation);
             Assert.Equal("TestModel.EnumType", annotation.TypeName);
         }
@@ -54,7 +54,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataEnumSerializer.AddTypeNameAnnotationAsNeeded(enumValue, enumType, ODataMetadataLevel.NoMetadata);
 
             // Assert
-            SerializationTypeNameAnnotation annotation = enumValue.GetAnnotation<SerializationTypeNameAnnotation>();
+            ODataTypeAnnotation annotation = enumValue.TypeAnnotation;
             Assert.NotNull(annotation);
             Assert.Null(annotation.TypeName);
         }

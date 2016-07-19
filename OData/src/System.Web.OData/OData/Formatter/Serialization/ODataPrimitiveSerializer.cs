@@ -96,10 +96,7 @@ namespace System.Web.OData.Formatter.Serialization
                 typeName = primitiveType.FullName();
             }
 
-            primitive.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
-            {
-                TypeName = typeName
-            });
+            primitive.TypeAnnotation = new ODataTypeAnnotation(typeName);
         }
 
         internal static ODataPrimitiveValue CreatePrimitive(object value, IEdmPrimitiveTypeReference primitiveType,

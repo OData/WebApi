@@ -756,7 +756,7 @@ namespace System.Web.OData.Builder
                     EdmEntitySet entitySet = navigationSource as EdmEntitySet;
                     if (entitySet != null)
                     {
-                        return new EdmEntitySetReferenceExpression(entitySet);
+                        return new EdmPathExpression(entitySet.Name);
                     }
                 }
                 else

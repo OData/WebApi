@@ -235,8 +235,8 @@ namespace System.Web.OData.Builder
             var customers = model.FindDeclaredEntitySet("Customers");
             Assert.NotNull(customers);
 
-            var annotations = model.FindVocabularyAnnotations<IEdmValueAnnotation>(customers, CoreVocabularyModel.ConcurrencyTerm);
-            IEdmValueAnnotation concurrencyAnnotation = Assert.Single(annotations);
+            var annotations = model.FindVocabularyAnnotations<IEdmVocabularyAnnotation>(customers, CoreVocabularyModel.ConcurrencyTerm);
+            IEdmVocabularyAnnotation concurrencyAnnotation = Assert.Single(annotations);
 
             IEdmCollectionExpression properties = concurrencyAnnotation.Value as IEdmCollectionExpression;
             Assert.NotNull(properties);
@@ -245,7 +245,7 @@ namespace System.Web.OData.Builder
             var element = properties.Elements.First() as IEdmPathExpression;
             Assert.NotNull(element);
 
-            string path = Assert.Single(element.Path);
+            string path = Assert.Single(element.PathSegments);
             Assert.Equal("Name", path);
         }
 

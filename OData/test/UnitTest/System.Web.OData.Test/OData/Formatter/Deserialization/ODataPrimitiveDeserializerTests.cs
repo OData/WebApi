@@ -26,7 +26,6 @@ namespace System.Web.OData.Formatter.Deserialization
             {
                 return new TheoryDataSet<object, object>
                 {
-                    { null, null },
                     { (char)'1', "1" },
                     { (char[]) new char[] {'1'}, "1" },
                     { (UInt16)1, (int)1 },

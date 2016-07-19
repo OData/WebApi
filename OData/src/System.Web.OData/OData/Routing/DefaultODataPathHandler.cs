@@ -29,10 +29,10 @@ namespace System.Web.OData.Routing
         public ODataUriResolver UriResolver { get; set; }
 
         /// <summary>
-        /// Gets or Sets the <see cref="ODataUrlConventions"/> to use while parsing, specifically
+        /// Gets or Sets the <see cref="ODataUrlKeyDelimiter"/> to use while parsing, specifically
         /// whether to recognize keys as segments or not.
         /// </summary>
-        public ODataUrlConventions UrlConventions { get; set; }
+        public ODataUrlKeyDelimiter UrlKeyDelimiter { get; set; }
 
         /// <summary>
         /// Parses the specified OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
@@ -146,9 +146,16 @@ namespace System.Web.OData.Routing
                 uriParser.Resolver = UriResolver;
             }
 
-            if (UrlConventions != null)
+            if (UrlKeyDelimiter != null)
             {
-                uriParser.UrlConventions = UrlConventions;
+                uriParser.UrlKeyDelimiter = UrlKeyDelimiter;
+            }
+            else
+            {
+                // ODL changes to use ODataUrlKeyDelimiter.Slash as default value.
+                // Web API still uses the ODataUrlKeyDelimiter.Parentheses as default value.
+                // Please remove it after fix: https://github.com/OData/odata.net/issues/642
+                uriParser.UrlKeyDelimiter = ODataUrlKeyDelimiter.Parentheses;
             }
 
             ODL.ODataPath path;

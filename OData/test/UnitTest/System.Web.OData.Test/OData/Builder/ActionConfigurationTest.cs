@@ -384,10 +384,7 @@ namespace System.Web.OData.Builder
             Assert.Equal("ActionName", action.Name);
             Assert.NotNull(action.Action.ReturnType);
             Assert.NotNull(action.EntitySet);
-            Assert.Equal("Customers", (action.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.Name);
-            Assert.Equal(
-                typeof(Customer).FullName,
-                (action.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.EntityType().FullName());
+            Assert.Equal("Customers", (action.EntitySet as IEdmPathExpression).Path);
             Assert.Empty(action.Action.Parameters);
         }
 

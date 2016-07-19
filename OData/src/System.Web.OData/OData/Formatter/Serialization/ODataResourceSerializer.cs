@@ -164,7 +164,8 @@ namespace System.Web.OData.Formatter.Serialization
                             property = new ODataProperty
                             {
                                 Name = prop.Name,
-                                Value = new ODataComplexValue
+                                // TODO: Update to write the nested complex wrapper.
+                                Value = new ODataResource
                                 {
                                     Properties = CreateODataPropertiesFromDynamicType(entityType, value)
                                 }
@@ -1044,10 +1045,7 @@ namespace System.Web.OData.Formatter.Serialization
                 typeName = resource.TypeName;
             }
 
-            resource.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
-            {
-                TypeName = typeName
-            });
+            resource.TypeAnnotation = new ODataTypeAnnotation(typeName);
         }
 
         internal static void AddTypeNameAnnotationAsNeededForComplex(ODataResource resource, ODataMetadataLevel metadataLevel)
@@ -1073,10 +1071,7 @@ namespace System.Web.OData.Formatter.Serialization
                     typeName = resource.TypeName;
                 }
 
-                resource.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
-                {
-                    TypeName = typeName
-                });
+                resource.TypeAnnotation = new ODataTypeAnnotation(typeName);
             }
         }
 

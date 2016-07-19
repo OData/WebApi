@@ -164,9 +164,9 @@ namespace System.Web.OData.Routing
             "RoutingCustomers/Default.FunctionBoundToRoutingCustomers()")]
         [InlineData("RoutingCustomers/System.Web.OData.Routing.VIP/Default.FunctionBoundToRoutingCustomers()", "~/entityset/cast/function",
             "RoutingCustomers/System.Web.OData.Routing.VIP/Default.FunctionBoundToRoutingCustomers()")]
-        [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts",
-            "~/entityset/key/navigation/cast/key/navigation/navigation",
-            "Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts")]
+        [InlineData("Products(1)/RoutingCustomers(1)/System.Web.OData.Routing.VIP/RelationshipManager/ManagedProducts",
+            "~/entityset/key/navigation/key/cast/navigation/navigation",
+            "Products(1)/RoutingCustomers(1)/System.Web.OData.Routing.VIP/RelationshipManager/ManagedProducts")]
         [InlineData("Products(1)/Default.FunctionBoundToProductWithMultipleParamters(P1=1,P2=2,P3='a')", "~/entityset/key/function",
             "Products(1)/Default.FunctionBoundToProductWithMultipleParamters(P1=1,P2=2,P3='a')")]
         [InlineData("Products(1)/Default.FunctionBoundToProduct()", "~/entityset/key/function",
@@ -347,7 +347,7 @@ namespace System.Web.OData.Routing
 
             Assert.Equal("System.Web.OData.Routing.UsAddress", typeSegment.ToUriLiteral());
 
-            Assert.Null(path.NavigationSource);
+            Assert.NotNull(path.NavigationSource);
 
             Assert.Same(complexType, path.EdmType);
         }
@@ -407,7 +407,7 @@ namespace System.Web.OData.Routing
             string expectedText = "112";
             IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
             var simplifiedParser = new DefaultODataPathHandler();
-            simplifiedParser.UrlConventions = ODataUrlConventions.ODataSimplified;
+            simplifiedParser.UrlKeyDelimiter = ODataUrlKeyDelimiter.Slash;
 
             // Act
             ODataPath path = simplifiedParser.Parse(_model, _serviceRoot, odataPath);
@@ -687,7 +687,7 @@ namespace System.Web.OData.Routing
 
             Assert.Equal(ExpectedText, typeSegment.ToUriLiteral());
 
-            Assert.Null(path.NavigationSource);
+            Assert.NotNull(path.NavigationSource);
             Assert.Same(expectedType, path.EdmType);
         }
 
@@ -798,7 +798,6 @@ namespace System.Web.OData.Routing
         }
 
         [Theory]
-        [InlineData("RoutingCustomers(1)/Products/$ref?$id=5", "The value of $id '5' is invalid.")]
         [InlineData("RoutingCustomers(1)/Products/$ref?$id=Products(5)", "The value of $id 'Products(5)' is invalid.")]
         [InlineData("RoutingCustomers(1)/Products/$ref?$id=../../RoutingCustomers(5)", "The value of $id '../../RoutingCustomers(5)' is invalid.")]
         [InlineData("VipCustomer/Products/$ref?$id=" + _serviceRoot + "RoutingCustomers(5)", "The value of $id '" + _serviceRoot + "RoutingCustomers(5)' is invalid.")]
@@ -1170,7 +1169,7 @@ namespace System.Web.OData.Routing
             // Arrange
             var model = new CustomersModelWithInheritance();
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
-            IEdmExpression entitySet = new EdmEntitySetReferenceExpression(model.Customers);
+            IEdmExpression entitySet = new EdmPathExpression(model.Customers.Name);
             var function = new EdmFunction(
                 model.Container.Namespace,
                 "IsSpecial",
@@ -1202,7 +1201,7 @@ namespace System.Web.OData.Routing
             // Arrange
             var model = new CustomersModelWithInheritance();
             IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
-            IEdmExpression entitySet = new EdmEntitySetReferenceExpression(model.Customers);
+            IEdmExpression entitySet = new EdmPathExpression(model.Customers.Name);
             var function = new EdmFunction(
                 model.Container.Namespace,
                 "Count",
@@ -1510,24 +1509,6 @@ namespace System.Web.OData.Routing
         {
             // Arrange & Act
             Assert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Default.CanMoveToAddress" + parameterValue));
-        }
-
-        // Complex as inline parameter value should not be supported. But, So far it's supported in ODL.
-        // Please remove or modify this test case after ODL change the behavior.
-        [Theory]
-        [InlineData("(addresses=[{\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"},{\"Street\":\"Pine St.\",\"City\":\"Seattle\"}])")]
-        public void CanParse_CollectionOfComplexTypeAsFunctionParameter_Inline(string parametervalue)
-        {
-            // Arrange & Act
-            ODataPath path = _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Default.MoveToAddresses" + parametervalue);
-
-            // Assert
-            Assert.Equal("~/entityset/key/function", path.PathTemplate);
-            OperationSegment functionSegment = (OperationSegment)path.Segments.Last();
-
-            object parameterValue = functionSegment.GetParameterValue("addresses");
-            ODataCollectionValue addresses = Assert.IsType<ODataCollectionValue>(parameterValue);
-            Assert.Equal("Collection(System.Web.OData.Routing.Address)", addresses.TypeName);
         }
 
         [Theory]
@@ -1922,8 +1903,8 @@ namespace System.Web.OData.Routing
         [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP", "VIP", "RoutingCustomers", true)]
         [InlineData("SalesPeople(1)/ManagedRoutingCustomers", "VIP", "RoutingCustomers", true)]
         [InlineData("RoutingCustomers(1)/System.Web.OData.Routing.VIP/RelationshipManager", "SalesPerson", "SalesPeople", false)]
-        [InlineData("Products/System.Web.OData.Routing.ImportantProduct(1)/LeadSalesPerson", "SalesPerson", "SalesPeople", false)]
-        [InlineData("Products(1)/RoutingCustomers/System.Web.OData.Routing.VIP(1)/RelationshipManager/ManagedProducts", "ImportantProduct", "Products", true)]
+        [InlineData("Products(1)/System.Web.OData.Routing.ImportantProduct/LeadSalesPerson", "SalesPerson", "SalesPeople", false)]
+        [InlineData("Products(1)/RoutingCustomers(1)/System.Web.OData.Routing.VIP/RelationshipManager/ManagedProducts", "ImportantProduct", "Products", true)]
         public void CanResolveSetAndTypeViaCastSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
             AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
@@ -2430,7 +2411,7 @@ namespace System.Web.OData.Routing
             IEdmEntitySet entitySet = null, IEdmTypeReference bindingParameterType = null, string entitySetPath = null)
         {
             returnType = returnType ?? EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
-            IEdmExpression expression = entitySet == null ? null : new EdmEntitySetReferenceExpression(entitySet);
+            IEdmExpression expression = entitySet == null ? null : new EdmPathExpression(entitySet.Name);
 
             var function = new EdmFunction(
                 model.Container.Namespace,

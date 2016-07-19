@@ -123,10 +123,7 @@ namespace System.Web.OData.Formatter.Serialization
                     typeName = enumType.FullName();
                 }
 
-                enumValue.SetAnnotation(new SerializationTypeNameAnnotation
-                {
-                    TypeName = typeName
-                });
+                enumValue.TypeAnnotation = new ODataTypeAnnotation(typeName);
             }
         }
 

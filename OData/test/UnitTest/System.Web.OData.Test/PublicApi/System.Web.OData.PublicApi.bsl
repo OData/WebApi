@@ -1758,7 +1758,7 @@ public sealed class System.Web.OData.Extensions.HttpConfigurationExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static void SetUrlConventions (System.Web.Http.HttpConfiguration configuration, Microsoft.OData.ODataUrlConventions conventions)
+	public static void SetUrlKeyDelimiter (System.Web.Http.HttpConfiguration configuration, Microsoft.OData.ODataUrlKeyDelimiter urlKeyDelimiter)
 
 	[
 	ExtensionAttribute(),
@@ -2516,7 +2516,7 @@ public interface System.Web.OData.Routing.IODataPathTemplateHandler {
 
 public interface System.Web.OData.Routing.IODataUriResolver {
 	Microsoft.OData.UriParser.ODataUriResolver UriResolver  { public abstract get; public abstract set; }
-	Microsoft.OData.ODataUrlConventions UrlConventions  { public abstract get; public abstract set; }
+	Microsoft.OData.ODataUrlKeyDelimiter UrlKeyDelimiter  { public abstract get; public abstract set; }
 }
 
 [
@@ -2584,7 +2584,7 @@ public class System.Web.OData.Routing.DefaultODataPathHandler : IODataPathHandle
 	public DefaultODataPathHandler ()
 
 	Microsoft.OData.UriParser.ODataUriResolver UriResolver  { public virtual get; public virtual set; }
-	Microsoft.OData.ODataUrlConventions UrlConventions  { public virtual get; public virtual set; }
+	Microsoft.OData.ODataUrlKeyDelimiter UrlKeyDelimiter  { public virtual get; public virtual set; }
 
 	public virtual string Link (ODataPath path)
 	public virtual ODataPath Parse (Microsoft.OData.Edm.IEdmModel model, string serviceRoot, string odataPath, System.IServiceProvider requestContainer)

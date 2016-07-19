@@ -229,7 +229,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataCollectionSerializer.AddTypeNameAnnotationAsNeeded(value, ODataMetadataLevel.MinimalMetadata);
 
             // Assert
-            Assert.Null(value.GetAnnotation<SerializationTypeNameAnnotation>());
+            Assert.Null(value.TypeAnnotation);
         }
 
         [Fact]
@@ -246,7 +246,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataCollectionSerializer.AddTypeNameAnnotationAsNeeded(value, ODataMetadataLevel.FullMetadata);
 
             // Assert
-            SerializationTypeNameAnnotation annotation = value.GetAnnotation<SerializationTypeNameAnnotation>();
+            ODataTypeAnnotation annotation = value.TypeAnnotation;
             Assert.NotNull(annotation); // Guard
             Assert.Equal(expectedTypeName, annotation.TypeName);
         }
@@ -265,7 +265,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataCollectionSerializer.AddTypeNameAnnotationAsNeeded(value, ODataMetadataLevel.NoMetadata);
 
             // Assert
-            SerializationTypeNameAnnotation annotation = value.GetAnnotation<SerializationTypeNameAnnotation>();
+            ODataTypeAnnotation annotation = value.TypeAnnotation;
             Assert.NotNull(annotation); // Guard
             Assert.Null(annotation.TypeName);
         }

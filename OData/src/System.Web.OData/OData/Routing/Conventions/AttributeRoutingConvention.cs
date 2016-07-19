@@ -62,9 +62,9 @@ namespace System.Web.OData.Routing.Conventions
                 pathResolver.UriResolver = settings.UriResolver;
             }
 
-            if (pathResolver != null && pathResolver.UrlConventions == null)
+            if (pathResolver != null && pathResolver.UrlKeyDelimiter == null)
             {
-                pathResolver.UrlConventions = settings.UrlConventions;
+                pathResolver.UrlKeyDelimiter = settings.UrlKeyDelimiter;
             }
 
             Action<HttpConfiguration> oldInitializer = configuration.Initializer;

@@ -387,7 +387,7 @@ namespace System.Web.OData.Formatter
                 formatter, content, formattedContent, mediaType, encoding, isDefaultEncoding);
         }
 
-        [Theory(Skip = "TODO: Sam Xu")]
+        [Theory]
         [InlineData("Test content", "utf-8", true)]
         [InlineData("Test content", "utf-16", true)]
         public override Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding)
@@ -839,7 +839,7 @@ namespace System.Web.OData.Formatter
         private static string CreateFormattedContent(string value)
         {
             return string.Format(CultureInfo.InvariantCulture,
-                "{{\r\n  \"@odata.context\":\"http://dummy/$metadata#Edm.String\",\"value\":\"{0}\"\r\n}}", value);
+                "{{\"@odata.context\":\"http://dummy/$metadata#Edm.String\",\"value\":\"{0}\"}}", value);
         }
 
         protected override ODataMediaTypeFormatter CreateFormatter()

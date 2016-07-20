@@ -69,25 +69,39 @@ namespace System.Web.OData.Formatter.Deserialization
                 "readContext");
         }
 
-        [Fact(Skip = "TODO: Sam Xu")]
-        public void Read_ThrowsArgument_ODataPathMissing()
+        [Fact]
+        public void Read_ThrowsArgument_ODataPathMissing_ForEntity()
         {
+            // Arrange
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = _edmModel,
+                ResourceType = typeof(Product)
+            };
+
+            // Act & Assert
             Assert.ThrowsArgument(
-                () => deserializer.Read(ODataTestUtil.GetMockODataMessageReader(), typeof(Product), new ODataDeserializerContext()),
+                () => deserializer.Read(ODataTestUtil.GetMockODataMessageReader(), typeof(Product), readContext),
                 "readContext",
                 "The operation cannot be completed because no ODataPath is available for the request.");
         }
 
-        [Fact(Skip = "TODO: Sam Xu")]
+        [Fact]
         public void Read_ThrowsArgument_EntitysetMissing()
         {
             // Arrange
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Path = new ODataPath(),
+                Model = _edmModel,
+                ResourceType = typeof(Product)
+            };
 
             // Act & Assert
             Assert.Throws<SerializationException>(
-                () => deserializer.Read(ODataTestUtil.GetMockODataMessageReader(), typeof(Product), new ODataDeserializerContext { Path = new ODataPath() }),
+                () => deserializer.Read(ODataTestUtil.GetMockODataMessageReader(), typeof(Product), readContext),
                 "The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to deserialize the payload.");
         }
 

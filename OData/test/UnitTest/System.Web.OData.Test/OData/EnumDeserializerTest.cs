@@ -165,17 +165,17 @@ namespace System.Web.OData
             Assert.Null(enumComplexWithNullableEnum.NullableColor);
         }
 
-        [Fact(Skip = "TODO: Sam Xu discuss it with layla")]
+        [Fact]
         public void UndefinedEnumValueDeserializerTest()
         {
             // Arrange
-            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
+            var deserializerProvider = new DefaultODataDeserializerProvider();
             var deserializer = new ODataResourceDeserializer(deserializerProvider);
             ODataResource resourceValue = new ODataResource
             {
                 Properties = new[]
                 { 
-                    new ODataProperty { Name = "RequiredColor", Value = (Color)123}
+                    new ODataProperty { Name = "RequiredColor", Value = new ODataEnumValue("123") }
                 },
                 TypeName = "System.Web.OData.EnumComplexWithRequiredEnum"
             };
@@ -192,7 +192,7 @@ namespace System.Web.OData
             Assert.Equal((Color)123, enumComplexWithRequiredEnum.RequiredColor);
         }
 
-        [Theory(Skip = "TODO: Sam Xu discuss it with layla")]
+        [Theory]
         [InlineData(Color.Red)]
         [InlineData(Color.Green | Color.Blue)]
         [InlineData((Color)1)]
@@ -201,9 +201,8 @@ namespace System.Web.OData
         {
             // Arrange
             IEdmModel model = GetEdmModel();
-            IEdmEnumType enumType = model.SchemaElements.OfType<IEdmEnumType>().First(c => c.Name == "Color");
 
-            var deserializerProvider = new Mock<ODataDeserializerProvider>().Object;
+            var deserializerProvider = new DefaultODataDeserializerProvider();
             var deserializer = new ODataResourceDeserializer(deserializerProvider);
             ODataResource resourceValue = new ODataResource
             {
@@ -212,7 +211,7 @@ namespace System.Web.OData
                     new ODataProperty
                     {
                         Name = "RequiredColor",
-                        Value = new EdmEnumValue(new EdmEnumTypeReference(enumType, isNullable: false), new EdmEnumMemberValue((long)color))
+                        Value = new ODataEnumValue(color.ToString())
                     }
                 },
                 TypeName = "System.Web.OData.EnumComplexWithRequiredEnum"

@@ -71,10 +71,10 @@ namespace System.Web.OData
                 (string)result["@odata.context"]);
         }
 
-        [Theory(Skip = "TODO: Sam Xu ")]
-        [InlineData("/odata/MyOrders(2)/System.Web.OData.Builder.TestModels.MySpecialOrder", "http://localhost/odata/$metadata#MyOrders/System.Web.OData.Builder.TestModels.MySpecialOrder/$entity")]
-        [InlineData("/odata/MyOrders(2)", "http://localhost/odata/$metadata#MyOrders/$entity")]
-        public void GetMyOrder_WithOrWithoutCastType_Containment(string url, string expectedContext)
+        [Theory]
+        [InlineData("/odata/MyOrders(2)/System.Web.OData.Builder.TestModels.MySpecialOrder")]
+        [InlineData("/odata/MyOrders(2)")]
+        public void GetMyOrder_WithOrWithoutCastType_Containment(string url)
         {
             // Arrange
             var requestUri = BaseAddress + url;
@@ -87,7 +87,7 @@ namespace System.Web.OData
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Contains(
-                expectedContext,
+                "http://localhost/odata/$metadata#MyOrders/System.Web.OData.Builder.TestModels.MySpecialOrder/$entity",
                 (string)result["@odata.context"]);
         }
         

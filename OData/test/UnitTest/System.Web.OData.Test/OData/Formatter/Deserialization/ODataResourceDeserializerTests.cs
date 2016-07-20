@@ -1032,7 +1032,7 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Equal("123456", (supplier as dynamic).Address.ZipCode);
         }
 
-        [Fact(Skip = "TODO: Sam Xu")]
+        [Fact]
         public void Read_ThrowsOnUnknownEntityType()
         {
             // Arrange
@@ -1041,7 +1041,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             // Act & Assert
             Assert.Throws<ODataException>(() => deserializer.Read(GetODataMessageReader(GetODataMessage(content), _edmModel),
-                typeof(Product), _readContext), "The property 'Concurrency' does not exist on type 'ODataDemo.Product'. Make sure to only use property names that are defined by the type.");
+                typeof(Product), _readContext), "The property 'Concurrency' does not exist on type 'ODataDemo.Product'. Make sure to only use property names that are defined by the type or mark the type as open type.");
         }
 
         private static ODataMessageReader GetODataMessageReader(IODataRequestMessage oDataRequestMessage, IEdmModel edmModel)

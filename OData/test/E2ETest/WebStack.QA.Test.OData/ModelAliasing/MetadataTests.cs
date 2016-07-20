@@ -133,7 +133,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/convention/$metadata");
             HttpResponseMessage response = Client.SendAsync(request).Result;
-            IEdmModel model = EdmxReader.Parse(XmlReader.Create(response.Content.ReadAsStreamAsync().Result));
+            IEdmModel model = CsdlReader.Parse(XmlReader.Create(response.Content.ReadAsStreamAsync().Result));
             //Can rename an entity + namespace
             IEdmEntityType customer = model.FindDeclaredType("ModelAliasing.Customer") as IEdmEntityType;
             Assert.NotNull(customer);
@@ -161,7 +161,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/convention/$metadata");
             HttpResponseMessage response = Client.SendAsync(request).Result;
-            IEdmModel model = EdmxReader.Parse(XmlReader.Create(response.Content.ReadAsStreamAsync().Result));
+            IEdmModel model = CsdlReader.Parse(XmlReader.Create(response.Content.ReadAsStreamAsync().Result));
             // Can change the name of regular, complex and navigation properties.
             IEdmEntityType customer = model.FindDeclaredType("ModelAliasing.Customer") as IEdmEntityType;
             Assert.NotNull(customer);
@@ -192,7 +192,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/explicit/$metadata");
             HttpResponseMessage response = Client.SendAsync(request).Result;
-            IEdmModel model = EdmxReader.Parse(XmlReader.Create(response.Content.ReadAsStreamAsync().Result));
+            IEdmModel model = CsdlReader.Parse(XmlReader.Create(response.Content.ReadAsStreamAsync().Result));
             //Can rename an entity + namespace
             IEdmEntityType customer = model.FindDeclaredType("ModelAliasing.Customer") as IEdmEntityType;
             Assert.NotNull(customer);
@@ -220,7 +220,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/explicit/$metadata");
             HttpResponseMessage response = Client.SendAsync(request).Result;
-            IEdmModel model = EdmxReader.Parse(XmlReader.Create(response.Content.ReadAsStreamAsync().Result));
+            IEdmModel model = CsdlReader.Parse(XmlReader.Create(response.Content.ReadAsStreamAsync().Result));
             // Can change the name of regular, complex and navigation properties.
             IEdmEntityType customer = model.FindDeclaredType("ModelAliasing.Customer") as IEdmEntityType;
             Assert.NotNull(customer);

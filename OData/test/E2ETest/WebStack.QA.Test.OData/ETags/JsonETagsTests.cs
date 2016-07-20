@@ -117,7 +117,7 @@ namespace WebStack.QA.Test.OData.ETags
             Assert.Same(CoreVocabularyModel.ConcurrencyTerm, annotation.Term);
             Assert.Same(etagCustomers, annotation.Target);
 
-            IEdmValueAnnotation valueAnnotation = annotation as IEdmValueAnnotation;
+            IEdmVocabularyAnnotation valueAnnotation = annotation as IEdmVocabularyAnnotation;
             Assert.NotNull(valueAnnotation);
             Assert.NotNull(valueAnnotation.Value);
 
@@ -131,7 +131,7 @@ namespace WebStack.QA.Test.OData.ETags
                 "GuidProperty", "DateTimeOffsetProperty",
                 "StringWithConcurrencyCheckAttributeProperty"
             },
-                collection.Elements.Select(e => ((IEdmPathExpression) e).Path.Single()));
+                collection.Elements.Select(e => ((IEdmPathExpression) e).PathSegments.Single()));
         }
 
         [Fact]

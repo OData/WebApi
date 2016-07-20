@@ -646,7 +646,7 @@
                 var response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 var content = await response.Content.ReadAsAsync<JObject>();
-                Assert.Equal(6, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 dynamic properties
+                Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("US", content["CountryCode"]);
@@ -660,10 +660,7 @@
                 // Get ~/Accounts(1)/Address
                 request = new HttpRequestMessage(HttpMethod.Get, requestUri);
                 response = await Client.SendAsync(request);
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                content = await response.Content.ReadAsAsync<JObject>();
-                Assert.Equal(2, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 new dynamic properties
-                Assert.Equal("True", content["@odata.null"]);
+                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
             }
         }
         #endregion
@@ -1553,7 +1550,7 @@
             setting.NewLineOnAttributes = false;
             XmlWriter xmlWriter = XmlWriter.Create(filePath, setting);
             IEnumerable<Microsoft.OData.Edm.Validation.EdmError> errors;
-            EdmxWriter.TryWriteEdmx(edmModel, xmlWriter, EdmxTarget.EntityFramework, out errors);
+            CsdlWriter.TryWriteCsdl(edmModel, xmlWriter, CsdlTarget.EntityFramework, out errors);
             xmlWriter.Flush();
             xmlWriter.Close();
             //Microsoft.OData.Client.Design.T4.ODataT4CodeGenerator t4CodeGenerator = new ODataT4CodeGenerator

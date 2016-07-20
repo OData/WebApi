@@ -35,7 +35,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight
                     var xmlTextReader = new XmlTextReader(metadataUri.ToString());
                     IEdmModel edmModel = null;
                     IEnumerable<EdmError> errors = null;
-                    if (EdmxReader.TryParse(xmlTextReader, out edmModel, out errors))
+                    if (CsdlReader.TryParse(xmlTextReader, out edmModel, out errors))
                     {
                         models[metadataUri] = edmModel;
                     }

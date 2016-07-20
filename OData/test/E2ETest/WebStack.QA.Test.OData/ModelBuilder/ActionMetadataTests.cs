@@ -48,7 +48,7 @@ namespace WebStack.QA.Test.OData.ModelBuilder
             Stream stream = Client.GetStreamAsync(BaseAddress + "/odata/$metadata").Result;
             using (XmlReader reader = XmlReader.Create(stream))
             {
-                model = EdmxReader.Parse(reader);
+                model = CsdlReader.Parse(reader);
             }
             IEdmAction collection = model.FindDeclaredOperations("Default.GetProductsByCategory").SingleOrDefault() as IEdmAction;
             IEdmEntityType expectedReturnType = model.FindDeclaredType(typeof(ActionProduct).FullName) as IEdmEntityType;

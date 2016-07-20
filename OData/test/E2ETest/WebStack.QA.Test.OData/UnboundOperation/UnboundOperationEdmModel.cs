@@ -96,19 +96,19 @@ namespace WebStack.QA.Test.OData.UnboundOperation
 
             var entitySet = container.FindEntitySet("ConventionCustomers");
             var getCustomersByIdOfEdmFunction = edmModel.FindDeclaredOperations(schemaNamespace + ".GetConventionCustomerById").First() as EdmFunction;
-            container.AddFunctionImport("GetConventionCustomerByIdImport", getCustomersByIdOfEdmFunction, new EdmEntitySetReferenceExpression(entitySet));
+            container.AddFunctionImport("GetConventionCustomerByIdImport", getCustomersByIdOfEdmFunction, new EdmPathExpression(entitySet.Name));
 
             var functionsOfGetAllConventionCustomers = edmModel.FindDeclaredOperations(schemaNamespace + ".GetAllConventionCustomers");
             var getAllConventionCustomersOfEdmFunction = functionsOfGetAllConventionCustomers.FirstOrDefault(f => f.Parameters.Count() == 0) as EdmFunction;
-            container.AddFunctionImport("GetAllConventionCustomersImport", getAllConventionCustomersOfEdmFunction, new EdmEntitySetReferenceExpression(entitySet));
+            container.AddFunctionImport("GetAllConventionCustomersImport", getAllConventionCustomersOfEdmFunction, new EdmPathExpression(entitySet.Name));
 
             // TODO delete this overload after bug 1640 is fixed: It can not find the correct overload function if the the function is exposed as a function import.
             var getAllConventionCustomersOverloadOfEdmFunction = functionsOfGetAllConventionCustomers.FirstOrDefault(f => f.Parameters.Count() > 0) as EdmFunction;
-            container.AddFunctionImport("GetAllConventionCustomersImport", getAllConventionCustomersOverloadOfEdmFunction, new EdmEntitySetReferenceExpression(entitySet));
+            container.AddFunctionImport("GetAllConventionCustomersImport", getAllConventionCustomersOverloadOfEdmFunction, new EdmPathExpression(entitySet.Name));
 
             var entitySet1 = container.FindEntitySet("ConventionOrders");
             var GetConventionOrderByCustomerIdAndOrderNameOfEdmFunction = edmModel.FindDeclaredOperations(schemaNamespace + ".GetConventionOrderByCustomerIdAndOrderName").First() as EdmFunction;
-            container.AddFunctionImport("GetConventionOrderByCustomerIdAndOrderNameImport", GetConventionOrderByCustomerIdAndOrderNameOfEdmFunction, new EdmEntitySetReferenceExpression(entitySet1));
+            container.AddFunctionImport("GetConventionOrderByCustomerIdAndOrderNameImport", GetConventionOrderByCustomerIdAndOrderNameOfEdmFunction, new EdmPathExpression(entitySet1.Name));
 
             var getConventionCustomerNameByIdOfEdmFunction = edmModel.FindDeclaredOperations(schemaNamespace + ".GetConventionCustomerNameById").First() as EdmFunction;
             container.AddFunctionImport("GetConventionCustomerNameByIdImport", getConventionCustomerNameByIdOfEdmFunction, null);
@@ -126,7 +126,7 @@ namespace WebStack.QA.Test.OData.UnboundOperation
             container.AddActionImport("CreateCustomerImport", createCustomerOfEdmAction);
             */
             var updateAddressOfEdmAction = edmModel.FindDeclaredOperations(schemaNamespace + ".UpdateAddress").FirstOrDefault() as EdmAction;
-            container.AddActionImport("UpdateAddressImport", updateAddressOfEdmAction, new EdmEntitySetReferenceExpression(entitySet));
+            container.AddActionImport("UpdateAddressImport", updateAddressOfEdmAction, new EdmPathExpression(entitySet.Name));
 
             #endregion
 

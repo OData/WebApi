@@ -49,6 +49,7 @@ namespace WebStack.QA.Test.OData.UnboundOperation
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
             configuration.Routes.Clear();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null); 
             configuration.MapODataServiceRoute("unboundFunctionConvention", "odata", UnboundFunctionEdmModel.GetEdmModel());
 
             configuration.EnsureInitialized();
@@ -295,7 +296,6 @@ namespace WebStack.QA.Test.OData.UnboundOperation
             const int CustomerId = 401;
             ConventionCustomer expectCustomer = (new ConventionCustomersController()).GetConventionCustomerById(CustomerId); // expect customer instance
             Assert.NotNull(expectCustomer);
-
 
             // Act
             var requestUri = String.Format("{0}/odata/{1}?$filter=ID eq {2}", this.BaseAddress, functionImport, CustomerId);

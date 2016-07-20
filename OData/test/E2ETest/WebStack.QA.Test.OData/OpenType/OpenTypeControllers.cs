@@ -279,13 +279,24 @@
         [ODataRoute("Accounts({key})/Address")]
         public IHttpActionResult GetAddressAttributeRouting(int key)
         {
-            return Ok(Accounts.SingleOrDefault(e => e.Id == key).Address);
+            return GetAddress(key);
         }
 
         // convention routing
         public IHttpActionResult GetAddress(int key)
         {
-            return Ok(Accounts.SingleOrDefault(e => e.Id == key).Address);
+            Account account = Accounts.SingleOrDefault(e => e.Id == key);
+            if (account == null)
+            {
+                return NotFound();
+            }
+
+            if (account.Address == null)
+            {
+                return this.StatusCode(HttpStatusCode.NoContent);
+            }
+
+            return Ok(account.Address);
         }
 
         [HttpGet]

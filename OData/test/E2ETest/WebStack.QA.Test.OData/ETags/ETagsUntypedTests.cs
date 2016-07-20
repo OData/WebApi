@@ -96,13 +96,13 @@ namespace WebStack.QA.Test.OData.ETags
             Assert.Same(CoreVocabularyModel.ConcurrencyTerm, annotation.Term);
             Assert.Same(etagCustomers, annotation.Target);
 
-            IEdmValueAnnotation valueAnnotation = annotation as IEdmValueAnnotation;
+            IEdmVocabularyAnnotation valueAnnotation = annotation as IEdmVocabularyAnnotation;
             Assert.NotNull(valueAnnotation);
             Assert.NotNull(valueAnnotation.Value);
 
             IEdmCollectionExpression collection = valueAnnotation.Value as IEdmCollectionExpression;
             Assert.NotNull(collection);
-            Assert.Equal(new[] { "Name" }, collection.Elements.Select(e => ((IEdmPathExpression) e).Path.Single()));
+            Assert.Equal(new[] { "Name" }, collection.Elements.Select(e => ((IEdmPathExpression) e).PathSegments.Single()));
         }
 
         [Fact]

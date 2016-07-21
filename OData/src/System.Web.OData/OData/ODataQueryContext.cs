@@ -63,6 +63,7 @@ namespace System.Web.OData
             Model = model;
             Path = path;
             NavigationSource = GetNavigationSource(Model, ElementType, path);
+            DefaultQuerySettings = new DefaultQuerySettings();
         }
 
         /// <summary>
@@ -94,6 +95,7 @@ namespace System.Web.OData
             ElementType = elementType;
             Path = path;
             NavigationSource = GetNavigationSource(Model, ElementType, path);
+            DefaultQuerySettings = new DefaultQuerySettings();
         }
 
         internal ODataQueryContext(IEdmModel model, Type elementClrType)
@@ -166,10 +168,13 @@ namespace System.Web.OData
 
         private void InitializeWithRequestContainer(IServiceProvider requestContainer)
         {
+            if (requestContainer == null)
+            {
+                throw Error.ArgumentNull("requestContainer");
+            }
+
             RequestContainer = requestContainer;
-            DefaultQuerySettings = requestContainer == null
-                ? null
-                : requestContainer.GetRequiredService<DefaultQuerySettings>();
+            DefaultQuerySettings = requestContainer.GetRequiredService<DefaultQuerySettings>();
         }
     }
 }

@@ -30,7 +30,13 @@ namespace System.Web.OData.Extensions
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
                 AutoComputePayloadMetadata = true,
             });
-            builder.AddService<CountQueryValidator>(ServiceLifetime.Scoped);
+            builder.AddService<CountQueryValidator>(ServiceLifetime.Singleton);
+            builder.AddService<FilterQueryValidator>(ServiceLifetime.Singleton);
+            builder.AddService<ODataQueryValidator>(ServiceLifetime.Singleton);
+            builder.AddService<OrderByQueryValidator>(ServiceLifetime.Singleton);
+            builder.AddService<SelectExpandQueryValidator>(ServiceLifetime.Singleton);
+            builder.AddService<SkipQueryValidator>(ServiceLifetime.Singleton);
+            builder.AddService<TopQueryValidator>(ServiceLifetime.Singleton);
 
             return builder;
         }

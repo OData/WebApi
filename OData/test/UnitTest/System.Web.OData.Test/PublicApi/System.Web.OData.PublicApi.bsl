@@ -2097,7 +2097,7 @@ public class System.Web.OData.Query.CountQueryOption {
 
 	ODataQueryContext Context  { public get; }
 	string RawValue  { public get; }
-	CountQueryValidator Validator  { public get; }
+	CountQueryValidator Validator  { public get; public set; }
 	bool Value  { public get; }
 
 	public System.Nullable`1[[System.Int64]] GetEntityCount (System.Linq.IQueryable query)
@@ -3100,7 +3100,6 @@ public class System.Web.OData.Query.Validators.CountQueryValidator {
 }
 
 public class System.Web.OData.Query.Validators.FilterQueryValidator {
-	public FilterQueryValidator ()
 	public FilterQueryValidator (DefaultQuerySettings defaultQuerySettings)
 
 	public virtual void Validate (FilterQueryOption filterQueryOption, ODataValidationSettings settings)
@@ -3132,14 +3131,12 @@ public class System.Web.OData.Query.Validators.ODataQueryValidator {
 }
 
 public class System.Web.OData.Query.Validators.OrderByQueryValidator {
-	public OrderByQueryValidator ()
 	public OrderByQueryValidator (DefaultQuerySettings defaultQuerySettings)
 
 	public virtual void Validate (OrderByQueryOption orderByOption, ODataValidationSettings validationSettings)
 }
 
 public class System.Web.OData.Query.Validators.SelectExpandQueryValidator {
-	public SelectExpandQueryValidator ()
 	public SelectExpandQueryValidator (DefaultQuerySettings defaultQuerySettings)
 
 	public virtual void Validate (SelectExpandQueryOption selectExpandQueryOption, ODataValidationSettings validationSettings)

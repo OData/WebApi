@@ -50,7 +50,7 @@ namespace System.Web.OData.Query
 
             Context = context;
             RawValue = rawValue;
-            Validator = new FilterQueryValidator(context.DefaultQuerySettings);
+            Validator = FilterQueryValidator.GetFilterQueryValidator(context);
             _queryOptionParser = queryOptionParser;
         }
 
@@ -69,7 +69,7 @@ namespace System.Web.OData.Query
 
             Context = context;
             RawValue = rawValue;
-            Validator = new FilterQueryValidator(context.DefaultQuerySettings);
+            Validator = FilterQueryValidator.GetFilterQueryValidator(context);
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,

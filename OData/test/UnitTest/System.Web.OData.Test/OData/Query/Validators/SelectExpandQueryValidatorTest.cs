@@ -185,11 +185,11 @@ namespace System.Web.OData.Query.Validators
             int maxExpansionDepth = -1;
             // Arrange
             string expand = "Parent($levels=1)";
-            var validator = new SelectExpandQueryValidator();
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
+            var validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(context);
             var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
 
             // Act & Assert
@@ -273,7 +273,7 @@ namespace System.Web.OData.Query.Validators
                 new QueryableRestrictionsAnnotation(new QueryableRestrictions { NotNavigable = true }));
 
             string select = "Orders";
-            SelectExpandQueryValidator validator = new SelectExpandQueryValidator();
+            SelectExpandQueryValidator validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(queryContext);
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(select, null, queryContext);
             Assert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings()),
@@ -292,7 +292,7 @@ namespace System.Web.OData.Query.Validators
             model.Model.SetAnnotationValue(classType.FindProperty(propertyName), new QueryableRestrictionsAnnotation(new QueryableRestrictions { NotNavigable = true }));
 
             string select = "NS.SpecialCustomer/" + propertyName;
-            SelectExpandQueryValidator validator = new SelectExpandQueryValidator();
+            SelectExpandQueryValidator validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(queryContext);
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(select, null, queryContext);
             Assert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings()),
@@ -308,7 +308,7 @@ namespace System.Web.OData.Query.Validators
             model.Model.SetAnnotationValue(model.Customer.FindProperty("Orders"), new QueryableRestrictionsAnnotation(new QueryableRestrictions { NotExpandable = true }));
 
             string expand = "Orders";
-            SelectExpandQueryValidator validator = new SelectExpandQueryValidator();
+            SelectExpandQueryValidator validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(queryContext);
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, queryContext);
             Assert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings()),
@@ -319,10 +319,10 @@ namespace System.Web.OData.Query.Validators
         public void ValidateThrowException_IfNotExpandable_QuerySettings()
         {
             // Arrange
-            SelectExpandQueryValidator validator = new SelectExpandQueryValidator();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext queryContext = new ODataQueryContext(model.Model, typeof(Customer));
+            SelectExpandQueryValidator validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(queryContext);
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, "Orders", queryContext);
             IEdmStructuredType customerType =
                 model.Model.SchemaElements.First(e => e.Name.Equals("Customer")) as IEdmStructuredType;
@@ -352,7 +352,7 @@ namespace System.Web.OData.Query.Validators
             model.Model.SetAnnotationValue(classType.FindProperty(propertyName), new QueryableRestrictionsAnnotation(new QueryableRestrictions { NotExpandable = true }));
 
             string expand = "NS.SpecialCustomer/" + propertyName;
-            SelectExpandQueryValidator validator = new SelectExpandQueryValidator();
+            SelectExpandQueryValidator validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(queryContext);
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, queryContext);
             Assert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings()),

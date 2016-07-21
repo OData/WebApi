@@ -7,6 +7,7 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -21,14 +22,6 @@ namespace System.Web.OData.Query.Validators
         private readonly DefaultQuerySettings _defaultQuerySettings;
         private readonly FilterQueryValidator _filterQueryValidator;
         private SelectExpandQueryOption _selectExpandQueryOption;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SelectExpandQueryValidator" /> class.
-        /// </summary>>
-        public SelectExpandQueryValidator()
-            : this(new DefaultQuerySettings())
-        {
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SelectExpandQueryValidator" /> class based on
@@ -77,6 +70,18 @@ namespace System.Web.OData.Query.Validators
 
                 ValidateDepth(selectExpandQueryOption.SelectExpandClause, validationSettings.MaxExpansionDepth);
             }
+        }
+
+        internal static SelectExpandQueryValidator GetSelectExpandQueryValidator(ODataQueryContext context)
+        {
+            if (context == null)
+            {
+                return new SelectExpandQueryValidator(new DefaultQuerySettings());
+            }
+
+            return context.RequestContainer == null
+                ? new SelectExpandQueryValidator(context.DefaultQuerySettings)
+                : context.RequestContainer.GetRequiredService<SelectExpandQueryValidator>();
         }
 
         private static void ValidateDepth(SelectExpandClause selectExpand, int maxDepth)

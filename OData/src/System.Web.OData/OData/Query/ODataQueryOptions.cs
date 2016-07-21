@@ -97,7 +97,7 @@ namespace System.Web.OData.Query
 
             BuildQueryOptions(queryParameters);
 
-            Validator = new ODataQueryValidator();
+            Validator = ODataQueryValidator.GetODataQueryValidator(context);
         }
 
         /// <summary>

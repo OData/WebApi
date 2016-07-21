@@ -4,6 +4,7 @@
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -16,14 +17,6 @@ namespace System.Web.OData.Query.Validators
     public class OrderByQueryValidator
     {
         private readonly DefaultQuerySettings _defaultQuerySettings;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OrderByQueryValidator" /> class.
-        /// </summary>>
-        public OrderByQueryValidator()
-        {
-            _defaultQuerySettings = new DefaultQuerySettings();
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OrderByQueryValidator" /> class based on
@@ -105,6 +98,18 @@ namespace System.Web.OData.Query.Validators
                     }
                 }
             }
+        }
+
+        internal static OrderByQueryValidator GetOrderByQueryValidator(ODataQueryContext context)
+        {
+            if (context == null)
+            {
+                return new OrderByQueryValidator(new DefaultQuerySettings());
+            }
+
+            return context.RequestContainer == null
+                ? new OrderByQueryValidator(context.DefaultQuerySettings)
+                : context.RequestContainer.GetRequiredService<OrderByQueryValidator>();
         }
 
         private static bool IsAllowed(ODataValidationSettings validationSettings, string propertyName)

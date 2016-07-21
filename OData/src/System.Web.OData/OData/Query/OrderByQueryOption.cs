@@ -50,7 +50,7 @@ namespace System.Web.OData.Query
 
             Context = context;
             RawValue = rawValue;
-            Validator = new OrderByQueryValidator(context.DefaultQuerySettings);
+            Validator = OrderByQueryValidator.GetOrderByQueryValidator(context);
             _queryOptionParser = queryOptionParser;
         }
 
@@ -69,7 +69,7 @@ namespace System.Web.OData.Query
 
             Context = context;
             RawValue = rawValue;
-            Validator = new OrderByQueryValidator(context.DefaultQuerySettings);
+            Validator = OrderByQueryValidator.GetOrderByQueryValidator(context);
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,

@@ -256,7 +256,7 @@ namespace System.Web.OData.Query.Validators
             settings.AllowedOrderByProperties.Add("Value");
 
             // Act & Assert
-            OrderByQueryValidator validator = new OrderByQueryValidator();
+            OrderByQueryValidator validator = OrderByQueryValidator.GetOrderByQueryValidator(context);
             Assert.DoesNotThrow(() => validator.Validate(option, settings));
         }
 
@@ -272,7 +272,7 @@ namespace System.Web.OData.Query.Validators
             settings.AllowedOrderByProperties.Add("NotSortableProperty");
 
             // Act & Assert
-            OrderByQueryValidator validator = new OrderByQueryValidator();
+            OrderByQueryValidator validator = OrderByQueryValidator.GetOrderByQueryValidator(context);
             Assert.Throws<ODataException>(() =>
                 validator.Validate(option, settings),
                 "Order by 'Value' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on EnableQueryAttribute or QueryValidationSettings.");

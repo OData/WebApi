@@ -8,6 +8,7 @@ using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -29,14 +30,6 @@ namespace System.Web.OData.Query.Validators
         private IEdmStructuredType _structuredType;
 
         private IEdmModel _model;
-        
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FilterQueryValidator" /> class.
-        /// </summary>>
-        public FilterQueryValidator()
-        {
-            _defaultQuerySettings = new DefaultQuerySettings();
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterQueryValidator" /> class based on
@@ -614,6 +607,18 @@ namespace System.Web.OData.Query.Validators
             }
 
             ValidateQueryNode(singleResourceCastNode.Source, settings);
+        }
+
+        internal static FilterQueryValidator GetFilterQueryValidator(ODataQueryContext context)
+        {
+            if (context == null)
+            {
+                return new FilterQueryValidator(new DefaultQuerySettings());
+            }
+
+            return context.RequestContainer == null
+                ? new FilterQueryValidator(context.DefaultQuerySettings)
+                : context.RequestContainer.GetRequiredService<FilterQueryValidator>();
         }
 
         private void EnterLambda(ODataValidationSettings validationSettings)

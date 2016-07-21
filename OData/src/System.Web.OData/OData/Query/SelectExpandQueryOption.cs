@@ -63,7 +63,7 @@ namespace System.Web.OData.Query
             Context = context;
             RawSelect = select;
             RawExpand = expand;
-            Validator = new SelectExpandQueryValidator(context.DefaultQuerySettings);
+            Validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(context);
             _queryOptionParser = queryOptionParser;
         }
 
@@ -99,7 +99,7 @@ namespace System.Web.OData.Query
             Context = context;
             RawSelect = select;
             RawExpand = expand;
-            Validator = new SelectExpandQueryValidator(context.DefaultQuerySettings);
+            Validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(context);
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,

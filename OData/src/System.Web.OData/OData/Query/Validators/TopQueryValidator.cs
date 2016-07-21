@@ -4,6 +4,7 @@
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
@@ -58,6 +59,16 @@ namespace System.Web.OData.Query.Validators
                 throw new ODataException(Error.Format(SRResources.SkipTopLimitExceeded, maxTop,
                     AllowedQueryOptions.Top, topQueryOption.Value));
             }
+        }
+
+        internal static TopQueryValidator GetTopQueryValidator(ODataQueryContext context)
+        {
+            if (context == null || context.RequestContainer == null)
+            {
+                return new TopQueryValidator();
+            }
+
+            return context.RequestContainer.GetRequiredService<TopQueryValidator>();
         }
     }
 }

@@ -871,6 +871,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The given untyped value &apos;{0}&apos; in payload is invalid. Consider using a @odata.type annoation explicitly..
+        /// </summary>
+        internal static string InvalidODataUntypedValue {
+            get {
+                return ResourceManager.GetString("InvalidODataUntypedValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The URI segment &apos;{0}&apos; is invalid after the segment &apos;{1}&apos;..
         /// </summary>
         internal static string InvalidPathSegment {

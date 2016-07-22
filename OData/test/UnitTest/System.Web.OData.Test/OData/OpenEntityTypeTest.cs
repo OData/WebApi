@@ -10,7 +10,6 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
-using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
@@ -679,7 +678,7 @@ namespace System.Web.OData
 
             Assert.NotNull(cityValue);
             Assert.Equal(typeof(String), cityType);
-            Assert.Equal("\"City 6\"", cityValue); // It reads as ODataUntypedValue, and the RawValue is the string with the ""
+            Assert.Equal("City 6", cityValue); // It reads as ODataUntypedValue, and the RawValue is the string with the ""
 
             return Ok(customer);
         }

@@ -4,6 +4,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Web.Http;
@@ -259,8 +260,21 @@ namespace System.Web.OData.Formatter.Deserialization
             ODataUntypedValue untypedValue = oDataValue as ODataUntypedValue;
             if (untypedValue != null)
             {
-                oDataValue = untypedValue.RawValue;
-                //oDataValue = ODataUriUtils.ConvertFromUriLiteral(untypedValue.RawValue, ODataVersion.V4);
+                Contract.Assert(!String.IsNullOrEmpty(untypedValue.RawValue));
+
+                if (untypedValue.RawValue.StartsWith("[", StringComparison.Ordinal) ||
+                    untypedValue.RawValue.StartsWith("{", StringComparison.Ordinal))
+                {
+                    throw new ODataException(Error.Format(SRResources.InvalidODataUntypedValue, untypedValue.RawValue));
+                }
+
+                ODataCollectionValue collectionValue = (ODataCollectionValue)ODataUriUtils.ConvertFromUriLiteral(
+                    string.Format(CultureInfo.InvariantCulture, "[{0}]", untypedValue.RawValue), ODataVersion.V4);
+                foreach (object item in collectionValue.Items)
+                {
+                    oDataValue = item;
+                    break;
+                }
             }
 
             typeKind = EdmTypeKind.Primitive;

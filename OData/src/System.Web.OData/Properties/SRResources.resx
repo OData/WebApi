@@ -841,4 +841,7 @@
   <data name="NullContainerBuilder" xml:space="preserve">
     <value>The container builder created by the container builder factory must not be null.</value>
   </data>
+  <data name="InvalidODataUntypedValue" xml:space="preserve">
+    <value>The given untyped value '{0}' in payload is invalid. Consider using a @odata.type annoation explicitly.</value>
+  </data>
 </root>

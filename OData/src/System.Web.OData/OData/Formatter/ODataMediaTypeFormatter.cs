@@ -355,6 +355,7 @@ namespace System.Web.OData.Formatter
                     ODataMessageReaderSettings oDataReaderSettings =
                         Request.RequestContainer().GetRequiredService<ODataMessageReaderSettings>();
                     oDataReaderSettings.BaseUri = GetBaseAddressInternal(Request);
+                    oDataReaderSettings.Validations = oDataReaderSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
 
                     IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders, Request.GetODataContentIdMapping())
                     {

@@ -58,6 +58,7 @@ namespace WebStack.QA.Test.OData.Common
             }
 
             var newRequest = new HttpRequestMessage(HttpMethod.Get, uri);
+			newRequest.SetConfiguration(request.GetConfiguration());
             var route = request.GetRouteData().Route;
 
             var newRoute = new HttpRoute(

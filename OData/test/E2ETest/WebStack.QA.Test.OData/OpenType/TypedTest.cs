@@ -278,7 +278,7 @@
 
         #region Update
 
-        [Theory]
+        [Theory(Skip = "https://github.com/OData/odata.net/issues/612")]
         [InlineData("application/json;odata.metadata=full")]
         [InlineData("application/json;odata.metadata=minimal")]
         [InlineData("application/json;odata.metadata=none")]
@@ -290,17 +290,16 @@
 
                 var patchUri = string.Format(this.BaseAddress + "/{0}/Accounts(1)?$format={1}", routing, format);
                 var request = new HttpRequestMessage(new HttpMethod("PATCH"), patchUri);
-                // TODO: bug: dynamic collection type property can't be set to null due to an ODL Defect 2738547:ODL should not throw exception if a collection dynamic property value is null
                 request.Content = new StringContent(
                  @"{
-                        '@odata.type':'#WebStack.QA.Test.OData.OpenType.Account',
-                'AccountInfo':{'NickName':'NewNickName1','Age':40,'Gender': 'Male'},
-                'Address':{'Country':'United States'},
-                        'Tags':{'Tag1':'New Value'},
-                        'ShipAddresses@odata.type':'#Collection(WebStack.QA.Test.OData.OpenType.Address)',
-                        'ShipAddresses':[],
-                        'OwnerGender@odata.type':'#WebStack.QA.Test.OData.OpenType.Gender',
-                        'OwnerGender':null
+                    '@odata.type':'#WebStack.QA.Test.OData.OpenType.Account',
+                    'AccountInfo':{'NickName':'NewNickName1','Age':40,'Gender': 'Male'},
+                    'Address':{'Country':'United States'},
+                    'Tags':{'Tag1':'New Value'},
+                    'ShipAddresses@odata.type':'#Collection(WebStack.QA.Test.OData.OpenType.Address)',
+                    'ShipAddresses':[],
+                    'OwnerGender@odata.type':'#WebStack.QA.Test.OData.OpenType.Gender',
+                    'OwnerGender':null
                   }");
 
                 request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
@@ -413,7 +412,7 @@
                 var response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 var content = await response.Content.ReadAsAsync<JObject>();
-                Assert.Equal(6, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 dynamic properties
+                Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("US", content["CountryCode"]);
@@ -438,7 +437,7 @@
                 response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 content = await response.Content.ReadAsAsync<JObject>();
-                Assert.Equal(7, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 dynamic properties + 1 new dynamic properties
+                Assert.Equal(6, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties + 1 new dynamic properties
                 Assert.Equal("NewCity", content["City"]); // updated
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("US", content["CountryCode"]);
@@ -460,7 +459,7 @@
                 var response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 var content = await response.Content.ReadAsAsync<JObject>();
-                Assert.Equal(6, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 dynamic properties
+                Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("US", content["CountryCode"]);
@@ -484,7 +483,7 @@
                 response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 content = await response.Content.ReadAsAsync<JObject>();
-                Assert.Equal(6, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 dynamic properties
+                Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("NewCountryCode", content["CountryCode"]); // updated
@@ -505,7 +504,7 @@
                 var response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 var content = await response.Content.ReadAsAsync<JObject>();
-                Assert.Equal(6, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 dynamic properties
+                Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("US", content["CountryCode"]);
@@ -531,7 +530,7 @@
                 response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 content = await response.Content.ReadAsAsync<JObject>();
-                Assert.Equal(6, content.Count); // @odata.context + @odata.type + 3 declared properties + 1 new dynamic properties
+                Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 new dynamic properties
                 Assert.Equal("NewCity", content["City"]); // updated
                 Assert.Equal("NewStreet", content["Street"]); // updated
                 Assert.Equal("US", content["CountryCode"]);
@@ -747,7 +746,7 @@
             var city = result["Address"]["City"].ToString();
             Assert.Equal("City 11", city);
             var country = result["Address"]["Country"].ToString();
-            Assert.Equal("\"Country 11\"", country);
+            Assert.Equal("Country 11", country);
         }
 
         #endregion
@@ -994,7 +993,7 @@
             }
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/OData/odata.net/issues/612")]
         public async Task PutEntityWithOpenComplexTypeClientTest()
         {
             foreach (string routing in Routings)
@@ -1337,7 +1336,7 @@
 
             var account = client.Accounts.Where(a => a.Id == 1).Single();
             Assert.Equal("New City", account.Address.City);
-            Assert.Equal("\"New Country\"", account.Address.Country);
+            Assert.Equal("New Country", account.Address.Country);
         }
 
         #endregion

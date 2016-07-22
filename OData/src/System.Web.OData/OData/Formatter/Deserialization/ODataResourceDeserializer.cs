@@ -516,6 +516,8 @@ namespace System.Web.OData.Formatter.Deserialization
             Contract.Assert(resource != null);
             Contract.Assert(readContext != null);
 
+            // TODO: https://github.com/OData/odata.net/issues/612
+            // Make sure the resource set an be empty.
             IEdmSchemaType elementType =
                 readContext.Model.FindDeclaredType(resourceSetWrapper.Resources.First().Resource.TypeName);
 

@@ -31,7 +31,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                       typeof(EFSelectCustomersController)));
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute("selectexpand", "selectexpand", GetEdmModel(configuration));
         }
 

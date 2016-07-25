@@ -5,6 +5,7 @@ using Microsoft.OData.Edm;
 
 namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
 {
+    [Filter("AutoExpandOrder", "Address")]
     public class Customer
     {
         public int Id { get; set; }
@@ -13,6 +14,7 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
 
         public Order AutoExpandOrder { get; set; }
 
+        [Filter]
         public Address Address { get; set; }
 
         [Filter("Id")]
@@ -77,8 +79,9 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
         public static IEdmModel GetEdmModelByModelBoundAPI()
         {
             var builder = new ODataConventionModelBuilder();
-            builder.EntitySet<Customer>("Customers");
+            builder.EntitySet<Customer>("Customers").EntityType.Filter("AutoExpandOrder", "Address");
             builder.EntityType<Customer>().HasMany(c => c.Orders).Filter("Id");
+            builder.EntityType<Customer>().ComplexProperty(c => c.Address).Filter();
 
             builder.EntitySet<Order>("Orders").EntityType.Filter().Filter(QueryOptionSetting.Disabled, "Id");
             builder.EntityType<Order>().HasMany(o => o.Customers).Filter();

@@ -114,6 +114,7 @@ namespace System.Web.OData
                 });
             }
 
+            config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             config.MapODataServiceRoute("odata", "odata", model);
             return config;
         }
@@ -202,7 +203,7 @@ namespace System.Web.OData
             {
                 EnableCaseInsensitive = caseInsensitive
             });
-            config.Count().OrderBy().Filter().Expand().MaxTop(null);
+            config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
             config.MapODataServiceRoute("query", "query", GetEdmModel());
             return config;
         }

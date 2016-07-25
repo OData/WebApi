@@ -25,7 +25,7 @@ namespace System.Web.OData.Routing
         {
             IEdmModel model = GetEdmModel();
             HttpConfiguration configuration = new[] { typeof(LevelsEntitiesController) }.GetHttpConfiguration();
-            configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
+            configuration.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute("odata", "odata", model);
             var server = new HttpServer(configuration);
             _client = new HttpClient(server);

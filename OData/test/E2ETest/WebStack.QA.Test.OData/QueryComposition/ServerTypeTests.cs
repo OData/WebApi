@@ -199,7 +199,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             EnableQueryAttribute q = new EnableQueryAttribute();
             var configuration = new HttpConfiguration();
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.Routes.MapHttpRoute("ApiDefault", "api/{controller}/{id}", new { id = RouteParameter.Optional });
             configuration.EnableDependencyInjection();
             var request = new HttpRequestMessage(HttpMethod.Get, "http://test/api/Objects?" + queryString);

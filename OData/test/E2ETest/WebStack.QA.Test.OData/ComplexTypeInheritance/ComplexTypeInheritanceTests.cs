@@ -66,7 +66,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
 
             configuration.Routes.Clear();
             HttpServer httpServer = configuration.GetHttpServer();
-            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration
                 .MapODataServiceRoute(routeName: "convention",
                     routePrefix: "convention",

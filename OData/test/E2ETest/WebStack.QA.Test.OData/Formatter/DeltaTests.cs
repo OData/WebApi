@@ -305,7 +305,7 @@ namespace WebStack.QA.Test.OData.Formatter
         public static void UpdateConfiguration(HttpConfiguration config)
         {
             config.Routes.Clear();
-            config.Count().Filter().OrderBy().Expand().MaxTop(null);
+            config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             config.MapODataServiceRoute("odata", "odata", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
@@ -348,7 +348,7 @@ namespace WebStack.QA.Test.OData.Formatter
         public static void UpdateConfiguration(HttpConfiguration config)
         {
             config.Routes.Clear();
-            config.Count().Filter().OrderBy().Expand().MaxTop(null);
+            config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             config.MapODataServiceRoute("odata", "odata", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 

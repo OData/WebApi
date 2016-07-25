@@ -267,6 +267,7 @@ namespace System.Web.OData.Formatter.Serialization
                 selectExpandNode = new SelectExpandNode(structuredType, writeContext);
                 writeContext.Items[key] = selectExpandNode;
             }
+
             return selectExpandNode as SelectExpandNode;
         }
 
@@ -282,6 +283,7 @@ namespace System.Web.OData.Formatter.Serialization
             {
                 throw Error.ArgumentNull("selectExpandNode");
             }
+
             if (resourceContext == null)
             {
                 throw Error.ArgumentNull("resourceContext");

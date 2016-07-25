@@ -454,7 +454,7 @@ namespace System.Web.OData.Test
             builder.EntitySet<AutoExpandedCustomer>("AutoExpandedCustomers");
             IEdmModel model = builder.GetEdmModel();
 
-            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute("odata", "odata", model);
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
@@ -662,7 +662,7 @@ namespace System.Web.OData.Test
 
             IEdmModel model = builder.GetEdmModel();
 
-            configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
+            configuration.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute("odata", "odata", model);
 
             return new HttpServer(configuration);

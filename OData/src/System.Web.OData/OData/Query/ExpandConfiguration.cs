@@ -9,9 +9,9 @@ namespace System.Web.OData.Query
     public class ExpandConfiguration
     {
         /// <summary>
-        /// Gets or sets the <see cref="ExpandType"/>.
+        /// Gets or sets the <see cref="SelectExpandType"/>.
         /// </summary>
-        public ExpandType ExpandType { get; set; }
+        public SelectExpandType ExpandType { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum depth.

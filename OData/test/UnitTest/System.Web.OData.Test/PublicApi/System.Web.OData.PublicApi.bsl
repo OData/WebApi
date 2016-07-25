@@ -991,11 +991,11 @@ public abstract class System.Web.OData.Builder.PropertyConfiguration {
 	public PropertyConfiguration Expand ()
 	public PropertyConfiguration Expand (int maxDepth)
 	public PropertyConfiguration Expand (string[] properties)
-	public PropertyConfiguration Expand (ExpandType expandType)
+	public PropertyConfiguration Expand (SelectExpandType expandType)
 	public PropertyConfiguration Expand (int maxDepth, string[] properties)
-	public PropertyConfiguration Expand (ExpandType expandType, int maxDepth)
-	public PropertyConfiguration Expand (ExpandType expandType, string[] properties)
-	public PropertyConfiguration Expand (int maxDepth, ExpandType expandType, string[] properties)
+	public PropertyConfiguration Expand (SelectExpandType expandType, int maxDepth)
+	public PropertyConfiguration Expand (SelectExpandType expandType, string[] properties)
+	public PropertyConfiguration Expand (int maxDepth, SelectExpandType expandType, string[] properties)
 	public PropertyConfiguration Filter ()
 	public PropertyConfiguration Filter (string[] properties)
 	public PropertyConfiguration Filter (QueryOptionSetting setting)
@@ -1018,6 +1018,10 @@ public abstract class System.Web.OData.Builder.PropertyConfiguration {
 	public PropertyConfiguration OrderBy (QueryOptionSetting setting, string[] properties)
 	public PropertyConfiguration Page ()
 	public PropertyConfiguration Page (System.Nullable`1[[System.Int32]] maxTopValue, System.Nullable`1[[System.Int32]] pageSizeValue)
+	public PropertyConfiguration Select ()
+	public PropertyConfiguration Select (string[] properties)
+	public PropertyConfiguration Select (SelectExpandType selectType)
+	public PropertyConfiguration Select (SelectExpandType selectType, string[] properties)
 }
 
 public abstract class System.Web.OData.Builder.StructuralPropertyConfiguration : PropertyConfiguration {
@@ -1084,11 +1088,11 @@ public abstract class System.Web.OData.Builder.StructuralTypeConfiguration`1 {
 	public StructuralTypeConfiguration`1 Expand ()
 	public StructuralTypeConfiguration`1 Expand (int maxDepth)
 	public StructuralTypeConfiguration`1 Expand (string[] properties)
-	public StructuralTypeConfiguration`1 Expand (ExpandType expandType)
+	public StructuralTypeConfiguration`1 Expand (SelectExpandType expandType)
 	public StructuralTypeConfiguration`1 Expand (int maxDepth, string[] properties)
-	public StructuralTypeConfiguration`1 Expand (ExpandType expandType, int maxDepth)
-	public StructuralTypeConfiguration`1 Expand (ExpandType expandType, string[] properties)
-	public StructuralTypeConfiguration`1 Expand (int maxDepth, ExpandType expandType, string[] properties)
+	public StructuralTypeConfiguration`1 Expand (SelectExpandType expandType, int maxDepth)
+	public StructuralTypeConfiguration`1 Expand (SelectExpandType expandType, string[] properties)
+	public StructuralTypeConfiguration`1 Expand (int maxDepth, SelectExpandType expandType, string[] properties)
 	public StructuralTypeConfiguration`1 Filter ()
 	public StructuralTypeConfiguration`1 Filter (string[] properties)
 	public StructuralTypeConfiguration`1 Filter (QueryOptionSetting setting)
@@ -1111,6 +1115,10 @@ public abstract class System.Web.OData.Builder.StructuralTypeConfiguration`1 {
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
+	public StructuralTypeConfiguration`1 Select ()
+	public StructuralTypeConfiguration`1 Select (string[] properties)
+	public StructuralTypeConfiguration`1 Select (SelectExpandType selectType)
+	public StructuralTypeConfiguration`1 Select (SelectExpandType selectType, string[] properties)
 }
 
 [
@@ -1555,11 +1563,12 @@ public class System.Web.OData.Builder.QueryConfiguration {
 	ModelBoundQuerySettings ModelBoundQuerySettings  { public get; public set; }
 
 	public virtual void SetCount (bool enableCount)
-	public virtual void SetExpand (System.Collections.Generic.IEnumerable`1[[System.String]] properties, System.Nullable`1[[System.Int32]] maxDepth, ExpandType expandType)
+	public virtual void SetExpand (System.Collections.Generic.IEnumerable`1[[System.String]] properties, System.Nullable`1[[System.Int32]] maxDepth, SelectExpandType expandType)
 	public virtual void SetFilter (System.Collections.Generic.IEnumerable`1[[System.String]] properties, bool enableFilter)
 	public virtual void SetMaxTop (System.Nullable`1[[System.Int32]] maxTop)
 	public virtual void SetOrderBy (System.Collections.Generic.IEnumerable`1[[System.String]] properties, bool enableOrderBy)
 	public virtual void SetPageSize (System.Nullable`1[[System.Int32]] pageSize)
+	public virtual void SetSelect (System.Collections.Generic.IEnumerable`1[[System.String]] properties, SelectExpandType selectType)
 }
 
 public class System.Web.OData.Builder.SelfLinkBuilder`1 {
@@ -1739,6 +1748,16 @@ public sealed class System.Web.OData.Extensions.HttpConfigurationExtensions {
 	ExtensionAttribute(),
 	]
 	public static System.Web.Http.HttpConfiguration OrderBy (System.Web.Http.HttpConfiguration configuration, QueryOptionSetting setting)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static System.Web.Http.HttpConfiguration Select (System.Web.Http.HttpConfiguration configuration)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static System.Web.Http.HttpConfiguration Select (System.Web.Http.HttpConfiguration configuration, QueryOptionSetting setting)
 
 	[
 	ExtensionAttribute(),
@@ -2051,12 +2070,6 @@ public enum System.Web.OData.Query.AllowedQueryOptions : int {
 	Top = 16
 }
 
-public enum System.Web.OData.Query.ExpandType : int {
-	Allowed = 0
-	Automatic = 1
-	Disabled = 2
-}
-
 public enum System.Web.OData.Query.HandleNullPropagationOption : int {
 	Default = 0
 	False = 2
@@ -2066,6 +2079,12 @@ public enum System.Web.OData.Query.HandleNullPropagationOption : int {
 public enum System.Web.OData.Query.QueryOptionSetting : int {
 	Allowed = 0
 	Disabled = 1
+}
+
+public enum System.Web.OData.Query.SelectExpandType : int {
+	Allowed = 0
+	Automatic = 1
+	Disabled = 2
 }
 
 public interface System.Web.OData.Query.IPropertyMapper {
@@ -2120,13 +2139,14 @@ public class System.Web.OData.Query.DefaultQuerySettings {
 	bool EnableExpand  { public get; public set; }
 	bool EnableFilter  { public get; public set; }
 	bool EnableOrderBy  { public get; public set; }
+	bool EnableSelect  { public get; public set; }
 	System.Nullable`1[[System.Int32]] MaxTop  { public get; public set; }
 }
 
 public class System.Web.OData.Query.ExpandConfiguration {
 	public ExpandConfiguration ()
 
-	ExpandType ExpandType  { public get; public set; }
+	SelectExpandType ExpandType  { public get; public set; }
 	int MaxDepth  { public get; public set; }
 }
 
@@ -2149,17 +2169,20 @@ public class System.Web.OData.Query.ModelBoundQuerySettings {
 	System.Nullable`1[[System.Boolean]] Countable  { public get; public set; }
 	System.Nullable`1[[System.Boolean]] DefaultEnableFilter  { public get; public set; }
 	System.Nullable`1[[System.Boolean]] DefaultEnableOrderBy  { public get; public set; }
-	System.Nullable`1[[System.Web.OData.Query.ExpandType]] DefaultExpandType  { public get; public set; }
-	System.Nullable`1[[System.Int32]] DefaultMaxDepth  { public get; public set; }
+	System.Nullable`1[[System.Web.OData.Query.SelectExpandType]] DefaultExpandType  { public get; public set; }
+	int DefaultMaxDepth  { public get; public set; }
+	System.Nullable`1[[System.Web.OData.Query.SelectExpandType]] DefaultSelectType  { public get; public set; }
 	System.Collections.Generic.Dictionary`2[[System.String],[System.Web.OData.Query.ExpandConfiguration]] ExpandConfigurations  { public get; }
 	System.Collections.Generic.Dictionary`2[[System.String],[System.Boolean]] FilterConfigurations  { public get; }
 	System.Nullable`1[[System.Int32]] MaxTop  { public get; public set; }
 	System.Collections.Generic.Dictionary`2[[System.String],[System.Boolean]] OrderByConfigurations  { public get; }
 	System.Nullable`1[[System.Int32]] PageSize  { public get; public set; }
+	System.Collections.Generic.Dictionary`2[[System.String],[System.Web.OData.Query.SelectExpandType]] SelectConfigurations  { public get; }
 
 	public void CopyExpandConfigurations (System.Collections.Generic.Dictionary`2[[System.String],[System.Web.OData.Query.ExpandConfiguration]] expandConfigurations)
 	public void CopyFilterConfigurations (System.Collections.Generic.Dictionary`2[[System.String],[System.Boolean]] filterConfigurations)
 	public void CopyOrderByConfigurations (System.Collections.Generic.Dictionary`2[[System.String],[System.Boolean]] orderByConfigurations)
+	public void CopySelectConfigurations (System.Collections.Generic.Dictionary`2[[System.String],[System.Web.OData.Query.SelectExpandType]] selectConfigurations)
 }
 
 [
@@ -2393,7 +2416,7 @@ public sealed class System.Web.OData.Query.ExpandAttribute : System.Attribute, _
 	public ExpandAttribute (string[] properties)
 
 	System.Collections.Generic.Dictionary`2[[System.String],[System.Web.OData.Query.ExpandConfiguration]] ExpandConfigurations  { public get; }
-	ExpandType ExpandType  { public get; public set; }
+	SelectExpandType ExpandType  { public get; public set; }
 	int MaxDepth  { public get; public set; }
 }
 
@@ -2469,6 +2492,17 @@ public sealed class System.Web.OData.Query.PageAttribute : System.Attribute, _At
 
 	int MaxTop  { public get; public set; }
 	int PageSize  { public get; public set; }
+}
+
+[
+AttributeUsageAttribute(),
+]
+public sealed class System.Web.OData.Query.SelectAttribute : System.Attribute, _Attribute {
+	public SelectAttribute ()
+	public SelectAttribute (string[] properties)
+
+	System.Collections.Generic.Dictionary`2[[System.String],[System.Web.OData.Query.SelectExpandType]] SelectConfigurations  { public get; }
+	SelectExpandType SelectType  { public get; public set; }
 }
 
 [

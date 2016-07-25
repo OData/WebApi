@@ -6,17 +6,17 @@ using System.Web.OData.Query;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
-    internal class ExpandAttributeEdmTypeConvention : AttributeEdmTypeConvention<StructuralTypeConfiguration>
+    internal class SelectAttributeEdmTypeConvention : AttributeEdmTypeConvention<StructuralTypeConfiguration>
     {
-        public ExpandAttributeEdmTypeConvention()
-            : base(attribute => attribute.GetType() == typeof(ExpandAttribute), allowMultiple: true)
+        public SelectAttributeEdmTypeConvention()
+            : base(attribute => attribute.GetType() == typeof(SelectAttribute), allowMultiple: true)
         {
         }
 
         /// <summary>
-        /// Set the <see cref="ExpandConfiguration"/>s of navigation properties of this structural type.
+        /// Set whether the $select can be applied on those properties of this structural type.
         /// </summary>
-        /// <param name="edmTypeConfiguration">The entity type to configure.</param>
+        /// <param name="edmTypeConfiguration">The structural type to configure.</param>
         /// <param name="model">The edm model that this type belongs to.</param>
         /// <param name="attribute">The <see cref="Attribute"/> found on this type.</param>
         public override void Apply(StructuralTypeConfiguration edmTypeConfiguration, ODataConventionModelBuilder model,
@@ -34,27 +34,27 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             if (!edmTypeConfiguration.AddedExplicitly)
             {
-                ExpandAttribute expandAttribute = attribute as ExpandAttribute;
+                SelectAttribute selectAttribute = attribute as SelectAttribute;
                 ModelBoundQuerySettings querySettings =
                     edmTypeConfiguration.QueryConfiguration.GetModelBoundQuerySettingsOrDefault();
-                if (querySettings.ExpandConfigurations.Count == 0)
+                if (querySettings.SelectConfigurations.Count == 0)
                 {
-                    querySettings.CopyExpandConfigurations(
-                        expandAttribute.ExpandConfigurations);
+                    querySettings.CopySelectConfigurations(
+                        selectAttribute.SelectConfigurations);
                 }
                 else
                 {
-                    foreach (var property in expandAttribute.ExpandConfigurations.Keys)
+                    foreach (var property in selectAttribute.SelectConfigurations.Keys)
                     {
-                        querySettings.ExpandConfigurations[property] =
-                            expandAttribute.ExpandConfigurations[property];
+                        querySettings.SelectConfigurations[property] =
+                            selectAttribute.SelectConfigurations[property];
                     }
                 }
 
-                if (expandAttribute.ExpandConfigurations.Count == 0)
+                if (selectAttribute.SelectConfigurations.Count == 0)
                 {
-                    querySettings.DefaultExpandType = expandAttribute.DefaultExpandType;
-                    querySettings.DefaultMaxDepth = expandAttribute.DefaultMaxDepth ?? ODataValidationSettings.DefaultMaxExpansionDepth;
+                    querySettings.DefaultSelectType =
+                        selectAttribute.DefaultSelectType;
                 }
             }
         }

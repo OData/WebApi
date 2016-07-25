@@ -146,5 +146,40 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.OrderByAttributeTest
                 Assert.Contains("cannot be used in the $orderby query option.", result);
             }
         }
+
+        [Theory]
+        [InlineData(CustomerBaseUrl + "?$orderby=AutoExpandOrder/Name", HttpStatusCode.OK)]
+        [InlineData(CustomerBaseUrl + "?$orderby=AutoExpandOrder/Id", HttpStatusCode.BadRequest)]
+        [InlineData(CustomerBaseUrl + "?$orderby=Address/Name", HttpStatusCode.OK)]
+        [InlineData(CustomerBaseUrl + "?$orderby=Address/Street", HttpStatusCode.OK)]
+        [InlineData(OrderBaseUrl + "?$expand=Customers($orderby=AutoExpandOrder/Id)", HttpStatusCode.BadRequest)]
+        [InlineData(OrderBaseUrl + "?$expand=Customers($orderby=AutoExpandOrder/Name)", HttpStatusCode.OK)]
+        [InlineData(OrderBaseUrl + "?$expand=Customers($orderby=Address/Name)", HttpStatusCode.OK)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$orderby=AutoExpandOrder/Name", HttpStatusCode.OK)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$orderby=AutoExpandOrder/Id", HttpStatusCode.BadRequest)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$orderby=Address/Name", HttpStatusCode.OK)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$orderby=Address/Street", HttpStatusCode.OK)]
+        [InlineData(ModelBoundOrderBaseUrl + "?$expand=Customers($orderby=AutoExpandOrder/Id)", HttpStatusCode.BadRequest)]
+        [InlineData(ModelBoundOrderBaseUrl + "?$expand=Customers($orderby=AutoExpandOrder/Name)", HttpStatusCode.OK)]
+        [InlineData(ModelBoundOrderBaseUrl + "?$expand=Customers($orderby=Address/Name)", HttpStatusCode.OK)]
+        public void OrderBySingleNavigationOrComplexProperty(string entitySetUrl, HttpStatusCode statusCode)
+        {
+            string queryUrl =
+                string.Format(
+                    entitySetUrl,
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = client.SendAsync(request).Result;
+            string result = response.Content.ReadAsStringAsync().Result;
+
+            Assert.Equal(statusCode, response.StatusCode);
+            if (statusCode == HttpStatusCode.BadRequest)
+            {
+                Assert.Contains("cannot be used in the $orderby query option.", result);
+            }
+        }
     }
 }

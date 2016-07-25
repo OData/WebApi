@@ -31,7 +31,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
         public static void UpdateConfiguration(HttpConfiguration config)
         {
             config.Routes.Clear();
-            config.Count().Filter().OrderBy().Expand().MaxTop(null);
+            config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             config.MapODataServiceRoute("convention", "convention", GetConventionModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 

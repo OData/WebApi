@@ -168,5 +168,24 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.ExpandAttributeTest
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains("AutoExpandOrder", result);
         }
+
+        [Theory]
+        [InlineData(CustomerBaseUrl)]
+        [InlineData(CustomerBaseUrl + "(9)")]
+        [InlineData(ModelBoundCustomerBaseUrl)]
+        [InlineData(ModelBoundCustomerBaseUrl + "(9)")]
+        public void AutomaticExpandInDerivedType(string url)
+        {
+            string queryUrl = string.Format(url, BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = client.SendAsync(request).Result;
+            string result = response.Content.ReadAsStringAsync().Result;
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("SpecialOrder", result);
+        }
     }
 }

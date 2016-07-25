@@ -14,6 +14,7 @@ namespace System.Web.OData.Query
         private bool _enableOrderBy;
         private bool _enableExpand;
         private bool _enableCount;
+        private bool _enableSelect;
         private int? _maxTop = 0;
 
         /// <summary>
@@ -28,6 +29,21 @@ namespace System.Web.OData.Query
             set
             {
                 _enableExpand = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether property can be selected.
+        /// </summary>
+        public bool EnableSelect
+        {
+            get
+            {
+                return _enableSelect;
+            }
+            set
+            {
+                _enableSelect = value;
             }
         }
 

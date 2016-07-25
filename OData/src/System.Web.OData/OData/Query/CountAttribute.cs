@@ -4,8 +4,8 @@
 namespace System.Web.OData.Query
 {
     /// <summary>
-    /// Represents an <see cref="Attribute"/> that can be placed on a class or property to specify that
-    /// whether the $count can be applied on the property or the entityset.
+    /// Represents an <see cref="Attribute"/> that can be placed on a class or property
+    /// correlate to OData's $count query option settings.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
     public sealed class CountAttribute : Attribute

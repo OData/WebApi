@@ -356,7 +356,7 @@ namespace System.Web.OData.Query
                 result = Top.ApplyTo(result, querySettings);
             }
 
-            AddAutoExpandProperties();
+            AddAutoSelectExpandProperties();
 
             if (SelectExpand != null)
             {
@@ -431,7 +431,7 @@ namespace System.Web.OData.Query
                 throw Error.InvalidOperation(SRResources.NonSelectExpandOnSingleEntity);
             }
 
-            AddAutoExpandProperties();
+            AddAutoSelectExpandProperties();
 
             if (SelectExpand != null)
             {
@@ -591,21 +591,46 @@ namespace System.Web.OData.Query
             return Request.GetETag(etagHeaderValue);
         }
 
-        internal void AddAutoExpandProperties()
+        internal void AddAutoSelectExpandProperties()
         {
+            bool containsAutoSelectExpandProperties = false;
             var autoExpandRawValue = GetAutoExpandRawValue();
-            if (autoExpandRawValue != null && !autoExpandRawValue.Equals(RawValues.Expand))
+            var autoSelectRawValue = GetAutoSelectRawValue();
+
+            IDictionary<string, string> queryParameters =
+               Request.GetQueryNameValuePairs().ToDictionary(p => p.Key, p => p.Value);
+            if (!String.IsNullOrEmpty(autoExpandRawValue) && !autoExpandRawValue.Equals(RawValues.Expand))
             {
-                IDictionary<string, string> queryParameters =
-                   Request.GetQueryNameValuePairs().ToDictionary(p => p.Key, p => p.Value);
                 queryParameters["$expand"] = autoExpandRawValue;
+                containsAutoSelectExpandProperties = true;
+            }
+            else
+            {
+                autoExpandRawValue = RawValues.Expand;
+            }
+
+            if (!String.IsNullOrEmpty(autoSelectRawValue) && !autoSelectRawValue.Equals(RawValues.Select))
+            {
+                queryParameters["$select"] = autoSelectRawValue;
+                containsAutoSelectExpandProperties = true;
+            }
+            else
+            {
+                autoSelectRawValue = RawValues.Select;
+            }
+
+            if (containsAutoSelectExpandProperties)
+            {
                 _queryOptionParser = new ODataQueryOptionParser(
                     Context.Model,
                     Context.ElementType,
                     Context.NavigationSource,
                     queryParameters);
                 var originalSelectExpand = SelectExpand;
-                SelectExpand = new SelectExpandQueryOption(RawValues.Select, autoExpandRawValue, Context,
+                SelectExpand = new SelectExpandQueryOption(
+                    autoSelectRawValue,
+                    autoExpandRawValue,
+                    Context,
                     _queryOptionParser);
                 if (originalSelectExpand != null && originalSelectExpand.LevelsMaxLiteralExpansionDepth > 0)
                 {
@@ -614,13 +639,56 @@ namespace System.Web.OData.Query
             }
         }
 
+        private string GetAutoSelectRawValue()
+        {
+            var selectRawValue = RawValues.Select;
+            var autoSelectRawValue = String.Empty;
+            IEdmEntityType baseEntityType = Context.TargetStructuredType as IEdmEntityType;
+            if (String.IsNullOrEmpty(selectRawValue))
+            {
+                var autoSelectProperties = EdmLibHelpers.GetAutoSelectProperties(Context.TargetProperty,
+                    Context.TargetStructuredType, Context.Model);
+
+                foreach (var property in autoSelectProperties)
+                {
+                    if (!String.IsNullOrEmpty(autoSelectRawValue))
+                    {
+                        autoSelectRawValue += ",";
+                    }
+
+                    if (baseEntityType != null && property.DeclaringType != baseEntityType)
+                    {
+                        autoSelectRawValue += String.Format(CultureInfo.InvariantCulture, "{0}/",
+                            property.DeclaringType.FullTypeName());
+                    }
+
+                    autoSelectRawValue += property.Name;
+                }
+
+                if (!String.IsNullOrEmpty(autoSelectRawValue))
+                {
+                    if (!String.IsNullOrEmpty(selectRawValue))
+                    {
+                        selectRawValue = String.Format(CultureInfo.InvariantCulture, "{0},{1}",
+                            autoSelectRawValue, selectRawValue);
+                    }
+                    else
+                    {
+                        selectRawValue = autoSelectRawValue;
+                    }
+                }
+            }
+
+            return selectRawValue;
+        }
+
         private string GetAutoExpandRawValue()
         {
             var expandRawValue = RawValues.Expand;
-            IEdmEntityType baseEntityType = Context.ElementType as IEdmEntityType;
+            IEdmEntityType baseEntityType = Context.TargetStructuredType as IEdmEntityType;
             var autoExpandRawValue = String.Empty;
-            var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(baseEntityType,
-                Context.Model);
+            var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(
+                Context.TargetProperty, Context.TargetStructuredType, Context.Model);
 
             foreach (var property in autoExpandNavigationProperties)
             {

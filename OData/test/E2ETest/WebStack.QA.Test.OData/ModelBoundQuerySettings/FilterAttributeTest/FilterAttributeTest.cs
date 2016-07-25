@@ -146,5 +146,40 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.FilterAttributeTest
                 Assert.Contains("cannot be used in the $filter query option.", result);
             }
         }
+
+        [Theory]
+        [InlineData(CustomerBaseUrl + "?$filter=AutoExpandOrder/Name eq 'test'", HttpStatusCode.OK)]
+        [InlineData(CustomerBaseUrl + "?$filter=AutoExpandOrder/Id eq 1", HttpStatusCode.BadRequest)]
+        [InlineData(CustomerBaseUrl + "?$filter=Address/Name eq 'test'", HttpStatusCode.OK)]
+        [InlineData(CustomerBaseUrl + "?$filter=Address/Street eq 'test'", HttpStatusCode.OK)]
+        [InlineData(OrderBaseUrl + "?$expand=Customers($filter=AutoExpandOrder/Id eq 1)", HttpStatusCode.BadRequest)]
+        [InlineData(OrderBaseUrl + "?$expand=Customers($filter=AutoExpandOrder/Name eq 'test')", HttpStatusCode.OK)]
+        [InlineData(OrderBaseUrl + "?$expand=Customers($filter=Address/Name eq 'test')", HttpStatusCode.OK)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$filter=AutoExpandOrder/Name eq 'test'", HttpStatusCode.OK)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$filter=AutoExpandOrder/Id eq 1", HttpStatusCode.BadRequest)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$filter=Address/Name eq 'test'", HttpStatusCode.OK)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$filter=Address/Street eq 'test'", HttpStatusCode.OK)]
+        [InlineData(ModelBoundOrderBaseUrl + "?$expand=Customers($filter=AutoExpandOrder/Id eq 1)", HttpStatusCode.BadRequest)]
+        [InlineData(ModelBoundOrderBaseUrl + "?$expand=Customers($filter=AutoExpandOrder/Name eq 'test')", HttpStatusCode.OK)]
+        [InlineData(ModelBoundOrderBaseUrl + "?$expand=Customers($filter=Address/Name eq 'test')", HttpStatusCode.OK)]
+        public void FilterSingleNavigationOrComplexProperty(string entitySetUrl, HttpStatusCode statusCode)
+        {
+            string queryUrl =
+                string.Format(
+                    entitySetUrl,
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = client.SendAsync(request).Result;
+            string result = response.Content.ReadAsStringAsync().Result;
+
+            Assert.Equal(statusCode, response.StatusCode);
+            if (statusCode == HttpStatusCode.BadRequest)
+            {
+                Assert.Contains("cannot be used in the $filter query option.", result);
+            }
+        }
     }
 }

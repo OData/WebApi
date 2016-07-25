@@ -6,10 +6,10 @@ using System.Web.OData.Query;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
-    internal class OrderByAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PropertyConfiguration>
+    internal class SelectAttributeEdmPropertyConvention : AttributeEdmPropertyConvention<PropertyConfiguration>
     {
-        public OrderByAttributeEdmPropertyConvention()
-            : base(attribute => attribute.GetType() == typeof(OrderByAttribute), allowMultiple: true)
+        public SelectAttributeEdmPropertyConvention()
+            : base(attribute => attribute.GetType() == typeof(SelectAttribute), allowMultiple: true)
         {
         }
 
@@ -25,25 +25,25 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             if (!edmProperty.AddedExplicitly)
             {
-                OrderByAttribute orderByAttribute = attribute as OrderByAttribute;
+                SelectAttribute selectAttribute = attribute as SelectAttribute;
                 ModelBoundQuerySettings querySettings =
                     edmProperty.QueryConfiguration.GetModelBoundQuerySettingsOrDefault();
-                if (querySettings.OrderByConfigurations.Count == 0)
+                if (querySettings.SelectConfigurations.Count == 0)
                 {
-                    querySettings.CopyOrderByConfigurations(orderByAttribute.OrderByConfigurations);
+                    querySettings.CopySelectConfigurations(selectAttribute.SelectConfigurations);
                 }
                 else
                 {
-                    foreach (var property in orderByAttribute.OrderByConfigurations.Keys)
+                    foreach (var property in selectAttribute.SelectConfigurations.Keys)
                     {
-                        querySettings.OrderByConfigurations[property] =
-                            orderByAttribute.OrderByConfigurations[property];
+                        querySettings.SelectConfigurations[property] =
+                            selectAttribute.SelectConfigurations[property];
                     }
                 }
 
-                if (orderByAttribute.OrderByConfigurations.Count == 0)
+                if (selectAttribute.SelectConfigurations.Count == 0)
                 {
-                    querySettings.DefaultEnableOrderBy = orderByAttribute.DefaultEnableOrderBy;
+                    querySettings.DefaultSelectType = selectAttribute.DefaultSelectType;
                 }
             }
         }

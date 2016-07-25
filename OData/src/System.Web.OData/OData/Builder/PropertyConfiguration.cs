@@ -346,6 +346,42 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Sets selectable properties depends on <see cref="SelectExpandType"/> of this property.
+        /// </summary>
+        public PropertyConfiguration Select(SelectExpandType selectType, params string[] properties)
+        {
+            QueryConfiguration.SetSelect(properties, selectType);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets selectable properties of this property.
+        /// </summary>
+        public PropertyConfiguration Select(params string[] properties)
+        {
+            QueryConfiguration.SetSelect(properties, SelectExpandType.Allowed);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets <see cref="SelectExpandType"/> of all properties of this property is selectable.
+        /// </summary>
+        public PropertyConfiguration Select(SelectExpandType selectType)
+        {
+            QueryConfiguration.SetSelect(null, selectType);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties of this property is selectable.
+        /// </summary>
+        public PropertyConfiguration Select()
+        {
+            QueryConfiguration.SetSelect(null, SelectExpandType.Allowed);
+            return this;
+        }
+
+        /// <summary>
         /// Sets the max value of $top of this property that a client can request
         /// and the maximum number of query results of this property to return.
         /// </summary>
@@ -368,9 +404,9 @@ namespace System.Web.OData.Builder
 
         /// <summary>
         /// Sets the maximum depth of expand result,
-        /// expandable properties and their <see cref="ExpandType"/> of this navigation property.
+        /// expandable properties and their <see cref="SelectExpandType"/> of this navigation property.
         /// </summary>
-        public PropertyConfiguration Expand(int maxDepth, ExpandType expandType, params string[] properties)
+        public PropertyConfiguration Expand(int maxDepth, SelectExpandType expandType, params string[] properties)
         {
             QueryConfiguration.SetExpand(properties, maxDepth, expandType);
             return this;
@@ -381,7 +417,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         public PropertyConfiguration Expand(params string[] properties)
         {
-            QueryConfiguration.SetExpand(properties, null, ExpandType.Allowed);
+            QueryConfiguration.SetExpand(properties, null, SelectExpandType.Allowed);
             return this;
         }
 
@@ -391,23 +427,23 @@ namespace System.Web.OData.Builder
         /// </summary>
         public PropertyConfiguration Expand(int maxDepth, params string[] properties)
         {
-            QueryConfiguration.SetExpand(properties, maxDepth, ExpandType.Allowed);
+            QueryConfiguration.SetExpand(properties, maxDepth, SelectExpandType.Allowed);
             return this;
         }
 
         /// <summary>
-        /// Sets the expandable properties and their <see cref="ExpandType"/> of this navigation property.
+        /// Sets the expandable properties and their <see cref="SelectExpandType"/> of this navigation property.
         /// </summary>
-        public PropertyConfiguration Expand(ExpandType expandType, params string[] properties)
+        public PropertyConfiguration Expand(SelectExpandType expandType, params string[] properties)
         {
             QueryConfiguration.SetExpand(properties, null, expandType);
             return this;
         }
 
         /// <summary>
-        /// Sets <see cref="ExpandType"/> of all properties with maximum depth of expand result.
+        /// Sets <see cref="SelectExpandType"/> of all properties with maximum depth of expand result.
         /// </summary>
-        public PropertyConfiguration Expand(ExpandType expandType, int maxDepth)
+        public PropertyConfiguration Expand(SelectExpandType expandType, int maxDepth)
         {
             QueryConfiguration.SetExpand(null, maxDepth, expandType);
             return this;
@@ -418,14 +454,14 @@ namespace System.Web.OData.Builder
         /// </summary>
         public PropertyConfiguration Expand(int maxDepth)
         {
-            QueryConfiguration.SetExpand(null, maxDepth, ExpandType.Allowed);
+            QueryConfiguration.SetExpand(null, maxDepth, SelectExpandType.Allowed);
             return this;
         }
 
         /// <summary>
-        /// Sets <see cref="ExpandType"/> of all properties.
+        /// Sets <see cref="SelectExpandType"/> of all properties.
         /// </summary>
-        public PropertyConfiguration Expand(ExpandType expandType)
+        public PropertyConfiguration Expand(SelectExpandType expandType)
         {
             QueryConfiguration.SetExpand(null, null, expandType);
             return this;
@@ -436,7 +472,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         public PropertyConfiguration Expand()
         {
-            QueryConfiguration.SetExpand(null, null, ExpandType.Allowed);
+            QueryConfiguration.SetExpand(null, null, SelectExpandType.Allowed);
             return this;
         }
     }

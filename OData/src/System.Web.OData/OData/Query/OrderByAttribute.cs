@@ -8,8 +8,8 @@ using System.Linq;
 namespace System.Web.OData.Query
 {
     /// <summary>
-    /// Represents an <see cref="Attribute"/> that can be placed on a class to specify that
-    /// whether the $orderby can be applied on those properties.
+    /// Represents an <see cref="Attribute"/> that can be placed on a class or property
+    /// correlate to OData's $orderby query option settings.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
     [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments",

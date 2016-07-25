@@ -45,7 +45,7 @@ namespace WebStack.QA.Test.OData.AutoExpand
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute(
                 "autoexpand", 
                 "autoexpand", 
@@ -77,10 +77,13 @@ namespace WebStack.QA.Test.OData.AutoExpand
 
             // level one
             JObject friend = customer["Friend"] as JObject;
-            VerifyOrderAndChoiceOrder(friend);
+            JObject order = friend["Order"] as JObject;
+            Assert.NotNull(order);
+            Assert.Null(order["Choice"]);
 
             // level two
-            Assert.Null(friend["Friend"]);
+            friend = friend["Friend"] as JObject;
+            Assert.Null(friend["Order"]);
         }
 
         [Fact]
@@ -124,13 +127,95 @@ namespace WebStack.QA.Test.OData.AutoExpand
             var people = responseJson["value"] as JArray;
             var he = people[8] as JObject;
             JObject friend = he;
-            for (int i = 0; i < levelNumber; i++)
+            for (int i = 1; i <= levelNumber; i++)
             {
                 friend = friend["Friend"] as JObject;
                 Assert.NotNull(friend);
-                VerifyOrderAndChoiceOrder(friend);
+                if (i + 2 <= levelNumber)
+                {
+                    VerifyOrderAndChoiceOrder(friend);
+                }
             }
             Assert.Null(friend["Friend"]);
+        }
+
+        [Fact]
+        public void QueryForAnEntryIncludeTheDerivedAutoExpandNavigationProperty()
+        {
+            // Arrange
+            string queryUrl = string.Format("{0}/autoexpand/Customers(8)", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Act
+            response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+
+            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            VerifyOrderAndChoiceOrder(customer, special: true);
+
+            // level one
+            JObject friend = customer["Friend"] as JObject;
+            JObject order = friend["Order"] as JObject;
+            Assert.NotNull(order);
+            Assert.Null(order["Choice"]);
+        }
+
+        [Fact]
+        public void QueryForAnEntryIncludeTheMultiDerivedAutoExpandNavigationProperty()
+        {
+            // Arrange
+            string queryUrl = string.Format("{0}/autoexpand/Customers(9)", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Act
+            response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+
+            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            VerifyOrderAndChoiceOrder(customer, special: true, vip: true);
+
+            // level one
+            JObject friend = customer["Friend"] as JObject;
+            JObject order = friend["Order"] as JObject;
+            Assert.NotNull(order);
+            Assert.Null(order["Choice"]);
+        }
+
+        [Theory]
+        [InlineData("{0}/autoexpand/NormalOrders")]
+        [InlineData("{0}/autoexpand/NormalOrders(1)")]
+        public void DerivedAutoExpandNavigationPropertyTest(string url)
+        {
+            // Arrange
+            string queryUrl = string.Format(url, BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Act
+            response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            string result = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains("OrderDetail", result);
         }
 
         private static void VerifyOrderAndChoiceOrder(JObject customer, bool special = false, bool vip = false)
@@ -140,20 +225,20 @@ namespace WebStack.QA.Test.OData.AutoExpand
 
             JObject choice = order["Choice"] as JObject;
             Assert.NotNull(choice);
-            Assert.Equal((int)order["Id"] * 1000, choice["Amount"]);
+            Assert.Equal((int) order["Id"]*1000, choice["Amount"]);
 
             if (special)
             {
                 choice = order["SpecialChoice"] as JObject;
                 Assert.NotNull(choice);
-                Assert.Equal((int)order["Id"] * 2000, choice["Amount"]);
+                Assert.Equal((int) order["Id"]*2000, choice["Amount"]);
             }
 
             if (vip)
             {
                 choice = order["VipChoice"] as JObject;
                 Assert.NotNull(choice);
-                Assert.Equal((int)order["Id"] * 3000, choice["Amount"]);
+                Assert.Equal((int) order["Id"]*3000, choice["Amount"]);
             }
         }
     }

@@ -504,6 +504,47 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Sets selectable properties depends on <see cref="SelectExpandType"/> of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Select(SelectExpandType selectType,
+            params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetSelect(properties, selectType);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets selectable properties of this structural type.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Select(params string[] properties)
+        {
+            _configuration.QueryConfiguration.SetSelect(properties, SelectExpandType.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets <see cref="SelectExpandType"/> of all properties of this structural type is selectable.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Select(SelectExpandType selectType)
+        {
+            _configuration.QueryConfiguration.SetSelect(null, selectType);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets all properties of this structural type is selectable.
+        /// </summary>
+        public StructuralTypeConfiguration<TStructuralType> Select()
+        {
+            _configuration.QueryConfiguration.SetSelect(null, SelectExpandType.Allowed);
+            _configuration.AddedExplicitly = true;
+            return this;
+        }
+
+        /// <summary>
         /// Sets the max value of $top of this structural type that a client can request
         /// and the maximum number of query results of this entity type to return.
         /// </summary>
@@ -528,9 +569,9 @@ namespace System.Web.OData.Builder
 
         /// <summary>
         /// Sets the maximum depth of expand result,
-        /// expandable properties and their <see cref="ExpandType"/> of this structural type.
+        /// expandable properties and their <see cref="SelectExpandType"/> of this structural type.
         /// </summary>
-        public StructuralTypeConfiguration<TStructuralType> Expand(int maxDepth, ExpandType expandType, params string[] properties)
+        public StructuralTypeConfiguration<TStructuralType> Expand(int maxDepth, SelectExpandType expandType, params string[] properties)
         {
             _configuration.QueryConfiguration.SetExpand(properties, maxDepth, expandType);
             _configuration.AddedExplicitly = true;
@@ -542,7 +583,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         public StructuralTypeConfiguration<TStructuralType> Expand(params string[] properties)
         {
-            _configuration.QueryConfiguration.SetExpand(properties, null, ExpandType.Allowed);
+            _configuration.QueryConfiguration.SetExpand(properties, null, SelectExpandType.Allowed);
             _configuration.AddedExplicitly = true;
             return this;
         }
@@ -553,15 +594,15 @@ namespace System.Web.OData.Builder
         /// </summary>
         public StructuralTypeConfiguration<TStructuralType> Expand(int maxDepth, params string[] properties)
         {
-            _configuration.QueryConfiguration.SetExpand(properties, maxDepth, ExpandType.Allowed);
+            _configuration.QueryConfiguration.SetExpand(properties, maxDepth, SelectExpandType.Allowed);
             _configuration.AddedExplicitly = true;
             return this;
         }
 
         /// <summary>
-        /// Sets the expandable properties and their <see cref="ExpandType"/> of this structural type.
+        /// Sets the expandable properties and their <see cref="SelectExpandType"/> of this structural type.
         /// </summary>
-        public StructuralTypeConfiguration<TStructuralType> Expand(ExpandType expandType, params string[] properties)
+        public StructuralTypeConfiguration<TStructuralType> Expand(SelectExpandType expandType, params string[] properties)
         {
             _configuration.QueryConfiguration.SetExpand(properties, null, expandType);
             _configuration.AddedExplicitly = true;
@@ -569,9 +610,9 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Sets <see cref="ExpandType"/> of all properties with maximum depth of expand result of this structural type.
+        /// Sets <see cref="SelectExpandType"/> of all properties with maximum depth of expand result of this structural type.
         /// </summary>
-        public StructuralTypeConfiguration<TStructuralType> Expand(ExpandType expandType, int maxDepth)
+        public StructuralTypeConfiguration<TStructuralType> Expand(SelectExpandType expandType, int maxDepth)
         {
             _configuration.QueryConfiguration.SetExpand(null, maxDepth, expandType);
             _configuration.AddedExplicitly = true;
@@ -583,15 +624,15 @@ namespace System.Web.OData.Builder
         /// </summary>
         public StructuralTypeConfiguration<TStructuralType> Expand(int maxDepth)
         {
-            _configuration.QueryConfiguration.SetExpand(null, maxDepth, ExpandType.Allowed);
+            _configuration.QueryConfiguration.SetExpand(null, maxDepth, SelectExpandType.Allowed);
             _configuration.AddedExplicitly = true;
             return this;
         }
 
         /// <summary>
-        /// Sets <see cref="ExpandType"/> of all properties of this structural type.
+        /// Sets <see cref="SelectExpandType"/> of all properties of this structural type.
         /// </summary>
-        public StructuralTypeConfiguration<TStructuralType> Expand(ExpandType expandType)
+        public StructuralTypeConfiguration<TStructuralType> Expand(SelectExpandType expandType)
         {
             _configuration.QueryConfiguration.SetExpand(null, null, expandType);
             _configuration.AddedExplicitly = true;
@@ -603,7 +644,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         public StructuralTypeConfiguration<TStructuralType> Expand()
         {
-            _configuration.QueryConfiguration.SetExpand(null, null, ExpandType.Allowed);
+            _configuration.QueryConfiguration.SetExpand(null, null, SelectExpandType.Allowed);
             _configuration.AddedExplicitly = true;
             return this;
         }

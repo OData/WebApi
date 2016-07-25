@@ -4,22 +4,22 @@
 namespace System.Web.OData.Query
 {
     /// <summary>
-    /// Represents the type of expand.
+    /// Represents the type of expand and select.
     /// </summary>
-    public enum ExpandType
+    public enum SelectExpandType
     {
         /// <summary>
-        /// Allowed to be expanded.
+        /// Allowed to be expanded and selected.
         /// </summary>
         Allowed,
 
         /// <summary>
-        /// Automatic expanded.
+        /// Automatic expanded and selected.
         /// </summary>
         Automatic,
 
         /// <summary>
-        /// Disallowed to be expanded.
+        /// Disallowed to be expanded and selected.
         /// </summary>
         Disabled
     }

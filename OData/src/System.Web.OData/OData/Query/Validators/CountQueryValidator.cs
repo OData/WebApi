@@ -49,10 +49,9 @@ namespace System.Web.OData.Query.Validators
 
             if (path != null && path.Segments.Count > 0)
             {
-                IEdmProperty property;
-                IEdmStructuredType structuredType;
-                string name;
-                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(path.Segments, out property, out structuredType, out name);
+                IEdmProperty property = countQueryOption.Context.TargetProperty;
+                IEdmStructuredType structuredType = countQueryOption.Context.TargetStructuredType;
+                string name = countQueryOption.Context.TargetName;
                 if (EdmLibHelpers.IsNotCountable(property, structuredType,
                     countQueryOption.Context.Model,
                     _defaultQuerySettings.EnableCount))

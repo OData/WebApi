@@ -44,7 +44,7 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
             configuration.Routes.Clear();
-            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute("odata", "odata", BuildEdmModel());
             configuration.EnsureInitialized();
             CreateDatabase();

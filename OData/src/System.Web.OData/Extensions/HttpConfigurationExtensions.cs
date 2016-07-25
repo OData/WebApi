@@ -119,7 +119,7 @@ namespace System.Web.OData.Extensions
         /// <summary>
         /// Sets the EnableExpand of <see cref="DefaultQuerySettings"/> in the configuration,
         /// depends on <see cref="QueryOptionSetting"/>.
-        /// Todo: change QueryOptionSetting to ExpandType.
+        /// Todo: change QueryOptionSetting to SelectExpandType.
         /// </summary>
         public static HttpConfiguration Expand(this HttpConfiguration configuration, QueryOptionSetting setting)
         {
@@ -135,6 +135,28 @@ namespace System.Web.OData.Extensions
         {
             DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
             defaultQuerySettings.EnableExpand = true;
+            return configuration;
+        }
+
+        /// <summary>
+        /// Sets the SelectType of <see cref="DefaultQuerySettings"/> in the configuration,
+        /// depends on <see cref="QueryOptionSetting"/>.
+        /// Todo: change QueryOptionSetting to SelectExpandType.
+        /// </summary>
+        public static HttpConfiguration Select(this HttpConfiguration configuration, QueryOptionSetting setting)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableSelect = setting == QueryOptionSetting.Allowed;
+            return configuration;
+        }
+
+        /// <summary>
+        /// Sets the EnableSelect to true of <see cref="DefaultQuerySettings"/> in the configuration.
+        /// </summary>
+        public static HttpConfiguration Select(this HttpConfiguration configuration)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableSelect = true;
             return configuration;
         }
 

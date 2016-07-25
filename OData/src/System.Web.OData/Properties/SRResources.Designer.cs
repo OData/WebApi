@@ -1438,6 +1438,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; cannot be used in the $select query option..
+        /// </summary>
+        internal static string NotSelectablePropertyUsedInSelect {
+            get {
+                return ResourceManager.GetString("NotSelectablePropertyUsedInSelect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The property &apos;{0}&apos; cannot be used in the $orderby query option..
         /// </summary>
         internal static string NotSortablePropertyUsedInOrderBy {

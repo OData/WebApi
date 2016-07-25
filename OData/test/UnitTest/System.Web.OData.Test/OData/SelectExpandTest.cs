@@ -39,6 +39,7 @@ namespace System.Web.OData
                     typeof(SelectExpandTestSpecialOrderWithAlias),
                 }.GetHttpConfiguration();
             _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            _configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
 
             _configuration.MapODataServiceRoute("odata", "odata", GetModel());
             _configuration.MapODataServiceRoute("odata-inheritance", "odata-inheritance", GetModelWithInheritance());

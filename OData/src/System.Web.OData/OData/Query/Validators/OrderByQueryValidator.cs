@@ -2,11 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Web.Http;
-using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
-using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
 namespace System.Web.OData.Query.Validators
@@ -116,113 +114,6 @@ namespace System.Web.OData.Query.Validators
         {
             return validationSettings.AllowedOrderByProperties.Count == 0 ||
                    validationSettings.AllowedOrderByProperties.Contains(propertyName);
-        }
-
-        private class OrderByModelLimitationsValidator : QueryNodeVisitor<SingleValueNode>
-        {
-            private readonly IEdmModel _model;
-            private readonly bool _enableOrderBy;
-            private IEdmProperty _property;
-            private IEdmStructuredType _structuredType;
-
-            public OrderByModelLimitationsValidator(ODataQueryContext context, bool enableOrderBy)
-            {
-                _model = context.Model;
-                _enableOrderBy = enableOrderBy;
-
-                if (context.Path != null)
-                {
-                    string name;
-                    EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(context.Path.Segments,
-                        out _property,
-                        out _structuredType,
-                        out name);
-                }
-            }
-
-            // Visits the expression to find the first node if any, that is not sortable and throws
-            // an exception only if no explicit properties have been defined in AllowedOrderByProperties
-            // on the ODataValidationSettings instance associated with this OrderByValidator.
-            public bool TryValidate(OrderByClause orderByClause, bool explicitPropertiesDefined)
-            {
-                SingleValueNode invalidNode = orderByClause.Expression.Accept(this);
-                if (invalidNode != null && !explicitPropertiesDefined)
-                {
-                    throw new ODataException(Error.Format(SRResources.NotSortablePropertyUsedInOrderBy,
-                        GetPropertyName(invalidNode)));
-                }
-                return invalidNode == null;
-            }
-
-            public override SingleValueNode Visit(SingleValuePropertyAccessNode nodeIn)
-            {
-                if (EdmLibHelpers.IsNotSortable(nodeIn.Property, _property, _structuredType, _model, _enableOrderBy))
-                {
-                    return nodeIn;
-                }
-
-                if (nodeIn.Source != null)
-                {
-                    return nodeIn.Source.Accept(this);
-                }
-                return null;
-            }
-
-            public override SingleValueNode Visit(SingleComplexNode nodeIn)
-            {
-                if (EdmLibHelpers.IsNotSortable(nodeIn.Property, _property, _structuredType, _model, _enableOrderBy))
-                {
-                    return nodeIn;
-                }
-
-                if (nodeIn.Source != null)
-                {
-                    return nodeIn.Source.Accept(this);
-                }
-                return null;
-            }
-
-            public override SingleValueNode Visit(SingleNavigationNode nodeIn)
-            {
-                if (EdmLibHelpers.IsNotSortable(nodeIn.NavigationProperty, _property, _structuredType, _model,
-                    _enableOrderBy))
-                {
-                    return nodeIn;
-                }
-
-                if (nodeIn.Source != null)
-                {
-                    return nodeIn.Source.Accept(this);
-                }
-                return null;
-            }
-
-            public override SingleValueNode Visit(ResourceRangeVariableReferenceNode nodeIn)
-            {
-                return null;
-            }
-
-            public override SingleValueNode Visit(NonResourceRangeVariableReferenceNode nodeIn)
-            {
-                return null;
-            }
-
-            private static string GetPropertyName(SingleValueNode node)
-            {
-                if (node.Kind == QueryNodeKind.SingleNavigationNode)
-                {
-                    return ((SingleNavigationNode)node).NavigationProperty.Name;
-                }
-                else if (node.Kind == QueryNodeKind.SingleValuePropertyAccess)
-                {
-                    return ((SingleValuePropertyAccessNode)node).Property.Name;
-                }
-                else if (node.Kind == QueryNodeKind.SingleComplexNode)
-                {
-                    return ((SingleComplexNode)node).Property.Name;
-                }
-                return null;
-            }
         }
     }
 }

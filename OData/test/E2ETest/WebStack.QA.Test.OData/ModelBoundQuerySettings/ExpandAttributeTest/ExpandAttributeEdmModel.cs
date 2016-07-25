@@ -6,14 +6,14 @@ using Microsoft.OData.Edm;
 namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.ExpandAttributeTest
 {
     [Expand("Orders", "Friend", MaxDepth = 10)]
-    [Expand("AutoExpandOrder", ExpandType = ExpandType.Automatic, MaxDepth = 8)]
+    [Expand("AutoExpandOrder", ExpandType = SelectExpandType.Automatic, MaxDepth = 8)]
     public class Customer
     {
         public int Id { get; set; }
 
         public string Name { get; set; }
 
-        [Expand(ExpandType = ExpandType.Disabled)]
+        [Expand(ExpandType = SelectExpandType.Disabled)]
         public Order Order { get; set; }
 
         public Order AutoExpandOrder { get; set; }
@@ -31,8 +31,14 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.ExpandAttributeTest
         public Customer Friend { get; set; }
     }
 
+    [Expand("SpecialOrder", ExpandType = SelectExpandType.Automatic)]
+    public class SpecialCustomer : Customer
+    {
+        public Order SpecialOrder { get; set; }
+    }
+
     [Expand(MaxDepth = 6)]
-    [Expand("NoExpandCustomers", ExpandType = ExpandType.Disabled)]
+    [Expand("NoExpandCustomers", ExpandType = SelectExpandType.Disabled)]
     public class Order
     {
         public int Id { get; set; }
@@ -75,12 +81,16 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.ExpandAttributeTest
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<Customer>("Customers")
                 .EntityType.Expand(10, "Orders", "Friend")
-                .Expand(8, ExpandType.Automatic, "AutoExpandOrder");
+                .Expand(8, SelectExpandType.Automatic, "AutoExpandOrder");
             builder.EntityType<Customer>().HasMany(p => p.Orders).Expand(2, "Customers");
+
+            builder.EntityType<SpecialCustomer>()
+                .HasOptional(p => p.SpecialOrder)
+                .Expand(SelectExpandType.Automatic, "SpecialOrder");
 
             builder.EntitySet<Order>("Orders")
                 .EntityType.Expand(6)
-                .Expand(ExpandType.Disabled, "NoExpandCustomers");
+                .Expand(SelectExpandType.Disabled, "NoExpandCustomers");
             builder.EntityType<Order>().HasMany(p => p.Customers).Expand("Orders");
             builder.EntityType<Order>().HasMany(p => p.Customers2).Expand("Order");
             IEdmModel model = builder.GetEdmModel();

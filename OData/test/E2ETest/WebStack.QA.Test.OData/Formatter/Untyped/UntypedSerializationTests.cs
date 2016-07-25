@@ -58,6 +58,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
         {
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute("untyped", "untyped", GetEdmModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 

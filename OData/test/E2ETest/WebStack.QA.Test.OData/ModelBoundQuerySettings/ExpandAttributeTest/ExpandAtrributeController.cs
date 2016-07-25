@@ -15,6 +15,13 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.ExpandAttributeTest
             return _customers;
         }
 
+        [EnableQuery(MaxExpansionDepth = 10)]
+        public Customer Get(int key)
+        {
+            Generate();
+            return _customers[key];
+        }
+
         [EnableQuery]
         public List<Order> GetOrders(int key)
         {
@@ -76,6 +83,21 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.ExpandAttributeTest
 
                 _customers.Add(customer);
             }
+
+            _customers.Add(new SpecialCustomer
+            {
+
+                AutoExpandOrder = new Order
+                {
+                    Id = 10,
+                    Name = "AutoExpandOrder" + 10
+                },
+                SpecialOrder = new Order
+                {
+                    Id = 10,
+                    Name = "SpecialOrder" + 10
+                }
+            });
         }
     }
 

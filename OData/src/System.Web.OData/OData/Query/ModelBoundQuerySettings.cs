@@ -14,6 +14,7 @@ namespace System.Web.OData.Query
         private int? _pageSize;
         private int? _maxTop = 0;
         private Dictionary<string, ExpandConfiguration> _expandConfigurations = new Dictionary<string, ExpandConfiguration>();
+        private Dictionary<string, SelectExpandType> _selectConfigurations = new Dictionary<string, SelectExpandType>();
         private Dictionary<string, bool> _orderByConfigurations = new Dictionary<string, bool>();
         private Dictionary<string, bool> _filterConfigurations = new Dictionary<string, bool>();
 
@@ -41,9 +42,11 @@ namespace System.Web.OData.Query
             DefaultEnableOrderBy = querySettings.DefaultEnableOrderBy;
             DefaultExpandType = querySettings.DefaultExpandType;
             DefaultMaxDepth = querySettings.DefaultMaxDepth;
+            DefaultSelectType = querySettings.DefaultSelectType;
             CopyOrderByConfigurations(querySettings.OrderByConfigurations);
             CopyFilterConfigurations(querySettings.FilterConfigurations);
             CopyExpandConfigurations(querySettings.ExpandConfigurations);
+            CopySelectConfigurations(querySettings.SelectConfigurations);
         }
 
         /// <summary>
@@ -109,14 +112,14 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Gets or sets the default <see cref="ExpandType"/> of navigation properties.
+        /// Gets or sets the default <see cref="SelectExpandType"/> of navigation properties.
         /// </summary>
-        public ExpandType? DefaultExpandType { get; set; }
+        public SelectExpandType? DefaultExpandType { get; set; }
 
         /// <summary>
         /// Gets or sets the default maxDepth of navigation properties.
         /// </summary>
-        public int? DefaultMaxDepth { get; set; }
+        public int DefaultMaxDepth { get; set; }
 
         /// <summary>
         /// Gets or sets whether the properties can apply $orderby by default.
@@ -127,6 +130,11 @@ namespace System.Web.OData.Query
         /// Gets or sets whether the properties can apply $filter by default.
         /// </summary>
         public bool? DefaultEnableFilter { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the properties can apply $select by default.
+        /// </summary>
+        public SelectExpandType? DefaultSelectType { get; set; }
 
         /// <summary>
         /// Gets the $orderby configuration of properties.
@@ -147,6 +155,17 @@ namespace System.Web.OData.Query
             get
             {
                 return _filterConfigurations;
+            }
+        }
+
+        /// <summary>
+        /// Gets the $select configuration of properties.
+        /// </summary>
+        public Dictionary<string, SelectExpandType> SelectConfigurations
+        {
+            get
+            {
+                return _selectConfigurations;
             }
         }
 
@@ -175,6 +194,18 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
+        /// Copy the $select configuration of properties.
+        /// </summary>
+        public void CopySelectConfigurations(Dictionary<string, SelectExpandType> selectConfigurations)
+        {
+            _selectConfigurations.Clear();
+            foreach (var selectConfiguration in selectConfigurations)
+            {
+                _selectConfigurations.Add(selectConfiguration.Key, selectConfiguration.Value);
+            }
+        }
+
+        /// <summary>
         /// Copy the $filter configuration of properties.
         /// </summary>
         public void CopyFilterConfigurations(Dictionary<string, bool> filterConfigurations)
@@ -191,11 +222,24 @@ namespace System.Web.OData.Query
             ExpandConfiguration expandConfiguration;
             if (ExpandConfigurations.TryGetValue(propertyName, out expandConfiguration))
             {
-                return expandConfiguration.ExpandType != ExpandType.Disabled;
+                return expandConfiguration.ExpandType != SelectExpandType.Disabled;
             }
             else
             {
-                return DefaultExpandType.HasValue && DefaultExpandType != ExpandType.Disabled;
+                return DefaultExpandType.HasValue && DefaultExpandType != SelectExpandType.Disabled;
+            }
+        }
+
+        internal bool Selectable(string propertyName)
+        {
+            SelectExpandType selectExpandType;
+            if (SelectConfigurations.TryGetValue(propertyName, out selectExpandType))
+            {
+                return selectExpandType != SelectExpandType.Disabled;
+            }
+            else
+            {
+                return DefaultSelectType.HasValue && DefaultSelectType != SelectExpandType.Disabled;
             }
         }
 
@@ -230,11 +274,24 @@ namespace System.Web.OData.Query
             ExpandConfiguration expandConfiguration;
             if (ExpandConfigurations.TryGetValue(propertyName, out expandConfiguration))
             {
-                return expandConfiguration.ExpandType == ExpandType.Automatic;
+                return expandConfiguration.ExpandType == SelectExpandType.Automatic;
             }
             else
             {
-                return false;
+                return DefaultExpandType.HasValue && DefaultExpandType == SelectExpandType.Automatic;
+            }
+        }
+        
+        internal bool IsAutomaticSelect(string propertyName)
+        {
+            SelectExpandType selectExpandType;
+            if (SelectConfigurations.TryGetValue(propertyName, out selectExpandType))
+            {
+                return selectExpandType == SelectExpandType.Automatic;
+            }
+            else
+            {
+                return DefaultSelectType.HasValue && DefaultSelectType == SelectExpandType.Automatic;
             }
         }
     }

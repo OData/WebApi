@@ -6,7 +6,7 @@ using Microsoft.OData.Edm;
 namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CombinedTest
 {
     [Expand("Orders", "Friend", "CountableOrders", MaxDepth = 10)]
-    [Expand("AutoExpandOrder", ExpandType = ExpandType.Automatic, MaxDepth = 8)]
+    [Expand("AutoExpandOrder", ExpandType = SelectExpandType.Automatic, MaxDepth = 8)]
     [Page(MaxTop = 5, PageSize = 1)]
     public class Customer
     {
@@ -14,7 +14,7 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CombinedTest
 
         public string Name { get; set; }
 
-        [Expand(ExpandType = ExpandType.Disabled)]
+        [Expand(ExpandType = SelectExpandType.Disabled)]
         public Order Order { get; set; }
 
         public Order AutoExpandOrder { get; set; }
@@ -38,7 +38,7 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CombinedTest
 
     [Count]
     [Expand(MaxDepth = 6)]
-    [Expand("NoExpandCustomers", ExpandType = ExpandType.Disabled)]
+    [Expand("NoExpandCustomers", ExpandType = SelectExpandType.Disabled)]
     [Filter("Id", Disabled = true)]
     [Filter]
     [OrderBy("Id", Disabled = true)]
@@ -89,7 +89,7 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CombinedTest
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<Customer>("Customers")
                 .EntityType.Expand(10, "Orders", "Friend", "CountableOrders")
-                .Expand(8, ExpandType.Automatic, "AutoExpandOrder")
+                .Expand(8, SelectExpandType.Automatic, "AutoExpandOrder")
                 .Page(5, 2);
             builder.EntityType<Customer>()
                 .HasMany(p => p.Orders)
@@ -101,11 +101,11 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.CombinedTest
                 .Count();
             builder.EntityType<Customer>()
                 .HasOptional(p => p.Order)
-                .Expand(ExpandType.Disabled);
+                .Expand(SelectExpandType.Disabled);
 
             builder.EntitySet<Order>("Orders")
                 .EntityType.Expand(6)
-                .Expand(ExpandType.Disabled, "NoExpandCustomers")
+                .Expand(SelectExpandType.Disabled, "NoExpandCustomers")
                 .Count()
                 .Filter()
                 .Filter(QueryOptionSetting.Disabled, "Id")

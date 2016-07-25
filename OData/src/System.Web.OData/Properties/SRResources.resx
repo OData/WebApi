@@ -712,6 +712,9 @@
   <data name="NotExpandablePropertyUsedInExpand" xml:space="preserve">
     <value>The property '{0}' cannot be used in the $expand query option.</value>
   </data>
+  <data name="NotSelectablePropertyUsedInSelect" xml:space="preserve">
+    <value>The property '{0}' cannot be used in the $select query option.</value>
+  </data>
   <data name="NotNavigablePropertyUsedInNavigation" xml:space="preserve">
     <value>The property '{0}' cannot be used for navigation.</value>
   </data>

@@ -86,10 +86,12 @@
     <Compile Include="OData\Builder\Conventions\Attributes\CountAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\CountAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\FilterAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\SelectAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\OrderByAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ExpandAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ExpandAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\FilterAttributeEdmTypeConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\SelectAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\OrderByAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\PageAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\PageAttributeEdmPropertyConvention.cs" />
@@ -104,9 +106,10 @@
     <Compile Include="OData\Formatter\Serialization\ODataSerializerProviderProxy.cs" />
     <Compile Include="OData\QueryContextHelpers.cs" />
     <Compile Include="OData\Query\CountAttribute.cs" />
+    <Compile Include="OData\Query\SelectAttribute.cs" />
     <Compile Include="OData\Query\ExpandConfiguration.cs" />
     <Compile Include="OData\Query\QueryOptionSetting.cs" />
-    <Compile Include="OData\Query\ExpandType.cs" />
+    <Compile Include="OData\Query\SelectExpandType.cs" />
     <Compile Include="OData\Query\FilterAttribute.cs" />
     <Compile Include="OData\Query\OrderByAttribute.cs" />
     <Compile Include="OData\Query\PageAttribute.cs" />
@@ -196,6 +199,7 @@
     <Compile Include="OData\Query\OrderByOpenPropertyNode.cs" />
     <Compile Include="OData\Query\ParameterAliasNodeTranslator.cs" />
     <Compile Include="OData\Query\Validators\CountQueryValidator.cs" />
+    <Compile Include="OData\Query\Validators\OrderByModelLimitationsValidator.cs" />
     <Compile Include="OData\RequestPreferenceHelpers.cs" />
     <Compile Include="OData\FunctionImportComparer.cs" />
     <Compile Include="OData\Formatter\Deserialization\EnumDeserializationHelpers.cs" />

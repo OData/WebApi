@@ -31,6 +31,8 @@ namespace System.Web.OData.Formatter
 
         private static readonly IAssembliesResolver _defaultAssemblyResolver = new DefaultAssembliesResolver();
 
+        private static ConcurrentDictionary<IEdmEntitySet, IEnumerable<IEdmStructuralProperty>> _concurrencyProperties;
+
         private static readonly Dictionary<Type, IEdmPrimitiveType> _builtInTypesMapping =
             new[]
             {
@@ -308,9 +310,11 @@ namespace System.Web.OData.Formatter
                 {
                     return !enable;
                 }
+                else
+                {
+                    return querySettings.DefaultEnableFilter == false;
+                }
             }
-
-            return false;
         }
 
         public static bool IsNotSortable(IEdmProperty edmProperty, IEdmProperty pathEdmProperty,
@@ -340,9 +344,37 @@ namespace System.Web.OData.Formatter
                 {
                     return !enable;
                 }
+                else
+                {
+                    return querySettings.DefaultEnableOrderBy == false;
+                }
+            }
+        }
+
+        public static bool IsNotSelectable(IEdmProperty edmProperty, IEdmProperty pathEdmProperty,
+            IEdmStructuredType pathEdmStructuredType, IEdmModel edmModel, bool enableSelect)
+        {
+            if (pathEdmStructuredType == null)
+            {
+                pathEdmStructuredType = edmProperty.DeclaringType;
             }
 
-            return false;
+            ModelBoundQuerySettings querySettings = GetModelBoundQuerySettings(pathEdmProperty,
+                pathEdmStructuredType, edmModel);
+            if (!enableSelect)
+            {
+                return !querySettings.Selectable(edmProperty.Name);
+            }
+
+            SelectExpandType enable;
+            if (querySettings.SelectConfigurations.TryGetValue(edmProperty.Name, out enable))
+            {
+                return enable == SelectExpandType.Disabled;
+            }
+            else
+            {
+                return querySettings.DefaultSelectType == SelectExpandType.Disabled;
+            }
         }
 
         public static bool IsNotNavigable(IEdmProperty edmProperty, IEdmModel edmModel)
@@ -357,35 +389,116 @@ namespace System.Web.OData.Formatter
             return annotation == null ? false : annotation.Restrictions.NotExpandable;
         }
 
-        public static bool IsAutoExpand(IEdmProperty edmProperty, IEdmModel edmModel)
+        public static bool IsAutoSelect(IEdmProperty property, IEdmProperty pathProperty,
+            IEdmStructuredType pathStructuredType, IEdmModel edmModel, ModelBoundQuerySettings querySettings = null)
         {
-            QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(edmProperty, edmModel);
-            return annotation == null ? false : annotation.Restrictions.AutoExpand;
+            if (querySettings == null)
+            {
+                querySettings = GetModelBoundQuerySettings(pathProperty, pathStructuredType, edmModel);
+            }
+
+            if (querySettings != null && querySettings.IsAutomaticSelect(property.Name))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsAutoExpand(IEdmProperty navigationProperty, IEdmProperty pathProperty,
+            IEdmStructuredType pathStructuredType, IEdmModel edmModel, ModelBoundQuerySettings querySettings = null)
+        {
+            QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(navigationProperty, edmModel);
+            if (annotation != null && annotation.Restrictions.AutoExpand)
+            {
+                return true;
+            }
+
+            if (querySettings == null)
+            {
+                querySettings = GetModelBoundQuerySettings(pathProperty, pathStructuredType, edmModel);
+            }
+
+            if (querySettings != null && querySettings.IsAutomaticExpand(navigationProperty.Name))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public static IEnumerable<IEdmNavigationProperty> GetAutoExpandNavigationProperties(
-            IEdmEntityType entityType, IEdmModel edmModel, ModelBoundQuerySettings querySettings = null)
+            IEdmProperty pathProperty, IEdmStructuredType pathStructuredType, IEdmModel edmModel,
+            ModelBoundQuerySettings querySettings = null)
         {
             List<IEdmNavigationProperty> autoExpandNavigationProperties = new List<IEdmNavigationProperty>();
-            if (entityType != null)
+            IEdmEntityType baseEntityType = pathStructuredType as IEdmEntityType;
+            if (baseEntityType != null)
             {
-                if (querySettings == null)
+                List<IEdmEntityType> entityTypes = new List<IEdmEntityType>();
+                entityTypes.Add(baseEntityType);
+                entityTypes.AddRange(GetAllDerivedEntityTypes(baseEntityType, edmModel));
+                foreach (var entityType in entityTypes)
                 {
-                    querySettings = GetModelBoundQuerySettings(entityType, edmModel);
-                }
+                    IEnumerable<IEdmNavigationProperty> navigationProperties = entityType == baseEntityType
+                        ? entityType.NavigationProperties()
+                        : entityType.DeclaredNavigationProperties();
 
-                IEnumerable<IEdmNavigationProperty> navigationProperties = entityType.NavigationProperties();
-                if (navigationProperties != null)
-                {
-                    autoExpandNavigationProperties.AddRange(
-                        navigationProperties.Where(
-                            navigationProperty =>
-                                IsAutoExpand(navigationProperty, edmModel) ||
-                                querySettings.IsAutomaticExpand(navigationProperty.Name)));
+                    if (navigationProperties != null)
+                    {
+                        autoExpandNavigationProperties.AddRange(
+                            navigationProperties.Where(
+                                navigationProperty =>
+                                    IsAutoExpand(navigationProperty, pathProperty, entityType, edmModel, querySettings)));
+                    }
                 }
             }
 
             return autoExpandNavigationProperties;
+        }
+
+        public static IEnumerable<IEdmStructuralProperty> GetAutoSelectProperties(
+            IEdmProperty pathProperty,
+            IEdmStructuredType pathStructuredType,
+            IEdmModel edmModel,
+            ModelBoundQuerySettings querySettings = null)
+        {
+            List<IEdmStructuralProperty> autoSelectProperties = new List<IEdmStructuralProperty>();
+            IEdmEntityType baseEntityType = pathStructuredType as IEdmEntityType;
+            if (baseEntityType != null)
+            {
+                List<IEdmEntityType> entityTypes = new List<IEdmEntityType>();
+                entityTypes.Add(baseEntityType);
+                entityTypes.AddRange(GetAllDerivedEntityTypes(baseEntityType, edmModel));
+                foreach (var entityType in entityTypes)
+                {
+                    IEnumerable<IEdmStructuralProperty> properties = entityType == baseEntityType
+                        ? entityType.StructuralProperties()
+                        : entityType.DeclaredStructuralProperties();
+                    if (properties != null)
+                    {
+                        autoSelectProperties.AddRange(
+                            properties.Where(
+                                property =>
+                                    IsAutoSelect(property, pathProperty, entityType, edmModel,
+                                        querySettings)));
+                    }
+                }
+            }
+            else if (pathStructuredType != null)
+            {
+                IEnumerable<IEdmStructuralProperty> properties = pathStructuredType.StructuralProperties();
+                if (properties != null)
+                {
+                    autoSelectProperties.AddRange(
+                        properties.Where(
+                            property =>
+                                IsAutoSelect(property, pathProperty, pathStructuredType, edmModel,
+                                    querySettings)));
+                }
+            }
+
+            return autoSelectProperties;
         }
 
         public static bool IsTopLimitExceeded(IEdmProperty property, IEdmStructuredType structuredType,
@@ -439,7 +552,7 @@ namespace System.Web.OData.Formatter
                     expandConfiguration = new ExpandConfiguration
                     {
                         ExpandType = querySettings.DefaultExpandType.Value,
-                        MaxDepth = querySettings.DefaultMaxDepth.Value
+                        MaxDepth = querySettings.DefaultMaxDepth
                     };
                 }
 
@@ -449,55 +562,6 @@ namespace System.Web.OData.Formatter
             return false;
         }
 
-        public static ModelBoundQuerySettings GetMergedPropertyQuerySettings(
-            ModelBoundQuerySettings propertyQuerySettings, ModelBoundQuerySettings propertyTypeQuerySettings)
-        {
-            ModelBoundQuerySettings mergedQuerySettings = new ModelBoundQuerySettings(propertyQuerySettings);
-            if (propertyTypeQuerySettings != null)
-            {
-                if (!mergedQuerySettings.PageSize.HasValue)
-                {
-                    mergedQuerySettings.PageSize =
-                        propertyTypeQuerySettings.PageSize;
-                }
-
-                if (mergedQuerySettings.MaxTop == 0 && propertyTypeQuerySettings.MaxTop != 0)
-                {
-                    mergedQuerySettings.MaxTop =
-                        propertyTypeQuerySettings.MaxTop;
-                }
-
-                if (!mergedQuerySettings.Countable.HasValue)
-                {
-                    mergedQuerySettings.Countable = propertyTypeQuerySettings.Countable;
-                }
-
-                if (mergedQuerySettings.OrderByConfigurations.Count == 0 &&
-                    !mergedQuerySettings.DefaultEnableOrderBy.HasValue)
-                {
-                    mergedQuerySettings.CopyOrderByConfigurations(propertyTypeQuerySettings.OrderByConfigurations);
-                    mergedQuerySettings.DefaultEnableOrderBy = propertyTypeQuerySettings.DefaultEnableOrderBy;
-                }
-
-                if (mergedQuerySettings.FilterConfigurations.Count == 0 &&
-                    !mergedQuerySettings.DefaultEnableFilter.HasValue)
-                {
-                    mergedQuerySettings.CopyFilterConfigurations(propertyTypeQuerySettings.FilterConfigurations);
-                    mergedQuerySettings.DefaultEnableFilter = propertyTypeQuerySettings.DefaultEnableFilter;
-                }
-
-                if (mergedQuerySettings.ExpandConfigurations.Count == 0 &&
-                    !mergedQuerySettings.DefaultExpandType.HasValue)
-                {
-                    mergedQuerySettings.CopyExpandConfigurations(
-                        propertyTypeQuerySettings.ExpandConfigurations);
-                    mergedQuerySettings.DefaultExpandType = propertyTypeQuerySettings.DefaultExpandType;
-                    mergedQuerySettings.DefaultMaxDepth = propertyTypeQuerySettings.DefaultMaxDepth;
-                }
-            }
-            return mergedQuerySettings;
-        }
-
         public static ModelBoundQuerySettings GetModelBoundQuerySettings(IEdmProperty property,
             IEdmStructuredType structuredType, IEdmModel edmModel, DefaultQuerySettings defaultQuerySettings = null)
         {
@@ -505,43 +569,43 @@ namespace System.Web.OData.Formatter
 
             ModelBoundQuerySettings querySettings = GetModelBoundQuerySettings(structuredType, edmModel,
                 defaultQuerySettings);
-            ModelBoundQuerySettings propertyQuerySettings = GetModelBoundQuerySettings(property, edmModel,
-                defaultQuerySettings);
             if (property == null)
             {
                 return querySettings;
             }
             else
             {
+                ModelBoundQuerySettings propertyQuerySettings = GetModelBoundQuerySettings(property, edmModel,
+                    defaultQuerySettings);
                 return GetMergedPropertyQuerySettings(propertyQuerySettings,
                     querySettings);
             }
         }
 
-        private static ModelBoundQuerySettings GetModelBoundQuerySettings<T>(T key, IEdmModel edmModel,
-            DefaultQuerySettings defaultQuerySettings = null)
-            where T : IEdmElement
+        public static IEnumerable<IEdmEntityType> GetAllDerivedEntityTypes(
+            IEdmEntityType entityType, IEdmModel edmModel)
         {
-            Contract.Assert(edmModel != null);
-
-            if (key == null)
+            List<IEdmEntityType> derivedEntityTypes = new List<IEdmEntityType>();
+            if (entityType != null)
             {
-                return null;
-            }
-            else
-            {
-                ModelBoundQuerySettings querySettings = edmModel.GetAnnotationValue<ModelBoundQuerySettings>(key);
-                if (querySettings == null)
+                List<IEdmStructuredType> typeList = new List<IEdmStructuredType>();
+                typeList.Add(entityType);
+                while (typeList.Count > 0)
                 {
-                    querySettings = new ModelBoundQuerySettings();
-                    if (defaultQuerySettings != null &&
-                        (!defaultQuerySettings.MaxTop.HasValue || defaultQuerySettings.MaxTop > 0))
+                    var head = typeList[0];
+                    derivedEntityTypes.Add(head as IEdmEntityType);
+                    var derivedTypes = edmModel.FindDirectlyDerivedTypes(head);
+                    if (derivedTypes != null)
                     {
-                        querySettings.MaxTop = defaultQuerySettings.MaxTop;
+                        typeList.AddRange(derivedTypes);
                     }
+
+                    typeList.RemoveAt(0);
                 }
-                return querySettings;
             }
+
+            derivedEntityTypes.RemoveAt(0);
+            return derivedEntityTypes;
         }
 
         public static IEdmType GetElementType(IEdmTypeReference edmTypeReference)
@@ -610,15 +674,6 @@ namespace System.Web.OData.Formatter
                     }
                 }
             }
-        }
-
-        private static QueryableRestrictionsAnnotation GetPropertyRestrictions(IEdmProperty edmProperty,
-            IEdmModel edmModel)
-        {
-            Contract.Assert(edmProperty != null);
-            Contract.Assert(edmModel != null);
-
-            return edmModel.GetAnnotationValue<QueryableRestrictionsAnnotation>(edmProperty);
         }
 
         public static string GetClrPropertyName(IEdmProperty edmProperty, IEdmModel edmModel)
@@ -711,8 +766,6 @@ namespace System.Web.OData.Formatter
             return String.Format(CultureInfo.InvariantCulture, "{0}.{1}", clrType.Namespace, clrType.EdmName());
         }
 
-        private static ConcurrentDictionary<IEdmEntitySet, IEnumerable<IEdmStructuralProperty>> _concurrencyProperties;
-
         public static IEnumerable<IEdmStructuralProperty> GetConcurrencyProperties(this IEdmModel model, IEdmEntitySet entitySet)
         {
             Contract.Assert(model != null);
@@ -766,14 +819,105 @@ namespace System.Web.OData.Formatter
             return (type != null && typeof(DynamicTypeWrapper).IsAssignableFrom(type));
         }
 
-        private static IEdmPrimitiveType GetPrimitiveType(EdmPrimitiveTypeKind primitiveKind)
-        {
-            return _coreModel.GetPrimitiveType(primitiveKind);
-        }
-
         public static bool IsNullable(Type type)
         {
             return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
+        }
+
+        private static ModelBoundQuerySettings GetMergedPropertyQuerySettings(
+            ModelBoundQuerySettings propertyQuerySettings, ModelBoundQuerySettings propertyTypeQuerySettings)
+        {
+            ModelBoundQuerySettings mergedQuerySettings = new ModelBoundQuerySettings(propertyQuerySettings);
+            if (propertyTypeQuerySettings != null)
+            {
+                if (!mergedQuerySettings.PageSize.HasValue)
+                {
+                    mergedQuerySettings.PageSize =
+                        propertyTypeQuerySettings.PageSize;
+                }
+
+                if (mergedQuerySettings.MaxTop == 0 && propertyTypeQuerySettings.MaxTop != 0)
+                {
+                    mergedQuerySettings.MaxTop =
+                        propertyTypeQuerySettings.MaxTop;
+                }
+
+                if (!mergedQuerySettings.Countable.HasValue)
+                {
+                    mergedQuerySettings.Countable = propertyTypeQuerySettings.Countable;
+                }
+
+                if (mergedQuerySettings.OrderByConfigurations.Count == 0 &&
+                    !mergedQuerySettings.DefaultEnableOrderBy.HasValue)
+                {
+                    mergedQuerySettings.CopyOrderByConfigurations(propertyTypeQuerySettings.OrderByConfigurations);
+                    mergedQuerySettings.DefaultEnableOrderBy = propertyTypeQuerySettings.DefaultEnableOrderBy;
+                }
+
+                if (mergedQuerySettings.FilterConfigurations.Count == 0 &&
+                    !mergedQuerySettings.DefaultEnableFilter.HasValue)
+                {
+                    mergedQuerySettings.CopyFilterConfigurations(propertyTypeQuerySettings.FilterConfigurations);
+                    mergedQuerySettings.DefaultEnableFilter = propertyTypeQuerySettings.DefaultEnableFilter;
+                }
+
+                if (mergedQuerySettings.SelectConfigurations.Count == 0 &&
+                    !mergedQuerySettings.DefaultSelectType.HasValue)
+                {
+                    mergedQuerySettings.CopySelectConfigurations(propertyTypeQuerySettings.SelectConfigurations);
+                    mergedQuerySettings.DefaultSelectType = propertyTypeQuerySettings.DefaultSelectType;
+                }
+
+                if (mergedQuerySettings.ExpandConfigurations.Count == 0 &&
+                    !mergedQuerySettings.DefaultExpandType.HasValue)
+                {
+                    mergedQuerySettings.CopyExpandConfigurations(
+                        propertyTypeQuerySettings.ExpandConfigurations);
+                    mergedQuerySettings.DefaultExpandType = propertyTypeQuerySettings.DefaultExpandType;
+                    mergedQuerySettings.DefaultMaxDepth = propertyTypeQuerySettings.DefaultMaxDepth;
+                }
+            }
+            return mergedQuerySettings;
+        }
+
+        private static ModelBoundQuerySettings GetModelBoundQuerySettings<T>(T key, IEdmModel edmModel,
+            DefaultQuerySettings defaultQuerySettings = null)
+            where T : IEdmElement
+        {
+            Contract.Assert(edmModel != null);
+
+            if (key == null)
+            {
+                return null;
+            }
+            else
+            {
+                ModelBoundQuerySettings querySettings = edmModel.GetAnnotationValue<ModelBoundQuerySettings>(key);
+                if (querySettings == null)
+                {
+                    querySettings = new ModelBoundQuerySettings();
+                    if (defaultQuerySettings != null &&
+                        (!defaultQuerySettings.MaxTop.HasValue || defaultQuerySettings.MaxTop > 0))
+                    {
+                        querySettings.MaxTop = defaultQuerySettings.MaxTop;
+                    }
+                }
+                return querySettings;
+            }
+        }
+
+        private static QueryableRestrictionsAnnotation GetPropertyRestrictions(IEdmProperty edmProperty,
+            IEdmModel edmModel)
+        {
+            Contract.Assert(edmProperty != null);
+            Contract.Assert(edmModel != null);
+
+            return edmModel.GetAnnotationValue<QueryableRestrictionsAnnotation>(edmProperty);
+        }
+
+        private static IEdmPrimitiveType GetPrimitiveType(EdmPrimitiveTypeKind primitiveKind)
+        {
+            return _coreModel.GetPrimitiveType(primitiveKind);
         }
 
         private static bool IsSelectExpandWrapper(Type type, out Type entityType)

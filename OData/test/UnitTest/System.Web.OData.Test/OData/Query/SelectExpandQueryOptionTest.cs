@@ -606,18 +606,20 @@ namespace System.Web.OData.Query
             Assert.Equal(0, clauseOfParent.SelectedItems.Count());
         }
 
-        [Fact]
-        public void ProcessLevelsCorrectly_WithMaxLevelsAndAutoExpand()
+        [Theory]
+        [InlineData("http://test")]
+        [InlineData("http://test?$expand=Friend($levels=max)")]
+        public void ProcessLevelsCorrectly_WithAutoExpand(string url)
         {
             // Arrange
             var model = GetAutoExpandEdmModel();
             var context = new ODataQueryContext(
                 model,
                 model.FindDeclaredType("System.Web.OData.TestCommon.Models.AutoExpandCustomer"));
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://test?$expand=Friend($levels=max)");
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.EnableHttpDependencyInjectionSupport();
             var queryOption = new ODataQueryOptions(context, request);
-            queryOption.AddAutoExpandProperties();
+            queryOption.AddAutoSelectExpandProperties();
             var selectExpand = queryOption.SelectExpand;
 
             // Act
@@ -631,9 +633,9 @@ namespace System.Web.OData.Query
             var cutomer = Assert.Single(
                 clause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Where(
                     item => item.PathToNavigationProperty.FirstSegment is NavigationPropertySegment &&
-                    ((NavigationPropertySegment)item.PathToNavigationProperty.FirstSegment).NavigationProperty.Name == "Friend")
+                            ((NavigationPropertySegment) item.PathToNavigationProperty.FirstSegment).NavigationProperty
+                                .Name == "Friend")
                 );
-            Assert.Null(cutomer.LevelsOption);
 
             var clauseOfCustomer = cutomer.SelectAndExpand;
             Assert.True(clauseOfCustomer.AllSelected);
@@ -641,9 +643,10 @@ namespace System.Web.OData.Query
 
             // Order under Customer.
             var order = Assert.Single(
-                clauseOfCustomer.SelectedItems.OfType<ExpandedNavigationSelectItem>().Where(
+                clause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Where(
                     item => item.PathToNavigationProperty.FirstSegment is NavigationPropertySegment &&
-                    ((NavigationPropertySegment)item.PathToNavigationProperty.FirstSegment).NavigationProperty.Name == "Order")
+                            ((NavigationPropertySegment) item.PathToNavigationProperty.FirstSegment).NavigationProperty
+                                .Name == "Order")
                 );
             Assert.Null(order.LevelsOption);
 
@@ -651,79 +654,37 @@ namespace System.Web.OData.Query
             Assert.True(clauseOfOrder.AllSelected);
             Assert.Equal(1, clauseOfOrder.SelectedItems.Count());
 
-            // ChoiceOrder under Order.
-            var choiceOrder = Assert.Single(
-                clauseOfOrder.SelectedItems.OfType<ExpandedNavigationSelectItem>().Where(
-                    item => item.PathToNavigationProperty.FirstSegment is NavigationPropertySegment &&
-                    ((NavigationPropertySegment)item.PathToNavigationProperty.FirstSegment).NavigationProperty.Name == "Choice")
-                );
+            // Choice Order under Order
+            var choiceOrder = Assert.IsType<ExpandedNavigationSelectItem>(clauseOfOrder.SelectedItems.Single());
             Assert.Null(choiceOrder.LevelsOption);
+            Assert.True(choiceOrder.SelectAndExpand.AllSelected);
+            Assert.Equal(0, choiceOrder.SelectAndExpand.SelectedItems.Count());
 
-            var clauseOfChoiceOrder = choiceOrder.SelectAndExpand;
-            Assert.True(clauseOfChoiceOrder.AllSelected);
-            Assert.Equal(0, clauseOfChoiceOrder.SelectedItems.Count());
+            // Level 2 of Order.
+            order = Assert.Single(
+                clauseOfCustomer.SelectedItems.OfType<ExpandedNavigationSelectItem>().Where(
+                    item => item.PathToNavigationProperty.FirstSegment is NavigationPropertySegment &&
+                            ((NavigationPropertySegment) item.PathToNavigationProperty.FirstSegment).NavigationProperty
+                                .Name == "Order")
+                );
+            Assert.Null(order.LevelsOption);
+
+            clauseOfOrder = order.SelectAndExpand;
+            Assert.True(clauseOfOrder.AllSelected);
+            Assert.Equal(0, clauseOfOrder.SelectedItems.Count());
 
             // Level 2 of Customer.
             cutomer = Assert.Single(
                 clauseOfCustomer.SelectedItems.OfType<ExpandedNavigationSelectItem>().Where(
                     item => item.PathToNavigationProperty.FirstSegment is NavigationPropertySegment &&
-                    ((NavigationPropertySegment)item.PathToNavigationProperty.FirstSegment).NavigationProperty.Name == "Friend")
+                            ((NavigationPropertySegment) item.PathToNavigationProperty.FirstSegment).NavigationProperty
+                                .Name == "Friend")
                 );
             Assert.Null(cutomer.LevelsOption);
 
             clauseOfCustomer = cutomer.SelectAndExpand;
             Assert.True(clauseOfCustomer.AllSelected);
-            Assert.Equal(1, clauseOfCustomer.SelectedItems.Count());
-        }
-
-        [Fact]
-        public void ProcessLevelsCorrectly_WithAutoExpand()
-        {
-            // Arrange
-            var model = GetAutoExpandEdmModel();
-            var context = new ODataQueryContext(
-                model,
-                model.FindDeclaredType("System.Web.OData.TestCommon.Models.AutoExpandCustomer"));
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://test");
-            request.EnableHttpDependencyInjectionSupport();
-            var queryOption = new ODataQueryOptions(context, request);
-            queryOption.AddAutoExpandProperties();
-            var selectExpand = queryOption.SelectExpand;
-
-            // Act
-            SelectExpandClause clause = selectExpand.ProcessLevels();
-
-            // Assert
-            Assert.True(clause.AllSelected);
-            Assert.Equal(2, clause.SelectedItems.Count());
-
-            // Level 1 of Customer.
-            var cutomer = Assert.Single(
-                clause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Where(
-                    item => item.PathToNavigationProperty.FirstSegment is NavigationPropertySegment &&
-                    ((NavigationPropertySegment)item.PathToNavigationProperty.FirstSegment).NavigationProperty.Name == "Friend")
-                );
-            Assert.Null(cutomer.LevelsOption);
-
-            var clauseOfCustomer = cutomer.SelectAndExpand;
-            Assert.True(clauseOfCustomer.AllSelected);
-            Assert.Equal(1, clauseOfCustomer.SelectedItems.Count());
-
-            // Order under Customer.
-            var order = Assert.IsType<ExpandedNavigationSelectItem>(clauseOfCustomer.SelectedItems.Single());
-            Assert.Null(order.LevelsOption);
-
-            var clauseOfOrder = order.SelectAndExpand;
-            Assert.True(clauseOfOrder.AllSelected);
-            Assert.Equal(1, clauseOfOrder.SelectedItems.Count());
-
-            // ChoiceOrder under Order.
-            var choiceOrder = Assert.IsType<ExpandedNavigationSelectItem>(clauseOfOrder.SelectedItems.Single());
-            Assert.Null(choiceOrder.LevelsOption);
-
-            var clauseOfChoiceOrder = choiceOrder.SelectAndExpand;
-            Assert.True(clauseOfChoiceOrder.AllSelected);
-            Assert.Equal(0, clauseOfChoiceOrder.SelectedItems.Count());
+            Assert.Equal(0, clauseOfCustomer.SelectedItems.Count());
         }
 
         private IEdmModel GetAutoExpandEdmModel()

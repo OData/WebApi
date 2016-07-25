@@ -7,8 +7,8 @@ using System.Diagnostics.CodeAnalysis;
 namespace System.Web.OData.Query
 {
     /// <summary>
-    /// Represents an <see cref="Attribute"/> that can be placed on a property or a class to specify that
-    /// the <see cref="ExpandConfiguration"/> of navigation properties.
+    /// Represents an <see cref="Attribute"/> that can be placed on a property or a class
+    /// correlate to OData's $expand query option settings.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = true)]
     [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments",
@@ -16,8 +16,8 @@ namespace System.Web.OData.Query
     public sealed class ExpandAttribute : Attribute
     {
         private readonly Dictionary<string, ExpandConfiguration> _expandConfigurations = new Dictionary<string, ExpandConfiguration>();
-        private ExpandType _expandType;
-        private ExpandType? _defaultExpandType;
+        private SelectExpandType _expandType;
+        private SelectExpandType? _defaultExpandType;
         private int? _defaultMaxDepth;
         private int _maxDepth;
 
@@ -26,7 +26,7 @@ namespace System.Web.OData.Query
         /// </summary>
         public ExpandAttribute()
         {
-            _defaultExpandType = ExpandType.Allowed;
+            _defaultExpandType = SelectExpandType.Allowed;
             _defaultMaxDepth = ODataValidationSettings.DefaultMaxExpansionDepth;
         }
 
@@ -42,7 +42,7 @@ namespace System.Web.OData.Query
                 {
                     _expandConfigurations.Add(property, new ExpandConfiguration
                     {
-                        ExpandType = ExpandType.Allowed,
+                        ExpandType = SelectExpandType.Allowed,
                         MaxDepth = ODataValidationSettings.DefaultMaxExpansionDepth
                     });
                 }
@@ -63,7 +63,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// Gets or sets the <see cref="ExpandType"/> of navigation properties.
         /// </summary>
-        public ExpandType ExpandType
+        public SelectExpandType ExpandType
         {
             get
             {
@@ -108,7 +108,7 @@ namespace System.Web.OData.Query
             }
         }
 
-        internal ExpandType? DefaultExpandType
+        internal SelectExpandType? DefaultExpandType
         {
             get
             {

@@ -956,8 +956,8 @@ namespace System.Web.OData.Query
         [Fact]
         public void OnActionExecuted_SingleResult_ReturnsSingleItemEvenIfThereIsNoSelectExpand()
         {
-            Customer customer = new Customer();
-            SingleResult singleResult = new SingleResult<Customer>(new Customer[] { customer }.AsQueryable());
+            BellevueCustomer customer = new BellevueCustomer();
+            SingleResult singleResult = new SingleResult<BellevueCustomer>(new BellevueCustomer[] { customer }.AsQueryable());
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", singleResult);
             EnableQueryAttribute attribute = new EnableQueryAttribute();
 

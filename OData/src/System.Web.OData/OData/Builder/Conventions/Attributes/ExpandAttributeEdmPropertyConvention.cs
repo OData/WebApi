@@ -43,7 +43,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 if (expandAttribute.ExpandConfigurations.Count == 0)
                 {
                     querySettings.DefaultExpandType = expandAttribute.DefaultExpandType;
-                    querySettings.DefaultMaxDepth = expandAttribute.DefaultMaxDepth;
+                    querySettings.DefaultMaxDepth = expandAttribute.DefaultMaxDepth ?? ODataValidationSettings.DefaultMaxExpansionDepth;
                 }
             }
         }

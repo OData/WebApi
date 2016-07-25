@@ -57,6 +57,8 @@ namespace System.Web.OData.Builder
             new FilterAttributeEdmTypeConvention(),
             new OrderByAttributeEdmPropertyConvention(),
             new FilterAttributeEdmPropertyConvention(),
+            new SelectAttributeEdmTypeConvention(),
+            new SelectAttributeEdmPropertyConvention(),
 
             // INavigationSourceConvention's
             new SelfLinksGenerationConvention(),

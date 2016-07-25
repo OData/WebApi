@@ -63,11 +63,8 @@ namespace System.Web.OData.Query.Validators
 
             if (filterQueryOption.Context.Path != null)
             {
-                string name;
-                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(filterQueryOption.Context.Path.Segments,
-                    out _property,
-                    out _structuredType,
-                    out name);
+                _property = filterQueryOption.Context.TargetProperty;
+                _structuredType = filterQueryOption.Context.TargetStructuredType;
             }
 
             Validate(filterQueryOption.FilterClause, settings, filterQueryOption.Context.Model);
@@ -415,8 +412,30 @@ namespace System.Web.OData.Query.Validators
 
             // Check whether the property is filterable.
             IEdmProperty property = propertyAccessNode.Property;
-            if (EdmLibHelpers.IsNotFilterable(property, _property, _structuredType, _model,
-                _defaultQuerySettings.EnableFilter))
+            bool notFilterable = false;
+            if (propertyAccessNode.Source != null)
+            {
+                if (propertyAccessNode.Source.Kind == QueryNodeKind.SingleNavigationNode)
+                {
+                    SingleNavigationNode singleNavigationNode = propertyAccessNode.Source as SingleNavigationNode;
+                    notFilterable = EdmLibHelpers.IsNotFilterable(property, singleNavigationNode.NavigationProperty,
+                        singleNavigationNode.NavigationProperty.ToEntityType(), _model,
+                        _defaultQuerySettings.EnableFilter);
+                }
+                else if (propertyAccessNode.Source.Kind == QueryNodeKind.SingleComplexNode)
+                {
+                    SingleComplexNode singleComplexNode = propertyAccessNode.Source as SingleComplexNode;
+                    notFilterable = EdmLibHelpers.IsNotFilterable(property, singleComplexNode.Property,
+                        property.DeclaringType, _model, _defaultQuerySettings.EnableFilter);
+                }
+                else
+                {
+                    notFilterable = EdmLibHelpers.IsNotFilterable(property, _property, _structuredType, _model,
+                        _defaultQuerySettings.EnableFilter);
+                }
+            }
+
+            if (notFilterable)
             {
                 throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, property.Name));
             }

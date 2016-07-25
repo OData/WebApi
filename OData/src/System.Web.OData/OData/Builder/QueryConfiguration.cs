@@ -56,7 +56,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Sets the ExpandConfigurations in <see cref="ModelBoundQuerySettings"/>.
         /// </summary>
-        public virtual void SetExpand(IEnumerable<string> properties, int? maxDepth, ExpandType expandType)
+        public virtual void SetExpand(IEnumerable<string> properties, int? maxDepth, SelectExpandType expandType)
         {
             GetModelBoundQuerySettingsOrDefault();
             if (properties == null)
@@ -68,18 +68,30 @@ namespace System.Web.OData.Builder
             {
                 foreach (var property in properties)
                 {
-                    if (!ModelBoundQuerySettings.ExpandConfigurations.ContainsKey(property))
+                    ModelBoundQuerySettings.ExpandConfigurations[property] = new ExpandConfiguration
                     {
-                        ModelBoundQuerySettings.ExpandConfigurations.Add(property, new ExpandConfiguration
-                        {
-                            ExpandType = expandType,
-                            MaxDepth = maxDepth ?? ODataValidationSettings.DefaultMaxExpansionDepth
-                        });
-                    }
-                    else
-                    {
-                        ModelBoundQuerySettings.ExpandConfigurations[property].ExpandType = expandType;
-                    }
+                        ExpandType = expandType,
+                        MaxDepth = maxDepth ?? ODataValidationSettings.DefaultMaxExpansionDepth
+                    };
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the SelectConfigurations in <see cref="ModelBoundQuerySettings"/>.
+        /// </summary>
+        public virtual void SetSelect(IEnumerable<string> properties, SelectExpandType selectType)
+        {
+            GetModelBoundQuerySettingsOrDefault();
+            if (properties == null)
+            {
+                ModelBoundQuerySettings.DefaultSelectType = selectType;
+            }
+            else
+            {
+                foreach (var property in properties)
+                {
+                    ModelBoundQuerySettings.SelectConfigurations[property] = selectType;
                 }
             }
         }
@@ -98,14 +110,7 @@ namespace System.Web.OData.Builder
             {
                 foreach (var property in properties)
                 {
-                    if (!ModelBoundQuerySettings.OrderByConfigurations.ContainsKey(property))
-                    {
-                        ModelBoundQuerySettings.OrderByConfigurations.Add(property, enableOrderBy);
-                    }
-                    else
-                    {
-                        ModelBoundQuerySettings.OrderByConfigurations[property] = enableOrderBy;
-                    }
+                    ModelBoundQuerySettings.OrderByConfigurations[property] = enableOrderBy;
                 }
             }
         }
@@ -124,14 +129,7 @@ namespace System.Web.OData.Builder
             {
                 foreach (var property in properties)
                 {
-                    if (!ModelBoundQuerySettings.FilterConfigurations.ContainsKey(property))
-                    {
-                        ModelBoundQuerySettings.FilterConfigurations.Add(property, enableFilter);
-                    }
-                    else
-                    {
-                        ModelBoundQuerySettings.FilterConfigurations[property] = enableFilter;
-                    }
+                    ModelBoundQuerySettings.FilterConfigurations[property] = enableFilter;
                 }
             }
         }

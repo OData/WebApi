@@ -406,7 +406,7 @@ namespace System.Web.OData
                     _querySettings.ModelBoundPageSize.HasValue ||
                     responseContent.Value is SingleResult ||
                     ODataCountMediaTypeMapping.IsCountRequest(request) ||
-                    ContainsAutoExpandProperty(responseContent.Value, request, actionDescriptor));
+                    ContainsAutoSelectExpandProperty(responseContent.Value, request, actionDescriptor));
 
                 if (shouldApplyQuery)
                 {
@@ -569,17 +569,8 @@ namespace System.Web.OData
                 return;
             }
 
-            IEdmProperty property = null;
-            IEdmStructuredType structuredType = queryContext.ElementType as IEdmStructuredType;
-            if (queryContext.Path != null)
-            {
-                string name;
-                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(queryContext.Path.Segments, out property,
-                    out structuredType,
-                    out name);
-            }
-
-            ModelBoundQuerySettings querySettings = EdmLibHelpers.GetModelBoundQuerySettings(property, structuredType,
+            ModelBoundQuerySettings querySettings = EdmLibHelpers.GetModelBoundQuerySettings(queryContext.TargetProperty,
+                queryContext.TargetStructuredType,
                 queryContext.Model);
             if (querySettings != null && querySettings.PageSize.HasValue)
             {
@@ -739,7 +730,8 @@ namespace System.Web.OData
             }
         }
 
-        private bool ContainsAutoExpandProperty(object response, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
+        private bool ContainsAutoSelectExpandProperty(object response, HttpRequestMessage request,
+            HttpActionDescriptor actionDescriptor)
         {
             Type elementClrType = GetElementType(response, actionDescriptor);
 
@@ -749,18 +741,64 @@ namespace System.Web.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            IEdmEntityType entityType = model.GetEdmType(elementClrType) as IEdmEntityType;
-            if (entityType != null)
+            IEdmEntityType baseEntityType = model.GetEdmType(elementClrType) as IEdmEntityType;
+            IEdmStructuredType structuredType = model.GetEdmType(elementClrType) as IEdmStructuredType;
+            IEdmProperty property = null;
+            if (request.ODataProperties().Path != null)
             {
-                ModelBoundQuerySettings querySettings = EdmLibHelpers.GetModelBoundQuerySettings(null, entityType, model);
-                IEnumerable<IEdmNavigationProperty> navigationProperties = entityType.NavigationProperties();
-                if (navigationProperties != null)
+                string name;
+                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(request.ODataProperties().Path.Segments, out property,
+                    out structuredType,
+                    out name);
+            }
+
+            if (baseEntityType != null)
+            {
+                List<IEdmEntityType> entityTypes = new List<IEdmEntityType>();
+                entityTypes.Add(baseEntityType);
+                entityTypes.AddRange(EdmLibHelpers.GetAllDerivedEntityTypes(baseEntityType, model));
+                foreach (var entityType in entityTypes)
                 {
-                    return
-                        navigationProperties.Any(
-                            navigationProperty =>
-                                EdmLibHelpers.IsAutoExpand(navigationProperty, model) ||
-                                querySettings.IsAutomaticExpand(navigationProperty.Name));
+                    IEnumerable<IEdmNavigationProperty> navigationProperties = entityType == baseEntityType
+                        ? entityType.NavigationProperties()
+                        : entityType.DeclaredNavigationProperties();
+                    if (navigationProperties != null)
+                    {
+                        if (navigationProperties.Any(
+                                navigationProperty =>
+                                    EdmLibHelpers.IsAutoExpand(navigationProperty, property, entityType, model)))
+                        {
+                            return true;
+                        }
+                    }
+
+                    IEnumerable<IEdmStructuralProperty> properties = entityType == baseEntityType
+                        ? entityType.StructuralProperties()
+                        : entityType.DeclaredStructuralProperties();
+                    if (properties != null)
+                    {
+                        foreach (var edmProperty in properties)
+                        {
+                            if (EdmLibHelpers.IsAutoSelect(edmProperty, property, entityType, model))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (structuredType != null)
+            {
+                IEnumerable<IEdmStructuralProperty> properties = structuredType.StructuralProperties();
+                if (properties != null)
+                {
+                    foreach (var edmProperty in properties)
+                    {
+                        if (EdmLibHelpers.IsAutoSelect(edmProperty, property, structuredType, model))
+                        {
+                            return true;
+                        }
+                    }
                 }
             }
 

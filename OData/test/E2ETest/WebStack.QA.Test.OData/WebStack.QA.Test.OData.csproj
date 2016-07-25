@@ -179,6 +179,9 @@
     <Compile Include="ModelBoundQuerySettings\FilterAttributeTest\FilterAtrributeController.cs" />
     <Compile Include="ModelBoundQuerySettings\FilterAttributeTest\FilterAttributeEdmModel.cs" />
     <Compile Include="ModelBoundQuerySettings\FilterAttributeTest\FilterAttributeTest.cs" />
+    <Compile Include="ModelBoundQuerySettings\SelectAttributeTest\SelectAttributeController.cs" />
+    <Compile Include="ModelBoundQuerySettings\SelectAttributeTest\SelectAttributeEdmModel.cs" />
+    <Compile Include="ModelBoundQuerySettings\SelectAttributeTest\SelectAttributeTest.cs" />
     <Compile Include="ModelBoundQuerySettings\OrderByAttributeTest\OrderByAttributeEdmModel.cs" />
     <Compile Include="ModelBoundQuerySettings\OrderByAttributeTest\OrderByAtrributeController.cs" />
     <Compile Include="ModelBoundQuerySettings\OrderByAttributeTest\OrderByAttributeTest.cs" />

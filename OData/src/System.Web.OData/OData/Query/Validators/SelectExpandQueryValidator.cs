@@ -21,6 +21,7 @@ namespace System.Web.OData.Query.Validators
     {
         private readonly DefaultQuerySettings _defaultQuerySettings;
         private readonly FilterQueryValidator _filterQueryValidator;
+        private OrderByModelLimitationsValidator _orderByQueryValidator;
         private SelectExpandQueryOption _selectExpandQueryOption;
 
         /// <summary>
@@ -51,6 +52,8 @@ namespace System.Web.OData.Query.Validators
                 throw Error.ArgumentNull("validationSettings");
             }
 
+            _orderByQueryValidator = new OrderByModelLimitationsValidator(selectExpandQueryOption.Context,
+                _defaultQuerySettings.EnableOrderBy);
             _selectExpandQueryOption = selectExpandQueryOption;
             ValidateRestrictions(null, 0, selectExpandQueryOption.SelectExpandClause, null, validationSettings);
 
@@ -168,27 +171,11 @@ namespace System.Web.OData.Query.Validators
         }
 
         private void ValidateOrderByInExpand(IEdmProperty property, IEdmStructuredType structuredType,
-            IEdmModel edmModel, OrderByClause orderByClause)
+            OrderByClause orderByClause)
         {
             if (orderByClause != null)
             {
-                SingleValuePropertyAccessNode node = orderByClause.Expression as SingleValuePropertyAccessNode;
-                if (node != null &&
-                    EdmLibHelpers.IsNotSortable(node.Property, property, structuredType, edmModel,
-                        _defaultQuerySettings.EnableOrderBy))
-                {
-                    throw new ODataException(Error.Format(SRResources.NotSortablePropertyUsedInOrderBy,
-                        node.Property.Name));
-                }
-
-                SingleComplexNode complexNode = orderByClause.Expression as SingleComplexNode;
-                if (complexNode != null &&
-                    EdmLibHelpers.IsNotSortable(complexNode.Property, property, structuredType, edmModel,
-                        _defaultQuerySettings.EnableOrderBy))
-                {
-                    throw new ODataException(Error.Format(SRResources.NotSortablePropertyUsedInOrderBy,
-                        complexNode.Property.Name));
-                }
+                _orderByQueryValidator.TryValidate(property, structuredType, orderByClause, false);
             }
         }
 
@@ -201,7 +188,8 @@ namespace System.Web.OData.Query.Validators
             }
         }
 
-        private static void ValidateSelectItem(SelectItem selectItem, IEdmModel edmModel)
+        private void ValidateSelectItem(SelectItem selectItem, IEdmProperty pathProperty, IEdmStructuredType pathStructuredType,
+            IEdmModel edmModel)
         {
             PathSelectItem pathSelectItem = selectItem as PathSelectItem;
             if (pathSelectItem != null)
@@ -215,6 +203,35 @@ namespace System.Web.OData.Query.Validators
                     {
                         throw new ODataException(Error.Format(SRResources.NotNavigablePropertyUsedInNavigation,
                             property.Name));
+                    }
+                }
+                else
+                {
+                    PropertySegment propertySegment = segment as PropertySegment;
+                    if (propertySegment != null)
+                    {
+                        if (EdmLibHelpers.IsNotSelectable(propertySegment.Property, pathProperty, pathStructuredType, edmModel,
+                            _defaultQuerySettings.EnableSelect))
+                        {
+                            throw new ODataException(Error.Format(SRResources.NotSelectablePropertyUsedInSelect,
+                                propertySegment.Property.Name));
+                        }
+                    }
+                }
+            }
+            else
+            {
+                WildcardSelectItem wildCardSelectItem = selectItem as WildcardSelectItem;
+                if (wildCardSelectItem != null)
+                {
+                    foreach (var property in pathStructuredType.StructuralProperties())
+                    {
+                        if (EdmLibHelpers.IsNotSelectable(property, pathProperty, pathStructuredType, edmModel,
+                            _defaultQuerySettings.EnableSelect))
+                        {
+                            throw new ODataException(Error.Format(SRResources.NotSelectablePropertyUsedInSelect,
+                                property.Name));
+                        }
                     }
                 }
             }
@@ -246,12 +263,24 @@ namespace System.Web.OData.Query.Validators
             else
             {
                 if (!_defaultQuerySettings.EnableExpand ||
-                    (expandConfiguration != null && expandConfiguration.ExpandType == ExpandType.Disabled))
+                    (expandConfiguration != null && expandConfiguration.ExpandType == SelectExpandType.Disabled))
                 {
                     throw new ODataException(Error.Format(SRResources.NotExpandablePropertyUsedInExpand,
                         property.Name));
                 }
             }
+        }
+
+        private void ValidateOtherQueryOptionInExpand(
+            IEdmNavigationProperty property,
+            IEdmModel edmModel,
+            ExpandedNavigationSelectItem expandItem,
+            ODataValidationSettings validationSettings)
+        {
+            ValidateTopInExpand(property, property.ToEntityType(), edmModel, expandItem.TopOption);
+            ValidateCountInExpand(property, property.ToEntityType(), edmModel, expandItem.CountOption);
+            ValidateOrderByInExpand(property, property.ToEntityType(), expandItem.OrderByOption);
+            ValidateFilterInExpand(property, property.ToEntityType(), edmModel, expandItem.FilterOption, validationSettings);
         }
 
         private void ValidateRestrictions(
@@ -267,6 +296,20 @@ namespace System.Web.OData.Query.Validators
             {
                 throw new ODataException(
                     Error.Format(SRResources.MaxExpandDepthExceeded, currentDepth - 1, "MaxExpansionDepth"));
+            }
+
+            IEdmProperty pathProperty;
+            IEdmStructuredType pathStructuredType;
+
+            if (navigationProperty == null)
+            {
+                pathProperty = _selectExpandQueryOption.Context.TargetProperty;
+                pathStructuredType = _selectExpandQueryOption.Context.TargetStructuredType;
+            }
+            else
+            {
+                pathProperty = navigationProperty;
+                pathStructuredType = navigationProperty.ToEntityType();
             }
 
             foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
@@ -285,59 +328,26 @@ namespace System.Web.OData.Query.Validators
 
                     if (edmModel != null)
                     {
-                        ValidateTopInExpand(property, property.ToEntityType(), edmModel, expandItem.TopOption);
-                        ValidateCountInExpand(property, property.ToEntityType(), edmModel, expandItem.CountOption);
-                        ValidateOrderByInExpand(property, property.ToEntityType(), edmModel, expandItem.OrderByOption);
-                        ValidateFilterInExpand(property, property.ToEntityType(), edmModel, expandItem.FilterOption, validationSettings);
-
+                        ValidateOtherQueryOptionInExpand(property, edmModel, expandItem, validationSettings);
                         bool isExpandable;
                         ExpandConfiguration expandConfiguration;
-                        if (navigationProperty == null)
+                        isExpandable = EdmLibHelpers.IsExpandable(property.Name,
+                            pathProperty,
+                            pathStructuredType,
+                            edmModel,
+                            out expandConfiguration);
+                        if (isExpandable)
                         {
-                            IEdmProperty pathProperty = null;
-                            IEdmStructuredType pathStructuredType =
-                                _selectExpandQueryOption.Context.ElementType as IEdmStructuredType;
-                            if (_selectExpandQueryOption.Context.Path != null)
+                            int maxDepth = expandConfiguration.MaxDepth;
+                            if (maxDepth > 0 && (remainDepth == null || maxDepth < remainDepth))
                             {
-                                string name;
-                                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(
-                                    _selectExpandQueryOption.Context.Path.Segments,
-                                    out pathProperty,
-                                    out pathStructuredType,
-                                    out name);
-                            }
-
-                            isExpandable = EdmLibHelpers.IsExpandable(property.Name,
-                                pathProperty,
-                                pathStructuredType,
-                                edmModel,
-                                out expandConfiguration);
-                            if (isExpandable && expandConfiguration.MaxDepth > 0)
-                            {
-                                remainDepth = expandConfiguration.MaxDepth;
+                                remainDepth = maxDepth;
                             }
                         }
-                        else
-                        {
-                            isExpandable = EdmLibHelpers.IsExpandable(property.Name,
-                                navigationProperty,
-                                navigationProperty.ToEntityType(),
-                                edmModel,
-                                out expandConfiguration);
-                            if (isExpandable)
-                            {
-                                int maxDepth = expandConfiguration.MaxDepth;
-                                if (maxDepth > 0 && (remainDepth == null || maxDepth < remainDepth))
-                                {
-                                    remainDepth = maxDepth;
-                                }
-                            }
-                        }
-
-                        if (!isExpandable)
+                        else if (!isExpandable)
                         {
                             if (!_defaultQuerySettings.EnableExpand ||
-                                (expandConfiguration != null && expandConfiguration.ExpandType == ExpandType.Disabled))
+                                (expandConfiguration != null && expandConfiguration.ExpandType == SelectExpandType.Disabled))
                             {
                                 throw new ODataException(Error.Format(SRResources.NotExpandablePropertyUsedInExpand,
                                     property.Name));
@@ -360,7 +370,7 @@ namespace System.Web.OData.Query.Validators
                     remainDepth = depth;
                 }
 
-                ValidateSelectItem(selectItem, edmModel);
+                ValidateSelectItem(selectItem, pathProperty, pathStructuredType, edmModel);
             }
         }
     }

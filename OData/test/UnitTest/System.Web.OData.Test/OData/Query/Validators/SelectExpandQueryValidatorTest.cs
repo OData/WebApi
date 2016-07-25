@@ -3,6 +3,7 @@
 
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization.Models;
 using System.Web.OData.Routing;
@@ -71,7 +72,7 @@ namespace System.Web.OData.Query.Validators
             ModelBoundQuerySettings querySettings = new ModelBoundQuerySettings();
             querySettings.ExpandConfigurations.Add("Orders", new ExpandConfiguration
             {
-                ExpandType = ExpandType.Allowed,
+                ExpandType = SelectExpandType.Allowed,
                 MaxDepth = maxExpansionDepth
             });
             model.Model.SetAnnotationValue(customerType, querySettings);
@@ -251,7 +252,7 @@ namespace System.Web.OData.Query.Validators
             ModelBoundQuerySettings querySettings = new ModelBoundQuerySettings();
             querySettings.ExpandConfigurations.Add("Orders", new ExpandConfiguration
             {
-                ExpandType = ExpandType.Allowed,
+                ExpandType = SelectExpandType.Allowed,
                 MaxDepth = 0
             });
             model.Model.SetAnnotationValue(customerType, querySettings);
@@ -328,7 +329,7 @@ namespace System.Web.OData.Query.Validators
             ModelBoundQuerySettings querySettings = new ModelBoundQuerySettings();
             querySettings.ExpandConfigurations.Add("Orders", new ExpandConfiguration
             {
-                ExpandType = ExpandType.Disabled,
+                ExpandType = SelectExpandType.Disabled,
                 MaxDepth = 0
             });
             model.Model.SetAnnotationValue(customerType, querySettings);

@@ -156,7 +156,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 }
             }
 
-            return new ODataCollectionValue { Items = items, TypeName = typeName };
+            return new ODataCollectionValue { Items = items.Cast<object>(), TypeName = typeName };
         }
     }
 }

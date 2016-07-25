@@ -178,12 +178,12 @@ namespace System.Web.OData.Query.Validators
                 return null;
             }
 
-            public override SingleValueNode Visit(EntityRangeVariableReferenceNode nodeIn)
+            public override SingleValueNode Visit(ResourceRangeVariableReferenceNode nodeIn)
             {
                 return null;
             }
 
-            public override SingleValueNode Visit(NonentityRangeVariableReferenceNode nodeIn)
+            public override SingleValueNode Visit(NonResourceRangeVariableReferenceNode nodeIn)
             {
                 return null;
             }

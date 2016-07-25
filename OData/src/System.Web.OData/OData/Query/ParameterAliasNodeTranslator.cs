@@ -113,8 +113,10 @@ namespace System.Web.OData.Query
             return nodeIn.Source == null ?
                 nodeIn :
                 new CollectionNavigationNode(
+                    (SingleResourceNode)nodeIn.Source.Accept(this),
                     nodeIn.NavigationProperty,
-                    (SingleEntityNode)nodeIn.Source.Accept(this));
+                    // TODO: need ODL to public the binding path.
+                    new EdmPathExpression(nodeIn.NavigationProperty.Name));
         }
 
         /// <summary>
@@ -174,25 +176,25 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Translate an EntityCollectionCastNode.
+        /// Translate an CollectionResourceCastNode.
         /// </summary>
         /// <param name="nodeIn">The node to be translated.</param>
         /// <returns>The translated node.</returns>
-        public override QueryNode Visit(EntityCollectionCastNode nodeIn)
+        public override QueryNode Visit(CollectionResourceCastNode nodeIn)
         {
-            return new EntityCollectionCastNode(
-                (EntityCollectionNode)nodeIn.Source.Accept(this),
+            return new CollectionResourceCastNode(
+                (CollectionResourceNode)nodeIn.Source.Accept(this),
                 (IEdmEntityType)nodeIn.ItemType.Definition);
         }
 
         /// <summary>
-        /// Translate an EntityCollectionFunctionCallNode.
+        /// Translate an CollectionResourceFunctionCallNode.
         /// </summary>
         /// <param name="nodeIn">The node to be translated.</param>
         /// <returns>The translated node.</returns>
-        public override QueryNode Visit(EntityCollectionFunctionCallNode nodeIn)
+        public override QueryNode Visit(CollectionResourceFunctionCallNode nodeIn)
         {
-            return new EntityCollectionFunctionCallNode(
+            return new CollectionResourceFunctionCallNode(
                 nodeIn.Name,
                 nodeIn.Functions,
                 nodeIn.Parameters.Select(p => p.Accept(this)),
@@ -202,11 +204,11 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Translate an EntityRangeVariableReferenceNode.
+        /// Translate an ResourceRangeVariableReferenceNode.
         /// </summary>
         /// <param name="nodeIn">The node to be translated.</param>
         /// <returns>The original node.</returns>
-        public override QueryNode Visit(EntityRangeVariableReferenceNode nodeIn)
+        public override QueryNode Visit(ResourceRangeVariableReferenceNode nodeIn)
         {
             return nodeIn;
         }
@@ -224,11 +226,11 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Translate a NonentityRangeVariableReferenceNode.
+        /// Translate a NonResourceRangeVariableReferenceNode.
         /// </summary>
         /// <param name="nodeIn">The node to be translated.</param>
         /// <returns>The original node.</returns>
-        public override QueryNode Visit(NonentityRangeVariableReferenceNode nodeIn)
+        public override QueryNode Visit(NonResourceRangeVariableReferenceNode nodeIn)
         {
             return nodeIn;
         }
@@ -263,31 +265,31 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Translate a SingleEntityCastNode.
+        /// Translate a SingleResourceCastNode.
         /// </summary>
         /// <param name="nodeIn">The node to be translated.</param>
         /// <returns>The translated node.</returns>
-        public override QueryNode Visit(SingleEntityCastNode nodeIn)
+        public override QueryNode Visit(SingleResourceCastNode nodeIn)
         {
             return nodeIn.Source == null ?
                 nodeIn :
-                new SingleEntityCastNode(
-                    (SingleEntityNode)nodeIn.Source.Accept(this),
+                new SingleResourceCastNode(
+                    (SingleResourceNode)nodeIn.Source.Accept(this),
                     (IEdmEntityType)nodeIn.TypeReference.Definition);
         }
 
         /// <summary>
-        /// Translate a SingleEntityFunctionCallNode.
+        /// Translate a SingleResourceFunctionCallNode.
         /// </summary>
         /// <param name="nodeIn">The node to be translated.</param>
         /// <returns>The translated node.</returns>
-        public override QueryNode Visit(SingleEntityFunctionCallNode nodeIn)
+        public override QueryNode Visit(SingleResourceFunctionCallNode nodeIn)
         {
-            return new SingleEntityFunctionCallNode(
+            return new SingleResourceFunctionCallNode(
                 nodeIn.Name,
                 nodeIn.Functions,
                 nodeIn.Parameters.Select(p => p.Accept(this)),
-                nodeIn.EntityTypeReference,
+                nodeIn.StructuredTypeReference,
                 nodeIn.NavigationSource,
                 nodeIn.Source == null ? null : nodeIn.Source.Accept(this));
         }
@@ -302,8 +304,10 @@ namespace System.Web.OData.Query
             return nodeIn.Source == null ?
                 nodeIn :
                 new SingleNavigationNode(
+                    (SingleResourceNode)nodeIn.Source.Accept(this),
                     nodeIn.NavigationProperty,
-                    (SingleEntityNode)nodeIn.Source.Accept(this));
+                    // TODO: need ODL to public the binding path.
+                    new EdmPathExpression(nodeIn.NavigationProperty.Name));
         }
 
         /// <summary>

@@ -120,11 +120,11 @@ namespace System.Web.OData.Query.Expressions
                     case QueryNodeKind.CollectionPropertyAccess:
                         return BindCollectionPropertyAccessNode(node as CollectionPropertyAccessNode);
 
-                    case QueryNodeKind.EntityCollectionCast:
-                        return BindEntityCollectionCastNode(node as EntityCollectionCastNode);
+                    case QueryNodeKind.CollectionResourceCast:
+                        return BindCollectionResourceCastNode(node as CollectionResourceCastNode);
 
                     case QueryNodeKind.CollectionFunctionCall:
-                    case QueryNodeKind.EntityCollectionFunctionCall:
+                    case QueryNodeKind.CollectionResourceFunctionCall:
                     case QueryNodeKind.CollectionOpenPropertyAccess:
                     case QueryNodeKind.CollectionPropertyCast:
                     // Unused or have unknown uses.
@@ -145,11 +145,11 @@ namespace System.Web.OData.Query.Expressions
                     case QueryNodeKind.Convert:
                         return BindConvertNode(node as ConvertNode);
 
-                    case QueryNodeKind.EntityRangeVariableReference:
-                        return BindRangeVariable((node as EntityRangeVariableReferenceNode).RangeVariable);
+                    case QueryNodeKind.ResourceRangeVariableReference:
+                        return BindRangeVariable((node as ResourceRangeVariableReferenceNode).RangeVariable);
 
-                    case QueryNodeKind.NonentityRangeVariableReference:
-                        return BindRangeVariable((node as NonentityRangeVariableReferenceNode).RangeVariable);
+                    case QueryNodeKind.NonResourceRangeVariableReference:
+                        return BindRangeVariable((node as NonResourceRangeVariableReferenceNode).RangeVariable);
 
                     case QueryNodeKind.SingleValuePropertyAccess:
                         return BindPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
@@ -173,11 +173,11 @@ namespace System.Web.OData.Query.Expressions
                     case QueryNodeKind.All:
                         return BindAllNode(node as AllNode);
 
-                    case QueryNodeKind.SingleEntityCast:
-                        return BindSingleEntityCastNode(node as SingleEntityCastNode);
+                    case QueryNodeKind.SingleResourceCast:
+                        return BindSingleResourceCastNode(node as SingleResourceCastNode);
 
-                    case QueryNodeKind.SingleEntityFunctionCall:
-                        return BindSingleEntityFunctionCallNode(node as SingleEntityFunctionCallNode);
+                    case QueryNodeKind.SingleResourceFunctionCall:
+                        return BindSingleResourceFunctionCallNode(node as SingleResourceFunctionCallNode);
 
                     case QueryNodeKind.NamedFunctionParameter:
                     case QueryNodeKind.ParameterAlias:
@@ -266,18 +266,18 @@ namespace System.Web.OData.Query.Expressions
             return prop;
         }
 
-        private Expression BindSingleEntityFunctionCallNode(SingleEntityFunctionCallNode node)
+        private Expression BindSingleResourceFunctionCallNode(SingleResourceFunctionCallNode node)
         {
             switch (node.Name)
             {
                 case ClrCanonicalFunctions.CastFunctionName:
-                    return BindSingleEntityCastFunctionCall(node);
+                    return BindSingleResourceCastFunctionCall(node);
                 default:
                     throw Error.NotSupported(SRResources.ODataFunctionNotSupported, node.Name);
             }
         }
 
-        private Expression BindSingleEntityCastFunctionCall(SingleEntityFunctionCallNode node)
+        private Expression BindSingleResourceCastFunctionCall(SingleResourceFunctionCallNode node)
         {
             Contract.Assert(ClrCanonicalFunctions.CastFunctionName == node.Name);
 
@@ -306,23 +306,23 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
-        private Expression BindSingleEntityCastNode(SingleEntityCastNode node)
+        private Expression BindSingleResourceCastNode(SingleResourceCastNode node)
         {
-            IEdmEntityTypeReference entity = node.EntityTypeReference;
-            Contract.Assert(entity != null, "NS casts can contain only entity types");
+            IEdmStructuredTypeReference structured = node.StructuredTypeReference;
+            Contract.Assert(structured != null, "NS casts can contain only structured types");
 
-            Type clrType = EdmLibHelpers.GetClrType(entity, _model);
+            Type clrType = EdmLibHelpers.GetClrType(structured, _model);
 
             Expression source = BindCastSourceNode(node.Source);
             return Expression.TypeAs(source, clrType);
         }
 
-        private Expression BindEntityCollectionCastNode(EntityCollectionCastNode node)
+        private Expression BindCollectionResourceCastNode(CollectionResourceCastNode node)
         {
-            IEdmEntityTypeReference entity = node.EntityItemType;
-            Contract.Assert(entity != null, "NS casts can contain only entity types");
+            IEdmStructuredTypeReference structured = node.ItemStructuredType;
+            Contract.Assert(structured != null, "NS casts can contain only structured types");
 
-            Type clrType = EdmLibHelpers.GetClrType(entity, _model);
+            Type clrType = EdmLibHelpers.GetClrType(structured, _model);
 
             Expression source = BindCastSourceNode(node.Source);
             return OfType(source, clrType);

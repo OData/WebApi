@@ -493,7 +493,7 @@ namespace System.Web.OData.Query.Validators
         }
 
         /// <summary>
-        /// Override this method to validate single entity function calls, such as 'cast'.
+        /// Override this method to validate single resource function calls, such as 'cast'.
         /// </summary>
         /// <param name="node">The node to validate.</param>
         /// <param name="settings">The settings to use while validating.</param>
@@ -502,7 +502,7 @@ namespace System.Web.OData.Query.Validators
         /// testing scenarios and is not intended to be called from user code. Call the Validate method to validate a
         /// <see cref="FilterQueryOption" /> instance.
         /// </remarks>
-        public virtual void ValidateSingleEntityFunctionCallNode(SingleEntityFunctionCallNode node, ODataValidationSettings settings)
+        public virtual void ValidateSingleResourceFunctionCallNode(SingleResourceFunctionCallNode node, ODataValidationSettings settings)
         {
             if (node == null)
             {
@@ -579,41 +579,41 @@ namespace System.Web.OData.Query.Validators
         }
 
         /// <summary>
-        /// Override this method if you want to validate casts on entity collections.
+        /// Override this method if you want to validate casts on resource collections.
         /// </summary>
         /// <remarks>
         /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
         /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
-        /// <param name="entityCollectionCastNode"></param>
+        /// <param name="collectionResourceCastNode"></param>
         /// <param name="settings"></param>
-        public virtual void ValidateEntityCollectionCastNode(EntityCollectionCastNode entityCollectionCastNode, ODataValidationSettings settings)
+        public virtual void ValidateCollectionResourceCastNode(CollectionResourceCastNode collectionResourceCastNode, ODataValidationSettings settings)
         {
-            if (entityCollectionCastNode == null)
+            if (collectionResourceCastNode == null)
             {
-                throw Error.ArgumentNull("entityCollectionCastNode");
+                throw Error.ArgumentNull("collectionResourceCastNode");
             }
 
-            ValidateQueryNode(entityCollectionCastNode.Source, settings);
+            ValidateQueryNode(collectionResourceCastNode.Source, settings);
         }
 
         /// <summary>
-        /// Override this method if you want to validate casts on single entities.
+        /// Override this method if you want to validate casts on single resource.
         /// </summary>
         /// <remarks>
         /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
         /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
         /// </remarks>
-        /// <param name="singleEntityCastNode"></param>
+        /// <param name="singleResourceCastNode"></param>
         /// <param name="settings"></param>
-        public virtual void ValidateSingleEntityCastNode(SingleEntityCastNode singleEntityCastNode, ODataValidationSettings settings)
+        public virtual void ValidateSingleResourceCastNode(SingleResourceCastNode singleResourceCastNode, ODataValidationSettings settings)
         {
-            if (singleEntityCastNode == null)
+            if (singleResourceCastNode == null)
             {
-                throw Error.ArgumentNull("singleEntityCastNode");
+                throw Error.ArgumentNull("singleResourceCastNode");
             }
 
-            ValidateQueryNode(singleEntityCastNode.Source, settings);
+            ValidateQueryNode(singleResourceCastNode.Source, settings);
         }
 
         private void EnterLambda(ODataValidationSettings validationSettings)
@@ -656,12 +656,12 @@ namespace System.Web.OData.Query.Validators
                     ValidateNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty, settings);
                     break;
 
-                case QueryNodeKind.EntityCollectionCast:
-                    ValidateEntityCollectionCastNode(node as EntityCollectionCastNode, settings);
+                case QueryNodeKind.CollectionResourceCast:
+                    ValidateCollectionResourceCastNode(node as CollectionResourceCastNode, settings);
                     break;
 
                 case QueryNodeKind.CollectionFunctionCall:
-                case QueryNodeKind.EntityCollectionFunctionCall:
+                case QueryNodeKind.CollectionResourceFunctionCall:
                 case QueryNodeKind.CollectionOpenPropertyAccess:
                 case QueryNodeKind.CollectionPropertyCast:
                     // Unused or have unknown uses.
@@ -691,12 +691,12 @@ namespace System.Web.OData.Query.Validators
                     ValidateConvertNode(node as ConvertNode, settings);
                     break;
 
-                case QueryNodeKind.EntityRangeVariableReference:
-                    ValidateRangeVariable((node as EntityRangeVariableReferenceNode).RangeVariable, settings);
+                case QueryNodeKind.ResourceRangeVariableReference:
+                    ValidateRangeVariable((node as ResourceRangeVariableReferenceNode).RangeVariable, settings);
                     break;
 
-                case QueryNodeKind.NonentityRangeVariableReference:
-                    ValidateRangeVariable((node as NonentityRangeVariableReferenceNode).RangeVariable, settings);
+                case QueryNodeKind.NonResourceRangeVariableReference:
+                    ValidateRangeVariable((node as NonResourceRangeVariableReferenceNode).RangeVariable, settings);
                     break;
 
                 case QueryNodeKind.SingleValuePropertyAccess:
@@ -711,8 +711,8 @@ namespace System.Web.OData.Query.Validators
                     ValidateSingleValueFunctionCallNode(node as SingleValueFunctionCallNode, settings);
                     break;
 
-                case QueryNodeKind.SingleEntityFunctionCall:
-                    ValidateSingleEntityFunctionCallNode((SingleEntityFunctionCallNode)node, settings);
+                case QueryNodeKind.SingleResourceFunctionCall:
+                    ValidateSingleResourceFunctionCallNode((SingleResourceFunctionCallNode)node, settings);
                     break;
 
                 case QueryNodeKind.SingleNavigationNode:
@@ -720,8 +720,8 @@ namespace System.Web.OData.Query.Validators
                     ValidateNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty, settings);
                     break;
 
-                case QueryNodeKind.SingleEntityCast:
-                    ValidateSingleEntityCastNode(node as SingleEntityCastNode, settings);
+                case QueryNodeKind.SingleResourceCast:
+                    ValidateSingleResourceCastNode(node as SingleResourceCastNode, settings);
                     break;
 
                 case QueryNodeKind.Any:

@@ -256,7 +256,7 @@ namespace System.Web.OData.Query.Expressions
         {
             switch (node.Kind)
             {
-                case QueryNodeKind.EntityRangeVariableReference:
+                case QueryNodeKind.ResourceRangeVariableReference:
                     return this._lambdaParameter;
                 case QueryNodeKind.SingleValuePropertyAccess:
                     var propAccessNode = node as SingleValuePropertyAccessNode;

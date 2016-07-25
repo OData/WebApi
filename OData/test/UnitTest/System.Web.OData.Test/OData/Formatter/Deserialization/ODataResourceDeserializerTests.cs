@@ -382,7 +382,7 @@ namespace System.Web.OData.Formatter.Deserialization
                         new ODataProperty
                         {
                             Name = "ArrayProperty",
-                            Value = new ODataCollectionValue { TypeName = "Collection(Edm.Int32)", Items = new[] {1, 2, 3, 4} }
+                            Value = new ODataCollectionValue { TypeName = "Collection(Edm.Int32)", Items = new[] {1, 2, 3, 4}.Cast<object>() }
                         }
                     }
                 }
@@ -777,59 +777,6 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Throws<ODataException>(
                 () => deserializer.ApplyNestedProperty(42, resourceInfoWrapper, _supplierEdmType, _readContext),
                 "Cannot apply PATCH to navigation property 'Products' on entity type 'ODataDemo.Supplier'.");
-        }
-
-        [Fact(Skip = "TODO: Sam Xu")]
-        public void ApplyNestProperty_Calls_ReadInlineOnResourceSet()
-        {
-            // Arrange
-            Mock<ODataEdmTypeDeserializer> productsDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.ResourceSet);
-            Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
-            var deserializer = new ODataResourceDeserializer(deserializerProvider.Object);
-            ODataNestedResourceInfoWrapper resourceInfoWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo { Name = "Products" });
-            resourceInfoWrapper.NestedItems.Add(new ODataResourceSetWrapper(new ODataResourceSet()));
-
-            Supplier supplier = new Supplier();
-            IEnumerable products = new[] { new Product { ID = 42 } };
-
-            deserializerProvider.Setup(d => d.GetEdmTypeDeserializer(It.IsAny<IEdmTypeReference>())).Returns(productsDeserializer.Object);
-            productsDeserializer
-                .Setup(d => d.ReadInline(resourceInfoWrapper.NestedItems[0], _supplierEdmType.FindNavigationProperty("Products").Type, _readContext))
-                .Returns(products).Verifiable();
-
-            // Act
-            deserializer.ApplyNestedProperty(supplier, resourceInfoWrapper, _supplierEdmType, _readContext);
-
-            // Assert
-            productsDeserializer.Verify();
-            Assert.Equal(1, supplier.Products.Count());
-            Assert.Equal(42, supplier.Products.First().ID);
-        }
-
-        [Fact(Skip = "TODO: Sam Xu about to create the new deserialize context for nested property")]
-        public void ApplyNestedProperty_Calls_ReadInlineOnResource()
-        {
-            // Arrange
-            Mock<ODataEdmTypeDeserializer> supplierDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.ResourceSet);
-            Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
-            var deserializer = new ODataResourceDeserializer(deserializerProvider.Object);
-            ODataNestedResourceInfoWrapper resourceInfoWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo { Name = "Supplier" });
-            resourceInfoWrapper.NestedItems.Add(new ODataResourceWrapper(new ODataResource()));
-
-            Product product = new Product();
-            Supplier supplier = new Supplier { ID = 42 };
-
-            deserializerProvider.Setup(d => d.GetEdmTypeDeserializer(It.IsAny<IEdmTypeReference>())).Returns(supplierDeserializer.Object);
-            supplierDeserializer
-                .Setup(d => d.ReadInline(resourceInfoWrapper.NestedItems[0], _productEdmType.FindNavigationProperty("Supplier").Type, _readContext))
-                .Returns(supplier).Verifiable();
-
-            // Act
-            deserializer.ApplyNestedProperty(product, resourceInfoWrapper, _productEdmType, _readContext);
-
-            // Assert
-            supplierDeserializer.Verify();
-            Assert.Equal(supplier, product.Supplier);
         }
 
         [Fact]

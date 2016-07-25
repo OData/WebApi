@@ -148,7 +148,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             // Act & Assert
             Assert.Throws<SerializationException>(
-                () => deserializer.ReadCollectionValue(new ODataCollectionValue() { Items = new[] { 1, 2, 3 } },
+                () => deserializer.ReadCollectionValue(new ODataCollectionValue() { Items = new[] { 1, 2, 3 }.Cast<object>() },
                     ColorCollectionType.ElementType(), new ODataDeserializerContext())
                     .GetEnumerator()
                     .MoveNext(),
@@ -184,7 +184,7 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Equal(numbers, readnumbers.Cast<int>());
         }
 
-        [Fact(Skip = "TODO: https://github.com/OData/odata.net/issues/580 CreateODataCollectionReader can't work for collection of enum")]
+        [Fact]
         public void Read_Roundtrip_EnumCollection()
         {
             // Arrange

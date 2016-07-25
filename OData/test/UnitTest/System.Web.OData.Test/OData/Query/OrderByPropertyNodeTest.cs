@@ -51,8 +51,8 @@ namespace System.Web.OData.Query
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             IEdmProperty property = model.Customer.FindProperty("ID");
-            EntityRangeVariable variable = new EntityRangeVariable("it", model.Customer.AsReference(), model.Customers);
-            SingleValuePropertyAccessNode node = new SingleValuePropertyAccessNode(new EntityRangeVariableReferenceNode("it", variable), property);
+            ResourceRangeVariable variable = new ResourceRangeVariable("it", model.Customer.AsReference(), model.Customers);
+            SingleValuePropertyAccessNode node = new SingleValuePropertyAccessNode(new ResourceRangeVariableReferenceNode("it", variable), property);
             OrderByClause orderBy = new OrderByClause(thenBy: null, expression: node, direction: OrderByDirection.Ascending, rangeVariable: variable);
 
             // Act
@@ -69,8 +69,8 @@ namespace System.Web.OData.Query
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             IEdmProperty property = model.Customer.FindProperty("ID");
             OrderByDirection direction = OrderByDirection.Ascending;
-            EntityRangeVariable variable = new EntityRangeVariable("it", model.Customer.AsReference(), model.Customers);
-            SingleValuePropertyAccessNode node = new SingleValuePropertyAccessNode(new EntityRangeVariableReferenceNode("it", variable), property);
+            ResourceRangeVariable variable = new ResourceRangeVariable("it", model.Customer.AsReference(), model.Customers);
+            SingleValuePropertyAccessNode node = new SingleValuePropertyAccessNode(new ResourceRangeVariableReferenceNode("it", variable), property);
             OrderByClause orderBy = new OrderByClause(thenBy: null, expression: node, direction: direction, rangeVariable: variable);
 
             // Act

@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Extensions;
@@ -178,7 +179,7 @@ namespace System.Web.OData.Formatter.Serialization
             // if a V1 or V2 Client requests a type that has a collection within it ODataLib will throw.
             ODataCollectionValue value = new ODataCollectionValue
             {
-                Items = valueCollection,
+                Items = valueCollection.Cast<object>(),
                 TypeName = typeName
             };
 

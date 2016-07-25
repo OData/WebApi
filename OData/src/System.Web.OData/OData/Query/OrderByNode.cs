@@ -39,7 +39,7 @@ namespace System.Web.OData.Query
             List<OrderByNode> result = new List<OrderByNode>();
             for (OrderByClause clause = orderByClause; clause != null; clause = clause.ThenBy)
             {
-                if (clause.Expression is NonentityRangeVariableReferenceNode || clause.Expression is EntityRangeVariableReferenceNode)
+                if (clause.Expression is NonResourceRangeVariableReferenceNode || clause.Expression is ResourceRangeVariableReferenceNode)
                 {
                     result.Add(new OrderByItNode(clause.Direction));
                     continue;

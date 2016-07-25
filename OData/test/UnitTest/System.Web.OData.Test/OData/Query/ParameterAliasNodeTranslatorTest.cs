@@ -118,7 +118,7 @@ namespace System.Web.OData.Query
             // Assert
             var allNode = Assert.IsType<AllNode>(translatedNode);
             var collectionFunctionCallNode = Assert.IsType<CollectionFunctionCallNode>(allNode.Source);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(collectionFunctionCallNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(collectionFunctionCallNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
             namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(collectionFunctionCallNode.Parameters.Single());
@@ -134,7 +134,7 @@ namespace System.Web.OData.Query
             // Assert
             var allNode = Assert.IsType<AllNode>(translatedNode);
             var collectionNavigationNode = Assert.IsType<CollectionNavigationNode>(allNode.Source);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(collectionNavigationNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(collectionNavigationNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
         }
@@ -149,7 +149,7 @@ namespace System.Web.OData.Query
             var allNode = Assert.IsType<AllNode>(translatedNode);
             var collectionOpenPropertyAccessNode = Assert.IsType<CollectionOpenPropertyAccessNode>(allNode.Source);
             var singleValuePropertyAccessNode = Assert.IsType<SingleValuePropertyAccessNode>(collectionOpenPropertyAccessNode.Source);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(singleValuePropertyAccessNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(singleValuePropertyAccessNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
         }
@@ -163,7 +163,7 @@ namespace System.Web.OData.Query
             // Assert
             var allNode = Assert.IsType<AllNode>(translatedNode);
             var collectionPropertyAccessNode = Assert.IsType<CollectionPropertyAccessNode>(allNode.Source);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(collectionPropertyAccessNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(collectionPropertyAccessNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
         }
@@ -178,36 +178,36 @@ namespace System.Web.OData.Query
             var allNode = Assert.IsType<AllNode>(translatedNode);
             var collectionPropertyCastNode = Assert.IsType<CollectionPropertyCastNode>(allNode.Source);
             var collectionPropertyAccessNode = Assert.IsType<CollectionPropertyAccessNode>(collectionPropertyCastNode.Source);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(collectionPropertyAccessNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(collectionPropertyAccessNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
         }
 
         [Fact]
-        public void CanTranslate_EntityCollectionCastNode()
+        public void CanTranslate_CollectionResourceCastNode()
         {
             // Arrange & Act
             QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Orders/System.Web.OData.Query.ParameterAliasOrder/all(o : o ne null)");
 
             // Assert
             var allNode = Assert.IsType<AllNode>(translatedNode);
-            var entityCollectionCastNode = Assert.IsType<EntityCollectionCastNode>(allNode.Source);
+            var entityCollectionCastNode = Assert.IsType<CollectionResourceCastNode>(allNode.Source);
             var collectionNavigationNode = Assert.IsType<CollectionNavigationNode>(entityCollectionCastNode.Source);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(collectionNavigationNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(collectionNavigationNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
         }
 
         [Fact]
-        public void CanTranslate_EntityCollectionFunctionCallNode()
+        public void CanTranslate_CollectionResourceFunctionCallNode()
         {
             // Arrange & Act
             QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Default.EntityCollectionFunctionCall(p1=@p)/any(r : r eq null)");
 
             // Assert
             var anyNode = Assert.IsType<AnyNode>(translatedNode);
-            var entityCollectionFunctionCallNode = Assert.IsType<EntityCollectionFunctionCallNode>(anyNode.Source);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(entityCollectionFunctionCallNode.Source);
+            var entityCollectionFunctionCallNode = Assert.IsType<CollectionResourceFunctionCallNode>(anyNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(entityCollectionFunctionCallNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
             namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(entityCollectionFunctionCallNode.Parameters.Single());
@@ -215,29 +215,29 @@ namespace System.Web.OData.Query
         }
 
         [Fact]
-        public void CanTranslate_SingleEntityCastNode()
+        public void CanTranslate_SingleResourceCastNode()
         {
             // Arrange & Act
             QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/System.Web.OData.Query.ParameterAliasCustomer eq null");
 
             // Assert
             var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);
-            var singleEntityCastNode = Assert.IsType<SingleEntityCastNode>(binaryOperatorNode.Left);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(singleEntityCastNode.Source);
+            var singleEntityCastNode = Assert.IsType<SingleResourceCastNode>(binaryOperatorNode.Left);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(singleEntityCastNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
         }
 
         [Fact]
-        public void CanTranslate_SingleEntityFunctionCallNode()
+        public void CanTranslate_SingleResourceFunctionCallNode()
         {
             // Arrange & Act
             QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Default.SingleEntityFunctionCall(p1=@p) eq null");
 
             // Assert
             var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(binaryOperatorNode.Left);
-            var singleEntityFunctionCallSourceNode = Assert.IsType<SingleEntityFunctionCallNode>(singleEntityFunctionCallNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(binaryOperatorNode.Left);
+            var singleEntityFunctionCallSourceNode = Assert.IsType<SingleResourceFunctionCallNode>(singleEntityFunctionCallNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallSourceNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
             namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
@@ -245,15 +245,15 @@ namespace System.Web.OData.Query
         }
 
         [Fact]
-        public void CanTranslate_SingleEntityFunctionCallNodeWithoutParameters()
+        public void CanTranslate_SingleResourceFunctionCallNodeWithoutParameters()
         {
             // Arrange & Act
             QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Default.SingleEntityFunctionCallWithoutParameters() eq null");
 
             // Assert
             var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(binaryOperatorNode.Left);
-            var singleEntityFunctionCallSourceNode = Assert.IsType<SingleEntityFunctionCallNode>(singleEntityFunctionCallNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(binaryOperatorNode.Left);
+            var singleEntityFunctionCallSourceNode = Assert.IsType<SingleResourceFunctionCallNode>(singleEntityFunctionCallNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallSourceNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
             Assert.Empty(singleEntityFunctionCallNode.Parameters);
@@ -268,7 +268,7 @@ namespace System.Web.OData.Query
             // Assert
             var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);
             var singleNavigationNode = Assert.IsType<SingleNavigationNode>(binaryOperatorNode.Left);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(singleNavigationNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(singleNavigationNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
         }
@@ -283,7 +283,7 @@ namespace System.Web.OData.Query
             var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);
             var singleValueCastNode = Assert.IsType<SingleValueCastNode>(binaryOperatorNode.Left);
             var singleValuePropertyAccessNode = Assert.IsType<SingleValuePropertyAccessNode>(singleValueCastNode.Source);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(singleValuePropertyAccessNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(singleValuePropertyAccessNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
         }
@@ -298,7 +298,7 @@ namespace System.Web.OData.Query
             var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);
             var convertNode = Assert.IsType<ConvertNode>(binaryOperatorNode.Right);
             var singleValueFunctionCallNode = Assert.IsType<SingleValueFunctionCallNode>(convertNode.Source);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(singleValueFunctionCallNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(singleValueFunctionCallNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
             namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleValueFunctionCallNode.Parameters.Single());
@@ -315,7 +315,7 @@ namespace System.Web.OData.Query
             var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);
             var singleValueOpenPropertyAccessNode = Assert.IsType<SingleValueOpenPropertyAccessNode>(binaryOperatorNode.Left);
             var singleValuePropertyAccessNode = Assert.IsType<SingleValuePropertyAccessNode>(singleValueOpenPropertyAccessNode.Source);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(singleValuePropertyAccessNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(singleValuePropertyAccessNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
         }
@@ -329,7 +329,7 @@ namespace System.Web.OData.Query
             // Assert
             var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);
             var singleValuePropertyAccessNode = Assert.IsType<SingleValuePropertyAccessNode>(binaryOperatorNode.Left);
-            var singleEntityFunctionCallNode = Assert.IsType<SingleEntityFunctionCallNode>(singleValuePropertyAccessNode.Source);
+            var singleEntityFunctionCallNode = Assert.IsType<SingleResourceFunctionCallNode>(singleValuePropertyAccessNode.Source);
             var namedFunctionParameterNode = Assert.IsType<NamedFunctionParameterNode>(singleEntityFunctionCallNode.Parameters.Single());
             Assert.Same(_parameterAliasMappedNode, namedFunctionParameterNode.Value);
         }

@@ -11,7 +11,6 @@ using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Validation;
-using Microsoft.OData.Edm.Vocabularies;
 
 namespace System.Web.OData.Builder
 {
@@ -223,9 +222,9 @@ namespace System.Web.OData.Builder
         private static void ValidateOperationEntitySetPath(IEdmModel model, IEdmOperationImport operationImport, OperationConfiguration operationConfiguration)
         {
             IEdmOperationParameter operationParameter;
-            IEnumerable<IEdmNavigationProperty> navPath;
+            Dictionary<IEdmNavigationProperty, IEdmPathExpression> relativeNavigations;
             IEnumerable<EdmError> edmErrors;
-            if (operationConfiguration.EntitySetPath != null && !operationImport.TryGetRelativeEntitySetPath(model, out operationParameter, out navPath, out edmErrors))
+            if (operationConfiguration.EntitySetPath != null && !operationImport.TryGetRelativeEntitySetPath(model, out operationParameter, out relativeNavigations, out edmErrors))
             {
                 throw Error.InvalidOperation(SRResources.OperationHasInvalidEntitySetPath, String.Join("/", operationConfiguration.EntitySetPath), operationConfiguration.FullyQualifiedName);
             }

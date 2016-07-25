@@ -269,7 +269,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 }
 
                 ODataCollectionValue collectionValue = (ODataCollectionValue)ODataUriUtils.ConvertFromUriLiteral(
-                    string.Format(CultureInfo.InvariantCulture, "[{0}]", untypedValue.RawValue), ODataVersion.V4);
+                    String.Format(CultureInfo.InvariantCulture, "[{0}]", untypedValue.RawValue), ODataVersion.V4);
                 foreach (object item in collectionValue.Items)
                 {
                     oDataValue = item;

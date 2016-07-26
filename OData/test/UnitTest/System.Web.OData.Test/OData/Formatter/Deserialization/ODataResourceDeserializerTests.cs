@@ -416,7 +416,10 @@ namespace System.Web.OData.Formatter.Deserialization
                 Name = "CollectionProperty"
             };
             ODataNestedResourceInfoWrapper resourceInfoWrapper = new ODataNestedResourceInfoWrapper(resourceInfo);
-            ODataResourceSetWrapper resourceSetWrapper = new ODataResourceSetWrapper(new ODataResourceSet());
+            ODataResourceSetWrapper resourceSetWrapper = new ODataResourceSetWrapper(new ODataResourceSet
+            {
+                TypeName = String.Format("Collection({0})", typeof(SimpleOpenAddress).FullName)
+            });
             foreach (var complexResource in complexResources)
             {
                 resourceSetWrapper.Resources.Add(new ODataResourceWrapper(complexResource));

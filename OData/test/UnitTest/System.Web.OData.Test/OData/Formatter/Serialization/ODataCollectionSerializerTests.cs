@@ -80,7 +80,7 @@ namespace System.Web.OData.Formatter.Serialization
             Mock<ODataCollectionSerializer> serializer = new Mock<ODataCollectionSerializer>(new DefaultODataSerializerProvider());
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "CollectionName", Model = _model };
             IEnumerable enumerable = new object[0];
-            ODataCollectionValue collectionValue = new ODataCollectionValue { TypeName = "NS.Name", Items = new[] { 0, 1, 2 }.Cast<object>() };
+            ODataCollectionValue collectionValue = new ODataCollectionValue { TypeName = "NS.Name", Items = new object[] { 0, 1, 2 } };
 
             serializer.CallBase = true;
             serializer

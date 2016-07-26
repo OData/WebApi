@@ -19,7 +19,7 @@ namespace System.Web.OData.Query.Validators
 
         public const string MaxExpandDepthExceededErrorString =
             "The request includes a $expand path which is too deep. The maximum depth allowed is {0}. " +
-            "To increase the limit, set the 'MaxExpansionDepth' property on EnableQueryAttribute or ODataValidationSettings, or set the maxDepth in ExpandAttribute.";
+            "To increase the limit, set the 'MaxExpansionDepth' property on EnableQueryAttribute or ODataValidationSettings, or set the 'MaxDepth' property in ExpandAttribute.";
 
         public SelectExpandQueryValidatorTest()
         {

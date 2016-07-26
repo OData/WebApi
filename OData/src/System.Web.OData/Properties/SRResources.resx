@@ -569,7 +569,7 @@
     <value>'{0}' should be less than or equal to '{1}'.</value>
   </data>
   <data name="MaxExpandDepthExceeded" xml:space="preserve">
-    <value>The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the '{1}' property on EnableQueryAttribute or ODataValidationSettings, or set the maxDepth in ExpandAttribute.</value>
+    <value>The request includes a $expand path which is too deep. The maximum depth allowed is {0}. To increase the limit, set the '{1}' property on EnableQueryAttribute or ODataValidationSettings, or set the 'MaxDepth' property in ExpandAttribute.</value>
   </data>
   <data name="NonSelectExpandOnSingleEntity" xml:space="preserve">
     <value>The requested resource is not a collection. Query options $filter, $orderby, $count, $skip, and $top can be applied only on collections.</value>

@@ -66,7 +66,7 @@ namespace System.Web.OData.Routing
             Assert.Equal(
                 "The query specified in the URI is not valid. The request includes a $expand path which is too deep. " +
                 "The maximum depth allowed is 5. To increase the limit, set the 'MaxExpansionDepth' property on " +
-                "EnableQueryAttribute or ODataValidationSettings, or set the maxDepth in ExpandAttribute.",
+                "EnableQueryAttribute or ODataValidationSettings, or set the 'MaxDepth' property in ExpandAttribute.",
                 result);
         }
 

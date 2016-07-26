@@ -197,7 +197,7 @@ namespace WebStack.QA.Test.OData.LowerCamelCase
             var result = await response.Content.ReadAsAsync<JObject>();
             Assert.Contains("The request includes a $expand path which is " +
                 "too deep. The maximum depth allowed is 3. To increase the limit, set the 'MaxExpansionDepth' property " +
-                "on EnableQueryAttribute or ODataValidationSettings.",
+                "on EnableQueryAttribute or ODataValidationSettings, or set the 'MaxDepth' property in ExpandAttribute.",
                 result["error"]["message"].Value<string>());
         }
 

@@ -278,7 +278,7 @@
 
         #region Update
 
-        [Theory(Skip = "https://github.com/OData/odata.net/issues/612")]
+        [Theory]
         [InlineData("application/json;odata.metadata=full")]
         [InlineData("application/json;odata.metadata=minimal")]
         [InlineData("application/json;odata.metadata=none")]

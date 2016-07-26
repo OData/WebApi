@@ -844,4 +844,7 @@
   <data name="InvalidODataUntypedValue" xml:space="preserve">
     <value>The given untyped value '{0}' in payload is invalid. Consider using a OData type annotation explicitly.</value>
   </data>
+  <data name="DynamicResourceSetTypeNameIsRequired" xml:space="preserve">
+    <value>The type name of the dynamic resource set '{0}' is required and cannot be empty. Consider using a OData type annotation explicitly.</value>
+  </data>
 </root>

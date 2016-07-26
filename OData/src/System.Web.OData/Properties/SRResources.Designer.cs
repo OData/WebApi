@@ -484,6 +484,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The type name of the dynamic resource set &apos;{0}&apos; is required and cannot be empty. Consider using a OData type annotation explicitly..
+        /// </summary>
+        internal static string DynamicResourceSetTypeNameIsRequired {
+            get {
+                return ResourceManager.GetString("DynamicResourceSetTypeNameIsRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The edit link builder for the entity set &apos;{0}&apos; returned null. An edit link is required for the location header..
         /// </summary>
         internal static string EditLinkNullForLocationHeader {

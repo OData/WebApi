@@ -516,10 +516,16 @@ namespace System.Web.OData.Formatter.Deserialization
             Contract.Assert(resource != null);
             Contract.Assert(readContext != null);
 
-            // TODO: https://github.com/OData/odata.net/issues/612
-            // Make sure the resource set an be empty.
-            IEdmSchemaType elementType =
-                readContext.Model.FindDeclaredType(resourceSetWrapper.Resources.First().Resource.TypeName);
+            if (String.IsNullOrEmpty(resourceSetWrapper.ResourceSet.TypeName))
+            {
+                string message = Error.Format(SRResources.DynamicResourceSetTypeNameIsRequired, propertyName);
+                throw new ODataException(message);
+            }
+
+            string elementTypeName =
+                DeserializationHelpers.GetCollectionElementTypeName(resourceSetWrapper.ResourceSet.TypeName,
+                    isNested: false);
+            IEdmSchemaType elementType = readContext.Model.FindDeclaredType(elementTypeName);
 
             IEdmTypeReference edmTypeReference = elementType.ToEdmTypeReference(true);
             EdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(edmTypeReference));

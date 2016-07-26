@@ -125,6 +125,7 @@ namespace System.Web.OData.Batch
                 throw Error.ArgumentNull("request");
             }
 
+            request.ODataProperties().RouteName = ODataRouteName;
             IServiceProvider requestContainer = request.RequestContainer();
             requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri = GetBaseUri(request);
 

@@ -241,14 +241,22 @@ namespace System.Web.OData.Extensions
                 return (IServiceProvider)value;
             }
 
-            string routeName = request.ODataProperties().RouteName;
-            if (routeName == null)
+            HttpConfiguration configuration = request.GetConfiguration();
+            if (configuration == null)
             {
-                throw Error.InvalidOperation(SRResources.RequestMustHaveODataRouteName);
+                throw Error.Argument("request", SRResources.RequestMustContainConfiguration);
             }
 
-            HttpConfiguration configuration = request.GetConfiguration();
-            IServiceProvider rootContainer = configuration.GetRootContainer(routeName);
+            string routeName = request.ODataProperties().RouteName;
+            IServiceProvider rootContainer = routeName != null
+                ? configuration.GetRootContainer(routeName)
+                : configuration.GetDefaultRootContainer();
+            if (rootContainer == null)
+            {
+                throw Error.InvalidOperation(String.Format(CultureInfo.InvariantCulture,
+                    SRResources.CannotDetermineRootContainer, routeName));
+            }
+
             IServiceScope requestScope = rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
             IServiceProvider requestContainer = requestScope.ServiceProvider;
 

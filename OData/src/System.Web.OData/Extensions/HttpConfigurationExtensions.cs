@@ -447,7 +447,20 @@ namespace System.Web.OData.Extensions
                 return rootContainer;
             }
 
-            throw Error.InvalidOperation(SRResources.NullContainer);
+            return null;
+        }
+
+        internal static IServiceProvider GetDefaultRootContainer(this HttpConfiguration configuration)
+        {
+            ConcurrentDictionary<string, IServiceProvider> rootContainers = configuration.GetRootContainers();
+            if (rootContainers.Count == 1)
+            {
+                return rootContainers.First().Value;
+            }
+
+            // Search for the first non-OData route because OData routes always associate a request with a route name.
+            List<string> odataRouteNames = configuration.Routes.OfType<ODataRoute>().Select(r => r.PathRouteConstraint.RouteName).ToList();
+            return rootContainers.FirstOrDefault(kvp => !odataRouteNames.Contains(kvp.Key)).Value;
         }
 
         internal static void SetRootContainer(this HttpConfiguration configuration, string routeName, IServiceProvider rootContainer)

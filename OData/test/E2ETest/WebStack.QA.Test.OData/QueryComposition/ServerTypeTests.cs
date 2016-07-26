@@ -201,6 +201,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.Routes.MapHttpRoute("ApiDefault", "api/{controller}/{id}", new { id = RouteParameter.Optional });
+            configuration.EnableDependencyInjection("ApiDefault");
             var request = new HttpRequestMessage(HttpMethod.Get, "http://test/api/Objects?" + queryString);
             request.Properties.Add(HttpPropertyKeys.HttpConfigurationKey, configuration);
             var controllerContext = new HttpControllerContext(

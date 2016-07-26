@@ -38,6 +38,7 @@ namespace System.Web.OData.Batch
             ValidateRequest(request);
 
             // This container is for the overall batch request.
+            request.ODataProperties().RouteName = ODataRouteName;
             IServiceProvider requestContainer = request.RequestContainer();
             requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri = GetBaseUri(request);
 

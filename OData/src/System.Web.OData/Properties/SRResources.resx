@@ -850,4 +850,7 @@
   <data name="CannotReconfigureContainerBuilder" xml:space="preserve">
     <value>Cannot re-configure the container builder because the root container has already been built.</value>
   </data>
+  <data name="CannotDetermineRootContainer" xml:space="preserve">
+    <value>Cannot determine the root container for the route '{0}'.</value>
+  </data>
 </root>

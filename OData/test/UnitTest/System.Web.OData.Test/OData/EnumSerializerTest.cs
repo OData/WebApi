@@ -13,7 +13,6 @@ using System.Web.OData.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
-using HttpRouteCollectionExtensions = System.Web.OData.Formatter.HttpRouteCollectionExtensions;
 
 namespace System.Web.OData
 {

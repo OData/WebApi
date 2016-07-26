@@ -250,6 +250,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot determine the root container for the route &apos;{0}&apos;..
+        /// </summary>
+        internal static string CannotDetermineRootContainer {
+            get {
+                return ResourceManager.GetString("CannotDetermineRootContainer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot determine the Edm type for the CLR type &apos;{0}&apos; because the derived type &apos;{1}&apos; is configured as entity type and another derived type &apos;{2}&apos; is configured as complex type..
         /// </summary>
         internal static string CannotInferEdmType {

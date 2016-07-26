@@ -7,6 +7,7 @@ using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Query;
+using System.Web.OData.Query.Validators;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
@@ -107,6 +108,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.AddODataQueryFilter();
+            configuration.EnableDependencyInjection("api default");
         }
 
         [Fact]
@@ -147,7 +149,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             ODataQueryOptionsController controller = new ODataQueryOptionsController();
 
             ODataQueryContext context = new ODataQueryContext(GetEdmModel(), typeof(ODataQueryOptions_Todo), path: null,
-                requestContainer: null);
+                requestContainer: new MockContainer());
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$orderby=Name desc");
             ODataQueryOptions<ODataQueryOptions_Todo> options = new ODataQueryOptions<ODataQueryOptions_Todo>(context, request);
             var result = controller.OptionsOnString(options);
@@ -160,7 +162,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             ODataQueryOptionsController controller = new ODataQueryOptionsController();
 
             ODataQueryContext context = new ODataQueryContext(new ODataConventionModelBuilder().GetEdmModel(),
-                typeof(string), path: null, requestContainer: null);
+                typeof(string), path: null, requestContainer: new MockContainer());
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$top=1");
             ODataQueryOptions<string> options = new ODataQueryOptions<string>(context, request);
             var result = controller.OptionsWithString(options);
@@ -172,6 +174,34 @@ namespace WebStack.QA.Test.OData.QueryComposition
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntityType<ODataQueryOptions_Todo>();
             return builder.GetEdmModel();
+        }
+
+        private class MockContainer : IServiceProvider
+        {
+            public object GetService(Type serviceType)
+            {
+                if (serviceType == typeof(TopQueryValidator))
+                {
+                    return new TopQueryValidator();
+                }
+
+                if (serviceType == typeof(OrderByQueryValidator))
+                {
+                    return new OrderByQueryValidator(new DefaultQuerySettings());
+                }
+
+                if (serviceType == typeof(ODataQueryValidator))
+                {
+                    return new ODataQueryValidator();
+                }
+
+                if (serviceType == typeof(DefaultQuerySettings))
+                {
+                    return new DefaultQuerySettings();
+                }
+
+                throw new NotImplementedException();
+            }
         }
     }
 }

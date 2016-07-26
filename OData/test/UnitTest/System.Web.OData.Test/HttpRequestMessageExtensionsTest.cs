@@ -446,6 +446,7 @@ namespace System.Net.Http
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
+            request.SetConfiguration(new HttpConfiguration());
 
             // Act
             Action action = () => request.RequestContainer();

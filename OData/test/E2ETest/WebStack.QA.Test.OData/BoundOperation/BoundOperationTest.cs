@@ -65,7 +65,7 @@ namespace WebStack.QA.Test.OData.BoundOperation
             // only with attribute routing & metadata routing convention
             IList<IODataRoutingConvention> routingConventions = new List<IODataRoutingConvention>
             {
-                new AttributeRoutingConvention(edmModel, configuration),
+                new AttributeRoutingConvention("AttributeRouting", edmModel, configuration),
                 new MetadataRoutingConvention()
             };
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);

@@ -23,6 +23,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Formatters.JsonFormatter.Indent = true;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
+            configuration.EnableDependencyInjection("api default");
         }
 
         [Fact]

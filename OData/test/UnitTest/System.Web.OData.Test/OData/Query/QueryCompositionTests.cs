@@ -33,9 +33,8 @@ namespace System.Web.OData.Query
             HttpServer server = new HttpServer(InitializeConfiguration(controllerName, useCustomEdmModel: false));
             HttpClient client = new HttpClient(server);
 
-            HttpResponseMessage response = client.GetAsync(
-                String.Format("http://localhost:8080/{0}?$filter=Id ge 22 and Address/City ne 'seattle'&$orderby=Name&$skip=0&$top=1", controllerName))
-                .Result;
+            HttpResponseMessage response = GetResponse(client,
+                String.Format("http://localhost:8080/{0}?$filter=Id ge 22 and Address/City ne 'seattle'&$orderby=Name&$skip=0&$top=1", controllerName));
             response.EnsureSuccessStatusCode();
             var customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
 
@@ -48,9 +47,8 @@ namespace System.Web.OData.Query
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", useCustomEdmModel: true));
             HttpClient client = new HttpClient(server);
 
-            HttpResponseMessage response = client.GetAsync(
-                String.Format("http://localhost:8080/QueryCompositionCustomer?$filter=Id ge 22 and Address/City ne 'seattle'&$orderby=Name&$skip=0&$top=1", "QueryCompositionCustomer"))
-                .Result;
+            HttpResponseMessage response = GetResponse(client,
+                String.Format("http://localhost:8080/QueryCompositionCustomer?$filter=Id ge 22 and Address/City ne 'seattle'&$orderby=Name&$skip=0&$top=1", "QueryCompositionCustomer"));
             response.EnsureSuccessStatusCode();
             var customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
 
@@ -73,9 +71,8 @@ namespace System.Web.OData.Query
             });
 
             // Act
-            HttpResponseMessage response = client.GetAsync(
-                "http://localhost:8080/QueryCompositionCustomer" + caseInSensitive)
-                .Result;
+            HttpResponseMessage response = GetResponse(client,
+                "http://localhost:8080/QueryCompositionCustomer" + caseInSensitive);
 
             // Assert
             Assert.Equal(expect, response.IsSuccessStatusCode);
@@ -88,7 +85,7 @@ namespace System.Web.OData.Query
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomerLowLevel_ODataQueryOptionsOfT", false));
             HttpClient client = new HttpClient(server);
 
-            HttpResponseMessage response = client.GetAsync("http://localhost:8080/QueryCompositionCustomerLowLevel_ODataQueryOptionsOfT/?$filter=Id ge 22").Result;
+            HttpResponseMessage response = GetResponse(client, "http://localhost:8080/QueryCompositionCustomerLowLevel_ODataQueryOptionsOfT/?$filter=Id ge 22");
             response.EnsureSuccessStatusCode();
             int count = response.Content.ReadAsAsync<int>().Result;
             Assert.Equal(2, count);
@@ -100,7 +97,7 @@ namespace System.Web.OData.Query
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionAnonymousTypesController", useCustomEdmModel: false));
             HttpClient client = new HttpClient(server);
 
-            HttpResponseMessage response = client.GetAsync("http://localhost:8080/QueryCompositionAnonymousTypes/?$filter=Id ge 5").Result;
+            HttpResponseMessage response = GetResponse(client, "http://localhost:8080/QueryCompositionAnonymousTypes/?$filter=Id ge 5");
             response.EnsureSuccessStatusCode();
 
             Type anon_type = new { Id = default(int) }.GetType();
@@ -148,14 +145,14 @@ namespace System.Web.OData.Query
             HttpClient client = new HttpClient(server);
 
             // skip = 1 is ok
-            HttpResponseMessage response = client.GetAsync("http://localhost:8080/QueryCompositionCustomerValidation/?$skip=1").Result;
+            HttpResponseMessage response = GetResponse(client, "http://localhost:8080/QueryCompositionCustomerValidation/?$skip=1");
             response.EnsureSuccessStatusCode();
 
             List<QueryCompositionCustomer> customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
             Assert.Equal(new[] { 11, 22, 33 }, customers.Select(customer => customer.Id));
 
             // skip = 2 exceeds the limit
-            response = client.GetAsync("http://localhost:8080/QueryCompositionCustomerValidation/?$skip=2").Result;
+            response = GetResponse(client, "http://localhost:8080/QueryCompositionCustomerValidation/?$skip=2");
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -203,7 +200,7 @@ namespace System.Web.OData.Query
                 typeof(QueryCompositionCategoryController), typeof(QueryCompositionAnonymousTypesController)
             };
             HttpConfiguration config = controllers.GetHttpConfiguration();
-            config.SetFakeRootContainer();
+            config.EnableDependencyInjection("default");
             config.Routes.MapHttpRoute("default", "{controller}/{key}", new { key = RouteParameter.Optional });
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
@@ -224,6 +221,13 @@ namespace System.Web.OData.Query
             }
 
            return config;
+        }
+
+        private static HttpResponseMessage GetResponse(HttpClient client, string requestUri)
+        {
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.ODataProperties().RouteName = "default";
+            return client.SendAsync(request).Result;
         }
 
         private static void AreEqual(List<QueryCompositionCustomer> expectedList, List<QueryCompositionCustomer> actualList)

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
+using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
@@ -218,9 +219,10 @@ namespace System.Web.OData.Test
         {
             HttpRequestMessage request;
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.SetFakeRootContainer();
+            configuration.EnableDependencyInjection();
             request = new HttpRequestMessage(method, "http://host/any");
             request.SetConfiguration(configuration);
+            request.SetFakeODataRouteName();
             HttpRequestMessageProperties properties = request.ODataProperties();
             IEdmModel model = edmModel ?? SetupModel();
             properties.Model = model;

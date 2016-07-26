@@ -15,10 +15,12 @@ namespace System.Web.OData.Routing.Conventions
         /// <summary>
         /// Creates a mutable list of the default OData routing conventions with attribute routing enabled.
         /// </summary>
+        /// <param name="routeName">The name of the route.</param>
         /// <param name="configuration">The server configuration.</param>
         /// <param name="model">The EDM model to use for parsing OData paths.</param>
         /// <returns>A mutable list of the default OData routing conventions.</returns>
         public static IList<IODataRoutingConvention> CreateDefaultWithAttributeRouting(
+            string routeName,
             HttpConfiguration configuration,
             IEdmModel model)
         {
@@ -26,13 +28,19 @@ namespace System.Web.OData.Routing.Conventions
             {
                 throw Error.ArgumentNull("configuration");
             }
+
+            if (routeName == null)
+            {
+                throw Error.ArgumentNull("routeName");
+            }
+
             if (model == null)
             {
                 throw Error.ArgumentNull("model");
             }
 
             IList<IODataRoutingConvention> routingConventions = CreateDefault();
-            AttributeRoutingConvention routingConvention = new AttributeRoutingConvention(model, configuration);
+            AttributeRoutingConvention routingConvention = new AttributeRoutingConvention(routeName, model, configuration);
             routingConventions.Insert(0, routingConvention);
             return routingConventions;
         }

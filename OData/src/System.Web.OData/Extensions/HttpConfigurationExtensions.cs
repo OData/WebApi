@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -42,7 +43,7 @@ namespace System.Web.OData.Extensions
 
         private const string ContainerBuilderFactoryKey = "System.Web.OData.ContainerBuilderFactoryKey";
 
-        private const string RootContainerKey = "System.Web.OData.RootContainerKey";
+        private const string RootContainersKey = "System.Web.OData.RootContainersKey";
         
         private const string DefaultQuerySettingsKey = "System.Web.OData.DefaultQuerySettings";
 
@@ -438,35 +439,20 @@ namespace System.Web.OData.Extensions
             return defaultSettings;
         }
 
-        internal static IServiceProvider GetRootContainer(this HttpConfiguration configuration)
+        internal static IServiceProvider GetRootContainer(this HttpConfiguration configuration, string routeName)
         {
-            if (configuration == null)
+            IServiceProvider rootContainer;
+            if (configuration.GetRootContainers().TryGetValue(routeName, out rootContainer))
             {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            object value;
-            if (configuration.Properties.TryGetValue(RootContainerKey, out value))
-            {
-                return value as IServiceProvider;
+                return rootContainer;
             }
 
             throw Error.InvalidOperation(SRResources.NullContainer);
         }
 
-        internal static void SetRootContainer(this HttpConfiguration configuration, IServiceProvider rootContainer)
+        internal static void SetRootContainer(this HttpConfiguration configuration, string routeName, IServiceProvider rootContainer)
         {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            if (rootContainer == null)
-            {
-                throw Error.ArgumentNull("rootContainer");
-            }
-
-            configuration.Properties[RootContainerKey] = rootContainer;
+            configuration.GetRootContainers().TryAdd(routeName, rootContainer);
         }
 
         /// <summary>
@@ -493,36 +479,88 @@ namespace System.Web.OData.Extensions
         }
 
         /// <summary>
-        /// Maps the specified OData route and the OData route attributes.
+        /// Enables dependency injection support for the route <paramref name="routeName"/>.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        /// <param name="routeName">The name of the route to map.</param>
-        /// <param name="routePrefix">The prefix to add to the OData route's path template.</param>
-        /// <param name="setupAction">The setup action to add the services to the root container.</param>
-        /// <returns>The added <see cref="ODataRoute"/>.</returns>
-        public static ODataRoute MapODataServiceRoute(this HttpConfiguration configuration, string routeName,
-            string routePrefix, Action<IContainerBuilder> setupAction)
+        /// <param name="routeName">The name of the route.</param>
+        /// <returns>The root container.</returns>
+        public static IServiceProvider EnableDependencyInjection(this HttpConfiguration configuration, string routeName)
+        {
+            return configuration.EnableDependencyInjection(routeName, null);
+        }
+
+        /// <summary>
+        /// Enables dependency injection support for the route <paramref name="routeName"/>.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="routeName">The name of the route.</param>
+        /// <param name="configureAction">The configuring action to add the services to the root container.</param>
+        /// <returns>The root container.</returns>
+        public static IServiceProvider EnableDependencyInjection(this HttpConfiguration configuration, string routeName,
+            Action<IContainerBuilder> configureAction)
         {
             if (configuration == null)
             {
                 throw Error.ArgumentNull("configuration");
             }
 
-            // 1) Build and configure the root container.
-            IContainerBuilder builder = configuration.CreateContainerBuilderWithDefaultServices();
-            
-            if (setupAction != null)
+            if (routeName == null)
             {
-                setupAction(builder);
+                throw Error.ArgumentNull("routeName");
             }
 
-            IServiceProvider rootContainer = builder.BuildContainer();
+            IServiceProvider rootContainer;
+            if (configuration.GetRootContainers().TryGetValue(routeName, out rootContainer))
+            {
+                if (configureAction != null)
+                {
+                    throw Error.InvalidOperation(SRResources.CannotReconfigureContainerBuilder);
+                }
+
+                return rootContainer;
+            }
+
+            IContainerBuilder builder = configuration.CreateContainerBuilderWithDefaultServices();
+
+            if (configureAction != null)
+            {
+                configureAction(builder);
+            }
+
+            rootContainer = builder.BuildContainer();
             if (rootContainer == null)
             {
                 throw Error.InvalidOperation(SRResources.NullContainer);
             }
 
-            configuration.SetRootContainer(rootContainer);
+            configuration.SetRootContainer(routeName, rootContainer);
+
+            return rootContainer;
+        }
+
+        /// <summary>
+        /// Maps the specified OData route and the OData route attributes.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="routeName">The name of the route to map.</param>
+        /// <param name="routePrefix">The prefix to add to the OData route's path template.</param>
+        /// <param name="configureAction">The configuring action to add the services to the root container.</param>
+        /// <returns>The added <see cref="ODataRoute"/>.</returns>
+        public static ODataRoute MapODataServiceRoute(this HttpConfiguration configuration, string routeName,
+            string routePrefix, Action<IContainerBuilder> configureAction)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            if (routeName == null)
+            {
+                throw Error.ArgumentNull("routeName");
+            }
+
+            // 1) Build and configure the root container.
+            IServiceProvider rootContainer = configuration.EnableDependencyInjection(routeName, configureAction);
 
             // 2) Resolve the path handler and set URI resolver to it.
             IODataPathHandler pathHandler = rootContainer.GetRequiredService<IODataPathHandler>();
@@ -549,7 +587,7 @@ namespace System.Web.OData.Extensions
                 // CANNOT add the routing conventions within AddDefaultWebApiServices because
                 // then user will have no way to replace the whole set of routing conventions
                 // with his own ones.
-                routingConventions = ODataRoutingConventions.CreateDefaultWithAttributeRouting(configuration, model);
+                routingConventions = ODataRoutingConventions.CreateDefaultWithAttributeRouting(routeName, configuration, model);
             }
 
             HttpRouteCollection routes = configuration.Routes;
@@ -753,6 +791,12 @@ namespace System.Web.OData.Extensions
             builder.AddDefaultWebApiServices();
 
             return builder;
+        }
+
+        private static ConcurrentDictionary<string, IServiceProvider> GetRootContainers(this HttpConfiguration configuration)
+        {
+            return (ConcurrentDictionary<string, IServiceProvider>)configuration.Properties.GetOrAdd(RootContainersKey,
+                key => new ConcurrentDictionary<string, IServiceProvider>());
         }
     }
 }

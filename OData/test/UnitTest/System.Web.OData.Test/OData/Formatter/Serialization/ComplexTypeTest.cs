@@ -39,7 +39,7 @@ namespace System.Web.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");
             request.ODataProperties().Model = GetSampleModel();
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.SetFakeRootContainer();
+            configuration.EnableDependencyInjection();
             configuration.Routes.MapFakeODataRoute();
             request.SetConfiguration(configuration);
             request.SetFakeODataRouteName();

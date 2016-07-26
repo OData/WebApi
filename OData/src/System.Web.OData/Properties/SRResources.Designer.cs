@@ -295,6 +295,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot re-configure the container builder because the root container has already been built..
+        /// </summary>
+        internal static string CannotReconfigureContainerBuilder {
+            get {
+                return ResourceManager.GetString("CannotReconfigureContainerBuilder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot redefine property &apos;{0}&apos; already defined on the base type &apos;{1}&apos;..
         /// </summary>
         internal static string CannotRedefineBaseTypeProperty {

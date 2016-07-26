@@ -440,5 +440,18 @@ namespace System.Net.Http
             [ConcurrencyCheck]
             public long LongVal { get; set; }
         }
+
+        [Fact]
+        public void RequestContainer_Throws_WhenRouteNameIsNotSet()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage();
+
+            // Act
+            Action action = () => request.RequestContainer();
+
+            // Assert
+            Assert.Throws<InvalidOperationException>(action);
+        }
     }
 }

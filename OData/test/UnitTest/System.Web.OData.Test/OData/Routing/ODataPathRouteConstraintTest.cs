@@ -126,7 +126,7 @@ namespace System.Web.OData.Routing
             HttpRouteCollection httpRouteCollection = new HttpRouteCollection();
             httpRouteCollection.Add(_routeName, new HttpRoute());
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.SetFakeRootContainer();
+            configuration.EnableDependencyInjection(_routeName);
             request.SetConfiguration(configuration);
 
             var values = new Dictionary<string, object>() { { "odataPath", "NotAnODataPath" } };
@@ -144,7 +144,7 @@ namespace System.Web.OData.Routing
             HttpRouteCollection httpRouteCollection = new HttpRouteCollection();
             httpRouteCollection.Add(_routeName, new HttpRoute());
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.SetRootContainer(_rootContainer);
+            configuration.SetRootContainer(_routeName, _rootContainer);
             request.SetConfiguration(configuration);
 
             var values = new Dictionary<string, object>() { { "odataPath", "$metadata" } };
@@ -177,7 +177,7 @@ namespace System.Web.OData.Routing
                 { _routeName, new HttpRoute() },
             };
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.SetFakeRootContainer();
+            configuration.EnableDependencyInjection(_routeName);
             request.SetConfiguration(configuration);
 
             var pathHandler = new TestPathHandler();
@@ -216,7 +216,7 @@ namespace System.Web.OData.Routing
                 { _routeName, new HttpRoute() },
             };
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.SetFakeRootContainer();
+            configuration.EnableDependencyInjection(_routeName);
             request.SetConfiguration(configuration);
 
             var pathHandler = new TestPathHandler();
@@ -255,7 +255,7 @@ namespace System.Web.OData.Routing
                 { _routeName, new HttpRoute() },
             };
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.SetFakeRootContainer();
+            configuration.EnableDependencyInjection(_routeName);
             request.SetConfiguration(configuration);
 
             var builder = new ODataModelBuilder();
@@ -301,7 +301,7 @@ namespace System.Web.OData.Routing
                 { _routeName, new HttpRoute() },
             };
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.SetFakeRootContainer();
+            configuration.EnableDependencyInjection(_routeName);
             request.SetConfiguration(configuration);
 
             var builder = new ODataModelBuilder();

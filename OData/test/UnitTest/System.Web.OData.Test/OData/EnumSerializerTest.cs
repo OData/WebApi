@@ -13,6 +13,7 @@ using System.Web.OData.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using HttpRouteCollectionExtensions = System.Web.OData.Formatter.HttpRouteCollectionExtensions;
 
 namespace System.Web.OData
 {
@@ -184,7 +185,7 @@ namespace System.Web.OData
             request.ODataProperties().Model = GetSampleModel();
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Routes.MapFakeODataRoute();
-            configuration.SetFakeRootContainer();
+            configuration.EnableDependencyInjection();
             request.SetConfiguration(configuration);
             request.SetFakeODataRouteName();
             return request;

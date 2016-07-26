@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
+using System.Web.OData.Formatter;
 using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -345,6 +346,7 @@ namespace System.Web.OData
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(acceptHeader));
+            request.ODataProperties().RouteName = "odata";
             return _client.SendAsync(request).Result;
         }
 

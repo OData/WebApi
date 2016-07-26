@@ -168,6 +168,7 @@ namespace System.Web.OData.Routing
                             serviceRoot = serviceRoot.Substring(0, serviceRoot.Length - 3);
                         }
 
+                        request.ODataProperties().RouteName = RouteName;
                         path = PathHandler.Parse(EdmModel, serviceRoot, oDataPathAndQuery, request.RequestContainer());
                     }
                     catch (ODataException)
@@ -177,6 +178,7 @@ namespace System.Web.OData.Routing
 
                     if (path != null)
                     {
+                        // TODO: Move Model, Path and RoutingConventions into container so that we don't need assignments below.
                         // Set all the properties we need for routing, querying, formatting
                         request.ODataProperties().Model = EdmModel;
                         request.ODataProperties().Path = path;

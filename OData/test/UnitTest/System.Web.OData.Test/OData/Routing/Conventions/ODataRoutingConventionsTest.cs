@@ -19,7 +19,7 @@ namespace System.Web.OData.Routing.Conventions
             var model = new Mock<IEdmModel>().Object;
 
             // Act
-            var conventions = ODataRoutingConventions.CreateDefaultWithAttributeRouting(config, model);
+            var conventions = ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config, model);
 
             // Assert
             Assert.Single(conventions.OfType<AttributeRoutingConvention>());

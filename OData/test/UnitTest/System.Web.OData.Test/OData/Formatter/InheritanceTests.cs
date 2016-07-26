@@ -38,7 +38,7 @@ namespace System.Web.OData.Formatter
 
             configuration.Routes.MapHttpRoute("default", "{action}", new { Controller = "Inheritance" });
             configuration.Routes.MapFakeODataRoute();
-            configuration.SetFakeRootContainer();
+            configuration.EnableDependencyInjection();
 
             _server = new HttpServer(configuration);
             _client = new HttpClient(_server);

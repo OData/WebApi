@@ -229,7 +229,7 @@ namespace System.Web.OData.Formatter
         {
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Routes.MapFakeODataRoute();
-            configuration.SetFakeRootContainer();
+            configuration.EnableDependencyInjection();
             return configuration;
         }
 

@@ -1648,6 +1648,16 @@ public sealed class System.Web.OData.Extensions.HttpConfigurationExtensions {
 	[
 	ExtensionAttribute(),
 	]
+	public static System.IServiceProvider EnableDependencyInjection (System.Web.Http.HttpConfiguration configuration, string routeName)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static System.IServiceProvider EnableDependencyInjection (System.Web.Http.HttpConfiguration configuration, string routeName, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static System.Web.Http.HttpConfiguration Expand (System.Web.Http.HttpConfiguration configuration)
 
 	[
@@ -1688,7 +1698,7 @@ public sealed class System.Web.OData.Extensions.HttpConfigurationExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static ODataRoute MapODataServiceRoute (System.Web.Http.HttpConfiguration configuration, string routeName, string routePrefix, System.Action`1[[Microsoft.OData.IContainerBuilder]] setupAction)
+	public static ODataRoute MapODataServiceRoute (System.Web.Http.HttpConfiguration configuration, string routeName, string routePrefix, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
 
 	[
 	ExtensionAttribute(),
@@ -3168,7 +3178,7 @@ public abstract class System.Web.OData.Routing.Conventions.NavigationSourceRouti
 
 public sealed class System.Web.OData.Routing.Conventions.ODataRoutingConventions {
 	public static System.Collections.Generic.IList`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefault ()
-	public static System.Collections.Generic.IList`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefaultWithAttributeRouting (System.Web.Http.HttpConfiguration configuration, Microsoft.OData.Edm.IEdmModel model)
+	public static System.Collections.Generic.IList`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefaultWithAttributeRouting (string routeName, System.Web.Http.HttpConfiguration configuration, Microsoft.OData.Edm.IEdmModel model)
 }
 
 public class System.Web.OData.Routing.Conventions.ActionRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
@@ -3178,10 +3188,10 @@ public class System.Web.OData.Routing.Conventions.ActionRoutingConvention : Navi
 }
 
 public class System.Web.OData.Routing.Conventions.AttributeRoutingConvention : IODataRoutingConvention {
-	public AttributeRoutingConvention (Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IEnumerable`1[[System.Web.Http.Controllers.HttpControllerDescriptor]] controllers)
-	public AttributeRoutingConvention (Microsoft.OData.Edm.IEdmModel model, System.Web.Http.HttpConfiguration configuration)
-	public AttributeRoutingConvention (Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IEnumerable`1[[System.Web.Http.Controllers.HttpControllerDescriptor]] controllers, IODataPathTemplateHandler pathTemplateHandler)
-	public AttributeRoutingConvention (Microsoft.OData.Edm.IEdmModel model, System.Web.Http.HttpConfiguration configuration, IODataPathTemplateHandler pathTemplateHandler)
+	public AttributeRoutingConvention (string routeName, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IEnumerable`1[[System.Web.Http.Controllers.HttpControllerDescriptor]] controllers)
+	public AttributeRoutingConvention (string routeName, Microsoft.OData.Edm.IEdmModel model, System.Web.Http.HttpConfiguration configuration)
+	public AttributeRoutingConvention (string routeName, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IEnumerable`1[[System.Web.Http.Controllers.HttpControllerDescriptor]] controllers, IODataPathTemplateHandler pathTemplateHandler)
+	public AttributeRoutingConvention (string routeName, Microsoft.OData.Edm.IEdmModel model, System.Web.Http.HttpConfiguration configuration, IODataPathTemplateHandler pathTemplateHandler)
 
 	Microsoft.OData.Edm.IEdmModel Model  { public get; }
 	IODataPathTemplateHandler ODataPathTemplateHandler  { public get; }

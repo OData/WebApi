@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Extensions;
+using System.Web.OData.Formatter;
 using System.Web.OData.TestCommon;
 using Microsoft.TestCommon;
 
@@ -60,6 +61,7 @@ namespace System.Web.OData.Routing
 
             HttpClient client = new HttpClient(server);
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(method), requestUri);
+            request.SetFakeODataRouteName();
 
             // Act
             var response = await client.SendAsync(request);
@@ -89,6 +91,7 @@ namespace System.Web.OData.Routing
 
             HttpClient client = new HttpClient(server);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
+            request.SetFakeODataRouteName();
 
             // Act
             HttpResponseMessage response = await client.SendAsync(request);

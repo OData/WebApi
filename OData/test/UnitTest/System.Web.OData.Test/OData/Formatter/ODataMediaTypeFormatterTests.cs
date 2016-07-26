@@ -143,12 +143,12 @@ namespace System.Web.OData.Formatter
             IEdmModel model = new ODataConventionModelBuilder().GetEdmModel();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.SetFakeRootContainer();
-            configuration.Routes.MapHttpRoute("OData", "{param}");
+            configuration.EnableDependencyInjection();
+            configuration.Routes.MapHttpRoute(HttpRouteCollectionExtensions.RouteName, "{param}");
             request.SetConfiguration(configuration);
             request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath();
-            request.ODataProperties().RouteName = "OData";
+            request.ODataProperties().RouteName = HttpRouteCollectionExtensions.RouteName;
 
             ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.ServiceDocument);
             var content = new ObjectContent<ODataServiceDocument>(new ODataServiceDocument(), formatter);
@@ -899,7 +899,7 @@ namespace System.Web.OData.Formatter
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
             request.ODataProperties().Model = model;
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.SetFakeRootContainer();
+            configuration.EnableDependencyInjection();
             configuration.Routes.MapFakeODataRoute();
             request.SetConfiguration(configuration);
             request.ODataProperties().Path =

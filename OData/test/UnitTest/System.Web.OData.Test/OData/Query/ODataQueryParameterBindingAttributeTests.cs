@@ -15,6 +15,7 @@ using System.Web.Http.Metadata;
 using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
+using System.Web.OData.Formatter;
 using System.Web.OData.Query.Controllers;
 using System.Web.OData.TestCommon.Models;
 using Microsoft.OData.Edm;
@@ -66,8 +67,9 @@ namespace System.Web.OData.Query
             ODataQueryParameterBindingAttribute attribute = new ODataQueryParameterBindingAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
-            config.SetFakeRootContainer();
+            config.EnableDependencyInjection();
             request.SetConfiguration(config);
+            request.SetFakeODataRouteName();
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerLowLevel", typeof(CustomerHighLevelController));
             MethodInfo methodInfo = typeof(CustomerLowLevelController).GetMethod(methodName);
@@ -181,8 +183,9 @@ namespace System.Web.OData.Query
                 HttpMethod.Get,
                 "http://localhost/Customer/?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
-            config.SetFakeRootContainer();
+            config.EnableDependencyInjection();
             request.SetConfiguration(config);
+            request.SetFakeODataRouteName();
 
             // Get EDM model, and set path to request.
             ODataModelBuilder odataModel = new ODataModelBuilder();

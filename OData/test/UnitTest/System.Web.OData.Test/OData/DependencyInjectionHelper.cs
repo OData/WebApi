@@ -4,8 +4,9 @@
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Extensions;
+using System.Web.OData.Formatter;
 using Microsoft.OData;
-using ServiceLifetime = Microsoft.OData.ServiceLifetime;
+using HttpRouteCollectionExtensions = System.Web.OData.Formatter.HttpRouteCollectionExtensions;
 
 namespace System.Web.OData
 {
@@ -13,34 +14,22 @@ namespace System.Web.OData
     {
         public static IServiceProvider BuildContainer(Action<IContainerBuilder> action)
         {
-            IContainerBuilder builder = new DefaultContainerBuilder();
-
-            builder.AddDefaultODataServices();
-            builder.AddDefaultWebApiServices();
-
-            if (action != null)
-            {
-                action(builder);
-            }
-
-            return builder.BuildContainer();
+            return CreateConfigurationWithRootContainer().GetRootContainer(HttpRouteCollectionExtensions.RouteName);
         }
 
         public static HttpConfiguration CreateConfigurationWithRootContainer()
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.SetFakeRootContainer();
+            configuration.EnableDependencyInjection(HttpRouteCollectionExtensions.RouteName);
             return configuration;
         }
 
-        public static void SetFakeRootContainer(this HttpConfiguration configuration)
+        public static void EnableDependencyInjection(this HttpConfiguration configuration)
         {
-            configuration.SetRootContainer(BuildContainer(builder =>
-                builder.AddService(ServiceLifetime.Singleton, sp => configuration)
-                       .AddService(ServiceLifetime.Singleton, sp => configuration.GetDefaultQuerySettings())));
+            configuration.EnableDependencyInjection(HttpRouteCollectionExtensions.RouteName);
         }
 
-        public static void SetFakeRootContainer(this HttpRequestMessage request)
+        public static void EnableDependencyInjection(this HttpRequestMessage request)
         {
             HttpConfiguration configuration = request.GetConfiguration();
             if (configuration == null)
@@ -48,6 +37,8 @@ namespace System.Web.OData
                 configuration = CreateConfigurationWithRootContainer();
                 request.SetConfiguration(configuration);
             }
+
+            request.SetFakeODataRouteName();
         }
     }
 }

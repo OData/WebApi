@@ -241,8 +241,14 @@ namespace System.Web.OData.Extensions
                 return (IServiceProvider)value;
             }
 
+            string routeName = request.ODataProperties().RouteName;
+            if (routeName == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustHaveODataRouteName);
+            }
+
             HttpConfiguration configuration = request.GetConfiguration();
-            IServiceProvider rootContainer = configuration.GetRootContainer();
+            IServiceProvider rootContainer = configuration.GetRootContainer(routeName);
             IServiceScope requestScope = rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
             IServiceProvider requestContainer = requestScope.ServiceProvider;
 

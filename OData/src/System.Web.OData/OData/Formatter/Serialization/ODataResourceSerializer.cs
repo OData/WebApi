@@ -320,7 +320,7 @@ namespace System.Web.OData.Formatter.Serialization
                 AddTypeNameAnnotationAsNeeded(resource, pathType, resourceContext.SerializerContext.MetadataLevel);
             }
 
-            if (resourceContext.NavigationSource != null)
+            if (resourceContext.StructuredType.TypeKind == EdmTypeKind.Entity && resourceContext.NavigationSource != null)
             {
                 if (!(resourceContext.NavigationSource is IEdmContainedEntitySet))
                 {

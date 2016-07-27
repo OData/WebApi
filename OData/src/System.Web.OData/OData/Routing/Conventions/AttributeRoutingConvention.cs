@@ -341,7 +341,7 @@ namespace System.Web.OData.Routing.Conventions
                 // We are NOT in a request but establishing the attribute routing convention.
                 // So use the root container rather than the request container.
                 odataPathTemplate = ODataPathTemplateHandler.ParseTemplate(Model, pathTemplate,
-                    action.Configuration.GetRootContainer(_routeName));
+                    action.Configuration.GetODataRootContainer(_routeName));
             }
             catch (ODataException e)
             {

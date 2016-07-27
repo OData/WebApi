@@ -276,7 +276,7 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void ConfigureServices_Sets_DefaultContainer()
+        public void ConfigureServices_ImplicitlySets_RootContainer()
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
@@ -285,68 +285,12 @@ namespace System.Web.OData
             config.MapODataServiceRoute("odata", "odata", builder =>
                 builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
                        .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
-            IServiceProvider rootContainer = config.GetRootContainer("odata");
+            IServiceProvider rootContainer = config.GetODataRootContainer("odata");
             ITestService o1 = rootContainer.GetRequiredService<ITestService>();
             ITestService o2 = rootContainer.GetRequiredService<ITestService>();
 
             // Assert
             Assert.Equal(o1, o2);
-        }
-
-        [Fact]
-        public void ConfigureServices_In_EnableDependencyInjection()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-
-            // Act
-            config.EnableDependencyInjection("odata", builder =>
-                builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
-                       .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
-            config.MapODataServiceRoute("odata", "odata", configureAction: null);
-            IServiceProvider rootContainer = config.GetRootContainer("odata");
-            ITestService o1 = rootContainer.GetRequiredService<ITestService>();
-            ITestService o2 = rootContainer.GetRequiredService<ITestService>();
-
-            // Assert
-            Assert.Equal(o1, o2);
-        }
-
-        [Fact]
-        public void ConfigureServices_ShouldNotThrow_WhenReEnableDependencyInjectionWithoutConfigureAction()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-
-            // Act
-            config.MapODataServiceRoute("odata", "odata", builder =>
-                builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
-                       .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
-            config.EnableDependencyInjection("odata");
-            IServiceProvider rootContainer = config.GetRootContainer("odata");
-            ITestService o1 = rootContainer.GetRequiredService<ITestService>();
-            ITestService o2 = rootContainer.GetRequiredService<ITestService>();
-
-            // Assert
-            Assert.Equal(o1, o2);
-        }
-
-        [Fact]
-        public void ConfigureServices_Throws_WhenReEnableDependencyInjectionWithConfigureAction()
-        {
-            // Arrange
-            HttpConfiguration config = new HttpConfiguration();
-
-            // Act: conflict configure actions.
-            config.EnableDependencyInjection("odata", builder =>
-                builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
-                       .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
-            Action action = () => config.MapODataServiceRoute("odata", "odata", builder =>
-                builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
-                       .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
-
-            // Assert
-            Assert.Throws<InvalidOperationException>(action);
         }
 
         [Fact]
@@ -356,11 +300,11 @@ namespace System.Web.OData
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            config.EnableDependencyInjection("odata", builder =>
+            config.EnableDependencyInjection(builder =>
                 builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
                        .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
             config.Routes.MapHttpRoute("odata", "odata");
-            IServiceProvider rootContainer = config.GetRootContainer("odata");
+            IServiceProvider rootContainer = config.GetNonODataRootContainer();
             ITestService o1 = rootContainer.GetRequiredService<ITestService>();
             ITestService o2 = rootContainer.GetRequiredService<ITestService>();
 
@@ -369,32 +313,29 @@ namespace System.Web.OData
         }
 
         [Fact]
-        public void ConfigureServices_ReturnsNullRootContainer_WhenDependencyInjectionNotEnabled()
+        public void ConfigureServices_Throws_WhenNoODataRoute()
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            IServiceProvider rootContainer = config.GetRootContainer("odata");
+            Action action = () => config.GetODataRootContainer("odata");
 
             // Assert
-            Assert.Null(rootContainer);
+            Assert.Throws<InvalidOperationException>(action);
         }
 
         [Fact]
-        public void ConfigureServices_ReturnsNullRootContainer_WhenDependencyInjectionEnabledOnDifferentRoute()
+        public void ConfigureServices_Throws_WhenDependencyInjectionNotEnabled()
         {
             // Arrange
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            config.EnableDependencyInjection("odata1", builder =>
-                builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
-                       .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
-            IServiceProvider rootContainer = config.GetRootContainer("odata");
+            Action action = () => config.GetNonODataRootContainer();
 
             // Assert
-            Assert.Null(rootContainer);
+            Assert.Throws<InvalidOperationException>(action);
         }
 
         [Fact]
@@ -410,8 +351,8 @@ namespace System.Web.OData
             config.MapODataServiceRoute("odata2", "odata2", builder =>
                 builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
                        .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
-            IServiceProvider rootContainer1 = config.GetRootContainer("odata1");
-            IServiceProvider rootContainer2 = config.GetRootContainer("odata2");
+            IServiceProvider rootContainer1 = config.GetODataRootContainer("odata1");
+            IServiceProvider rootContainer2 = config.GetODataRootContainer("odata2");
             ITestService o1 = rootContainer1.GetRequiredService<ITestService>();
             ITestService o2 = rootContainer2.GetRequiredService<ITestService>();
 
@@ -426,23 +367,20 @@ namespace System.Web.OData
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            config.MapODataServiceRoute("odata1", "odata1", builder =>
+            config.MapODataServiceRoute("odata", "odata", builder =>
                 builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
                        .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
-            config.EnableDependencyInjection("odata2", builder =>
+            config.EnableDependencyInjection(builder =>
                 builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
                        .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
             config.Routes.MapHttpRoute("odata2", "odata2");
-            IServiceProvider rootContainer1 = config.GetRootContainer("odata1");
-            IServiceProvider rootContainer2 = config.GetRootContainer("odata2");
-            IServiceProvider defaultRootContainer = config.GetDefaultRootContainer();
-            ITestService o1 = rootContainer1.GetRequiredService<ITestService>();
-            ITestService o2 = rootContainer2.GetRequiredService<ITestService>();
-            ITestService o = defaultRootContainer.GetRequiredService<ITestService>();
+            IServiceProvider rootContainer = config.GetODataRootContainer("odata");
+            IServiceProvider nonODataRootContainer = config.GetNonODataRootContainer();
+            ITestService o1 = rootContainer.GetRequiredService<ITestService>();
+            ITestService o2 = nonODataRootContainer.GetRequiredService<ITestService>();
 
             // Assert
             Assert.NotEqual(o1, o2);
-            Assert.Equal(o2, o); // should be the Http route.
         }
 
         [Fact]
@@ -452,24 +390,17 @@ namespace System.Web.OData
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            config.EnableDependencyInjection("odata1", builder =>
+            config.EnableDependencyInjection(builder =>
                 builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
                        .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
             config.Routes.MapHttpRoute("odata1", "odata1");
-            config.EnableDependencyInjection("odata2", builder =>
-                builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
-                       .AddService<ITestService, TestService2>(ServiceLifetime.Singleton));
             config.Routes.MapHttpRoute("odata2", "odata2");
-            IServiceProvider rootContainer1 = config.GetRootContainer("odata1");
-            IServiceProvider rootContainer2 = config.GetRootContainer("odata2");
-            IServiceProvider defaultRootContainer = config.GetDefaultRootContainer();
-            ITestService o1 = rootContainer1.GetRequiredService<ITestService>();
-            ITestService o2 = rootContainer2.GetRequiredService<ITestService>();
-            ITestService o = defaultRootContainer.GetRequiredService<ITestService>();
+            IServiceProvider nonODataRootContainer = config.GetNonODataRootContainer();
+            ITestService o1 = nonODataRootContainer.GetRequiredService<ITestService>();
+            ITestService o2 = nonODataRootContainer.GetRequiredService<ITestService>();
 
             // Assert
-            Assert.NotEqual(o1, o2);
-            Assert.True(o1 == o || o2 == o); // should be one of the Http routes.
+            Assert.Equal(o1, o2);
         }
 
         [Fact]
@@ -483,7 +414,7 @@ namespace System.Web.OData
             config.MapODataServiceRoute("odata", "odata", builder =>
                 builder.AddService<IEdmModel, EdmModel>(ServiceLifetime.Singleton)
                        .AddService<ITestService, TestService>(ServiceLifetime.Singleton));
-            IServiceProvider rootContainer = config.GetRootContainer("odata");
+            IServiceProvider rootContainer = config.GetODataRootContainer("odata");
             ITestService testService = rootContainer.GetRequiredService<ITestService>();
 
             // Assert

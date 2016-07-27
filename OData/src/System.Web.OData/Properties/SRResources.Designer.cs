@@ -250,15 +250,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot determine the root container for the route &apos;{0}&apos;..
-        /// </summary>
-        internal static string CannotDetermineRootContainer {
-            get {
-                return ResourceManager.GetString("CannotDetermineRootContainer", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Cannot determine the Edm type for the CLR type &apos;{0}&apos; because the derived type &apos;{1}&apos; is configured as entity type and another derived type &apos;{2}&apos; is configured as complex type..
         /// </summary>
         internal static string CannotInferEdmType {
@@ -304,20 +295,20 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot re-configure the container builder because the root container has already been built..
-        /// </summary>
-        internal static string CannotReconfigureContainerBuilder {
-            get {
-                return ResourceManager.GetString("CannotReconfigureContainerBuilder", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Cannot redefine property &apos;{0}&apos; already defined on the base type &apos;{1}&apos;..
         /// </summary>
         internal static string CannotRedefineBaseTypeProperty {
             get {
                 return ResourceManager.GetString("CannotRedefineBaseTypeProperty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot re-enable dependency injection for HTTP routes..
+        /// </summary>
+        internal static string CannotReEnableDependencyInjection {
+            get {
+                return ResourceManager.GetString("CannotReEnableDependencyInjection", resourceCulture);
             }
         }
         
@@ -1335,6 +1326,15 @@ namespace System.Web.OData.Properties {
         internal static string NonNullUriRequiredForMediaTypeMapping {
             get {
                 return ResourceManager.GetString("NonNullUriRequiredForMediaTypeMapping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No non-OData HTTP route registered..
+        /// </summary>
+        internal static string NoNonODataHttpRouteRegistered {
+            get {
+                return ResourceManager.GetString("NoNonODataHttpRouteRegistered", resourceCulture);
             }
         }
         

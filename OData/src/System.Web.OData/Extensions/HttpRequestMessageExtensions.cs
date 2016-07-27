@@ -241,23 +241,7 @@ namespace System.Web.OData.Extensions
                 return (IServiceProvider)value;
             }
 
-            HttpConfiguration configuration = request.GetConfiguration();
-            if (configuration == null)
-            {
-                throw Error.Argument("request", SRResources.RequestMustContainConfiguration);
-            }
-
-            string routeName = request.ODataProperties().RouteName;
-            IServiceProvider rootContainer = routeName != null
-                ? configuration.GetRootContainer(routeName)
-                : configuration.GetDefaultRootContainer();
-            if (rootContainer == null)
-            {
-                throw Error.InvalidOperation(String.Format(CultureInfo.InvariantCulture,
-                    SRResources.CannotDetermineRootContainer, routeName));
-            }
-
-            IServiceScope requestScope = rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
+            IServiceScope requestScope = request.CreateRequestScope();
             IServiceProvider requestContainer = requestScope.ServiceProvider;
 
             request.Properties[RequestScopeKey] = requestScope;
@@ -353,6 +337,26 @@ namespace System.Web.OData.Extensions
                 Query = queryBuilder.ToString()
             };
             return uriBuilder.Uri;
+        }
+
+        private static IServiceProvider RootContainer(this HttpRequestMessage request)
+        {
+            HttpConfiguration configuration = request.GetConfiguration();
+            if (configuration == null)
+            {
+                throw Error.Argument("request", SRResources.RequestMustContainConfiguration);
+            }
+
+            // Requests from OData routes will have RouteName set.
+            string routeName = request.ODataProperties().RouteName;
+            return routeName != null
+                ? configuration.GetODataRootContainer(routeName)
+                : configuration.GetNonODataRootContainer();
+        }
+
+        private static IServiceScope CreateRequestScope(this HttpRequestMessage request)
+        {
+            return request.RootContainer().GetRequiredService<IServiceScopeFactory>().CreateScope();
         }
     }
 }

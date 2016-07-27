@@ -219,7 +219,7 @@ namespace System.Web.OData.Test
         {
             HttpRequestMessage request;
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableDependencyInjection();
+            configuration.EnableDependencyInjectionSupport();
             request = new HttpRequestMessage(method, "http://host/any");
             request.SetConfiguration(configuration);
             request.SetFakeODataRouteName();

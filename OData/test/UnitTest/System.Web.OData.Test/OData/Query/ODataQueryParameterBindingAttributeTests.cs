@@ -67,7 +67,7 @@ namespace System.Web.OData.Query
             ODataQueryParameterBindingAttribute attribute = new ODataQueryParameterBindingAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
-            config.EnableDependencyInjection();
+            config.EnableDependencyInjectionSupport();
             request.SetConfiguration(config);
             request.SetFakeODataRouteName();
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
@@ -183,7 +183,7 @@ namespace System.Web.OData.Query
                 HttpMethod.Get,
                 "http://localhost/Customer/?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
-            config.EnableDependencyInjection();
+            config.EnableDependencyInjectionSupport();
             request.SetConfiguration(config);
             request.SetFakeODataRouteName();
 

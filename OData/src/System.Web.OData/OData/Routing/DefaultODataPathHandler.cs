@@ -10,7 +10,6 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing.Template;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;

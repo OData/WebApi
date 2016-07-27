@@ -1648,12 +1648,12 @@ public sealed class System.Web.OData.Extensions.HttpConfigurationExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static System.IServiceProvider EnableDependencyInjection (System.Web.Http.HttpConfiguration configuration, string routeName)
+	public static void EnableDependencyInjection (System.Web.Http.HttpConfiguration configuration)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static System.IServiceProvider EnableDependencyInjection (System.Web.Http.HttpConfiguration configuration, string routeName, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
+	public static void EnableDependencyInjection (System.Web.Http.HttpConfiguration configuration, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
 
 	[
 	ExtensionAttribute(),

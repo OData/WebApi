@@ -150,7 +150,7 @@ namespace System.Web.OData.Routing.Conventions
 
             ODataPathTemplate pathTemplate = new ODataPathTemplate();
             Mock<IODataPathTemplateHandler> pathTemplateHandler = new Mock<IODataPathTemplateHandler>();
-            pathTemplateHandler.Setup(p => p.ParseTemplate(model.Model, "Customers", config.GetRootContainer(RouteName)))
+            pathTemplateHandler.Setup(p => p.ParseTemplate(model.Model, "Customers", config.GetODataRootContainer(RouteName)))
                 .Returns(pathTemplate).Verifiable();
 
             AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, model.Model, config, pathTemplateHandler.Object);
@@ -192,7 +192,7 @@ namespace System.Web.OData.Routing.Conventions
             ODataPathTemplate pathTemplate = new ODataPathTemplate();
             Mock<IODataPathTemplateHandler> pathTemplateHandler = new Mock<IODataPathTemplateHandler>();
             pathTemplateHandler
-                .Setup(p => p.ParseTemplate(model.Model, expectedPathTemplate, controller.Configuration.GetRootContainer(RouteName)))
+                .Setup(p => p.ParseTemplate(model.Model, expectedPathTemplate, controller.Configuration.GetODataRootContainer(RouteName)))
                 .Returns(pathTemplate)
                 .Verifiable();
 
@@ -245,7 +245,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             IEdmModel model = new EdmModel();
             HttpConfiguration configuration = new[] { typeof(TestODataController) }.GetHttpConfiguration();
-            configuration.EnableDependencyInjection();
+            configuration.EnableDependencyInjectionSupport();
             AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, model, configuration);
 
             // Act & Assert
@@ -261,7 +261,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             IEdmModel model = new CustomersModelWithInheritance().Model;
             HttpConfiguration configuration = new[] { typeof(TestODataController) }.GetHttpConfiguration();
-            configuration.EnableDependencyInjection();
+            configuration.EnableDependencyInjectionSupport();
             AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, model, configuration);
 
             // Act & Assert

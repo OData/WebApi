@@ -143,7 +143,7 @@ namespace System.Web.OData.Formatter
             IEdmModel model = new ODataConventionModelBuilder().GetEdmModel();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableDependencyInjection();
+            configuration.EnableDependencyInjectionSupport();
             configuration.Routes.MapHttpRoute(HttpRouteCollectionExtensions.RouteName, "{param}");
             request.SetConfiguration(configuration);
             request.ODataProperties().Model = model;
@@ -899,7 +899,7 @@ namespace System.Web.OData.Formatter
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
             request.ODataProperties().Model = model;
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableDependencyInjection();
+            configuration.EnableDependencyInjectionSupport();
             configuration.Routes.MapFakeODataRoute();
             request.SetConfiguration(configuration);
             request.ODataProperties().Path =

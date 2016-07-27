@@ -267,7 +267,7 @@ namespace System.Web.OData.Query
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$orderby=Name");
             HttpConfiguration config = new HttpConfiguration();
             config.Count().OrderBy().Filter().Expand().MaxTop(null);
-            config.EnableDependencyInjection();
+            config.EnableDependencyInjectionSupport();
             request.SetConfiguration(config);
             request.SetFakeODataRouteName();
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
@@ -297,7 +297,7 @@ namespace System.Web.OData.Query
             request.ODataProperties().Path = new ODataPath(CountSegment.Instance);
             request.SetFakeODataRouteName();
             HttpConfiguration config = new HttpConfiguration();
-            config.EnableDependencyInjection();
+            config.EnableDependencyInjectionSupport();
             request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(
                 config,
@@ -334,7 +334,7 @@ namespace System.Web.OData.Query
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?select");
             HttpConfiguration config = new HttpConfiguration();
-            config.EnableDependencyInjection();
+            config.EnableDependencyInjectionSupport();
             request.SetConfiguration(config);
             request.SetFakeODataRouteName();
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
@@ -358,7 +358,7 @@ namespace System.Web.OData.Query
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$custom");
             HttpConfiguration config = new HttpConfiguration();
-            config.EnableDependencyInjection();
+            config.EnableDependencyInjectionSupport();
             request.SetConfiguration(config);
             request.SetFakeODataRouteName();
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
@@ -465,7 +465,7 @@ namespace System.Web.OData.Query
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Primitive/?" + filter);
             HttpConfiguration config = new HttpConfiguration();
-            config.EnableDependencyInjection();
+            config.EnableDependencyInjectionSupport();
             request.SetConfiguration(config);
             request.SetFakeODataRouteName();
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
@@ -1091,7 +1091,7 @@ namespace System.Web.OData.Query
             var response = request.CreateResponse<TResponse>(HttpStatusCode.OK, result);
             var actionExecutedContext = new HttpActionExecutedContext { ActionContext = actionContext, Response = response };
             var config = request.GetConfiguration();
-            config.EnableDependencyInjection();
+            config.EnableDependencyInjectionSupport();
             actionContext.ActionDescriptor.Configuration = config;
             return actionExecutedContext;
         }

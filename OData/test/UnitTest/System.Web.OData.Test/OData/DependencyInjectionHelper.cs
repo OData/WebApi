@@ -14,31 +14,36 @@ namespace System.Web.OData
     {
         public static IServiceProvider BuildContainer(Action<IContainerBuilder> action)
         {
-            return CreateConfigurationWithRootContainer().GetRootContainer(HttpRouteCollectionExtensions.RouteName);
+            return CreateConfigurationWithRootContainer().GetODataRootContainer(HttpRouteCollectionExtensions.RouteName);
         }
 
         public static HttpConfiguration CreateConfigurationWithRootContainer()
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableDependencyInjection(HttpRouteCollectionExtensions.RouteName);
+            configuration.EnableDependencyInjectionSupport();
             return configuration;
         }
 
-        public static void EnableDependencyInjection(this HttpConfiguration configuration)
+        public static void EnableDependencyInjectionSupport(this HttpConfiguration configuration)
         {
-            configuration.EnableDependencyInjection(HttpRouteCollectionExtensions.RouteName);
+            configuration.EnableDependencyInjectionSupport(HttpRouteCollectionExtensions.RouteName);
         }
 
-        public static void EnableDependencyInjection(this HttpRequestMessage request)
+        public static void EnableDependencyInjectionSupport(this HttpConfiguration configuration, string routeName)
+        {
+            configuration.CreateODataRootContainer(routeName, null);
+        }
+
+        public static void EnableDependencyInjectionSupport(this HttpRequestMessage request)
         {
             HttpConfiguration configuration = request.GetConfiguration();
             if (configuration == null)
             {
-                configuration = CreateConfigurationWithRootContainer();
+                configuration = new HttpConfiguration();
                 request.SetConfiguration(configuration);
             }
 
-            request.SetFakeODataRouteName();
+            configuration.EnableDependencyInjection();
         }
     }
 }

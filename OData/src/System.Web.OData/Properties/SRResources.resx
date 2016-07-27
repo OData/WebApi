@@ -847,10 +847,10 @@
   <data name="DynamicResourceSetTypeNameIsRequired" xml:space="preserve">
     <value>The type name of the dynamic resource set '{0}' is required and cannot be empty. Consider using a OData type annotation explicitly.</value>
   </data>
-  <data name="CannotReconfigureContainerBuilder" xml:space="preserve">
-    <value>Cannot re-configure the container builder because the root container has already been built.</value>
+  <data name="CannotReEnableDependencyInjection" xml:space="preserve">
+    <value>Cannot re-enable dependency injection for HTTP routes.</value>
   </data>
-  <data name="CannotDetermineRootContainer" xml:space="preserve">
-    <value>Cannot determine the root container for the route '{0}'.</value>
+  <data name="NoNonODataHttpRouteRegistered" xml:space="preserve">
+    <value>No non-OData HTTP route registered.</value>
   </data>
 </root>

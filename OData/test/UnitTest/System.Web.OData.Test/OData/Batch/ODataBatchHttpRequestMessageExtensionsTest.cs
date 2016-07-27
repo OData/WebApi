@@ -95,7 +95,7 @@ namespace System.Web.OData.Test
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            request.EnableDependencyInjection();
+            request.EnableDependencyInjectionSupport();
             var responses = new ODataBatchResponseItem[] { };
             var quotas = new ODataMessageQuotas();
 

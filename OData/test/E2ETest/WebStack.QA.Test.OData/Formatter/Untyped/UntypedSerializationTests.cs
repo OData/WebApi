@@ -13,6 +13,7 @@ using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Query;
+using System.Web.OData.Query.Validators;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
@@ -270,7 +271,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
             }
 
             ODataQueryContext context = new ODataQueryContext(Request.ODataProperties().Model, CustomerType, path: null,
-                requestContainer: null);
+                requestContainer: new MockContainer());
             ODataQueryOptions query = new ODataQueryOptions(context, Request);
             if (query.SelectExpand != null)
             {
@@ -396,6 +397,30 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
             return address;
         }
     }
+
+    public class MockContainer : IServiceProvider
+    {
+        public object GetService(Type serviceType)
+        {
+            if (serviceType == typeof(DefaultQuerySettings))
+            {
+                return new DefaultQuerySettings();
+            }
+
+            if (serviceType == typeof(SelectExpandQueryValidator))
+            {
+                return new SelectExpandQueryValidator(new DefaultQuerySettings());
+            }
+
+            if (serviceType == typeof(ODataQueryValidator))
+            {
+                return new ODataQueryValidator();
+            }
+
+            throw new NotImplementedException();
+        }
+    }
+
     public class UntypedCustomer
     {
         public int Id { get; set; }

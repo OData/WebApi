@@ -1,5 +1,6 @@
 ﻿using System.Web.Http;
 using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using Microsoft.OData.Edm;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
@@ -51,7 +52,7 @@ namespace WebStack.QA.Test.OData.ModelBuilder
 
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.EnableODataSupport(GetImplicitEdmModel());
         }
 

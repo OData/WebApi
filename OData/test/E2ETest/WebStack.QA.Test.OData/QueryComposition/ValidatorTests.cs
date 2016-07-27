@@ -192,9 +192,9 @@ namespace WebStack.QA.Test.OData.QueryComposition
                 set.Add(commonSettings, "$top=10", true);
                 set.Add(commonSettings, "$top=11", false);
                 set.Add(commonSettings, new AttackStringBuilder().Append("$filter=").Repeat("not ", 50).Append("(1 mul 1 eq 1)").ToString(), false);
-                set.Add(commonSettings, "$top=10&$orderby=ID,DateTime&$filter=contains(Name, 'Test') and (DateTime gt 2012-12-04 or 1 add 1 eq 2) and floor(Double) gt 5", true);
-                set.Add(commonSettings, "$top=10&$orderby=ID,DateTime&$filter=contains(Name, 'Test') and (DateTime gt 2012-12-04 or 1 add 1 eq 2) and floor(Decimal) gt 5", true);
-                set.Add(commonSettings, "$top=10&$orderby=ID,DateTime&$filter=contains(Name, 'Test') and (DateTime gt 2012-12-04 or 1 add 1 eq 2) and length(Name) gt 5", false);
+                set.Add(commonSettings, "$top=10&$orderby=ID,DateTime&$filter=contains(Name, 'Test') and (DateTime gt 2012-12-04T00:00:00Z or 1 add 1 eq 2) and floor(Double) gt 5", true);
+                set.Add(commonSettings, "$top=10&$orderby=ID,DateTime&$filter=contains(Name, 'Test') and (DateTime gt 2012-12-04T00:00:00Z or 1 add 1 eq 2) and floor(Decimal) gt 5", true);
+                set.Add(commonSettings, "$top=10&$orderby=ID,DateTime&$filter=contains(Name, 'Test') and (DateTime gt 2012-12-04T00:00:00Z or 1 add 1 eq 2) and length(Name) gt 5", false);
 
                 return set;
             }

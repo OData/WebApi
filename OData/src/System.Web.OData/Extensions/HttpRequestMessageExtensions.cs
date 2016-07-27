@@ -228,6 +228,8 @@ namespace System.Web.OData.Extensions
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns>The dependency injection container.</returns>
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
+            Justification = "requestScope will be disposed when the request ends.")]
         public static IServiceProvider RequestContainer(this HttpRequestMessage request)
         {
             if (request == null)

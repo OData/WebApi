@@ -43,7 +43,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.AddODataQueryFilter();
-            configuration.EnableDependencyInjection("api default");
+            configuration.EnableDependencyInjection();
         }
 
         [Theory]

@@ -4,7 +4,6 @@
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Extensions;
-using System.Web.OData.Formatter;
 using Microsoft.OData;
 using HttpRouteCollectionExtensions = System.Web.OData.Formatter.HttpRouteCollectionExtensions;
 

@@ -195,7 +195,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.AddODataQueryFilter();
-            configuration.EnableDependencyInjection("api default");
+            configuration.EnableDependencyInjection();
         }
 
         [Theory]

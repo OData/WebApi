@@ -172,7 +172,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.AddODataQueryFilter(new EnableQueryAttribute() { PageSize = 3 });
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
-            configuration.EnableDependencyInjection("api default");
+            configuration.EnableDependencyInjection();
         }
 
         [Theory]
@@ -249,7 +249,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.AddODataQueryFilter(new DerivedQueryableAttribute());
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
-            configuration.EnableDependencyInjection("api default");
+            configuration.EnableDependencyInjection();
         }
 
         [Theory]

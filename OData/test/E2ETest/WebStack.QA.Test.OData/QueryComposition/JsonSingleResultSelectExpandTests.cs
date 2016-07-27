@@ -24,7 +24,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.Routes.MapHttpRoute("api", "api/{controller}/{id}", new { id = RouteParameter.Optional });
-            configuration.EnableDependencyInjection("api default");
+            configuration.EnableDependencyInjection();
         }
 
         [Fact]

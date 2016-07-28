@@ -261,6 +261,9 @@ namespace System.Web.OData.Query.Expressions
                 case QueryNodeKind.SingleValuePropertyAccess:
                     var propAccessNode = node as SingleValuePropertyAccessNode;
                     return CreatePropertyAccessExpression(BindAccessor(propAccessNode.Source), propAccessNode.Property);
+                case QueryNodeKind.SingleComplexNode:
+                    var singleComplexNode = node as SingleComplexNode;
+                    return CreatePropertyAccessExpression(BindAccessor(singleComplexNode.Source), singleComplexNode.Property);
                 case QueryNodeKind.SingleValueOpenPropertyAccess:
                     var openNode = node as SingleValueOpenPropertyAccessNode;
                     return Expression.Property(BindAccessor(openNode.Source), openNode.Name);

@@ -151,13 +151,12 @@ namespace System.Web.OData.Formatter
 
         [Theory]
         [PropertyData("NullPrimitiveValueToTest")]
-        public void NullPrimitiveValueSerializeAsOData(Type valueType, object value, MediaTypeHeaderValue mediaType, string notUsed)
+        public void NullPrimitiveValueSerializeAsODataThrows(Type valueType, object value, MediaTypeHeaderValue mediaType, string notUsed)
         {
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
 
-            string actualEntity;
 
             using (HttpConfiguration configuration = CreateConfiguration())
             using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
@@ -177,8 +176,8 @@ namespace System.Web.OData.Formatter
 
                 using (ObjectContent content = new ObjectContent(type, value, formatter))
                 {
-                    actualEntity = content.ReadAsStringAsync().Result;
-                    Assert.Equal("", actualEntity);
+                    Assert.Throws<ODataException>(() => content.ReadAsStringAsync().Result, 
+                        "A null top-level property is not allowed to be serialized.");
                 }
             }
         }

@@ -101,6 +101,8 @@ namespace System.Web.OData.Query.Expressions
             return orderByLambda;
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+            Justification = "These are simple conversion function and cannot be split up.")]
         private Expression Bind(QueryNode node)
         {
             // Recursion guard to avoid stack overflows
@@ -120,13 +122,15 @@ namespace System.Web.OData.Query.Expressions
                     case QueryNodeKind.CollectionPropertyAccess:
                         return BindCollectionPropertyAccessNode(node as CollectionPropertyAccessNode);
 
+                    case QueryNodeKind.CollectionComplexNode:
+                        return BindCollectionComplexNode(node as CollectionComplexNode);
+
                     case QueryNodeKind.CollectionResourceCast:
                         return BindCollectionResourceCastNode(node as CollectionResourceCastNode);
 
                     case QueryNodeKind.CollectionFunctionCall:
                     case QueryNodeKind.CollectionResourceFunctionCall:
                     case QueryNodeKind.CollectionOpenPropertyAccess:
-                    case QueryNodeKind.CollectionPropertyCast:
                     // Unused or have unknown uses.
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
@@ -153,6 +157,9 @@ namespace System.Web.OData.Query.Expressions
 
                     case QueryNodeKind.SingleValuePropertyAccess:
                         return BindPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
+
+                    case QueryNodeKind.SingleComplexNode:
+                        return BindSingleComplexNode(node as SingleComplexNode);
 
                     case QueryNodeKind.SingleValueOpenPropertyAccess:
                         return BindDynamicPropertyAccessQueryNode(node as SingleValueOpenPropertyAccessNode);
@@ -184,7 +191,6 @@ namespace System.Web.OData.Query.Expressions
                     case QueryNodeKind.EntitySet:
                     case QueryNodeKind.KeyLookup:
                     case QueryNodeKind.SearchTerm:
-                    case QueryNodeKind.SingleValueCast:
                     // Unused or have unknown uses.
                     default:
                         throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
@@ -512,10 +518,22 @@ namespace System.Web.OData.Query.Expressions
             return CreatePropertyAccessExpression(source, propertyAccessNode.Property);
         }
 
+        private Expression BindCollectionComplexNode(CollectionComplexNode collectionComplexNode)
+        {
+            Expression source = Bind(collectionComplexNode.Source);
+            return CreatePropertyAccessExpression(source, collectionComplexNode.Property);
+        }
+
         private Expression BindPropertyAccessQueryNode(SingleValuePropertyAccessNode propertyAccessNode)
         {
             Expression source = Bind(propertyAccessNode.Source);
             return CreatePropertyAccessExpression(source, propertyAccessNode.Property);
+        }
+
+        private Expression BindSingleComplexNode(SingleComplexNode singleComplexNode)
+        {
+            Expression source = Bind(singleComplexNode.Source);
+            return CreatePropertyAccessExpression(source, singleComplexNode.Property);
         }
 
         private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property)

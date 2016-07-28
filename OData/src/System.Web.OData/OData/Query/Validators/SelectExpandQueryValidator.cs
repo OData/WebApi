@@ -180,6 +180,15 @@ namespace System.Web.OData.Query.Validators
                     throw new ODataException(Error.Format(SRResources.NotSortablePropertyUsedInOrderBy,
                         node.Property.Name));
                 }
+
+                SingleComplexNode complexNode = orderByClause.Expression as SingleComplexNode;
+                if (complexNode != null &&
+                    EdmLibHelpers.IsNotSortable(complexNode.Property, property, structuredType, edmModel,
+                        _defaultQuerySettings.EnableOrderBy))
+                {
+                    throw new ODataException(Error.Format(SRResources.NotSortablePropertyUsedInOrderBy,
+                        complexNode.Property.Name));
+                }
             }
         }
 

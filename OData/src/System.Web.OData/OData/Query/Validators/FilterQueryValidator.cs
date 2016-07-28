@@ -425,6 +425,38 @@ namespace System.Web.OData.Query.Validators
         }
 
         /// <summary>
+        /// Override this method to validate single complex property accessor.
+        /// </summary>
+        /// <remarks>
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
+        /// <param name="singleComplexNode"></param>
+        /// <param name="settings"></param>
+        public virtual void ValidateSingleComplexNode(SingleComplexNode singleComplexNode, ODataValidationSettings settings)
+        {
+            if (singleComplexNode == null)
+            {
+                throw Error.ArgumentNull("singleComplexNode");
+            }
+
+            if (settings == null)
+            {
+                throw Error.ArgumentNull("settings");
+            }
+
+            // Check whether the property is filterable.
+            IEdmProperty property = singleComplexNode.Property;
+            if (EdmLibHelpers.IsNotFilterable(property, _property, _structuredType, _model,
+                _defaultQuerySettings.EnableFilter))
+            {
+                throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, property.Name));
+            }
+
+            ValidateQueryNode(singleComplexNode.Source, settings);
+        }
+
+        /// <summary>
         /// Override this method to validate collection property accessor.
         /// </summary>
         /// <remarks>
@@ -454,6 +486,38 @@ namespace System.Web.OData.Query.Validators
             }
 
             ValidateQueryNode(propertyAccessNode.Source, settings);
+        }
+
+        /// <summary>
+        /// Override this method to validate collection complex property accessor.
+        /// </summary>
+        /// <remarks>
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
+        /// <param name="collectionComplexNode"></param>
+        /// <param name="settings"></param>
+        public virtual void ValidateCollectionComplexNode(CollectionComplexNode collectionComplexNode, ODataValidationSettings settings)
+        {
+            if (collectionComplexNode == null)
+            {
+                throw Error.ArgumentNull("collectionComplexNode");
+            }
+
+            if (settings == null)
+            {
+                throw Error.ArgumentNull("settings");
+            }
+
+            // Check whether the property is filterable.
+            IEdmProperty property = collectionComplexNode.Property;
+            if (EdmLibHelpers.IsNotFilterable(property, _property, _structuredType, _model,
+                _defaultQuerySettings.EnableFilter))
+            {
+                throw new ODataException(Error.Format(SRResources.NotFilterablePropertyUsedInFilter, property.Name));
+            }
+
+            ValidateQueryNode(collectionComplexNode.Source, settings);
         }
 
         /// <summary>
@@ -656,6 +720,11 @@ namespace System.Web.OData.Query.Validators
                     ValidateCollectionPropertyAccessNode(propertyAccessNode, settings);
                     break;
 
+                case QueryNodeKind.CollectionComplexNode:
+                    CollectionComplexNode collectionComplexNode = node as CollectionComplexNode;
+                    ValidateCollectionComplexNode(collectionComplexNode, settings);
+                    break;
+
                 case QueryNodeKind.CollectionNavigationNode:
                     CollectionNavigationNode navigationNode = node as CollectionNavigationNode;
                     ValidateNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty, settings);
@@ -668,7 +737,6 @@ namespace System.Web.OData.Query.Validators
                 case QueryNodeKind.CollectionFunctionCall:
                 case QueryNodeKind.CollectionResourceFunctionCall:
                 case QueryNodeKind.CollectionOpenPropertyAccess:
-                case QueryNodeKind.CollectionPropertyCast:
                     // Unused or have unknown uses.
                 default:
                     throw Error.NotSupported(SRResources.QueryNodeValidationNotSupported, node.Kind, typeof(FilterQueryValidator).Name);
@@ -706,6 +774,10 @@ namespace System.Web.OData.Query.Validators
 
                 case QueryNodeKind.SingleValuePropertyAccess:
                     ValidateSingleValuePropertyAccessNode(node as SingleValuePropertyAccessNode, settings);
+                    break;
+
+                case QueryNodeKind.SingleComplexNode:
+                    ValidateSingleComplexNode(node as SingleComplexNode, settings);
                     break;
 
                 case QueryNodeKind.UnaryOperator:
@@ -746,7 +818,6 @@ namespace System.Web.OData.Query.Validators
                 case QueryNodeKind.EntitySet:
                 case QueryNodeKind.KeyLookup:
                 case QueryNodeKind.SearchTerm:
-                case QueryNodeKind.SingleValueCast:
                     // Unused or have unknown uses.
                 default:
                     throw Error.NotSupported(SRResources.QueryNodeValidationNotSupported, node.Kind, typeof(FilterQueryValidator).Name);

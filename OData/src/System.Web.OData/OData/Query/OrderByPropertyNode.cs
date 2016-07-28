@@ -31,9 +31,20 @@ namespace System.Web.OData.Query
             SingleValuePropertyAccessNode propertyExpression = orderByClause.Expression as SingleValuePropertyAccessNode;
             if (propertyExpression == null)
             {
-                throw new ODataException(SRResources.OrderByClauseNotSupported);
+                SingleComplexNode singleComplexNode = orderByClause.Expression as SingleComplexNode;
+                if (singleComplexNode == null)
+                {
+                    throw new ODataException(SRResources.OrderByClauseNotSupported);
+                }
+                else
+                {
+                    Property = singleComplexNode.Property;
+                }
             }
-            Property = propertyExpression.Property;
+            else
+            {
+                Property = propertyExpression.Property;
+            }
         }
 
         /// <summary>

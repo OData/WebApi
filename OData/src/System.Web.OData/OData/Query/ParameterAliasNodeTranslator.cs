@@ -115,8 +115,7 @@ namespace System.Web.OData.Query
                 new CollectionNavigationNode(
                     (SingleResourceNode)nodeIn.Source.Accept(this),
                     nodeIn.NavigationProperty,
-                    // TODO: need ODL to public the binding path.
-                    new EdmPathExpression(nodeIn.NavigationProperty.Name));
+                    nodeIn.BindingPath ?? new EdmPathExpression(nodeIn.NavigationProperty.Name));
         }
 
         /// <summary>
@@ -132,6 +131,18 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
+        /// Translate a CollectionComplexNode.
+        /// </summary>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
+        public override QueryNode Visit(CollectionComplexNode nodeIn)
+        {
+            return new CollectionComplexNode(
+                (SingleResourceNode)nodeIn.Source.Accept(this),
+                nodeIn.Property);
+        }
+
+        /// <summary>
         /// Translate a CollectionPropertyAccessNode.
         /// </summary>
         /// <param name="nodeIn">The node to be translated.</param>
@@ -141,18 +152,6 @@ namespace System.Web.OData.Query
             return new CollectionPropertyAccessNode(
                 (SingleValueNode)nodeIn.Source.Accept(this),
                 nodeIn.Property);
-        }
-
-        /// <summary>
-        /// Translate a CollectionPropertyCastNode.
-        /// </summary>
-        /// <param name="nodeIn">The node to be translated.</param>
-        /// <returns>The translated node.</returns>
-        public override QueryNode Visit(CollectionPropertyCastNode nodeIn)
-        {
-            return new CollectionPropertyCastNode(
-                (CollectionPropertyAccessNode)nodeIn.Source.Accept(this),
-                (IEdmComplexType)nodeIn.ItemType.Definition);
         }
 
         /// <summary>
@@ -184,7 +183,7 @@ namespace System.Web.OData.Query
         {
             return new CollectionResourceCastNode(
                 (CollectionResourceNode)nodeIn.Source.Accept(this),
-                (IEdmEntityType)nodeIn.ItemType.Definition);
+                (IEdmStructuredType)nodeIn.ItemType.Definition);
         }
 
         /// <summary>
@@ -275,7 +274,7 @@ namespace System.Web.OData.Query
                 nodeIn :
                 new SingleResourceCastNode(
                     (SingleResourceNode)nodeIn.Source.Accept(this),
-                    (IEdmEntityType)nodeIn.TypeReference.Definition);
+                    (IEdmStructuredType)nodeIn.TypeReference.Definition);
         }
 
         /// <summary>
@@ -306,22 +305,7 @@ namespace System.Web.OData.Query
                 new SingleNavigationNode(
                     (SingleResourceNode)nodeIn.Source.Accept(this),
                     nodeIn.NavigationProperty,
-                    // TODO: need ODL to public the binding path.
-                    new EdmPathExpression(nodeIn.NavigationProperty.Name));
-        }
-
-        /// <summary>
-        /// Translate a SingleValueCastNode.
-        /// </summary>
-        /// <param name="nodeIn">The node to be translated.</param>
-        /// <returns>The translated node.</returns>
-        public override QueryNode Visit(SingleValueCastNode nodeIn)
-        {
-            return nodeIn.Source == null ?
-                nodeIn :
-                new SingleValueCastNode(
-                    (SingleValueNode)nodeIn.Source.Accept(this),
-                    (IEdmComplexType)nodeIn.TypeReference.Definition);
+                    nodeIn.BindingPath ?? new EdmPathExpression(nodeIn.NavigationProperty.Name));
         }
 
         /// <summary>
@@ -360,6 +344,18 @@ namespace System.Web.OData.Query
         {
             return new SingleValuePropertyAccessNode(
                 (SingleValueNode)nodeIn.Source.Accept(this),
+                nodeIn.Property);
+        }
+
+        /// <summary>
+        /// Translate a SingleComplexNode.
+        /// </summary>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
+        public override QueryNode Visit(SingleComplexNode nodeIn)
+        {
+            return new SingleComplexNode(
+                (SingleResourceNode)nodeIn.Source.Accept(this),
                 nodeIn.Property);
         }
 

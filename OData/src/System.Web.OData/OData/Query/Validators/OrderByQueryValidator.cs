@@ -168,6 +168,20 @@ namespace System.Web.OData.Query.Validators
                 return null;
             }
 
+            public override SingleValueNode Visit(SingleComplexNode nodeIn)
+            {
+                if (EdmLibHelpers.IsNotSortable(nodeIn.Property, _property, _structuredType, _model, _enableOrderBy))
+                {
+                    return nodeIn;
+                }
+
+                if (nodeIn.Source != null)
+                {
+                    return nodeIn.Source.Accept(this);
+                }
+                return null;
+            }
+
             public override SingleValueNode Visit(SingleNavigationNode nodeIn)
             {
                 if (EdmLibHelpers.IsNotSortable(nodeIn.NavigationProperty, _property, _structuredType, _model,
@@ -202,6 +216,10 @@ namespace System.Web.OData.Query.Validators
                 else if (node.Kind == QueryNodeKind.SingleValuePropertyAccess)
                 {
                     return ((SingleValuePropertyAccessNode)node).Property.Name;
+                }
+                else if (node.Kind == QueryNodeKind.SingleComplexNode)
+                {
+                    return ((SingleComplexNode)node).Property.Name;
                 }
                 return null;
             }

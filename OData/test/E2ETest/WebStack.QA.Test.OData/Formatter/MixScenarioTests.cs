@@ -75,6 +75,7 @@ namespace WebStack.QA.Test.OData.Formatter
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.EnableODataSupport(GetEdmModel(configuration), "odata");
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
+            configuration.EnableDependencyInjection();
         }
 
         protected static IEdmModel GetEdmModel(HttpConfiguration configuration)

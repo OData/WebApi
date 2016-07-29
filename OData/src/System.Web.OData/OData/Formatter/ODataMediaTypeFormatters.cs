@@ -24,17 +24,17 @@ namespace System.Web.OData.Formatter
 
         /// <summary>
         /// Creates a list of media type formatters to handle OData.
-        /// The default serializer provider is <see cref="DefaultODataSerializerProvider"/> and the default deserializer provider is
-        /// <see cref="DefaultODataDeserializerProvider"/>.
+        /// The default serializer provider is <see cref="ODataSerializerProviderProxy"/> and the default deserializer provider is
+        /// <see cref="ODataDeserializerProviderProxy"/>.
         /// </summary>
         /// <returns>A list of media type formatters to handle OData.</returns>
         public static IList<ODataMediaTypeFormatter> Create()
         {
-            return Create(DefaultODataSerializerProvider.Instance, DefaultODataDeserializerProvider.Instance);
+            return Create(ODataSerializerProviderProxy.Instance, ODataDeserializerProviderProxy.Instance);
         }
 
         /// <summary>
-        /// Creates a list of media type formatters to handle OData with the given <paramref name="serializerProvider"/> and 
+        /// Creates a list of media type formatters to handle OData with the given <paramref name="serializerProvider"/> and
         /// <paramref name="deserializerProvider"/>.
         /// </summary>
         /// <param name="serializerProvider">The serializer provider to use.</param>

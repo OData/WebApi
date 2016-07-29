@@ -651,19 +651,19 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void Create_UsesDefaultSerializerProviderInstance()
+        public void Create_UsesODataSerializerProviderProxyInstance()
         {
             var formatters = ODataMediaTypeFormatters.Create();
 
-            Assert.Same(formatters.First().SerializerProvider, DefaultODataSerializerProvider.Instance);
+            Assert.Same(formatters.First().SerializerProvider, ODataSerializerProviderProxy.Instance);
         }
 
         [Fact]
-        public void Create_UsesDefaultDeserializerProviderInstance()
+        public void Create_UsesODataDeserializerProviderProxy()
         {
             var formatters = ODataMediaTypeFormatters.Create();
 
-            Assert.Same(formatters.First().DeserializerProvider, DefaultODataDeserializerProvider.Instance);
+            Assert.Same(formatters.First().DeserializerProvider, ODataDeserializerProviderProxy.Instance);
         }
 
         private static IEdmModel CreateModel()
@@ -688,6 +688,7 @@ namespace System.Web.OData.Formatter
             using (HttpRequestMessage request = new HttpRequestMessage())
             {
                 request.RequestUri = new Uri("http://any");
+                request.EnableODataDependencyInjectionSupport();
                 ContentNegotiationResult result = negotiator.Negotiate(type, request, formatters);
                 mediaType = result.MediaType;
             }
@@ -708,6 +709,7 @@ namespace System.Web.OData.Formatter
             using (HttpRequestMessage request = new HttpRequestMessage())
             {
                 request.RequestUri = new Uri("http://any/?$format=" + dollarFormat);
+                request.EnableODataDependencyInjectionSupport();
                 ContentNegotiationResult result = negotiator.Negotiate(type, request, formatters);
                 mediaType = result.MediaType;
             }
@@ -729,6 +731,7 @@ namespace System.Web.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage();
             request.RequestUri = new Uri("http://any");
             request.ODataProperties().Model = model;
+            request.EnableODataDependencyInjectionSupport();
             return ODataMediaTypeFormatters.Create().Select(f => f.GetPerRequestFormatterInstance(typeof(void), request, null) as ODataMediaTypeFormatter);
         }
     }

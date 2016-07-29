@@ -44,12 +44,14 @@ namespace System.Web.OData.Formatter
         private readonly ODataDeserializerProvider _deserializerProvider;
         private readonly ODataSerializerProvider _serializerProvider;
 
+        private HttpRequestMessage _request;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataMediaTypeFormatter"/> class.
         /// </summary>
         /// <param name="payloadKinds">The kind of payloads this formatter supports.</param>
         public ODataMediaTypeFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
-            : this(DefaultODataDeserializerProvider.Instance, DefaultODataSerializerProvider.Instance, payloadKinds)
+            : this(ODataDeserializerProviderProxy.Instance, ODataSerializerProviderProxy.Instance, payloadKinds)
         {
         }
 
@@ -116,6 +118,22 @@ namespace System.Web.OData.Formatter
 
             // Parameter 3: request
             Request = request;
+
+            if (_serializerProvider.GetType() == typeof(ODataSerializerProviderProxy))
+            {
+                _serializerProvider = new ODataSerializerProviderProxy
+                {
+                    RequestContainer = request.GetRequestContainer()
+                };
+            }
+
+            if (_deserializerProvider.GetType() == typeof(ODataDeserializerProviderProxy))
+            {
+                _deserializerProvider = new ODataDeserializerProviderProxy
+                {
+                    RequestContainer = request.GetRequestContainer()
+                };
+            }
         }
 
         /// <summary>
@@ -149,7 +167,15 @@ namespace System.Web.OData.Formatter
         /// <summary>
         /// The request message associated with the per-request formatter instance.
         /// </summary>
-        public HttpRequestMessage Request { get; set; }
+        public HttpRequestMessage Request
+        {
+            get { return _request; }
+            set
+            {
+                EnsureRequestContainer(value);
+                _request = value;
+            }
+        }
 
         /// <inheritdoc/>
         public override MediaTypeFormatter GetPerRequestFormatterInstance(Type type, HttpRequestMessage request, MediaTypeHeaderValue mediaType)
@@ -188,7 +214,7 @@ namespace System.Web.OData.Formatter
 
             // When calling this formatter as part of content negotiation the content negotiator will always
             // pick a non null media type. In case the user creates a new ObjectContent<T> and doesn't pass in a
-            // media type, we delegate to the base class to rely on the default behavior. It's the user's 
+            // media type, we delegate to the base class to rely on the default behavior. It's the user's
             // responsibility to pass in the right media type.
 
             if (mediaType != null)
@@ -685,13 +711,6 @@ namespace System.Web.OData.Formatter
             return expectedPayloadType;
         }
 
-        private static bool IsEntityOrFeed(IEdmTypeReference type)
-        {
-            Contract.Assert(type != null);
-            return type.IsEntity() ||
-                (type.IsCollection() && type.AsCollection().ElementType().IsEntity());
-        }
-
         /// <summary>
         /// Internal method used for selecting the base address to be used with OData uris.
         /// If the consumer has provided a delegate for overriding our default implementation,
@@ -770,6 +789,21 @@ namespace System.Web.OData.Formatter
             }
 
             return false;
+        }
+
+        private void EnsureRequestContainer(HttpRequestMessage request)
+        {
+            ODataSerializerProviderProxy serializerProviderProxy = _serializerProvider as ODataSerializerProviderProxy;
+            if (serializerProviderProxy != null && serializerProviderProxy.RequestContainer == null)
+            {
+                serializerProviderProxy.RequestContainer = request.GetRequestContainer();
+            }
+
+            ODataDeserializerProviderProxy deserializerProviderProxy = _deserializerProvider as ODataDeserializerProviderProxy;
+            if (deserializerProviderProxy != null && deserializerProviderProxy.RequestContainer == null)
+            {
+                deserializerProviderProxy.RequestContainer = request.GetRequestContainer();
+            }
         }
     }
 }

@@ -249,6 +249,7 @@ namespace System.Web.OData.Formatter
         public void SetDefaultContentHeaders_SetsRightODataServiceVersion(string requestDataServiceVersion, string requestMaxDataServiceVersion, string expectedDataServiceVersion)
         {
             HttpRequestMessage request = new HttpRequestMessage();
+            request.EnableODataDependencyInjectionSupport();
             if (requestDataServiceVersion != null)
             {
                 request.Headers.TryAddWithoutValidation("OData-Version", requestDataServiceVersion);
@@ -297,6 +298,7 @@ namespace System.Web.OData.Formatter
                 MediaTypeHeaderValue.Parse(acceptHeader);
 
             HttpRequestMessage request = new HttpRequestMessage();
+            request.EnableODataDependencyInjectionSupport();
             if (acceptHeader != null)
             {
                 request.Headers.TryAddWithoutValidation("Accept", acceptHeader);

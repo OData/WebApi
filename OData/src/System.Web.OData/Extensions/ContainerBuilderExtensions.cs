@@ -2,6 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Web.Http;
+using System.Web.OData.Formatter.Deserialization;
+using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Query.Validators;
 using System.Web.OData.Routing;
 using Microsoft.OData;
@@ -37,6 +39,8 @@ namespace System.Web.OData.Extensions
             builder.AddService<SelectExpandQueryValidator>(ServiceLifetime.Singleton);
             builder.AddService<SkipQueryValidator>(ServiceLifetime.Singleton);
             builder.AddService<TopQueryValidator>(ServiceLifetime.Singleton);
+            builder.AddService<ODataSerializerProvider, DefaultODataSerializerProvider>(ServiceLifetime.Singleton);
+            builder.AddService<ODataDeserializerProvider, DefaultODataDeserializerProvider>(ServiceLifetime.Singleton);
 
             return builder;
         }

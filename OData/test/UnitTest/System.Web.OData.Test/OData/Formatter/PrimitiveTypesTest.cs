@@ -203,7 +203,7 @@ namespace System.Web.OData.Formatter
                 HttpConfiguration config = new HttpConfiguration();
                 config.MapODataServiceRoute("default", "", model);
                 request.SetConfiguration(config);
-                request.ODataProperties().RouteName = "default";
+                request.EnableODataDependencyInjectionSupport("default");
                 request.ODataProperties().Model = model;
 
                 ODataMediaTypeFormatter formatter = CreateFormatter(request);

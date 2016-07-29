@@ -125,8 +125,7 @@ namespace System.Web.OData.Batch
                 throw Error.ArgumentNull("request");
             }
 
-            request.ODataProperties().RouteName = ODataRouteName;
-            IServiceProvider requestContainer = request.RequestContainer();
+            IServiceProvider requestContainer = request.CreateRequestContainer(ODataRouteName);
             requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri = GetBaseUri(request);
 
             ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(requestContainer, cancellationToken);
@@ -143,6 +142,7 @@ namespace System.Web.OData.Batch
                     foreach (HttpRequestMessage changeSetRequest in changeSetRequests)
                     {
                         changeSetRequest.CopyBatchRequestProperties(request);
+                        changeSetRequest.DetachRequestContainer(false);
                     }
                     requests.Add(new ChangeSetRequestItem(changeSetRequests));
                 }
@@ -150,6 +150,7 @@ namespace System.Web.OData.Batch
                 {
                     HttpRequestMessage operationRequest = await batchReader.ReadOperationRequestAsync(batchId, bufferContentStream: true, cancellationToken: cancellationToken);
                     operationRequest.CopyBatchRequestProperties(request);
+                    operationRequest.DetachRequestContainer(false);
                     requests.Add(new OperationRequestItem(operationRequest));
                 }
             }

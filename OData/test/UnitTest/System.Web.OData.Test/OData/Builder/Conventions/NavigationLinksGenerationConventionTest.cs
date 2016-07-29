@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Builder.TestModels;
@@ -83,7 +82,7 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
-            request.ODataProperties().RouteName = routeName;
+            request.EnableODataDependencyInjectionSupport(routeName);
 
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
             linkBuilder.AddNavigationPropertyLinkBuilder(carManufacturerProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: true), false));
@@ -142,7 +141,7 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
-            request.ODataProperties().RouteName = routeName;
+            request.EnableODataDependencyInjectionSupport(routeName);
 
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
             linkBuilder.AddNavigationPropertyLinkBuilder(carManufacturerProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: false), false));
@@ -172,7 +171,7 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
-            request.ODataProperties().RouteName = routeName;
+            request.EnableODataDependencyInjectionSupport(routeName);
 
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehicleEdmSingleton);
             linkBuilder.AddNavigationPropertyLinkBuilder(carManufacturerProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: false), false));
@@ -202,7 +201,7 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
             request.SetConfiguration(configuration);
-            request.ODataProperties().RouteName = routeName;
+            request.EnableODataDependencyInjectionSupport(routeName);
 
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
             linkBuilder.AddNavigationPropertyLinkBuilder(motorcycleManufacturerProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: false), false));

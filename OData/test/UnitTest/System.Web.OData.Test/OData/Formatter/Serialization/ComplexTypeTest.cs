@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.TestCommon.Models;
@@ -38,11 +37,8 @@ namespace System.Web.OData.Formatter.Serialization
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");
             request.ODataProperties().Model = GetSampleModel();
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableDependencyInjectionSupport();
-            configuration.Routes.MapFakeODataRoute();
-            request.SetConfiguration(configuration);
-            request.SetFakeODataRouteName();
+            request.EnableODataDependencyInjectionSupport();
+            request.GetConfiguration().Routes.MapFakeODataRoute();
             return request;
         }
 

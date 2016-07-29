@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
-using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
@@ -218,15 +217,12 @@ namespace System.Web.OData.Test
         private static HttpRequestMessage SetupRequest(HttpMethod method, string odataPath, IEdmModel edmModel = null)
         {
             HttpRequestMessage request;
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableDependencyInjectionSupport();
             request = new HttpRequestMessage(method, "http://host/any");
-            request.SetConfiguration(configuration);
-            request.SetFakeODataRouteName();
+            request.EnableODataDependencyInjectionSupport();
             HttpRequestMessageProperties properties = request.ODataProperties();
             IEdmModel model = edmModel ?? SetupModel();
             properties.Model = model;
-            properties.Path = request.RequestContainer()
+            properties.Path = request.GetRequestContainer()
                 .GetRequiredService<IODataPathHandler>()
                 .Parse(model, "http://localhost/any", odataPath);
             return request;

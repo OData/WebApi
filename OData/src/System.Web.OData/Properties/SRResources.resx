@@ -853,4 +853,7 @@
   <data name="NoNonODataHttpRouteRegistered" xml:space="preserve">
     <value>No non-OData HTTP route registered.</value>
   </data>
+  <data name="RequestContainerAlreadyExists" xml:space="preserve">
+    <value>A request container already exists on the request.</value>
+  </data>
 </root>

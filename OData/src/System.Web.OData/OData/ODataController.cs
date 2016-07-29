@@ -27,14 +27,14 @@ namespace System.Web.OData
         {
             if (disposing && Request != null)
             {
-                Request.DisposeRequestContainer();
+                Request.DetachRequestContainer(true);
             }
 
             base.Dispose(disposing);
         }
 
         /// <summary>
-        /// Creates an action result with the specified values that is a response to a POST operation with an entity 
+        /// Creates an action result with the specified values that is a response to a POST operation with an entity
         /// to an entity set.
         /// </summary>
         /// <typeparam name="TEntity">The created entity type.</typeparam>
@@ -51,7 +51,7 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Creates an action result with the specified values that is a response to a PUT, PATCH, or a MERGE operation 
+        /// Creates an action result with the specified values that is a response to a PUT, PATCH, or a MERGE operation
         /// on an OData entity.
         /// </summary>
         /// <typeparam name="TEntity">The updated entity type.</typeparam>

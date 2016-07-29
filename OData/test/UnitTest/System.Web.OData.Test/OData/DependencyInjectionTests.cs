@@ -58,7 +58,7 @@ namespace System.Web.OData
         [EnableQuery]
         public IHttpActionResult Get()
         {
-            IServiceProvider requestContainer = this.Request.RequestContainer();
+            IServiceProvider requestContainer = this.Request.GetRequestContainer();
             return Ok(requestContainer.GetRequiredService<DependencyInjectionModel>());
         }
     }

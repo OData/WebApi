@@ -38,7 +38,7 @@ namespace System.Web.OData.Formatter
 
             configuration.Routes.MapHttpRoute("default", "{action}", new { Controller = "Inheritance" });
             configuration.Routes.MapFakeODataRoute();
-            configuration.EnableDependencyInjectionSupport();
+            configuration.EnableODataDependencyInjectionSupport();
 
             _server = new HttpServer(configuration);
             _client = new HttpClient(_server);
@@ -313,7 +313,7 @@ namespace System.Web.OData.Formatter
             request.ODataProperties().Path = new DefaultODataPathHandler()
                 .Parse(_model, "http://any/", GetODataPath(request.RequestUri.AbsoluteUri));
             request.ODataProperties().Model = _model;
-            request.SetFakeODataRouteName();
+            request.EnableODataDependencyInjectionSupport();
         }
 
         private static IEdmModel GetEdmModel()

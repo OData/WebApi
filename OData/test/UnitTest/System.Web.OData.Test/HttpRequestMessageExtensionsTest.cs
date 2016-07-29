@@ -449,7 +449,7 @@ namespace System.Net.Http
             request.SetConfiguration(new HttpConfiguration());
 
             // Act
-            Action action = () => request.RequestContainer();
+            Action action = () => request.GetRequestContainer();
 
             // Assert
             Assert.Throws<InvalidOperationException>(action);

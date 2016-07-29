@@ -40,7 +40,7 @@ namespace System.Web.OData.Test
         {
             DefaultODataBatchHandler batchHandler = new DefaultODataBatchHandler(new HttpServer());
             HttpRequestMessage request = new HttpRequestMessage();
-            request.EnableDependencyInjectionSupport();
+            request.EnableHttpDependencyInjectionSupport();
             Assert.ThrowsArgumentNull(
                 () => batchHandler.CreateResponseMessageAsync(null, request, CancellationToken.None).Wait(),
                 "responses");
@@ -64,7 +64,7 @@ namespace System.Web.OData.Test
                 new OperationResponseItem(new HttpResponseMessage(HttpStatusCode.OK))
             };
             HttpRequestMessage request = new HttpRequestMessage();
-            request.EnableDependencyInjectionSupport();
+            request.EnableHttpDependencyInjectionSupport();
 
             HttpResponseMessage response = batchHandler.CreateResponseMessageAsync(responses, request, CancellationToken.None).Result;
 
@@ -101,7 +101,7 @@ namespace System.Web.OData.Test
                     ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Get, "http://example.com/"))
                 }
             };
-            batchRequest.EnableDependencyInjectionSupport();
+            batchRequest.EnableHttpDependencyInjectionSupport();
 
             // Act
             var response = batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None).Result;
@@ -159,10 +159,10 @@ namespace System.Web.OData.Test
                 }
             };
             var enableContinueOnErrorconfig = new HttpConfiguration();
-            enableContinueOnErrorconfig.EnableDependencyInjectionSupport();
+            enableContinueOnErrorconfig.EnableODataDependencyInjectionSupport();
             enableContinueOnErrorconfig.EnableContinueOnErrorHeader();
             batchRequest.SetConfiguration(enableContinueOnErrorconfig);
-            batchRequest.EnableDependencyInjectionSupport();
+            batchRequest.EnableHttpDependencyInjectionSupport();
             HttpRequestMessage batchRequestWithPrefContinueOnError = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
             {
                 Content = new MultipartContent("mixed")
@@ -181,7 +181,7 @@ namespace System.Web.OData.Test
                     }),
                 }
             };
-            batchRequestWithPrefContinueOnError.EnableDependencyInjectionSupport();
+            batchRequestWithPrefContinueOnError.EnableHttpDependencyInjectionSupport();
             if (enableContinueOnError)
             {
                 batchRequestWithPrefContinueOnError.SetConfiguration(enableContinueOnErrorconfig);
@@ -302,7 +302,7 @@ namespace System.Web.OData.Test
                     }
                 }
             };
-            batchRequest.EnableDependencyInjectionSupport();
+            batchRequest.EnableHttpDependencyInjectionSupport();
 
             IList<ODataBatchRequestItem> requests = batchHandler.ParseBatchRequestsAsync(batchRequest, CancellationToken.None).Result;
 
@@ -335,7 +335,7 @@ namespace System.Web.OData.Test
             batchRequest.Properties.Add("foo", "bar");
             batchRequest.SetRouteData(new HttpRouteData(new HttpRoute()));
             batchRequest.RegisterForDispose(new StringContent(String.Empty));
-            batchRequest.EnableDependencyInjectionSupport();
+            batchRequest.EnableHttpDependencyInjectionSupport();
 
             IList<ODataBatchRequestItem> requests = batchHandler.ParseBatchRequestsAsync(batchRequest, CancellationToken.None).Result;
 

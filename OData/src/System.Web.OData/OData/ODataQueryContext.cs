@@ -15,7 +15,7 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData
 {
     /// <summary>
-    /// This defines some context information used to perform query composition. 
+    /// This defines some context information used to perform query composition.
     /// </summary>
     public class ODataQueryContext
     {

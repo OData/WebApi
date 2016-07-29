@@ -168,8 +168,8 @@ namespace System.Web.OData.Routing
                             serviceRoot = serviceRoot.Substring(0, serviceRoot.Length - 3);
                         }
 
-                        request.ODataProperties().RouteName = RouteName;
-                        path = PathHandler.Parse(EdmModel, serviceRoot, oDataPathAndQuery, request.RequestContainer());
+                        path = PathHandler.Parse(EdmModel, serviceRoot, oDataPathAndQuery,
+                            request.CreateRequestContainer(RouteName));
                     }
                     catch (ODataException)
                     {
@@ -199,6 +199,8 @@ namespace System.Web.OData.Routing
                     }
                 }
 
+                // The request doesn't match this route so dipose the request container.
+                request.DetachRequestContainer(true);
                 return false;
             }
             else

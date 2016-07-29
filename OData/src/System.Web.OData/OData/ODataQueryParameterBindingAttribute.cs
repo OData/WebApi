@@ -70,7 +70,7 @@ namespace System.Web.OData
                 }
 
                 // Get the entity type from the parameter type if it is ODataQueryOptions<T>.
-                // Fall back to the return type if not. Also, note that the entity type from the return type and ODataQueryOptions<T> 
+                // Fall back to the return type if not. Also, note that the entity type from the return type and ODataQueryOptions<T>
                 // can be different (example implementing $select or $expand).
                 Type entityClrType = GetEntityClrTypeFromParameterType(Descriptor) ?? GetEntityClrTypeFromActionReturnType(actionDescriptor);
 
@@ -79,7 +79,7 @@ namespace System.Web.OData
                     model,
                     entityClrType,
                     request.ODataProperties().Path,
-                    request.RequestContainer());
+                    request.GetRequestContainer());
 
                 Func<ODataQueryContext, HttpRequestMessage, ODataQueryOptions> createODataQueryOptions =
                     (Func<ODataQueryContext, HttpRequestMessage, ODataQueryOptions>)Descriptor.Properties.GetOrAdd(CreateODataQueryOptionsCtorKey, _ =>

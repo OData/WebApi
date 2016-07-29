@@ -245,7 +245,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             IEdmModel model = new EdmModel();
             HttpConfiguration configuration = new[] { typeof(TestODataController) }.GetHttpConfiguration();
-            configuration.EnableDependencyInjectionSupport();
+            configuration.EnableODataDependencyInjectionSupport();
             AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, model, configuration);
 
             // Act & Assert
@@ -261,7 +261,7 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             IEdmModel model = new CustomersModelWithInheritance().Model;
             HttpConfiguration configuration = new[] { typeof(TestODataController) }.GetHttpConfiguration();
-            configuration.EnableDependencyInjectionSupport();
+            configuration.EnableODataDependencyInjectionSupport();
             AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, model, configuration);
 
             // Act & Assert

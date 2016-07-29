@@ -126,7 +126,7 @@ namespace System.Web.OData.Routing
             HttpRouteCollection httpRouteCollection = new HttpRouteCollection();
             httpRouteCollection.Add(_routeName, new HttpRoute());
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.EnableDependencyInjectionSupport(_routeName);
+            configuration.EnableODataDependencyInjectionSupport(_routeName);
             request.SetConfiguration(configuration);
 
             var values = new Dictionary<string, object>() { { "odataPath", "NotAnODataPath" } };
@@ -157,7 +157,7 @@ namespace System.Web.OData.Routing
             Assert.Same(_model, request.ODataProperties().Model);
             Assert.Same(_routeName, request.ODataProperties().RouteName);
             Assert.Equal(_conventions, request.ODataProperties().RoutingConventions);
-            Assert.Same(_pathHandler, request.RequestContainer().GetRequiredService<IODataPathHandler>());
+            Assert.Same(_pathHandler, request.GetRequestContainer().GetRequiredService<IODataPathHandler>());
         }
 
         [Theory]
@@ -177,7 +177,7 @@ namespace System.Web.OData.Routing
                 { _routeName, new HttpRoute() },
             };
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.EnableDependencyInjectionSupport(_routeName);
+            configuration.EnableODataDependencyInjectionSupport(_routeName);
             request.SetConfiguration(configuration);
 
             var pathHandler = new TestPathHandler();
@@ -216,7 +216,7 @@ namespace System.Web.OData.Routing
                 { _routeName, new HttpRoute() },
             };
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.EnableDependencyInjectionSupport(_routeName);
+            configuration.EnableODataDependencyInjectionSupport(_routeName);
             request.SetConfiguration(configuration);
 
             var pathHandler = new TestPathHandler();
@@ -255,7 +255,7 @@ namespace System.Web.OData.Routing
                 { _routeName, new HttpRoute() },
             };
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.EnableDependencyInjectionSupport(_routeName);
+            configuration.EnableODataDependencyInjectionSupport(_routeName);
             request.SetConfiguration(configuration);
 
             var builder = new ODataModelBuilder();
@@ -301,7 +301,7 @@ namespace System.Web.OData.Routing
                 { _routeName, new HttpRoute() },
             };
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.EnableDependencyInjectionSupport(_routeName);
+            configuration.EnableODataDependencyInjectionSupport(_routeName);
             request.SetConfiguration(configuration);
 
             var builder = new ODataModelBuilder();

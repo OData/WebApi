@@ -53,7 +53,7 @@ namespace System.Web.OData.Extensions
                 throw Error.InvalidOperation(SRResources.RequestMustHaveODataRouteName);
             }
 
-            IODataPathHandler pathHandler = request.RequestContainer().GetRequiredService<IODataPathHandler>();
+            IODataPathHandler pathHandler = request.GetRequestContainer().GetRequiredService<IODataPathHandler>();
             return CreateODataLink(urlHelper, routeName, pathHandler, segments);
         }
 

@@ -184,7 +184,7 @@ namespace System.Web.OData.Batch
             Contract.Assert(request != null);
 
             ODataVersion odataVersion = ODataMediaTypeFormatter.GetODataResponseVersion(request);
-            IServiceProvider requestContainer = request.RequestContainer();
+            IServiceProvider requestContainer = request.GetRequestContainer();
             ODataMessageWriterSettings writerSettings =
                 requestContainer.GetRequiredService<ODataMessageWriterSettings>();
             writerSettings.Version = odataVersion;

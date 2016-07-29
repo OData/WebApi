@@ -26,7 +26,7 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             ODataMediaTypeFormatter formatter = CreateFormatter();
 
-            IEnumerable<Employee> collectionOfPerson = new Collection<Employee>() 
+            IEnumerable<Employee> collectionOfPerson = new Collection<Employee>()
             {
                 (Employee)TypeInitializer.GetInstance(SupportedTypes.Employee, 0),
                 (Employee)TypeInitializer.GetInstance(SupportedTypes.Employee, 1),
@@ -57,7 +57,7 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmEntitySet entitySet = _model.EntityContainer.FindEntitySet("employees");
             request.ODataProperties().Model = _model;
             request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));
-            request.ODataProperties().RouteName = routeName;
+            request.EnableODataDependencyInjectionSupport(routeName);
             return request;
         }
 

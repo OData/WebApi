@@ -228,9 +228,7 @@ namespace System.Web.OData.Extensions
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns>The dependency injection container.</returns>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
-            Justification = "requestScope will be disposed when the request ends.")]
-        public static IServiceProvider RequestContainer(this HttpRequestMessage request)
+        public static IServiceProvider GetRequestContainer(this HttpRequestMessage request)
         {
             if (request == null)
             {
@@ -243,7 +241,21 @@ namespace System.Web.OData.Extensions
                 return (IServiceProvider)value;
             }
 
-            IServiceScope requestScope = request.CreateRequestScope();
+            // HTTP routes will not have chance to call CreateRequestContainer.
+            // We have to call it.
+            return request.CreateRequestContainer(null);
+        }
+
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
+            Justification = "requestScope will be disposed when the request ends.")]
+        internal static IServiceProvider CreateRequestContainer(this HttpRequestMessage request, string routeName)
+        {
+            if (request.Properties.ContainsKey(RequestContainerKey))
+            {
+                throw Error.InvalidOperation(SRResources.RequestContainerAlreadyExists);
+            }
+
+            IServiceScope requestScope = request.CreateRequestScope(routeName);
             IServiceProvider requestContainer = requestScope.ServiceProvider;
 
             request.Properties[RequestScopeKey] = requestScope;
@@ -252,20 +264,21 @@ namespace System.Web.OData.Extensions
             return requestContainer;
         }
 
-        internal static void DisposeRequestContainer(this HttpRequestMessage request)
+        internal static void DetachRequestContainer(this HttpRequestMessage request, bool dispose)
         {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
             object value;
             if (request.Properties.TryGetValue(RequestScopeKey, out value))
             {
                 IServiceScope requestScope = (IServiceScope)value;
                 Contract.Assert(requestScope != null);
 
-                requestScope.Dispose();
+                request.Properties.Remove(RequestScopeKey);
+                request.Properties.Remove(RequestContainerKey);
+
+                if (dispose)
+                {
+                    requestScope.Dispose();
+                }
             }
         }
 
@@ -341,7 +354,7 @@ namespace System.Web.OData.Extensions
             return uriBuilder.Uri;
         }
 
-        private static IServiceProvider RootContainer(this HttpRequestMessage request)
+        private static IServiceProvider GetRootContainer(this HttpRequestMessage request, string routeName)
         {
             HttpConfiguration configuration = request.GetConfiguration();
             if (configuration == null)
@@ -350,15 +363,14 @@ namespace System.Web.OData.Extensions
             }
 
             // Requests from OData routes will have RouteName set.
-            string routeName = request.ODataProperties().RouteName;
             return routeName != null
                 ? configuration.GetODataRootContainer(routeName)
                 : configuration.GetNonODataRootContainer();
         }
 
-        private static IServiceScope CreateRequestScope(this HttpRequestMessage request)
+        private static IServiceScope CreateRequestScope(this HttpRequestMessage request, string routeName)
         {
-            return request.RootContainer().GetRequiredService<IServiceScopeFactory>().CreateScope();
+            return request.GetRootContainer(routeName).GetRequiredService<IServiceScopeFactory>().CreateScope();
         }
     }
 }

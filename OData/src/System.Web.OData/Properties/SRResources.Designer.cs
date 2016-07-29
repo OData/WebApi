@@ -1843,6 +1843,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A request container already exists on the request..
+        /// </summary>
+        internal static string RequestContainerAlreadyExists {
+            get {
+                return ResourceManager.GetString("RequestContainerAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Request message does not contain an HttpConfiguration object..
         /// </summary>
         internal static string RequestMustContainConfiguration {

@@ -17,7 +17,6 @@ using System.Web.Http.Filters;
 using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
-using System.Web.OData.Formatter;
 using System.Web.OData.Query.Controllers;
 using System.Web.OData.Query.Validators;
 using System.Web.OData.Routing;
@@ -265,12 +264,9 @@ namespace System.Web.OData.Query
             // Arrange
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer?$orderby=Name");
-            HttpConfiguration config = new HttpConfiguration();
-            config.Count().OrderBy().Filter().Expand().MaxTop(null);
-            config.EnableDependencyInjectionSupport();
-            request.SetConfiguration(config);
-            request.SetFakeODataRouteName();
-            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
+            request.EnableODataDependencyInjectionSupport();
+            request.GetConfiguration().Count().OrderBy().Filter().Expand().MaxTop(null);
+            HttpControllerContext controllerContext = new HttpControllerContext(request.GetConfiguration(), new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod(methodName));
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
@@ -295,12 +291,9 @@ namespace System.Web.OData.Query
                 HttpMethod.Get,
                 "http://localhost/DollarCountEntities(5)/StringCollectionProp/$count");
             request.ODataProperties().Path = new ODataPath(CountSegment.Instance);
-            request.SetFakeODataRouteName();
-            HttpConfiguration config = new HttpConfiguration();
-            config.EnableDependencyInjectionSupport();
-            request.SetConfiguration(config);
+            request.EnableODataDependencyInjectionSupport();
             HttpControllerContext controllerContext = new HttpControllerContext(
-                config,
+                request.GetConfiguration(),
                 new HttpRouteData(new HttpRoute()),
                 request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(
@@ -333,11 +326,8 @@ namespace System.Web.OData.Query
             // Arrange
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?select");
-            HttpConfiguration config = new HttpConfiguration();
-            config.EnableDependencyInjectionSupport();
-            request.SetConfiguration(config);
-            request.SetFakeODataRouteName();
-            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
+            request.EnableODataDependencyInjectionSupport();
+            HttpControllerContext controllerContext = new HttpControllerContext(request.GetConfiguration(), new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod("Get"));
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
@@ -357,11 +347,8 @@ namespace System.Web.OData.Query
             // Arrange
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$custom");
-            HttpConfiguration config = new HttpConfiguration();
-            config.EnableDependencyInjectionSupport();
-            request.SetConfiguration(config);
-            request.SetFakeODataRouteName();
-            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
+            request.EnableODataDependencyInjectionSupport();
+            HttpControllerContext controllerContext = new HttpControllerContext(request.GetConfiguration(), new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod("Get"));
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
@@ -464,11 +451,8 @@ namespace System.Web.OData.Query
             // Arrange
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Primitive/?" + filter);
-            HttpConfiguration config = new HttpConfiguration();
-            config.EnableDependencyInjectionSupport();
-            request.SetConfiguration(config);
-            request.SetFakeODataRouteName();
-            HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);
+            request.EnableODataDependencyInjectionSupport();
+            HttpControllerContext controllerContext = new HttpControllerContext(request.GetConfiguration(), new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "Primitive", typeof(PrimitiveController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(PrimitiveController).GetMethod("GetIEnumerableOfInt"));
             HttpActionContext actionContext = new HttpActionContext(controllerContext, actionDescriptor);
@@ -521,7 +505,7 @@ namespace System.Web.OData.Query
             defaultQuerySettings.EnableFilter = true;
             defaultQuerySettings.EnableOrderBy = true;
             defaultQuerySettings.MaxTop = null;
-            
+
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer), null, defaultQuerySettings), request);
 
@@ -645,7 +629,7 @@ namespace System.Web.OData.Query
             HttpConfiguration config = new HttpConfiguration();
             config.Count().OrderBy().Filter().Expand().MaxTop(null);
             request.SetConfiguration(config);
-            
+
             ODataQueryOptions queryOptions = new ODataQueryOptions(ValidationTestHelper.CreateCustomerContext(), request);
 
             Assert.DoesNotThrow(() => attribute.ValidateQuery(request, queryOptions));
@@ -1086,13 +1070,11 @@ namespace System.Web.OData.Query
         private static HttpActionExecutedContext GetActionExecutedContext<TResponse>(string uri, TResponse result)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, uri);
-            request.SetFakeODataRouteName();
+            request.EnableODataDependencyInjectionSupport();
             var actionContext = ContextUtil.CreateActionContext(ContextUtil.CreateControllerContext(request: request));
             var response = request.CreateResponse<TResponse>(HttpStatusCode.OK, result);
             var actionExecutedContext = new HttpActionExecutedContext { ActionContext = actionContext, Response = response };
-            var config = request.GetConfiguration();
-            config.EnableDependencyInjectionSupport();
-            actionContext.ActionDescriptor.Configuration = config;
+            actionContext.ActionDescriptor.Configuration = request.GetConfiguration();
             return actionExecutedContext;
         }
     }

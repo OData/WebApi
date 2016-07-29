@@ -4,6 +4,7 @@
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Extensions;
+using System.Web.OData.Formatter;
 using Microsoft.OData;
 using HttpRouteCollectionExtensions = System.Web.OData.Formatter.HttpRouteCollectionExtensions;
 
@@ -19,21 +20,21 @@ namespace System.Web.OData
         public static HttpConfiguration CreateConfigurationWithRootContainer()
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableDependencyInjectionSupport();
+            configuration.EnableODataDependencyInjectionSupport();
             return configuration;
         }
 
-        public static void EnableDependencyInjectionSupport(this HttpConfiguration configuration)
+        public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration)
         {
-            configuration.EnableDependencyInjectionSupport(HttpRouteCollectionExtensions.RouteName);
+            configuration.EnableODataDependencyInjectionSupport(HttpRouteCollectionExtensions.RouteName);
         }
 
-        public static void EnableDependencyInjectionSupport(this HttpConfiguration configuration, string routeName)
+        public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration, string routeName)
         {
             configuration.CreateODataRootContainer(routeName, null);
         }
 
-        public static void EnableDependencyInjectionSupport(this HttpRequestMessage request)
+        public static void EnableHttpDependencyInjectionSupport(this HttpRequestMessage request)
         {
             HttpConfiguration configuration = request.GetConfiguration();
             if (configuration == null)
@@ -43,6 +44,34 @@ namespace System.Web.OData
             }
 
             configuration.EnableDependencyInjection();
+        }
+
+        public static void EnableODataDependencyInjectionSupport(this HttpRequestMessage request)
+        {
+            HttpConfiguration configuration = request.GetConfiguration();
+            if (configuration == null)
+            {
+                configuration = new HttpConfiguration();
+                configuration.EnableODataDependencyInjectionSupport();
+                request.SetConfiguration(configuration);
+            }
+
+            request.SetFakeODataRouteName();
+            request.CreateRequestContainer(HttpRouteCollectionExtensions.RouteName);
+        }
+
+        public static void EnableODataDependencyInjectionSupport(this HttpRequestMessage request, string routeName)
+        {
+            HttpConfiguration configuration = request.GetConfiguration();
+            if (configuration == null)
+            {
+                configuration = new HttpConfiguration();
+                configuration.EnableODataDependencyInjectionSupport(routeName);
+                request.SetConfiguration(configuration);
+            }
+
+            request.ODataProperties().RouteName = routeName;
+            request.CreateRequestContainer(routeName);
         }
     }
 }

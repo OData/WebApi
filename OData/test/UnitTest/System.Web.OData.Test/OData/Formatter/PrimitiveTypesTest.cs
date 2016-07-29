@@ -75,7 +75,7 @@ namespace System.Web.OData.Formatter
                     model.EntityContainer.EntitySets().Single().EntityType().Properties().First();
                 request.ODataProperties().Model = model;
                 request.ODataProperties().Path = new ODataPath(new PropertySegment(property as IEdmStructuralProperty));
-                request.SetFakeODataRouteName();
+                request.EnableODataDependencyInjectionSupport();
 
                 ODataMediaTypeFormatter formatter = CreateFormatter(request);
                 formatter.SupportedMediaTypes.Add(mediaType);
@@ -112,7 +112,7 @@ namespace System.Web.OData.Formatter
                 HttpConfiguration config = new HttpConfiguration();
                 config.MapODataServiceRoute("default", "", model);
                 request.SetConfiguration(config);
-                request.ODataProperties().RouteName = "default";
+                request.EnableODataDependencyInjectionSupport("default");
                 request.ODataProperties().Model = model;
 
                 ODataMediaTypeFormatter formatter = CreateFormatter(request);
@@ -167,7 +167,7 @@ namespace System.Web.OData.Formatter
                     model.EntityContainer.EntitySets().Single().EntityType().Properties().First();
                 request.ODataProperties().Model = model;
                 request.ODataProperties().Path = new ODataPath(new PropertySegment(property as IEdmStructuralProperty));
-                request.SetFakeODataRouteName();
+                request.EnableODataDependencyInjectionSupport();
 
                 ODataMediaTypeFormatter formatter = CreateFormatter(request);
                 formatter.SupportedMediaTypes.Add(mediaType);
@@ -176,7 +176,7 @@ namespace System.Web.OData.Formatter
 
                 using (ObjectContent content = new ObjectContent(type, value, formatter))
                 {
-                    Assert.Throws<ODataException>(() => content.ReadAsStringAsync().Result, 
+                    Assert.Throws<ODataException>(() => content.ReadAsStringAsync().Result,
                         "A null top-level property is not allowed to be serialized.");
                 }
             }
@@ -228,7 +228,7 @@ namespace System.Web.OData.Formatter
         {
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Routes.MapFakeODataRoute();
-            configuration.EnableDependencyInjectionSupport();
+            configuration.EnableODataDependencyInjectionSupport();
             return configuration;
         }
 

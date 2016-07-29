@@ -225,7 +225,7 @@ namespace System.Web.OData.Formatter
 
                 HttpRequestMessage request = readContext.Request;
                 ODataMessageReaderSettings oDataReaderSettings =
-                    request.RequestContainer().GetRequiredService<ODataMessageReaderSettings>();
+                    request.GetRequestContainer().GetRequiredService<ODataMessageReaderSettings>();
 
                 using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(valueString)))
                 {
@@ -362,7 +362,7 @@ namespace System.Web.OData.Formatter
                 DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
                 string serviceRoot = GetServiceRoot(request);
                 IEnumerable<KeyValuePair<string, object>> keyValues = GetKeys(pathHandler, edmModel, serviceRoot, resource.Id,
-                    request.RequestContainer());
+                    request.GetRequestContainer());
 
                 IList<IEdmStructuralProperty> keys = entityTypeReference.Key().ToList();
 
@@ -392,7 +392,7 @@ namespace System.Web.OData.Formatter
             {
                 return request.GetUrlHelper().CreateODataLink(
                     request.ODataProperties().RouteName,
-                    request.RequestContainer().GetRequiredService<IODataPathHandler>(),
+                    request.GetRequestContainer().GetRequiredService<IODataPathHandler>(),
                     new List<ODataPathSegment>());
             }
 

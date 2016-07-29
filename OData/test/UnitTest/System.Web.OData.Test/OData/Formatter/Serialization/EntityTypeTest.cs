@@ -49,7 +49,7 @@ namespace System.Web.OData.Formatter.Serialization
             request.SetConfiguration(configuration);
             IEdmEntitySet entitySet = _model.EntityContainer.FindEntitySet("employees");
             request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));
-            request.ODataProperties().RouteName = routeName;
+            request.EnableODataDependencyInjectionSupport(routeName);
             return request;
         }
 

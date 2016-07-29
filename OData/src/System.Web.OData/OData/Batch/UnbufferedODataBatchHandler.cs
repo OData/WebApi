@@ -38,8 +38,7 @@ namespace System.Web.OData.Batch
             ValidateRequest(request);
 
             // This container is for the overall batch request.
-            request.ODataProperties().RouteName = ODataRouteName;
-            IServiceProvider requestContainer = request.RequestContainer();
+            IServiceProvider requestContainer = request.CreateRequestContainer(ODataRouteName);
             requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri = GetBaseUri(request);
 
             ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(requestContainer, cancellationToken);
@@ -48,7 +47,7 @@ namespace System.Web.OData.Batch
             ODataBatchReader batchReader = reader.CreateODataBatchReader();
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
             Guid batchId = Guid.NewGuid();
-            
+
             string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(request);
             if ((preferHeader != null && preferHeader.Contains(PreferenceContinueOnError)) || (!request.GetConfiguration().HasEnabledContinueOnErrorHeader()))
             {
@@ -119,6 +118,7 @@ namespace System.Web.OData.Batch
             HttpRequestMessage operationRequest = await batchReader.ReadOperationRequestAsync(batchId, bufferContentStream: false);
 
             operationRequest.CopyBatchRequestProperties(originalRequest);
+            operationRequest.DetachRequestContainer(false);
             OperationRequestItem operation = new OperationRequestItem(operationRequest);
             try
             {
@@ -162,6 +162,7 @@ namespace System.Web.OData.Batch
                     {
                         HttpRequestMessage changeSetOperationRequest = await batchReader.ReadChangeSetOperationRequestAsync(batchId, changeSetId, bufferContentStream: false);
                         changeSetOperationRequest.CopyBatchRequestProperties(originalRequest);
+                        changeSetOperationRequest.DetachRequestContainer(false);
                         try
                         {
                             HttpResponseMessage response = await ODataBatchRequestItem.SendMessageAsync(Invoker, changeSetOperationRequest, cancellationToken, contentIdToLocationMapping);

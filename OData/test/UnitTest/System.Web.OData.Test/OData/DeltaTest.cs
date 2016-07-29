@@ -32,7 +32,7 @@ namespace System.Web.OData
                 MethodInfo getDefaultValue = typeof(DeltaTest).GetMethod("GetDefaultValue");
 
                 var defaultValues = typeof(DeltaModel).GetProperties().Select(p => new[] { p.Name, getDefaultValue.MakeGenericMethod(p.PropertyType).Invoke(obj: null, parameters: null) });
-                return defaultValues.Concat(new object[][] 
+                return defaultValues.Concat(new object[][]
                 {
                     new object[] { "StringProperty" , "42" },
                     new object[] { "ComplexModelProperty", new ComplexModel { ComplexIntProperty = 42, ComplexNullableIntProperty = null } },
@@ -483,8 +483,8 @@ namespace System.Web.OData
                 IEdmEntitySet entitySet = model.EntityContainer.EntitySets().Single();
                 HttpConfiguration config = new HttpConfiguration();
                 config.MapODataServiceRoute("default", "", model);
-                request.ODataProperties().RouteName = "default";
                 request.SetConfiguration(config);
+                request.EnableODataDependencyInjectionSupport("default");
                 request.ODataProperties().Model = model;
                 request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));
                 IEnumerable<MediaTypeFormatter> perRequestFormatters = odataFormatters.Select(
@@ -536,8 +536,8 @@ namespace System.Web.OData
                 IEdmEntitySet entitySet = model.EntityContainer.EntitySets().Single();
                 HttpConfiguration config = new HttpConfiguration();
                 config.MapODataServiceRoute("default", "", model);
-                request.ODataProperties().RouteName = "default";
                 request.SetConfiguration(config);
+                request.EnableODataDependencyInjectionSupport("default");
                 request.ODataProperties().Model = model;
                 request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));
                 IEnumerable<MediaTypeFormatter> perRequestFormatters = odataFormatters.Select(
@@ -564,7 +564,7 @@ namespace System.Web.OData
                 return new TheoryDataSet<Type>()
                 {
                     { typeof(Customer) },
-                    { typeof(BellevueCustomer) } 
+                    { typeof(BellevueCustomer) }
                 };
             }
         }
@@ -573,7 +573,7 @@ namespace System.Web.OData
         [PropertyData("TypedDelta_Returns_Correct_ExpectedClrType_And_ActualType_DataSet")]
         public void TypedDelta_Returns_Correct_ExpectedClrType_And_ActualType(Type actualType)
         {
-            // Arrange 
+            // Arrange
             TypedDelta delta = new Delta<Customer>(actualType);
 
             // Act

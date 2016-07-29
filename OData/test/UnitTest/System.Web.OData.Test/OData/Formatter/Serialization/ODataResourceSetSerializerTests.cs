@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
-using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
@@ -701,11 +700,8 @@ namespace System.Web.OData.Formatter.Serialization
         private static UrlHelper CreateMetadataLinkFactory(string metadataPath)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, metadataPath);
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableDependencyInjectionSupport();
-            configuration.Routes.MapFakeODataRoute();
-            request.SetConfiguration(configuration);
-            request.SetFakeODataRouteName();
+            request.EnableODataDependencyInjectionSupport();
+            request.GetConfiguration().Routes.MapFakeODataRoute();
             return new UrlHelper(request);
         }
 

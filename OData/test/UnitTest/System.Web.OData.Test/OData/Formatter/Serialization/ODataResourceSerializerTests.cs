@@ -309,8 +309,8 @@ namespace System.Web.OData.Formatter.Serialization
 
             SelectExpandNode selectExpandNode = new SelectExpandNode
             {
-                ExpandedNavigationProperties = 
-                { 
+                ExpandedNavigationProperties =
+                {
                     { ordersProperty, selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>().Single().SelectAndExpand }
                 }
             };
@@ -1735,7 +1735,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             SelectExpandNode selectExpandNode = new SelectExpandNode
             {
-                ExpandedNavigationProperties = 
+                ExpandedNavigationProperties =
                 {
                      { ordersProperty, new SelectExpandClause(new SelectItem[0], allSelected: true) }
                 }
@@ -1888,7 +1888,7 @@ namespace System.Web.OData.Formatter.Serialization
             mock.Setup(o => o.Operation).Returns(mockAction.Object);
             return mock.Object;
         }
-        
+
         private static IEdmActionImport CreateFakeActionImport(IEdmEntityContainer container, string name, bool isBindable)
         {
             Mock<IEdmActionImport> mock = new Mock<IEdmActionImport>();
@@ -1940,12 +1940,6 @@ namespace System.Web.OData.Formatter.Serialization
             return mockAction.Object;
         }
 
-        private static IEdmModel CreateFakeModel()
-        {
-            IEdmDirectValueAnnotationsManager annotationsManager = CreateFakeAnnotationsManager();
-            return CreateFakeModel(annotationsManager);
-        }
-
         private static IEdmModel CreateFakeModel(IEdmDirectValueAnnotationsManager annotationsManager)
         {
             Mock<IEdmModel> model = new Mock<IEdmModel>();
@@ -1956,11 +1950,8 @@ namespace System.Web.OData.Formatter.Serialization
         private static UrlHelper CreateMetadataLinkFactory(string metadataPath)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, metadataPath);
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableDependencyInjectionSupport();
-            configuration.Routes.MapFakeODataRoute();
-            request.SetConfiguration(configuration);
-            request.SetFakeODataRouteName();
+            request.EnableODataDependencyInjectionSupport();
+            request.GetConfiguration().Routes.MapFakeODataRoute();
             return new UrlHelper(request);
         }
 

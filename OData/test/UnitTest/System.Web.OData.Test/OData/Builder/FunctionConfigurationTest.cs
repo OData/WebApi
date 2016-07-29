@@ -12,7 +12,6 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.TestCommon;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -616,7 +615,7 @@ namespace System.Web.OData.Builder
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, null, model);
             request.SetConfiguration(configuration);
-            request.ODataProperties().RouteName = routeName;
+            request.EnableODataDependencyInjectionSupport(routeName);
             UrlHelper urlHelper = new UrlHelper(request);
 
             // Act
@@ -651,7 +650,7 @@ namespace System.Web.OData.Builder
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, null, model);
             request.SetConfiguration(configuration);
-            request.ODataProperties().RouteName = routeName;
+            request.EnableODataDependencyInjectionSupport(routeName);
             request.ODataProperties().Model = model;
 
             UrlHelper urlHelper = new UrlHelper(request);

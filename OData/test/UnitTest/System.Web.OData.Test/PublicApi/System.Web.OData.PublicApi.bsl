@@ -1815,12 +1815,12 @@ public sealed class System.Web.OData.Extensions.HttpRequestMessageExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static HttpRequestMessageProperties ODataProperties (System.Net.Http.HttpRequestMessage request)
+	public static System.IServiceProvider GetRequestContainer (System.Net.Http.HttpRequestMessage request)
 
 	[
 	ExtensionAttribute(),
 	]
-	public static System.IServiceProvider RequestContainer (System.Net.Http.HttpRequestMessage request)
+	public static HttpRequestMessageProperties ODataProperties (System.Net.Http.HttpRequestMessage request)
 }
 
 [

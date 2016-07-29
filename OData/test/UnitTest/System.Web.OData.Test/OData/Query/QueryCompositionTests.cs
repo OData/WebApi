@@ -33,7 +33,7 @@ namespace System.Web.OData.Query
             HttpServer server = new HttpServer(InitializeConfiguration(controllerName, useCustomEdmModel: false));
             HttpClient client = new HttpClient(server);
 
-            HttpResponseMessage response = GetResponse(client,
+            HttpResponseMessage response = GetResponse(client, server.Configuration,
                 String.Format("http://localhost:8080/{0}?$filter=Id ge 22 and Address/City ne 'seattle'&$orderby=Name&$skip=0&$top=1", controllerName));
             response.EnsureSuccessStatusCode();
             var customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
@@ -47,7 +47,7 @@ namespace System.Web.OData.Query
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", useCustomEdmModel: true));
             HttpClient client = new HttpClient(server);
 
-            HttpResponseMessage response = GetResponse(client,
+            HttpResponseMessage response = GetResponse(client, server.Configuration,
                 String.Format("http://localhost:8080/QueryCompositionCustomer?$filter=Id ge 22 and Address/City ne 'seattle'&$orderby=Name&$skip=0&$top=1", "QueryCompositionCustomer"));
             response.EnsureSuccessStatusCode();
             var customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
@@ -71,7 +71,7 @@ namespace System.Web.OData.Query
             });
 
             // Act
-            HttpResponseMessage response = GetResponse(client,
+            HttpResponseMessage response = GetResponse(client, server.Configuration,
                 "http://localhost:8080/QueryCompositionCustomer" + caseInSensitive);
 
             // Assert
@@ -85,7 +85,8 @@ namespace System.Web.OData.Query
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomerLowLevel_ODataQueryOptionsOfT", false));
             HttpClient client = new HttpClient(server);
 
-            HttpResponseMessage response = GetResponse(client, "http://localhost:8080/QueryCompositionCustomerLowLevel_ODataQueryOptionsOfT/?$filter=Id ge 22");
+            HttpResponseMessage response = GetResponse(client, server.Configuration,
+                "http://localhost:8080/QueryCompositionCustomerLowLevel_ODataQueryOptionsOfT/?$filter=Id ge 22");
             response.EnsureSuccessStatusCode();
             int count = response.Content.ReadAsAsync<int>().Result;
             Assert.Equal(2, count);
@@ -97,7 +98,8 @@ namespace System.Web.OData.Query
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionAnonymousTypesController", useCustomEdmModel: false));
             HttpClient client = new HttpClient(server);
 
-            HttpResponseMessage response = GetResponse(client, "http://localhost:8080/QueryCompositionAnonymousTypes/?$filter=Id ge 5");
+            HttpResponseMessage response = GetResponse(client, server.Configuration,
+                "http://localhost:8080/QueryCompositionAnonymousTypes/?$filter=Id ge 5");
             response.EnsureSuccessStatusCode();
 
             Type anon_type = new { Id = default(int) }.GetType();
@@ -145,14 +147,16 @@ namespace System.Web.OData.Query
             HttpClient client = new HttpClient(server);
 
             // skip = 1 is ok
-            HttpResponseMessage response = GetResponse(client, "http://localhost:8080/QueryCompositionCustomerValidation/?$skip=1");
+            HttpResponseMessage response = GetResponse(client, server.Configuration,
+                "http://localhost:8080/QueryCompositionCustomerValidation/?$skip=1");
             response.EnsureSuccessStatusCode();
 
             List<QueryCompositionCustomer> customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
             Assert.Equal(new[] { 11, 22, 33 }, customers.Select(customer => customer.Id));
 
             // skip = 2 exceeds the limit
-            response = GetResponse(client, "http://localhost:8080/QueryCompositionCustomerValidation/?$skip=2");
+            response = GetResponse(client, server.Configuration,
+                "http://localhost:8080/QueryCompositionCustomerValidation/?$skip=2");
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -200,7 +204,7 @@ namespace System.Web.OData.Query
                 typeof(QueryCompositionCategoryController), typeof(QueryCompositionAnonymousTypesController)
             };
             HttpConfiguration config = controllers.GetHttpConfiguration();
-            config.EnableDependencyInjectionSupport("default");
+            config.EnableODataDependencyInjectionSupport("default");
             config.Routes.MapHttpRoute("default", "{controller}/{key}", new { key = RouteParameter.Optional });
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
@@ -220,36 +224,15 @@ namespace System.Web.OData.Query
                 config.Filters.Add(new SetModelFilter(_queryCompositionCustomerModel));
             }
 
-           return config;
+            return config;
         }
 
-        private static HttpResponseMessage GetResponse(HttpClient client, string requestUri)
+        private static HttpResponseMessage GetResponse(HttpClient client, HttpConfiguration config, string requestUri)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            request.ODataProperties().RouteName = "default";
+            request.SetConfiguration(config);
+            request.EnableODataDependencyInjectionSupport("default");
             return client.SendAsync(request).Result;
-        }
-
-        private static void AreEqual(List<QueryCompositionCustomer> expectedList, List<QueryCompositionCustomer> actualList)
-        {
-            Assert.NotNull(expectedList);
-            Assert.NotNull(actualList);
-            Assert.Equal(expectedList.Count, actualList.Count);
-
-            for (int i = 0; i < expectedList.Count; i++)
-            {
-                QueryCompositionCustomer expected = expectedList[i];
-                QueryCompositionCustomer actual = actualList[i];
-                AreEqual(expected, actual);
-            }
-        }
-
-        private static void AreEqual(QueryCompositionCustomer expected, QueryCompositionCustomer actual)
-        {
-            Assert.NotNull(expected);
-            Assert.NotNull(actual);
-
-            Assert.True(expected.Name == actual.Name && expected.Id == actual.Id);
         }
 
         private static void AssertRespondsWithExpectedStatusCode(HttpClient client, string uri, HttpStatusCode expectedStatusCode)

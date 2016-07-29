@@ -49,6 +49,7 @@ namespace System.Web.OData
                 GetModelWithCustomerAliasAndInheritance());
             _configuration.MapODataServiceRoute("odata2", "odata2", GetModelWithOperations());
             _configuration.Routes.MapHttpRoute("api", "api/{controller}", new { controller = "NonODataSelectExpandTestCustomers" });
+            _configuration.EnableDependencyInjection();
 
             HttpServer server = new HttpServer(_configuration);
             _client = new HttpClient(server);
@@ -281,7 +282,7 @@ namespace System.Web.OData
             Assert.Equal(42, result["PreviousCustomer"]["PreviousCustomer"]["ID"]);
             Assert.Null(result["PreviousCustomer"]["PreviousCustomer"]["PreviousCustomer"]);
         }
-        
+
         [Fact]
         public void SelectExpand_Works_ForSelectAction_WithNamespaceQualifiedName()
         {
@@ -345,7 +346,7 @@ namespace System.Web.OData
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(acceptHeader));
-            request.ODataProperties().RouteName = "odata";
+            request.SetConfiguration(_configuration);
             return _client.SendAsync(request).Result;
         }
 

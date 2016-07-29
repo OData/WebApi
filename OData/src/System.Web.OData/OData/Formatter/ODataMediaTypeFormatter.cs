@@ -353,13 +353,13 @@ namespace System.Web.OData.Formatter
                 try
                 {
                     ODataMessageReaderSettings oDataReaderSettings =
-                        Request.RequestContainer().GetRequiredService<ODataMessageReaderSettings>();
+                        Request.GetRequestContainer().GetRequiredService<ODataMessageReaderSettings>();
                     oDataReaderSettings.BaseUri = GetBaseAddressInternal(Request);
                     oDataReaderSettings.Validations = oDataReaderSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
 
                     IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders, Request.GetODataContentIdMapping())
                     {
-                        Container = Request.RequestContainer()
+                        Container = Request.GetRequestContainer()
                     };
                     ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
 
@@ -460,7 +460,7 @@ namespace System.Web.OData.Formatter
 
             ODataMessageWrapper responseMessageWrapper = new ODataMessageWrapper(writeStream, content.Headers)
             {
-                Container = Request.RequestContainer()
+                Container = Request.GetRequestContainer()
             };
             IODataResponseMessage responseMessage = responseMessageWrapper;
             if (annotationFilter != null)
@@ -470,7 +470,7 @@ namespace System.Web.OData.Formatter
 
             Uri baseAddress = GetBaseAddressInternal(Request);
             ODataMessageWriterSettings writerSettings =
-                Request.RequestContainer().GetRequiredService<ODataMessageWriterSettings>();
+                Request.GetRequestContainer().GetRequiredService<ODataMessageWriterSettings>();
             writerSettings.BaseUri = baseAddress;
             writerSettings.Version = _version;
             writerSettings.Validations = writerSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;

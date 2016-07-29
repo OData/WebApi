@@ -182,11 +182,8 @@ namespace System.Web.OData
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");
             request.ODataProperties().Model = GetSampleModel();
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapFakeODataRoute();
-            configuration.EnableDependencyInjectionSupport();
-            request.SetConfiguration(configuration);
-            request.SetFakeODataRouteName();
+            request.EnableODataDependencyInjectionSupport();
+            request.GetConfiguration().Routes.MapFakeODataRoute();
             return request;
         }
 

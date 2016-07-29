@@ -97,7 +97,7 @@ namespace System.Web.OData.Formatter
             IEdmEntitySet entitySet = model.EntityContainer.EntitySets().Single();
             request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet),
                 new KeySegment(new[] {new KeyValuePair<string, object>("ID", 10)}, entitySet.EntityType(), entitySet));
-            request.ODataProperties().RouteName = routeName;
+            request.EnableODataDependencyInjectionSupport(routeName);
 
             ODataMediaTypeFormatter formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.Resource);
 
@@ -123,7 +123,7 @@ namespace System.Web.OData.Formatter
             request.SetConfiguration(configuration);
             request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath();
-            request.ODataProperties().RouteName = routeName;
+            request.EnableODataDependencyInjectionSupport(routeName);
             HttpRouteData routeData = new HttpRouteData(new HttpRoute());
             routeData.Values.Add("a", "prefix");
             routeData.Values.Add("b", "prefix2");
@@ -142,13 +142,10 @@ namespace System.Web.OData.Formatter
         {
             IEdmModel model = new ODataConventionModelBuilder().GetEdmModel();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableDependencyInjectionSupport();
-            configuration.Routes.MapHttpRoute(HttpRouteCollectionExtensions.RouteName, "{param}");
-            request.SetConfiguration(configuration);
+            request.EnableODataDependencyInjectionSupport();
+            request.GetConfiguration().Routes.MapHttpRoute(HttpRouteCollectionExtensions.RouteName, "{param}");
             request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath();
-            request.ODataProperties().RouteName = HttpRouteCollectionExtensions.RouteName;
 
             ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.ServiceDocument);
             var content = new ObjectContent<ODataServiceDocument>(new ODataServiceDocument(), formatter);
@@ -194,7 +191,7 @@ namespace System.Web.OData.Formatter
             request.SetConfiguration(configuration);
             request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath();
-            request.ODataProperties().RouteName = routeName;
+            request.EnableODataDependencyInjectionSupport(routeName);
             HttpRouteData routeData = new HttpRouteData(new HttpRoute());
             routeData.Values.Add("a", "prefix");
             request.SetRouteData(routeData);
@@ -229,7 +226,7 @@ namespace System.Web.OData.Formatter
             configuration.MapODataServiceRoute(routeName, routePrefix, model);
             request.SetConfiguration(configuration);
             request.ODataProperties().Model = model;
-            request.ODataProperties().RouteName = routeName;
+            request.EnableODataDependencyInjectionSupport(routeName);
 
             // Act
             Uri baseUri = ODataMediaTypeFormatter.GetDefaultBaseAddress(request);
@@ -359,7 +356,7 @@ namespace System.Web.OData.Formatter
             HttpContent content = new StringContent(String.Empty);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            // Act 
+            // Act
             return formatter.WriteToStreamAsync(typeof(SampleType), null, mockStream.Object, content, null).ContinueWith(
                 writeTask =>
                 {
@@ -494,7 +491,7 @@ namespace System.Web.OData.Formatter
         public void MessageReaderSettings_Property()
         {
             var formatter = CreateFormatter();
-            var messageReaderSettings = formatter.Request.RequestContainer()
+            var messageReaderSettings = formatter.Request.GetRequestContainer()
                 .GetRequiredService<ODataMessageReaderSettings>();
 
             Assert.NotNull(messageReaderSettings);
@@ -505,7 +502,7 @@ namespace System.Web.OData.Formatter
         public void MessageWriterSettings_Property()
         {
             var formatter = CreateFormatter();
-            var messageWriterSettings = formatter.Request.RequestContainer()
+            var messageWriterSettings = formatter.Request.GetRequestContainer()
                 .GetRequiredService<ODataMessageWriterSettings>();
 
             Assert.NotNull(messageWriterSettings);
@@ -517,7 +514,7 @@ namespace System.Web.OData.Formatter
         public void MessageReaderQuotas_Property_RoundTrip()
         {
             var formatter = CreateFormatter();
-            var messageReaderQuotas = formatter.Request.RequestContainer()
+            var messageReaderQuotas = formatter.Request.GetRequestContainer()
                 .GetRequiredService<ODataMessageReaderSettings>().MessageQuotas;
             messageReaderQuotas.MaxNestingDepth = 42;
 
@@ -528,7 +525,7 @@ namespace System.Web.OData.Formatter
         public void MessageWriterQuotas_Property_RoundTrip()
         {
             var formatter = CreateFormatter();
-            var messageWriterSettings = formatter.Request.RequestContainer()
+            var messageWriterSettings = formatter.Request.GetRequestContainer()
                 .GetRequiredService<ODataMessageWriterSettings>();
             messageWriterSettings.MessageQuotas.MaxNestingDepth = 42;
 
@@ -539,7 +536,7 @@ namespace System.Web.OData.Formatter
         public void Default_ReceiveMessageSize_Is_MaxedOut()
         {
             var formatter = CreateFormatter();
-            var messageReaderQuotas = formatter.Request.RequestContainer()
+            var messageReaderQuotas = formatter.Request.GetRequestContainer()
                 .GetRequiredService<ODataMessageReaderSettings>().MessageQuotas;
             Assert.Equal(Int64.MaxValue, messageReaderQuotas.MaxReceivedMessageSize);
         }
@@ -548,7 +545,7 @@ namespace System.Web.OData.Formatter
         public void MessageReaderQuotas_Is_Passed_To_ODataLib()
         {
             ODataMediaTypeFormatter formatter = CreateFormatter();
-            var messageReaderQuotas = formatter.Request.RequestContainer()
+            var messageReaderQuotas = formatter.Request.GetRequestContainer()
                 .GetRequiredService<ODataMessageReaderSettings>().MessageQuotas;
             messageReaderQuotas.MaxReceivedMessageSize = 1;
 
@@ -897,14 +894,11 @@ namespace System.Web.OData.Formatter
         private static HttpRequestMessage CreateFakeODataRequest(IEdmModel model)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
+            request.EnableODataDependencyInjectionSupport();
+            request.GetConfiguration().Routes.MapFakeODataRoute();
             request.ODataProperties().Model = model;
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableDependencyInjectionSupport();
-            configuration.Routes.MapFakeODataRoute();
-            request.SetConfiguration(configuration);
             request.ODataProperties().Path =
                 new ODataPath(new EntitySetSegment(model.EntityContainer.EntitySets().Single()));
-            request.SetFakeODataRouteName();
             return request;
         }
 

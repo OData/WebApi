@@ -53,7 +53,7 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:123");
             request.SetConfiguration(configuration);
-            request.ODataProperties().RouteName = "odata";
+            request.EnableODataDependencyInjectionSupport("odata");
 
             IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
             var edmType = model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "Customer");
@@ -110,7 +110,7 @@ namespace System.Web.OData.Builder.Conventions
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:123");
             request.SetConfiguration(configuration);
-            request.ODataProperties().RouteName = "odata";
+            request.EnableODataDependencyInjectionSupport("odata");
             request.ODataProperties().Model = model;
 
             IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");

@@ -76,9 +76,9 @@ namespace System.Web.OData.Query
 
             // Parse the query from request Uri
             RawValues = new ODataRawQueryOptions();
-            IDictionary<string, string> queryParameters = 
+            IDictionary<string, string> queryParameters =
                 request.GetQueryNameValuePairs().ToDictionary(p => p.Key, p => p.Value);
-            
+
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,
@@ -276,8 +276,8 @@ namespace System.Web.OData.Query
         /// <param name="querySettings">The settings to use in query composition.</param>
         /// <returns>The new <see cref="IQueryable"/> after the query has been applied to.</returns>
         [SuppressMessage(
-            "Microsoft.Maintainability", 
-            "CA1502:AvoidExcessiveComplexity", 
+            "Microsoft.Maintainability",
+            "CA1502:AvoidExcessiveComplexity",
             Justification = "These are simple conversion function and cannot be split up.")]
         public virtual IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
         {
@@ -333,7 +333,7 @@ namespace System.Web.OData.Query
             // generate an $orderby that will produce a stable sort.
             if (querySettings.EnsureStableOrdering &&
                 (IsAvailableODataQueryOption(Skip, AllowedQueryOptions.Skip) ||
-                 IsAvailableODataQueryOption(Top, AllowedQueryOptions.Top) || 
+                 IsAvailableODataQueryOption(Top, AllowedQueryOptions.Top) ||
                  querySettings.PageSize.HasValue))
             {
                 // If there is no OrderBy present, we manufacture a default.
@@ -402,8 +402,8 @@ namespace System.Web.OData.Query
         /// </summary>
         /// <param name="entity">The original entity.</param>
         /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
-        /// <param name="ignoreQueryOptions">The query parameters that are already applied in queries.</param>  
-        /// <returns>The new entity after the $select and $expand query has been applied to.</returns>     
+        /// <param name="ignoreQueryOptions">The query parameters that are already applied in queries.</param>
+        /// <returns>The new entity after the $select and $expand query has been applied to.</returns>
         /// <remarks>Only $select and $expand query options can be applied on single entities. This method throws if the query contains any other
         /// query options.</remarks>
         public virtual object ApplyTo(object entity, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)

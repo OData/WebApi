@@ -19,6 +19,8 @@ namespace System.Web.OData.Formatter.Serialization
 {
     public class DefaultODataSerializerProviderTests
     {
+        private ODataSerializerProvider _serializerProvider =
+            DependencyInjectionHelper.GetDefaultODataSerializerProvider();
         private IEdmModel _edmModel = EdmTestHelpers.GetModel();
 
         public static TheoryDataSet<Type, EdmPrimitiveTypeKind> EdmPrimitiveMappingData
@@ -53,12 +55,11 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetODataPayloadSerializer_ThrowsArgumentNull_Model()
         {
             // Arrange
-            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => serializerProvider.GetODataPayloadSerializer(model: null, type: typeof(int), request: request),
+                () => _serializerProvider.GetODataPayloadSerializer(model: null, type: typeof(int), request: request),
                "model");
         }
 
@@ -66,25 +67,20 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetODataPayloadSerializer_ThrowsArgumentNull_Type()
         {
             // Arrange
-            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => serializerProvider.GetODataPayloadSerializer(model: EdmCoreModel.Instance, type: null, request: request),
+                () => _serializerProvider.GetODataPayloadSerializer(model: EdmCoreModel.Instance, type: null, request: request),
                "type");
         }
 
         [Fact]
         public void GetODataPayloadSerializer_ThrowsArgumentNull_Request()
         {
-            // Arrange
-            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
-            HttpRequestMessage request = new HttpRequestMessage();
-
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => serializerProvider.GetODataPayloadSerializer(EdmCoreModel.Instance, typeof(int), request: null),
+                () => _serializerProvider.GetODataPayloadSerializer(EdmCoreModel.Instance, typeof(int), request: null),
                "request");
         }
 
@@ -93,11 +89,10 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetODataSerializer_Primitive(Type type, EdmPrimitiveTypeKind edmPrimitiveTypeKind)
         {
             // Arrange
-            var serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, type, request);
+            var serializer = _serializerProvider.GetODataPayloadSerializer(_edmModel, type, request);
 
             // Assert
             Assert.NotNull(serializer);
@@ -110,13 +105,12 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetODataPayloadSerializer_ReturnsRawValueSerializer_ForValueRequests(Type type, EdmPrimitiveTypeKind edmPrimitiveTypeKind)
         {
             // Arrange
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Path =
                 new ODataPath(new ValueSegment(EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32)));
 
             // Act
-            var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, type, request);
+            var serializer = _serializerProvider.GetODataPayloadSerializer(_edmModel, type, request);
 
             // Assert
             Assert.NotNull(serializer);
@@ -127,11 +121,10 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetODataSerializer_Enum()
         {
             // Arrange
-            var serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            var serializer = serializerProvider.GetODataPayloadSerializer(GetEnumModel(), typeof(TestEnum), request);
+            var serializer = _serializerProvider.GetODataPayloadSerializer(GetEnumModel(), typeof(TestEnum), request);
 
             // Assert
             Assert.NotNull(serializer);
@@ -143,13 +136,12 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetODataPayloadSerializer_ReturnsRawValueSerializer_ForEnumValueRequests()
         {
             // Arrange
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
             request.ODataProperties().Path =
                 new ODataPath(new ValueSegment(EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32)));
 
             // Act
-            var serializer = serializerProvider.GetODataPayloadSerializer(GetEnumModel(), typeof(TestEnum), request);
+            var serializer = _serializerProvider.GetODataPayloadSerializer(GetEnumModel(), typeof(TestEnum), request);
 
             // Assert
             Assert.NotNull(serializer);
@@ -184,10 +176,9 @@ namespace System.Web.OData.Formatter.Serialization
             var pathHandler = new DefaultODataPathHandler();
             var path = pathHandler.Parse(model, "http://localhost/", uri);
             request.ODataProperties().Path = path;
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
 
             // Act
-            var serializer = serializerProvider.GetODataPayloadSerializer(model, type, request);
+            var serializer = _serializerProvider.GetODataPayloadSerializer(model, type, request);
 
             // Assert
             Assert.NotNull(serializer);
@@ -199,16 +190,15 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetODataSerializer_Resource_ForEntity()
         {
             // Arrange
-            var serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, typeof(ODataResourceDeserializerTests.Product), request);
+            var serializer = _serializerProvider.GetODataPayloadSerializer(_edmModel, typeof(ODataResourceDeserializerTests.Product), request);
 
             // Assert
             Assert.NotNull(serializer);
             var entitySerializer = Assert.IsType<ODataResourceSerializer>(serializer);
-            Assert.Equal(entitySerializer.SerializerProvider, serializerProvider);
+            Assert.Equal(entitySerializer.SerializerProvider, _serializerProvider);
             Assert.Equal(entitySerializer.ODataPayloadKind, ODataPayloadKind.Resource);
         }
 
@@ -216,16 +206,15 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetODataSerializer_Resource_ForComplex()
         {
             // Arrange
-            var serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, typeof(ODataResourceDeserializerTests.Address), request);
+            var serializer = _serializerProvider.GetODataPayloadSerializer(_edmModel, typeof(ODataResourceDeserializerTests.Address), request);
 
             // Assert
             Assert.NotNull(serializer);
             var complexSerializer = Assert.IsType<ODataResourceSerializer>(serializer);
-            Assert.Equal(complexSerializer.SerializerProvider, serializerProvider);
+            Assert.Equal(complexSerializer.SerializerProvider, _serializerProvider);
             Assert.Equal(complexSerializer.ODataPayloadKind, ODataPayloadKind.Resource);
         }
 
@@ -239,17 +228,16 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetODataSerializer_ResourceSet_ForEntityCollection(Type collectionType)
         {
             // Arrange
-            var serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, collectionType, request);
+            var serializer = _serializerProvider.GetODataPayloadSerializer(_edmModel, collectionType, request);
 
             // Assert
             Assert.NotNull(serializer);
             var resourceSetSerializer = Assert.IsType<ODataResourceSetSerializer>(serializer);
             Assert.Equal(resourceSetSerializer.ODataPayloadKind, ODataPayloadKind.ResourceSet);
-            Assert.Same(resourceSetSerializer.SerializerProvider, serializerProvider);
+            Assert.Same(resourceSetSerializer.SerializerProvider, _serializerProvider);
         }
 
         [Theory]
@@ -262,17 +250,16 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetODataSerializer_ResourceSet_ForComplexCollection(Type collectionType)
         {
             // Arrange
-            var serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            var serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, collectionType, request);
+            var serializer = _serializerProvider.GetODataPayloadSerializer(_edmModel, collectionType, request);
 
             // Assert
             Assert.NotNull(serializer);
             var resourceSetSerializer = Assert.IsType<ODataResourceSetSerializer>(serializer);
             Assert.Equal(resourceSetSerializer.ODataPayloadKind, ODataPayloadKind.ResourceSet);
-            Assert.Same(resourceSetSerializer.SerializerProvider, serializerProvider);
+            Assert.Same(resourceSetSerializer.SerializerProvider, _serializerProvider);
         }
 
         [Theory]
@@ -285,11 +272,10 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetODataSerializer_Returns_ExpectedSerializerType(Type payloadType, Type expectedSerializerType)
         {
             // Arrange
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            ODataSerializer serializer = serializerProvider.GetODataPayloadSerializer(_edmModel, payloadType, request);
+            ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(_edmModel, payloadType, request);
 
             // Assert
             Assert.NotNull(serializer);
@@ -300,13 +286,12 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetODataSerializer_ReturnsSameSerializer_ForSameType()
         {
             // Arrange
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            ODataSerializer firstCallSerializer = serializerProvider.GetODataPayloadSerializer(_edmModel,
+            ODataSerializer firstCallSerializer = _serializerProvider.GetODataPayloadSerializer(_edmModel,
                 typeof(ODataResourceDeserializerTests.Supplier), request);
-            ODataSerializer secondCallSerializer = serializerProvider.GetODataPayloadSerializer(_edmModel,
+            ODataSerializer secondCallSerializer = _serializerProvider.GetODataPayloadSerializer(_edmModel,
                 typeof(ODataResourceDeserializerTests.Supplier), request);
 
             // Assert
@@ -316,12 +301,9 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void GetEdmTypeSerializer_ThrowsArgumentNull_EdmType()
         {
-            // Arrange
-            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
-
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => serializerProvider.GetEdmTypeSerializer(edmType: null),
+                () => _serializerProvider.GetEdmTypeSerializer(edmType: null),
                 "edmType");
         }
 
@@ -329,26 +311,14 @@ namespace System.Web.OData.Formatter.Serialization
         public void GetEdmTypeSerializer_Caches_CreateEdmTypeSerializerOutput()
         {
             // Arrange
-            DefaultODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
             IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
 
             // Act
-            var serializer1 = serializerProvider.GetEdmTypeSerializer(edmType);
-            var serializer2 = serializerProvider.GetEdmTypeSerializer(edmType);
+            var serializer1 = _serializerProvider.GetEdmTypeSerializer(edmType);
+            var serializer2 = _serializerProvider.GetEdmTypeSerializer(edmType);
 
             // Assert
             Assert.Same(serializer2, serializer1);
-        }
-
-        [Fact]
-        public void Property_Instance_IsCached()
-        {
-            // Arrange
-            DefaultODataSerializerProvider instance1 = DefaultODataSerializerProvider.Instance;
-            DefaultODataSerializerProvider instance2 = DefaultODataSerializerProvider.Instance;
-
-            // Act & Assert
-            Assert.Same(instance1, instance2);
         }
 
         private static IEdmModel GetEnumModel()

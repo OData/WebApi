@@ -18,6 +18,8 @@ namespace System.Web.OData.Formatter.Deserialization
     {
         private static readonly IEdmModel Model = GetEdmModel();
 
+        private static readonly ODataSerializerProvider SerializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
+
         private static readonly ODataDeserializerProvider DeserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
 
         private static readonly IEdmEnumTypeReference ColorType =
@@ -161,7 +163,7 @@ namespace System.Web.OData.Formatter.Deserialization
             // Arrange
             int[] numbers = Enumerable.Range(0, 100).ToArray();
 
-            ODataCollectionSerializer serializer = new ODataCollectionSerializer(new DefaultODataSerializerProvider());
+            ODataCollectionSerializer serializer = new ODataCollectionSerializer(SerializerProvider);
             ODataCollectionDeserializer deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             MemoryStream stream = new MemoryStream();
@@ -190,7 +192,7 @@ namespace System.Web.OData.Formatter.Deserialization
             // Arrange
             Color[] colors = {Color.Blue, Color.Green};
 
-            ODataCollectionSerializer serializer = new ODataCollectionSerializer(new DefaultODataSerializerProvider());
+            ODataCollectionSerializer serializer = new ODataCollectionSerializer(SerializerProvider);
             ODataCollectionDeserializer deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             MemoryStream stream = new MemoryStream();

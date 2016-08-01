@@ -40,7 +40,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 NavigationSource = singleton
             };
 
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            ODataSerializerProvider serializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
             EmployeeModel boss = new EmployeeModel {EmployeeId = 987, EmployeeName = "John Mountain"};
             MemoryStream bufferedStream = new MemoryStream();
 

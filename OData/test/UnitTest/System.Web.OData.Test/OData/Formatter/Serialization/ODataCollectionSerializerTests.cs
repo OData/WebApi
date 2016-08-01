@@ -4,9 +4,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Web.OData.Formatter.Serialization.Models;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
@@ -17,8 +15,7 @@ namespace System.Web.OData.Formatter.Serialization
     public class ODataCollectionSerializerTests
     {
         IEdmModel _model;
-        IEdmEntitySet _customerSet;
-        Customer _customer;
+        ODataSerializerProvider _serializerProvider;
         ODataCollectionSerializer _serializer;
         IEdmPrimitiveTypeReference _edmIntType;
         IEdmCollectionTypeReference _collectionType;
@@ -26,18 +23,11 @@ namespace System.Web.OData.Formatter.Serialization
         public ODataCollectionSerializerTests()
         {
             _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
-            _customerSet = _model.EntityContainer.FindEntitySet("Customers");
             _edmIntType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false);
-            _customer = new Customer()
-            {
-                FirstName = "Foo",
-                LastName = "Bar",
-                ID = 10,
-            };
 
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            _serializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
             _collectionType = new EdmCollectionTypeReference(new EdmCollectionType(_edmIntType));
-            _serializer = new ODataCollectionSerializer(serializerProvider);
+            _serializer = new ODataCollectionSerializer(_serializerProvider);
         }
 
         [Fact]
@@ -77,7 +67,7 @@ namespace System.Web.OData.Formatter.Serialization
             settings.SetContentType(ODataFormat.Json);
 
             ODataMessageWriter messageWriter = new ODataMessageWriter(message, settings);
-            Mock<ODataCollectionSerializer> serializer = new Mock<ODataCollectionSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataCollectionSerializer> serializer = new Mock<ODataCollectionSerializer>(_serializerProvider);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "CollectionName", Model = _model };
             IEnumerable enumerable = new object[0];
             ODataCollectionValue collectionValue = new ODataCollectionValue { TypeName = "NS.Name", Items = new object[] { 0, 1, 2 } };
@@ -138,7 +128,7 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             ODataCollectionValue oDataCollectionValue = new ODataCollectionValue();
             var collection = new object[0];
-            Mock<ODataCollectionSerializer> serializer = new Mock<ODataCollectionSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataCollectionSerializer> serializer = new Mock<ODataCollectionSerializer>(_serializerProvider);
             ODataSerializerContext writeContext = new ODataSerializerContext();
             serializer.CallBase = true;
             serializer

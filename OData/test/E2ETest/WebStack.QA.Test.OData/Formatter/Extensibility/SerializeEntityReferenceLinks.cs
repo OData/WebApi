@@ -103,6 +103,11 @@ namespace WebStack.QA.Test.OData.Formatter.Extensibility
 
     public class CustomODataSerializerProvider : DefaultODataSerializerProvider
     {
+        public CustomODataSerializerProvider(IServiceProvider rootContainer)
+            : base(rootContainer)
+        {
+        }
+
         public override ODataSerializer GetODataPayloadSerializer(IEdmModel model, Type type, HttpRequestMessage request)
         {
             if (model == null)
@@ -189,7 +194,7 @@ namespace WebStack.QA.Test.OData.Formatter.Extensibility
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.InsertRange(0,
                 ODataMediaTypeFormatters.Create(
-                    new CustomODataSerializerProvider(),
+                    new CustomODataSerializerProvider(new MockContainer()),
                     new DefaultODataDeserializerProvider(new MockContainer())));
             var routingConventions = ODataRoutingConventions.CreateDefault();
             routingConventions.Insert(4, new GetRefRoutingConvention());
@@ -221,8 +226,34 @@ namespace WebStack.QA.Test.OData.Formatter.Extensibility
 
         private class MockContainer : IServiceProvider
         {
+            private readonly ODataSerializerProvider serializerProvider;
+            private readonly ODataCollectionSerializer collectionSerializer;
+            private readonly ODataPrimitiveSerializer primitiveSerializer;
+
+            public MockContainer()
+            {
+                serializerProvider = new DefaultODataSerializerProvider(this);
+                collectionSerializer = new ODataCollectionSerializer(serializerProvider);
+                primitiveSerializer = new ODataPrimitiveSerializer();
+            }
+
             public object GetService(Type serviceType)
             {
+                if (serviceType == typeof(ODataSerializerProvider))
+                {
+                    return serializerProvider;
+                }
+
+                if (serviceType == typeof(ODataCollectionSerializer))
+                {
+                    return collectionSerializer;
+                }
+
+                if (serviceType == typeof(ODataPrimitiveSerializer))
+                {
+                    return primitiveSerializer;
+                }
+
                 throw new NotImplementedException();
             }
         }

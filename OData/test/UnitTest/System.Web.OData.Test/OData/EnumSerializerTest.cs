@@ -18,6 +18,9 @@ namespace System.Web.OData
 {
     public class EnumSerializerTest
     {
+        private readonly ODataSerializerProvider _serializerProvider =
+            DependencyInjectionHelper.GetDefaultODataSerializerProvider();
+
         [Fact]
         public void GetEdmTypeSerializer_ReturnODataEnumSerializer_ForEnumType()
         {
@@ -25,7 +28,7 @@ namespace System.Web.OData
             IEdmTypeReference edmType = new EdmEnumTypeReference(new EdmEnumType("TestModel", "Color"), isNullable: false);
 
             // Act
-            ODataEdmTypeSerializer serializer = new DefaultODataSerializerProvider().GetEdmTypeSerializer(edmType);
+            ODataEdmTypeSerializer serializer = _serializerProvider.GetEdmTypeSerializer(edmType);
 
             // Assert
             Assert.NotNull(serializer);
@@ -44,7 +47,7 @@ namespace System.Web.OData
             // Act & Assert
             Assert.ThrowsArgumentNull(
                 () =>
-                    new ODataEnumSerializer(new DefaultODataSerializerProvider()).WriteObject(graph, type, messageWriter,
+                    new ODataEnumSerializer(_serializerProvider).WriteObject(graph, type, messageWriter,
                         writeContext),
                 "messageWriter");
         }
@@ -62,7 +65,7 @@ namespace System.Web.OData
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => new ODataEnumSerializer(new DefaultODataSerializerProvider()).WriteObject(graph, type, messageWriter, writeContext),
+                () => new ODataEnumSerializer(_serializerProvider).WriteObject(graph, type, messageWriter, writeContext),
                 "writeContext");
         }
 
@@ -79,7 +82,7 @@ namespace System.Web.OData
 
             // Act & Assert
             Assert.ThrowsArgument(
-                () => new ODataEnumSerializer(new DefaultODataSerializerProvider()).WriteObject(graph, type, messageWriter, writeContext),
+                () => new ODataEnumSerializer(_serializerProvider).WriteObject(graph, type, messageWriter, writeContext),
                 "writeContext",
                 "The 'RootElementName' property is required on 'ODataSerializerContext'.");
         }
@@ -94,7 +97,7 @@ namespace System.Web.OData
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => new ODataEnumSerializer(new DefaultODataSerializerProvider()).CreateODataValue(graph, expectedType, writeContext),
+                () => new ODataEnumSerializer(_serializerProvider).CreateODataValue(graph, expectedType, writeContext),
                 "ODataEnumSerializer cannot write an object of type 'Edm.Int32'.");
         }
 

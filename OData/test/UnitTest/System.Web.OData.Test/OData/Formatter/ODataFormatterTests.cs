@@ -1088,6 +1088,11 @@ namespace System.Web.OData.Formatter
 
         private class CustomSerializerProvider : DefaultODataSerializerProvider
         {
+            public CustomSerializerProvider()
+                : base(DependencyInjectionHelper.BuildContainer(null))
+            {
+            }
+
             public override ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmType)
             {
                 if (edmType.IsCollection() && edmType.AsCollection().ElementType().IsEntity())

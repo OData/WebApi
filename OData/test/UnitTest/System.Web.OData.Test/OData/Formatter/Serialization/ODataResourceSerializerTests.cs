@@ -67,7 +67,7 @@ namespace System.Web.OData.Formatter.Serialization
                 ID = 20,
             };
 
-            _serializerProvider = new DefaultODataSerializerProvider();
+            _serializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
             _customerType = _model.GetEdmTypeReference(typeof(Customer)).AsEntity();
             _orderType = _model.GetEdmTypeReference(typeof(Order)).AsEntity();
             _specialCustomerType = _model.GetEdmTypeReference(typeof(SpecialCustomer)).AsEntity();
@@ -107,7 +107,7 @@ namespace System.Web.OData.Formatter.Serialization
         public void WriteObject_Calls_WriteObjectInline_WithRightEntityType()
         {
             // Arrange
-            Mock<ODataResourceSerializer> serializer = new Mock<ODataResourceSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataResourceSerializer> serializer = new Mock<ODataResourceSerializer>(_serializerProvider);
             serializer
                 .Setup(s => s.WriteObjectInline(_customer, It.Is<IEdmTypeReference>(e => _customerType.Definition == e.Definition),
                     It.IsAny<ODataWriter>(), _writeContext))
@@ -793,8 +793,7 @@ namespace System.Web.OData.Formatter.Serialization
             model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
                 simpleOpenAddress.GetProperty("Properties")));
 
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
-            ODataResourceSerializer serializer = new ODataResourceSerializer(serializerProvider);
+            ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);
 
             SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);
             ODataSerializerContext writeContext = new ODataSerializerContext
@@ -887,8 +886,7 @@ namespace System.Web.OData.Formatter.Serialization
             model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
                 simpleOpenAddress.GetProperty("Properties")));
 
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
-            ODataResourceSerializer serializer = new ODataResourceSerializer(serializerProvider);
+            ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);
 
             HttpConfiguration config = new HttpConfiguration();
             config.SetSerializeNullDynamicProperty(enableNullDynamicProperty);

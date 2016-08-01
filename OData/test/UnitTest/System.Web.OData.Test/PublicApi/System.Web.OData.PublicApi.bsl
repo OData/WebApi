@@ -2939,9 +2939,7 @@ public abstract class System.Web.OData.Formatter.Serialization.ODataSerializerPr
 }
 
 public class System.Web.OData.Formatter.Serialization.DefaultODataSerializerProvider : ODataSerializerProvider {
-	public DefaultODataSerializerProvider ()
-
-	DefaultODataSerializerProvider Instance  { public static get; }
+	public DefaultODataSerializerProvider (System.IServiceProvider rootContainer)
 
 	public virtual ODataEdmTypeSerializer GetEdmTypeSerializer (Microsoft.OData.Edm.IEdmTypeReference edmType)
 	public virtual ODataSerializer GetODataPayloadSerializer (Microsoft.OData.Edm.IEdmModel model, System.Type type, System.Net.Http.HttpRequestMessage request)

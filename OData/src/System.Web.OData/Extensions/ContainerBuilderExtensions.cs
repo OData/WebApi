@@ -21,6 +21,9 @@ namespace System.Web.OData.Extensions
             }
 
             builder.AddService<IODataPathHandler, DefaultODataPathHandler>(ServiceLifetime.Singleton);
+
+            // ReaderSettings and WriterSettings are registered as prototype services.
+            // There will be a copy (if it is accessed) of each prototype for each request.
             builder.AddServicePrototype(new ODataMessageReaderSettings
             {
                 EnableMessageStreamDisposal = false,
@@ -32,6 +35,8 @@ namespace System.Web.OData.Extensions
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
                 AutoComputePayloadMetadata = true,
             });
+
+            // QueryValidators.
             builder.AddService<CountQueryValidator>(ServiceLifetime.Singleton);
             builder.AddService<FilterQueryValidator>(ServiceLifetime.Singleton);
             builder.AddService<ODataQueryValidator>(ServiceLifetime.Singleton);
@@ -39,8 +44,12 @@ namespace System.Web.OData.Extensions
             builder.AddService<SelectExpandQueryValidator>(ServiceLifetime.Singleton);
             builder.AddService<SkipQueryValidator>(ServiceLifetime.Singleton);
             builder.AddService<TopQueryValidator>(ServiceLifetime.Singleton);
+
+            // SerializerProvider and DeserializerProvider.
             builder.AddService<ODataSerializerProvider, DefaultODataSerializerProvider>(ServiceLifetime.Singleton);
             builder.AddService<ODataDeserializerProvider, DefaultODataDeserializerProvider>(ServiceLifetime.Singleton);
+
+            // Deserializers.
             builder.AddService<ODataResourceDeserializer>(ServiceLifetime.Singleton);
             builder.AddService<ODataEnumDeserializer>(ServiceLifetime.Singleton);
             builder.AddService<ODataPrimitiveDeserializer>(ServiceLifetime.Singleton);
@@ -48,6 +57,20 @@ namespace System.Web.OData.Extensions
             builder.AddService<ODataCollectionDeserializer>(ServiceLifetime.Singleton);
             builder.AddService<ODataEntityReferenceLinkDeserializer>(ServiceLifetime.Singleton);
             builder.AddService<ODataActionPayloadDeserializer>(ServiceLifetime.Singleton);
+
+            // Serializers.
+            builder.AddService<ODataEnumSerializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataPrimitiveSerializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataDeltaFeedSerializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataResourceSetSerializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataCollectionSerializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataResourceSerializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataServiceDocumentSerializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataEntityReferenceLinkSerializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataEntityReferenceLinksSerializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataErrorSerializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataMetadataSerializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataRawValueSerializer>(ServiceLifetime.Singleton);
 
             return builder;
         }

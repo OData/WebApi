@@ -33,6 +33,8 @@ namespace System.Web.OData.Formatter
 {
     public class ODataMediaTypeFormatterTests : MediaTypeFormatterTestBase<ODataMediaTypeFormatter>
     {
+        private readonly ODataSerializerProvider _serializerProvider =
+            DependencyInjectionHelper.GetDefaultODataSerializerProvider();
         private readonly ODataDeserializerProvider _deserializerProvider =
             DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
 
@@ -47,7 +49,7 @@ namespace System.Web.OData.Formatter
         [Fact]
         public void Ctor_ThrowsArgumentNull_DeserializerProvider()
         {
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            ODataSerializerProvider serializerProvider = _serializerProvider;
             ODataPayloadKind[] payloadKinds = new ODataPayloadKind[0];
 
             Assert.ThrowsArgumentNull(
@@ -568,9 +570,8 @@ namespace System.Web.OData.Formatter
             deserializer
                 .Setup(d => d.Read(It.IsAny<ODataMessageReader>(), typeof(int), It.Is<ODataDeserializerContext>(c => c.Request == request)))
                 .Verifiable();
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
 
-            var formatter = new ODataMediaTypeFormatter(deserializerProvider.Object, serializerProvider, Enumerable.Empty<ODataPayloadKind>());
+            var formatter = new ODataMediaTypeFormatter(deserializerProvider.Object, _serializerProvider, Enumerable.Empty<ODataPayloadKind>());
             formatter.Request = request;
             HttpContent content = new StringContent("42");
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
@@ -807,7 +808,7 @@ namespace System.Web.OData.Formatter
 
             // Act
             ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(provider.Object,
-                new DefaultODataSerializerProvider(), Enumerable.Empty<ODataPayloadKind>());
+                _serializerProvider, Enumerable.Empty<ODataPayloadKind>());
             formatter.Request = request;
 
             formatter.ReadFromStreamAsync(typeof(int), stream, content, null);

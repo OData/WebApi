@@ -23,6 +23,7 @@ namespace System.Web.OData.Formatter.Deserialization
         private readonly IEdmModel _model;
         private readonly IEdmCollectionTypeReference _customersType;
         private readonly IEdmEntityTypeReference _customerType;
+        private readonly ODataSerializerProvider _serializerProvider;
         private readonly ODataDeserializerProvider _deserializerProvider;
 
         public ODataResourceSetDeserializerTest()
@@ -30,6 +31,7 @@ namespace System.Web.OData.Formatter.Deserialization
             _model = GetEdmModel();
             _customerType = _model.GetEdmTypeReference(typeof(Customer)).AsEntity();
             _customersType = new EdmCollectionTypeReference(new EdmCollectionType(_customerType));
+            _serializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
             _deserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
         }
 
@@ -163,7 +165,7 @@ namespace System.Web.OData.Formatter.Deserialization
                     new Address { City ="Seattle", StreetAddress ="S", State ="321"}
                 };
 
-            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(_serializerProvider);
             ODataResourceSetDeserializer deserializer = new ODataResourceSetDeserializer(_deserializerProvider);
 
             MemoryStream stream = new MemoryStream();

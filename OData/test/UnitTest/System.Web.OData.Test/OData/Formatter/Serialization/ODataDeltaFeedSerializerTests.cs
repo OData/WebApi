@@ -25,6 +25,8 @@ namespace System.Web.OData.Formatter.Serialization
         IEdmCollectionTypeReference _customersType;
         private ODataPath _path;
         ODataSerializerContext _writeContext;
+        ODataSerializerProvider _serializerProvider;
+
         public ODataDeltaFeedSerializerTests()
         {
             _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
@@ -55,6 +57,7 @@ namespace System.Web.OData.Formatter.Serialization
              _customersType = _model.GetEdmTypeReference(typeof(Customer[])).AsCollection();
 
             _writeContext = new ODataSerializerContext() { NavigationSource = _customerSet, Model = _model, Path = _path };
+            _serializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
         }
 
         [Fact]
@@ -68,7 +71,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_ThrowsArgumentNull_MessageWriter()
         {
-            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(new DefaultODataSerializerProvider());
+            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(_serializerProvider);
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteObject(graph: null, type: null, messageWriter: null, writeContext: new ODataSerializerContext()),
                 "messageWriter");
@@ -77,7 +80,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_ThrowsArgumentNull_WriteContext()
         {
-            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(new DefaultODataSerializerProvider());
+            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(_serializerProvider);
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteObject(graph: null, type: null, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
                 "writeContext");
@@ -87,7 +90,7 @@ namespace System.Web.OData.Formatter.Serialization
         public void WriteObject_ThrowsEntitySetMissingDuringSerialization()
         {
             object graph = new object();
-            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(new DefaultODataSerializerProvider());
+            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(_serializerProvider);
             Assert.Throws<SerializationException>(
                 () => serializer.WriteObject(graph: graph, type: null, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: new ODataSerializerContext()),
                 "The related entity set could not be found from the OData path. The related entity set is required to serialize the payload.");
@@ -98,7 +101,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             object graph = new object();
-            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(_serializerProvider);
             serializer.CallBase = true;
             serializer
                 .Setup(s => s.WriteDeltaFeedInline(graph, It.Is<IEdmTypeReference>(e => _customersType.IsEquivalentTo(e)),
@@ -122,7 +125,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteDeltaFeedInline_ThrowsArgumentNull_Writer()
         {
-            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(new DefaultODataSerializerProvider());
+            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(_serializerProvider);
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteDeltaFeedInline(graph: null, expectedType: null, writer: null, writeContext: new ODataSerializerContext()),
                 "writer");
@@ -131,7 +134,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteDeltaFeedInline_ThrowsArgumentNull_WriteContext()
         {
-            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(new DefaultODataSerializerProvider());
+            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(_serializerProvider);
             Assert.ThrowsArgumentNull(
                 () => serializer.WriteDeltaFeedInline(graph: null, expectedType: null, writer: new Mock<ODataDeltaWriter>().Object, writeContext: null),
                 "writeContext");
@@ -140,7 +143,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteDeltaFeedInline_ThrowsSerializationException_CannotSerializerNull()
         {
-            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(new DefaultODataSerializerProvider());
+            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(_serializerProvider);
             Assert.Throws<SerializationException>(
                 () => serializer.WriteDeltaFeedInline(graph: null, expectedType: _customersType,
                     writer: new Mock<ODataDeltaWriter>().Object, writeContext: _writeContext),
@@ -150,7 +153,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void WriteDeltaFeedInline_ThrowsSerializationException_IfGraphIsNotEnumerable()
         {
-            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(new DefaultODataSerializerProvider());
+            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(_serializerProvider);
             Assert.Throws<SerializationException>(
                 () => serializer.WriteDeltaFeedInline(graph: 42, expectedType: _customersType,
                     writer: new Mock<ODataDeltaWriter>().Object, writeContext: _writeContext),
@@ -162,7 +165,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             IEnumerable instance = new object[] { null };
-            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(new DefaultODataSerializerProvider());
+            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(_serializerProvider);
 
             // Act
             Assert.Throws<SerializationException>(
@@ -191,7 +194,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             IEnumerable instance = new object[0];
-            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(_serializerProvider);
             serializer.CallBase = true;
             serializer.Setup(s => s.CreateODataDeltaFeed(instance, _customersType, _writeContext)).Returns(new ODataDeltaResourceSet()).Verifiable();
 
@@ -207,7 +210,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             // Arrange
             IEnumerable instance = new object[0];
-            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(_serializerProvider);
             serializer.CallBase = true;
             serializer.Setup(s => s.CreateODataDeltaFeed(instance, _customersType, _writeContext)).Returns<ODataDeltaResourceSet>(null);
             ODataDeltaWriter writer = new Mock<ODataDeltaWriter>().Object;
@@ -224,7 +227,7 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             IEnumerable instance = new object[0];
             ODataDeltaResourceSet deltafeed = new ODataDeltaResourceSet();
-            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(_serializerProvider);
             serializer.CallBase = true;
             serializer.Setup(s => s.CreateODataDeltaFeed(instance, _customersType, _writeContext)).Returns(deltafeed);
             Mock<ODataDeltaWriter> writer = new Mock<ODataDeltaWriter>();
@@ -248,7 +251,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             var mockWriter = new Mock<ODataDeltaWriter>();
 
-            Mock<ODataResourceSerializer> customerSerializer = new Mock<ODataResourceSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataResourceSerializer> customerSerializer = new Mock<ODataResourceSerializer>(_serializerProvider);
             customerSerializer.Setup(s => s.WriteDeltaObjectInline(edmObject.Object, edmType, mockWriter.Object, _writeContext)).Verifiable();
 
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
@@ -267,7 +270,7 @@ namespace System.Web.OData.Formatter.Serialization
         public void WriteDeltaFeedInline_WritesEachEntityInstance()
         {
             // Arrange
-            Mock<ODataResourceSerializer> customerSerializer = new Mock<ODataResourceSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataResourceSerializer> customerSerializer = new Mock<ODataResourceSerializer>(_serializerProvider);
             ODataSerializerProvider provider = ODataTestUtil.GetMockODataSerializerProvider(customerSerializer.Object);
             var mockWriter = new Mock<ODataDeltaWriter>();
             customerSerializer.Setup(s => s.WriteDeltaObjectInline(_deltaFeedCustomers[0], _customersType.ElementType(), mockWriter.Object, _writeContext)).Verifiable();
@@ -286,7 +289,7 @@ namespace System.Web.OData.Formatter.Serialization
             // Arrange
             IEnumerable instance = new object[0];
             ODataDeltaResourceSet deltafeed = new ODataDeltaResourceSet { NextPageLink = new Uri("http://nextlink.com/") };
-            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(new DefaultODataSerializerProvider());
+            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(_serializerProvider);
             serializer.CallBase = true;
             serializer.Setup(s => s.CreateODataDeltaFeed(instance, _customersType, _writeContext)).Returns(deltafeed);
             var mockWriter = new Mock<ODataDeltaWriter>();
@@ -311,7 +314,7 @@ namespace System.Web.OData.Formatter.Serialization
         public void CreateODataDeltaFeed_Sets_CountValueForPageResult()
         {
             // Arrange
-            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(new DefaultODataSerializerProvider());
+            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(_serializerProvider);
             Uri expectedNextLink = new Uri("http://nextlink.com");
             const long ExpectedCountValue = 1000;
 
@@ -328,7 +331,7 @@ namespace System.Web.OData.Formatter.Serialization
         public void CreateODataDeltaFeed_Sets_NextPageLinkForPageResult()
         {
             // Arrange
-            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(new DefaultODataSerializerProvider());
+            ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(_serializerProvider);
             Uri expectedNextLink = new Uri("http://nextlink.com");
             const long ExpectedCountValue = 1000;
 

@@ -20,8 +20,7 @@ namespace System.Web.OData.Formatter.Serialization
         [Fact]
         public void Ctor_SetsProperty_SerializerProvider()
         {
-            IEdmTypeReference edmType = new Mock<IEdmTypeReference>().Object;
-            ODataSerializerProvider serializerProvider = new DefaultODataSerializerProvider();
+            ODataSerializerProvider serializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
             var serializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Unsupported, serializerProvider).Object;
 
             Assert.Same(serializerProvider, serializer.SerializerProvider);

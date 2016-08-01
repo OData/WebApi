@@ -58,8 +58,6 @@ namespace System.Web.OData.Formatter
 
             private static readonly MethodInfo CastMethodInfo = typeof(Enumerable).GetMethod("Cast");
 
-            private static readonly ODataDeserializerProvider DeserializerProvider = new DefaultODataDeserializerProvider();
-
             [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to fail in model binding.")]
             public bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
             {
@@ -91,7 +89,8 @@ namespace System.Web.OData.Formatter
                     ODataParameterValue paramValue = value.RawValue as ODataParameterValue;
                     if (paramValue != null)
                     {
-                        bindingContext.Model = ConvertTo(paramValue, actionContext, bindingContext);
+                        bindingContext.Model = ConvertTo(paramValue, actionContext, bindingContext,
+                            actionContext.Request.GetRequestContainer());
                         return true;
                     }
 
@@ -126,7 +125,8 @@ namespace System.Web.OData.Formatter
                 }
             }
 
-            internal static object ConvertTo(ODataParameterValue parameterValue, HttpActionContext actionContext, ModelBindingContext bindingContext)
+            internal static object ConvertTo(ODataParameterValue parameterValue, HttpActionContext actionContext, ModelBindingContext bindingContext,
+                IServiceProvider requestContainer)
             {
                 Contract.Assert(parameterValue != null && parameterValue.EdmType != null);
 
@@ -138,12 +138,13 @@ namespace System.Web.OData.Formatter
 
                 IEdmTypeReference edmTypeReference = parameterValue.EdmType;
                 ODataDeserializerContext readContext = BuildDeserializerContext(actionContext, bindingContext, edmTypeReference);
+                ODataDeserializerProvider deserializerProvider = requestContainer.GetRequiredService<ODataDeserializerProvider>();
 
                 // collection of primitive, enum
                 ODataCollectionValue collectionValue = oDataValue as ODataCollectionValue;
                 if (collectionValue != null)
                 {
-                    return ConvertCollection(collectionValue, edmTypeReference, bindingContext, readContext);
+                    return ConvertCollection(collectionValue, edmTypeReference, bindingContext, readContext, requestContainer);
                 }
 
                 // enum value
@@ -153,8 +154,7 @@ namespace System.Web.OData.Formatter
                     IEdmEnumTypeReference edmEnumType = edmTypeReference.AsEnum();
                     Contract.Assert(edmEnumType != null);
 
-                    ODataEnumDeserializer deserializer =
-                        (ODataEnumDeserializer)DeserializerProvider.GetEdmTypeDeserializer(edmEnumType);
+                    ODataEnumDeserializer deserializer = (ODataEnumDeserializer)deserializerProvider.GetEdmTypeDeserializer(edmEnumType);
 
                     return deserializer.ReadInline(enumValue, edmEnumType, readContext);
                 }
@@ -170,15 +170,17 @@ namespace System.Web.OData.Formatter
             }
 
             internal static object ConvertCollection(ODataCollectionValue collectionValue, IEdmTypeReference edmTypeReference,
-                ModelBindingContext bindingContext, ODataDeserializerContext readContext)
+                ModelBindingContext bindingContext, ODataDeserializerContext readContext, IServiceProvider requestContainer)
             {
                 Contract.Assert(collectionValue != null);
 
                 IEdmCollectionTypeReference collectionType = edmTypeReference as IEdmCollectionTypeReference;
                 Contract.Assert(collectionType != null);
 
+                ODataDeserializerProvider deserializerProvider =
+                    requestContainer.GetRequiredService<ODataDeserializerProvider>();
                 ODataCollectionDeserializer deserializer =
-                    (ODataCollectionDeserializer)DeserializerProvider.GetEdmTypeDeserializer(collectionType);
+                    (ODataCollectionDeserializer)deserializerProvider.GetEdmTypeDeserializer(collectionType);
 
                 object value = deserializer.ReadInline(collectionValue, collectionType, readContext);
                 if (value == null)
@@ -268,8 +270,11 @@ namespace System.Web.OData.Formatter
                 ODataResourceSetWrapper resourceSet =
                     odataReader.ReadResourceOrResourceSet() as ODataResourceSetWrapper;
 
+                ODataDeserializerProvider deserializerProvider =
+                    readContext.Request.GetRequestContainer().GetRequiredService<ODataDeserializerProvider>();
+
                 ODataResourceSetDeserializer resourceSetDeserializer =
-                    (ODataResourceSetDeserializer)DeserializerProvider.GetEdmTypeDeserializer(collectionType);
+                    (ODataResourceSetDeserializer)deserializerProvider.GetEdmTypeDeserializer(collectionType);
 
                 object result = resourceSetDeserializer.ReadInline(resourceSet, collectionType, readContext);
                 IEnumerable enumerable = result as IEnumerable;
@@ -320,8 +325,11 @@ namespace System.Web.OData.Formatter
                 ODataResourceWrapper topLevelResource = item as ODataResourceWrapper;
                 Contract.Assert(topLevelResource != null);
 
+                ODataDeserializerProvider deserializerProvider =
+                    readContext.Request.GetRequestContainer().GetRequiredService<ODataDeserializerProvider>();
+
                 ODataResourceDeserializer entityDeserializer =
-                    (ODataResourceDeserializer)DeserializerProvider.GetEdmTypeDeserializer(edmTypeReference);
+                    (ODataResourceDeserializer)deserializerProvider.GetEdmTypeDeserializer(edmTypeReference);
                 object value = entityDeserializer.ReadInline(topLevelResource, edmTypeReference, readContext);
 
                 if (edmTypeReference.IsEntity())

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -42,7 +41,7 @@ namespace System.Web.OData.Formatter.Deserialization
             _productEdmType = _edmModel.GetEdmTypeReference(typeof(Product)).AsEntity();
             _supplierEdmType = _edmModel.GetEdmTypeReference(typeof(Supplier)).AsEntity();
             _addressEdmType = _edmModel.GetEdmTypeReference(typeof(Address)).AsComplex();
-            _deserializerProvider = new DefaultODataDeserializerProvider();
+            _deserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
         }
 
         [Fact]
@@ -345,8 +344,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             IEdmEntityTypeReference customerTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenCustomer)).AsEntity();
 
-            var deserializerProvider = new DefaultODataDeserializerProvider();
-            var deserializer = new ODataResourceDeserializer(deserializerProvider);
+            var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             ODataEnumValue enumValue = new ODataEnumValue("Third", typeof(SimpleEnum).FullName);
 
@@ -464,8 +462,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             IEdmEntityTypeReference vipCustomerTypeReference = model.GetEdmTypeReference(typeof(SimpleVipCustomer)).AsEntity();
 
-            var deserializerProvider = new DefaultODataDeserializerProvider();
-            var deserializer = new ODataResourceDeserializer(deserializerProvider);
+            var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             ODataResource resource = new ODataResource
             {
@@ -528,8 +525,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             IEdmEntityTypeReference vipCustomerTypeReference = model.GetEdmTypeReference(typeof(MyCustomer)).AsEntity();
 
-            var deserializerProvider = new DefaultODataDeserializerProvider();
-            var deserializer = new ODataResourceDeserializer(deserializerProvider);
+            var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             ODataResource resource = new ODataResource
             {

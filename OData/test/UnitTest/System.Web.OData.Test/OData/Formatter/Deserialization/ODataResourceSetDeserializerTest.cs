@@ -23,12 +23,14 @@ namespace System.Web.OData.Formatter.Deserialization
         private readonly IEdmModel _model;
         private readonly IEdmCollectionTypeReference _customersType;
         private readonly IEdmEntityTypeReference _customerType;
+        private readonly ODataDeserializerProvider _deserializerProvider;
 
         public ODataResourceSetDeserializerTest()
         {
             _model = GetEdmModel();
             _customerType = _model.GetEdmTypeReference(typeof(Customer)).AsEntity();
             _customersType = new EdmCollectionTypeReference(new EdmCollectionType(_customerType));
+            _deserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
         }
 
         [Fact]
@@ -42,14 +44,14 @@ namespace System.Web.OData.Formatter.Deserialization
         [Fact]
         public void ReadInline_ReturnsNull_IfItemIsNull()
         {
-            var deserializer = new ODataResourceSetDeserializer(new DefaultODataDeserializerProvider());
+            var deserializer = new ODataResourceSetDeserializer(_deserializerProvider);
             Assert.Null(deserializer.ReadInline(item: null, edmType: _customersType, readContext: new ODataDeserializerContext()));
         }
 
         [Fact]
         public void ReadInline_Throws_ArgumentMustBeOfType()
         {
-            var deserializer = new ODataResourceSetDeserializer(new DefaultODataDeserializerProvider());
+            var deserializer = new ODataResourceSetDeserializer(_deserializerProvider);
             Assert.ThrowsArgument(
                 () => deserializer.ReadInline(item: 42, edmType: _customersType, readContext: new ODataDeserializerContext()),
                 "item",
@@ -60,7 +62,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadInline_Calls_ReadFeed()
         {
             // Arrange
-            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
+            ODataDeserializerProvider deserializerProvider = _deserializerProvider;
             Mock<ODataResourceSetDeserializer> deserializer = new Mock<ODataResourceSetDeserializer>(deserializerProvider);
             ODataResourceSetWrapper feedWrapper = new ODataResourceSetWrapper(new ODataResourceSet());
             ODataDeserializerContext readContext = new ODataDeserializerContext();
@@ -128,7 +130,7 @@ namespace System.Web.OData.Formatter.Deserialization
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             IODataRequestMessage request = new ODataMessageWrapper(content.ReadAsStreamAsync().Result, content.Headers);
             ODataMessageReader reader = new ODataMessageReader(request, new ODataMessageReaderSettings(), _model);
-            var deserializer = new ODataResourceSetDeserializer(new DefaultODataDeserializerProvider());
+            var deserializer = new ODataResourceSetDeserializer(_deserializerProvider);
             ODataDeserializerContext readContext = new ODataDeserializerContext
             {
                 Model = _model,
@@ -162,7 +164,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 };
 
             ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(new DefaultODataSerializerProvider());
-            ODataResourceSetDeserializer deserializer = new ODataResourceSetDeserializer(new DefaultODataDeserializerProvider());
+            ODataResourceSetDeserializer deserializer = new ODataResourceSetDeserializer(_deserializerProvider);
 
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);

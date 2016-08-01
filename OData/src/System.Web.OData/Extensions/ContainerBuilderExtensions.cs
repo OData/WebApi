@@ -41,6 +41,13 @@ namespace System.Web.OData.Extensions
             builder.AddService<TopQueryValidator>(ServiceLifetime.Singleton);
             builder.AddService<ODataSerializerProvider, DefaultODataSerializerProvider>(ServiceLifetime.Singleton);
             builder.AddService<ODataDeserializerProvider, DefaultODataDeserializerProvider>(ServiceLifetime.Singleton);
+            builder.AddService<ODataResourceDeserializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataEnumDeserializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataPrimitiveDeserializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataResourceSetDeserializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataCollectionDeserializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataEntityReferenceLinkDeserializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataActionPayloadDeserializer>(ServiceLifetime.Singleton);
 
             return builder;
         }

@@ -5,6 +5,8 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Deserialization;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using HttpRouteCollectionExtensions = System.Web.OData.Formatter.HttpRouteCollectionExtensions;
 
@@ -15,6 +17,11 @@ namespace System.Web.OData
         public static IServiceProvider BuildContainer(Action<IContainerBuilder> action)
         {
             return CreateConfigurationWithRootContainer().GetODataRootContainer(HttpRouteCollectionExtensions.RouteName);
+        }
+
+        public static ODataDeserializerProvider GetDefaultODataDeserializerProvider()
+        {
+            return BuildContainer(null).GetRequiredService<ODataDeserializerProvider>();
         }
 
         public static HttpConfiguration CreateConfigurationWithRootContainer()

@@ -267,7 +267,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string))));
 
             EdmEntityTypeReference entityTypeReference = new EdmEntityTypeReference(entityType, isNullable: false);
-            ODataDeserializerProvider provider = new DefaultODataDeserializerProvider();
+            ODataDeserializerProvider provider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
 
             var resource = new Mock<IDelta>(MockBehavior.Strict);
             Type propertyType = typeof(string);

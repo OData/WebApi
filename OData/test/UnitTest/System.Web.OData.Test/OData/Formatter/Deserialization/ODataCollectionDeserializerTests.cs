@@ -18,7 +18,7 @@ namespace System.Web.OData.Formatter.Deserialization
     {
         private static readonly IEdmModel Model = GetEdmModel();
 
-        private static readonly ODataDeserializerProvider DeserializerProvider = new DefaultODataDeserializerProvider();
+        private static readonly ODataDeserializerProvider DeserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
 
         private static readonly IEdmEnumTypeReference ColorType =
             new EdmEnumTypeReference(Model.SchemaElements.OfType<IEdmEnumType>().First(c => c.Name == "Color"),
@@ -41,7 +41,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void Read_ThrowsArgumentNull_MessageReader()
         {
             // Arrange
-            var deserializer = new ODataCollectionDeserializer(new DefaultODataDeserializerProvider());
+            var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
@@ -53,7 +53,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void Read_ThrowsArgumentMustBeOfType_Type()
         {
             // Arrange
-            var deserializer = new ODataCollectionDeserializer(new DefaultODataDeserializerProvider());
+            var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
             Assert.ThrowsArgument(() => deserializer.Read(messageReader: ODataTestUtil.GetMockODataMessageReader(),
@@ -65,7 +65,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadInline_ThrowsArgument_ArgumentMustBeOfType()
         {
             // Arrange
-            var deserializer = new ODataCollectionDeserializer(new DefaultODataDeserializerProvider());
+            var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
             Assert.Throws<ArgumentException>(
@@ -77,7 +77,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadInline_ThrowsArgumentNull_EdmType()
         {
             // Arrange
-            var deserializer = new ODataCollectionDeserializer(new DefaultODataDeserializerProvider());
+            var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
@@ -89,7 +89,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadInline_ReturnsNull_IfItemIsNull()
         {
             // Arrange
-            var deserializer = new ODataCollectionDeserializer(new DefaultODataDeserializerProvider());
+            var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
             Assert.Null(deserializer.ReadInline(item: null, edmType: IntCollectionType, readContext: new ODataDeserializerContext()));
@@ -99,7 +99,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadInline_Calls_ReadCollectionValue()
         {
             // Arrange
-            Mock<ODataCollectionDeserializer> deserializer = new Mock<ODataCollectionDeserializer>(new DefaultODataDeserializerProvider());
+            Mock<ODataCollectionDeserializer> deserializer = new Mock<ODataCollectionDeserializer>(DeserializerProvider);
             ODataCollectionValue collectionValue = new ODataCollectionValue();
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
@@ -117,7 +117,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadCollectionValue_ThrowsArgumentNull_CollectionValue()
         {
             // Arrange
-            var deserializer = new ODataCollectionDeserializer(new DefaultODataDeserializerProvider());
+            var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() => deserializer.ReadCollectionValue(collectionValue: null,
@@ -129,7 +129,7 @@ namespace System.Web.OData.Formatter.Deserialization
         public void ReadCollectionValue_ThrowsArgumentNull_ElementType()
         {
             // Arrange
-            var deserializer = new ODataCollectionDeserializer(new DefaultODataDeserializerProvider());
+            var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
@@ -191,7 +191,7 @@ namespace System.Web.OData.Formatter.Deserialization
             Color[] colors = {Color.Blue, Color.Green};
 
             ODataCollectionSerializer serializer = new ODataCollectionSerializer(new DefaultODataSerializerProvider());
-            ODataCollectionDeserializer deserializer = new ODataCollectionDeserializer(new DefaultODataDeserializerProvider());
+            ODataCollectionDeserializer deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             MemoryStream stream = new MemoryStream();
             ODataMessageWrapper message = new ODataMessageWrapper(stream);

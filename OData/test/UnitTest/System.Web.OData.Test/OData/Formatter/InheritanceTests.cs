@@ -241,7 +241,7 @@ namespace System.Web.OData.Formatter
             IODataRequestMessage oDataRequest = new ODataMessageWrapper(content.ReadAsStreamAsync().Result, content.Headers);
             ODataMessageReader reader = new ODataMessageReader(oDataRequest, new ODataMessageReaderSettings(), _model);
 
-            ODataDeserializerProvider deserializerProvider = new DefaultODataDeserializerProvider();
+            ODataDeserializerProvider deserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
 
             ODataDeserializerContext context = new ODataDeserializerContext { Model = _model };
             IEdmActionImport action = _model.EntityContainer

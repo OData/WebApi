@@ -3,6 +3,7 @@
 
 using System.Net.Http;
 using System.Web.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Formatter.Deserialization
@@ -12,37 +13,20 @@ namespace System.Web.OData.Formatter.Deserialization
     /// </summary>
     public class DefaultODataDeserializerProvider : ODataDeserializerProvider
     {
-        private static readonly ODataEntityReferenceLinkDeserializer _entityReferenceLinkDeserializer = new ODataEntityReferenceLinkDeserializer();
-        private static readonly ODataPrimitiveDeserializer _primitiveDeserializer = new ODataPrimitiveDeserializer();
-        private static readonly ODataEnumDeserializer _enumDeserializer = new ODataEnumDeserializer();
-
-        private readonly ODataActionPayloadDeserializer _actionPayloadDeserializer;
-        private readonly ODataResourceDeserializer _resourceDeserializer;
-        private readonly ODataResourceSetDeserializer _resourceSetDeserializer;
-        private readonly ODataCollectionDeserializer _collectionDeserializer;
-
-        private static readonly DefaultODataDeserializerProvider _instance = new DefaultODataDeserializerProvider();
+        private readonly IServiceProvider _rootContainer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultODataDeserializerProvider"/> class.
         /// </summary>
-        public DefaultODataDeserializerProvider()
+        /// <param name="rootContainer">The root container.</param>
+        public DefaultODataDeserializerProvider(IServiceProvider rootContainer)
         {
-            _actionPayloadDeserializer = new ODataActionPayloadDeserializer(this);
-            _resourceDeserializer = new ODataResourceDeserializer(this);
-            _resourceSetDeserializer = new ODataResourceSetDeserializer(this);
-            _collectionDeserializer = new ODataCollectionDeserializer(this);
-        }
-
-        /// <summary>
-        /// Gets the default instance of the <see cref="DefaultODataDeserializerProvider"/>.
-        /// </summary>
-        public static DefaultODataDeserializerProvider Instance
-        {
-            get
+            if (rootContainer == null)
             {
-                return _instance;
+                throw Error.ArgumentNull("rootContainer");
             }
+
+            _rootContainer = rootContainer;
         }
 
         /// <inheritdoc />
@@ -57,23 +41,23 @@ namespace System.Web.OData.Formatter.Deserialization
             {
                 case EdmTypeKind.Entity:
                 case EdmTypeKind.Complex:
-                    return _resourceDeserializer;
+                    return _rootContainer.GetRequiredService<ODataResourceDeserializer>();
 
                 case EdmTypeKind.Enum:
-                    return _enumDeserializer;
+                    return _rootContainer.GetRequiredService<ODataEnumDeserializer>();
 
                 case EdmTypeKind.Primitive:
-                    return _primitiveDeserializer;
+                    return _rootContainer.GetRequiredService<ODataPrimitiveDeserializer>();
 
                 case EdmTypeKind.Collection:
                     IEdmCollectionTypeReference collectionType = edmType.AsCollection();
                     if (collectionType.ElementType().IsEntity() || collectionType.ElementType().IsComplex())
                     {
-                        return _resourceSetDeserializer;
+                        return _rootContainer.GetRequiredService<ODataResourceSetDeserializer>();
                     }
                     else
                     {
-                        return _collectionDeserializer;
+                        return _rootContainer.GetRequiredService<ODataCollectionDeserializer>();
                     }
 
                 default:
@@ -96,12 +80,12 @@ namespace System.Web.OData.Formatter.Deserialization
 
             if (type == typeof(Uri))
             {
-                return _entityReferenceLinkDeserializer;
+                return _rootContainer.GetRequiredService<ODataEntityReferenceLinkDeserializer>();
             }
 
             if (type == typeof(ODataActionParameters) || type == typeof(ODataUntypedActionParameters))
             {
-                return _actionPayloadDeserializer;
+                return _rootContainer.GetRequiredService<ODataActionPayloadDeserializer>();
             }
 
             ClrTypeCache typeMappingCache = model.GetTypeMappingCache();

@@ -2810,9 +2810,7 @@ public sealed class System.Web.OData.Formatter.Deserialization.ODataReaderExtens
 }
 
 public class System.Web.OData.Formatter.Deserialization.DefaultODataDeserializerProvider : ODataDeserializerProvider {
-	public DefaultODataDeserializerProvider ()
-
-	DefaultODataDeserializerProvider Instance  { public static get; }
+	public DefaultODataDeserializerProvider (System.IServiceProvider rootContainer)
 
 	public virtual ODataEdmTypeDeserializer GetEdmTypeDeserializer (Microsoft.OData.Edm.IEdmTypeReference edmType)
 	public virtual ODataDeserializer GetODataDeserializer (Microsoft.OData.Edm.IEdmModel model, System.Type type, System.Net.Http.HttpRequestMessage request)

@@ -659,7 +659,7 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void Create_UsesODataDeserializerProviderProxy()
+        public void Create_UsesODataDeserializerProviderProxyInstance()
         {
             var formatters = ODataMediaTypeFormatters.Create();
 

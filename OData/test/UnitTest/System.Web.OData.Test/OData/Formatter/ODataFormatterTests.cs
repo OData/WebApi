@@ -29,6 +29,8 @@ namespace System.Web.OData.Formatter
     public class ODataFormatterTests
     {
         private const string baseAddress = "http://localhost:8081/";
+        private readonly ODataDeserializerProvider _deserializerProvider =
+            DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
 
         [Theory]
         [InlineData("application/json;odata.metadata=none", "PersonEntryInJsonLightNoMetadata.json")]
@@ -319,7 +321,7 @@ namespace System.Web.OData.Formatter
             {
                 configuration.Formatters.InsertRange(
                     0,
-                    ODataMediaTypeFormatters.Create(new CustomSerializerProvider(), new DefaultODataDeserializerProvider()));
+                    ODataMediaTypeFormatters.Create(new CustomSerializerProvider(), _deserializerProvider));
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
                 using (HttpRequestMessage request = CreateRequestWithAnnotationFilter("People", "odata.include-annotations=\"*\""))
@@ -344,14 +346,14 @@ namespace System.Web.OData.Formatter
         [InlineData("Property.*,Hello.*", "PeopleWithMultipleAnnotations.json")]
         public void CustomSerializerWorks_ForInstanceAnnotationsFilter(string filter, string expect)
         {
-            // Remove indentation in expect string 
+            // Remove indentation in expect string
             expect = Regex.Replace(Resources.GetString(expect), @"\r\n\s*([""{}\]])", "$1");
 
             // Arrange
             HttpConfiguration configuration = CreateConfiguration();
             configuration.Formatters.InsertRange(0,
                     ODataMediaTypeFormatters.Create(new CustomSerializerProvider(),
-                    new DefaultODataDeserializerProvider()));
+                    _deserializerProvider));
             HttpClient client = new HttpClient(new HttpServer(configuration));
 
             HttpRequestMessage request = CreateRequestWithAnnotationFilter("People(2)",

@@ -187,7 +187,10 @@ namespace WebStack.QA.Test.OData.Formatter.Extensibility
         public static void UpdateConfiguration(HttpConfiguration configuration)
         {
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(new CustomODataSerializerProvider(), new DefaultODataDeserializerProvider()));
+            configuration.Formatters.InsertRange(0,
+                ODataMediaTypeFormatters.Create(
+                    new CustomODataSerializerProvider(),
+                    new DefaultODataDeserializerProvider(new MockContainer())));
             var routingConventions = ODataRoutingConventions.CreateDefault();
             routingConventions.Insert(4, new GetRefRoutingConvention());
             configuration.MapODataServiceRoute(
@@ -214,6 +217,14 @@ namespace WebStack.QA.Test.OData.Formatter.Extensibility
             HttpResponseMessage response = Client.SendAsync(message).Result;
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
             JsonAssert.ArrayLength(10, "value", result);
+        }
+
+        private class MockContainer : IServiceProvider
+        {
+            public object GetService(Type serviceType)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

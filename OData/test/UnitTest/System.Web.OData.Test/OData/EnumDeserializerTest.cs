@@ -2,14 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Web.OData.Builder;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.TestCommon;
 using Moq;
 
@@ -17,6 +15,9 @@ namespace System.Web.OData
 {
     public class EnumDeserializerTest
     {
+        private readonly ODataDeserializerProvider _deserializerProvider =
+            DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
+
         [Fact]
         public void GetEdmTypeDeserializer_ReturnODataEnumDeserializer_ForEnumType()
         {
@@ -24,7 +25,7 @@ namespace System.Web.OData
             IEdmTypeReference edmType = new EdmEnumTypeReference(new EdmEnumType("TestModel", "Color"), isNullable: false);
 
             // Act
-            ODataEdmTypeDeserializer deserializer = new DefaultODataDeserializerProvider().GetEdmTypeDeserializer(edmType);
+            ODataEdmTypeDeserializer deserializer = _deserializerProvider.GetEdmTypeDeserializer(edmType);
 
             // Assert
             Assert.NotNull(deserializer);
@@ -145,7 +146,7 @@ namespace System.Web.OData
             ODataResource resourceValue = new ODataResource
             {
                 Properties = new[]
-                { 
+                {
                     new ODataProperty { Name = "NullableColor", Value = null}
                 },
                 TypeName = "System.Web.OData.EnumComplexWithNullableEnum"
@@ -169,12 +170,11 @@ namespace System.Web.OData
         public void UndefinedEnumValueDeserializerTest()
         {
             // Arrange
-            var deserializerProvider = new DefaultODataDeserializerProvider();
-            var deserializer = new ODataResourceDeserializer(deserializerProvider);
+            var deserializer = new ODataResourceDeserializer(_deserializerProvider);
             ODataResource resourceValue = new ODataResource
             {
                 Properties = new[]
-                { 
+                {
                     new ODataProperty { Name = "RequiredColor", Value = new ODataEnumValue("123") }
                 },
                 TypeName = "System.Web.OData.EnumComplexWithRequiredEnum"
@@ -202,12 +202,11 @@ namespace System.Web.OData
             // Arrange
             IEdmModel model = GetEdmModel();
 
-            var deserializerProvider = new DefaultODataDeserializerProvider();
-            var deserializer = new ODataResourceDeserializer(deserializerProvider);
+            var deserializer = new ODataResourceDeserializer(_deserializerProvider);
             ODataResource resourceValue = new ODataResource
             {
                 Properties = new[]
-                { 
+                {
                     new ODataProperty
                     {
                         Name = "RequiredColor",

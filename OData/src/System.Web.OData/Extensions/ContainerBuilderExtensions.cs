@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Web.Http;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
@@ -13,6 +14,7 @@ namespace System.Web.OData.Extensions
 {
     internal static class ContainerBuilderExtensions
     {
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "DI services")]
         public static IContainerBuilder AddDefaultWebApiServices(this IContainerBuilder builder)
         {
             if (builder == null)

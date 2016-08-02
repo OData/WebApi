@@ -3,6 +3,8 @@
 
 using System.Collections;
 using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Web.Http;
@@ -17,6 +19,8 @@ namespace System.Web.OData.Formatter.Deserialization
     /// </summary>
     public class ODataResourceSetDeserializer : ODataEdmTypeDeserializer
     {
+        private static readonly MethodInfo CastMethodInfo = typeof(Enumerable).GetMethod("Cast");
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataResourceSetDeserializer"/> class.
         /// </summary>
@@ -76,7 +80,32 @@ namespace System.Web.OData.Formatter.Deserialization
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
             IEdmStructuredTypeReference elementType = edmType.AsCollection().ElementType().AsStructured();
-            return ReadResourceSet(resourceSet, elementType, readContext);
+
+            IEnumerable result = ReadResourceSet(resourceSet, elementType, readContext);
+            if (result != null && elementType.IsComplex())
+            {
+                if (readContext.IsUntyped)
+                {
+                    EdmComplexObjectCollection complexCollection = new EdmComplexObjectCollection(edmType.AsCollection());
+                    foreach (EdmComplexObject complexObject in result)
+                    {
+                        complexCollection.Add(complexObject);
+                    }
+                    return complexCollection;
+                }
+                else
+                {
+                    Type elementClrType = EdmLibHelpers.GetClrType(elementType, readContext.Model);
+                    IEnumerable castedResult =
+                        CastMethodInfo.MakeGenericMethod(elementClrType).Invoke(null, new object[] { result }) as
+                            IEnumerable;
+                    return castedResult;
+                }
+            }
+            else
+            {
+                return result;
+            }
         }
 
         /// <summary>

@@ -55,10 +55,8 @@ namespace System.Web.OData.Query
             Assert.Equal(new[] { 22 }, customers.Select(c => c.Id));
         }
 
-        [Theory]
-        [InlineData(false, false, "The query parameter '$fIlTer' is not supported.")]
-        [InlineData(true, true, "[{\"Name\":\"Highest\",\"Add")]
-        public void QueryComposition_WorkAsExpect_ForCaseInsensitive(bool caseInsensitive, bool expect, string contains)
+        [Fact]
+        public void QueryComposition_ThrowsException_ForCaseSensitive()
         {
             // Arrange
             const string caseInSensitive = "?$fIlTer=iD Eq 33";
@@ -67,7 +65,7 @@ namespace System.Web.OData.Query
 
             server.Configuration.SetUriResolver(new ODataUriResolver
             {
-                EnableCaseInsensitive = caseInsensitive
+                EnableCaseInsensitive = false
             });
 
             // Act
@@ -75,8 +73,30 @@ namespace System.Web.OData.Query
                 "http://localhost:8080/QueryCompositionCustomer" + caseInSensitive);
 
             // Assert
-            Assert.Equal(expect, response.IsSuccessStatusCode);
-            Assert.Contains(contains, response.Content.ReadAsStringAsync().Result);
+            Assert.False(response.IsSuccessStatusCode);
+            Assert.Contains("The query parameter '$fIlTer' is not supported.", response.Content.ReadAsStringAsync().Result);
+        }
+
+        [Fact]
+        public void QueryComposition_WorkAsExpect_ForCaseInsensitive()
+        {
+            // Arrange
+            const string caseInSensitive = "?$fIlTer=iD Eq 33";
+            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", useCustomEdmModel: true));
+            HttpClient client = new HttpClient(server);
+
+            server.Configuration.SetUriResolver(new ODataUriResolver
+            {
+                EnableCaseInsensitive = true
+            });
+
+            // Act
+            HttpResponseMessage response = GetResponse(client, server.Configuration,
+                "http://localhost:8080/QueryCompositionCustomer" + caseInSensitive);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Contains("[{\"Name\":\"Highest\",\"Add", response.Content.ReadAsStringAsync().Result);
         }
 
         [Fact]

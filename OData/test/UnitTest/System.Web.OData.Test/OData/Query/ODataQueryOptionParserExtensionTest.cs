@@ -97,6 +97,7 @@ namespace System.Web.OData.Query
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.SetConfiguration(configuration);
+            request.EnableHttpDependencyInjectionSupport();
 
             IEdmModel model = ODataRoutingModel.GetModel();
 

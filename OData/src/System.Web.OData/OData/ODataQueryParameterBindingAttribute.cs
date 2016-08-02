@@ -75,11 +75,10 @@ namespace System.Web.OData
                 Type entityClrType = GetEntityClrTypeFromParameterType(Descriptor) ?? GetEntityClrTypeFromActionReturnType(actionDescriptor);
 
                 IEdmModel model = request.ODataProperties().Model ?? actionDescriptor.GetEdmModel(entityClrType);
-                ODataQueryContext entitySetContext = new ODataQueryContext(
-                    model,
-                    entityClrType,
-                    request.ODataProperties().Path,
-                    request.GetRequestContainer());
+                ODataQueryContext entitySetContext = new ODataQueryContext(model, entityClrType, request.ODataProperties().Path)
+                {
+                    RequestContainer = request.GetRequestContainer()
+                };
 
                 Func<ODataQueryContext, HttpRequestMessage, ODataQueryOptions> createODataQueryOptions =
                     (Func<ODataQueryContext, HttpRequestMessage, ODataQueryOptions>)Descriptor.Properties.GetOrAdd(CreateODataQueryOptionsCtorKey, _ =>

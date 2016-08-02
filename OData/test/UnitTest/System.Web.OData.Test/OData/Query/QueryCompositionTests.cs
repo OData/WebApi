@@ -204,7 +204,10 @@ namespace System.Web.OData.Query
         [PropertyData("PrimitiveTypesQueryCompositionData")]
         public virtual void PrimitiveTypesQueryComposition(string query, IEnumerable<int> expectedResults)
         {
-            ODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(EdmCoreModel.Instance, typeof(int)), new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query));
+            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query);
+            message.EnableHttpDependencyInjectionSupport();
+
+            ODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(EdmCoreModel.Instance, typeof(int)), message);
             var results = queryOptions.ApplyTo(Enumerable.Range(0, 100).AsQueryable()) as IQueryable<int>;
 
             // Assert

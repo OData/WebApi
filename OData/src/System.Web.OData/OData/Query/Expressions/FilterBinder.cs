@@ -19,7 +19,7 @@ using Microsoft.OData.UriParser;
 namespace System.Web.OData.Query.Expressions
 {
     /// <summary>
-    /// Translates an OData $filter parse tree represented by <see cref="FilterClause"/> to 
+    /// Translates an OData $filter parse tree represented by <see cref="FilterClause"/> to
     /// an <see cref="Expression"/> and applies it to an <see cref="IQueryable"/>.
     /// </summary>
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
@@ -40,9 +40,9 @@ namespace System.Web.OData.Query.Expressions
         }
 
         private FilterBinder(
-            IEdmModel model, 
-            IAssembliesResolver assembliesResolver, 
-            ODataQuerySettings querySettings, 
+            IEdmModel model,
+            IAssembliesResolver assembliesResolver,
+            ODataQuerySettings querySettings,
             Type filterType)
             : base(model, assembliesResolver, querySettings)
         {
@@ -339,7 +339,7 @@ namespace System.Web.OData.Query.Expressions
             Expression source;
             if (sourceNode == null)
             {
-                // if the cast is on the root i.e $it (~/Products?$filter=NS.PopularProducts/.....), 
+                // if the cast is on the root i.e $it (~/Products?$filter=NS.PopularProducts/.....),
                 // source would be null. So bind null to '$it'.
                 source = _lambdaParameters[ODataItParameterName];
             }
@@ -1090,7 +1090,7 @@ namespace System.Web.OData.Query.Expressions
                 Contract.Assert(IsInteger(arguments[1].Type));
 
                 // When null propagation is allowed, we use a safe version of String.Substring(int).
-                // But for providers that would not recognize custom expressions like this, we map 
+                // But for providers that would not recognize custom expressions like this, we map
                 // directly to String.Substring(int)
                 if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
                 {
@@ -1108,7 +1108,7 @@ namespace System.Web.OData.Query.Expressions
                 Contract.Assert(arguments.Length == 3 && IsInteger(arguments[1].Type) && IsInteger(arguments[2].Type));
 
                 // When null propagation is allowed, we use a safe version of String.Substring(int, int).
-                // But for providers that would not recognize custom expressions like this, we map 
+                // But for providers that would not recognize custom expressions like this, we map
                 // directly to String.Substring(int, int)
                 if (_querySettings.HandleNullPropagation == HandleNullPropagationOption.True)
                 {

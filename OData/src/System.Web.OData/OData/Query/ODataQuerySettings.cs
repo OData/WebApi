@@ -25,7 +25,7 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Initialize a new instance of the <see cref="ODataQuerySettings"/> class based on an existing one. 
+        /// Initialize a new instance of the <see cref="ODataQuerySettings"/> class based on an existing one.
         /// </summary>
         /// <param name="settings">The setting to copy from.</param>
         public ODataQuerySettings(ODataQuerySettings settings)
@@ -75,7 +75,7 @@ namespace System.Web.OData.Query
 
         /// <summary>
         /// Gets or sets a value indicating how null propagation should
-        /// be handled during query composition. 
+        /// be handled during query composition.
         /// </summary>
         /// <value>
         /// The default is <see cref="HandleNullPropagationOption.Default"/>.
@@ -94,7 +94,7 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether constants should be parameterized. Parameterizing constants 
+        /// Gets or sets a value indicating whether constants should be parameterized. Parameterizing constants
         /// would result in better performance with Entity framework.
         /// </summary>
         /// <value>The default value is <c>true</c>.</value>

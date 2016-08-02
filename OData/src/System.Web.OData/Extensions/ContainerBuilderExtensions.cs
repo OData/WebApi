@@ -3,10 +3,12 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Web.Http;
+using System.Web.Http.Dispatcher;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Query.Validators;
 using System.Web.OData.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
@@ -73,7 +75,16 @@ namespace System.Web.OData.Extensions
             builder.AddService<ODataMetadataSerializer>(ServiceLifetime.Singleton);
             builder.AddService<ODataRawValueSerializer>(ServiceLifetime.Singleton);
 
+            // AssembliesResolver.
+            builder.AddService(ServiceLifetime.Singleton, GetAssembliesResolver);
+
             return builder;
+        }
+
+        private static IAssembliesResolver GetAssembliesResolver(IServiceProvider rootContainer)
+        {
+            HttpConfiguration configuration = rootContainer.GetRequiredService<HttpConfiguration>();
+            return configuration.Services.GetAssembliesResolver() ?? new DefaultAssembliesResolver();
         }
     }
 }

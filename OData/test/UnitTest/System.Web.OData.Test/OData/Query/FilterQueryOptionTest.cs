@@ -600,18 +600,6 @@ namespace System.Web.OData.Query
             Assert.ThrowsArgumentNull(() => filter.ApplyTo(new Customer[0].AsQueryable(), null), "querySettings");
         }
 
-        [Fact]
-        public void ApplyTo_Throws_Null_AssembliesResolver()
-        {
-            // Arrange
-            var model = new ODataModelBuilder().Add_Customer_EntityType_With_CollectionProperties().Add_Customers_EntitySet().Add_Address_ComplexType().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer));
-            var filter = new FilterQueryOption("Addresses/any(a: a/HouseNumber eq 1)", context);
-
-            // Act & Assert
-            Assert.ThrowsArgumentNull(() => filter.ApplyTo(new Customer[0].AsQueryable(), new ODataQuerySettings(), null), "assembliesResolver");
-        }
-
         [Theory]
         [PropertyData("CustomerTestFilters")]
         public void ApplyTo_Returns_Correct_Queryable(string filter, int[] customerIds)

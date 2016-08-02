@@ -19,6 +19,15 @@ namespace System.Web.OData
     /// </summary>
     public class ODataQueryContext
     {
+        private IServiceProvider _requestContainer;
+
+        // Remove this
+        internal ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path, DefaultQuerySettings defaultQuerySettings)
+            : this(model, elementClrType, path)
+        {
+            DefaultQuerySettings = defaultQuerySettings;
+        }
+
         /// <summary>
         /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" />, element CLR type,
         /// and <see cref="ODataPath" />.
@@ -27,20 +36,7 @@ namespace System.Web.OData
         /// the given <paramref name="elementClrType"/>.</param>
         /// <param name="elementClrType">The CLR type of the element of the collection being queried.</param>
         /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
-        /// <param name="requestContainer">The request container.</param>
-        public ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path, IServiceProvider requestContainer)
-            : this(model, elementClrType, path)
-        {
-            InitializeWithRequestContainer(requestContainer);
-        }
-
-        internal ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path, DefaultQuerySettings defaultQuerySettings)
-            : this(model, elementClrType, path)
-        {
-            DefaultQuerySettings = defaultQuerySettings;
-        }
-
-        internal ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path)
+        public ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path)
         {
             if (model == null)
             {
@@ -73,14 +69,7 @@ namespace System.Web.OData
         /// <param name="model">The EDM model the given EDM type belongs to.</param>
         /// <param name="elementType">The EDM type of the element of the collection being queried.</param>
         /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
-        /// <param name="requestContainer">The request container.</param>
-        public ODataQueryContext(IEdmModel model, IEdmType elementType, ODataPath path, IServiceProvider requestContainer)
-            : this(model, elementType, path)
-        {
-            InitializeWithRequestContainer(requestContainer);
-        }
-
-        internal ODataQueryContext(IEdmModel model, IEdmType elementType, ODataPath path)
+        public ODataQueryContext(IEdmModel model, IEdmType elementType, ODataPath path)
         {
             if (model == null)
             {
@@ -139,9 +128,13 @@ namespace System.Web.OData
         public ODataPath Path { get; private set; }
 
         /// <summary>
-        /// Gets the request container.
+        /// Gets or sets the request container.
         /// </summary>
-        public IServiceProvider RequestContainer { get; private set; }
+        public IServiceProvider RequestContainer
+        {
+            get { return _requestContainer; }
+            set { SetRequestContainer(value); }
+        }
 
         private static IEdmNavigationSource GetNavigationSource(IEdmModel model, IEdmType elementType, ODataPath odataPath)
         {
@@ -166,14 +159,14 @@ namespace System.Web.OData
             return (matchedNavigationSources.Count != 1) ? null : matchedNavigationSources[0];
         }
 
-        private void InitializeWithRequestContainer(IServiceProvider requestContainer)
+        private void SetRequestContainer(IServiceProvider requestContainer)
         {
             if (requestContainer == null)
             {
                 throw Error.ArgumentNull("requestContainer");
             }
 
-            RequestContainer = requestContainer;
+            _requestContainer = requestContainer;
             DefaultQuerySettings = requestContainer.GetRequiredService<DefaultQuerySettings>();
         }
     }

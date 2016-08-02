@@ -13,14 +13,14 @@ using Microsoft.OData.Edm;
 namespace System.Web.OData.Query
 {
     /// <summary>
-    /// This defines a composite OData query options that can be used to perform query composition. 
+    /// This defines a composite OData query options that can be used to perform query composition.
     /// Currently this only supports $filter, $orderby, $top, $skip.
     /// </summary>
     [ODataQueryParameterBinding]
     public class ODataQueryOptions<TEntity> : ODataQueryOptions
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from 
+        /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
         /// the <see cref="ODataQueryContext"/>.
         /// </summary>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>

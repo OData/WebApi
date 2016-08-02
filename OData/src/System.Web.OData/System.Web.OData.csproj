@@ -102,6 +102,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\MediaTypeAttributeConvention.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerProviderProxy.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerProviderProxy.cs" />
+    <Compile Include="OData\QueryContextHelpers.cs" />
     <Compile Include="OData\Query\CountAttribute.cs" />
     <Compile Include="OData\Query\ExpandConfiguration.cs" />
     <Compile Include="OData\Query\QueryOptionSetting.cs" />

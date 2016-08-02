@@ -365,6 +365,7 @@ namespace System.Web.OData.Test.OData.Query
                             .GetEdmModel();
             var context = new ODataQueryContext(model, typeof(Customer));
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + filter);
+            request.EnableHttpDependencyInjectionSupport();
 
             var options = new ODataQueryOptions(context, request);
 

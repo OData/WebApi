@@ -139,7 +139,7 @@ namespace System.Web.OData.Formatter
                         {
                             elementClrType = entityType;
                         }
-                      
+
                         IEdmType elementType = GetEdmType(edmModel, elementClrType, testCollections: false);
                         if (elementType != null)
                         {
@@ -164,7 +164,7 @@ namespace System.Web.OData.Formatter
                     .Select(tuple => tuple.EdmType)
                     .SingleOrDefault();
 
-                // default to the EdmType with the same name as the ClrType name 
+                // default to the EdmType with the same name as the ClrType name
                 returnType = returnType ?? edmModel.FindType(clrType.EdmFullName());
 
                 if (clrType.BaseType != null)
@@ -314,7 +314,7 @@ namespace System.Web.OData.Formatter
         }
 
         public static bool IsNotSortable(IEdmProperty edmProperty, IEdmProperty pathEdmProperty,
-            IEdmStructuredType pathEdmStructuredType, IEdmModel edmModel, bool enableQrderBy)
+            IEdmStructuredType pathEdmStructuredType, IEdmModel edmModel, bool enableOrderBy)
         {
             QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(edmProperty, edmModel);
             if (annotation != null && annotation.Restrictions.NotSortable)
@@ -330,7 +330,7 @@ namespace System.Web.OData.Formatter
 
                 ModelBoundQuerySettings querySettings = GetModelBoundQuerySettings(pathEdmProperty,
                     pathEdmStructuredType, edmModel);
-                if (!enableQrderBy)
+                if (!enableOrderBy)
                 {
                     return !querySettings.Sortable(edmProperty.Name);
                 }
@@ -574,7 +574,7 @@ namespace System.Web.OData.Formatter
                         {
                             structuredType = navigationPathSegment.NavigationProperty.ToEntityType();
                         }
-                        
+
                         name = navigationPathSegment.NavigationProperty.Name + typeCast;
                         return;
                     }
@@ -698,7 +698,7 @@ namespace System.Web.OData.Formatter
             return reverseLookupClrType;
         }
 
-        // Mangle the invalid EDM literal Type.FullName (System.Collections.Generic.IEnumerable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]) 
+        // Mangle the invalid EDM literal Type.FullName (System.Collections.Generic.IEnumerable`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]])
         // to a valid EDM literal (the C# type name IEnumerable<int>).
         public static string EdmName(this Type clrType)
         {

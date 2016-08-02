@@ -615,6 +615,7 @@ namespace System.Web.OData.Query
                 model,
                 model.FindDeclaredType("System.Web.OData.TestCommon.Models.AutoExpandCustomer"));
             var request = new HttpRequestMessage(HttpMethod.Get, "http://test?$expand=Friend($levels=max)");
+            request.EnableHttpDependencyInjectionSupport();
             var queryOption = new ODataQueryOptions(context, request);
             queryOption.AddAutoExpandProperties();
             var selectExpand = queryOption.SelectExpand;
@@ -684,6 +685,7 @@ namespace System.Web.OData.Query
                 model,
                 model.FindDeclaredType("System.Web.OData.TestCommon.Models.AutoExpandCustomer"));
             var request = new HttpRequestMessage(HttpMethod.Get, "http://test");
+            request.EnableHttpDependencyInjectionSupport();
             var queryOption = new ODataQueryOptions(context, request);
             queryOption.AddAutoExpandProperties();
             var selectExpand = queryOption.SelectExpand;

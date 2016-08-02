@@ -419,8 +419,8 @@ public class System.Web.OData.ODataNullValueMessageHandler : System.Net.Http.Del
 }
 
 public class System.Web.OData.ODataQueryContext {
-	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Edm.IEdmType elementType, ODataPath path, System.IServiceProvider requestContainer)
-	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, System.Type elementClrType, ODataPath path, System.IServiceProvider requestContainer)
+	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Edm.IEdmType elementType, ODataPath path)
+	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, System.Type elementClrType, ODataPath path)
 
 	DefaultQuerySettings DefaultQuerySettings  { public get; }
 	System.Type ElementClrType  { public get; }
@@ -428,7 +428,7 @@ public class System.Web.OData.ODataQueryContext {
 	Microsoft.OData.Edm.IEdmModel Model  { public get; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; }
 	ODataPath Path  { public get; }
-	System.IServiceProvider RequestContainer  { public get; }
+	System.IServiceProvider RequestContainer  { public get; public set; }
 }
 
 public class System.Web.OData.ODataSwaggerConverter {
@@ -2099,7 +2099,6 @@ public class System.Web.OData.Query.ApplyQueryOption {
 	System.Type ResultClrType  { public get; }
 
 	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings)
-	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, System.Web.Http.Dispatcher.IAssembliesResolver assembliesResolver)
 }
 
 public class System.Web.OData.Query.CountQueryOption {
@@ -2140,7 +2139,6 @@ public class System.Web.OData.Query.FilterQueryOption {
 	FilterQueryValidator Validator  { public get; public set; }
 
 	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings)
-	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, System.Web.Http.Dispatcher.IAssembliesResolver assembliesResolver)
 	public void Validate (ODataValidationSettings validationSettings)
 }
 
@@ -2338,8 +2336,6 @@ public class System.Web.OData.Query.SelectExpandQueryOption {
 
 	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable queryable, ODataQuerySettings settings)
 	public object ApplyTo (object entity, ODataQuerySettings settings)
-	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable queryable, ODataQuerySettings settings, System.Web.Http.Dispatcher.IAssembliesResolver assembliesResolver)
-	public object ApplyTo (object entity, ODataQuerySettings settings, System.Web.Http.Dispatcher.IAssembliesResolver assembliesResolver)
 	public void Validate (ODataValidationSettings validationSettings)
 }
 

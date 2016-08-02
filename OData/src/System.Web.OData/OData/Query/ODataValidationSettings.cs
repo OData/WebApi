@@ -52,10 +52,10 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Gets or sets a list of allowed functions used in the $filter query. 
-        /// 
+        /// Gets or sets a list of allowed functions used in the $filter query.
+        ///
         /// The allowed functions include the following:
-        /// 
+        ///
         /// String related: contains, endswith, startswith, length, indexof, substring, tolower, toupper, trim, concat
         ///
         /// e.g. ~/Customers?$filter=length(CompanyName) eq 19
@@ -66,10 +66,10 @@ namespace System.Web.OData.Query
         ///
         /// Math related: round, floor, ceiling
         ///
-        /// Type related:isof, cast, 
+        /// Type related:isof, cast,
         ///
         /// Collection related: any, all
-        ///  
+        ///
         /// </summary>
         public AllowedFunctions AllowedFunctions
         {
@@ -109,10 +109,10 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Gets a list of properties one can orderby the result with. Note, by default this list is empty, 
+        /// Gets a list of properties one can orderby the result with. Note, by default this list is empty,
         /// it means it can be ordered by any property.
-        /// 
-        /// For example, having an empty collection means client can order the queryable result by any properties.  
+        ///
+        /// For example, having an empty collection means client can order the queryable result by any properties.
         /// Adding "Name" to this list means that it only allows queryable result to be ordered by Name property.
         /// </summary>
         public Collection<string> AllowedOrderByProperties

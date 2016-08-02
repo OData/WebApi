@@ -20,12 +20,13 @@ namespace System.Web.OData.Query
     /// </summary>
     public class FilterQueryOption
     {
-        private static readonly IAssembliesResolver _defaultAssembliesResolver = new DefaultAssembliesResolver();
+        private readonly IAssembliesResolver _assembliesResolver;
+
         private FilterClause _filterClause;
         private ODataQueryOptionParser _queryOptionParser;
 
         /// <summary>
-        /// Initialize a new instance of <see cref="FilterQueryOption"/> based on the raw $filter value and 
+        /// Initialize a new instance of <see cref="FilterQueryOption"/> based on the raw $filter value and
         /// an EdmModel from <see cref="ODataQueryContext"/>.
         /// </summary>
         /// <param name="rawValue">The raw value for $filter query. It can be null or empty.</param>
@@ -52,6 +53,7 @@ namespace System.Web.OData.Query
             RawValue = rawValue;
             Validator = FilterQueryValidator.GetFilterQueryValidator(context);
             _queryOptionParser = queryOptionParser;
+            _assembliesResolver = QueryContextHelpers.GetAssembliesResolver(context);
         }
 
         // This constructor is intended for unit testing only.
@@ -75,6 +77,7 @@ namespace System.Web.OData.Query
                 context.ElementType,
                 context.NavigationSource,
                 new Dictionary<string, string> { { "$filter", rawValue } });
+            _assembliesResolver = QueryContextHelpers.GetAssembliesResolver(context);
         }
 
         /// <summary>
@@ -124,22 +127,6 @@ namespace System.Web.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
         public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
         {
-            return ApplyTo(query, querySettings, _defaultAssembliesResolver);
-        }
-
-        /// <summary>
-        /// Apply the filter query to the given IQueryable.
-        /// </summary>
-        /// <remarks>
-        /// The <see cref="ODataQuerySettings.HandleNullPropagation"/> property specifies
-        /// how this method should handle null propagation.
-        /// </remarks>
-        /// <param name="query">The original <see cref="IQueryable"/>.</param>
-        /// <param name="querySettings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
-        /// <param name="assembliesResolver">The <see cref="IAssembliesResolver"/> to use.</param>
-        /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, IAssembliesResolver assembliesResolver)
-        {
             if (query == null)
             {
                 throw Error.ArgumentNull("query");
@@ -147,10 +134,6 @@ namespace System.Web.OData.Query
             if (querySettings == null)
             {
                 throw Error.ArgumentNull("querySettings");
-            }
-            if (assembliesResolver == null)
-            {
-                throw Error.ArgumentNull("assembliesResolver");
             }
             if (Context.ElementClrType == null)
             {
@@ -168,7 +151,7 @@ namespace System.Web.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
             }
 
-            Expression filter = FilterBinder.Bind(filterClause, Context.ElementClrType, Context.Model, assembliesResolver, updatedSettings);
+            Expression filter = FilterBinder.Bind(filterClause, Context.ElementClrType, Context.Model, _assembliesResolver, updatedSettings);
             query = ExpressionHelpers.Where(query, filter, Context.ElementClrType);
             return query;
         }

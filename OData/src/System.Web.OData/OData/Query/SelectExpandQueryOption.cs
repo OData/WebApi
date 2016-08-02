@@ -21,7 +21,8 @@ namespace System.Web.OData.Query
     /// </summary>
     public class SelectExpandQueryOption
     {
-        private static readonly IAssembliesResolver _defaultAssembliesResolver = new DefaultAssembliesResolver();
+        private readonly IAssembliesResolver _assembliesResolver;
+
         private SelectExpandClause _selectExpandClause;
         private ODataQueryOptionParser _queryOptionParser;
         // Give _levelsMaxLiteralExpansionDepth a negative value meaning it is uninitialized, and it will be set to:
@@ -65,6 +66,7 @@ namespace System.Web.OData.Query
             RawExpand = expand;
             Validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(context);
             _queryOptionParser = queryOptionParser;
+            _assembliesResolver = QueryContextHelpers.GetAssembliesResolver(context);
         }
 
         internal SelectExpandQueryOption(
@@ -105,6 +107,7 @@ namespace System.Web.OData.Query
                 context.ElementType,
                 context.NavigationSource,
                 new Dictionary<string, string> { { "$select", select }, { "$expand", expand } });
+            _assembliesResolver = QueryContextHelpers.GetAssembliesResolver(context);
         }
 
         /// <summary>
@@ -179,20 +182,6 @@ namespace System.Web.OData.Query
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "stopgap. will be used later.")]
         public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings)
         {
-            return ApplyTo(queryable, settings, _defaultAssembliesResolver);
-        }
-
-        /// <summary>
-        /// Applies the $select and $expand query options to the given <see cref="IQueryable"/> using the given
-        /// <see cref="ODataQuerySettings"/>.
-        /// </summary>
-        /// <param name="queryable">The original <see cref="IQueryable"/>.</param>
-        /// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
-        /// <param name="assembliesResolver">The <see cref="IAssembliesResolver"/> to use.</param>
-        /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "stopgap. will be used later.")]
-        public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings, IAssembliesResolver assembliesResolver)
-        {
             if (queryable == null)
             {
                 throw Error.ArgumentNull("queryable");
@@ -214,7 +203,7 @@ namespace System.Web.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(queryable);
             }
 
-            return SelectExpandBinder.Bind(queryable, updatedSettings, assembliesResolver, this);
+            return SelectExpandBinder.Bind(queryable, updatedSettings, _assembliesResolver, this);
         }
 
         /// <summary>
@@ -224,18 +213,6 @@ namespace System.Web.OData.Query
         /// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
         /// <returns>The new entity after the $select and $expand query has been applied to.</returns>
         public object ApplyTo(object entity, ODataQuerySettings settings)
-        {
-            return ApplyTo(entity, settings, _defaultAssembliesResolver);
-        }
-
-        /// <summary>
-        /// Applies the $select and $expand query options to the given entity using the given <see cref="ODataQuerySettings"/>.
-        /// </summary>
-        /// <param name="entity">The original entity.</param>
-        /// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
-        /// <param name="assembliesResolver">The <see cref="IAssembliesResolver"/> to use.</param>
-        /// <returns>The new entity after the $select and $expand query has been applied to.</returns>
-        public object ApplyTo(object entity, ODataQuerySettings settings, IAssembliesResolver assembliesResolver)
         {
             if (entity == null)
             {
@@ -258,7 +235,7 @@ namespace System.Web.OData.Query
                 updatedSettings.HandleNullPropagation = HandleNullPropagationOption.True;
             }
 
-            return SelectExpandBinder.Bind(entity, updatedSettings, assembliesResolver, this);
+            return SelectExpandBinder.Bind(entity, updatedSettings, _assembliesResolver, this);
         }
 
         /// <summary>
@@ -282,9 +259,9 @@ namespace System.Web.OData.Query
         {
             bool levelsEncountered;
             bool isMaxLevel;
-            return ProcessLevels(SelectExpandClause, 
-                LevelsMaxLiteralExpansionDepth < 0 ? ODataValidationSettings.DefaultMaxExpansionDepth : LevelsMaxLiteralExpansionDepth, 
-                out levelsEncountered, 
+            return ProcessLevels(SelectExpandClause,
+                LevelsMaxLiteralExpansionDepth < 0 ? ODataValidationSettings.DefaultMaxExpansionDepth : LevelsMaxLiteralExpansionDepth,
+                out levelsEncountered,
                 out isMaxLevel);
         }
 
@@ -358,7 +335,7 @@ namespace System.Web.OData.Query
 
                     if (item.LevelsOption != null && item.LevelsOption.Level > 0 && expandItem == null)
                     {
-                        // Abandon this attempt if any of the items failed to expand 
+                        // Abandon this attempt if any of the items failed to expand
                         return null;
                     }
                     else if (item.LevelsOption != null)
@@ -501,7 +478,7 @@ namespace System.Web.OData.Query
             level++;
 
             var entityType = expandItem.NavigationSource.EntityType();
-            IEdmNavigationProperty navigationProperty = 
+            IEdmNavigationProperty navigationProperty =
                 (expandItem.PathToNavigationProperty.LastSegment as NavigationPropertySegment).NavigationProperty;
             ModelBoundQuerySettings querySettings = EdmLibHelpers.GetModelBoundQuerySettings(navigationProperty,
                 navigationProperty.ToEntityType(),
@@ -509,8 +486,8 @@ namespace System.Web.OData.Query
             IEnumerable<SelectItem> autoExpandNavigationSelectItems = GetAutoExpandedNavigationSelectItems(
                 entityType,
                 Context.Model,
-                navigationProperty.Type, 
-                expandItem.NavigationSource, 
+                navigationProperty.Type,
+                expandItem.NavigationSource,
                 selectExpandClause.AllSelected,
                 querySettings);
             bool hasAutoExpandInExpand = (autoExpandNavigationSelectItems.Count() != 0);
@@ -541,11 +518,11 @@ namespace System.Web.OData.Query
                 }
                 else
                 {
-                    // PathSelectItem is needed for the expanded item if AllSelected is false. 
+                    // PathSelectItem is needed for the expanded item if AllSelected is false.
                     PathSelectItem pathSelectItem = new PathSelectItem(
                         new ODataSelectPath(expandItem.PathToNavigationProperty));
 
-                    // Keep default SelectItems before expanded item to keep consistent with normal SelectExpandClause 
+                    // Keep default SelectItems before expanded item to keep consistent with normal SelectExpandClause
                     SelectItem[] items = new SelectItem[] { item, pathSelectItem };
                     currentSelectExpandClause = new SelectExpandClause(
                         new SelectItem[] { }.Concat(selectExpandClause.SelectedItems)
@@ -563,7 +540,7 @@ namespace System.Web.OData.Query
                 level--;
 
                 // Need expand and construct selectExpandClause every time if it is max level in inner expand
-                if (isMaxLevelInInnerExpand) 
+                if (isMaxLevelInInnerExpand)
                 {
                     selectExpandClause = ProcessLevels(
                         expandItem.SelectAndExpand,

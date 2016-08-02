@@ -10,7 +10,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
@@ -29,8 +28,6 @@ namespace System.Web.OData.Query
     public class ODataQueryOptions
     {
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
-
-        private IAssembliesResolver _assembliesResolver;
 
         private ETag _etagIfMatch;
 
@@ -62,17 +59,15 @@ namespace System.Web.OData.Query
                 throw Error.ArgumentNull("request");
             }
 
-            if (request.GetConfiguration() != null)
-            {
-                _assembliesResolver = request.GetConfiguration().Services.GetAssembliesResolver();
-            }
-
-            // fallback to the default assemblies resolver if none available.
-            _assembliesResolver = _assembliesResolver ?? new DefaultAssembliesResolver();
-
             // remember the context and request
             Context = context;
             Request = request;
+
+            // Set the request container to the context
+            if (Context.RequestContainer == null)
+            {
+                Context.RequestContainer = request.GetRequestContainer();
+            }
 
             // Parse the query from request Uri
             RawValues = new ODataRawQueryOptions();
@@ -297,7 +292,7 @@ namespace System.Web.OData.Query
             // Section 3.15 of the spec http://docs.oasis-open.org/odata/odata-data-aggregation-ext/v4.0/cs01/odata-data-aggregation-ext-v4.0-cs01.html#_Toc378326311
             if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
             {
-                result = Apply.ApplyTo(result, querySettings, _assembliesResolver);
+                result = Apply.ApplyTo(result, querySettings);
                 Request.ODataProperties().ApplyClause = Apply.ApplyClause;
                 this.Context.ElementClrType = Apply.ResultClrType;
             }
@@ -305,7 +300,7 @@ namespace System.Web.OData.Query
             // Construct the actual query and apply them in the following order: filter, orderby, skip, top
             if (IsAvailableODataQueryOption(Filter, AllowedQueryOptions.Filter))
             {
-                result = Filter.ApplyTo(result, querySettings, _assembliesResolver);
+                result = Filter.ApplyTo(result, querySettings);
             }
 
             if (IsAvailableODataQueryOption(Count, AllowedQueryOptions.Count))

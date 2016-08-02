@@ -491,7 +491,7 @@ namespace System.Web.OData.Query
                         ? entityType.Key()
                         : entityType
                             .StructuralProperties()
-                            .Where(property => property.Type.IsPrimitive());
+                            .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
 
                 // Sort properties alphabetically for stable sort
                 return properties.OrderBy(property => property.Name);

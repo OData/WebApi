@@ -543,7 +543,8 @@ namespace System.Web.OData.Query.Expressions
                         ? entityType.Key()
                         : entityType
                             .StructuralProperties()
-                            .Where(property => property.Type.IsPrimitive()).OrderBy(property => property.Name);
+                            .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream())
+                            .OrderBy(property => property.Name);
 
                 if (expandedItem == null || expandedItem.OrderByOption == null)
                 {

@@ -8,13 +8,12 @@ using System.Reflection;
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
-using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Builder
 {
     /// <summary>
-    /// Represents the configuration for a navigation property of an entity type.
+    /// Represents the configuration for a navigation property of a structural type.
     /// </summary>
     /// <remarks>This configuration functionality is exposed by the model builder Fluent API, see <see cref="ODataModelBuilder"/>.</remarks>
     public class NavigationPropertyConfiguration : PropertyConfiguration
@@ -28,8 +27,8 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="property">The backing CLR property.</param>
         /// <param name="multiplicity">The <see cref="EdmMultiplicity"/>.</param>
-        /// <param name="declaringType">The declaring entity type.</param>
-        public NavigationPropertyConfiguration(PropertyInfo property, EdmMultiplicity multiplicity, EntityTypeConfiguration declaringType)
+        /// <param name="declaringType">The declaring structural type.</param>
+        public NavigationPropertyConfiguration(PropertyInfo property, EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
             : base(property, declaringType)
         {
             if (property == null)

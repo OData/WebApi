@@ -437,6 +437,96 @@ namespace System.Web.OData.Builder
             Assert.False(baseComplex.BaseTypeConfigured);
             Assert.True(derivedComplex.BaseTypeConfigured);
         }
+
+        [Fact]
+        public void CreateComplexTypeWith_OneToOne_NavigationProperty()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<Customer>().HasKey(c => c.CustomerId);
+
+            ComplexTypeConfiguration<Order> order = builder.ComplexType<Order>();
+            order.HasRequired(o => o.Customer);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType customerType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
+            Assert.Equal("System.Web.OData.Builder.TestModels.Customer", customerType.FullName());
+            Assert.Equal("CustomerId", customerType.DeclaredKey.Single().Name);
+            Assert.Equal(1, customerType.DeclaredProperties.Count());
+            Assert.Empty(customerType.NavigationProperties());
+
+            IEdmComplexType orderType = Assert.Single(model.SchemaElements.OfType<IEdmComplexType>());
+            Assert.Equal("System.Web.OData.Builder.TestModels.Order", orderType.FullName());
+
+            IEdmNavigationProperty navProperty = Assert.Single(orderType.NavigationProperties());
+            Assert.Equal(EdmMultiplicity.One, navProperty.TargetMultiplicity());
+            Assert.Equal("Customer", navProperty.Name);
+            Assert.True(navProperty.Type.IsEntity());
+            Assert.Same(customerType, navProperty.Type.Definition);
+        }
+
+        [Fact]
+        public void CreateComplexTypeWith_OneToOneOrZero_NavigationProperty()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<Customer>().HasKey(c => c.CustomerId);
+
+            ComplexTypeConfiguration<Order> order = builder.ComplexType<Order>();
+            order.HasOptional(o => o.Customer);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType customerType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
+            Assert.Equal("System.Web.OData.Builder.TestModels.Customer", customerType.FullName());
+            Assert.Equal("CustomerId", customerType.DeclaredKey.Single().Name);
+            Assert.Equal(1, customerType.DeclaredProperties.Count());
+            Assert.Empty(customerType.NavigationProperties());
+
+            IEdmComplexType orderType = Assert.Single(model.SchemaElements.OfType<IEdmComplexType>());
+            Assert.Equal("System.Web.OData.Builder.TestModels.Order", orderType.FullName());
+
+            IEdmNavigationProperty navProperty = Assert.Single(orderType.NavigationProperties());
+            Assert.Equal(EdmMultiplicity.ZeroOrOne, navProperty.TargetMultiplicity());
+            Assert.Equal("Customer", navProperty.Name);
+            Assert.True(navProperty.Type.IsEntity());
+            Assert.Same(customerType, navProperty.Type.Definition);
+        }
+
+        [Fact]
+        public void CreateComplexTypeWith_OneToMany_NavigationProperty()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<Order>().HasKey(o => o.OrderId);
+
+            ComplexTypeConfiguration<Customer> customer = builder.ComplexType<Customer>();
+            customer.HasMany(c => c.Orders);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType orderType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
+            Assert.Equal("System.Web.OData.Builder.TestModels.Order", orderType.FullName());
+            Assert.Equal("OrderId", orderType.DeclaredKey.Single().Name);
+            Assert.Equal(1, orderType.DeclaredProperties.Count());
+            Assert.Empty(orderType.NavigationProperties());
+
+            IEdmComplexType customerType = Assert.Single(model.SchemaElements.OfType<IEdmComplexType>());
+            Assert.Equal("System.Web.OData.Builder.TestModels.Customer", customerType.FullName());
+
+            IEdmNavigationProperty navProperty = Assert.Single(customerType.NavigationProperties());
+            Assert.Equal(EdmMultiplicity.Many, navProperty.TargetMultiplicity());
+            Assert.Equal("Orders", navProperty.Name);
+            Assert.True(navProperty.Type.IsCollection());
+            Assert.Same(orderType, navProperty.Type.AsCollection().ElementType().Definition);
+        }
     }
 
     public class ComplexTypeTestModel

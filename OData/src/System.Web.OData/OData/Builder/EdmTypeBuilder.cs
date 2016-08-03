@@ -53,9 +53,9 @@ namespace System.Web.OData.Builder
                 CreateEdmTypeBody(config);
             }
 
-            foreach (EntityTypeConfiguration entity in _configurations.OfType<EntityTypeConfiguration>())
+            foreach (StructuralTypeConfiguration structrual in _configurations.OfType<StructuralTypeConfiguration>())
             {
-                CreateNavigationProperty(entity);
+                CreateNavigationProperty(structrual);
             }
 
             return _types;
@@ -306,11 +306,11 @@ namespace System.Web.OData.Builder
             type.AddKeys(keys);
         }
 
-        private void CreateNavigationProperty(EntityTypeConfiguration config)
+        private void CreateNavigationProperty(StructuralTypeConfiguration config)
         {
             Contract.Assert(config != null);
 
-            EdmEntityType type = (EdmEntityType)(GetEdmType(config.ClrType));
+            EdmStructuredType type = (EdmStructuredType)(GetEdmType(config.ClrType));
 
             foreach (NavigationPropertyConfiguration navProp in config.NavigationProperties)
             {

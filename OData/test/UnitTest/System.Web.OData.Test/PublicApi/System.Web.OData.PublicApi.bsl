@@ -1045,6 +1045,7 @@ public abstract class System.Web.OData.Builder.StructuralTypeConfiguration : IEd
 	ODataModelBuilder ModelBuilder  { public virtual get; }
 	string Name  { public virtual get; public virtual set; }
 	string Namespace  { public virtual get; public virtual set; }
+	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationPropertyConfiguration]] NavigationProperties  { public virtual get; }
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.PropertyConfiguration]] Properties  { public get; }
 	QueryConfiguration QueryConfiguration  { public get; public set; }
 	System.Collections.Generic.IList`1[[System.Reflection.PropertyInfo]] RemovedProperties  { protected get; }
@@ -1052,8 +1053,10 @@ public abstract class System.Web.OData.Builder.StructuralTypeConfiguration : IEd
 	internal virtual void AbstractImpl ()
 	public virtual CollectionPropertyConfiguration AddCollectionProperty (System.Reflection.PropertyInfo propertyInfo)
 	public virtual ComplexPropertyConfiguration AddComplexProperty (System.Reflection.PropertyInfo propertyInfo)
+	public virtual NavigationPropertyConfiguration AddContainedNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual void AddDynamicPropertyDictionary (System.Reflection.PropertyInfo propertyInfo)
 	public virtual EnumPropertyConfiguration AddEnumProperty (System.Reflection.PropertyInfo propertyInfo)
+	public virtual NavigationPropertyConfiguration AddNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual PrimitivePropertyConfiguration AddProperty (System.Reflection.PropertyInfo propertyInfo)
 	internal virtual void DerivesFromImpl (StructuralTypeConfiguration baseType)
 	internal virtual void DerivesFromNothingImpl ()
@@ -1071,6 +1074,9 @@ public abstract class System.Web.OData.Builder.StructuralTypeConfiguration`1 {
 
 	public CollectionPropertyConfiguration CollectionProperty (Expression`1 propertyExpression)
 	public ComplexPropertyConfiguration ComplexProperty (Expression`1 propertyExpression)
+	public NavigationPropertyConfiguration ContainsMany (Expression`1 navigationPropertyExpression)
+	public NavigationPropertyConfiguration ContainsOptional (Expression`1 navigationPropertyExpression)
+	public NavigationPropertyConfiguration ContainsRequired (Expression`1 navigationPropertyExpression)
 	public StructuralTypeConfiguration`1 Count ()
 	public StructuralTypeConfiguration`1 Count (QueryOptionSetting setting)
 	public EnumPropertyConfiguration EnumProperty (Expression`1 propertyExpression)
@@ -1088,6 +1094,11 @@ public abstract class System.Web.OData.Builder.StructuralTypeConfiguration`1 {
 	public StructuralTypeConfiguration`1 Filter (QueryOptionSetting setting)
 	public StructuralTypeConfiguration`1 Filter (QueryOptionSetting setting, string[] properties)
 	public void HasDynamicProperties (Expression`1 propertyExpression)
+	public NavigationPropertyConfiguration HasMany (Expression`1 navigationPropertyExpression)
+	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression)
+	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression, Expression`1 referentialConstraintExpression)
+	public NavigationPropertyConfiguration HasRequired (Expression`1 navigationPropertyExpression)
+	public NavigationPropertyConfiguration HasRequired (Expression`1 navigationPropertyExpression, Expression`1 referentialConstraintExpression)
 	public virtual void Ignore (Expression`1 propertyExpression)
 	public StructuralTypeConfiguration`1 OrderBy ()
 	public StructuralTypeConfiguration`1 OrderBy (string[] properties)
@@ -1284,11 +1295,8 @@ public class System.Web.OData.Builder.EntityTypeConfiguration : StructuralTypeCo
 	bool HasStream  { public virtual get; public virtual set; }
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.PrimitivePropertyConfiguration]] Keys  { public virtual get; }
 	Microsoft.OData.Edm.EdmTypeKind Kind  { public virtual get; }
-	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationPropertyConfiguration]] NavigationProperties  { public virtual get; }
 
 	public virtual EntityTypeConfiguration Abstract ()
-	public virtual NavigationPropertyConfiguration AddContainedNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
-	public virtual NavigationPropertyConfiguration AddNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual EntityTypeConfiguration DerivesFrom (EntityTypeConfiguration baseType)
 	public virtual EntityTypeConfiguration DerivesFromNothing ()
 	public virtual EntityTypeConfiguration HasKey (System.Reflection.PropertyInfo keyProperty)
@@ -1305,18 +1313,10 @@ public class System.Web.OData.Builder.EntityTypeConfiguration`1 : StructuralType
 
 	public EntityTypeConfiguration`1 Abstract ()
 	public ActionConfiguration Action (string name)
-	public NavigationPropertyConfiguration ContainsMany (Expression`1 navigationPropertyExpression)
-	public NavigationPropertyConfiguration ContainsOptional (Expression`1 navigationPropertyExpression)
-	public NavigationPropertyConfiguration ContainsRequired (Expression`1 navigationPropertyExpression)
 	public EntityTypeConfiguration`1 DerivesFrom ()
 	public EntityTypeConfiguration`1 DerivesFromNothing ()
 	public FunctionConfiguration Function (string name)
 	public EntityTypeConfiguration`1 HasKey (Expression`1 keyDefinitionExpression)
-	public NavigationPropertyConfiguration HasMany (Expression`1 navigationPropertyExpression)
-	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression)
-	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression, Expression`1 referentialConstraintExpression)
-	public NavigationPropertyConfiguration HasRequired (Expression`1 navigationPropertyExpression)
-	public NavigationPropertyConfiguration HasRequired (Expression`1 navigationPropertyExpression, Expression`1 referentialConstraintExpression)
 	public EntityTypeConfiguration`1 MediaType ()
 }
 
@@ -1418,7 +1418,7 @@ public class System.Web.OData.Builder.NavigationPropertyBindingConfiguration {
 }
 
 public class System.Web.OData.Builder.NavigationPropertyConfiguration : PropertyConfiguration {
-	public NavigationPropertyConfiguration (System.Reflection.PropertyInfo property, Microsoft.OData.Edm.EdmMultiplicity multiplicity, EntityTypeConfiguration declaringType)
+	public NavigationPropertyConfiguration (System.Reflection.PropertyInfo property, Microsoft.OData.Edm.EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
 
 	bool ContainsTarget  { public get; }
 	EntityTypeConfiguration DeclaringEntityType  { public get; }

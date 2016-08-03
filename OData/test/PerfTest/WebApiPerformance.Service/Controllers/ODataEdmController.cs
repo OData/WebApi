@@ -25,7 +25,7 @@ namespace WebApiPerformance.Service
             var entityType = es.EntitySet.EntityType();
             var collectionType = new EdmCollectionType(new EdmEntityTypeReference(entityType, false));
 
-            var queryContext = new ODataQueryContext(model, entityType, props.Path, Request.RequestContainer());
+            var queryContext = new ODataQueryContext(model, entityType, props.Path, Request.GetRequestContainer());
             var queryOptions = new ODataQueryOptions(queryContext, Request);
 
             int n;

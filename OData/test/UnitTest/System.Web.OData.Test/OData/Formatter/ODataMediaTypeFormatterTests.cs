@@ -508,7 +508,6 @@ namespace System.Web.OData.Formatter
 
             Assert.NotNull(messageWriterSettings);
             Assert.False(messageWriterSettings.EnableMessageStreamDisposal);
-            Assert.True(messageWriterSettings.AutoComputePayloadMetadata);
         }
 
         [Fact]

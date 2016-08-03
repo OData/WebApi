@@ -2254,8 +2254,7 @@ namespace System.Web.OData.Query.Expressions
         {
             // Arrange
             var expectedMessage =
-                "An instance of SingleValueFunctionCallNode can only be created with a primitive, complex or enum type. " +
-                "For functions returning a single entity, use SingleEntityFunctionCallNode instead.";
+                "Instance property 'DerivedCategoryName' is not defined for type 'System.Object'";
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => Bind<Product>(filter), expectedMessage);

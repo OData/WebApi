@@ -35,7 +35,6 @@ namespace System.Web.OData.Extensions
             {
                 EnableMessageStreamDisposal = false,
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
-                AutoComputePayloadMetadata = true,
             });
 
             // QueryValidators.

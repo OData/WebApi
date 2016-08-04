@@ -306,9 +306,6 @@
   <data name="CannotCastFilter" xml:space="preserve">
     <value>Cannot cast $filter of type '{0}' to type '{1}'.</value>
   </data>
-  <data name="ComplexTypeRefersToEntityType" xml:space="preserve">
-    <value>The complex type '{0}' refers to the entity type '{1}' through the property '{2}'.</value>
-  </data>
   <data name="MultipleAttributesFound" xml:space="preserve">
     <value>The member '{0}' on type '{1}' contains multiple instances of the attribute '{2}'.</value>
   </data>

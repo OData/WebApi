@@ -385,15 +385,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The complex type &apos;{0}&apos; refers to the entity type &apos;{1}&apos; through the property &apos;{2}&apos;..
-        /// </summary>
-        internal static string ComplexTypeRefersToEntityType {
-            get {
-                return ResourceManager.GetString("ComplexTypeRefersToEntityType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Cannot compare an enum of type &apos;{0}&apos; to an expression of type &apos;{1}&apos;..
         /// </summary>
         internal static string ConvertToEnumFailed {

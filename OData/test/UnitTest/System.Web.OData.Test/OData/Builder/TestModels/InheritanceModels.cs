@@ -176,8 +176,8 @@ namespace System.Web.OData.Builder.TestModels
     public class PlantParkWithOceanPlantAndJasmine
     {
         public int Id { get; set; }
-        public OceanPlant OceanPant { get; set; }
-        public Jasmine Jaemine { get; set; }
+        public OceanPlant OceanPlant { get; set; }
+        public Jasmine Jasmine { get; set; }
     }
 
     public class PlantPark

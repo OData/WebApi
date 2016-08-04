@@ -92,13 +92,13 @@ namespace System.Web.OData.Builder.Conventions
             }
         }
 
-        // Get properties of this entity type that are not already declared in the base entity type and are not already ignored.
-        public static IEnumerable<PropertyInfo> GetProperties(EntityTypeConfiguration entity, bool includeReadOnly)
+        // Get properties of this structural type that are not already declared in the base structural type and are not already ignored.
+        public static IEnumerable<PropertyInfo> GetProperties(StructuralTypeConfiguration structural, bool includeReadOnly)
         {
-            IEnumerable<PropertyInfo> allProperties = GetAllProperties(entity as StructuralTypeConfiguration, includeReadOnly);
-            if (entity.BaseType != null)
+            IEnumerable<PropertyInfo> allProperties = GetAllProperties(structural, includeReadOnly);
+            if (structural.BaseTypeInternal != null)
             {
-                IEnumerable<PropertyInfo> baseTypeProperties = GetAllProperties(entity.BaseType as StructuralTypeConfiguration, includeReadOnly);
+                IEnumerable<PropertyInfo> baseTypeProperties = GetAllProperties(structural.BaseTypeInternal, includeReadOnly);
                 return allProperties.Except(baseTypeProperties, PropertyEqualityComparer.Instance);
             }
             else

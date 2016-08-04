@@ -190,7 +190,7 @@ namespace System.Web.OData.Query
             ODataPath path = new ODataPath(new EntitySetSegment(entitySet));
 
             // Act
-            ODataQueryContext context = new ODataQueryContext(model, typeof(Customer), path, defaultQuerySettings: null);
+            ODataQueryContext context = new ODataQueryContext(model, typeof(Customer), path);
 
             // Assert
             Assert.Same(model, context.Model);
@@ -207,7 +207,7 @@ namespace System.Web.OData.Query
             IEdmEntityType entityType = new Mock<IEdmEntityType>().Object;
             IEdmEntityContainer entityContiner = new Mock<IEdmEntityContainer>().Object;
             EdmEntitySet entitySet = new EdmEntitySet(entityContiner, "entitySet", entityType);
-            ODataPath path = new ODataPath(new EntitySetSegment(entitySet)); 
+            ODataPath path = new ODataPath(new EntitySetSegment(entitySet));
 
             // Act
             ODataQueryContext context = new ODataQueryContext(model, entityType, path);

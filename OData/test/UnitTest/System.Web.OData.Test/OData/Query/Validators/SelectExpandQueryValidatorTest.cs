@@ -25,9 +25,8 @@ namespace System.Web.OData.Query.Validators
         {
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
-            DefaultQuerySettings defaultQuerySettings = new DefaultQuerySettings();
-            defaultQuerySettings.EnableExpand = true;
-            _queryContext = new ODataQueryContext(model.Model, typeof(Customer), null, defaultQuerySettings);
+            _queryContext = new ODataQueryContext(model.Model, typeof(Customer), null);
+            _queryContext.DefaultQuerySettings.EnableExpand = true;
         }
 
         [Theory]

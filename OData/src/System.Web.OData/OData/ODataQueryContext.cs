@@ -19,14 +19,7 @@ namespace System.Web.OData
     /// </summary>
     public class ODataQueryContext
     {
-        private IServiceProvider _requestContainer;
-
-        // Remove this
-        internal ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path, DefaultQuerySettings defaultQuerySettings)
-            : this(model, elementClrType, path)
-        {
-            DefaultQuerySettings = defaultQuerySettings;
-        }
+        private DefaultQuerySettings _defaultQuerySettings;
 
         /// <summary>
         /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" />, element CLR type,
@@ -59,7 +52,6 @@ namespace System.Web.OData
             Model = model;
             Path = path;
             NavigationSource = GetNavigationSource(Model, ElementType, path);
-            DefaultQuerySettings = new DefaultQuerySettings();
         }
 
         /// <summary>
@@ -84,7 +76,6 @@ namespace System.Web.OData
             ElementType = elementType;
             Path = path;
             NavigationSource = GetNavigationSource(Model, ElementType, path);
-            DefaultQuerySettings = new DefaultQuerySettings();
         }
 
         internal ODataQueryContext(IEdmModel model, Type elementClrType)
@@ -100,7 +91,20 @@ namespace System.Web.OData
         /// <summary>
         /// Gets the given <see cref="DefaultQuerySettings"/>.
         /// </summary>
-        public DefaultQuerySettings DefaultQuerySettings { get; private set; }
+        public DefaultQuerySettings DefaultQuerySettings
+        {
+            get
+            {
+                if (_defaultQuerySettings == null)
+                {
+                    _defaultQuerySettings = RequestContainer != null
+                        ? RequestContainer.GetRequiredService<DefaultQuerySettings>()
+                        : new DefaultQuerySettings();
+                }
+
+                return _defaultQuerySettings;
+            }
+        }
 
         /// <summary>
         /// Gets the given <see cref="IEdmModel"/> that contains the EntitySet.
@@ -130,11 +134,7 @@ namespace System.Web.OData
         /// <summary>
         /// Gets or sets the request container.
         /// </summary>
-        public IServiceProvider RequestContainer
-        {
-            get { return _requestContainer; }
-            set { SetRequestContainer(value); }
-        }
+        public IServiceProvider RequestContainer { get; set; }
 
         private static IEdmNavigationSource GetNavigationSource(IEdmModel model, IEdmType elementType, ODataPath odataPath)
         {
@@ -157,17 +157,6 @@ namespace System.Web.OData
                 entityContainer.EntitySets().Where(e => e.EntityType() == elementType).ToList();
 
             return (matchedNavigationSources.Count != 1) ? null : matchedNavigationSources[0];
-        }
-
-        private void SetRequestContainer(IServiceProvider requestContainer)
-        {
-            if (requestContainer == null)
-            {
-                throw Error.ArgumentNull("requestContainer");
-            }
-
-            _requestContainer = requestContainer;
-            DefaultQuerySettings = requestContainer.GetRequiredService<DefaultQuerySettings>();
         }
     }
 }

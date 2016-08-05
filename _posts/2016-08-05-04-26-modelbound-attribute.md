@@ -28,9 +28,9 @@ We can set the PageSize to control the server-side pagination, and MaxTop to con
 [Page(MaxTop = 5, PageSize = 1)]
 public class Customer
 {
-	public int Id { get; set; }
-	public string Name { get; set; }
-	public Order Order { get; set; }
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public Order Order { get; set; }
     public Address Address { get; set; }
     [Page(MaxTop = 2, PageSize = 1)]
     public List<Order> Orders { get; set; }

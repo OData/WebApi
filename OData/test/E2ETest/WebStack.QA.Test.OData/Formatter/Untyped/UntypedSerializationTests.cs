@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http;
+using System.Web.Http.Dispatcher;
 using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
@@ -418,6 +419,11 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
             if (serviceType == typeof(ODataQueryValidator))
             {
                 return new ODataQueryValidator();
+            }
+
+            if (serviceType == typeof(IAssembliesResolver))
+            {
+                return new DefaultAssembliesResolver();
             }
 
             throw new NotImplementedException();

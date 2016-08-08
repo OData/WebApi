@@ -17,7 +17,6 @@ using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.UriParser;
 
 namespace System.Web.OData
 {

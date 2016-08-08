@@ -69,7 +69,7 @@ namespace System.Web.OData.Query
                 Context.RequestContainer = request.GetRequestContainer();
             }
 
-            // Parse the query from request Uri, including only keys which are OData query parameters
+            // Parse the query from request Uri, including only keys which are OData query parameters or parameter alias
             RawValues = new ODataRawQueryOptions();
             IDictionary<string, string> queryParameters = GetODataQueryParameters();
 
@@ -641,7 +641,8 @@ namespace System.Web.OData.Query
         private IDictionary<string, string> GetODataQueryParameters()
         {
             return Request.GetQueryNameValuePairs()
-                .Where(p => p.Key.StartsWith("$", StringComparison.Ordinal))
+                .Where(p => p.Key.StartsWith("$", StringComparison.Ordinal) ||
+                    p.Key.StartsWith("@", StringComparison.Ordinal))
                 .ToDictionary(p => p.Key, p => p.Value);
         }
 

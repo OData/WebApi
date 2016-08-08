@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -156,24 +157,23 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             var entryUrl = BaseAddress + "/EntityWithSimpleProperties(" + entity.Id + ")/" + propertyName;
             var response = await Client.GetWithAcceptAsync(entryUrl, acceptHeader);
             var result = await response.Content.ReadAsAsync<JObject>();
-            bool isODataNull = result.Property("@odata.null") != null;
 
             // Assert
-            if (acceptHeader.Contains("odata.metadata=none"))
+            if (propertyName.Equals("NullableIntProperty"))
             {
-                if (!isODataNull)
-                {
-                    JsonAssert.DoesNotContainProperty("@odata.*", result);
-                }
-                else
-                {
-                    JsonAssert.Equals(true, (bool)result.Property("@odata.null"));
-                }
+                Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+                Assert.Contains("A null top-level property is not allowed to be serialized",
+                    response.Content.ReadAsStringAsync().Result);
+            }
+            else if (acceptHeader.Contains("odata.metadata=none"))
+            {
+                JsonAssert.DoesNotContainProperty("@odata.*", result);
             }
             else
             {
                 ODataUrlAssert.UrlEquals(expectedContextUrl, result, "@odata.context", BaseAddress);
-                if (!acceptHeader.Contains("odata.metadata=full") || (inferableTypes.Contains(edmType) && !result.IsSpecialValue()))
+                if (!acceptHeader.Contains("odata.metadata=full") ||
+                    (inferableTypes.Contains(edmType) && !result.IsSpecialValue()))
                 {
                     JsonAssert.DoesNotContainProperty("@odata.type", result);
                 }

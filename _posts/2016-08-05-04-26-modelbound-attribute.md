@@ -4,7 +4,7 @@ layout: post
 category: "4. OData features"
 ---
 
-Since Web API OData V6.0.0 which depends on [OData Lib 7.0.0 beta](https://www.nuget.org/packages/Microsoft.OData.Core/7.0.0-beta), we add a new feature named ModelBoundAttribute, we can control the query setting through those attributes, to make our service more secure and even control the query result.
+Since Web API OData V6.0.0 which depends on [OData Lib 7.0.0 beta](https://www.nuget.org/packages/Microsoft.OData.Core/7.0.0-beta), we add a new feature named ModelBoundAttribute, use this feature, we can control the query setting through those attributes to make our service more secure and even control the query result by set page size, automatic select, automatic expand.
 
 Now we only have nightly nuget page: https://www.myget.org/F/aspnetwebstacknightly/
 
@@ -12,11 +12,13 @@ Let's see how to use this feature.
 
 ### Global Query Setting
 
-Now the default setting for WebAPI OData is : client can't apply `$count`, `$orderby`, `$select`, `$top`, `$expand`, `$filter` in the query, query like `localhost\odata\Customers?$orderby=Name` will failed as BadRequest, because all properties are not sort-able by default, this is a breaking change in 6.0.0, if we want to use the default behavior that all query option are enabled in 5.x version, we can configure the HttpConfigration choose to enable which query option like this:
+Now the default setting for WebAPI OData is : client can't apply `$count`, `$orderby`, `$select`, `$top`, `$expand`, `$filter` in the query, query like `localhost\odata\Customers?$orderby=Name` will failed as BadRequest, because all properties are not sort-able by default, this is a breaking change in 6.0.0, if we want to use the default behavior that all query option are enabled in 5.x version, we can configure the HttpConfigration to enable the query option we want like this:
 
 {% highlight csharp %}
+//...
 configuration.Count().Filter().OrderBy().Expand().Select().MaxTop(null);
 configuration.MapODataServiceRoute("odata", "odata", edmModel);
+//...
 {% endhighlight %}
 
 ### Page Attribute
@@ -39,7 +41,7 @@ public class Customer
 
 public class Order
 {
-	public int Id { get; set; }
+    public int Id { get; set; }
     public string Name { get; set; }
     public int Price { get; set; }
     [Page]
@@ -51,7 +53,7 @@ In the model above, we defined the page setting for Customer and Orders navigati
 
 #### Page Attribute on Entity Type
 
-The first page attribute on Customer type, means the query setting when we query the Customer type, like `localhost\odata\Customers`, the max value for `$top` is 5 and page size of returned customers are 1. 
+The first page attribute on Customer type, means the query setting when we query the Customer type, like `localhost\odata\Customers`, the max value for `$top` is 5 and page size of returned customers is 1. 
 
 For example:
 
@@ -61,7 +63,7 @@ The page size is 1 if you request `localhost\odata\Customers`.
 
 #### Page Attribute on Navigation Property
 
-And what about the page attribute in Order type's navigation property Customers? it means the query setting when we query the Customers navigation property in Order type. Now we get a query setting for Customer type and a query setting for Customers navigation property in Order type, how do we merge these two setting? The answer is: currently the property's query setting always override the type's query setting, if there is no query setting on property, it will inherent query setting from it's type.
+And what about the page attribute in Order type's navigation property Customers? it means the query setting when we query the Customers navigation property in Order type. Now we get a query setting for Customer type and a query setting for Customers navigation property in Order type, how do we merge these two settings? The answer is: currently the property's query setting always override the type's query setting, if there is no query setting on property, it will inherent query setting from it's type.
 
 For example:
 
@@ -187,7 +189,7 @@ For now we only support to specify which property can be filter just like what w
 ### Select Attribute
 
 Search settings correlate to OData's `$search` query option.
-We can specify which property can be selected, which property is automatic selected when there is no `$select` in the query like.
+We can specify which property can be selected, which property is automatic selected when there is no `$select` in the query.
 
 #### Automatic Select
 
@@ -204,7 +206,7 @@ public class User
 }
 {% endhighlight %}
 
-The first attribute means all the property will be automatic select when there is `$select` in the query, the second attribute means the property Secrete is not select-able.
+The first attribute means all the property will be automatic select when there is no `$select` in the query, the second attribute means the property Secrete is not select-able.
 
 #### Select Attribute on Navigation Property
 
@@ -227,9 +229,13 @@ public class Customer
 Expansion settings correlate to OData's `$expand` query option.
 We can specify which property can be expanded, which property is automatic expanded and we can specify the max depth of the expand property. Currently we support Expand attribute on entity type and navigation property, the using scenario is quite like Select Attribute and other attributes, you can just refer to those sections.
 
+#### Automatic Expand
+
+Automatic expand mean it will always expand that navigation property, it's like add a $expand in the query, so it will expand even if there is a `$select`.
+
 ### Model Bound Fluent APIs
 
-We also provide all fluent API to configure above attribute if you can't modify the class by adding attributes, it's very straight forward and simple to use:
+We also provide all fluent APIs to configure above attributes if you can't modify the class by adding attributes, it's very straight forward and simple to use:
  
  {% highlight csharp %}
 [Expand("Orders", "Friend", "CountableOrders", MaxDepth = 10)]
@@ -272,8 +278,8 @@ builder.EntityType<Customer>()
     .Expand(SelectExpandType.Disabled);
 {% endhighlight %}
 
-The example shows class with attribute and build model using the model bound fluent API if we can't modify the class. These two approach are getting two same models.
-About the multiple attribute, model bound fluent API are the same, the model bound fluent API with a constrained set of properties wins. For example: `builder.EntityType<Customer>().Expand().Expand("Friend", SelectExpandType.Disabled)`, Friend can't be expanded, even we put `Expand()` in the end. If there is a setting with same property, the last one wins, for example: `.Expand(8, "Friend").Expand(1, "Friend")`, the max depth will be 1.
+The example shows class with attributes and build model using the model bound fluent APIs if we can't modify the class. These two approaches are getting two same models.
+About the multiple attribute, model bound fluent APIs are the same, the model bound fluent API with a constrained set of properties wins. For example: `builder.EntityType<Customer>().Expand().Expand("Friend", SelectExpandType.Disabled)`, Friend can't be expanded, even we put `Expand()` in the end. If there is a setting with same property, the last one wins, for example: `.Expand(8, "Friend").Expand(1, "Friend")`, the max depth will be 1.
 
 ### Controller Level Query Setting
 

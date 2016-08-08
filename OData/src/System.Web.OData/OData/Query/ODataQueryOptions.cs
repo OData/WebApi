@@ -69,10 +69,9 @@ namespace System.Web.OData.Query
                 Context.RequestContainer = request.GetRequestContainer();
             }
 
-            // Parse the query from request Uri
+            // Parse the query from request Uri, including only keys which are OData query parameters
             RawValues = new ODataRawQueryOptions();
-            IDictionary<string, string> queryParameters =
-                request.GetQueryNameValuePairs().ToDictionary(p => p.Key, p => p.Value);
+            IDictionary<string, string> queryParameters = GetODataQueryParameters();
 
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
@@ -597,8 +596,8 @@ namespace System.Web.OData.Query
             var autoExpandRawValue = GetAutoExpandRawValue();
             var autoSelectRawValue = GetAutoSelectRawValue();
 
-            IDictionary<string, string> queryParameters =
-               Request.GetQueryNameValuePairs().ToDictionary(p => p.Key, p => p.Value);
+            IDictionary<string, string> queryParameters = GetODataQueryParameters();
+               
             if (!String.IsNullOrEmpty(autoExpandRawValue) && !autoExpandRawValue.Equals(RawValues.Expand))
             {
                 queryParameters["$expand"] = autoExpandRawValue;
@@ -637,6 +636,13 @@ namespace System.Web.OData.Query
                     SelectExpand.LevelsMaxLiteralExpansionDepth = originalSelectExpand.LevelsMaxLiteralExpansionDepth;
                 }
             }
+        }
+
+        private IDictionary<string, string> GetODataQueryParameters()
+        {
+            return Request.GetQueryNameValuePairs()
+                .Where(p => p.Key.StartsWith("$", StringComparison.Ordinal))
+                .ToDictionary(p => p.Key, p => p.Value);
         }
 
         private string GetAutoSelectRawValue()

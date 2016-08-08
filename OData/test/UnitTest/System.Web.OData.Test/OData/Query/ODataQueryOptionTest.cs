@@ -1128,6 +1128,44 @@ namespace System.Web.OData.Query
             Assert.Equal(expandProp[1]["ID2"], 1);
         }
 
+        [Fact]
+        public void DuplicateUnsupportedQueryParametersIgnored()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+
+            // a simple query with duplicate ignored parameters (key=test)
+            string uri = "http://server/service/Customers?$top=10&test=1&test=2";
+            var request = new HttpRequestMessage(
+                HttpMethod.Get,
+                new Uri(uri)
+                );
+            request.EnableHttpDependencyInjectionSupport();
+
+            // Act
+            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
+
+            // Assert
+            Assert.Equal(queryOptions.RawValues.Top, "10");
+        }
+
+        [Fact]
+        public void DuplicateUnsupportedQueryParametersIgnoredWithNoException()
+        {
+            // Arrange
+            string url = "http://localhost/odata/Products?$top=1&test=1&test=2";
+            HttpServer server = CreateServer();
+            HttpClient client = new HttpClient(server);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
         private static HttpServer CreateServer()
         {
             HttpConfiguration configuration = new HttpConfiguration();

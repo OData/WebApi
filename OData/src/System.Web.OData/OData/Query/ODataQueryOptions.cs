@@ -63,12 +63,6 @@ namespace System.Web.OData.Query
             Context = context;
             Request = request;
 
-            // Set the request container to the context
-            if (Context.RequestContainer == null)
-            {
-                Context.RequestContainer = request.GetRequestContainer();
-            }
-
             // Parse the query from request Uri, including only keys which are OData query parameters or parameter alias
             RawValues = new ODataRawQueryOptions();
             IDictionary<string, string> queryParameters = GetODataQueryParameters();
@@ -597,7 +591,7 @@ namespace System.Web.OData.Query
             var autoSelectRawValue = GetAutoSelectRawValue();
 
             IDictionary<string, string> queryParameters = GetODataQueryParameters();
-               
+
             if (!String.IsNullOrEmpty(autoExpandRawValue) && !autoExpandRawValue.Equals(RawValues.Expand))
             {
                 queryParameters["$expand"] = autoExpandRawValue;

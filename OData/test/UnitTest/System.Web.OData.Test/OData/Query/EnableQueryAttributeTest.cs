@@ -510,7 +510,11 @@ namespace System.Web.OData.Query
             defaultQuerySettings.MaxTop = null;
 
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer), null), request);
+            var context = new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer), null)
+            {
+                RequestContainer = request.GetRequestContainer()
+            };
+            var options = new ODataQueryOptions(context, request);
 
             // Act & Assert
             Assert.DoesNotThrow(() => attribute.ValidateQuery(request, options));

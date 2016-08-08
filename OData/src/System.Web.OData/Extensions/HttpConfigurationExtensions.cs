@@ -24,7 +24,7 @@ using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 namespace System.Web.OData.Extensions
 {
     /// <summary>
-    /// Provides extension methods for the <see cref="HttpConfiguration"/> class. 
+    /// Provides extension methods for the <see cref="HttpConfiguration"/> class.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpConfigurationExtensions
@@ -44,7 +44,7 @@ namespace System.Web.OData.Extensions
         private const string ContainerBuilderFactoryKey = "System.Web.OData.ContainerBuilderFactoryKey";
 
         private const string RootContainerMappingsKey = "System.Web.OData.RootContainerMappingsKey";
-        
+
         private const string DefaultQuerySettingsKey = "System.Web.OData.DefaultQuerySettings";
 
         private const string NonODataRootContainerKey = "System.Web.OData.NonODataRootContainerKey";

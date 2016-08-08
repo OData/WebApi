@@ -428,7 +428,7 @@ public class System.Web.OData.ODataQueryContext {
 	Microsoft.OData.Edm.IEdmModel Model  { public get; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; }
 	ODataPath Path  { public get; }
-	System.IServiceProvider RequestContainer  { public get; public set; }
+	System.IServiceProvider RequestContainer  { public get; }
 }
 
 public class System.Web.OData.ODataSwaggerConverter {

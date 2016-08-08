@@ -148,11 +148,11 @@ namespace WebStack.QA.Test.OData.QueryComposition
         {
             ODataQueryOptionsController controller = new ODataQueryOptionsController();
 
-            ODataQueryContext context = new ODataQueryContext(GetEdmModel(), typeof(ODataQueryOptions_Todo), path: null)
-            {
-                RequestContainer = new MockContainer()
-            };
+            ODataQueryContext context = new ODataQueryContext(GetEdmModel(), typeof(ODataQueryOptions_Todo), path: null);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$orderby=Name desc");
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.EnableDependencyInjection();
+            request.SetConfiguration(configuration);
             ODataQueryOptions<ODataQueryOptions_Todo> options = new ODataQueryOptions<ODataQueryOptions_Todo>(context, request);
             var result = controller.OptionsOnString(options);
             Assert.Equal("Test99", result);
@@ -163,11 +163,11 @@ namespace WebStack.QA.Test.OData.QueryComposition
         {
             ODataQueryOptionsController controller = new ODataQueryOptionsController();
 
-            ODataQueryContext context = new ODataQueryContext(new ODataConventionModelBuilder().GetEdmModel(), typeof(string), path: null)
-            {
-                RequestContainer = new MockContainer()
-            };
+            ODataQueryContext context = new ODataQueryContext(new ODataConventionModelBuilder().GetEdmModel(), typeof(string), path: null);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$top=1");
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.EnableDependencyInjection();
+            request.SetConfiguration(configuration);
             ODataQueryOptions<string> options = new ODataQueryOptions<string>(context, request);
             var result = controller.OptionsWithString(options);
             Assert.Equal("One", result.List.Single());
@@ -178,34 +178,6 @@ namespace WebStack.QA.Test.OData.QueryComposition
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntityType<ODataQueryOptions_Todo>();
             return builder.GetEdmModel();
-        }
-
-        private class MockContainer : IServiceProvider
-        {
-            public object GetService(Type serviceType)
-            {
-                if (serviceType == typeof(TopQueryValidator))
-                {
-                    return new TopQueryValidator();
-                }
-
-                if (serviceType == typeof(OrderByQueryValidator))
-                {
-                    return new OrderByQueryValidator(new DefaultQuerySettings());
-                }
-
-                if (serviceType == typeof(ODataQueryValidator))
-                {
-                    return new ODataQueryValidator();
-                }
-
-                if (serviceType == typeof(DefaultQuerySettings))
-                {
-                    return new DefaultQuerySettings();
-                }
-
-                throw new NotImplementedException();
-            }
         }
     }
 }

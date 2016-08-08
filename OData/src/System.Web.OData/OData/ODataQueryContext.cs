@@ -134,9 +134,9 @@ namespace System.Web.OData
         public ODataPath Path { get; private set; }
 
         /// <summary>
-        /// Gets or sets the request container.
+        /// Gets the request container.
         /// </summary>
-        public IServiceProvider RequestContainer { get; set; }
+        public IServiceProvider RequestContainer { get; internal set; }
 
         internal IEdmProperty TargetProperty { get; private set; }
 

@@ -272,10 +272,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
                 return BadRequest("The key isn't the one posted to the customer");
             }
 
-            ODataQueryContext context = new ODataQueryContext(Request.ODataProperties().Model, CustomerType, path: null)
-            {
-                RequestContainer = new MockContainer()
-            };
+            ODataQueryContext context = new ODataQueryContext(Request.ODataProperties().Model, CustomerType, path: null);
             ODataQueryOptions query = new ODataQueryOptions(context, Request);
             if (query.SelectExpand != null)
             {
@@ -399,34 +396,6 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
             address.City = "City " + j;
             address.State = "State " + j;
             return address;
-        }
-    }
-
-    public class MockContainer : IServiceProvider
-    {
-        public object GetService(Type serviceType)
-        {
-            if (serviceType == typeof(DefaultQuerySettings))
-            {
-                return new DefaultQuerySettings();
-            }
-
-            if (serviceType == typeof(SelectExpandQueryValidator))
-            {
-                return new SelectExpandQueryValidator(new DefaultQuerySettings());
-            }
-
-            if (serviceType == typeof(ODataQueryValidator))
-            {
-                return new ODataQueryValidator();
-            }
-
-            if (serviceType == typeof(IAssembliesResolver))
-            {
-                return new DefaultAssembliesResolver();
-            }
-
-            throw new NotImplementedException();
         }
     }
 

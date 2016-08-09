@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -340,10 +343,10 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
                 String.Format("\nExpected that Radius: 2, but actually: {0},\n request uri: {1},\n response payload: {2}", radius, requestUri, contentOfString));
         }
 
-        [Theory(Skip = "https://github.com/OData/odata.net/issues/457 [UriParser] Cast segment following a collection complex type property reports exception.")]
+        [Theory]
         [InlineData("convention")]
         [InlineData("explicit")]
-        // GET ~/Windows(1)/CurrentShape/WebStack.QA.Test.OData.ComplexTypeInheritance.Circle
+        // GET ~/Windows(1)/OptionalShapes/WebStack.QA.Test.OData.ComplexTypeInheritance.Circle
         public async Task GetOptionalShapesPlusCast(string modelMode)
         {
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();

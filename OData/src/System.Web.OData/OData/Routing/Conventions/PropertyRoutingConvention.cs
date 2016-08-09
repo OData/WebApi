@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -50,10 +51,20 @@ namespace System.Web.OData.Routing.Conventions
                 }
                 else
                 {
+                    IEdmComplexType typeCast;
+                    if (cast.EdmType.TypeKind == EdmTypeKind.Collection)
+                    {
+                        typeCast = ((IEdmCollectionType)cast.EdmType).ElementType.AsComplex().ComplexDefinition();
+                    }
+                    else
+                    {
+                        typeCast = (IEdmComplexType)cast.EdmType;
+                    }
+
                     // for example: GetCityOfSubAddressFromVipCustomer or GetCityOfSubAddress
                     actionName = actionMap.FindMatchingAction(
-                        prefix + property.Name + "Of" + ((IEdmComplexType)cast.EdmType).Name + "From" + declaringType.Name,
-                        prefix + property.Name + "Of" + ((IEdmComplexType)cast.EdmType).Name);
+                        prefix + property.Name + "Of" + typeCast.Name + "From" + declaringType.Name,
+                        prefix + property.Name + "Of" + typeCast.Name);
                 }
 
                 if (actionName != null)

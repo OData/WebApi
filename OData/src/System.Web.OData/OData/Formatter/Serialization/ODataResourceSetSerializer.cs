@@ -175,7 +175,8 @@ namespace System.Web.OData.Formatter.Serialization
                 TypeName = resourceSetType.FullName()
             };
 
-            if (writeContext.NavigationSource != null)
+            IEdmStructuredTypeReference structuredType = GetResourceType(resourceSetType).AsStructured();
+            if (writeContext.NavigationSource != null && structuredType.IsEntity())
             {
                 ResourceSetContext resourceSetContext = new ResourceSetContext
                 {
@@ -186,7 +187,7 @@ namespace System.Web.OData.Formatter.Serialization
                     ResourceSetInstance = resourceSetInstance
                 };
 
-                IEdmEntityType entityType = GetResourceType(resourceSetType).Definition as IEdmEntityType;
+                IEdmEntityType entityType = structuredType.AsEntity().EntityDefinition();
                 var operations = writeContext.Model.GetAvailableOperationsBoundToCollection(entityType);
                 var odataOperations = CreateODataOperations(operations, resourceSetContext, writeContext);
                 foreach (var odataOperation in odataOperations)

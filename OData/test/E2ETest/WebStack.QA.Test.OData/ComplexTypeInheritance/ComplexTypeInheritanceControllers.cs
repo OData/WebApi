@@ -187,8 +187,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
             return Ok(window.OptionalShapes);
         }
 
-        // https://github.com/OData/odata.net/issues/457: [UriParser] Cast segment following a collection complex type property reports exception.
-        // [ODataRoute("Windows({key})/OptionalShapes/WebStack.QA.Test.OData.ComplexTypeInheritance.Circle")]
+        [ODataRoute("Windows({key})/OptionalShapes/WebStack.QA.Test.OData.ComplexTypeInheritance.Circle")]
         public IHttpActionResult GetOptionalShapesOfCircle(int key)
         {
             Window window = _windows.FirstOrDefault(e => e.Id == key);

@@ -993,7 +993,7 @@
             }
         }
 
-        [Fact(Skip = "https://github.com/OData/odata.net/issues/612")]
+        [Fact]
         public async Task PutEntityWithOpenComplexTypeClientTest()
         {
             foreach (string routing in Routings)

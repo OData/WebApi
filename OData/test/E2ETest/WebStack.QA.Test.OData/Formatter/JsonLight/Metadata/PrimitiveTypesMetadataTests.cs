@@ -83,7 +83,6 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
                 var propertyNameAndEdmTypes = new Tuple<string, string>[] 
                 {
                     Tuple.Create("Id", "Edm.Int32"),
-                    Tuple.Create("NullableIntProperty", "Edm.Int32"),
                     Tuple.Create("BinaryProperty", "Edm.Binary"),
                     Tuple.Create("BooleanProperty", "Edm.Boolean"),
                     Tuple.Create("DurationProperty", "Edm.Duration"),
@@ -159,13 +158,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             var result = await response.Content.ReadAsAsync<JObject>();
 
             // Assert
-            if (propertyName.Equals("NullableIntProperty"))
-            {
-                Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-                Assert.Contains("A null top-level property is not allowed to be serialized",
-                    response.Content.ReadAsStringAsync().Result);
-            }
-            else if (acceptHeader.Contains("odata.metadata=none"))
+            if (acceptHeader.Contains("odata.metadata=none"))
             {
                 JsonAssert.DoesNotContainProperty("@odata.*", result);
             }

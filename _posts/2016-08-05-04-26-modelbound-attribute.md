@@ -193,6 +193,8 @@ We can specify which property can be selected, which property is automatic selec
 
 #### Automatic Select
 
+Automatic select mean we will add `$select` in the query depends on the select attribute.
+
 If we have a User class, and we don't want to expose some property to client, like secrete property, so client query `localhost\odata\Users?$select=Secrete` will failed and query `localhost\odata\Users?` won't return Secrete property, how can we achieve that with Select Attribute?
 
 {% highlight csharp %}
@@ -206,7 +208,11 @@ public class User
 }
 {% endhighlight %}
 
-The first attribute means all the property will be automatic select when there is no `$select` in the query, the second attribute means the property Secrete is not select-able.
+The first attribute means all the property will be automatic select when there is no `$select` in the query, the second attribute means the property Secrete is not select-able. For example, request `localhost\odata\Users` will have the same response with `localhost\odata\Users?$select=Id,Name`
+
+##### Automatic Select on Derived Type
+
+If the target type of our request have some derived types which have automatic select property, then these property will show in the response if there is no `$select` query option, for example, request `localhost\odata\Users` will have the same response with `localhost\odata\Users?$select=Id,Name,SpecialUser/SpecialName` if the SpecinalName property in automatic select.
 
 #### Select Attribute on Navigation Property
 
@@ -231,7 +237,7 @@ We can specify which property can be expanded, which property is automatic expan
 
 #### Automatic Expand
 
-Automatic expand mean it will always expand that navigation property, it's like add a $expand in the query, so it will expand even if there is a `$select`.
+Automatic expand mean it will always expand that navigation property, it's like automatic select, we will add a $expand in the query, so it will expand even if there is a `$select`.
 
 ### Model Bound Fluent APIs
 

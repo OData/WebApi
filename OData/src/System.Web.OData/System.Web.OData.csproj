@@ -160,7 +160,6 @@
     <Compile Include="OData\Builder\Conventions\Attributes\TimestampAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\INavigationSourceConvention.cs" />
     <Compile Include="OData\Builder\NavigationSourceAndAnnotations.cs" />
-    <Compile Include="OData\Builder\INavigationSourceConfiguration.cs" />
     <Compile Include="OData\Builder\NavigationSourceConfigurationOfTEntityType.cs" />
     <Compile Include="OData\Builder\NavigationSourceLinkBuilderAnnotation.cs" />
     <Compile Include="OData\Builder\PropertyPairSelectorVisitor.cs" />

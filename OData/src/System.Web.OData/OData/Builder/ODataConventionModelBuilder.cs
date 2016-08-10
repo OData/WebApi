@@ -74,7 +74,7 @@ namespace System.Web.OData.Builder
         // have been applied or being applied so that we don't run a convention twice on the
         // same type/set.
         private HashSet<StructuralTypeConfiguration> _mappedTypes;
-        private HashSet<INavigationSourceConfiguration> _configuredNavigationSources;
+        private HashSet<NavigationSourceConfiguration> _configuredNavigationSources;
         private HashSet<Type> _ignoredTypes;
 
         private IEnumerable<StructuralTypeConfiguration> _explicitlyAddedTypes;
@@ -134,7 +134,7 @@ namespace System.Web.OData.Builder
         internal void Initialize(IAssembliesResolver assembliesResolver, bool isQueryCompositionMode)
         {
             _isQueryCompositionMode = isQueryCompositionMode;
-            _configuredNavigationSources = new HashSet<INavigationSourceConfiguration>();
+            _configuredNavigationSources = new HashSet<NavigationSourceConfiguration>();
             _mappedTypes = new HashSet<StructuralTypeConfiguration>();
             _ignoredTypes = new HashSet<Type>();
             ModelAliasingEnabled = true;
@@ -276,9 +276,9 @@ namespace System.Web.OData.Builder
             PruneUnreachableTypes();
 
             // Apply navigation source conventions.
-            IEnumerable<INavigationSourceConfiguration> explictlyConfiguredNavigationSource =
-                new List<INavigationSourceConfiguration>(NavigationSources);
-            foreach (INavigationSourceConfiguration navigationSource in explictlyConfiguredNavigationSource)
+            IEnumerable<NavigationSourceConfiguration> explictlyConfiguredNavigationSource =
+                new List<NavigationSourceConfiguration>(NavigationSources);
+            foreach (NavigationSourceConfiguration navigationSource in explictlyConfiguredNavigationSource)
             {
                 ApplyNavigationSourceConventions(navigationSource);
             }
@@ -1015,7 +1015,7 @@ namespace System.Web.OData.Builder
             typeConvention.Apply(enumTypeConfiguration, this);
         }
 
-        private void ApplyNavigationSourceConventions(INavigationSourceConfiguration navigationSourceConfiguration)
+        private void ApplyNavigationSourceConventions(NavigationSourceConfiguration navigationSourceConfiguration)
         {
             if (!_configuredNavigationSources.Contains(navigationSourceConfiguration))
             {

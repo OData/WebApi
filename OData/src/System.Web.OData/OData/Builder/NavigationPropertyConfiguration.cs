@@ -54,17 +54,6 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
-        /// Gets the declaring entity type.
-        /// </summary>
-        public EntityTypeConfiguration DeclaringEntityType
-        {
-            get
-            {
-                return DeclaringType as EntityTypeConfiguration;
-            }
-        }
-
-        /// <summary>
         /// Gets the <see cref="EdmMultiplicity"/> of this navigation property.
         /// </summary>
         public EdmMultiplicity Multiplicity { get; private set; }
@@ -218,7 +207,7 @@ namespace System.Web.OData.Builder
             if (Multiplicity == EdmMultiplicity.Many)
             {
                 throw Error.NotSupported(SRResources.ReferentialConstraintOnManyNavigationPropertyNotSupported,
-                    Name, DeclaringEntityType.ClrType.FullName);
+                    Name, DeclaringType.ClrType.FullName);
             }
 
             if (ValidateConstraint(constraint))
@@ -226,12 +215,12 @@ namespace System.Web.OData.Builder
                 return this;
             }
 
-            EntityTypeConfiguration principalEntity = DeclaringEntityType.ModelBuilder.StructuralTypes
+            EntityTypeConfiguration principalEntity = DeclaringType.ModelBuilder.StructuralTypes
                     .OfType<EntityTypeConfiguration>().FirstOrDefault(e => e.ClrType == RelatedClrType);
             Contract.Assert(principalEntity != null);
 
             PrimitivePropertyConfiguration principal = principalEntity.AddProperty(constraint.Value);
-            PrimitivePropertyConfiguration dependent = DeclaringEntityType.AddProperty(constraint.Key);
+            PrimitivePropertyConfiguration dependent = DeclaringType.AddProperty(constraint.Key);
 
             // If the navigation property on which the referential constraint is defined or the principal property
             // is nullable, then the dependent property MUST be nullable.

@@ -39,12 +39,12 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void Property_DeclaringEntityType_Returns_DeclaredType()
+        public void Property_DeclaringType_Returns_DeclaredType()
         {
             Mock<EntityTypeConfiguration> mockDeclaringType = new Mock<EntityTypeConfiguration>();
             NavigationPropertyConfiguration navigationProperty = new NavigationPropertyConfiguration(new MockPropertyInfo(), EdmMultiplicity.One, mockDeclaringType.Object);
 
-            Assert.Equal(mockDeclaringType.Object, navigationProperty.DeclaringEntityType);
+            Assert.Equal(mockDeclaringType.Object, navigationProperty.DeclaringType);
         }
 
         [Fact]

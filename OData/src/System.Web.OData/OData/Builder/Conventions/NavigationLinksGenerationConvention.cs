@@ -7,7 +7,7 @@ namespace System.Web.OData.Builder.Conventions
 {
     internal class NavigationLinksGenerationConvention : INavigationSourceConvention
     {
-        public void Apply(INavigationSourceConfiguration configuration, ODataModelBuilder model)
+        public void Apply(NavigationSourceConfiguration configuration, ODataModelBuilder model)
         {
             if (configuration == null)
             {

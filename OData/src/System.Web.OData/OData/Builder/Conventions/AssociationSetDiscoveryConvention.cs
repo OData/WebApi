@@ -18,7 +18,7 @@ namespace System.Web.OData.Builder.Conventions
     /// </summary>
     internal class AssociationSetDiscoveryConvention : INavigationSourceConvention
     {
-        public void Apply(INavigationSourceConfiguration configuration, ODataModelBuilder model)
+        public void Apply(NavigationSourceConfiguration configuration, ODataModelBuilder model)
         {
             foreach (EntityTypeConfiguration entity in model.ThisAndBaseAndDerivedTypes(configuration.EntityType))
             {

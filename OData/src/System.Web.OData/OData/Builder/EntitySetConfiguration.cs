@@ -49,7 +49,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="feedSelfLinkFactory">The builder used to generate the link URL.</param>
         /// <returns>The navigation source configuration currently being configured.</returns>
-        public virtual INavigationSourceConfiguration HasFeedSelfLink(Func<ResourceSetContext, Uri> feedSelfLinkFactory)
+        public virtual NavigationSourceConfiguration HasFeedSelfLink(Func<ResourceSetContext, Uri> feedSelfLinkFactory)
         {
             _feedSelfLinkFactory = feedSelfLinkFactory;
             return this;

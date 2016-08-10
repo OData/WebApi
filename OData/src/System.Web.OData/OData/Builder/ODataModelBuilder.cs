@@ -21,8 +21,8 @@ namespace System.Web.OData.Builder
 
         private Dictionary<Type, EnumTypeConfiguration> _enumTypes = new Dictionary<Type, EnumTypeConfiguration>();
         private Dictionary<Type, StructuralTypeConfiguration> _structuralTypes = new Dictionary<Type, StructuralTypeConfiguration>();
-        private Dictionary<string, INavigationSourceConfiguration> _navigationSources
-            = new Dictionary<string, INavigationSourceConfiguration>();
+        private Dictionary<string, NavigationSourceConfiguration> _navigationSources
+            = new Dictionary<string, NavigationSourceConfiguration>();
         private Dictionary<Type, PrimitiveTypeConfiguration> _primitiveTypes = new Dictionary<Type, PrimitiveTypeConfiguration>();
         private List<OperationConfiguration> _operations = new List<OperationConfiguration>();
 
@@ -123,7 +123,7 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Gets the collection of EDM navigation sources (entity sets and singletons) in the model to be built.
         /// </summary>
-        public virtual IEnumerable<INavigationSourceConfiguration> NavigationSources
+        public virtual IEnumerable<NavigationSourceConfiguration> NavigationSources
         {
             get { return _navigationSources.Values; }
         }

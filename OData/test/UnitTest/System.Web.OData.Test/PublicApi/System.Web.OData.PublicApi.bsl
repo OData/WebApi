@@ -850,41 +850,17 @@ public interface System.Web.OData.Builder.IEdmTypeConfiguration {
 	string Namespace  { public abstract get; }
 }
 
-public interface System.Web.OData.Builder.INavigationSourceConfiguration {
-	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationPropertyBindingConfiguration]] Bindings  { public abstract get; }
-	System.Type ClrType  { public abstract get; }
-	EntityTypeConfiguration EntityType  { public abstract get; }
-	string Name  { public abstract get; }
-
-	NavigationPropertyBindingConfiguration AddBinding (NavigationPropertyConfiguration navigationConfiguration, INavigationSourceConfiguration targetNavigationSource)
-	NavigationPropertyBindingConfiguration FindBinding (string propertyName)
-	NavigationPropertyBindingConfiguration FindBinding (NavigationPropertyConfiguration navigationConfiguration)
-	NavigationPropertyBindingConfiguration FindBinding (NavigationPropertyConfiguration navigationConfiguration, bool autoCreate)
-	System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] GetEditLink ()
-	System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] GetIdLink ()
-	NavigationLinkBuilder GetNavigationPropertyLink (NavigationPropertyConfiguration navigationProperty)
-	System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] GetReadLink ()
-	string GetUrl ()
-	INavigationSourceConfiguration HasEditLink (System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] editLinkBuilder)
-	INavigationSourceConfiguration HasIdLink (System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] idLinkBuilder)
-	INavigationSourceConfiguration HasNavigationPropertiesLink (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationPropertyConfiguration]] navigationProperties, NavigationLinkBuilder navigationLinkBuilder)
-	INavigationSourceConfiguration HasNavigationPropertyLink (NavigationPropertyConfiguration navigationProperty, NavigationLinkBuilder navigationLinkBuilder)
-	INavigationSourceConfiguration HasReadLink (System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] readLinkBuilder)
-	INavigationSourceConfiguration HasUrl (string url)
-	void RemoveBinding (NavigationPropertyConfiguration navigationConfiguration)
-}
-
-public abstract class System.Web.OData.Builder.NavigationSourceConfiguration : INavigationSourceConfiguration {
+public abstract class System.Web.OData.Builder.NavigationSourceConfiguration {
 	protected NavigationSourceConfiguration ()
 	protected NavigationSourceConfiguration (ODataModelBuilder modelBuilder, System.Type entityClrType, string name)
 	protected NavigationSourceConfiguration (ODataModelBuilder modelBuilder, EntityTypeConfiguration entityType, string name)
 
-	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationPropertyBindingConfiguration]] Bindings  { public virtual get; }
-	System.Type ClrType  { public virtual get; }
+	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationPropertyBindingConfiguration]] Bindings  { public get; }
+	System.Type ClrType  { public get; }
 	EntityTypeConfiguration EntityType  { public virtual get; }
-	string Name  { public virtual get; }
+	string Name  { public get; }
 
-	public virtual NavigationPropertyBindingConfiguration AddBinding (NavigationPropertyConfiguration navigationConfiguration, INavigationSourceConfiguration targetNavigationSource)
+	public virtual NavigationPropertyBindingConfiguration AddBinding (NavigationPropertyConfiguration navigationConfiguration, NavigationSourceConfiguration targetNavigationSource)
 	public virtual NavigationPropertyBindingConfiguration FindBinding (string propertyName)
 	public virtual NavigationPropertyBindingConfiguration FindBinding (NavigationPropertyConfiguration navigationConfiguration)
 	public virtual NavigationPropertyBindingConfiguration FindBinding (NavigationPropertyConfiguration navigationConfiguration, bool autoCreate)
@@ -893,12 +869,12 @@ public abstract class System.Web.OData.Builder.NavigationSourceConfiguration : I
 	public virtual NavigationLinkBuilder GetNavigationPropertyLink (NavigationPropertyConfiguration navigationProperty)
 	public virtual System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] GetReadLink ()
 	public virtual string GetUrl ()
-	public virtual INavigationSourceConfiguration HasEditLink (System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] editLinkBuilder)
-	public virtual INavigationSourceConfiguration HasIdLink (System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] idLinkBuilder)
-	public virtual INavigationSourceConfiguration HasNavigationPropertiesLink (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationPropertyConfiguration]] navigationProperties, NavigationLinkBuilder navigationLinkBuilder)
-	public virtual INavigationSourceConfiguration HasNavigationPropertyLink (NavigationPropertyConfiguration navigationProperty, NavigationLinkBuilder navigationLinkBuilder)
-	public virtual INavigationSourceConfiguration HasReadLink (System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] readLinkBuilder)
-	public virtual INavigationSourceConfiguration HasUrl (string url)
+	public virtual NavigationSourceConfiguration HasEditLink (System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] editLinkBuilder)
+	public virtual NavigationSourceConfiguration HasIdLink (System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] idLinkBuilder)
+	public virtual NavigationSourceConfiguration HasNavigationPropertiesLink (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationPropertyConfiguration]] navigationProperties, NavigationLinkBuilder navigationLinkBuilder)
+	public virtual NavigationSourceConfiguration HasNavigationPropertyLink (NavigationPropertyConfiguration navigationProperty, NavigationLinkBuilder navigationLinkBuilder)
+	public virtual NavigationSourceConfiguration HasReadLink (System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] readLinkBuilder)
+	public virtual NavigationSourceConfiguration HasUrl (string url)
 	public virtual void RemoveBinding (NavigationPropertyConfiguration navigationConfiguration)
 }
 
@@ -1280,13 +1256,13 @@ public class System.Web.OData.Builder.EntityCollectionConfiguration`1 : Collecti
 	public FunctionConfiguration Function (string name)
 }
 
-public class System.Web.OData.Builder.EntitySetConfiguration : NavigationSourceConfiguration, INavigationSourceConfiguration {
+public class System.Web.OData.Builder.EntitySetConfiguration : NavigationSourceConfiguration {
 	public EntitySetConfiguration ()
 	public EntitySetConfiguration (ODataModelBuilder modelBuilder, System.Type entityClrType, string name)
 	public EntitySetConfiguration (ODataModelBuilder modelBuilder, EntityTypeConfiguration entityType, string name)
 
 	public virtual System.Func`2[[System.Web.OData.ResourceSetContext],[System.Uri]] GetFeedSelfLink ()
-	public virtual INavigationSourceConfiguration HasFeedSelfLink (System.Func`2[[System.Web.OData.ResourceSetContext],[System.Uri]] feedSelfLinkFactory)
+	public virtual NavigationSourceConfiguration HasFeedSelfLink (System.Func`2[[System.Web.OData.ResourceSetContext],[System.Uri]] feedSelfLinkFactory)
 }
 
 public class System.Web.OData.Builder.EntitySetConfiguration`1 : NavigationSourceConfiguration`1 {
@@ -1419,17 +1395,16 @@ public class System.Web.OData.Builder.NavigationLinkBuilder {
 }
 
 public class System.Web.OData.Builder.NavigationPropertyBindingConfiguration {
-	public NavigationPropertyBindingConfiguration (NavigationPropertyConfiguration navigationProperty, INavigationSourceConfiguration navigationSource)
+	public NavigationPropertyBindingConfiguration (NavigationPropertyConfiguration navigationProperty, NavigationSourceConfiguration navigationSource)
 
 	NavigationPropertyConfiguration NavigationProperty  { public get; }
-	INavigationSourceConfiguration TargetNavigationSource  { public get; }
+	NavigationSourceConfiguration TargetNavigationSource  { public get; }
 }
 
 public class System.Web.OData.Builder.NavigationPropertyConfiguration : PropertyConfiguration {
 	public NavigationPropertyConfiguration (System.Reflection.PropertyInfo property, Microsoft.OData.Edm.EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
 
 	bool ContainsTarget  { public get; }
-	EntityTypeConfiguration DeclaringEntityType  { public get; }
 	System.Collections.Generic.IEnumerable`1[[System.Reflection.PropertyInfo]] DependentProperties  { public get; }
 	PropertyKind Kind  { public virtual get; }
 	Microsoft.OData.Edm.EdmMultiplicity Multiplicity  { public get; }
@@ -1494,7 +1469,7 @@ public class System.Web.OData.Builder.ODataModelBuilder {
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.EnumTypeConfiguration]] EnumTypes  { public virtual get; }
 	System.Version MaxDataServiceVersion  { public get; public set; }
 	string Namespace  { public get; public set; }
-	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.INavigationSourceConfiguration]] NavigationSources  { public virtual get; }
+	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationSourceConfiguration]] NavigationSources  { public virtual get; }
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.OperationConfiguration]] Operations  { public virtual get; }
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.SingletonConfiguration]] Singletons  { public virtual get; }
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.StructuralTypeConfiguration]] StructuralTypes  { public virtual get; }
@@ -1578,7 +1553,7 @@ public class System.Web.OData.Builder.SelfLinkBuilder`1 {
 	bool FollowsConventions  { public get; }
 }
 
-public class System.Web.OData.Builder.SingletonConfiguration : NavigationSourceConfiguration, INavigationSourceConfiguration {
+public class System.Web.OData.Builder.SingletonConfiguration : NavigationSourceConfiguration {
 	public SingletonConfiguration ()
 	public SingletonConfiguration (ODataModelBuilder modelBuilder, System.Type entityClrType, string name)
 	public SingletonConfiguration (ODataModelBuilder modelBuilder, EntityTypeConfiguration entityType, string name)

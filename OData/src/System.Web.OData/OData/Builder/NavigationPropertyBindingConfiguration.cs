@@ -16,7 +16,7 @@ namespace System.Web.OData.Builder
         /// <param name="navigationProperty">The navigation property for the binding.</param>
         /// <param name="navigationSource">The target navigation source of the binding.</param>
         public NavigationPropertyBindingConfiguration(NavigationPropertyConfiguration navigationProperty,
-            INavigationSourceConfiguration navigationSource)
+            NavigationSourceConfiguration navigationSource)
         {
             NavigationProperty = navigationProperty;
             TargetNavigationSource = navigationSource;
@@ -30,6 +30,6 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Gets the target navigation source of the binding.
         /// </summary>
-        public INavigationSourceConfiguration TargetNavigationSource { get; private set; }
+        public NavigationSourceConfiguration TargetNavigationSource { get; private set; }
     }
 }

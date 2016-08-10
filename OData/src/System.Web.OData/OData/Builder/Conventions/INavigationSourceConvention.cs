@@ -5,6 +5,6 @@ namespace System.Web.OData.Builder.Conventions
 {
     internal interface INavigationSourceConvention : IConvention
     {
-        void Apply(INavigationSourceConfiguration configuration, ODataModelBuilder model);
+        void Apply(NavigationSourceConfiguration configuration, ODataModelBuilder model);
     }
 }

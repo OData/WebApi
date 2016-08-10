@@ -11,7 +11,7 @@ namespace System.Web.OData.Builder.Conventions
 {
     internal class SelfLinksGenerationConvention : INavigationSourceConvention
     {
-        public void Apply(INavigationSourceConfiguration configuration, ODataModelBuilder model)
+        public void Apply(NavigationSourceConfiguration configuration, ODataModelBuilder model)
         {
             if (configuration == null)
             {

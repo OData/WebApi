@@ -13,7 +13,7 @@ namespace System.Web.OData.Builder
     /// <summary>
     /// Allows configuration to be performed for a navigation source (entity set, singleton) in a model.
     /// </summary>
-    public abstract class NavigationSourceConfiguration : INavigationSourceConfiguration
+    public abstract class NavigationSourceConfiguration
     {
         private readonly ODataModelBuilder _modelBuilder;
         private string _url;
@@ -115,7 +115,7 @@ namespace System.Web.OData.Builder
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings",
             MessageId = "0#", Justification = "This Url property is not required to be a valid Uri")]
-        public virtual INavigationSourceConfiguration HasUrl(string url)
+        public virtual NavigationSourceConfiguration HasUrl(string url)
         {
             _url = url;
             return this;
@@ -126,7 +126,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="editLinkBuilder">The builder used to generate the edit link.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual INavigationSourceConfiguration HasEditLink(SelfLinkBuilder<Uri> editLinkBuilder)
+        public virtual NavigationSourceConfiguration HasEditLink(SelfLinkBuilder<Uri> editLinkBuilder)
         {
             if (editLinkBuilder == null)
             {
@@ -142,7 +142,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="readLinkBuilder">The builder used to generate the read link.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual INavigationSourceConfiguration HasReadLink(SelfLinkBuilder<Uri> readLinkBuilder)
+        public virtual NavigationSourceConfiguration HasReadLink(SelfLinkBuilder<Uri> readLinkBuilder)
         {
             if (readLinkBuilder == null)
             {
@@ -158,7 +158,7 @@ namespace System.Web.OData.Builder
         /// </summary>
         /// <param name="idLinkBuilder">The builder used to generate the ID.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual INavigationSourceConfiguration HasIdLink(SelfLinkBuilder<Uri> idLinkBuilder)
+        public virtual NavigationSourceConfiguration HasIdLink(SelfLinkBuilder<Uri> idLinkBuilder)
         {
             if (idLinkBuilder == null)
             {
@@ -175,7 +175,7 @@ namespace System.Web.OData.Builder
         /// <param name="navigationProperty">The navigation property for which the navigation link is being generated.</param>
         /// <param name="navigationLinkBuilder">The builder used to generate the navigation link.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual INavigationSourceConfiguration HasNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty,
+        public virtual NavigationSourceConfiguration HasNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty,
             NavigationLinkBuilder navigationLinkBuilder)
         {
             if (navigationProperty == null)
@@ -188,11 +188,11 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("navigationLinkBuilder");
             }
 
-            EntityTypeConfiguration declaringEntityType = navigationProperty.DeclaringEntityType;
-            if (!(declaringEntityType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringEntityType)))
+            StructuralTypeConfiguration declaringType = navigationProperty.DeclaringType;
+            if (!(declaringType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringType)))
             {
                 throw Error.Argument("navigationProperty", SRResources.NavigationPropertyNotInHierarchy,
-                    declaringEntityType.FullName, EntityType.FullName, Name);
+                    declaringType.FullName, EntityType.FullName, Name);
             }
 
             _navigationPropertyLinkBuilders[navigationProperty] = navigationLinkBuilder;
@@ -205,7 +205,7 @@ namespace System.Web.OData.Builder
         /// <param name="navigationProperties">The navigation properties for which the navigation link is being generated.</param>
         /// <param name="navigationLinkBuilder">The builder used to generate the navigation link.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual INavigationSourceConfiguration HasNavigationPropertiesLink(
+        public virtual NavigationSourceConfiguration HasNavigationPropertiesLink(
             IEnumerable<NavigationPropertyConfiguration> navigationProperties, NavigationLinkBuilder navigationLinkBuilder)
         {
             if (navigationProperties == null)
@@ -233,7 +233,7 @@ namespace System.Web.OData.Builder
         /// <param name="targetNavigationSource">The target navigation source.</param>
         /// <returns>The <see cref="NavigationPropertyBindingConfiguration"/> so that it can be further configured.</returns>
         public virtual NavigationPropertyBindingConfiguration AddBinding(NavigationPropertyConfiguration navigationConfiguration,
-            INavigationSourceConfiguration targetNavigationSource)
+            NavigationSourceConfiguration targetNavigationSource)
         {
             if (navigationConfiguration == null)
             {
@@ -245,11 +245,11 @@ namespace System.Web.OData.Builder
                 throw Error.ArgumentNull("targetNavigationSource");
             }
 
-            EntityTypeConfiguration declaringEntityType = navigationConfiguration.DeclaringEntityType;
-            if (!(declaringEntityType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringEntityType)))
+            StructuralTypeConfiguration declaringType = navigationConfiguration.DeclaringType;
+            if (!(declaringType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringType)))
             {
                 throw Error.Argument("navigationConfiguration", SRResources.NavigationPropertyNotInHierarchy,
-                    declaringEntityType.FullName, EntityType.FullName, Name);
+                    declaringType.FullName, EntityType.FullName, Name);
             }
 
             NavigationPropertyBindingConfiguration navigationPropertyBinding;
@@ -321,7 +321,7 @@ namespace System.Web.OData.Builder
             bool hasSingletonAttribute = navigationConfiguration.PropertyInfo.GetCustomAttributes<SingletonAttribute>().Any();
             Type entityType = navigationConfiguration.RelatedClrType;
 
-            INavigationSourceConfiguration[] matchedNavigationSources;
+            NavigationSourceConfiguration[] matchedNavigationSources;
             if (hasSingletonAttribute)
             {
                 matchedNavigationSources = _modelBuilder.Singletons.Where(es => es.EntityType.ClrType == entityType).ToArray();
@@ -344,7 +344,7 @@ namespace System.Web.OData.Builder
                 throw Error.NotSupported(
                     SRResources.CannotAutoCreateMultipleCandidates,
                     navigationConfiguration.Name,
-                    navigationConfiguration.DeclaringEntityType.FullName,
+                    navigationConfiguration.DeclaringType.FullName,
                     Name,
                     String.Join(", ", matchedNavigationSources.Select(s => s.Name)));
             }

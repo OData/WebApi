@@ -325,6 +325,19 @@ namespace System.Web.OData.Routing
         }
 
         /// <summary>
+        /// Handle a general path segment
+        /// </summary>
+        /// <param name="segment">the segment to handle</param>
+        public override void Handle(ODataPathSegment segment)
+        {
+            // ODL doesn't provide the handle function for general path segment
+            _navigationSource = null;
+
+            _pathTemplate.Add(segment.ToString());
+            _pathUriLiteral.Add(segment.ToString());
+        }
+
+        /// <summary>
         /// Handle a UnresolvedPathSegment
         /// </summary>
         /// <param name="segment">the segment to handle</param>
@@ -335,19 +348,6 @@ namespace System.Web.OData.Routing
 
             _pathTemplate.Add(ODataSegmentKinds.Unresolved); // unresolved
             _pathUriLiteral.Add(segment.SegmentValue);
-        }
-
-        /// <summary>
-        /// Handle a general path segment
-        /// </summary>
-        /// <param name="segment">the segment to handle</param>
-        public virtual void HandleODataPathSegment(ODataPathSegment segment)
-        {
-            // ODL doesn't provide the handle function for general path segment
-            _navigationSource = null;
-
-            _pathTemplate.Add(segment.ToString());
-            _pathUriLiteral.Add(segment.ToString());
         }
 
         // Convert the objects of keys in ODL path to string literals.

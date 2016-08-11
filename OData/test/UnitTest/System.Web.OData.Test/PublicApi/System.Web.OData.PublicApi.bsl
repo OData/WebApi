@@ -2676,6 +2676,7 @@ public class System.Web.OData.Routing.ODataPathSegmentHandler : Microsoft.OData.
 	public virtual void Handle (Microsoft.OData.UriParser.MetadataSegment segment)
 	public virtual void Handle (Microsoft.OData.UriParser.NavigationPropertyLinkSegment segment)
 	public virtual void Handle (Microsoft.OData.UriParser.NavigationPropertySegment segment)
+	public virtual void Handle (Microsoft.OData.UriParser.ODataPathSegment segment)
 	public virtual void Handle (Microsoft.OData.UriParser.OperationImportSegment segment)
 	public virtual void Handle (Microsoft.OData.UriParser.OperationSegment segment)
 	public virtual void Handle (Microsoft.OData.UriParser.PathTemplateSegment segment)
@@ -2684,7 +2685,6 @@ public class System.Web.OData.Routing.ODataPathSegmentHandler : Microsoft.OData.
 	public virtual void Handle (Microsoft.OData.UriParser.TypeSegment segment)
 	public virtual void Handle (Microsoft.OData.UriParser.ValueSegment segment)
 	public virtual void Handle (UnresolvedPathSegment segment)
-	public virtual void HandleODataPathSegment (Microsoft.OData.UriParser.ODataPathSegment segment)
 }
 
 public class System.Web.OData.Routing.ODataPathSegmentTranslator : Microsoft.OData.UriParser.PathSegmentTranslator`1[[Microsoft.OData.UriParser.ODataPathSegment]] {

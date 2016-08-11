@@ -34,7 +34,7 @@ namespace WebStack.QA.Test.OData.Swagger
             ODataPathSegmentHandler pathSegmentHandler = handler as ODataPathSegmentHandler;
             if (pathSegmentHandler != null)
             {
-                pathSegmentHandler.HandleODataPathSegment(this);
+                pathSegmentHandler.Handle(this);
             }
         }
 

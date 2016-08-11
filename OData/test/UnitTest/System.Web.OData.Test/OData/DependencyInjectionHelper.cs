@@ -4,7 +4,6 @@
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Extensions;
-using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,26 +14,24 @@ namespace System.Web.OData
 {
     public static class DependencyInjectionHelper
     {
-        public static IServiceProvider BuildContainer(Action<IContainerBuilder> action)
-        {
-            return CreateConfigurationWithRootContainer().GetODataRootContainer(HttpRouteCollectionExtensions.RouteName);
-        }
-
         public static ODataSerializerProvider GetDefaultODataSerializerProvider()
         {
-            return BuildContainer(null).GetRequiredService<ODataSerializerProvider>();
+            return new MockContainer().GetRequiredService<ODataSerializerProvider>();
         }
 
         public static ODataDeserializerProvider GetDefaultODataDeserializerProvider()
         {
-            return BuildContainer(null).GetRequiredService<ODataDeserializerProvider>();
+            return new MockContainer().GetRequiredService<ODataDeserializerProvider>();
         }
 
         public static HttpConfiguration CreateConfigurationWithRootContainer()
         {
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableODataDependencyInjectionSupport();
-            return configuration;
+            return new MockContainer().Configuration;
+        }
+
+        public static IServiceProvider GetODataRootContainer(this HttpConfiguration configuration)
+        {
+            return configuration.GetODataRootContainer(HttpRouteCollectionExtensions.RouteName);
         }
 
         public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration)
@@ -45,6 +42,12 @@ namespace System.Web.OData
         public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration, string routeName)
         {
             configuration.CreateODataRootContainer(routeName, null);
+        }
+
+        public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration,
+            Action<IContainerBuilder> action)
+        {
+            configuration.CreateODataRootContainer(HttpRouteCollectionExtensions.RouteName, action);
         }
 
         public static void EnableHttpDependencyInjectionSupport(this HttpRequestMessage request)
@@ -61,16 +64,7 @@ namespace System.Web.OData
 
         public static void EnableODataDependencyInjectionSupport(this HttpRequestMessage request)
         {
-            HttpConfiguration configuration = request.GetConfiguration();
-            if (configuration == null)
-            {
-                configuration = new HttpConfiguration();
-                configuration.EnableODataDependencyInjectionSupport();
-                request.SetConfiguration(configuration);
-            }
-
-            request.SetFakeODataRouteName();
-            request.CreateRequestContainer(HttpRouteCollectionExtensions.RouteName);
+            request.EnableODataDependencyInjectionSupport(HttpRouteCollectionExtensions.RouteName);
         }
 
         public static void EnableODataDependencyInjectionSupport(this HttpRequestMessage request, string routeName)

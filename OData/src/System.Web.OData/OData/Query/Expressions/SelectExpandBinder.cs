@@ -9,7 +9,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
@@ -28,14 +27,11 @@ namespace System.Web.OData.Query.Expressions
         private ODataQueryContext _context;
         private IEdmModel _model;
         private ODataQuerySettings _settings;
-        private IAssembliesResolver _assembliesResolver;
         private string _modelID;
 
-        public SelectExpandBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver,
-            SelectExpandQueryOption selectExpandQuery)
+        public SelectExpandBinder(ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
         {
             Contract.Assert(settings != null);
-            Contract.Assert(assembliesResolver != null);
             Contract.Assert(selectExpandQuery != null);
             Contract.Assert(selectExpandQuery.Context != null);
             Contract.Assert(selectExpandQuery.Context.Model != null);
@@ -46,24 +42,23 @@ namespace System.Web.OData.Query.Expressions
             _model = _context.Model;
             _modelID = ModelContainer.GetModelID(_model);
             _settings = settings;
-            _assembliesResolver = assembliesResolver;
         }
 
         public static IQueryable Bind(IQueryable queryable, ODataQuerySettings settings,
-            IAssembliesResolver assembliesResolver, SelectExpandQueryOption selectExpandQuery)
+            SelectExpandQueryOption selectExpandQuery)
         {
             Contract.Assert(queryable != null);
 
-            SelectExpandBinder binder = new SelectExpandBinder(settings, assembliesResolver, selectExpandQuery);
+            SelectExpandBinder binder = new SelectExpandBinder(settings, selectExpandQuery);
             return binder.Bind(queryable);
         }
 
-        public static object Bind(object entity, ODataQuerySettings settings, IAssembliesResolver assembliesResolver,
+        public static object Bind(object entity, ODataQuerySettings settings,
             SelectExpandQueryOption selectExpandQuery)
         {
             Contract.Assert(entity != null);
 
-            SelectExpandBinder binder = new SelectExpandBinder(settings, assembliesResolver, selectExpandQuery);
+            SelectExpandBinder binder = new SelectExpandBinder(settings, selectExpandQuery);
             return binder.Bind(entity);
         }
 
@@ -209,12 +204,7 @@ namespace System.Web.OData.Query.Expressions
                             nullablePropertyValue)
                         : nullablePropertyValue;
 
-                Expression filterPredicate = FilterBinder.Bind(
-                    filterClause,
-                    clrElementType,
-                    _model,
-                    _assembliesResolver,
-                    _settings);
+                Expression filterPredicate = FilterBinder.Bind(filterClause, clrElementType, _context.RequestContainer);
                 MethodCallExpression filterResult = Expression.Call(
                     ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(clrElementType),
                     filterSource,
@@ -481,12 +471,13 @@ namespace System.Web.OData.Query.Expressions
             if (orderbyClause != null)
             {
                 LambdaExpression orderByExpression =
-                    FilterBinder.Bind(orderbyClause, elementType, _model, _settings);
+                    FilterBinder.Bind(orderbyClause, elementType, _context.RequestContainer);
                 source = ExpressionHelpers.OrderBy(source, orderByExpression, elementType, orderbyClause.Direction);
             }
+
             return source;
         }
-        
+
         private Expression GetNullCheckExpression(IEdmNavigationProperty propertyToExpand, Expression propertyValue,
             SelectExpandClause projection)
         {
@@ -533,7 +524,7 @@ namespace System.Web.OData.Query.Expressions
                 source = AddOrderByQueryForSource(source, expandedItem.OrderByOption, elementType);
             }
 
-            if (_settings.PageSize.HasValue || modelBoundPageSize.HasValue || 
+            if (_settings.PageSize.HasValue || modelBoundPageSize.HasValue ||
                 (expandedItem != null && (expandedItem.TopOption.HasValue || expandedItem.SkipOption.HasValue)))
             {
                 // nested paging. Need to apply order by first, and take one more than page size as we need to know
@@ -582,7 +573,7 @@ namespace System.Web.OData.Query.Expressions
                 else if (_settings.ModelBoundPageSize.HasValue)
                 {
                     source = ExpressionHelpers.Take(source, modelBoundPageSize.Value + 1, elementType,
-                        _settings.EnableConstantParameterization);   
+                        _settings.EnableConstantParameterization);
                 }
             }
 
@@ -783,14 +774,14 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
-        /* Entityframework requires that the two different type initializers for a given type in the same query have the 
+        /* Entityframework requires that the two different type initializers for a given type in the same query have the
         same set of properties in the same order.
-        
+
         A ~/People?$select=Name&$expand=Friend results in a select expression that has two SelectExpandWrapper<Person>
         expressions, one for the root level person and the second for the expanded Friend person.
         The first wrapper has the Container property set (contains Name and Friend values) where as the second wrapper
         has the Instance property set as it contains all the properties of the expanded person.
-        
+
         The below four classes workaround that entity framework limitation by defining a seperate type for each
         property selection combination possible. */
 

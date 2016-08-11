@@ -2209,7 +2209,6 @@ public class System.Web.OData.Query.ODataQueryOptions`1 : ODataQueryOptions {
 
 public class System.Web.OData.Query.ODataQuerySettings {
 	public ODataQuerySettings ()
-	public ODataQuerySettings (ODataQuerySettings settings)
 
 	bool EnableConstantParameterization  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
@@ -3094,6 +3093,10 @@ public class System.Web.OData.Formatter.Serialization.SelectExpandNode {
 	public static void GetStructuralProperties (Microsoft.OData.Edm.IEdmStructuredType structuredType, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] structuralProperties, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] nestedStructuralProperties)
 }
 
+public abstract class System.Web.OData.Query.Expressions.ExpressionBinderBase {
+	protected ExpressionBinderBase (System.IServiceProvider requestContainer)
+}
+
 public class System.Web.OData.Query.Expressions.DynamicTypeWrapper {
 	public DynamicTypeWrapper ()
 
@@ -3102,6 +3105,29 @@ public class System.Web.OData.Query.Expressions.DynamicTypeWrapper {
 	public object GetPropertyValue (string propertyName)
 	public void SetPropertyValue (string propertyName, object value)
 	public bool TryGetPropertyValue (string propertyName, out System.Object& value)
+}
+
+public class System.Web.OData.Query.Expressions.FilterBinder : ExpressionBinderBase {
+	public FilterBinder (System.IServiceProvider requestContainer)
+
+	public virtual System.Linq.Expressions.Expression Bind (Microsoft.OData.UriParser.QueryNode node)
+	public virtual System.Linq.Expressions.Expression BindAllNode (Microsoft.OData.UriParser.AllNode allNode)
+	public virtual System.Linq.Expressions.Expression BindAnyNode (Microsoft.OData.UriParser.AnyNode anyNode)
+	public virtual System.Linq.Expressions.Expression BindBinaryOperatorNode (Microsoft.OData.UriParser.BinaryOperatorNode binaryOperatorNode)
+	public virtual System.Linq.Expressions.Expression BindCollectionComplexNode (Microsoft.OData.UriParser.CollectionComplexNode collectionComplexNode)
+	public virtual System.Linq.Expressions.Expression BindCollectionPropertyAccessNode (Microsoft.OData.UriParser.CollectionPropertyAccessNode propertyAccessNode)
+	public virtual System.Linq.Expressions.Expression BindCollectionResourceCastNode (Microsoft.OData.UriParser.CollectionResourceCastNode node)
+	public virtual System.Linq.Expressions.Expression BindConstantNode (Microsoft.OData.UriParser.ConstantNode constantNode)
+	public virtual System.Linq.Expressions.Expression BindConvertNode (Microsoft.OData.UriParser.ConvertNode convertNode)
+	public virtual System.Linq.Expressions.Expression BindDynamicPropertyAccessQueryNode (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
+	public virtual System.Linq.Expressions.Expression BindNavigationPropertyNode (Microsoft.OData.UriParser.QueryNode sourceNode, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty)
+	public virtual System.Linq.Expressions.Expression BindPropertyAccessQueryNode (Microsoft.OData.UriParser.SingleValuePropertyAccessNode propertyAccessNode)
+	public virtual System.Linq.Expressions.Expression BindRangeVariable (Microsoft.OData.UriParser.RangeVariable rangeVariable)
+	public virtual System.Linq.Expressions.Expression BindSingleComplexNode (Microsoft.OData.UriParser.SingleComplexNode singleComplexNode)
+	public virtual System.Linq.Expressions.Expression BindSingleResourceCastNode (Microsoft.OData.UriParser.SingleResourceCastNode node)
+	public virtual System.Linq.Expressions.Expression BindSingleResourceFunctionCallNode (Microsoft.OData.UriParser.SingleResourceFunctionCallNode node)
+	public virtual System.Linq.Expressions.Expression BindSingleValueFunctionCallNode (Microsoft.OData.UriParser.SingleValueFunctionCallNode node)
+	public virtual System.Linq.Expressions.Expression BindUnaryOperatorNode (Microsoft.OData.UriParser.UnaryOperatorNode unaryOperatorNode)
 }
 
 public class System.Web.OData.Query.Validators.CountQueryValidator {

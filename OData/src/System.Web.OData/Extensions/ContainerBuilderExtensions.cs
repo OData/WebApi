@@ -6,6 +6,8 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Query;
+using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
 using System.Web.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -77,6 +79,10 @@ namespace System.Web.OData.Extensions
 
             // AssembliesResolver.
             builder.AddService(ServiceLifetime.Singleton, GetAssembliesResolver);
+
+            // Binders.
+            builder.AddService<ODataQuerySettings>(ServiceLifetime.Scoped);
+            builder.AddService<FilterBinder>(ServiceLifetime.Transient);
 
             return builder;
         }

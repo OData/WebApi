@@ -59,7 +59,11 @@ namespace System.Web.OData.Query
                 throw Error.ArgumentNull("request");
             }
 
-            // remember the context and request
+            // Set the request container into context
+            Contract.Assert(context.RequestContainer == null);
+            context.RequestContainer = request.GetRequestContainer();
+
+            // Remember the context and request
             Context = context;
             Request = request;
 

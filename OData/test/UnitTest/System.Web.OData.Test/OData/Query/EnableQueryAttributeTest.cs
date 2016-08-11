@@ -510,10 +510,7 @@ namespace System.Web.OData.Query
             defaultQuerySettings.MaxTop = null;
 
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer), null)
-            {
-                RequestContainer = request.GetRequestContainer()
-            };
+            var context = new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer), null);
             var options = new ODataQueryOptions(context, request);
 
             // Act & Assert
@@ -621,7 +618,7 @@ namespace System.Web.OData.Query
             attribute.AllowedOrderByProperties = allowedProperties;
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customers/?$orderby=Id,Name");
             request.EnableHttpDependencyInjectionSupport();
-            ODataQueryOptions queryOptions = new ODataQueryOptions(ValidationTestHelper.CreateCustomerContext(), request);
+            ODataQueryOptions queryOptions = new ODataQueryOptions(ValidationTestHelper.CreateCustomerContext(false), request);
 
             Assert.Throws<ODataException>(() => attribute.ValidateQuery(request, queryOptions),
                 "Order by 'Name' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on EnableQueryAttribute or QueryValidationSettings.");
@@ -644,7 +641,8 @@ namespace System.Web.OData.Query
             request.SetConfiguration(config);
             request.EnableHttpDependencyInjectionSupport();
 
-            ODataQueryOptions queryOptions = new ODataQueryOptions(ValidationTestHelper.CreateCustomerContext(), request);
+            ODataQueryContext context = ValidationTestHelper.CreateCustomerContext(false);
+            ODataQueryOptions queryOptions = new ODataQueryOptions(context, request);
 
             Assert.DoesNotThrow(() => attribute.ValidateQuery(request, queryOptions));
         }

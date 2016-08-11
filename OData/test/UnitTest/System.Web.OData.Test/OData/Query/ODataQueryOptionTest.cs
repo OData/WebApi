@@ -770,7 +770,7 @@ namespace System.Web.OData.Query
             );
             message.EnableHttpDependencyInjectionSupport();
 
-            ODataQueryContext context = ValidationTestHelper.CreateCustomerContext();
+            ODataQueryContext context = ValidationTestHelper.CreateCustomerContext(false);
             ODataQueryOptions option = new ODataQueryOptions(context, message);
             ODataValidationSettings settings = new ODataValidationSettings()
             {

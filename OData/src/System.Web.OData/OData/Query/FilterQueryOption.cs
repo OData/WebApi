@@ -6,7 +6,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
@@ -20,8 +19,6 @@ namespace System.Web.OData.Query
     /// </summary>
     public class FilterQueryOption
     {
-        private readonly IAssembliesResolver _assembliesResolver;
-
         private FilterClause _filterClause;
         private ODataQueryOptionParser _queryOptionParser;
 
@@ -53,7 +50,6 @@ namespace System.Web.OData.Query
             RawValue = rawValue;
             Validator = FilterQueryValidator.GetFilterQueryValidator(context);
             _queryOptionParser = queryOptionParser;
-            _assembliesResolver = QueryContextHelpers.GetAssembliesResolver(context);
         }
 
         // This constructor is intended for unit testing only.
@@ -77,7 +73,6 @@ namespace System.Web.OData.Query
                 context.ElementType,
                 context.NavigationSource,
                 new Dictionary<string, string> { { "$filter", rawValue } });
-            _assembliesResolver = QueryContextHelpers.GetAssembliesResolver(context);
         }
 
         /// <summary>
@@ -143,15 +138,9 @@ namespace System.Web.OData.Query
             FilterClause filterClause = FilterClause;
             Contract.Assert(filterClause != null);
 
-            // Ensure we have decided how to handle null propagation
-            ODataQuerySettings updatedSettings = querySettings;
-            if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
-            {
-                updatedSettings = new ODataQuerySettings(updatedSettings);
-                updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
-            }
+            Context.UpdateQuerySettings(querySettings, query);
 
-            Expression filter = FilterBinder.Bind(filterClause, Context.ElementClrType, Context.Model, _assembliesResolver, updatedSettings);
+            Expression filter = FilterBinder.Bind(filterClause, Context.ElementClrType, Context.RequestContainer);
             query = ExpressionHelpers.Where(query, filter, Context.ElementClrType);
             return query;
         }

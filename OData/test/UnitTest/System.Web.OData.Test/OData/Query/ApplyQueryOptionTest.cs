@@ -319,7 +319,7 @@ namespace System.Web.OData.Test.OData.Query
                             .Add_Customer_EntityType_With_CollectionProperties()
                             .Add_Customers_EntitySet()
                             .GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer));
+            var context = new ODataQueryContext(model, typeof(Customer)) { RequestContainer = new MockContainer() };
             var queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,
@@ -406,7 +406,7 @@ namespace System.Web.OData.Test.OData.Query
                             .Add_Customer_EntityType_With_CollectionProperties()
                             .Add_Customers_EntitySet()
                             .GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer));
+            var context = new ODataQueryContext(model, typeof(Customer)) { RequestContainer = new MockContainer() };
             var queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,

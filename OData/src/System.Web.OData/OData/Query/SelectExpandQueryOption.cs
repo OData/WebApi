@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Web.Http;
-using System.Web.Http.Dispatcher;
-using System.Web.Http.Results;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Expressions;
@@ -22,8 +20,6 @@ namespace System.Web.OData.Query
     /// </summary>
     public class SelectExpandQueryOption
     {
-        private readonly IAssembliesResolver _assembliesResolver;
-
         private SelectExpandClause _selectExpandClause;
         private ODataQueryOptionParser _queryOptionParser;
         // Give _levelsMaxLiteralExpansionDepth a negative value meaning it is uninitialized, and it will be set to:
@@ -67,7 +63,6 @@ namespace System.Web.OData.Query
             RawExpand = expand;
             Validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(context);
             _queryOptionParser = queryOptionParser;
-            _assembliesResolver = QueryContextHelpers.GetAssembliesResolver(context);
         }
 
         internal SelectExpandQueryOption(
@@ -108,7 +103,6 @@ namespace System.Web.OData.Query
                 context.ElementType,
                 context.NavigationSource,
                 new Dictionary<string, string> { { "$select", select }, { "$expand", expand } });
-            _assembliesResolver = QueryContextHelpers.GetAssembliesResolver(context);
         }
 
         /// <summary>
@@ -196,15 +190,9 @@ namespace System.Web.OData.Query
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
 
-            // Ensure we have decided how to handle null propagation
-            ODataQuerySettings updatedSettings = settings;
-            if (settings.HandleNullPropagation == HandleNullPropagationOption.Default)
-            {
-                updatedSettings = new ODataQuerySettings(updatedSettings);
-                updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(queryable);
-            }
+            ODataQuerySettings updatedSettings = Context.UpdateQuerySettings(settings, queryable);
 
-            return SelectExpandBinder.Bind(queryable, updatedSettings, _assembliesResolver, this);
+            return SelectExpandBinder.Bind(queryable, updatedSettings, this);
         }
 
         /// <summary>
@@ -228,15 +216,9 @@ namespace System.Web.OData.Query
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
 
-            // Ensure we have decided how to handle null propagation
-            ODataQuerySettings updatedSettings = settings;
-            if (settings.HandleNullPropagation == HandleNullPropagationOption.Default)
-            {
-                updatedSettings = new ODataQuerySettings(updatedSettings);
-                updatedSettings.HandleNullPropagation = HandleNullPropagationOption.True;
-            }
+            ODataQuerySettings updatedSettings = Context.UpdateQuerySettings(settings, query: null);
 
-            return SelectExpandBinder.Bind(entity, updatedSettings, _assembliesResolver, this);
+            return SelectExpandBinder.Bind(entity, updatedSettings, this);
         }
 
         /// <summary>
@@ -262,8 +244,8 @@ namespace System.Web.OData.Query
             bool isMaxLevel;
             ModelBoundQuerySettings querySettings = EdmLibHelpers.GetModelBoundQuerySettings(Context.TargetProperty,
                 Context.TargetStructuredType, Context.Model, Context.DefaultQuerySettings);
-            return ProcessLevels(SelectExpandClause, 
-                LevelsMaxLiteralExpansionDepth < 0 ? ODataValidationSettings.DefaultMaxExpansionDepth : LevelsMaxLiteralExpansionDepth, 
+            return ProcessLevels(SelectExpandClause,
+                LevelsMaxLiteralExpansionDepth < 0 ? ODataValidationSettings.DefaultMaxExpansionDepth : LevelsMaxLiteralExpansionDepth,
                 querySettings,
                 out levelsEncountered,
                 out isMaxLevel);
@@ -532,7 +514,7 @@ namespace System.Web.OData.Query
             GetAutoSelectExpandItems(
                 entityType,
                 Context.Model,
-                expandItem.NavigationSource, 
+                expandItem.NavigationSource,
                 selectExpandClause.AllSelected,
                 nestQuerySettings,
                 maxDepth - 1,

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization.Models;
@@ -32,8 +31,8 @@ namespace System.Web.OData.Query.Expressions
             _model = new CustomersModelWithInheritance();
             _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.SpecialCustomer, new ClrTypeAnnotation(typeof(SpecialCustomer)));
-            _context = new ODataQueryContext(_model.Model, typeof(Customer));
-            _binder = new SelectExpandBinder(_settings, new DefaultAssembliesResolver(), new SelectExpandQueryOption("*", "", _context));
+            _context = new ODataQueryContext(_model.Model, typeof(Customer)) { RequestContainer = new MockContainer() };
+            _binder = new SelectExpandBinder(_settings, new SelectExpandQueryOption("*", "", _context));
 
             Customer customer = new Customer();
             Order order = new Order { Customer = customer };
@@ -49,7 +48,7 @@ namespace System.Web.OData.Query.Expressions
             SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(select: "ID", expand: null, context: _context);
 
             // Act
-            IQueryable queryable = SelectExpandBinder.Bind(_queryable, _settings, new DefaultAssembliesResolver(), selectExpand);
+            IQueryable queryable = SelectExpandBinder.Bind(_queryable, _settings, selectExpand);
 
             // Assert
             Assert.NotNull(queryable);
@@ -68,7 +67,7 @@ namespace System.Web.OData.Query.Expressions
             _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
 
             // Act
-            IQueryable queryable = SelectExpandBinder.Bind(_queryable, _settings, new DefaultAssembliesResolver(), selectExpand);
+            IQueryable queryable = SelectExpandBinder.Bind(_queryable, _settings, selectExpand);
 
             // Assert
             IEnumerator enumerator = queryable.GetEnumerator();
@@ -94,7 +93,7 @@ namespace System.Web.OData.Query.Expressions
             _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
 
             // Act
-            IQueryable queryable = SelectExpandBinder.Bind(_queryable, _settings, new DefaultAssembliesResolver(), selectExpand);
+            IQueryable queryable = SelectExpandBinder.Bind(_queryable, _settings, selectExpand);
 
             // Assert
             var unaryExpression = (UnaryExpression)((MethodCallExpression)queryable.Expression).Arguments.Single(a => a is UnaryExpression);

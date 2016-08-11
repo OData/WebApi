@@ -3,7 +3,6 @@
 
 using System.Globalization;
 using System.Linq;
-using System.Net.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization.Models;
 using System.Web.OData.Routing;
@@ -27,6 +26,7 @@ namespace System.Web.OData.Query.Validators
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             _queryContext = new ODataQueryContext(model.Model, typeof(Customer), null);
+            _queryContext.RequestContainer = new MockContainer();
             _queryContext.DefaultQuerySettings.EnableExpand = true;
         }
 
@@ -65,6 +65,7 @@ namespace System.Web.OData.Query.Validators
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext queryContext = new ODataQueryContext(model.Model, typeof(Customer));
+            queryContext.RequestContainer = new MockContainer();
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, queryContext);
             selectExpandQueryOption.LevelsMaxLiteralExpansionDepth = 1;
             IEdmStructuredType customerType =
@@ -98,6 +99,7 @@ namespace System.Web.OData.Query.Validators
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
+            context.RequestContainer = new MockContainer();
             var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
             selectExpandQueryOption.LevelsMaxLiteralExpansionDepth = 1;
 
@@ -127,6 +129,7 @@ namespace System.Web.OData.Query.Validators
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
+            context.RequestContainer = new MockContainer();
             var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
 
             // Act & Assert
@@ -146,6 +149,7 @@ namespace System.Web.OData.Query.Validators
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
+            context.RequestContainer = new MockContainer();
             var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
             selectExpandQueryOption.LevelsMaxLiteralExpansionDepth = 4;
 
@@ -170,6 +174,7 @@ namespace System.Web.OData.Query.Validators
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
+            context.RequestContainer = new MockContainer();
             var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
 
             // Act & Assert
@@ -189,6 +194,7 @@ namespace System.Web.OData.Query.Validators
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
+            context.RequestContainer = new MockContainer();
             var validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(context);
             var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
 
@@ -215,6 +221,7 @@ namespace System.Web.OData.Query.Validators
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
+            context.RequestContainer = new MockContainer();
             var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
             selectExpandQueryOption.LevelsMaxLiteralExpansionDepth = levelsMaxLiteralExpansionDepth;
 
@@ -246,6 +253,7 @@ namespace System.Web.OData.Query.Validators
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext queryContext = new ODataQueryContext(model.Model, typeof(Customer));
+            queryContext.RequestContainer = new MockContainer();
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, queryContext);
             IEdmStructuredType customerType =
                 model.Model.SchemaElements.First(e => e.Name.Equals("Customer")) as IEdmStructuredType;
@@ -268,6 +276,7 @@ namespace System.Web.OData.Query.Validators
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext queryContext = new ODataQueryContext(model.Model, typeof(Customer));
+            queryContext.RequestContainer = new MockContainer();
             model.Model.SetAnnotationValue(
                 model.Customer.FindProperty("Orders"),
                 new QueryableRestrictionsAnnotation(new QueryableRestrictions { NotNavigable = true }));
@@ -288,6 +297,7 @@ namespace System.Web.OData.Query.Validators
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.SpecialCustomer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext queryContext = new ODataQueryContext(model.Model, typeof(Customer));
+            queryContext.RequestContainer = new MockContainer();
             EdmEntityType classType = (className == "Customer") ? model.Customer : model.SpecialCustomer;
             model.Model.SetAnnotationValue(classType.FindProperty(propertyName), new QueryableRestrictionsAnnotation(new QueryableRestrictions { NotNavigable = true }));
 
@@ -305,6 +315,7 @@ namespace System.Web.OData.Query.Validators
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext queryContext = new ODataQueryContext(model.Model, typeof(Customer));
+            queryContext.RequestContainer = new MockContainer();
             model.Model.SetAnnotationValue(model.Customer.FindProperty("Orders"), new QueryableRestrictionsAnnotation(new QueryableRestrictions { NotExpandable = true }));
 
             string expand = "Orders";
@@ -322,6 +333,7 @@ namespace System.Web.OData.Query.Validators
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext queryContext = new ODataQueryContext(model.Model, typeof(Customer));
+            queryContext.RequestContainer = new MockContainer();
             SelectExpandQueryValidator validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(queryContext);
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, "Orders", queryContext);
             IEdmStructuredType customerType =
@@ -348,6 +360,7 @@ namespace System.Web.OData.Query.Validators
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             model.Model.SetAnnotationValue(model.SpecialCustomer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext queryContext = new ODataQueryContext(model.Model, typeof(Customer));
+            queryContext.RequestContainer = new MockContainer();
             EdmEntityType classType = (className == "Customer") ? model.Customer : model.SpecialCustomer;
             model.Model.SetAnnotationValue(classType.FindProperty(propertyName), new QueryableRestrictionsAnnotation(new QueryableRestrictions { NotExpandable = true }));
 

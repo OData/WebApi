@@ -25,19 +25,6 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Initialize a new instance of the <see cref="ODataQuerySettings"/> class based on an existing one.
-        /// </summary>
-        /// <param name="settings">The setting to copy from.</param>
-        public ODataQuerySettings(ODataQuerySettings settings)
-        {
-            EnsureStableOrdering = settings.EnsureStableOrdering;
-            EnableConstantParameterization = settings.EnableConstantParameterization;
-            HandleNullPropagation = settings.HandleNullPropagation;
-            PageSize = settings.PageSize;
-            ModelBoundPageSize = settings.ModelBoundPageSize;
-        }
-
-        /// <summary>
         /// Gets or sets the maximum number of query results to return based on the type or property.
         /// </summary>
         /// <value>
@@ -121,6 +108,15 @@ namespace System.Web.OData.Query
 
                 _pageSize = value;
             }
+        }
+
+        internal void CopyFrom(ODataQuerySettings settings)
+        {
+            EnsureStableOrdering = settings.EnsureStableOrdering;
+            EnableConstantParameterization = settings.EnableConstantParameterization;
+            HandleNullPropagation = settings.HandleNullPropagation;
+            PageSize = settings.PageSize;
+            ModelBoundPageSize = settings.ModelBoundPageSize;
         }
     }
 }

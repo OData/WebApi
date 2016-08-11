@@ -14,14 +14,14 @@ namespace System.Web.OData
         {
             Contract.Assert(handler != null);
 
-            return handler.Parse(model, serviceRoot, odataPath, DependencyInjectionHelper.BuildContainer(null));
+            return handler.Parse(model, serviceRoot, odataPath, new MockContainer());
         }
 
         public static ODataPathTemplate ParseTemplate(this IODataPathTemplateHandler handler, IEdmModel model, string odataPathTemplate)
         {
             Contract.Assert(handler != null);
 
-            return handler.ParseTemplate(model, odataPathTemplate, DependencyInjectionHelper.BuildContainer(null));
+            return handler.ParseTemplate(model, odataPathTemplate, new MockContainer());
         }
     }
 }

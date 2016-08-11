@@ -20,7 +20,7 @@ namespace System.Web.OData.Routing
         string _routeName = "name";
         IEnumerable<IODataRoutingConvention> _conventions = ODataRoutingConventions.CreateDefault();
         HttpRequestMessage _request = new HttpRequestMessage();
-        IServiceProvider _rootContainer = DependencyInjectionHelper.BuildContainer(null);
+        IServiceProvider _rootContainer = new MockContainer();
         IODataPathHandler _pathHandler;
 
         private static IList<string> _stringsWithUnescapedSlashes = new List<string>

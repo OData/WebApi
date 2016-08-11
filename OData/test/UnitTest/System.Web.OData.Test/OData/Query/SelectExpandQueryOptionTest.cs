@@ -76,6 +76,7 @@ namespace System.Web.OData.Query
             string selectValue = "select";
             _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext context = new ODataQueryContext(_model.Model, typeof(Customer));
+            context.RequestContainer = new MockContainer();
 
             // Act
             SelectExpandQueryOption result = new SelectExpandQueryOption(selectValue, expand: null, context: context);
@@ -91,6 +92,7 @@ namespace System.Web.OData.Query
             string expandValue = "expand";
             _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext context = new ODataQueryContext(_model.Model, typeof(Customer));
+            context.RequestContainer = new MockContainer();
 
             // Act
             SelectExpandQueryOption result = new SelectExpandQueryOption(select: null, expand: expandValue, context: context);
@@ -106,6 +108,7 @@ namespace System.Web.OData.Query
             IEdmModel model = _model.Model;
             _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));
+            context.RequestContainer = new MockContainer();
             SelectExpandQueryOption option = new SelectExpandQueryOption("ID,Name,SimpleEnum,Orders", "Orders", context);
 
             // Act
@@ -124,6 +127,7 @@ namespace System.Web.OData.Query
             _model.Model.SetAnnotationValue(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataPath odataPath = new ODataPath(new EntitySetSegment(_model.Customers));
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer), odataPath);
+            context.RequestContainer = new MockContainer();
             SelectExpandQueryOption option = new SelectExpandQueryOption("ID,Name,SimpleEnum,Orders", "Orders", context);
 
             // Act
@@ -142,6 +146,7 @@ namespace System.Web.OData.Query
             _model.Model.SetAnnotationValue(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataPath odataPath = new ODataPath(new EntitySetSegment(_model.Customers));
             ODataQueryContext context = new ODataQueryContext(model, _model.Customer, odataPath);
+            context.RequestContainer = new MockContainer();
             SelectExpandQueryOption option = new SelectExpandQueryOption("ID,Name,SimpleEnum,Orders", "Orders", context);
 
             // Act
@@ -171,6 +176,7 @@ namespace System.Web.OData.Query
             IEdmModel model = builder.GetEdmModel();
 
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));
+            context.RequestContainer = new MockContainer();
             SelectExpandQueryOption option = new SelectExpandQueryOption(select, expand, context);
 
             // Act & Assert
@@ -188,6 +194,7 @@ namespace System.Web.OData.Query
             IEdmModel model = _model.Model;
             _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));
+            context.RequestContainer = new MockContainer();
             SelectExpandQueryOption option = new SelectExpandQueryOption(select, expand, context);
 
             // Act
@@ -202,6 +209,7 @@ namespace System.Web.OData.Query
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            context.RequestContainer = new MockContainer();
             SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(select: "ID", expand: null, context: context);
 
             // Act & Assert
@@ -214,6 +222,7 @@ namespace System.Web.OData.Query
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            context.RequestContainer = new MockContainer();
             SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(select: "ID", expand: null, context: context);
             IQueryable queryable = new Mock<IQueryable>().Object;
 
@@ -228,6 +237,7 @@ namespace System.Web.OData.Query
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataQueryContext context = new ODataQueryContext(model.Model, model.Customer);
+            context.RequestContainer = new MockContainer();
             SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(select: "ID", expand: null, context: context);
             object entity = new object();
 
@@ -244,6 +254,7 @@ namespace System.Web.OData.Query
             var context = new ODataQueryContext(
                 model,
                 model.FindDeclaredType("System.Web.OData.Routing.LevelsEntity"));
+            context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: null,
                 expand: "Parent($expand=Parent($levels=2))",
@@ -299,6 +310,7 @@ namespace System.Web.OData.Query
             var context = new ODataQueryContext(
                 model,
                 model.FindDeclaredType("System.Web.OData.Routing.LevelsEntity"));
+            context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: "Name",
                 expand: "Parent($select=ID;$levels=max)",
@@ -365,6 +377,7 @@ namespace System.Web.OData.Query
             var context = new ODataQueryContext(
                 model,
                 model.FindDeclaredType("System.Web.OData.Routing.LevelsEntity"));
+            context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: null,
                 expand: "Parent($expand=Parent($levels=max),DerivedAncestors($levels=2;$select=ID)),BaseEntities($levels=2)",
@@ -473,6 +486,7 @@ namespace System.Web.OData.Query
             var context = new ODataQueryContext(
                 model,
                 model.FindDeclaredType("System.Web.OData.Routing.LevelsEntity"));
+            context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: null,
                 expand: "Parent($expand=DerivedAncestors($levels=2);$levels=max)",
@@ -558,6 +572,7 @@ namespace System.Web.OData.Query
             var context = new ODataQueryContext(
                 model,
                 model.FindDeclaredType("System.Web.OData.Routing.LevelsEntity"));
+            context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: null,
                 expand: "Parent($expand=DerivedAncestors($levels=max);$levels=2)",

@@ -25,7 +25,7 @@ namespace System.Web.OData.Query
         private ODataQueryOptionParser _queryOptionParser;
 
         /// <summary>
-        /// Initialize a new instance of <see cref="OrderByQueryOption"/> based on the raw $orderby value and 
+        /// Initialize a new instance of <see cref="OrderByQueryOption"/> based on the raw $orderby value and
         /// an EdmModel from <see cref="ODataQueryContext"/>.
         /// </summary>
         /// <param name="rawValue">The raw value for $orderby query. It can be null or empty.</param>
@@ -268,17 +268,10 @@ namespace System.Web.OData.Query
         private IQueryable AddOrderByQueryForProperty(IQueryable query, ODataQuerySettings querySettings,
             OrderByClause orderbyClause, IQueryable querySoFar, OrderByDirection direction, bool alreadyOrdered)
         {
-            // Ensure we have decided how to handle null propagation
-            ODataQuerySettings updatedSettings = querySettings;
-            if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
-            {
-                updatedSettings = new ODataQuerySettings(updatedSettings);
-                updatedSettings.HandleNullPropagation =
-                    HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
-            }
+            Context.UpdateQuerySettings(querySettings, query);
 
             LambdaExpression orderByExpression =
-                FilterBinder.Bind(orderbyClause, Context.ElementClrType, Context.Model, updatedSettings);
+                FilterBinder.Bind(orderbyClause, Context.ElementClrType, Context.RequestContainer);
             querySoFar = ExpressionHelpers.OrderBy(querySoFar, orderByExpression, direction, Context.ElementClrType,
                 alreadyOrdered);
             return querySoFar;

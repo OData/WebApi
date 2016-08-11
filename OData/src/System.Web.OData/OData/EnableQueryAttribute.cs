@@ -545,10 +545,7 @@ namespace System.Web.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            return new ODataQueryContext(model, elementClrType, request.ODataProperties().Path)
-            {
-                RequestContainer = request.GetRequestContainer()
-            };
+            return new ODataQueryContext(model, elementClrType, request.ODataProperties().Path);
         }
 
         private void GetModelBoundPageSize(ODataQueryContext queryContext, ObjectContent responseContent,

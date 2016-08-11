@@ -105,7 +105,7 @@ namespace System.Web.OData.Test
 
         private static ODataBatchContent CreateBatchContent(IEnumerable<ODataBatchResponseItem> responses)
         {
-            return new ODataBatchContent(responses, DependencyInjectionHelper.BuildContainer(null));
+            return new ODataBatchContent(responses, new MockContainer());
         }
     }
 }

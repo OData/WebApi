@@ -149,6 +149,7 @@
     <Compile Include="OData\Builder\TestModels\PropertyAlias.cs" />
     <Compile Include="OData\Builder\TestModels\SpecialOrderLine.cs" />
     <Compile Include="OData\ClrPropertyInfoAnnotationTest.cs" />
+    <Compile Include="OData\MockContainer.cs" />
     <Compile Include="OData\DependencyInjectionHelper.cs" />
     <Compile Include="OData\DateAndTimeOfDayTest.cs" />
     <Compile Include="OData\DateTimeTest.cs" />

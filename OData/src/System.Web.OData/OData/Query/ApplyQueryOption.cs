@@ -54,7 +54,7 @@ namespace System.Web.OData.Query
             //Validator = new FilterQueryValidator();
             _queryOptionParser = queryOptionParser;
             ResultClrType = Context.ElementClrType;
-            _assembliesResolver = QueryContextHelpers.GetAssembliesResolver(context);
+            _assembliesResolver = context.GetAssembliesResolver();
         }
 
         /// <summary>
@@ -118,13 +118,7 @@ namespace System.Web.OData.Query
             ApplyClause applyClause = ApplyClause;
             Contract.Assert(applyClause != null);
 
-            // Ensure we have decided how to handle null propagation
-            ODataQuerySettings updatedSettings = querySettings;
-            if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
-            {
-                updatedSettings = new ODataQuerySettings(updatedSettings);
-                updatedSettings.HandleNullPropagation = HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
-            }
+            ODataQuerySettings updatedSettings = Context.UpdateQuerySettings(querySettings, query);
 
             foreach (var transformation in applyClause.Transformations)
             {
@@ -137,7 +131,7 @@ namespace System.Web.OData.Query
                 else if (transformation.Kind == TransformationNodeKind.Filter)
                 {
                     var filterTransformation = transformation as FilterTransformationNode;
-                    Expression filter = FilterBinder.Bind(filterTransformation.FilterClause, ResultClrType, Context.Model, _assembliesResolver, updatedSettings);
+                    Expression filter = FilterBinder.Bind(filterTransformation.FilterClause, ResultClrType, Context.RequestContainer);
                     query = ExpressionHelpers.Where(query, filter, ResultClrType);
                 }
             }

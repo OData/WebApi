@@ -18,7 +18,7 @@ namespace System.Web.OData.Query.Validators
         public ODataQueryValidatorTest()
         {
             _validator = new ODataQueryValidator();
-            _context = ValidationTestHelper.CreateCustomerContext();
+            _context = ValidationTestHelper.CreateCustomerContext(false);
         }
 
         public static TheoryDataSet<AllowedQueryOptions, string, string> SupportedQueryOptions

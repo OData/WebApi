@@ -1089,7 +1089,7 @@ namespace System.Web.OData.Formatter
         private class CustomSerializerProvider : DefaultODataSerializerProvider
         {
             public CustomSerializerProvider()
-                : base(DependencyInjectionHelper.BuildContainer(null))
+                : base(new MockContainer())
             {
             }
 

@@ -50,7 +50,7 @@ namespace System.Web.OData.Test
 
             IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(contentStream, content.Headers)
             {
-                Container = DependencyInjectionHelper.BuildContainer(null)
+                Container = new MockContainer()
             };
             ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, settings);
             return oDataMessageReader;

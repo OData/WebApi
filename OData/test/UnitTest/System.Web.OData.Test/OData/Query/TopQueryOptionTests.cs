@@ -136,7 +136,7 @@ namespace System.Web.OData.Query
         public void CanApplySkipTopOrderby()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetServiceModel();
-            var context = new ODataQueryContext(model, typeof(Customer));
+            var context = new ODataQueryContext(model, typeof(Customer)) { RequestContainer = new MockContainer() };
             var orderbyOption = new OrderByQueryOption("Name", context);
             var skipOption = new SkipQueryOption("2", context);
             var topOption = new TopQueryOption("2", context);

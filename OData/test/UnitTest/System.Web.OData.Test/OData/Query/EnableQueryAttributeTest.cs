@@ -670,11 +670,10 @@ namespace System.Web.OData.Query
             var builder = new ODataConventionModelBuilder();
             var model = builder.GetEdmModel();
             var entityClrType = typeof(QueryCompositionCustomer);
-            var config = new HttpConfiguration();
             var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            request.ODataProperties().Model = model;
+            request.EnableHttpDependencyInjectionSupport(model);
             var descriptor = new ReflectedHttpActionDescriptor();
-            descriptor.Configuration = config;
+            descriptor.Configuration = request.GetConfiguration();
 
             var queryModel = new EnableQueryAttribute().GetModel(entityClrType, request, descriptor);
 
@@ -691,11 +690,10 @@ namespace System.Web.OData.Query
             builder.EntitySet<QueryCompositionCustomer>("customers");
             var model = builder.GetEdmModel();
             var entityClrType = typeof(QueryCompositionCustomer);
-            var config = new HttpConfiguration();
             var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            request.ODataProperties().Model = model;
+            request.EnableHttpDependencyInjectionSupport(model);
             var descriptor = new ReflectedHttpActionDescriptor();
-            descriptor.Configuration = config;
+            descriptor.Configuration = request.GetConfiguration();
 
             var queryModel = new EnableQueryAttribute().GetModel(entityClrType, request, descriptor);
 

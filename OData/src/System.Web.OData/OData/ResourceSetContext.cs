@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using System.Web.OData.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData
@@ -47,11 +48,7 @@ namespace System.Web.OData
         {
             get
             {
-                return Request.ODataProperties().Model;
-            }
-            set
-            {
-                Request.ODataProperties().Model = value;
+                return Request.GetRequestContainer().GetRequiredService<IEdmModel>();
             }
         }
     }

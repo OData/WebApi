@@ -89,7 +89,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
             for (int i=10 ; i < 15 ; i++)
             {
                 string contextUrl = BaseAddress.ToLowerInvariant() + "/untyped/$metadata#UntypedDeltaCustomers/$deletedEntity";
-                Assert.True(contextUrl.Equals(((dynamic)returnedObject).value[i]["@odata.context"].Value)); 
+                Assert.True(contextUrl.Equals(((dynamic)returnedObject).value[i]["@odata.context"].Value));
                 Assert.True(i.ToString().Equals(((dynamic)returnedObject).value[i]["id"].Value));
             }
         }
@@ -101,7 +101,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
         {
             get
             {
-                return Request.ODataProperties().Model.FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedCustomer") as IEdmEntityType;
+                return Request.GetEdmModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedCustomer") as IEdmEntityType;
             }
         }
 
@@ -109,7 +109,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
         {
             get
             {
-                return Request.ODataProperties().Model.FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedOrder") as IEdmEntityType;
+                return Request.GetEdmModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedOrder") as IEdmEntityType;
             }
         }
 
@@ -117,7 +117,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
         {
             get
             {
-                return Request.ODataProperties().Model.FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedAddress") as IEdmComplexType;
+                return Request.GetEdmModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedAddress") as IEdmComplexType;
             }
         }
 

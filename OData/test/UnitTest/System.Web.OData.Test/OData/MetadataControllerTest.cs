@@ -44,23 +44,10 @@ namespace System.Web.OData.Builder
 
             MetadataController controller = new MetadataController();
             controller.Request = new HttpRequestMessage();
-            controller.Request.ODataProperties().Model = model;
+            controller.Request.EnableHttpDependencyInjectionSupport(model);
 
             IEdmModel responseModel = controller.GetMetadata();
             Assert.Equal(model, responseModel);
-        }
-
-        [Fact]
-        public void GetMetadata_Throws_IfModelIsNotSetOnRequest()
-        {
-            HttpConfiguration configuration = new HttpConfiguration();
-            MetadataController controller = new MetadataController();
-            controller.Request = new HttpRequestMessage();
-
-            Assert.Throws<InvalidOperationException>(() => controller.GetMetadata(),
-                "The request must have an associated EDM model. Consider using the extension method " +
-                "HttpConfiguration.MapODataServiceRoute to register a route that parses the OData URI and " +
-                "attaches the model information.");
         }
 
         [Fact]

@@ -218,10 +218,9 @@ namespace System.Web.OData.Test
         {
             HttpRequestMessage request;
             request = new HttpRequestMessage(method, "http://host/any");
-            request.EnableODataDependencyInjectionSupport();
-            HttpRequestMessageProperties properties = request.ODataProperties();
             IEdmModel model = edmModel ?? SetupModel();
-            properties.Model = model;
+            request.EnableODataDependencyInjectionSupport(model);
+            HttpRequestMessageProperties properties = request.ODataProperties();
             properties.Path = request.GetRequestContainer()
                 .GetRequiredService<IODataPathHandler>()
                 .Parse(model, "http://localhost/any", odataPath);

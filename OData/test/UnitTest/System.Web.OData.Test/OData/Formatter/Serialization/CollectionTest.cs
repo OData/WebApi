@@ -235,7 +235,6 @@ namespace System.Web.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");
             request.EnableODataDependencyInjectionSupport();
             request.GetConfiguration().Routes.MapFakeODataRoute();
-            request.ODataProperties().Model = GetSampleModel();
             return request;
         }
 

@@ -14,6 +14,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using ODataPath = System.Web.OData.Routing.ODataPath;
@@ -122,7 +123,7 @@ namespace System.Web.OData.Results
 
         private static ResourceContext CreateResourceContext(HttpRequestMessage request, object entity)
         {
-            IEdmModel model = request.ODataProperties().Model;
+            IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
             if (model == null)
             {
                 throw new InvalidOperationException(SRResources.RequestMustHaveModel);

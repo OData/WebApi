@@ -67,7 +67,6 @@ namespace System.Web.OData.Formatter.Deserialization
             HttpRequestMessage request = new HttpRequestMessage();
             request.SetConfiguration(config);
             request.ODataProperties().RouteName = "odata";
-            request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath(new[] { new SingletonSegment(singleton) });
             request.RequestUri = new Uri("http://localhost/odata/Boss");
             return request;

@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Hosting;
+using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
@@ -21,30 +22,6 @@ namespace System.Net.Http
 {
     public class HttpRequestMessageExtensionsTest
     {
-        [Fact]
-        public void ModelGetter_ReturnsNullByDefault()
-        {
-            HttpRequestMessage request = new HttpRequestMessage();
-            IEdmModel model = request.ODataProperties().Model;
-
-            Assert.Null(model);
-        }
-
-        [Fact]
-        public void ModelGetter_Returns_ModelSetter()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            IEdmModel model = new EdmModel();
-
-            // Act
-            request.ODataProperties().Model = model;
-            IEdmModel newModel = request.ODataProperties().Model;
-
-            // Assert
-            Assert.Same(model, newModel);
-        }
-
         [Theory]
         [InlineData(IncludeErrorDetailPolicy.Default, null, null, false)]
         [InlineData(IncludeErrorDetailPolicy.Default, null, true, true)]
@@ -231,17 +208,16 @@ namespace System.Net.Http
         public void GetETag_Returns_ETagInHeader()
         {
             // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+
             HttpRequestMessage request = new HttpRequestMessage();
-            HttpConfiguration cofiguration = new HttpConfiguration();
-            request.SetConfiguration(cofiguration);
+            request.EnableHttpDependencyInjectionSupport(model.Model);
+
             Dictionary<string, object> properties = new Dictionary<string, object> { { "City", "Foo" } };
             EntityTagHeaderValue etagHeaderValue = new DefaultODataETagHandler().CreateETag(properties);
 
-            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-
             ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers));
             request.ODataProperties().Path = odataPath;
-            request.ODataProperties().Model = model.Model;
 
             // Act
             ETag result = request.GetETag(etagHeaderValue);
@@ -256,17 +232,16 @@ namespace System.Net.Http
         public void GetETagTEntity_Returns_ETagInHeader()
         {
             // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+
             HttpRequestMessage request = new HttpRequestMessage();
-            HttpConfiguration cofiguration = new HttpConfiguration();
-            request.SetConfiguration(cofiguration);
+            request.EnableHttpDependencyInjectionSupport(model.Model);
+
             Dictionary<string, object> properties = new Dictionary<string, object> { { "City", "Foo" } };
             EntityTagHeaderValue etagHeaderValue = new DefaultODataETagHandler().CreateETag(properties);
 
-            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-
             ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers));
             request.ODataProperties().Path = odataPath;
-            request.ODataProperties().Model = model.Model;
 
             // Act
             ETag<Customer> result = request.GetETag<Customer>(etagHeaderValue);
@@ -349,10 +324,8 @@ namespace System.Net.Http
             ODataPath odataPath = new ODataPath(new EntitySetSegment(customers));
 
             HttpRequestMessage request = new HttpRequestMessage();
-            HttpConfiguration cofiguration = new HttpConfiguration();
-            request.SetConfiguration(cofiguration);
+            request.EnableHttpDependencyInjectionSupport(model);
             request.ODataProperties().Path = odataPath;
-            request.ODataProperties().Model = model;
 
             // Act
             ETag result = request.GetETag(etagHeaderValue);
@@ -403,10 +376,8 @@ namespace System.Net.Http
             IEdmEntitySet orders = model.FindDeclaredEntitySet("Orders");
             ODataPath odataPath = new ODataPath(new EntitySetSegment(orders));
             HttpRequestMessage request = new HttpRequestMessage();
-            HttpConfiguration cofiguration = new HttpConfiguration();
-            request.SetConfiguration(cofiguration);
+            request.EnableHttpDependencyInjectionSupport(model);
             request.ODataProperties().Path = odataPath;
-            request.ODataProperties().Model = model;
 
             // Act
             ETag result = request.GetETag(etagHeaderValue);

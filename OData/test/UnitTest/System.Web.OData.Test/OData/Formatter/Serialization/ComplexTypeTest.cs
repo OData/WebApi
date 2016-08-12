@@ -36,8 +36,7 @@ namespace System.Web.OData.Formatter.Serialization
         private static HttpRequestMessage GetSampleRequest()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");
-            request.ODataProperties().Model = GetSampleModel();
-            request.EnableODataDependencyInjectionSupport();
+            request.EnableODataDependencyInjectionSupport(GetSampleModel());
             request.GetConfiguration().Routes.MapFakeODataRoute();
             return request;
         }

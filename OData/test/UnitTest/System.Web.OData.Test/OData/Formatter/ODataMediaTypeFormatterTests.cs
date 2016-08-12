@@ -97,7 +97,6 @@ namespace System.Web.OData.Formatter
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, null, model);
             request.SetConfiguration(configuration);
-            request.ODataProperties().Model = model;
             IEdmEntitySet entitySet = model.EntityContainer.EntitySets().Single();
             request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet),
                 new KeySegment(new[] {new KeyValuePair<string, object>("ID", 10)}, entitySet.EntityType(), entitySet));
@@ -125,7 +124,6 @@ namespace System.Web.OData.Formatter
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, routePrefix, model);
             request.SetConfiguration(configuration);
-            request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath();
             request.EnableODataDependencyInjectionSupport(routeName);
             HttpRouteData routeData = new HttpRouteData(new HttpRoute());
@@ -148,7 +146,6 @@ namespace System.Web.OData.Formatter
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
             request.EnableODataDependencyInjectionSupport();
             request.GetConfiguration().Routes.MapHttpRoute(HttpRouteCollectionExtensions.RouteName, "{param}");
-            request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath();
 
             ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.ServiceDocument);
@@ -193,7 +190,6 @@ namespace System.Web.OData.Formatter
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.MapODataServiceRoute(routeName, routePrefix, model);
             request.SetConfiguration(configuration);
-            request.ODataProperties().Model = model;
             request.ODataProperties().Path = new ODataPath();
             request.EnableODataDependencyInjectionSupport(routeName);
             HttpRouteData routeData = new HttpRouteData(new HttpRoute());
@@ -229,7 +225,6 @@ namespace System.Web.OData.Formatter
             IEdmModel model = new EdmModel();
             configuration.MapODataServiceRoute(routeName, routePrefix, model);
             request.SetConfiguration(configuration);
-            request.ODataProperties().Model = model;
             request.EnableODataDependencyInjectionSupport(routeName);
 
             // Act
@@ -893,9 +888,8 @@ namespace System.Web.OData.Formatter
         private static HttpRequestMessage CreateFakeODataRequest(IEdmModel model)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
-            request.EnableODataDependencyInjectionSupport();
+            request.EnableODataDependencyInjectionSupport(model);
             request.GetConfiguration().Routes.MapFakeODataRoute();
-            request.ODataProperties().Model = model;
             request.ODataProperties().Path =
                 new ODataPath(new EntitySetSegment(model.EntityContainer.EntitySets().Single()));
             return request;

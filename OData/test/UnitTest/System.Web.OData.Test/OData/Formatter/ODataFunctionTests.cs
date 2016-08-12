@@ -10,8 +10,8 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 
@@ -319,7 +319,7 @@ namespace System.Web.OData.Formatter
         [EnableQuery]
         public IHttpActionResult Get()
         {
-            IEdmModel model = Request.ODataProperties().Model;
+            IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
             IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "Customer");
 
             EdmEntityObject customer = new EdmEntityObject(customerType);

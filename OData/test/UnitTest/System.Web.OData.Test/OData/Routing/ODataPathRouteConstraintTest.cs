@@ -20,7 +20,7 @@ namespace System.Web.OData.Routing
         string _routeName = "name";
         IEnumerable<IODataRoutingConvention> _conventions = ODataRoutingConventions.CreateDefault();
         HttpRequestMessage _request = new HttpRequestMessage();
-        IServiceProvider _rootContainer = new MockContainer();
+        IServiceProvider _rootContainer;
         IODataPathHandler _pathHandler;
 
         private static IList<string> _stringsWithUnescapedSlashes = new List<string>
@@ -51,6 +51,7 @@ namespace System.Web.OData.Routing
 
         public ODataPathRouteConstraintTest()
         {
+            _rootContainer = new MockContainer(_model);
             _pathHandler = _rootContainer.GetRequiredService<IODataPathHandler>();
         }
 
@@ -154,7 +155,7 @@ namespace System.Web.OData.Routing
             Assert.True(constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution));
 
             Assert.Equal("Metadata", values["controller"]);
-            Assert.Same(_model, request.ODataProperties().Model);
+            Assert.Same(_model, request.GetRequestContainer().GetRequiredService<IEdmModel>());
             Assert.Same(_routeName, request.ODataProperties().RouteName);
             Assert.Equal(_conventions, request.ODataProperties().RoutingConventions);
             Assert.Same(_pathHandler, request.GetRequestContainer().GetRequiredService<IODataPathHandler>());

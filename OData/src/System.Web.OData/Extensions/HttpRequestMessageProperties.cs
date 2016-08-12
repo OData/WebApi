@@ -10,7 +10,6 @@ using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData;
-using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
 
@@ -24,7 +23,6 @@ namespace System.Web.OData.Extensions
     {
         // Maintain the System.Web.OData. prefix in any new properties to avoid conflicts with user properties
         // and those of the v3 assembly.
-        private const string ModelKey = "System.Web.OData.Model";
         private const string NextLinkKey = "System.Web.OData.NextLink";
         private const string PathKey = "System.Web.OData.Path";
         private const string RouteNameKey = "System.Web.OData.RouteName";
@@ -63,21 +61,6 @@ namespace System.Web.OData.Extensions
             set
             {
                 _request.Properties[TotalCountFuncKey] = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the EDM model associated with the request.
-        /// </summary>
-        public IEdmModel Model
-        {
-            get
-            {
-                return GetValueOrNull<IEdmModel>(ModelKey);
-            }
-            set
-            {
-                _request.Properties[ModelKey] = value;
             }
         }
 

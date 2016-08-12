@@ -180,7 +180,6 @@ namespace System.Web.OData.Routing
                     {
                         // TODO: Move Model, Path and RoutingConventions into container so that we don't need assignments below.
                         // Set all the properties we need for routing, querying, formatting
-                        request.ODataProperties().Model = EdmModel;
                         request.ODataProperties().Path = path;
                         request.ODataProperties().RouteName = RouteName;
                         request.ODataProperties().RoutingConventions = RoutingConventions;

@@ -259,7 +259,7 @@ namespace System.Web.OData.Formatter
 
             if (Request != null)
             {
-                IEdmModel model = Request.ODataProperties().Model;
+                IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
                 if (model != null)
                 {
                     IEdmTypeReference expectedPayloadType;
@@ -285,7 +285,7 @@ namespace System.Web.OData.Formatter
 
             if (Request != null)
             {
-                IEdmModel model = Request.ODataProperties().Model;
+                IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
                 if (model != null)
                 {
                     ODataPayloadKind? payloadKind;
@@ -363,7 +363,7 @@ namespace System.Web.OData.Formatter
             }
             else
             {
-                IEdmModel model = Request.ODataProperties().Model;
+                IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
                 if (model == null)
                 {
                     throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
@@ -455,7 +455,7 @@ namespace System.Web.OData.Formatter
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
         private void WriteToStream(Type type, object value, Stream writeStream, HttpContent content, HttpContentHeaders contentHeaders)
         {
-            IEdmModel model = Request.ODataProperties().Model;
+            IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
             if (model == null)
             {
                 throw Error.InvalidOperation(SRResources.RequestMustHaveModel);

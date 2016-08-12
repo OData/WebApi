@@ -189,24 +189,10 @@ namespace System.Web.OData.Results
         }
 
         [Fact]
-        public void GenerateLocationHeader_ThrowsRequestMustHaveModel_IfRequestDoesNotHaveModel()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(),
-                "The request must have an associated EDM model. Consider using the extension method " +
-                "HttpConfiguration.MapODataServiceRoute to register a route that parses the OData URI and " +
-                "attaches the model information.");
-        }
-
-        [Fact]
         public void GenerateLocationHeader_ThrowsODataPathMissing_IfRequestDoesNotHaveODataPath()
         {
             HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Model = EdmCoreModel.Instance;
+            request.EnableHttpDependencyInjectionSupport(EdmCoreModel.Instance);
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
@@ -220,8 +206,8 @@ namespace System.Web.OData.Results
             // Arrange
             ODataPath path = new ODataPath();
             HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Model = EdmCoreModel.Instance;
             request.ODataProperties().Path = path;
+            request.EnableHttpDependencyInjectionSupport(EdmCoreModel.Instance);
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
@@ -236,8 +222,8 @@ namespace System.Web.OData.Results
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
+            request.EnableHttpDependencyInjectionSupport(model.Model);
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
@@ -251,8 +237,8 @@ namespace System.Web.OData.Results
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
+            request.EnableHttpDependencyInjectionSupport(model.Model);
             model.Model.SetAnnotationValue(model.Address, new ClrTypeAnnotation(typeof(TestEntity)));
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
@@ -277,8 +263,8 @@ namespace System.Web.OData.Results
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
+            request.EnableHttpDependencyInjectionSupport(model.Model);
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act
@@ -299,7 +285,6 @@ namespace System.Web.OData.Results
                 "http://localhost/",
                 "MyOrders(1)/OrderLines");
             var request = GetODataRequest(model.Model);
-            request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
             var orderLine = new OrderLine { ID = 2 };
             var createdODataResult = new CreatedODataResult<OrderLine>(
@@ -326,8 +311,8 @@ namespace System.Web.OData.Results
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
+            request.EnableHttpDependencyInjectionSupport(model.Model);
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act
@@ -349,10 +334,10 @@ namespace System.Web.OData.Results
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
+            request.EnableHttpDependencyInjectionSupport(model.Model);
             TestController controller = new TestController();
-            controller.Configuration = new HttpConfiguration();
+            controller.Configuration = request.GetConfiguration();
             CreatedODataResult<TestEntity> createdODataResult = new CreatedODataResult<TestEntity>(_entity, controller);
 
             // Act
@@ -377,9 +362,9 @@ namespace System.Web.OData.Results
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
-            TestController controller = new TestController { Request = request, Configuration = new HttpConfiguration() };
+            request.EnableHttpDependencyInjectionSupport(model.Model);
+            TestController controller = new TestController { Request = request, Configuration = request.GetConfiguration() };
             CreatedODataResult<TestEntity> createdODataResult = new CreatedODataResult<TestEntity>(_entity, controller);
 
             // Act
@@ -406,9 +391,9 @@ namespace System.Web.OData.Results
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
             HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
-            TestController controller = new TestController { Configuration = new HttpConfiguration() };
+            request.EnableHttpDependencyInjectionSupport(model.Model);
+            TestController controller = new TestController { Configuration = request.GetConfiguration() };
             CreatedODataResult<TestEntity> createdODataResult = new CreatedODataResult<TestEntity>(_entity, controller);
 
             // Act

@@ -128,7 +128,7 @@ namespace WebStack.QA.Test.OData.ETags
         [EnableQuery]
         public IHttpActionResult Get(int key)
         {
-            IEdmModel model = Request.ODataProperties().Model;
+            IEdmModel model = Request.GetEdmModel();
             IEdmEntityType entityType = model.SchemaElements.OfType<IEdmEntityType>().First(c => c.Name == "Customer");
             EdmEntityObject customer = new EdmEntityObject(entityType);
             customer.TrySetPropertyValue("ID", key);

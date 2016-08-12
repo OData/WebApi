@@ -15,6 +15,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
@@ -641,7 +642,7 @@ namespace System.Web.OData
             HttpActionDescriptor actionDescriptor)
         {
             // Get model for the request
-            IEdmModel model = request.ODataProperties().Model;
+            IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
 
             if (model == null || model.GetEdmType(elementClrType) == null)
             {

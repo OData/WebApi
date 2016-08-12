@@ -42,7 +42,6 @@ namespace System.Web.OData.Formatter.Serialization
         private HttpRequestMessage GetSampleRequest()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/employees");
-            request.ODataProperties().Model = _model;
             HttpConfiguration configuration = new HttpConfiguration();
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, null, _model);

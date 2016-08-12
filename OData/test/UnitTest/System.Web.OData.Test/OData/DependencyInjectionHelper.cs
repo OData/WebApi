@@ -8,7 +8,9 @@ using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
+using Microsoft.OData.Edm;
 using HttpRouteCollectionExtensions = System.Web.OData.Formatter.HttpRouteCollectionExtensions;
+using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace System.Web.OData
 {
@@ -41,16 +43,42 @@ namespace System.Web.OData
 
         public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration, string routeName)
         {
-            configuration.CreateODataRootContainer(routeName, null);
+            configuration.EnableODataDependencyInjectionSupport(routeName, (Action<IContainerBuilder>)null);
+        }
+
+        public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration, string routeName,
+            Action<IContainerBuilder> action)
+        {
+            configuration.CreateODataRootContainer(routeName, action);
+        }
+
+        public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration, string routeName,
+            IEdmModel model)
+        {
+            configuration.CreateODataRootContainer(routeName, builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => model));
         }
 
         public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration,
             Action<IContainerBuilder> action)
         {
-            configuration.CreateODataRootContainer(HttpRouteCollectionExtensions.RouteName, action);
+            configuration.EnableODataDependencyInjectionSupport(HttpRouteCollectionExtensions.RouteName, action);
         }
 
         public static void EnableHttpDependencyInjectionSupport(this HttpRequestMessage request)
+        {
+            request.EnableHttpDependencyInjectionSupport((Action<IContainerBuilder>)null);
+        }
+
+        public static void EnableHttpDependencyInjectionSupport(this HttpRequestMessage request,
+            IEdmModel model)
+        {
+            request.EnableHttpDependencyInjectionSupport(builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => model));
+        }
+
+        public static void EnableHttpDependencyInjectionSupport(this HttpRequestMessage request,
+            Action<IContainerBuilder> action)
         {
             HttpConfiguration configuration = request.GetConfiguration();
             if (configuration == null)
@@ -59,7 +87,7 @@ namespace System.Web.OData
                 request.SetConfiguration(configuration);
             }
 
-            configuration.EnableDependencyInjection();
+            configuration.EnableDependencyInjection(action);
         }
 
         public static void EnableODataDependencyInjectionSupport(this HttpRequestMessage request)
@@ -69,11 +97,23 @@ namespace System.Web.OData
 
         public static void EnableODataDependencyInjectionSupport(this HttpRequestMessage request, string routeName)
         {
+            request.EnableODataDependencyInjectionSupport(routeName, null);
+        }
+
+        public static void EnableODataDependencyInjectionSupport(this HttpRequestMessage request, IEdmModel model)
+        {
+            request.EnableODataDependencyInjectionSupport(HttpRouteCollectionExtensions.RouteName, builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => model));
+        }
+
+        public static void EnableODataDependencyInjectionSupport(this HttpRequestMessage request, string routeName,
+            Action<IContainerBuilder> action)
+        {
             HttpConfiguration configuration = request.GetConfiguration();
             if (configuration == null)
             {
                 configuration = new HttpConfiguration();
-                configuration.EnableODataDependencyInjectionSupport(routeName);
+                configuration.EnableODataDependencyInjectionSupport(routeName, action);
                 request.SetConfiguration(configuration);
             }
 

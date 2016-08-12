@@ -137,7 +137,7 @@ namespace System.Web.OData.Extensions
 
                 // get property names from request
                 ODataPath odataPath = request.ODataProperties().Path;
-                IEdmModel model = request.ODataProperties().Model;
+                IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
                 IEdmEntitySet entitySet = odataPath.NavigationSource as IEdmEntitySet;
                 if (model != null && entitySet != null)
                 {

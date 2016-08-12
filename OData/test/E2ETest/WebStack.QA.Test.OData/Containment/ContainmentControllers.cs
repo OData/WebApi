@@ -398,7 +398,7 @@ namespace WebStack.QA.Test.OData.Containment
 
         private IEdmEntityType GetEdmEntityTypeOfStatement()
         {
-            IEdmModel edmModel = Request.ODataProperties().Model;
+            IEdmModel edmModel = Request.GetEdmModel();
             IEdmEntityType statementType = (IEdmEntityType)edmModel.FindDeclaredType(typeof(Statement).FullName);
             return statementType;
         }

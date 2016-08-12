@@ -651,7 +651,6 @@ namespace System.Web.OData.Builder
             configuration.MapODataServiceRoute(routeName, null, model);
             request.SetConfiguration(configuration);
             request.EnableODataDependencyInjectionSupport(routeName);
-            request.ODataProperties().Model = model;
 
             UrlHelper urlHelper = new UrlHelper(request);
 

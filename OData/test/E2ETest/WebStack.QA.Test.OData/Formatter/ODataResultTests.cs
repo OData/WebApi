@@ -57,7 +57,7 @@ namespace WebStack.QA.Test.OData.Formatter
             }
             var baseUri = new Uri(this.Url.CreateODataLink());
 
-            IEdmEntitySet entitySet = Request.ODataProperties().Model.EntityContainer.FindEntitySet("ODataResult_Model2");
+            IEdmEntitySet entitySet = Request.GetEdmModel().EntityContainer.FindEntitySet("ODataResult_Model2");
             var uri = new Uri(this.Url.CreateODataLink(new EntitySetSegment(entitySet)));
             return new PageResult<ODataResult_Model2>(models, baseUri.MakeRelativeUri(uri), count);
         }

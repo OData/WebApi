@@ -72,9 +72,6 @@ namespace System.Web.OData.Query
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
-            HttpConfiguration cofiguration = new HttpConfiguration();
-            request.SetConfiguration(cofiguration);
-            request.EnableHttpDependencyInjectionSupport();
             Dictionary<string, object> properties = new Dictionary<string, object> { { "Name", "Foo" } };
             EntityTagHeaderValue etagHeaderValue = new DefaultODataETagHandler().CreateETag(properties);
             if (header.Equals("IfMatch"))
@@ -99,7 +96,7 @@ namespace System.Web.OData.Query
             EntitySetSegment entitySetSegment = new EntitySetSegment(customers);
             ODataPath odataPath = new ODataPath(new[] { entitySetSegment });
             request.ODataProperties().Path = odataPath;
-            request.ODataProperties().Model = model;
+            request.EnableHttpDependencyInjectionSupport(model);
 
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));
 

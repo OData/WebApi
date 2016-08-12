@@ -312,8 +312,7 @@ namespace System.Web.OData.Formatter
         {
             request.ODataProperties().Path = new DefaultODataPathHandler()
                 .Parse(_model, "http://any/", GetODataPath(request.RequestUri.AbsoluteUri));
-            request.ODataProperties().Model = _model;
-            request.EnableODataDependencyInjectionSupport();
+            request.EnableODataDependencyInjectionSupport(_model);
         }
 
         private static IEdmModel GetEdmModel()

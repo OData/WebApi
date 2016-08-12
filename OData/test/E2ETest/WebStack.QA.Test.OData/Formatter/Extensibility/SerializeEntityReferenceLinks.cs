@@ -55,7 +55,7 @@ namespace WebStack.QA.Test.OData.Formatter.Extensibility
 
         public HttpResponseMessage GetLinksForChildren(int key)
         {
-            IEdmModel model = Request.ODataProperties().Model;
+            IEdmModel model = Request.GetEdmModel();
             IEdmEntitySet childEntity = model.EntityContainer.FindEntitySet("ChildEntity");
 
             return Request.CreateResponse(HttpStatusCode.OK,

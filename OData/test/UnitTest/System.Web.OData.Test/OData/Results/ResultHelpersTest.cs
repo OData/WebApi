@@ -30,8 +30,8 @@ namespace System.Web.OData.Results
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             var path = new ODataPath(new EntitySetSegment(model.Customers));
             var request = new HttpRequestMessage();
-            request.ODataProperties().Model = model.Model;
             request.ODataProperties().Path = path;
+            request.EnableHttpDependencyInjectionSupport(model.Model);
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(

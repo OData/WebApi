@@ -46,7 +46,7 @@ namespace System.Web.OData.Formatter
                         },
                 };
         }
-        
+
         [Fact]
         public void GetValue_Returns_SetValue()
         {
@@ -68,7 +68,7 @@ namespace System.Web.OData.Formatter
             etag.Name = "Name1";
             Assert.Equal("Name1", etag.Name);
         }
-        
+
         [Fact]
         public void GetValue_ThrowsInvalidOperation_IfNotWellFormed()
         {
@@ -217,8 +217,6 @@ namespace System.Web.OData.Formatter
             EntityTagHeaderValue etagHeaderValue = handerl.CreateETag(properties);
 
             HttpRequestMessage request = new HttpRequestMessage();
-            HttpConfiguration cofiguration = new HttpConfiguration();
-            request.SetConfiguration(cofiguration);
 
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<MyETagCustomer>("Customers");
@@ -226,8 +224,8 @@ namespace System.Web.OData.Formatter
             IEdmEntityType customer = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(e => e.Name == "MyEtagCustomer");
             IEdmEntitySet customers = model.FindDeclaredEntitySet("Customers");
             ODataPath odataPath = new ODataPath(new[] { new EntitySetSegment(customers) });
+            request.EnableHttpDependencyInjectionSupport(model);
             request.ODataProperties().Path = odataPath;
-            request.ODataProperties().Model = model;
 
             ETag etagCustomer = request.GetETag(etagHeaderValue);
             etagCustomer.EntityType = typeof(MyETagCustomer);
@@ -309,8 +307,6 @@ namespace System.Web.OData.Formatter
             EntityTagHeaderValue etagHeaderValue = handerl.CreateETag(properties);
 
             HttpRequestMessage request = new HttpRequestMessage();
-            HttpConfiguration cofiguration = new HttpConfiguration();
-            request.SetConfiguration(cofiguration);
 
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<MyETagOrder>("Orders");
@@ -318,7 +314,7 @@ namespace System.Web.OData.Formatter
             IEdmEntitySet orders = model.FindDeclaredEntitySet("Orders");
             ODataPath odataPath = new ODataPath(new[] {new EntitySetSegment(orders) });
             request.ODataProperties().Path = odataPath;
-            request.ODataProperties().Model = model;
+            request.EnableHttpDependencyInjectionSupport(model);
 
             ETag etagCustomer = request.GetETag(etagHeaderValue);
             etagCustomer.EntityType = typeof(MyETagOrder);

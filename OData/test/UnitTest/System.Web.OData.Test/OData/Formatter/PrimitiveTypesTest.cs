@@ -73,7 +73,6 @@ namespace System.Web.OData.Formatter
                 request.SetConfiguration(configuration);
                 IEdmProperty property =
                     model.EntityContainer.EntitySets().Single().EntityType().Properties().First();
-                request.ODataProperties().Model = model;
                 request.ODataProperties().Path = new ODataPath(new PropertySegment(property as IEdmStructuralProperty));
                 request.EnableODataDependencyInjectionSupport();
 
@@ -113,7 +112,6 @@ namespace System.Web.OData.Formatter
                 config.MapODataServiceRoute("default", "", model);
                 request.SetConfiguration(config);
                 request.EnableODataDependencyInjectionSupport("default");
-                request.ODataProperties().Model = model;
 
                 ODataMediaTypeFormatter formatter = CreateFormatter(request);
                 formatter.SupportedMediaTypes.Add(mediaType);
@@ -165,7 +163,6 @@ namespace System.Web.OData.Formatter
                 request.SetConfiguration(configuration);
                 IEdmProperty property =
                     model.EntityContainer.EntitySets().Single().EntityType().Properties().First();
-                request.ODataProperties().Model = model;
                 request.ODataProperties().Path = new ODataPath(new PropertySegment(property as IEdmStructuralProperty));
                 request.EnableODataDependencyInjectionSupport();
 
@@ -204,7 +201,6 @@ namespace System.Web.OData.Formatter
                 config.MapODataServiceRoute("default", "", model);
                 request.SetConfiguration(config);
                 request.EnableODataDependencyInjectionSupport("default");
-                request.ODataProperties().Model = model;
 
                 ODataMediaTypeFormatter formatter = CreateFormatter(request);
                 formatter.SupportedMediaTypes.Add(mediaType);

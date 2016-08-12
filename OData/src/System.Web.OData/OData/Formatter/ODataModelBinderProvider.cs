@@ -422,7 +422,7 @@ namespace System.Web.OData.Formatter
             {
                 HttpRequestMessage request = actionContext.Request;
                 ODataPath path = request.ODataProperties().Path;
-                IEdmModel edmModel = request.ODataProperties().Model;
+                IEdmModel edmModel = request.GetRequestContainer().GetRequiredService<IEdmModel>();
 
                 return new ODataDeserializerContext
                 {

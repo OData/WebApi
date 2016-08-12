@@ -14,6 +14,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using ODataPath = System.Web.OData.Routing.ODataPath;
@@ -21,7 +22,7 @@ using ODataPath = System.Web.OData.Routing.ODataPath;
 namespace System.Web.OData
 {
     /// <summary>
-    /// Defines a <see cref="HttpMessageHandler"/> to add an ETag header value to an OData response when the response 
+    /// Defines a <see cref="HttpMessageHandler"/> to add an ETag header value to an OData response when the response
     /// is a single resource that has an ETag defined.
     /// </summary>
     public class ETagMessageHandler : DelegatingHandler
@@ -49,7 +50,7 @@ namespace System.Web.OData
             // unless the request's representation data was saved without any transformation applied to the body
             // (i.e., the resource's new representation data is identical to the representation data received in the
             // PUT request) and the ETag value reflects the new representation.
-            // Even in that case returning an ETag is optional and it requires access to the original object which is 
+            // Even in that case returning an ETag is optional and it requires access to the original object which is
             // not possible with the current architecture, so if the user is interested he can set the ETag in that
             // case by himself on the response.
             if (response == null || !response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.NoContent)
@@ -58,7 +59,7 @@ namespace System.Web.OData
             }
 
             ODataPath path = request.ODataProperties().Path;
-            IEdmModel model = request.ODataProperties().Model;
+            IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
 
             IEdmEntityType edmType = GetSingleEntityEntityType(path);
             object value = GetSingleEntityObject(response);

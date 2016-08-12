@@ -111,7 +111,6 @@ namespace System.Web.OData.Builder.Conventions
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:123");
             request.SetConfiguration(configuration);
             request.EnableODataDependencyInjectionSupport("odata");
-            request.ODataProperties().Model = model;
 
             IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
             var entityContext = new ResourceSetContext { EntitySetBase = customers, Request = request, Url = request.GetUrlHelper() };

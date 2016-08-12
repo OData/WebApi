@@ -485,7 +485,6 @@ namespace System.Web.OData
                 config.MapODataServiceRoute("default", "", model);
                 request.SetConfiguration(config);
                 request.EnableODataDependencyInjectionSupport("default");
-                request.ODataProperties().Model = model;
                 request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));
                 IEnumerable<MediaTypeFormatter> perRequestFormatters = odataFormatters.Select(
                     (f) => f.GetPerRequestFormatterInstance(typeof(Delta<DeltaModel>), request, null));
@@ -538,7 +537,6 @@ namespace System.Web.OData
                 config.MapODataServiceRoute("default", "", model);
                 request.SetConfiguration(config);
                 request.EnableODataDependencyInjectionSupport("default");
-                request.ODataProperties().Model = model;
                 request.ODataProperties().Path = new ODataPath(new EntitySetSegment(entitySet));
                 IEnumerable<MediaTypeFormatter> perRequestFormatters = odataFormatters.Select(
                     (f) => f.GetPerRequestFormatterInstance(typeof(Delta<DeltaModelWithAlias>), request, null));

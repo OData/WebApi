@@ -12,6 +12,8 @@ using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.TestCommon;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
@@ -30,7 +32,7 @@ namespace System.Web.OData.Query
         [InlineData("QueryCompositionCustomerWithTaskOfIEnumerable")]
         public void QueryComposition_Works(string controllerName)
         {
-            HttpServer server = new HttpServer(InitializeConfiguration(controllerName, useCustomEdmModel: false));
+            HttpServer server = new HttpServer(InitializeConfiguration(controllerName, useCustomEdmModel: true));
             HttpClient client = new HttpClient(server);
 
             HttpResponseMessage response = GetResponse(client, server.Configuration,
@@ -102,7 +104,7 @@ namespace System.Web.OData.Query
         [Fact]
         public void ODataQueryOptionsOfT_Works()
         {
-            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomerLowLevel_ODataQueryOptionsOfT", false));
+            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomerLowLevel_ODataQueryOptionsOfT", true));
             HttpClient client = new HttpClient(server);
 
             HttpResponseMessage response = GetResponse(client, server.Configuration,
@@ -227,7 +229,6 @@ namespace System.Web.OData.Query
                 typeof(QueryCompositionCategoryController), typeof(QueryCompositionAnonymousTypesController)
             };
             HttpConfiguration config = controllers.GetHttpConfiguration();
-            config.EnableODataDependencyInjectionSupport("default");
             config.Routes.MapHttpRoute("default", "{controller}/{key}", new { key = RouteParameter.Optional });
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
@@ -244,7 +245,12 @@ namespace System.Web.OData.Query
                     modelBuilder.EntitySet<QueryCompositionCustomer>(typeof(QueryCompositionCustomer).Name);
                     _queryCompositionCustomerModel = modelBuilder.GetEdmModel();
                 }
+                config.EnableODataDependencyInjectionSupport("default", _queryCompositionCustomerModel);
                 config.Filters.Add(new SetModelFilter(_queryCompositionCustomerModel));
+            }
+            else
+            {
+                config.EnableODataDependencyInjectionSupport("default");
             }
 
             return config;
@@ -277,7 +283,7 @@ namespace System.Web.OData.Query
 
             public override void OnActionExecuting(HttpActionContext actionContext)
             {
-                actionContext.Request.ODataProperties().Model = _model;
+                Assert.Equal(_model, actionContext.Request.GetRequestContainer().GetRequiredService<IEdmModel>());
             }
         }
     }

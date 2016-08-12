@@ -527,7 +527,7 @@ public class System.Web.OData.ResourceContext`1 : ResourceContext {
 public class System.Web.OData.ResourceSetContext {
 	public ResourceSetContext ()
 
-	Microsoft.OData.Edm.IEdmModel EdmModel  { public get; public set; }
+	Microsoft.OData.Edm.IEdmModel EdmModel  { public get; }
 	Microsoft.OData.Edm.IEdmEntitySetBase EntitySetBase  { public get; public set; }
 	System.Net.Http.HttpRequestMessage Request  { public get; public set; }
 	System.Web.Http.Controllers.HttpRequestContext RequestContext  { public get; public set; }
@@ -1840,7 +1840,6 @@ public sealed class System.Web.OData.Extensions.UrlHelperExtensions {
 
 public class System.Web.OData.Extensions.HttpRequestMessageProperties {
 	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public get; public set; }
-	Microsoft.OData.Edm.IEdmModel Model  { public get; public set; }
 	System.Uri NextLink  { public get; public set; }
 	ODataPath Path  { public get; public set; }
 	string RouteName  { public get; public set; }

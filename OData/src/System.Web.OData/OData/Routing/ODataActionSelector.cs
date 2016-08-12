@@ -12,6 +12,7 @@ using System.Web.Http.Routing;
 using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace System.Web.OData.Routing
 {
@@ -67,7 +68,7 @@ namespace System.Web.OData.Routing
 
             HttpRequestMessage request = controllerContext.Request;
             ODataPath odataPath = request.ODataProperties().Path;
-            IEnumerable<IODataRoutingConvention> routingConventions = request.ODataProperties().RoutingConventions;
+            IEnumerable<IODataRoutingConvention> routingConventions = request.GetRequestContainer().GetServices<IODataRoutingConvention>();
             IHttpRouteData routeData = controllerContext.RouteData;
 
             if (odataPath == null || routingConventions == null || routeData.Values.ContainsKey(ODataRouteConstants.Action))

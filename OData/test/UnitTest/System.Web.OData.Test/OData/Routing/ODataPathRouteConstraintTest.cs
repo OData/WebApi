@@ -51,7 +51,7 @@ namespace System.Web.OData.Routing
 
         public ODataPathRouteConstraintTest()
         {
-            _rootContainer = new MockContainer(_model);
+            _rootContainer = new MockContainer(_model, _conventions);
             _pathHandler = _rootContainer.GetRequiredService<IODataPathHandler>();
         }
 
@@ -157,7 +157,7 @@ namespace System.Web.OData.Routing
             Assert.Equal("Metadata", values["controller"]);
             Assert.Same(_model, request.GetRequestContainer().GetRequiredService<IEdmModel>());
             Assert.Same(_routeName, request.ODataProperties().RouteName);
-            Assert.Equal(_conventions, request.ODataProperties().RoutingConventions);
+            Assert.Equal(_conventions, request.GetRequestContainer().GetServices<IODataRoutingConvention>());
             Assert.Same(_pathHandler, request.GetRequestContainer().GetRequiredService<IODataPathHandler>());
         }
 

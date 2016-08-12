@@ -80,21 +80,6 @@ namespace System.Web.OData.Extensions
         }
 
         /// <summary>
-        /// Gets or sets the OData routing conventions for controller and action selection.
-        /// </summary>
-        public IEnumerable<IODataRoutingConvention> RoutingConventions
-        {
-            get
-            {
-                return GetValueOrNull<IEnumerable<IODataRoutingConvention>>(RoutingConventionsKey);
-            }
-            set
-            {
-                _request.Properties[RoutingConventionsKey] = value;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the OData path of the request.
         /// </summary>
         public Routing.ODataPath Path

@@ -105,7 +105,7 @@ namespace System.Web.OData
 
         private IEdmModel GetModel()
         {
-            IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>(); ;
+            IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
             if (model == null)
             {
                 throw Error.InvalidOperation(SRResources.RequestMustHaveModel);

@@ -178,11 +178,9 @@ namespace System.Web.OData.Routing
 
                     if (path != null)
                     {
-                        // TODO: Move Model, Path and RoutingConventions into container so that we don't need assignments below.
                         // Set all the properties we need for routing, querying, formatting
                         request.ODataProperties().Path = path;
                         request.ODataProperties().RouteName = RouteName;
-                        request.ODataProperties().RoutingConventions = RoutingConventions;
 
                         if (!values.ContainsKey(ODataRouteConstants.Controller))
                         {

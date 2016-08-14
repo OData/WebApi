@@ -3202,7 +3202,7 @@ public abstract class System.Web.OData.Routing.Conventions.NavigationSourceRouti
 
 public sealed class System.Web.OData.Routing.Conventions.ODataRoutingConventions {
 	public static System.Collections.Generic.IList`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefault ()
-	public static System.Collections.Generic.IList`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefaultWithAttributeRouting (string routeName, System.Web.Http.HttpConfiguration configuration, Microsoft.OData.Edm.IEdmModel model)
+	public static System.Collections.Generic.IList`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefaultWithAttributeRouting (string routeName, System.Web.Http.HttpConfiguration configuration)
 }
 
 public class System.Web.OData.Routing.Conventions.ActionRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {

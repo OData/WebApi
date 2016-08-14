@@ -609,7 +609,7 @@ namespace System.Web.OData.Extensions
             return configuration.MapODataServiceRoute(routeName, routePrefix, builder =>
                 builder.AddService(ServiceLifetime.Singleton, sp => model)
                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
-                           ODataRoutingConventions.CreateDefaultWithAttributeRouting(routeName, configuration, model)));
+                           ODataRoutingConventions.CreateDefaultWithAttributeRouting(routeName, configuration)));
         }
 
         /// <summary>
@@ -629,7 +629,7 @@ namespace System.Web.OData.Extensions
                 builder.AddService(ServiceLifetime.Singleton, sp => model)
                        .AddService(ServiceLifetime.Singleton, sp => batchHandler)
                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
-                           ODataRoutingConventions.CreateDefaultWithAttributeRouting(routeName, configuration, model)));
+                           ODataRoutingConventions.CreateDefaultWithAttributeRouting(routeName, configuration)));
         }
 
         /// <summary>
@@ -649,7 +649,7 @@ namespace System.Web.OData.Extensions
                 builder.AddService(ServiceLifetime.Singleton, sp => model)
                        .AddService(ServiceLifetime.Singleton, sp => defaultHandler)
                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
-                           ODataRoutingConventions.CreateDefaultWithAttributeRouting(routeName, configuration, model)));
+                           ODataRoutingConventions.CreateDefaultWithAttributeRouting(routeName, configuration)));
         }
 
         /// <summary>

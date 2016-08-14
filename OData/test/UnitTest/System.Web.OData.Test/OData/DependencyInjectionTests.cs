@@ -46,7 +46,7 @@ namespace System.Web.OData
                 builder.AddService(ServiceLifetime.Singleton, sp => instance)
                        .AddService(ServiceLifetime.Singleton, sp => model)
                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
-                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config, model)));
+                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config)));
             return new HttpClient(new HttpServer(config));
         }
 

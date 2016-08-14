@@ -3,9 +3,7 @@
 
 using System.Linq;
 using System.Web.Http;
-using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
-using Moq;
 
 namespace System.Web.OData.Routing.Conventions
 {
@@ -16,10 +14,9 @@ namespace System.Web.OData.Routing.Conventions
         {
             // Arrange
             var config = new HttpConfiguration();
-            var model = new Mock<IEdmModel>().Object;
 
             // Act
-            var conventions = ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config, model);
+            var conventions = ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config);
 
             // Assert
             Assert.Single(conventions.OfType<AttributeRoutingConvention>());

@@ -11,7 +11,7 @@ namespace WebStack.QA.Test.OData.SxS.ODataV4
         public static void Register(HttpConfiguration config)
         {
             var model = WebStack.QA.Test.OData.SxS.ODataV4.Models.ModelBuilder.GetEdmModel();
-            var conventions = ODataRoutingConventions.CreateDefaultWithAttributeRouting("SxSODataV4", config, model);
+            var conventions = ODataRoutingConventions.CreateDefaultWithAttributeRouting("SxSODataV4", config);
             conventions.Add(new EntitySetVersioningRoutingConvention("V2"));
 
             var odataRoute = config.MapODataServiceRoute(

@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Web.Http;
-using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing.Conventions
 {
@@ -17,12 +16,10 @@ namespace System.Web.OData.Routing.Conventions
         /// </summary>
         /// <param name="routeName">The name of the route.</param>
         /// <param name="configuration">The server configuration.</param>
-        /// <param name="model">The EDM model to use for parsing OData paths.</param>
         /// <returns>A mutable list of the default OData routing conventions.</returns>
         public static IList<IODataRoutingConvention> CreateDefaultWithAttributeRouting(
             string routeName,
-            HttpConfiguration configuration,
-            IEdmModel model)
+            HttpConfiguration configuration)
         {
             if (configuration == null)
             {
@@ -32,11 +29,6 @@ namespace System.Web.OData.Routing.Conventions
             if (routeName == null)
             {
                 throw Error.ArgumentNull("routeName");
-            }
-
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
             }
 
             IList<IODataRoutingConvention> routingConventions = CreateDefault();

@@ -2519,11 +2519,11 @@ public class System.Web.OData.Results.UpdatedODataResult`1 : IHttpActionResult {
 
 public interface System.Web.OData.Routing.IODataPathHandler {
 	string Link (ODataPath path)
-	ODataPath Parse (Microsoft.OData.Edm.IEdmModel model, string serviceRoot, string odataPath, System.IServiceProvider requestContainer)
+	ODataPath Parse (string serviceRoot, string odataPath, System.IServiceProvider requestContainer)
 }
 
 public interface System.Web.OData.Routing.IODataPathTemplateHandler {
-	ODataPathTemplate ParseTemplate (Microsoft.OData.Edm.IEdmModel model, string odataPathTemplate, System.IServiceProvider requestContainer)
+	ODataPathTemplate ParseTemplate (string odataPathTemplate, System.IServiceProvider requestContainer)
 }
 
 public interface System.Web.OData.Routing.IODataUriResolver {
@@ -2599,8 +2599,8 @@ public class System.Web.OData.Routing.DefaultODataPathHandler : IODataPathHandle
 	Microsoft.OData.ODataUrlKeyDelimiter UrlKeyDelimiter  { public virtual get; public virtual set; }
 
 	public virtual string Link (ODataPath path)
-	public virtual ODataPath Parse (Microsoft.OData.Edm.IEdmModel model, string serviceRoot, string odataPath, System.IServiceProvider requestContainer)
-	public virtual ODataPathTemplate ParseTemplate (Microsoft.OData.Edm.IEdmModel model, string odataPathTemplate, System.IServiceProvider requestContainer)
+	public virtual ODataPath Parse (string serviceRoot, string odataPath, System.IServiceProvider requestContainer)
+	public virtual ODataPathTemplate ParseTemplate (string odataPathTemplate, System.IServiceProvider requestContainer)
 }
 
 public class System.Web.OData.Routing.DefaultODataPathValidator : Microsoft.OData.UriParser.PathSegmentHandler {
@@ -3212,12 +3212,11 @@ public class System.Web.OData.Routing.Conventions.ActionRoutingConvention : Navi
 }
 
 public class System.Web.OData.Routing.Conventions.AttributeRoutingConvention : IODataRoutingConvention {
-	public AttributeRoutingConvention (string routeName, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IEnumerable`1[[System.Web.Http.Controllers.HttpControllerDescriptor]] controllers)
-	public AttributeRoutingConvention (string routeName, Microsoft.OData.Edm.IEdmModel model, System.Web.Http.HttpConfiguration configuration)
-	public AttributeRoutingConvention (string routeName, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IEnumerable`1[[System.Web.Http.Controllers.HttpControllerDescriptor]] controllers, IODataPathTemplateHandler pathTemplateHandler)
-	public AttributeRoutingConvention (string routeName, Microsoft.OData.Edm.IEdmModel model, System.Web.Http.HttpConfiguration configuration, IODataPathTemplateHandler pathTemplateHandler)
+	public AttributeRoutingConvention (string routeName, System.Collections.Generic.IEnumerable`1[[System.Web.Http.Controllers.HttpControllerDescriptor]] controllers)
+	public AttributeRoutingConvention (string routeName, System.Web.Http.HttpConfiguration configuration)
+	public AttributeRoutingConvention (string routeName, System.Collections.Generic.IEnumerable`1[[System.Web.Http.Controllers.HttpControllerDescriptor]] controllers, IODataPathTemplateHandler pathTemplateHandler)
+	public AttributeRoutingConvention (string routeName, System.Web.Http.HttpConfiguration configuration, IODataPathTemplateHandler pathTemplateHandler)
 
-	Microsoft.OData.Edm.IEdmModel Model  { public get; }
 	IODataPathTemplateHandler ODataPathTemplateHandler  { public get; }
 
 	public virtual string SelectAction (ODataPath odataPath, System.Web.Http.Controllers.HttpControllerContext controllerContext, System.Linq.ILookup`2[[System.String],[System.Web.Http.Controllers.HttpActionDescriptor]] actionMap)

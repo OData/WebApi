@@ -19,22 +19,10 @@ namespace System.Web.OData.Routing.Conventions
         private static readonly string RouteName = System.Web.OData.Formatter.HttpRouteCollectionExtensions.RouteName;
 
         [Fact]
-        public void CtorTakingModelAndConfiguration_ThrowsArgumentNull_Model()
-        {
-            HttpConfiguration configuration = new HttpConfiguration();
-
-            Assert.ThrowsArgumentNull(
-                () => new AttributeRoutingConvention(model: null, routeName: RouteName, configuration: configuration),
-                "model");
-        }
-
-        [Fact]
         public void CtorTakingModelAndConfiguration_ThrowsArgumentNull_Configuration()
         {
-            IEdmModel model = new Mock<IEdmModel>().Object;
-
             Assert.ThrowsArgumentNull(
-                () => new AttributeRoutingConvention(model: model, routeName: RouteName, configuration: null),
+                () => new AttributeRoutingConvention(routeName: RouteName, configuration: null),
                 "configuration");
         }
 
@@ -42,33 +30,19 @@ namespace System.Web.OData.Routing.Conventions
         public void CtorTakingModelAndConfiguration_ThrowsArgumentNull_RouteName()
         {
             HttpConfiguration configuration = new HttpConfiguration();
-            IEdmModel model = new Mock<IEdmModel>().Object;
 
             Assert.ThrowsArgumentNull(
-                () => new AttributeRoutingConvention(model: model, routeName: null, configuration: configuration),
+                () => new AttributeRoutingConvention(routeName: null, configuration: configuration),
                 "routeName");
-        }
-
-        [Fact]
-        public void CtorTakingModelAndConfigurationAndPathHandler_ThrowsArgumentNull_Model()
-        {
-            HttpConfiguration configuration = new HttpConfiguration();
-            IODataPathTemplateHandler oDataPathTemplateHandler = new Mock<IODataPathTemplateHandler>().Object;
-
-            Assert.ThrowsArgumentNull(
-                () => new AttributeRoutingConvention(model: null, configuration: configuration,
-                    routeName: RouteName, pathTemplateHandler: oDataPathTemplateHandler),
-                "model");
         }
 
         [Fact]
         public void CtorTakingModelAndConfigurationAndPathHandler_ThrowsArgumentNull_Configuration()
         {
-            IEdmModel model = new Mock<IEdmModel>().Object;
             IODataPathTemplateHandler oDataPathTemplateHandler = new Mock<IODataPathTemplateHandler>().Object;
 
             Assert.ThrowsArgumentNull(
-                () => new AttributeRoutingConvention(model: model, configuration: null,
+                () => new AttributeRoutingConvention(configuration: null,
                     routeName: RouteName, pathTemplateHandler: oDataPathTemplateHandler),
                 "configuration");
         }
@@ -76,55 +50,29 @@ namespace System.Web.OData.Routing.Conventions
         [Fact]
         public void CtorTakingModelAndConfigurationAndPathHandler_ThrowsArgumentNull_PathTemplateHandler()
         {
-            IEdmModel model = new Mock<IEdmModel>().Object;
             HttpConfiguration configuration = DependencyInjectionHelper.CreateConfigurationWithRootContainer();
 
             Assert.ThrowsArgumentNull(
-                () => new AttributeRoutingConvention(model: model, configuration: configuration,
+                () => new AttributeRoutingConvention(configuration: configuration,
                     routeName: RouteName, pathTemplateHandler: null),
                 "pathTemplateHandler");
         }
 
         [Fact]
-        public void CtorTakingModelAndControllers_ThrowsArgumentNull_Model()
-        {
-            IEnumerable<HttpControllerDescriptor> controllers = new HttpControllerDescriptor[0];
-
-            Assert.ThrowsArgumentNull(
-                () => new AttributeRoutingConvention(model: null, routeName: RouteName, controllers: controllers),
-                "model");
-        }
-
-        [Fact]
         public void CtorTakingModelAndControllers_ThrowsArgumentNull_Controllers()
         {
-            IEdmModel model = new Mock<IEdmModel>().Object;
-
             Assert.ThrowsArgumentNull(
-                () => new AttributeRoutingConvention(model: model, routeName: RouteName, controllers: null),
+                () => new AttributeRoutingConvention(routeName: RouteName, controllers: null),
                 "controllers");
-        }
-
-        [Fact]
-        public void CtorTakingModelAndControllersAndPathHandler_ThrowsArgumentNull_Model()
-        {
-            IEnumerable<HttpControllerDescriptor> controllers = new HttpControllerDescriptor[0];
-            IODataPathTemplateHandler oDataPathTemplateHandler = new Mock<IODataPathTemplateHandler>().Object;
-
-            Assert.ThrowsArgumentNull(
-                () => new AttributeRoutingConvention(model: null, controllers: controllers,
-                    routeName: RouteName, pathTemplateHandler: oDataPathTemplateHandler),
-                "model");
         }
 
         [Fact]
         public void CtorTakingModelAndControllersAndPathHandler_ThrowsArgumentNull_Configuration()
         {
-            IEdmModel model = new Mock<IEdmModel>().Object;
             IODataPathTemplateHandler oDataPathTemplateHandler = new Mock<IODataPathTemplateHandler>().Object;
 
             Assert.ThrowsArgumentNull(
-                () => new AttributeRoutingConvention(model: model, controllers: null,
+                () => new AttributeRoutingConvention(controllers: null,
                     routeName: RouteName, pathTemplateHandler: oDataPathTemplateHandler),
                 "controllers");
         }
@@ -132,11 +80,10 @@ namespace System.Web.OData.Routing.Conventions
         [Fact]
         public void CtorTakingModelAndControllersAndPathHandler_ThrowsArgumentNull_PathTemplateHandler()
         {
-            IEdmModel model = new Mock<IEdmModel>().Object;
             IEnumerable<HttpControllerDescriptor> controllers = new HttpControllerDescriptor[0];
 
             Assert.ThrowsArgumentNull(
-                () => new AttributeRoutingConvention(model: model, controllers: controllers,
+                () => new AttributeRoutingConvention(controllers: controllers,
                     routeName: RouteName, pathTemplateHandler: null),
                 "pathTemplateHandler");
         }
@@ -145,15 +92,14 @@ namespace System.Web.OData.Routing.Conventions
         public void CtorTakingHttpConfiguration_InitializesAttributeMappings_OnFirstSelectControllerCall()
         {
             // Arrange
-            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             HttpConfiguration config = DependencyInjectionHelper.CreateConfigurationWithRootContainer();
 
             ODataPathTemplate pathTemplate = new ODataPathTemplate();
             Mock<IODataPathTemplateHandler> pathTemplateHandler = new Mock<IODataPathTemplateHandler>();
-            pathTemplateHandler.Setup(p => p.ParseTemplate(model.Model, "Customers", config.GetODataRootContainer(RouteName)))
+            pathTemplateHandler.Setup(p => p.ParseTemplate("Customers", config.GetODataRootContainer(RouteName)))
                 .Returns(pathTemplate).Verifiable();
 
-            AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, model.Model, config, pathTemplateHandler.Object);
+            AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, config, pathTemplateHandler.Object);
             config.EnsureInitialized();
 
             // Act
@@ -185,18 +131,17 @@ namespace System.Web.OData.Routing.Conventions
             string expectedPathTemplate, string expectedActionName)
         {
             // Arrange
-            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             HttpControllerDescriptor controller = new HttpControllerDescriptor(DependencyInjectionHelper.CreateConfigurationWithRootContainer(), "TestController",
                 controllerType);
 
             ODataPathTemplate pathTemplate = new ODataPathTemplate();
             Mock<IODataPathTemplateHandler> pathTemplateHandler = new Mock<IODataPathTemplateHandler>();
             pathTemplateHandler
-                .Setup(p => p.ParseTemplate(model.Model, expectedPathTemplate, controller.Configuration.GetODataRootContainer(RouteName)))
+                .Setup(p => p.ParseTemplate(expectedPathTemplate, controller.Configuration.GetODataRootContainer(RouteName)))
                 .Returns(pathTemplate)
                 .Verifiable();
 
-            AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, model.Model, new[] { controller }, pathTemplateHandler.Object);
+            AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, new[] { controller }, pathTemplateHandler.Object);
 
             // Act
             convention.SelectController(new ODataPath(), new HttpRequestMessage());
@@ -212,12 +157,12 @@ namespace System.Web.OData.Routing.Conventions
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            HttpControllerDescriptor controller = new HttpControllerDescriptor(DependencyInjectionHelper.CreateConfigurationWithRootContainer(), "TestController",
-                typeof(InvalidPathTemplateController));
+            HttpControllerDescriptor controller = new HttpControllerDescriptor(DependencyInjectionHelper.CreateConfigurationWithRootContainer(model.Model),
+                "TestController", typeof(InvalidPathTemplateController));
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
-                () => new AttributeRoutingConvention(RouteName, model.Model, new[] { controller }),
+                () => new AttributeRoutingConvention(RouteName, new[] { controller }),
                 "The path template 'Customers/Order' on the action 'GetCustomers' in controller 'TestController' is not " +
                 "a valid OData path template. The request URI is not valid. Since the segment 'Customers' refers to a " +
                 "collection, this must be the last segment in the request URI or it must be followed by an function or " +
@@ -228,9 +173,8 @@ namespace System.Web.OData.Routing.Conventions
         public void AttributeMappingsInitialization_ThrowsInvalidOperation_IfNoConfigEnsureInitialized()
         {
             // Arrange
-            IEdmModel model = Mock.Of<IEdmModel>();
             HttpConfiguration configuration = DependencyInjectionHelper.CreateConfigurationWithRootContainer();
-            AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, model, configuration);
+            AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, configuration);
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
@@ -243,10 +187,9 @@ namespace System.Web.OData.Routing.Conventions
         public void AttributeRoutingConvention_ConfigEnsureInitialized_ThrowsForInvalidPathTemplate()
         {
             // Arrange
-            IEdmModel model = new EdmModel();
             HttpConfiguration configuration = new[] { typeof(TestODataController) }.GetHttpConfiguration();
             configuration.EnableODataDependencyInjectionSupport();
-            AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, model, configuration);
+            AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, configuration);
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
@@ -261,8 +204,8 @@ namespace System.Web.OData.Routing.Conventions
             // Arrange
             IEdmModel model = new CustomersModelWithInheritance().Model;
             HttpConfiguration configuration = new[] { typeof(TestODataController) }.GetHttpConfiguration();
-            configuration.EnableODataDependencyInjectionSupport();
-            AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, model, configuration);
+            configuration.EnableODataDependencyInjectionSupport(model);
+            AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, configuration);
 
             // Act & Assert
             Assert.DoesNotThrow(() => configuration.EnsureInitialized());

@@ -17,14 +17,14 @@ namespace WebStack.QA.Test.OData
         {
             Contract.Assert(handler != null);
 
-            return handler.Parse(model, serviceRoot, odataPath, DefaultContainer);
+            return handler.Parse(serviceRoot, odataPath, DefaultContainer);
         }
 
         public static ODataPathTemplate ParseTemplate(this IODataPathTemplateHandler handler, IEdmModel model, string odataPathTemplate)
         {
             Contract.Assert(handler != null);
 
-            return handler.ParseTemplate(model, odataPathTemplate, DefaultContainer);
+            return handler.ParseTemplate(odataPathTemplate, DefaultContainer);
         }
     }
 }

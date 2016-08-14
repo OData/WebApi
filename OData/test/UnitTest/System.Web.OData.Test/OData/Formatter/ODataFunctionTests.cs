@@ -58,7 +58,7 @@ namespace System.Web.OData.Formatter
             // only with attribute routing
             IList<IODataRoutingConvention> routingConventions = new List<IODataRoutingConvention>
             {
-                new AttributeRoutingConvention("odata2", model, configuration)
+                new AttributeRoutingConvention("odata2", configuration)
             };
             configuration.MapODataServiceRoute("odata2", "attribute", model, pathHandler, routingConventions);
 

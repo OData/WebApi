@@ -32,6 +32,11 @@ namespace System.Web.OData
             return new MockContainer().Configuration;
         }
 
+        public static HttpConfiguration CreateConfigurationWithRootContainer(IEdmModel model)
+        {
+            return new MockContainer(model).Configuration;
+        }
+
         public static IServiceProvider GetODataRootContainer(this HttpConfiguration configuration)
         {
             return configuration.GetODataRootContainer(HttpRouteCollectionExtensions.RouteName);
@@ -51,6 +56,12 @@ namespace System.Web.OData
             Action<IContainerBuilder> action)
         {
             configuration.CreateODataRootContainer(routeName, action);
+        }
+
+        public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration, IEdmModel model)
+        {
+            configuration.CreateODataRootContainer(HttpRouteCollectionExtensions.RouteName, builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => model));
         }
 
         public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration, string routeName,

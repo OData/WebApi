@@ -40,7 +40,7 @@ namespace System.Web.OData.Routing.Conventions
             }
 
             IList<IODataRoutingConvention> routingConventions = CreateDefault();
-            AttributeRoutingConvention routingConvention = new AttributeRoutingConvention(routeName, model, configuration);
+            AttributeRoutingConvention routingConvention = new AttributeRoutingConvention(routeName, configuration);
             routingConventions.Insert(0, routingConvention);
             return routingConventions;
         }

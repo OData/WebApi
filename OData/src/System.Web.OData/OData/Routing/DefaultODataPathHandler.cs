@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing.Template;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -36,19 +37,12 @@ namespace System.Web.OData.Routing
         /// <summary>
         /// Parses the specified OData path as an <see cref="ODataPath"/> that contains additional information about the EDM type and entity set for the path.
         /// </summary>
-        /// <param name="model">The model to use for path parsing.</param>
         /// <param name="serviceRoot">The service root of the OData path.</param>
         /// <param name="odataPath">The OData path to parse.</param>
         /// <param name="requestContainer">The dependency injection container for the request.</param>
         /// <returns>A parsed representation of the path, or <c>null</c> if the path does not match the model.</returns>
-        public virtual ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath,
-            IServiceProvider requestContainer)
+        public virtual ODataPath Parse(string serviceRoot, string odataPath, IServiceProvider requestContainer)
         {
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
-            }
-
             if (serviceRoot == null)
             {
                 throw Error.ArgumentNull("serviceRoot");
@@ -64,25 +58,18 @@ namespace System.Web.OData.Routing
                 throw Error.ArgumentNull("requestContainer");
             }
 
-            return Parse(model, serviceRoot, odataPath, requestContainer, template: false);
+            return Parse(serviceRoot, odataPath, requestContainer, template: false);
         }
 
         /// <summary>
         /// Parses the specified OData path template as an <see cref="ODataPathTemplate"/> that can be matched to an <see cref="ODataPath"/>.
         /// </summary>
-        /// <param name="model">The model to use for path parsing.</param>
         /// <param name="odataPathTemplate">The OData path template to parse.</param>
         /// <param name="requestContainer">The dependency injection container for the request.</param>
         /// <returns>A parsed representation of the path template, or <c>null</c> if the path does not match the model.</returns>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "odata", Justification = "odata is spelled correctly")]
-        public virtual ODataPathTemplate ParseTemplate(IEdmModel model, string odataPathTemplate,
-            IServiceProvider requestContainer)
+        public virtual ODataPathTemplate ParseTemplate(string odataPathTemplate, IServiceProvider requestContainer)
         {
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
-            }
-
             if (odataPathTemplate == null)
             {
                 throw Error.ArgumentNull("odataPathTemplate");
@@ -93,7 +80,7 @@ namespace System.Web.OData.Routing
                 throw Error.ArgumentNull("requestContainer");
             }
 
-            return Templatify(Parse(model, serviceRoot: null, odataPath: odataPathTemplate,
+            return Templatify(Parse(serviceRoot: null, odataPath: odataPathTemplate,
                 requestContainer: requestContainer, template: true), odataPathTemplate);
         }
 
@@ -114,12 +101,13 @@ namespace System.Web.OData.Routing
             return path.ToString();
         }
 
-        private ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath, IServiceProvider requestContainer, bool template)
+        private ODataPath Parse(string serviceRoot, string odataPath, IServiceProvider requestContainer, bool template)
         {
             ODataUriParser uriParser;
             Uri serviceRootUri = null;
             Uri fullUri = null;
             NameValueCollection queryString = null;
+            IEdmModel model = requestContainer.GetRequiredService<IEdmModel>();
 
             if (template)
             {

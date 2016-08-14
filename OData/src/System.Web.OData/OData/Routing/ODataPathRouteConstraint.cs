@@ -11,7 +11,6 @@ using System.Web.OData.Properties;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
-using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Routing
 {
@@ -121,8 +120,7 @@ namespace System.Web.OData.Routing
 
                         IServiceProvider requestContainer = request.CreateRequestContainer(RouteName);
                         IODataPathHandler pathHandler = requestContainer.GetRequiredService<IODataPathHandler>();
-                        IEdmModel model = requestContainer.GetRequiredService<IEdmModel>();
-                        path = pathHandler.Parse(model, serviceRoot, oDataPathAndQuery, requestContainer);
+                        path = pathHandler.Parse(serviceRoot, oDataPathAndQuery, requestContainer);
                     }
                     catch (ODataException)
                     {

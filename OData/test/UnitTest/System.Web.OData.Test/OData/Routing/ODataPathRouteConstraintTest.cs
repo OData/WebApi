@@ -338,11 +338,11 @@ namespace System.Web.OData.Routing
             public string ServiceRoot { get; private set; }
             public string ODataPath { get; private set; }
 
-            public override ODataPath Parse(IEdmModel model, string serviceRoot, string odataPath, IServiceProvider requestContainer)
+            public override ODataPath Parse(string serviceRoot, string odataPath, IServiceProvider requestContainer)
             {
                 ServiceRoot = serviceRoot;
                 ODataPath = odataPath;
-                return base.Parse(model, serviceRoot, odataPath, requestContainer);
+                return base.Parse(serviceRoot, odataPath, requestContainer);
             }
         }
     }

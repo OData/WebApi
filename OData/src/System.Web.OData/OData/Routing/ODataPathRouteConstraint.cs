@@ -2,15 +2,14 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
@@ -27,69 +26,21 @@ namespace System.Web.OData.Routing
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataPathRouteConstraint" /> class.
         /// </summary>
-        /// <param name="pathHandler">The OData path handler to use for parsing.</param>
-        /// <param name="model">The EDM model to use for parsing the path.</param>
         /// <param name="routeName">The name of the route this constraint is associated with.</param>
-        /// <param name="routingConventions">The OData routing conventions to use for selecting the controller name.</param>
-        public ODataPathRouteConstraint(IODataPathHandler pathHandler, IEdmModel model, string routeName, IEnumerable<IODataRoutingConvention> routingConventions)
+        public ODataPathRouteConstraint(string routeName)
         {
-            if (pathHandler == null)
-            {
-                throw Error.ArgumentNull("pathHandler");
-            }
-
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
-            }
-
             if (routeName == null)
             {
                 throw Error.ArgumentNull("routeName");
             }
 
-            if (routingConventions == null)
-            {
-                throw Error.ArgumentNull("routingConventions");
-            }
-
-            PathHandler = pathHandler;
-            EdmModel = model;
             RouteName = routeName;
-            RoutingConventions = new Collection<IODataRoutingConvention>(routingConventions.ToList());
-        }
-
-        /// <summary>
-        /// Gets the OData path handler to use for parsing.
-        /// </summary>
-        public IODataPathHandler PathHandler
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// Gets the EDM model to use for parsing the path.
-        /// </summary>
-        public IEdmModel EdmModel
-        {
-            get;
-            private set;
         }
 
         /// <summary>
         /// Gets the name of the route this constraint is associated with.
         /// </summary>
         public string RouteName
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// Gets the OData routing conventions to use for selecting the controller name.
-        /// </summary>
-        public Collection<IODataRoutingConvention> RoutingConventions
         {
             get;
             private set;
@@ -168,8 +119,10 @@ namespace System.Web.OData.Routing
                             serviceRoot = serviceRoot.Substring(0, serviceRoot.Length - 3);
                         }
 
-                        path = PathHandler.Parse(EdmModel, serviceRoot, oDataPathAndQuery,
-                            request.CreateRequestContainer(RouteName));
+                        IServiceProvider requestContainer = request.CreateRequestContainer(RouteName);
+                        IODataPathHandler pathHandler = requestContainer.GetRequiredService<IODataPathHandler>();
+                        IEdmModel model = requestContainer.GetRequiredService<IEdmModel>();
+                        path = pathHandler.Parse(model, serviceRoot, oDataPathAndQuery, requestContainer);
                     }
                     catch (ODataException)
                     {
@@ -215,7 +168,9 @@ namespace System.Web.OData.Routing
         /// <returns>The name of the controller to dispatch to, or <c>null</c> if one cannot be resolved.</returns>
         protected virtual string SelectControllerName(ODataPath path, HttpRequestMessage request)
         {
-            foreach (IODataRoutingConvention routingConvention in RoutingConventions)
+            IEnumerable<IODataRoutingConvention> routingConventions =
+                request.GetRequestContainer().GetServices<IODataRoutingConvention>();
+            foreach (IODataRoutingConvention routingConvention in routingConventions)
             {
                 string controllerName = routingConvention.SelectController(path, request);
                 if (controllerName != null)

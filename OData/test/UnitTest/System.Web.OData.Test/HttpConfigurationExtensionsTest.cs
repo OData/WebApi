@@ -199,8 +199,8 @@ namespace System.Web.OData
 
             // Act
             config.SetUriResolver(resolver);
-            ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
-            var pathResolver = route.PathRouteConstraint.PathHandler as IODataUriResolver;
+            config.MapODataServiceRoute("odata", "odata", new EdmModel());
+            var pathResolver = GetUriResolver(config);
 
             // Assert
             Assert.NotNull(pathResolver);
@@ -214,8 +214,8 @@ namespace System.Web.OData
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
-            var pathResolver = route.PathRouteConstraint.PathHandler as IODataUriResolver;
+            config.MapODataServiceRoute("odata", "odata", new EdmModel());
+            var pathResolver = GetUriResolver(config);
 
             // Assert
             Assert.NotNull(pathResolver);
@@ -235,9 +235,9 @@ namespace System.Web.OData
 
             // Act
             config.SetUriResolver(new StringAsEnumResolver());
-            ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel(), pathHandler,
+            config.MapODataServiceRoute("odata", "odata", new EdmModel(), pathHandler,
                 ODataRoutingConventions.CreateDefault());
-            var pathResolver = route.PathRouteConstraint.PathHandler as IODataUriResolver;
+            var pathResolver = GetUriResolver(config);
 
             // Assert
             Assert.NotNull(pathResolver);
@@ -252,8 +252,8 @@ namespace System.Web.OData
 
             // Act
             config.SetUrlKeyDelimiter(ODataUrlKeyDelimiter.Slash);
-            ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
-            var pathResolver = route.PathRouteConstraint.PathHandler as IODataUriResolver;
+            config.MapODataServiceRoute("odata", "odata", new EdmModel());
+            var pathResolver = GetUriResolver(config);
 
             // Assert
             Assert.NotNull(pathResolver);
@@ -267,8 +267,8 @@ namespace System.Web.OData
             HttpConfiguration config = new HttpConfiguration();
 
             // Act
-            ODataRoute route = config.MapODataServiceRoute("odata", "odata", new EdmModel());
-            var pathResolver = route.PathRouteConstraint.PathHandler as IODataUriResolver;
+            config.MapODataServiceRoute("odata", "odata", new EdmModel());
+            var pathResolver = GetUriResolver(config);
 
             // Assert
             Assert.NotNull(pathResolver);
@@ -437,6 +437,11 @@ namespace System.Web.OData
             Assert.Equal(true, defaultQuerySettings.EnableExpand);
             Assert.Equal(true, defaultQuerySettings.EnableOrderBy);
             Assert.Equal(10, defaultQuerySettings.MaxTop);
+        }
+
+        private static IODataUriResolver GetUriResolver(HttpConfiguration config)
+        {
+            return config.GetODataRootContainer("odata").GetRequiredService<IODataPathHandler>() as IODataUriResolver;
         }
 
         private static ODataMediaTypeFormatter CreateODataFormatter()

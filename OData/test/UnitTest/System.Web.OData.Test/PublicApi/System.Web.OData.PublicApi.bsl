@@ -2647,12 +2647,9 @@ public class System.Web.OData.Routing.ODataPath {
 }
 
 public class System.Web.OData.Routing.ODataPathRouteConstraint : IHttpRouteConstraint {
-	public ODataPathRouteConstraint (IODataPathHandler pathHandler, Microsoft.OData.Edm.IEdmModel model, string routeName, System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] routingConventions)
+	public ODataPathRouteConstraint (string routeName)
 
-	Microsoft.OData.Edm.IEdmModel EdmModel  { public get; }
-	IODataPathHandler PathHandler  { public get; }
 	string RouteName  { public get; }
-	System.Collections.ObjectModel.Collection`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] RoutingConventions  { public get; }
 
 	public virtual bool Match (System.Net.Http.HttpRequestMessage request, System.Web.Http.Routing.IHttpRoute route, string parameterName, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values, System.Web.Http.Routing.HttpRouteDirection routeDirection)
 	protected virtual string SelectControllerName (ODataPath path, System.Net.Http.HttpRequestMessage request)

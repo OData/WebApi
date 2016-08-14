@@ -172,17 +172,17 @@ namespace System.Web.OData.Routing
                 expectedRoot += '/';
             }
 
+            var pathHandler = new TestPathHandler();
             var request = new HttpRequestMessage(HttpMethod.Get, expectedRoot + "$metadata");
             var httpRouteCollection = new HttpRouteCollection
             {
                 { _routeName, new HttpRoute() },
             };
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.EnableODataDependencyInjectionSupport(_routeName);
+            configuration.EnableODataDependencyInjectionSupport(_routeName, pathHandler);
             request.SetConfiguration(configuration);
 
-            var pathHandler = new TestPathHandler();
-            var constraint = CreatePathRouteConstraint(pathHandler);
+            var constraint = CreatePathRouteConstraint();
             var values = new Dictionary<string, object>
             {
                 { ODataRouteConstants.ODataPath, "$metadata" },
@@ -211,17 +211,17 @@ namespace System.Web.OData.Routing
                 originalRoot += "%2F";  // Escaped '/'
             }
 
+            var pathHandler = new TestPathHandler();
             var request = new HttpRequestMessage(HttpMethod.Get, originalRoot + "$metadata");
             var httpRouteCollection = new HttpRouteCollection
             {
                 { _routeName, new HttpRoute() },
             };
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.EnableODataDependencyInjectionSupport(_routeName);
+            configuration.EnableODataDependencyInjectionSupport(_routeName, pathHandler);
             request.SetConfiguration(configuration);
 
-            var pathHandler = new TestPathHandler();
-            var constraint = CreatePathRouteConstraint(pathHandler);
+            var constraint = CreatePathRouteConstraint();
             var values = new Dictionary<string, object>
             {
                 { ODataRouteConstants.ODataPath, "$metadata" },
@@ -249,6 +249,11 @@ namespace System.Web.OData.Routing
                 expectedRoot += '/';
             }
 
+            var builder = new ODataModelBuilder();
+            builder.Function("Unbound").Returns<string>().Parameter<string>("p0");
+            var model = builder.GetEdmModel();
+
+            var pathHandler = new TestPathHandler();
             var oDataPath = String.Format("Unbound(p0='{0}')", oDataString);
             var request = new HttpRequestMessage(HttpMethod.Get, expectedRoot + oDataPath);
             var httpRouteCollection = new HttpRouteCollection
@@ -256,15 +261,10 @@ namespace System.Web.OData.Routing
                 { _routeName, new HttpRoute() },
             };
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.EnableODataDependencyInjectionSupport(_routeName);
+            configuration.EnableODataDependencyInjectionSupport(_routeName, model, pathHandler);
             request.SetConfiguration(configuration);
 
-            var builder = new ODataModelBuilder();
-            builder.Function("Unbound").Returns<string>().Parameter<string>("p0");
-            var model = builder.GetEdmModel();
-
-            var pathHandler = new TestPathHandler();
-            var constraint = CreatePathRouteConstraint(pathHandler, model);
+            var constraint = CreatePathRouteConstraint();
             var values = new Dictionary<string, object>
             {
                 { ODataRouteConstants.ODataPath, Uri.UnescapeDataString(oDataPath) },
@@ -295,6 +295,11 @@ namespace System.Web.OData.Routing
                 originalRoot += "%2F";  // Escaped '/'
             }
 
+            var builder = new ODataModelBuilder();
+            builder.Function("Unbound").Returns<string>().Parameter<string>("p0");
+            var model = builder.GetEdmModel();
+
+            var pathHandler = new TestPathHandler();
             var oDataPath = String.Format("Unbound(p0='{0}')", oDataString);
             var request = new HttpRequestMessage(HttpMethod.Get, originalRoot + oDataPath);
             var httpRouteCollection = new HttpRouteCollection
@@ -302,15 +307,10 @@ namespace System.Web.OData.Routing
                 { _routeName, new HttpRoute() },
             };
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.EnableODataDependencyInjectionSupport(_routeName);
+            configuration.EnableODataDependencyInjectionSupport(_routeName, model, pathHandler);
             request.SetConfiguration(configuration);
 
-            var builder = new ODataModelBuilder();
-            builder.Function("Unbound").Returns<string>().Parameter<string>("p0");
-            var model = builder.GetEdmModel();
-
-            var pathHandler = new TestPathHandler();
-            var constraint = CreatePathRouteConstraint(pathHandler, model);
+            var constraint = CreatePathRouteConstraint();
             var values = new Dictionary<string, object>
             {
                 { ODataRouteConstants.ODataPath, Uri.UnescapeDataString(oDataPath) },
@@ -329,17 +329,7 @@ namespace System.Web.OData.Routing
 
         private ODataPathRouteConstraint CreatePathRouteConstraint()
         {
-            return CreatePathRouteConstraint(_pathHandler);
-        }
-
-        private ODataPathRouteConstraint CreatePathRouteConstraint(IODataPathHandler pathHandler)
-        {
-            return CreatePathRouteConstraint(pathHandler, _model);
-        }
-
-        private ODataPathRouteConstraint CreatePathRouteConstraint(IODataPathHandler pathHandler, IEdmModel model)
-        {
-            return new ODataPathRouteConstraint(pathHandler, model, _routeName, _conventions);
+            return new ODataPathRouteConstraint(_routeName);
         }
 
         // Wrap a PathHandler to allow us to check serviceRoot the constraint calculates.

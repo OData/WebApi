@@ -557,11 +557,10 @@ namespace System.Web.OData.Extensions
             }
 
             // 3) Resolve some required services and create the route constraint.
-            IEdmModel model = rootContainer.GetRequiredService<IEdmModel>();
-            IEnumerable<IODataRoutingConvention> routingConventions =
-                rootContainer.GetServices<IODataRoutingConvention>();
-            ODataPathRouteConstraint routeConstraint = new ODataPathRouteConstraint(
-                pathHandler, model, routeName, routingConventions);
+            ODataPathRouteConstraint routeConstraint = new ODataPathRouteConstraint(routeName);
+
+            // Attribute routing must initialized before configuration.EnsureInitialized is called.
+            rootContainer.GetServices<IODataRoutingConvention>();
 
             // 4) Resolve HTTP handler, create the OData route and register it.
             ODataRoute route;

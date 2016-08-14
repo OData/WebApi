@@ -6,6 +6,7 @@ using System.Web.Http;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -57,6 +58,21 @@ namespace System.Web.OData
         {
             configuration.CreateODataRootContainer(routeName, builder =>
                 builder.AddService(ServiceLifetime.Singleton, sp => model));
+        }
+
+        public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration, string routeName,
+            IODataPathHandler pathHandler)
+        {
+            configuration.CreateODataRootContainer(routeName, builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => pathHandler));
+        }
+
+        public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration, string routeName,
+            IEdmModel model, IODataPathHandler pathHandler)
+        {
+            configuration.CreateODataRootContainer(routeName, builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => model)
+                       .AddService(ServiceLifetime.Singleton, sp => pathHandler));
         }
 
         public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration,

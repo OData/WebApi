@@ -3,6 +3,7 @@
 
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 
@@ -66,16 +67,11 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         /// <inheritdoc />
-        public override ODataDeserializer GetODataDeserializer(IEdmModel model, Type type, HttpRequestMessage request)
+        public override ODataDeserializer GetODataDeserializer(Type type, HttpRequestMessage request)
         {
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
-            }
-
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
             }
 
             if (type == typeof(Uri))
@@ -88,6 +84,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 return _rootContainer.GetRequiredService<ODataActionPayloadDeserializer>();
             }
 
+            IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
             ClrTypeCache typeMappingCache = model.GetTypeMappingCache();
             IEdmTypeReference edmType = typeMappingCache.GetEdmType(type, model);
 

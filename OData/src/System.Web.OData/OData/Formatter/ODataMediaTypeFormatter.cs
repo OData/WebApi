@@ -260,15 +260,12 @@ namespace System.Web.OData.Formatter
             if (Request != null)
             {
                 IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
-                if (model != null)
+                IEdmTypeReference expectedPayloadType;
+                ODataDeserializer deserializer = GetDeserializer(type, Request.ODataProperties().Path, model,
+                    _deserializerProvider, out expectedPayloadType);
+                if (deserializer != null)
                 {
-                    IEdmTypeReference expectedPayloadType;
-                    ODataDeserializer deserializer = GetDeserializer(type, Request.ODataProperties().Path, model,
-                        _deserializerProvider, out expectedPayloadType);
-                    if (deserializer != null)
-                    {
-                        return _payloadKinds.Contains(deserializer.ODataPayloadKind);
-                    }
+                    return _payloadKinds.Contains(deserializer.ODataPayloadKind);
                 }
             }
 
@@ -285,24 +282,20 @@ namespace System.Web.OData.Formatter
 
             if (Request != null)
             {
-                IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
-                if (model != null)
+                ODataPayloadKind? payloadKind;
+
+                Type elementType;
+                if (typeof(IEdmObject).IsAssignableFrom(type) ||
+                    (type.IsCollection(out elementType) && typeof(IEdmObject).IsAssignableFrom(elementType)))
                 {
-                    ODataPayloadKind? payloadKind;
-
-                    Type elementType;
-                    if (typeof(IEdmObject).IsAssignableFrom(type) ||
-                        (type.IsCollection(out elementType) && typeof(IEdmObject).IsAssignableFrom(elementType)))
-                    {
-                        payloadKind = GetEdmObjectPayloadKind(type);
-                    }
-                    else
-                    {
-                        payloadKind = GetClrObjectResponsePayloadKind(type, model);
-                    }
-
-                    return payloadKind == null ? false : _payloadKinds.Contains(payloadKind.Value);
+                    payloadKind = GetEdmObjectPayloadKind(type);
                 }
+                else
+                {
+                    payloadKind = GetClrObjectResponsePayloadKind(type);
+                }
+
+                return payloadKind == null ? false : _payloadKinds.Contains(payloadKind.Value);
             }
 
             return false;
@@ -337,7 +330,7 @@ namespace System.Web.OData.Formatter
             }
         }
 
-        private ODataPayloadKind? GetClrObjectResponsePayloadKind(Type type, IEdmModel model)
+        private ODataPayloadKind? GetClrObjectResponsePayloadKind(Type type)
         {
             // SingleResult<T> should be serialized as T.
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SingleResult<>))
@@ -345,7 +338,7 @@ namespace System.Web.OData.Formatter
                 type = type.GetGenericArguments()[0];
             }
 
-            ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(model, type, Request);
+            ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(type, Request);
             return serializer == null ? null : (ODataPayloadKind?)serializer.ODataPayloadKind;
         }
 
@@ -364,11 +357,6 @@ namespace System.Web.OData.Formatter
             else
             {
                 IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
-                if (model == null)
-                {
-                    throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
-                }
-
                 IEdmTypeReference expectedPayloadType;
                 ODataDeserializer deserializer = GetDeserializer(type, Request.ODataProperties().Path, model, _deserializerProvider, out expectedPayloadType);
                 if (deserializer == null)
@@ -461,7 +449,7 @@ namespace System.Web.OData.Formatter
                 throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
             }
 
-            ODataSerializer serializer = GetSerializer(type, value, model, _serializerProvider);
+            ODataSerializer serializer = GetSerializer(type, value, _serializerProvider);
 
             UrlHelper urlHelper = Request.GetUrlHelper() ?? new UrlHelper(Request);
 
@@ -591,7 +579,7 @@ namespace System.Web.OData.Formatter
             expectedPayloadType = GetExpectedPayloadType(type, path, model);
 
             // Get the deserializer using the CLR type first from the deserializer provider.
-            ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(model, type, Request);
+            ODataDeserializer deserializer = deserializerProvider.GetODataDeserializer(type, Request);
             if (deserializer == null && expectedPayloadType != null)
             {
                 // we are in typeless mode, get the deserializer using the edm type from the path.
@@ -601,7 +589,7 @@ namespace System.Web.OData.Formatter
             return deserializer;
         }
 
-        private ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider)
+        private ODataSerializer GetSerializer(Type type, object value, ODataSerializerProvider serializerProvider)
         {
             ODataSerializer serializer;
 
@@ -631,7 +619,7 @@ namespace System.Web.OData.Formatter
                     type = value == null ? type : value.GetType();
                 }
 
-                serializer = serializerProvider.GetODataPayloadSerializer(model, type, Request);
+                serializer = serializerProvider.GetODataPayloadSerializer(type, Request);
                 if (serializer == null)
                 {
                     string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataMediaTypeFormatter).Name);

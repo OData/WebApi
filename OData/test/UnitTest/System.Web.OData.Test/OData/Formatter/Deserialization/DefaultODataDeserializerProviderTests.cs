@@ -22,7 +22,7 @@ namespace System.Web.OData.Formatter.Deserialization
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(_edmModel, typeof(Uri), request);
+            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(typeof(Uri), request);
 
             // Assert
             Assert.NotNull(deserializer);
@@ -46,9 +46,10 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
+            request.EnableHttpDependencyInjectionSupport();
 
             // Act
-            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(_edmModel, type, request);
+            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(type, request);
 
             // Assert
             Assert.NotNull(deserializer);
@@ -61,9 +62,10 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
+            request.EnableHttpDependencyInjectionSupport(_edmModel);
 
             // Act
-            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(_edmModel,
+            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(
                 typeof(ODataResourceDeserializerTests.Product), request);
 
             // Assert
@@ -78,9 +80,10 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
+            request.EnableHttpDependencyInjectionSupport(_edmModel);
 
             // Act
-            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(_edmModel,
+            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(
                 typeof(ODataResourceDeserializerTests.Address), request);
 
             // Assert
@@ -101,9 +104,10 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
+            request.EnableHttpDependencyInjectionSupport(_edmModel);
 
             // Act
-            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(_edmModel, collectionType, request);
+            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(collectionType, request);
 
             // Assert
             Assert.NotNull(deserializer);
@@ -123,9 +127,10 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
+            request.EnableHttpDependencyInjectionSupport(_edmModel);
 
             // Act
-            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(_edmModel, collectionType, request);
+            ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(collectionType, request);
 
             // Assert
             Assert.NotNull(deserializer);
@@ -139,11 +144,12 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
+            request.EnableHttpDependencyInjectionSupport(_edmModel);
 
             // Act
-            ODataDeserializer firstCallDeserializer = _deserializerProvider.GetODataDeserializer(_edmModel,
+            ODataDeserializer firstCallDeserializer = _deserializerProvider.GetODataDeserializer(
                 typeof(ODataResourceDeserializerTests.Supplier), request);
-            ODataDeserializer secondCallDeserializer = _deserializerProvider.GetODataDeserializer(_edmModel,
+            ODataDeserializer secondCallDeserializer = _deserializerProvider.GetODataDeserializer(
                 typeof(ODataResourceDeserializerTests.Supplier), request);
 
             // Assert
@@ -159,23 +165,11 @@ namespace System.Web.OData.Formatter.Deserialization
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act
-            ODataActionPayloadDeserializer basicActionPayload = _deserializerProvider.GetODataDeserializer(_edmModel,
+            ODataActionPayloadDeserializer basicActionPayload = _deserializerProvider.GetODataDeserializer(
                 resourceType, request) as ODataActionPayloadDeserializer;
 
             // Assert
             Assert.NotNull(basicActionPayload);
-        }
-
-        [Fact]
-        public void GetODataDeserializer_Throws_ArgumentNullForModel()
-        {
-            // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-
-            // Act & Assert
-            Assert.ThrowsArgumentNull(
-                () => _deserializerProvider.GetODataDeserializer(model: null, type: typeof(int), request: request),
-                "model");
         }
 
         [Fact]
@@ -186,7 +180,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => _deserializerProvider.GetODataDeserializer(model: EdmCoreModel.Instance, type: null, request: request),
+                () => _deserializerProvider.GetODataDeserializer(type: null, request: request),
                 "type");
         }
 

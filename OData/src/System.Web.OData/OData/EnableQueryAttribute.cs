@@ -644,7 +644,7 @@ namespace System.Web.OData
             // Get model for the request
             IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
 
-            if (model == null || model.GetEdmType(elementClrType) == null)
+            if (model == EdmCoreModel.Instance || model.GetEdmType(elementClrType) == null)
             {
                 // user has not configured anything or has registered a model without the element type
                 // let's create one just for this type and cache it in the action descriptor

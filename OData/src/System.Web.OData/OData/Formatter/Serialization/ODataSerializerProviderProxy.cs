@@ -46,10 +46,10 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         /// <inheritdoc />
-        public override ODataSerializer GetODataPayloadSerializer(IEdmModel model, Type type, HttpRequestMessage request)
+        public override ODataSerializer GetODataPayloadSerializer(Type type, HttpRequestMessage request)
         {
             return RequestContainer.GetRequiredService<ODataSerializerProvider>()
-                .GetODataPayloadSerializer(model, type, request);
+                .GetODataPayloadSerializer(type, request);
         }
     }
 }

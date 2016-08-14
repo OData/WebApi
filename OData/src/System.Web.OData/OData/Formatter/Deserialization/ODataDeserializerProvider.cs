@@ -21,10 +21,9 @@ namespace System.Web.OData.Formatter.Deserialization
         /// <summary>
         /// Gets an <see cref="ODataDeserializer"/> for the given type.
         /// </summary>
-        /// <param name="model">The EDM model.</param>
         /// <param name="type">The CLR type.</param>
         /// <param name="request">The request being deserialized.</param>
         /// <returns>An <see cref="ODataDeserializer"/> that can deserialize the given type.</returns>
-        public abstract ODataDeserializer GetODataDeserializer(IEdmModel model, Type type, HttpRequestMessage request);
+        public abstract ODataDeserializer GetODataDeserializer(Type type, HttpRequestMessage request);
     }
 }

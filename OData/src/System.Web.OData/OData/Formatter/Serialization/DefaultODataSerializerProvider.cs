@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.OData.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -72,12 +73,8 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         /// <inheritdoc />
-        public override ODataSerializer GetODataPayloadSerializer(IEdmModel model, Type type, HttpRequestMessage request)
+        public override ODataSerializer GetODataPayloadSerializer(Type type, HttpRequestMessage request)
         {
-            if (model == null)
-            {
-                throw Error.ArgumentNull("model");
-            }
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
@@ -110,6 +107,7 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             // if it is not a special type, assume it has a corresponding EdmType.
+            IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
             ClrTypeCache typeMappingCache = model.GetTypeMappingCache();
             IEdmTypeReference edmType = typeMappingCache.GetEdmType(type, model);
 

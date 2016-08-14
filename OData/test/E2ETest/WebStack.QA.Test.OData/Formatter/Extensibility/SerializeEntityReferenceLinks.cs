@@ -108,12 +108,8 @@ namespace WebStack.QA.Test.OData.Formatter.Extensibility
         {
         }
 
-        public override ODataSerializer GetODataPayloadSerializer(IEdmModel model, Type type, HttpRequestMessage request)
+        public override ODataSerializer GetODataPayloadSerializer(Type type, HttpRequestMessage request)
         {
-            if (model == null)
-            {
-                throw new ArgumentNullException("model");
-            }
             if (type == null)
             {
                 throw new ArgumentNullException("type");
@@ -126,7 +122,7 @@ namespace WebStack.QA.Test.OData.Formatter.Extensibility
             {
                 return new ODataEntityReferenceLinksSerializer();
             }
-            return base.GetODataPayloadSerializer(model, type, request);
+            return base.GetODataPayloadSerializer(type, request);
         }
     }
 

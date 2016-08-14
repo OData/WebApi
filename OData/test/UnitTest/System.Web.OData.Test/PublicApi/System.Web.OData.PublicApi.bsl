@@ -2780,7 +2780,7 @@ public abstract class System.Web.OData.Formatter.Deserialization.ODataDeserializ
 	protected ODataDeserializerProvider ()
 
 	public abstract ODataEdmTypeDeserializer GetEdmTypeDeserializer (Microsoft.OData.Edm.IEdmTypeReference edmType)
-	public abstract ODataDeserializer GetODataDeserializer (Microsoft.OData.Edm.IEdmModel model, System.Type type, System.Net.Http.HttpRequestMessage request)
+	public abstract ODataDeserializer GetODataDeserializer (System.Type type, System.Net.Http.HttpRequestMessage request)
 }
 
 public abstract class System.Web.OData.Formatter.Deserialization.ODataEdmTypeDeserializer : ODataDeserializer {
@@ -2812,7 +2812,7 @@ public class System.Web.OData.Formatter.Deserialization.DefaultODataDeserializer
 	public DefaultODataDeserializerProvider (System.IServiceProvider rootContainer)
 
 	public virtual ODataEdmTypeDeserializer GetEdmTypeDeserializer (Microsoft.OData.Edm.IEdmTypeReference edmType)
-	public virtual ODataDeserializer GetODataDeserializer (Microsoft.OData.Edm.IEdmModel model, System.Type type, System.Net.Http.HttpRequestMessage request)
+	public virtual ODataDeserializer GetODataDeserializer (System.Type type, System.Net.Http.HttpRequestMessage request)
 }
 
 public class System.Web.OData.Formatter.Deserialization.ODataActionPayloadDeserializer : ODataDeserializer {
@@ -2934,14 +2934,14 @@ public abstract class System.Web.OData.Formatter.Serialization.ODataSerializerPr
 	protected ODataSerializerProvider ()
 
 	public abstract ODataEdmTypeSerializer GetEdmTypeSerializer (Microsoft.OData.Edm.IEdmTypeReference edmType)
-	public abstract ODataSerializer GetODataPayloadSerializer (Microsoft.OData.Edm.IEdmModel model, System.Type type, System.Net.Http.HttpRequestMessage request)
+	public abstract ODataSerializer GetODataPayloadSerializer (System.Type type, System.Net.Http.HttpRequestMessage request)
 }
 
 public class System.Web.OData.Formatter.Serialization.DefaultODataSerializerProvider : ODataSerializerProvider {
 	public DefaultODataSerializerProvider (System.IServiceProvider rootContainer)
 
 	public virtual ODataEdmTypeSerializer GetEdmTypeSerializer (Microsoft.OData.Edm.IEdmTypeReference edmType)
-	public virtual ODataSerializer GetODataPayloadSerializer (Microsoft.OData.Edm.IEdmModel model, System.Type type, System.Net.Http.HttpRequestMessage request)
+	public virtual ODataSerializer GetODataPayloadSerializer (System.Type type, System.Net.Http.HttpRequestMessage request)
 }
 
 public class System.Web.OData.Formatter.Serialization.EntitySelfLinks {

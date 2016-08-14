@@ -434,7 +434,7 @@ namespace System.Web.OData.Formatter
             Mock<ODataSerializer> serializer = new Mock<ODataSerializer>(ODataPayloadKind.Property);
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
 
-            serializerProvider.Setup(p => p.GetODataPayloadSerializer(model, typeof(int), request)).Returns(serializer.Object);
+            serializerProvider.Setup(p => p.GetODataPayloadSerializer(typeof(int), request)).Returns(serializer.Object);
             serializer
                 .Setup(s => s.WriteObject(42, typeof(int), It.IsAny<ODataMessageWriter>(),
                     It.Is<ODataSerializerContext>(c => c.MetadataLevel == ODataMetadataLevel.FullMetadata)))
@@ -465,7 +465,7 @@ namespace System.Web.OData.Formatter
             Mock<ODataSerializer> serializer = new Mock<ODataSerializer>(ODataPayloadKind.Property);
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
 
-            serializerProvider.Setup(p => p.GetODataPayloadSerializer(model, typeof(int), request)).Returns(serializer.Object);
+            serializerProvider.Setup(p => p.GetODataPayloadSerializer(typeof(int), request)).Returns(serializer.Object);
             serializer
                 .Setup(s => s.WriteObject(42, typeof(int), It.IsAny<ODataMessageWriter>(),
                     It.Is<ODataSerializerContext>(c => c.SelectExpandClause == selectExpandClause)))
@@ -798,7 +798,7 @@ namespace System.Web.OData.Formatter
                 .Verifiable();
 
             Mock<ODataDeserializerProvider> provider = new Mock<ODataDeserializerProvider>();
-            provider.Setup(p => p.GetODataDeserializer(model, typeof(int), request)).Returns(deserializer.Object);
+            provider.Setup(p => p.GetODataDeserializer(typeof(int), request)).Returns(deserializer.Object);
 
             // Act
             ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(provider.Object,

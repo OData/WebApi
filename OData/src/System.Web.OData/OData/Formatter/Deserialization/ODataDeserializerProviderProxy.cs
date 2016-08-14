@@ -46,10 +46,10 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         /// <inheritdoc />
-        public override ODataDeserializer GetODataDeserializer(IEdmModel model, Type type, HttpRequestMessage request)
+        public override ODataDeserializer GetODataDeserializer(Type type, HttpRequestMessage request)
         {
             return RequestContainer.GetRequiredService<ODataDeserializerProvider>()
-                .GetODataDeserializer(model, type, request);
+                .GetODataDeserializer(type, request);
         }
     }
 }

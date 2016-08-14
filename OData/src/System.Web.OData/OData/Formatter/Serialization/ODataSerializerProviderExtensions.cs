@@ -3,19 +3,15 @@
 
 using System.Diagnostics.Contracts;
 using System.Net.Http;
-using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Formatter.Serialization
 {
     internal static class ODataSerializerProviderExtensions
     {
         public static ODataEdmTypeSerializer GetEdmTypeSerializer(this ODataSerializerProvider serializerProvider,
-            IEdmModel model, object instance, HttpRequestMessage request)
+            object instance, HttpRequestMessage request)
         {
             Contract.Assert(serializerProvider != null);
-            Contract.Assert(model != null);
-            Contract.Assert(instance != null);
-
             Contract.Assert(instance != null);
 
             IEdmObject edmObject = instance as IEdmObject;
@@ -24,7 +20,7 @@ namespace System.Web.OData.Formatter.Serialization
                 return serializerProvider.GetEdmTypeSerializer(edmObject.GetEdmType());
             }
 
-            return serializerProvider.GetODataPayloadSerializer(model, instance.GetType(), request) as ODataEdmTypeSerializer;
+            return serializerProvider.GetODataPayloadSerializer(instance.GetType(), request) as ODataEdmTypeSerializer;
         }
     }
 }

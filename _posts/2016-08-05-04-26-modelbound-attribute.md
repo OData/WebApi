@@ -237,7 +237,7 @@ We can specify which property can be expanded, which property is automatic expan
 
 #### Automatic Expand
 
-Automatic expand mean it will always expand that navigation property, it's like automatic select, we will add a $expand in the query, so it will expand even if there is a `$select`.
+Automatic expand mean it will always expand that navigation property, it's like automatic select, we will add a $expand in the query, so it will expand even if there is a `$select` which does not contain automatic epxand property.
 
 ### Model Bound Fluent APIs
 
@@ -286,6 +286,10 @@ builder.EntityType<Customer>()
 
 The example shows class with attributes and build model using the model bound fluent APIs if we can't modify the class. These two approaches are getting two same models.
 About the multiple attribute, model bound fluent APIs are the same, the model bound fluent API with a constrained set of properties wins. For example: `builder.EntityType<Customer>().Expand().Expand("Friend", SelectExpandType.Disabled)`, Friend can't be expanded, even we put `Expand()` in the end. If there is a setting with same property, the last one wins, for example: `.Expand(8, "Friend").Expand(1, "Friend")`, the max depth will be 1.
+
+### Overall Query Setting Precedence
+
+Query settings can be placed in many places, with the following precedence from lowest to highest: System Default(not query-able by default), Global Configuration, Model Bound Attribute, Fluent API.
 
 ### Controller Level Query Setting
 

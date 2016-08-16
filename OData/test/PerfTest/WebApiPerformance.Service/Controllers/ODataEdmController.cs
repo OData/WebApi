@@ -6,6 +6,7 @@ using System.Web.Http;
 using System.Web.OData;
 using System.Web.OData.Extensions;
 using System.Web.OData.Query;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -18,7 +19,7 @@ namespace WebApiPerformance.Service
         {
             var props = Request.ODataProperties();
 
-            var model = props.Model;
+            var model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
 
             var es = (EntitySetSegment)props.Path.Segments[0];
 

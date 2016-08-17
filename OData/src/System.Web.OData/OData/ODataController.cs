@@ -27,7 +27,7 @@ namespace System.Web.OData
         {
             if (disposing && Request != null)
             {
-                Request.DetachRequestContainer(true);
+                Request.DeleteRequestContainer(true);
             }
 
             base.Dispose(disposing);

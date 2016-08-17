@@ -142,7 +142,7 @@ namespace System.Web.OData.Batch
                     foreach (HttpRequestMessage changeSetRequest in changeSetRequests)
                     {
                         changeSetRequest.CopyBatchRequestProperties(request);
-                        changeSetRequest.DetachRequestContainer(false);
+                        changeSetRequest.DeleteRequestContainer(false);
                     }
                     requests.Add(new ChangeSetRequestItem(changeSetRequests));
                 }
@@ -150,7 +150,7 @@ namespace System.Web.OData.Batch
                 {
                     HttpRequestMessage operationRequest = await batchReader.ReadOperationRequestAsync(batchId, bufferContentStream: true, cancellationToken: cancellationToken);
                     operationRequest.CopyBatchRequestProperties(request);
-                    operationRequest.DetachRequestContainer(false);
+                    operationRequest.DeleteRequestContainer(false);
                     requests.Add(new OperationRequestItem(operationRequest));
                 }
             }

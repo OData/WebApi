@@ -118,7 +118,7 @@ namespace System.Web.OData.Batch
             HttpRequestMessage operationRequest = await batchReader.ReadOperationRequestAsync(batchId, bufferContentStream: false);
 
             operationRequest.CopyBatchRequestProperties(originalRequest);
-            operationRequest.DetachRequestContainer(false);
+            operationRequest.DeleteRequestContainer(false);
             OperationRequestItem operation = new OperationRequestItem(operationRequest);
             try
             {
@@ -162,7 +162,7 @@ namespace System.Web.OData.Batch
                     {
                         HttpRequestMessage changeSetOperationRequest = await batchReader.ReadChangeSetOperationRequestAsync(batchId, changeSetId, bufferContentStream: false);
                         changeSetOperationRequest.CopyBatchRequestProperties(originalRequest);
-                        changeSetOperationRequest.DetachRequestContainer(false);
+                        changeSetOperationRequest.DeleteRequestContainer(false);
                         try
                         {
                             HttpResponseMessage response = await ODataBatchRequestItem.SendMessageAsync(Invoker, changeSetOperationRequest, cancellationToken, contentIdToLocationMapping);

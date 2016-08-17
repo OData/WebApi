@@ -148,7 +148,7 @@ namespace System.Web.OData.Routing
                 }
 
                 // The request doesn't match this route so dipose the request container.
-                request.DetachRequestContainer(true);
+                request.DeleteRequestContainer(true);
                 return false;
             }
             else

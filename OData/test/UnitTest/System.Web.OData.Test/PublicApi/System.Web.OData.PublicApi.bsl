@@ -1794,6 +1794,16 @@ public sealed class System.Web.OData.Extensions.HttpRequestMessageExtensions {
 	[
 	ExtensionAttribute(),
 	]
+	public static System.IServiceProvider CreateRequestContainer (System.Net.Http.HttpRequestMessage request, string routeName)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static void DeleteRequestContainer (System.Net.Http.HttpRequestMessage request, bool dispose)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static ODataDeserializerProvider GetDeserializerProvider (System.Net.Http.HttpRequestMessage request)
 
 	[

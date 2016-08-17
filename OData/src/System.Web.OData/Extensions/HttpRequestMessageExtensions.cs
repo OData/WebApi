@@ -249,9 +249,15 @@ namespace System.Web.OData.Extensions
             return request.CreateRequestContainer(null);
         }
 
+        /// <summary>
+        /// Creates a request container that associates with the <paramref name="request"/>.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="routeName">The name of the route.</param>
+        /// <returns>The request container created.</returns>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
             Justification = "requestScope will be disposed when the request ends.")]
-        internal static IServiceProvider CreateRequestContainer(this HttpRequestMessage request, string routeName)
+        public static IServiceProvider CreateRequestContainer(this HttpRequestMessage request, string routeName)
         {
             if (request.Properties.ContainsKey(RequestContainerKey))
             {
@@ -267,7 +273,15 @@ namespace System.Web.OData.Extensions
             return requestContainer;
         }
 
-        internal static void DetachRequestContainer(this HttpRequestMessage request, bool dispose)
+        /// <summary>
+        /// Deletes the request container from the <paramref name="request"/> and disposes
+        /// the container if <paramref name="dispose"/> is <c>true</c>.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="dispose">
+        /// Returns <c>true</c> to dispose the request container after deletion; <c>false</c> otherwise.
+        /// </param>
+        public static void DeleteRequestContainer(this HttpRequestMessage request, bool dispose)
         {
             object value;
             if (request.Properties.TryGetValue(RequestScopeKey, out value))

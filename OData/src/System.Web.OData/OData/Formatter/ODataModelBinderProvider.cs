@@ -226,8 +226,7 @@ namespace System.Web.OData.Formatter
                 }
 
                 HttpRequestMessage request = readContext.Request;
-                ODataMessageReaderSettings oDataReaderSettings =
-                    request.GetRequestContainer().GetRequiredService<ODataMessageReaderSettings>();
+                ODataMessageReaderSettings oDataReaderSettings = request.GetReaderSettings();
 
                 using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(valueString)))
                 {
@@ -270,8 +269,7 @@ namespace System.Web.OData.Formatter
                 ODataResourceSetWrapper resourceSet =
                     odataReader.ReadResourceOrResourceSet() as ODataResourceSetWrapper;
 
-                ODataDeserializerProvider deserializerProvider =
-                    readContext.Request.GetRequestContainer().GetRequiredService<ODataDeserializerProvider>();
+                ODataDeserializerProvider deserializerProvider = readContext.Request.GetDeserializerProvider();
 
                 ODataResourceSetDeserializer resourceSetDeserializer =
                     (ODataResourceSetDeserializer)deserializerProvider.GetEdmTypeDeserializer(collectionType);
@@ -325,8 +323,7 @@ namespace System.Web.OData.Formatter
                 ODataResourceWrapper topLevelResource = item as ODataResourceWrapper;
                 Contract.Assert(topLevelResource != null);
 
-                ODataDeserializerProvider deserializerProvider =
-                    readContext.Request.GetRequestContainer().GetRequiredService<ODataDeserializerProvider>();
+                ODataDeserializerProvider deserializerProvider = readContext.Request.GetDeserializerProvider();
 
                 ODataResourceDeserializer entityDeserializer =
                     (ODataResourceDeserializer)deserializerProvider.GetEdmTypeDeserializer(edmTypeReference);
@@ -399,7 +396,7 @@ namespace System.Web.OData.Formatter
             {
                 return request.GetUrlHelper().CreateODataLink(
                     request.ODataProperties().RouteName,
-                    request.GetRequestContainer().GetRequiredService<IODataPathHandler>(),
+                    request.GetPathHandler(),
                     new List<ODataPathSegment>());
             }
 
@@ -421,7 +418,7 @@ namespace System.Web.OData.Formatter
             {
                 HttpRequestMessage request = actionContext.Request;
                 ODataPath path = request.ODataProperties().Path;
-                IEdmModel edmModel = request.GetRequestContainer().GetRequiredService<IEdmModel>();
+                IEdmModel edmModel = request.GetModel();
 
                 return new ODataDeserializerContext
                 {

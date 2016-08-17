@@ -84,7 +84,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 return _rootContainer.GetRequiredService<ODataActionPayloadDeserializer>();
             }
 
-            IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
+            IEdmModel model = request.GetModel();
             ClrTypeCache typeMappingCache = model.GetTypeMappingCache();
             IEdmTypeReference edmType = typeMappingCache.GetEdmType(type, model);
 

@@ -198,7 +198,6 @@
     <Compile Include="ODataCountTest\CountDataModel.cs" />
     <Compile Include="ODataCountTest\CountEdmModel.cs" />
     <Compile Include="ODataCountTest\CountTest.cs" />
-    <Compile Include="EdmModelExtensions.cs" />
     <Compile Include="ODataPathHandlerExtensions.cs" />
     <Compile Include="QueryComposition\IsOf\IsOfController.cs" />
     <Compile Include="QueryComposition\IsOf\IsofDataSource.cs" />

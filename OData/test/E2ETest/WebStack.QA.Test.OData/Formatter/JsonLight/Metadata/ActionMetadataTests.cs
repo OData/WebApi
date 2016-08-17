@@ -69,7 +69,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
                     var segments = new List<ODataPathSegment>();
                     segments.Add(new EntitySetSegment(eic.NavigationSource as IEdmEntitySet));
                     segments.Add(new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, eic.StructuredType as IEdmEntityType, null));
-                    var pathHandler = (IODataPathHandler)eic.Request.GetRequestContainer().GetService(typeof(IODataPathHandler));
+                    var pathHandler = eic.Request.GetPathHandler();
                     string link = eic.Url.CreateODataLink("Actions", pathHandler, segments);
                     link += "/" + action.FullName();
                     return new Uri(link);
@@ -103,7 +103,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
                     segments.Add(new TypeSegment(derivedType, null));
                     // bug 1985: Make the internal constructor as public in BoundActionPathSegment
                     //segments.Add(new BoundActionPathSegment(action));
-                    var pathHandler = (IODataPathHandler)eic.Request.GetRequestContainer().GetService(typeof(IODataPathHandler));
+                    var pathHandler = eic.Request.GetPathHandler();
                     string link = eic.Url.CreateODataLink("Actions", pathHandler, segments);
                     link += "/" + action.FullName();
                     return new Uri(link);

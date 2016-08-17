@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Web.Http;
 using System.Web.OData;
+using System.Web.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 using Newtonsoft.Json.Linq;
@@ -14,7 +15,7 @@ namespace WebStack.QA.Test.OData.Swagger
         [EnableQuery]
         public JObject GetSwagger()
         {
-            IEdmModel model = Request.GetEdmModel();
+            IEdmModel model = Request.GetModel();
             model.SetEdmxVersion(_defaultEdmxVersion);
             ODataSwaggerConverter converter = new ODataSwaggerConverter(model);
             return converter.GetSwaggerModel();

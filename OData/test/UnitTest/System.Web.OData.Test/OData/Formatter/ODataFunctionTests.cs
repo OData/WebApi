@@ -319,7 +319,7 @@ namespace System.Web.OData.Formatter
         [EnableQuery]
         public IHttpActionResult Get()
         {
-            IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
+            IEdmModel model = Request.GetModel();
             IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "Customer");
 
             EdmEntityObject customer = new EdmEntityObject(customerType);

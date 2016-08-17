@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.OData;
 using System.Web.OData.Extensions;
@@ -398,7 +396,7 @@ namespace WebStack.QA.Test.OData.Containment
 
         private IEdmEntityType GetEdmEntityTypeOfStatement()
         {
-            IEdmModel edmModel = Request.GetEdmModel();
+            IEdmModel edmModel = Request.GetModel();
             IEdmEntityType statementType = (IEdmEntityType)edmModel.FindDeclaredType(typeof(Statement).FullName);
             return statementType;
         }

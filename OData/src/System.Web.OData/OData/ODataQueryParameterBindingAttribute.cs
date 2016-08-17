@@ -75,7 +75,7 @@ namespace System.Web.OData
                 // can be different (example implementing $select or $expand).
                 Type entityClrType = GetEntityClrTypeFromParameterType(Descriptor) ?? GetEntityClrTypeFromActionReturnType(actionDescriptor);
 
-                IEdmModel userModel = request.GetRequestContainer().GetRequiredService<IEdmModel>();
+                IEdmModel userModel = request.GetModel();
                 IEdmModel model = userModel != EdmCoreModel.Instance ? userModel : actionDescriptor.GetEdmModel(entityClrType);
                 ODataQueryContext entitySetContext = new ODataQueryContext(model, entityClrType, request.ODataProperties().Path);
 

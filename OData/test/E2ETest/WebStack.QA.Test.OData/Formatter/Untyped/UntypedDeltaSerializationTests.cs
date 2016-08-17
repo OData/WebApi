@@ -101,7 +101,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
         {
             get
             {
-                return Request.GetEdmModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedCustomer") as IEdmEntityType;
+                return Request.GetModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedCustomer") as IEdmEntityType;
             }
         }
 
@@ -109,7 +109,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
         {
             get
             {
-                return Request.GetEdmModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedOrder") as IEdmEntityType;
+                return Request.GetModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedOrder") as IEdmEntityType;
             }
         }
 
@@ -117,7 +117,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
         {
             get
             {
-                return Request.GetEdmModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedAddress") as IEdmComplexType;
+                return Request.GetModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedAddress") as IEdmComplexType;
             }
         }
 

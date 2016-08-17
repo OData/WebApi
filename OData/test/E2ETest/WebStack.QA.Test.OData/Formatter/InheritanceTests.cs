@@ -98,7 +98,7 @@ namespace WebStack.QA.Test.OData.Formatter
                 new InheritanceTests_VehiclesController().LocalTable.AddOrUpdate(vehicle.Id, vehicle, (id, v) => vehicle);
                 this.LocalTable[key].BaseTypeNavigationProperty.Add(vehicle);
 
-                IEdmEntitySet entitySet = Request.GetEdmModel().EntityContainer.FindEntitySet("InheritanceTests_Vehicles");
+                IEdmEntitySet entitySet = Request.GetModel().EntityContainer.FindEntitySet("InheritanceTests_Vehicles");
 
                 var response = this.Request.CreateResponse(HttpStatusCode.Created, vehicle);
                 response.Headers.Location = new Uri(this.Url.CreateODataLink(
@@ -123,7 +123,7 @@ namespace WebStack.QA.Test.OData.Formatter
                 new InheritanceTests_VehiclesController().LocalTable.AddOrUpdate(vehicle.Id, vehicle, (id, v) => vehicle);
                 this.LocalTable[key].DerivedTypeNavigationProperty.Add(vehicle);
 
-                IEdmEntitySet entitySet = Request.GetEdmModel().EntityContainer.FindEntitySet("InheritanceTests_Vehicles");
+                IEdmEntitySet entitySet = Request.GetModel().EntityContainer.FindEntitySet("InheritanceTests_Vehicles");
 
                 var response = this.Request.CreateResponse(System.Net.HttpStatusCode.Created, vehicle);
                 response.Headers.Location = new Uri(this.Url.CreateODataLink(

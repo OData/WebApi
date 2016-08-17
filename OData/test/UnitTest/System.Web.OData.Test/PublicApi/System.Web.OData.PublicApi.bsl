@@ -1794,6 +1794,11 @@ public sealed class System.Web.OData.Extensions.HttpRequestMessageExtensions {
 	[
 	ExtensionAttribute(),
 	]
+	public static ODataDeserializerProvider GetDeserializerProvider (System.Net.Http.HttpRequestMessage request)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static ETag GetETag (System.Net.Http.HttpRequestMessage request, System.Net.Http.Headers.EntityTagHeaderValue entityTagHeaderValue)
 
 	[
@@ -1804,12 +1809,42 @@ public sealed class System.Web.OData.Extensions.HttpRequestMessageExtensions {
 	[
 	ExtensionAttribute(),
 	]
+	public static Microsoft.OData.Edm.IEdmModel GetModel (System.Net.Http.HttpRequestMessage request)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static System.Uri GetNextPageLink (System.Net.Http.HttpRequestMessage request, int pageSize)
 
 	[
 	ExtensionAttribute(),
 	]
+	public static IODataPathHandler GetPathHandler (System.Net.Http.HttpRequestMessage request)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.OData.ODataMessageReaderSettings GetReaderSettings (System.Net.Http.HttpRequestMessage request)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static System.IServiceProvider GetRequestContainer (System.Net.Http.HttpRequestMessage request)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.Conventions.IODataRoutingConvention]] GetRoutingConventions (System.Net.Http.HttpRequestMessage request)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static ODataSerializerProvider GetSerializerProvider (System.Net.Http.HttpRequestMessage request)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.OData.ODataMessageWriterSettings GetWriterSettings (System.Net.Http.HttpRequestMessage request)
 
 	[
 	ExtensionAttribute(),

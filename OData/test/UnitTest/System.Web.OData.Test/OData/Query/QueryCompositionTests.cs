@@ -283,7 +283,7 @@ namespace System.Web.OData.Query
 
             public override void OnActionExecuting(HttpActionContext actionContext)
             {
-                Assert.Equal(_model, actionContext.Request.GetRequestContainer().GetRequiredService<IEdmModel>());
+                Assert.Equal(_model, actionContext.Request.GetModel());
             }
         }
     }

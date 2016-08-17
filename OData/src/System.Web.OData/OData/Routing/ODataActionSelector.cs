@@ -68,7 +68,7 @@ namespace System.Web.OData.Routing
 
             HttpRequestMessage request = controllerContext.Request;
             ODataPath odataPath = request.ODataProperties().Path;
-            IEnumerable<IODataRoutingConvention> routingConventions = request.GetRequestContainer().GetServices<IODataRoutingConvention>();
+            IEnumerable<IODataRoutingConvention> routingConventions = request.GetRoutingConventions();
             IHttpRouteData routeData = controllerContext.RouteData;
 
             if (odataPath == null || routingConventions == null || routeData.Values.ContainsKey(ODataRouteConstants.Action))

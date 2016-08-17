@@ -642,7 +642,7 @@ namespace System.Web.OData
             HttpActionDescriptor actionDescriptor)
         {
             // Get model for the request
-            IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
+            IEdmModel model = request.GetModel();
 
             if (model == EdmCoreModel.Instance || model.GetEdmType(elementClrType) == null)
             {

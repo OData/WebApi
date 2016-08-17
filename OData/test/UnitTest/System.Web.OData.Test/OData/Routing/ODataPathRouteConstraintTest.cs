@@ -155,10 +155,10 @@ namespace System.Web.OData.Routing
             Assert.True(constraint.Match(request, null, null, values, HttpRouteDirection.UriResolution));
 
             Assert.Equal("Metadata", values["controller"]);
-            Assert.Same(_model, request.GetRequestContainer().GetRequiredService<IEdmModel>());
+            Assert.Same(_model, request.GetModel());
             Assert.Same(_routeName, request.ODataProperties().RouteName);
-            Assert.Equal(_conventions, request.GetRequestContainer().GetServices<IODataRoutingConvention>());
-            Assert.Same(_pathHandler, request.GetRequestContainer().GetRequiredService<IODataPathHandler>());
+            Assert.Equal(_conventions, request.GetRoutingConventions());
+            Assert.Same(_pathHandler, request.GetPathHandler());
         }
 
         [Theory]

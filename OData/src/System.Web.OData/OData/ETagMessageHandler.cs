@@ -59,7 +59,7 @@ namespace System.Web.OData
             }
 
             ODataPath path = request.ODataProperties().Path;
-            IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
+            IEdmModel model = request.GetModel();
 
             IEdmEntityType edmType = GetSingleEntityEntityType(path);
             object value = GetSingleEntityObject(response);

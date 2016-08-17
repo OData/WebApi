@@ -11,11 +11,15 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Web.Http;
 using System.Web.OData.Formatter;
+using System.Web.OData.Formatter.Deserialization;
+using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
 using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -137,7 +141,7 @@ namespace System.Web.OData.Extensions
 
                 // get property names from request
                 ODataPath odataPath = request.ODataProperties().Path;
-                IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
+                IEdmModel model = request.GetModel();
                 IEdmEntitySet entitySet = odataPath.NavigationSource as IEdmEntitySet;
                 if (model != null && entitySet != null)
                 {
@@ -280,6 +284,111 @@ namespace System.Web.OData.Extensions
                     requestScope.Dispose();
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IEdmModel"/> from the request container.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The <see cref="IEdmModel"/> from the request container.</returns>
+        public static IEdmModel GetModel(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetRequestContainer().GetRequiredService<IEdmModel>();
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ODataMessageWriterSettings"/> from the request container.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The <see cref="ODataMessageWriterSettings"/> from the request container.</returns>
+        public static ODataMessageWriterSettings GetWriterSettings(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetRequestContainer().GetRequiredService<ODataMessageWriterSettings>();
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ODataMessageReaderSettings"/> from the request container.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The <see cref="ODataMessageReaderSettings"/> from the request container.</returns>
+        public static ODataMessageReaderSettings GetReaderSettings(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetRequestContainer().GetRequiredService<ODataMessageReaderSettings>();
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IODataPathHandler"/> from the request container.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The <see cref="IODataPathHandler"/> from the request container.</returns>
+        public static IODataPathHandler GetPathHandler(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetRequestContainer().GetRequiredService<IODataPathHandler>();
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ODataSerializerProvider"/> from the request container.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The <see cref="ODataSerializerProvider"/> from the request container.</returns>
+        public static ODataSerializerProvider GetSerializerProvider(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetRequestContainer().GetRequiredService<ODataSerializerProvider>();
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ODataDeserializerProvider"/> from the request container.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The <see cref="ODataDeserializerProvider"/> from the request container.</returns>
+        public static ODataDeserializerProvider GetDeserializerProvider(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetRequestContainer().GetRequiredService<ODataDeserializerProvider>();
+        }
+
+        /// <summary>
+        /// Gets the set of <see cref="IODataRoutingConvention"/> from the request container.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>The set of <see cref="IODataRoutingConvention"/> from the request container.</returns>
+        public static IEnumerable<IODataRoutingConvention> GetRoutingConventions(this HttpRequestMessage request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return request.GetRequestContainer().GetServices<IODataRoutingConvention>();
         }
 
         internal static Uri GetNextPageLink(Uri requestUri, int pageSize)

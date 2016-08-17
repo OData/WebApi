@@ -166,9 +166,7 @@ namespace System.Web.OData.Routing
         /// <returns>The name of the controller to dispatch to, or <c>null</c> if one cannot be resolved.</returns>
         protected virtual string SelectControllerName(ODataPath path, HttpRequestMessage request)
         {
-            IEnumerable<IODataRoutingConvention> routingConventions =
-                request.GetRequestContainer().GetServices<IODataRoutingConvention>();
-            foreach (IODataRoutingConvention routingConvention in routingConventions)
+            foreach (IODataRoutingConvention routingConvention in request.GetRoutingConventions())
             {
                 string controllerName = routingConvention.SelectController(path, request);
                 if (controllerName != null)

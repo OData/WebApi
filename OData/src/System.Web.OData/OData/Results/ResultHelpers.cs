@@ -123,7 +123,7 @@ namespace System.Web.OData.Results
 
         private static ResourceContext CreateResourceContext(HttpRequestMessage request, object entity)
         {
-            IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
+            IEdmModel model = request.GetModel();
             if (model == null)
             {
                 throw new InvalidOperationException(SRResources.RequestMustHaveModel);

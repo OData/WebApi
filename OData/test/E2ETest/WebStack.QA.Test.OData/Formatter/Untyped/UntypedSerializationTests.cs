@@ -9,12 +9,10 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Query;
-using System.Web.OData.Query.Validators;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
@@ -222,7 +220,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
         {
             get
             {
-                return Request.GetEdmModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedCustomer") as IEdmEntityType;
+                return Request.GetModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedCustomer") as IEdmEntityType;
             }
         }
 
@@ -230,7 +228,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
         {
             get
             {
-                return Request.GetEdmModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedOrder") as IEdmEntityType;
+                return Request.GetModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedOrder") as IEdmEntityType;
             }
         }
 
@@ -238,7 +236,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
         {
             get
             {
-                return Request.GetEdmModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedAddress") as IEdmComplexType;
+                return Request.GetModel().FindType("WebStack.QA.Test.OData.Formatter.Untyped.UntypedAddress") as IEdmComplexType;
             }
         }
 
@@ -272,7 +270,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
                 return BadRequest("The key isn't the one posted to the customer");
             }
 
-            ODataQueryContext context = new ODataQueryContext(Request.GetEdmModel(), CustomerType, path: null);
+            ODataQueryContext context = new ODataQueryContext(Request.GetModel(), CustomerType, path: null);
             ODataQueryOptions query = new ODataQueryOptions(context, Request);
             if (query.SelectExpand != null)
             {
@@ -291,7 +289,7 @@ namespace WebStack.QA.Test.OData.Formatter.Untyped
             object id;
             customer.TryGetPropertyValue("Id", out id);
 
-            IEdmEntitySet entitySet = Request.GetEdmModel().EntityContainer.FindEntitySet("UntypedCustomers");
+            IEdmEntitySet entitySet = Request.GetModel().EntityContainer.FindEntitySet("UntypedCustomers");
             return Created(Url.CreateODataLink(new EntitySetSegment(entitySet),
                 new KeySegment(new[] {new KeyValuePair<string, object>("Id", id)}, entitySet.EntityType(), null)), customer);
         }

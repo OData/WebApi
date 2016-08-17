@@ -107,7 +107,7 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             // if it is not a special type, assume it has a corresponding EdmType.
-            IEdmModel model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
+            IEdmModel model = request.GetModel();
             ClrTypeCache typeMappingCache = model.GetTypeMappingCache();
             IEdmTypeReference edmType = typeMappingCache.GetEdmType(type, model);
 

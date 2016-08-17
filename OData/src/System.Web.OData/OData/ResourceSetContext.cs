@@ -48,7 +48,7 @@ namespace System.Web.OData
         {
             get
             {
-                return Request.GetRequestContainer().GetRequiredService<IEdmModel>();
+                return Request.GetModel();
             }
         }
     }

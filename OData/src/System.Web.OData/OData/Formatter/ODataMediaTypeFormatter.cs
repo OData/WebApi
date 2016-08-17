@@ -259,7 +259,7 @@ namespace System.Web.OData.Formatter
 
             if (Request != null)
             {
-                IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
+                IEdmModel model = Request.GetModel();
                 IEdmTypeReference expectedPayloadType;
                 ODataDeserializer deserializer = GetDeserializer(type, Request.ODataProperties().Path, model,
                     _deserializerProvider, out expectedPayloadType);
@@ -356,7 +356,7 @@ namespace System.Web.OData.Formatter
             }
             else
             {
-                IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
+                IEdmModel model = Request.GetModel();
                 IEdmTypeReference expectedPayloadType;
                 ODataDeserializer deserializer = GetDeserializer(type, Request.ODataProperties().Path, model, _deserializerProvider, out expectedPayloadType);
                 if (deserializer == null)
@@ -366,8 +366,7 @@ namespace System.Web.OData.Formatter
 
                 try
                 {
-                    ODataMessageReaderSettings oDataReaderSettings =
-                        Request.GetRequestContainer().GetRequiredService<ODataMessageReaderSettings>();
+                    ODataMessageReaderSettings oDataReaderSettings = Request.GetReaderSettings();
                     oDataReaderSettings.BaseUri = GetBaseAddressInternal(Request);
                     oDataReaderSettings.Validations = oDataReaderSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
 
@@ -443,7 +442,7 @@ namespace System.Web.OData.Formatter
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
         private void WriteToStream(Type type, object value, Stream writeStream, HttpContent content, HttpContentHeaders contentHeaders)
         {
-            IEdmModel model = Request.GetRequestContainer().GetRequiredService<IEdmModel>();
+            IEdmModel model = Request.GetModel();
             if (model == null)
             {
                 throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
@@ -483,8 +482,7 @@ namespace System.Web.OData.Formatter
             }
 
             Uri baseAddress = GetBaseAddressInternal(Request);
-            ODataMessageWriterSettings writerSettings =
-                Request.GetRequestContainer().GetRequiredService<ODataMessageWriterSettings>();
+            ODataMessageWriterSettings writerSettings = Request.GetWriterSettings();
             writerSettings.BaseUri = baseAddress;
             writerSettings.Version = _version;
             writerSettings.Validations = writerSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;

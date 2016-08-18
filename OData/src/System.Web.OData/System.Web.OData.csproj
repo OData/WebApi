@@ -103,6 +103,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\DataContractAttributeEnumTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\MediaTypeAttributeConvention.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerProviderProxy.cs" />
+    <Compile Include="OData\Formatter\ODataModelBinderConverter.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerProviderProxy.cs" />
     <Compile Include="OData\ODataQueryContextExtensions.cs" />
     <Compile Include="OData\Query\CountAttribute.cs" />

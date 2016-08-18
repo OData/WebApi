@@ -1919,6 +1919,10 @@ public sealed class System.Web.OData.Formatter.ODataMediaTypeFormatters {
 	public static System.Collections.Generic.IList`1[[System.Web.OData.Formatter.ODataMediaTypeFormatter]] Create (ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
 }
 
+public sealed class System.Web.OData.Formatter.ODataModelBinderConverter {
+	public static object Convert (object graph, Microsoft.OData.Edm.IEdmTypeReference edmTypeReference, System.Type clrType, string parameterName, ODataDeserializerContext readContext, System.IServiceProvider requestContainer)
+}
+
 [
 DefaultMemberAttribute(),
 ]

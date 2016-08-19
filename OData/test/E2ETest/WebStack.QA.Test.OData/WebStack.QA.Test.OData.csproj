@@ -163,6 +163,10 @@
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayTest.cs" />
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayWithEfTest.cs" />
     <Compile Include="DateAndTimeOfDay\DateWithEfTest.cs" />
+    <Compile Include="DependencyInjection\CustomizeCountQueryValidatorTest.cs" />
+    <Compile Include="DependencyInjection\CustomizeSerializerTest.cs" />
+    <Compile Include="DependencyInjection\DependencyInjectionController.cs" />
+    <Compile Include="DependencyInjection\DependencyInjectionEdmModel.cs" />
     <Compile Include="DollarLevels\DollarLevelsController.cs" />
     <Compile Include="DollarLevels\DollarLevelsDataModel.cs" />
     <Compile Include="DollarLevels\DollarLevelsEdmModel.cs" />

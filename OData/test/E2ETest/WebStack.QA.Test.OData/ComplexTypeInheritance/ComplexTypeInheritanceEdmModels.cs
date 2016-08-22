@@ -49,6 +49,7 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
             EntitySetConfiguration<Window> windows = builder.EntitySet<Window>("Windows");
             windows.HasEditLink(link, true);
             windows.HasIdLink(link, true);
+            windows.HasOptionalBinding(c => c.Parent, "Windows");
 
             builder.Namespace = typeof(Window).Namespace;
 

@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Web.OData.Builder.TestModels;
 using System.Web.OData.Formatter;
 using System.Web.OData.TestCommon;
@@ -274,6 +276,51 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
+        public void CreateEdmModel_WithSingleton_CanAddBindingPath_ToNavigationProperty_WithComplex()
+        {
+            // Arrange
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+
+            var motorcycle = builder.AddEntityType(typeof(Motorcycle));
+            var myMotor = builder.AddSingleton("MyMotor", motorcycle);
+
+            var manufacturer = builder.AddComplexType(typeof(MotorcycleManufacturer));
+            var address = builder.AddEntityType(typeof(ManufacturerAddress));
+
+            motorcycle.AddComplexProperty(typeof(Motorcycle).GetProperty("Manufacturer"));
+            var navProperty = manufacturer.AddNavigationProperty(typeof(Manufacturer).GetProperty("Address"), EdmMultiplicity.One);
+
+            var addresses = builder.AddEntitySet("Addresses", address);
+            myMotor.AddBinding(navProperty, addresses, new List<MemberInfo>
+            {
+                typeof(Motorcycle).GetProperty("Manufacturer"),
+                typeof(Manufacturer).GetProperty("Address")
+            });
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            var motorcycleEdmType = model.AssertHasEntityType(typeof(Motorcycle));
+            Assert.Empty(motorcycleEdmType.NavigationProperties());
+
+            var manufacturerEdmType = model.AssertHasComplexType(typeof(MotorcycleManufacturer));
+
+            var edmNavProperty = manufacturerEdmType.AssertHasNavigationProperty(model, "Address",
+                typeof(ManufacturerAddress), isNullable: false, multiplicity: EdmMultiplicity.One);
+
+            var myMotorSingleton = model.EntityContainer.FindSingleton("MyMotor");
+            Assert.NotNull(myMotorSingleton);
+
+            var bindings = myMotorSingleton.FindNavigationPropertyBindings(edmNavProperty);
+            var binding = Assert.Single(bindings);
+
+            Assert.Equal("Address", binding.NavigationProperty.Name);
+            Assert.Equal("Addresses", binding.Target.Name);
+            Assert.Equal("Manufacturer/Address", binding.Path.Path);
+        }
+
+        [Fact]
         public void CreateEdmModel_WithSingleton_CanAddNavigationLinkToDerivedNavigationProperty()
         {
             // Arrange
@@ -302,7 +349,7 @@ namespace System.Web.OData.Builder
         }
 
         [Fact]
-        public void SingletonAddBinding_Throws_IfBindingNavigationPropertyIsNotPartOfEntityType()
+        public void SingletonAddBinding_DoesnotThrows_IfBindingNavigationPropertyIsNotPartOfEntityType()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -315,11 +362,7 @@ namespace System.Web.OData.Builder
             var myVehicle = builder.AddSingleton("MyVehicle", vehicleType);
 
             // Act & Assert
-            Assert.ThrowsArgument(
-                () => myVehicle.AddBinding(navProperty, fordo),
-                "navigationConfiguration",
-                "The declaring entity type 'System.Web.OData.Builder.TestModels.Car' of the given navigation property is not a part of " +
-                "the entity type 'System.Web.OData.Builder.TestModels.Vehicle' hierarchy of the entity set or singleton 'MyVehicle'.");
+            Assert.DoesNotThrow(() => myVehicle.AddBinding(navProperty, fordo));
         }
 
         [Fact]

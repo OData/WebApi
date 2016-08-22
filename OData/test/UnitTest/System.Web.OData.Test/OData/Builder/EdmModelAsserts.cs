@@ -34,10 +34,10 @@ namespace System.Web.OData.Builder
         }
 
         public static IEdmNavigationPropertyBinding AssertHasNavigationTarget(this IEdmNavigationSource navigationSource,
-            IEdmNavigationProperty navigationProperty, string targetNavigationsource)
+            IEdmNavigationProperty navigationProperty, string targetNavigationsource, string bindingPath)
         {
             IEdmNavigationPropertyBinding navMapping = navigationSource.NavigationPropertyBindings
-                .SingleOrDefault(n => n.NavigationProperty == navigationProperty);
+                .SingleOrDefault(n => n.NavigationProperty == navigationProperty && n.Path.Path == bindingPath);
 
             Assert.NotNull(navMapping); // Guard
             Assert.Equal(targetNavigationsource, navMapping.Target.Name); // Guard

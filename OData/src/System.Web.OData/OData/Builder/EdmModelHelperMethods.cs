@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
@@ -41,7 +42,7 @@ namespace System.Web.OData.Builder
             IEnumerable<NavigationSourceAndAnnotations> navigationSources = entitySets.Concat(singletons);
 
             // Build the navigation source map
-            IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(builder, edmTypeMap, navigationSources);
+            IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(edmMap, navigationSources);
 
             // Add the core vocabulary annotations
             model.AddCoreVocabularyAnnotations(entitySets, edmMap);
@@ -108,8 +109,8 @@ namespace System.Web.OData.Builder
             }).ToArray();
         }
 
-        private static IDictionary<string, EdmNavigationSource> GetNavigationSourceMap(this EdmModel model, ODataModelBuilder builder,
-            Dictionary<Type, IEdmType> edmTypeMap, IEnumerable<NavigationSourceAndAnnotations> navigationSourceAndAnnotations)
+        private static IDictionary<string, EdmNavigationSource> GetNavigationSourceMap(this EdmModel model, EdmTypeMap edmMap,
+            IEnumerable<NavigationSourceAndAnnotations> navigationSourceAndAnnotations)
         {
             // index the navigation source by name
             Dictionary<string, EdmNavigationSource> edmNavigationSourceMap = navigationSourceAndAnnotations.ToDictionary(e => e.NavigationSource.Name, e => e.NavigationSource);
@@ -118,50 +119,70 @@ namespace System.Web.OData.Builder
             foreach (NavigationSourceAndAnnotations navigationSourceAndAnnotation in navigationSourceAndAnnotations)
             {
                 EdmNavigationSource navigationSource = navigationSourceAndAnnotation.NavigationSource;
-                model.SetAnnotationValue<NavigationSourceUrlAnnotation>(navigationSource, navigationSourceAndAnnotation.Url);
+                model.SetAnnotationValue(navigationSource, navigationSourceAndAnnotation.Url);
                 model.SetNavigationSourceLinkBuilder(navigationSource, navigationSourceAndAnnotation.LinkBuilder);
 
-                AddNavigationBindings(navigationSourceAndAnnotation.Configuration, navigationSource, navigationSourceAndAnnotation.LinkBuilder,
-                    builder, edmTypeMap, edmNavigationSourceMap);
+                AddNavigationBindings(edmMap, navigationSourceAndAnnotation.Configuration, navigationSource, navigationSourceAndAnnotation.LinkBuilder,
+                    edmNavigationSourceMap);
             }
 
             return edmNavigationSourceMap;
         }
 
-        private static void AddNavigationBindings(NavigationSourceConfiguration configuration,
+        private static void AddNavigationBindings(EdmTypeMap edmMap,
+            NavigationSourceConfiguration navigationSourceConfiguration,
             EdmNavigationSource navigationSource,
             NavigationSourceLinkBuilderAnnotation linkBuilder,
-            ODataModelBuilder builder,
-            Dictionary<Type, IEdmType> edmTypeMap,
             Dictionary<string, EdmNavigationSource> edmNavigationSourceMap)
         {
-            foreach (EntityTypeConfiguration entityType in builder.ThisAndBaseAndDerivedTypes(configuration.EntityType))
+            foreach (var binding in navigationSourceConfiguration.Bindings)
             {
-                foreach (NavigationPropertyConfiguration navigationProperty in entityType.NavigationProperties)
+                NavigationPropertyConfiguration navigationProperty = binding.NavigationProperty;
+                bool isContained = navigationProperty.ContainsTarget;
+
+                IEdmType edmType = edmMap.EdmTypes[navigationProperty.DeclaringType.ClrType];
+                IEdmStructuredType structuraType = edmType as IEdmStructuredType;
+                IEdmNavigationProperty edmNavigationProperty = structuraType.NavigationProperties()
+                    .Single(np => np.Name == navigationProperty.Name);
+
+                string bindingPath = ConvertBindingPath(edmMap, binding);
+                if (!isContained)
                 {
-                    NavigationPropertyBindingConfiguration binding = configuration.FindBinding(navigationProperty);
-                    bool isContained = navigationProperty.ContainsTarget;
-                    if (binding != null || isContained)
-                    {
-                        EdmEntityType edmEntityType = edmTypeMap[entityType.ClrType] as EdmEntityType;
-                        IEdmNavigationProperty edmNavigationProperty = edmEntityType.NavigationProperties()
-                            .Single(np => np.Name == navigationProperty.Name);
+                    // calculate the binding path
+                    navigationSource.AddNavigationTarget(
+                        edmNavigationProperty,
+                        edmNavigationSourceMap[binding.TargetNavigationSource.Name],
+                        new EdmPathExpression(bindingPath));
+                }
 
-                        if (!isContained)
-                        {
-                            navigationSource.AddNavigationTarget(
-                                edmNavigationProperty,
-                                edmNavigationSourceMap[binding.TargetNavigationSource.Name]);
-                        }
-
-                        NavigationLinkBuilder linkBuilderFunc = configuration.GetNavigationPropertyLink(navigationProperty);
-                        if (linkBuilderFunc != null)
-                        {
-                            linkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, linkBuilderFunc);
-                        }
-                    }
+                NavigationLinkBuilder linkBuilderFunc = navigationSourceConfiguration.GetNavigationPropertyLink(navigationProperty);
+                if (linkBuilderFunc != null)
+                {
+                    linkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, linkBuilderFunc);
                 }
             }
+        }
+
+        private static string ConvertBindingPath(EdmTypeMap edmMap, NavigationPropertyBindingConfiguration binding)
+        {
+            IList<string> bindings = new List<string>();
+            foreach (var bindingInfo in binding.Path)
+            {
+                Type typeCast = bindingInfo as Type;
+                PropertyInfo propertyInfo = bindingInfo as PropertyInfo;
+
+                if (typeCast != null)
+                {
+                    IEdmType edmType = edmMap.EdmTypes[typeCast];
+                    bindings.Add(edmType.FullTypeName());
+                }
+                else if (propertyInfo != null)
+                {
+                    bindings.Add(edmMap.EdmProperties[propertyInfo].Name);
+                }
+            }
+
+            return String.Join("/", bindings);
         }
 
         private static void AddOperationParameters(EdmOperation operation, OperationConfiguration operationConfiguration, Dictionary<Type, IEdmType> edmTypeMap)

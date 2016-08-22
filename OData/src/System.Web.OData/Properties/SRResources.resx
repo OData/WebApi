@@ -229,7 +229,7 @@
     <value>The type '{0}' is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError.</value>
   </data>
   <data name="CannotAutoCreateMultipleCandidates" xml:space="preserve">
-    <value>Cannot automatically bind the navigation property '{0}' on entity type '{1}' for the entity set or singleton '{2}' because there are two or more matching target entity sets or singletons. The matching entity sets or singletons are: {3}.</value>
+    <value>Cannot automatically bind the navigation property '{0}' on type '{1}' for the entity set or singleton '{2}' because there are two or more matching target entity sets or singletons. The matching entity sets or singletons are: {3}.</value>
   </data>
   <data name="PropertyDoesNotBelongToType" xml:space="preserve">
     <value>The property '{0}' does not belong to the type '{1}'.</value>
@@ -855,5 +855,14 @@
   </data>
   <data name="RequestContainerAlreadyExists" xml:space="preserve">
     <value>A request container already exists on the request.</value>
+  </data>
+  <data name="NavigationPropertyBindingPathIsNotValid" xml:space="preserve">
+    <value>The navigation property binding path '{0}' is not valid. The last segment must be the navigation property '{1}'.</value>
+  </data>
+  <data name="NavigationPropertyBindingPathNotSupported" xml:space="preserve">
+    <value>The navigation property binding path segment '{0}' of member type '{1}' is not supported.</value>
+  </data>
+  <data name="NavigationPropertyBindingPathNotInHierarchy" xml:space="preserve">
+    <value>The type '{0}' of the binding type cast segment '{1}' is not a part of the type '{2}' hierarchy.</value>
   </data>
 </root>

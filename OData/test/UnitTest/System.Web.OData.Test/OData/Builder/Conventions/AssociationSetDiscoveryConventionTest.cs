@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Reflection;
 using System.Web.OData.Builder.TestModels;
 using Microsoft.OData.Edm;
@@ -28,16 +29,23 @@ namespace System.Web.OData.Builder.Conventions
             NavigationPropertyConfiguration motorcycleNavigationProperty = motorcycle.AddNavigationProperty(typeof(Motorcycle).GetProperty("Manufacturer"), EdmMultiplicity.ZeroOrOne);
 
             EntityTypeConfiguration manufacturer = builder.AddEntityType(typeof(Manufacturer));
-            EntityTypeConfiguration motorcycleManufacturer = builder.AddEntityType(typeof(MotorcycleManufacturer)).DerivesFrom(manufacturer);
-            EntityTypeConfiguration carManufacturer = builder.AddEntityType(typeof(CarManufacturer)).DerivesFrom(manufacturer);
+            builder.AddEntityType(typeof(MotorcycleManufacturer)).DerivesFrom(manufacturer);
+            builder.AddEntityType(typeof(CarManufacturer)).DerivesFrom(manufacturer);
 
             EntitySetConfiguration manufacturers = builder.AddEntitySet("manufacturers", manufacturer);
 
-
             Mock<EntitySetConfiguration> entitySet = new Mock<EntitySetConfiguration>(MockBehavior.Strict);
             entitySet.Setup(v => v.EntityType).Returns(vehicle);
-            entitySet.Setup(v => v.AddBinding(motorcycleNavigationProperty, manufacturers)).Returns<NavigationPropertyConfiguration>(null);
-            entitySet.Setup(v => v.AddBinding(carNavigationProperty, manufacturers)).Returns<NavigationPropertyConfiguration>(null);
+            entitySet.Setup(
+                v =>
+                    v.AddBinding(motorcycleNavigationProperty, manufacturers,
+                        new List<MemberInfo> { typeof(Motorcycle), typeof(Motorcycle).GetProperty("Manufacturer") }))
+                .Returns<NavigationPropertyConfiguration>(null);
+            entitySet.Setup(
+                v =>
+                    v.AddBinding(carNavigationProperty, manufacturers,
+                        new List<MemberInfo> { typeof(Car), typeof(Car).GetProperty("Manufacturer") }))
+                .Returns<NavigationPropertyConfiguration>(null);
 
             // Act
             _convention.Apply(entitySet.Object, builder);

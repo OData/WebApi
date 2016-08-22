@@ -223,7 +223,7 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot automatically bind the navigation property &apos;{0}&apos; on entity type &apos;{1}&apos; for the entity set or singleton &apos;{2}&apos; because there are two or more matching target entity sets or singletons. The matching entity sets or singletons are: {3}..
+        ///   Looks up a localized string similar to Cannot automatically bind the navigation property &apos;{0}&apos; on type &apos;{1}&apos; for the entity set or singleton &apos;{2}&apos; because there are two or more matching target entity sets or singletons. The matching entity sets or singletons are: {3}..
         /// </summary>
         internal static string CannotAutoCreateMultipleCandidates {
             get {
@@ -1227,6 +1227,33 @@ namespace System.Web.OData.Properties {
         internal static string MustHaveMatchingMultiplicity {
             get {
                 return ResourceManager.GetString("MustHaveMatchingMultiplicity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The navigation property binding path &apos;{0}&apos; is not valid. The last segment must be the navigation property &apos;{1}&apos;..
+        /// </summary>
+        internal static string NavigationPropertyBindingPathIsNotValid {
+            get {
+                return ResourceManager.GetString("NavigationPropertyBindingPathIsNotValid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; of the binding type cast segment &apos;{1}&apos; is not a part of the type &apos;{2}&apos; hierarchy..
+        /// </summary>
+        internal static string NavigationPropertyBindingPathNotInHierarchy {
+            get {
+                return ResourceManager.GetString("NavigationPropertyBindingPathNotInHierarchy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The navigation property binding path segment &apos;{0}&apos; of member type &apos;{1}&apos; is not supported..
+        /// </summary>
+        internal static string NavigationPropertyBindingPathNotSupported {
+            get {
+                return ResourceManager.GetString("NavigationPropertyBindingPathNotSupported", resourceCulture);
             }
         }
         

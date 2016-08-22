@@ -38,6 +38,7 @@ namespace System.Web.OData.Builder
             ContainerName = "Container";
             DataServiceVersion = _defaultDataServiceVersion;
             MaxDataServiceVersion = _defaultMaxDataServiceVersion;
+            BindingOptions = NavigationPropertyBindingOption.None;
         }
 
         /// <summary>
@@ -135,6 +136,11 @@ namespace System.Web.OData.Builder
         {
             get { return _operations; }
         }
+
+        /// <summary>
+        /// Gets or sets the navigation property binding options.
+        /// </summary>
+        public NavigationPropertyBindingOption BindingOptions { get; set; }
 
         /// <summary>
         /// Registers an entity type as part of the model and returns an object that can be used to configure the entity type.

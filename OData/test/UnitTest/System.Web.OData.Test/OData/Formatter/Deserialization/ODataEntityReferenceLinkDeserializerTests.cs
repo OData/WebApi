@@ -114,6 +114,7 @@ namespace System.Web.OData.Formatter.Deserialization
             NavigationPropertyConfiguration entityToRelated =
                 entities.EntityType.HasOptional<RelatedEntity>((e) => e.Related);
             entities.HasNavigationPropertyLink(entityToRelated, (a, b) => new Uri("aa:b"), false);
+            entities.HasOptionalBinding((e) => e.Related, "related");
 
             return builder.GetEdmModel();
         }

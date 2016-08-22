@@ -111,6 +111,7 @@
     <Compile Include="OData\Batch\ChangeSetResponseItemTest.cs" />
     <Compile Include="OData\Batch\ChangeSetRequestItemTest.cs" />
     <Compile Include="OData\Batch\DefaultODataBatchHandlerTest.cs" />
+    <Compile Include="OData\Builder\BindingPathHelperTest.cs" />
     <Compile Include="OData\Builder\ComplexTypeConfigurationTest.cs" />
     <Compile Include="OData\Builder\ContainmentPathBuilderTest.cs" />
     <Compile Include="OData\Builder\Conventions\FunctionLinkGenerationConventionTest.cs" />
@@ -132,6 +133,7 @@
     <Compile Include="OData\Builder\LowerCamelCaserTest.cs" />
     <Compile Include="OData\Builder\PropertyConfigurationTest.cs" />
     <Compile Include="OData\Builder\SingletonTest.cs" />
+    <Compile Include="OData\Builder\BindingPathConfigurationOfTStructuralTypeTest.cs" />
     <Compile Include="OData\Builder\StructuralTypeConfigurationOfTStructuralTypeTest.cs" />
     <Compile Include="OData\Builder\StructuralTypeConfigurationTest.cs" />
     <Compile Include="OData\Builder\TestModels\Client.cs" />

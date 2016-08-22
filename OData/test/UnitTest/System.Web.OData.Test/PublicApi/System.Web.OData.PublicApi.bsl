@@ -826,6 +826,11 @@ public enum System.Web.OData.Builder.NameResolverOptions : int {
 	ProcessReflectedPropertyNames = 1
 }
 
+public enum System.Web.OData.Builder.NavigationPropertyBindingOption : int {
+	Auto = 1
+	None = 0
+}
+
 public enum System.Web.OData.Builder.OperationKind : int {
 	Action = 0
 	Function = 1
@@ -861,9 +866,10 @@ public abstract class System.Web.OData.Builder.NavigationSourceConfiguration {
 	string Name  { public get; }
 
 	public virtual NavigationPropertyBindingConfiguration AddBinding (NavigationPropertyConfiguration navigationConfiguration, NavigationSourceConfiguration targetNavigationSource)
-	public virtual NavigationPropertyBindingConfiguration FindBinding (string propertyName)
-	public virtual NavigationPropertyBindingConfiguration FindBinding (NavigationPropertyConfiguration navigationConfiguration)
-	public virtual NavigationPropertyBindingConfiguration FindBinding (NavigationPropertyConfiguration navigationConfiguration, bool autoCreate)
+	public virtual NavigationPropertyBindingConfiguration AddBinding (NavigationPropertyConfiguration navigationConfiguration, NavigationSourceConfiguration targetNavigationSource, System.Collections.Generic.IList`1[[System.Reflection.MemberInfo]] bindingPath)
+	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationPropertyBindingConfiguration]] FindBinding (NavigationPropertyConfiguration navigationConfiguration)
+	public virtual NavigationPropertyBindingConfiguration FindBinding (NavigationPropertyConfiguration navigationConfiguration, System.Collections.Generic.IList`1[[System.Reflection.MemberInfo]] bindingPath)
+	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationPropertyBindingConfiguration]] FindBindings (string propertyName)
 	public virtual System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] GetEditLink ()
 	public virtual System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] GetIdLink ()
 	public virtual NavigationLinkBuilder GetNavigationPropertyLink (NavigationPropertyConfiguration navigationProperty)
@@ -876,14 +882,16 @@ public abstract class System.Web.OData.Builder.NavigationSourceConfiguration {
 	public virtual NavigationSourceConfiguration HasReadLink (System.Web.OData.Builder.SelfLinkBuilder`1[[System.Uri]] readLinkBuilder)
 	public virtual NavigationSourceConfiguration HasUrl (string url)
 	public virtual void RemoveBinding (NavigationPropertyConfiguration navigationConfiguration)
+	public virtual void RemoveBinding (NavigationPropertyConfiguration navigationConfiguration, string bindingPath)
 }
 
 public abstract class System.Web.OData.Builder.NavigationSourceConfiguration`1 {
+	BindingPathConfiguration`1 Binding  { public get; }
 	EntityTypeConfiguration`1 EntityType  { public get; }
 
-	public NavigationPropertyBindingConfiguration FindBinding (string propertyName)
-	public NavigationPropertyBindingConfiguration FindBinding (NavigationPropertyConfiguration navigationConfiguration)
-	public NavigationPropertyBindingConfiguration FindBinding (NavigationPropertyConfiguration navigationConfiguration, bool autoCreate)
+	public System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationPropertyBindingConfiguration]] FindBinding (NavigationPropertyConfiguration navigationConfiguration)
+	public NavigationPropertyBindingConfiguration FindBinding (NavigationPropertyConfiguration navigationConfiguration, System.Collections.Generic.IList`1[[System.Reflection.MemberInfo]] bindingPath)
+	public System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.NavigationPropertyBindingConfiguration]] FindBindings (string propertyName)
 	public void HasEditLink (Func`2 editLinkFactory, bool followsConventions)
 	public void HasIdLink (Func`2 idLinkFactory, bool followsConventions)
 	public NavigationPropertyBindingConfiguration HasManyBinding (Expression`1 navigationExpression, NavigationSourceConfiguration`1 targetEntitySet)
@@ -1192,6 +1200,29 @@ public class System.Web.OData.Builder.BindingParameterConfiguration : ParameterC
 	public BindingParameterConfiguration (string name, IEdmTypeConfiguration parameterType)
 }
 
+public class System.Web.OData.Builder.BindingPathConfiguration`1 {
+	public BindingPathConfiguration`1 (ODataModelBuilder modelBuilder, StructuralTypeConfiguration`1 structuralType, NavigationSourceConfiguration navigationSource)
+	public BindingPathConfiguration`1 (ODataModelBuilder modelBuilder, StructuralTypeConfiguration`1 structuralType, NavigationSourceConfiguration navigationSource, System.Collections.Generic.IList`1[[System.Reflection.MemberInfo]] bindingPath)
+
+	string BindingPath  { public get; }
+	System.Collections.Generic.IList`1[[System.Reflection.MemberInfo]] Path  { public get; }
+
+	public NavigationPropertyBindingConfiguration HasManyBinding (Expression`1 navigationExpression, string targetEntitySet)
+	public NavigationPropertyBindingConfiguration HasManyBinding (Expression`1 navigationExpression, string targetEntitySet)
+	public BindingPathConfiguration`1 HasManyPath (Expression`1 pathExpression)
+	public BindingPathConfiguration`1 HasManyPath (Expression`1 pathExpression)
+	public BindingPathConfiguration`1 HasManyPath (Expression`1 pathExpression, bool contained)
+	public BindingPathConfiguration`1 HasManyPath (Expression`1 pathExpression, bool contained)
+	public NavigationPropertyBindingConfiguration HasOptionalBinding (Expression`1 navigationExpression, string targetEntitySet)
+	public NavigationPropertyBindingConfiguration HasOptionalBinding (Expression`1 navigationExpression, string targetEntitySet)
+	public NavigationPropertyBindingConfiguration HasRequiredBinding (Expression`1 navigationExpression, string targetEntitySet)
+	public NavigationPropertyBindingConfiguration HasRequiredBinding (Expression`1 navigationExpression, string targetEntitySet)
+	public BindingPathConfiguration`1 HasSinglePath (Expression`1 pathExpression)
+	public BindingPathConfiguration`1 HasSinglePath (Expression`1 pathExpression)
+	public BindingPathConfiguration`1 HasSinglePath (Expression`1 pathExpression, bool required, bool contained)
+	public BindingPathConfiguration`1 HasSinglePath (Expression`1 pathExpression, bool required, bool contained)
+}
+
 public class System.Web.OData.Builder.CollectionPropertyConfiguration : StructuralPropertyConfiguration {
 	public CollectionPropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
 
@@ -1396,8 +1427,11 @@ public class System.Web.OData.Builder.NavigationLinkBuilder {
 
 public class System.Web.OData.Builder.NavigationPropertyBindingConfiguration {
 	public NavigationPropertyBindingConfiguration (NavigationPropertyConfiguration navigationProperty, NavigationSourceConfiguration navigationSource)
+	public NavigationPropertyBindingConfiguration (NavigationPropertyConfiguration navigationProperty, NavigationSourceConfiguration navigationSource, System.Collections.Generic.IList`1[[System.Reflection.MemberInfo]] path)
 
+	string BindingPath  { public get; }
 	NavigationPropertyConfiguration NavigationProperty  { public get; }
+	System.Collections.Generic.IList`1[[System.Reflection.MemberInfo]] Path  { public get; }
 	NavigationSourceConfiguration TargetNavigationSource  { public get; }
 }
 
@@ -1463,6 +1497,7 @@ public class System.Web.OData.Builder.ODataConventionModelBuilder : ODataModelBu
 public class System.Web.OData.Builder.ODataModelBuilder {
 	public ODataModelBuilder ()
 
+	NavigationPropertyBindingOption BindingOptions  { public get; public set; }
 	string ContainerName  { public get; public set; }
 	System.Version DataServiceVersion  { public get; public set; }
 	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.EntitySetConfiguration]] EntitySets  { public virtual get; }

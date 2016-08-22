@@ -95,6 +95,9 @@
     <Compile Include="OData\Builder\Conventions\Attributes\OrderByAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\PageAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\PageAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\BindingPathConfigurationOfTStructuralType.cs" />
+    <Compile Include="OData\Builder\NavigationPropertyExtensions.cs" />
+    <Compile Include="OData\Builder\NavigationPropertyBindingOption.cs" />
     <Compile Include="OData\Builder\OperationLinkBuilder.cs" />
     <Compile Include="OData\Builder\AutoExpandAttribute.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\AutoExpandAttributeEdmTypeConvention.cs" />
@@ -102,6 +105,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\ColumnAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\DataContractAttributeEnumTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\MediaTypeAttributeConvention.cs" />
+    <Compile Include="OData\Builder\BindingPathHelper.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerProviderProxy.cs" />
     <Compile Include="OData\Formatter\ODataModelBinderConverter.cs" />
     <Compile Include="OData\Formatter\Serialization\ODataSerializerProviderProxy.cs" />

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http;
@@ -20,15 +21,17 @@ namespace System.Web.OData.Builder.Conventions
     {
         public void Apply(NavigationSourceConfiguration configuration, ODataModelBuilder model)
         {
-            foreach (EntityTypeConfiguration entity in model.ThisAndBaseAndDerivedTypes(configuration.EntityType))
+            IList<Tuple<StructuralTypeConfiguration, IList<MemberInfo>, NavigationPropertyConfiguration>> navigations =
+                new List<Tuple<StructuralTypeConfiguration, IList<MemberInfo>, NavigationPropertyConfiguration>>();
+            Stack<MemberInfo> path = new Stack<MemberInfo>();
+            model.FindAllNavigationProperties(configuration.EntityType, navigations, path);
+            foreach (var navigation in navigations)
             {
-                foreach (NavigationPropertyConfiguration navigationProperty in entity.NavigationProperties)
+                NavigationSourceConfiguration targetNavigationSource = GetTargetNavigationSource(
+                       navigation.Item3, model);
+                if (targetNavigationSource != null)
                 {
-                    NavigationSourceConfiguration targetNavigationSource = GetTargetNavigationSource(navigationProperty, model);
-                    if (targetNavigationSource != null)
-                    {
-                        configuration.AddBinding(navigationProperty, targetNavigationSource);
-                    }
+                    configuration.AddBinding(navigation.Item3, targetNavigationSource, navigation.Item2);
                 }
             }
         }
@@ -39,9 +42,8 @@ namespace System.Web.OData.Builder.Conventions
         {
             EntityTypeConfiguration targetEntityType =
                 model
-                .StructuralTypes
-                .OfType<EntityTypeConfiguration>()
-                .Where(e => e.ClrType == navigationProperty.RelatedClrType).SingleOrDefault();
+                    .StructuralTypes
+                    .OfType<EntityTypeConfiguration>().SingleOrDefault(e => e.ClrType == navigationProperty.RelatedClrType);
 
             if (targetEntityType == null)
             {
@@ -54,7 +56,8 @@ namespace System.Web.OData.Builder.Conventions
             return GetDefaultNavigationSource(targetEntityType, model, hasSingletonAttribute);
         }
 
-        private static NavigationSourceConfiguration GetDefaultNavigationSource(EntityTypeConfiguration targetEntityType,
+        private static NavigationSourceConfiguration GetDefaultNavigationSource(
+            EntityTypeConfiguration targetEntityType,
             ODataModelBuilder model, bool isSingleton)
         {
             if (targetEntityType == null)
@@ -74,6 +77,11 @@ namespace System.Web.OData.Builder.Conventions
 
             if (matchingNavigationSources.Length > 1)
             {
+                if (model.BindingOptions == NavigationPropertyBindingOption.Auto)
+                {
+                    return matchingNavigationSources[0];
+                }
+
                 return null;
             }
             else if (matchingNavigationSources.Length == 1)

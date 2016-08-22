@@ -992,6 +992,128 @@ namespace System.Web.OData.Builder
                 responseString);
         }
 
+        [Fact]
+        public void DollarMetadata_Works_WithNavigationPropertyBindingOnMultiplePath()
+        {
+            // Arrange
+          const string expectMetadata =
+            "<EntityContainer Name=\"Container\">" +
+                "<EntitySet Name=\"Customers\" EntityType=\"System.Web.OData.Formatter.BindingCustomer\">" +
+                    "<NavigationPropertyBinding Path=\"Location/City\" Target=\"Cities\" />" +
+                "</EntitySet>" +
+                "<EntitySet Name=\"Cities\" EntityType=\"System.Web.OData.Formatter.BindingCity\" />" +
+            "</EntityContainer>";
+
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<BindingCustomer>().HasKey(c => c.Id);
+            builder.EntityType<BindingCity>().HasKey(c => c.Id);
+
+            builder
+                .EntitySet<BindingCustomer>("Customers")
+                .Binding
+                .HasSinglePath(c => c.Location)
+                .HasRequiredBinding(a => a.City, "Cities");
+
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(builder.GetEdmModel());
+
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var responseString = client.GetStringAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.Contains(expectMetadata, responseString);
+        }
+
+        [Fact]
+        public void DollarMetadata_Works_WithNavigationPropertyBindingOnMultiplePath_WithDerived()
+        {
+            // Arrange
+            const string expectMetadata =
+              "<EntityContainer Name=\"Container\">" +
+                  "<EntitySet Name=\"Customers\" EntityType=\"System.Web.OData.Formatter.BindingCustomer\">" +
+                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipLocation/System.Web.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities_A\" />" +
+                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipLocation/System.Web.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities_B\" />" +
+                  "</EntitySet>" +
+                  "<EntitySet Name=\"Cities_A\" EntityType=\"System.Web.OData.Formatter.BindingCity\" />" +
+                  "<EntitySet Name=\"Cities_B\" EntityType=\"System.Web.OData.Formatter.BindingCity\" />" +
+              "</EntityContainer>";
+
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<BindingCustomer>().HasKey(c => c.Id);
+            builder.EntityType<BindingCity>().HasKey(c => c.Id);
+
+            var bindingConfiguration = builder
+                .EntitySet<BindingCustomer>("Customers")
+                .Binding
+                .HasSinglePath((BindingVipCustomer v) => v.VipLocation);
+
+            bindingConfiguration.HasOptionalBinding((BindingUsAddress u) => u.UsCity, "Cities_A");
+            bindingConfiguration.HasManyBinding((BindingUsAddress u) => u.UsCities, "Cities_B");
+
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(builder.GetEdmModel());
+
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var responseString = client.GetStringAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.Contains(expectMetadata, responseString);
+        }
+
+        [Fact]
+        public void DollarMetadata_Works_WithNavigationPropertyBindingOnMultiplePath_ConventionModelBuilder()
+        {
+            // Arrange
+            const string expectMetadata =
+              "<EntityContainer Name=\"Container\">" +
+                  "<EntitySet Name=\"Customers\" EntityType=\"System.Web.OData.Formatter.BindingCustomer\">" +
+                      "<NavigationPropertyBinding Path=\"Location/City\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Address/City\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Addresses/City\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipLocation/City\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipAddresses/City\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Address/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Addresses/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipLocation/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipAddresses/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/System.Web.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Address/System.Web.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Addresses/System.Web.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipLocation/System.Web.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipAddresses/System.Web.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/System.Web.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Address/System.Web.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Addresses/System.Web.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipLocation/System.Web.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipAddresses/System.Web.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                  "</EntitySet>" +
+                  "<EntitySet Name=\"Cities\" EntityType=\"System.Web.OData.Formatter.BindingCity\" />" +
+              "</EntityContainer>";
+
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<BindingCustomer>("Customers");
+            builder.EntitySet<BindingCity>("Cities");
+
+            var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();
+            config.MapODataServiceRoute(builder.GetEdmModel());
+
+            HttpServer server = new HttpServer(config);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            var responseString = client.GetStringAsync("http://localhost/$metadata").Result;
+
+            // Assert
+            Assert.Contains(expectMetadata, responseString);
+        }
+
         private HttpConfiguration GetConfiguration()
         {
             var config = new[] { typeof(MetadataController) }.GetHttpConfiguration();

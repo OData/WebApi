@@ -94,6 +94,11 @@ namespace System.Web.OData.Builder
             }
         }
 
+        internal StructuralTypeConfiguration Configuration
+        {
+            get { return _configuration; }
+        }
+
         /// <summary>
         /// Excludes a property from the type.
         /// </summary>

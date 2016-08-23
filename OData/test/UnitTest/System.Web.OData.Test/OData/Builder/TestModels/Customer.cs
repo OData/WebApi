@@ -11,6 +11,7 @@ namespace System.Web.OData.Builder.TestModels
         public string Name { get; set; }
         public string City { get; set; }
         public Address Address { get; set; }
+        public Address WorkAddress { get; set; }
         public string Website { get; set; }
         public string ShareSymbol { get; set; }
         public Decimal? SharePrice { get; set; }

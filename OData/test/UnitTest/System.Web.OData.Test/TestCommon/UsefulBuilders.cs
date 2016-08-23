@@ -127,6 +127,17 @@ namespace System.Web.OData
             return builder;
         }
 
+        public static ODataModelBuilder Add_Customer_EntityType_With_DuplicatedAddress(this ODataModelBuilder builder)
+        {
+            builder.Add_Customer_EntityType();
+            builder.Add_Address_ComplexType();
+            var customer = builder.EntityType<Customer>();
+            customer.ComplexProperty(c => c.Address);
+            customer.ComplexProperty(c => c.WorkAddress);
+            customer.Property(c => c.City);
+            return builder;
+        }
+
         public static ODataModelBuilder Add_Customer_EntityType_With_CollectionProperties(this ODataModelBuilder builder)
         {
             builder.Add_Customer_EntityType();

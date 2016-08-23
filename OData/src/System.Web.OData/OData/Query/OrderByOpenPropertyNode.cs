@@ -18,7 +18,7 @@ namespace System.Web.OData.Query
         /// </summary>
         /// <param name="orderByClause">The order by clause for this open property.</param>
         public OrderByOpenPropertyNode(OrderByClause orderByClause)
-            : base(orderByClause.Direction)
+            : base(orderByClause)
         {
             if (orderByClause == null)
             {
@@ -32,6 +32,7 @@ namespace System.Web.OData.Query
             {
                 throw new ODataException(SRResources.OrderByClauseNotSupported);
             }
+
             PropertyName = openPropertyExpression.Name;
         }
 

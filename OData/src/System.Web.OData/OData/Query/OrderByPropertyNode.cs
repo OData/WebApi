@@ -19,6 +19,7 @@ namespace System.Web.OData.Query
         /// </summary>
         /// <param name="orderByClause">The orderby clause representing property access.</param>
         public OrderByPropertyNode(OrderByClause orderByClause)
+            : base(orderByClause)
         {
             if (orderByClause == null)
             {
@@ -31,15 +32,7 @@ namespace System.Web.OData.Query
             SingleValuePropertyAccessNode propertyExpression = orderByClause.Expression as SingleValuePropertyAccessNode;
             if (propertyExpression == null)
             {
-                SingleComplexNode singleComplexNode = orderByClause.Expression as SingleComplexNode;
-                if (singleComplexNode == null)
-                {
-                    throw new ODataException(SRResources.OrderByClauseNotSupported);
-                }
-                else
-                {
-                    Property = singleComplexNode.Property;
-                }
+                throw new ODataException(SRResources.OrderByClauseNotSupported);
             }
             else
             {

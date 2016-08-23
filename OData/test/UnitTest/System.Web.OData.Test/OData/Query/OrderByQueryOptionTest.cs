@@ -334,6 +334,21 @@ namespace System.Web.OData.Query
         }
 
         [Fact]
+        public void OrderByDuplicatePropertyOfComplexTypeThrows()
+        {
+            // Arrange
+            var model = new ODataModelBuilder().Add_Customer_EntityType_With_Address().Add_Customers_EntitySet().GetServiceModel();
+
+            var context = new ODataQueryContext(model, typeof(Customer)){ RequestContainer = new MockContainer() };
+            var orderbyOption = new OrderByQueryOption("Address/City, Address/City", context);
+
+            // Act
+            Assert.Throws<ODataException>(
+                () => orderbyOption.ApplyTo(Enumerable.Empty<Customer>().AsQueryable()),
+                "Duplicate property named 'Address/City' is not supported in '$orderby'.");
+        }
+
+        [Fact]
         public void ApplyTo_NestedProperties_Succeeds()
         {
             // Arrange
@@ -378,6 +393,58 @@ namespace System.Web.OData.Query
             Assert.Equal(1, results[0].CustomerId);
             Assert.Equal(3, results[1].CustomerId);
             Assert.Equal(2, results[2].CustomerId);
+        }
+
+        [Fact]
+        public void ApplyTo_NestedProperties_WithDuplicatePathType_Succeeds()
+        {
+            // Arrange
+            var model =
+                new ODataModelBuilder().Add_Customer_EntityType_With_DuplicatedAddress()
+                    .Add_Customers_EntitySet()
+                    .GetServiceModel();
+            var context = new ODataQueryContext(model, typeof(Customer)) {RequestContainer = new MockContainer()};
+            var orderByOption = new OrderByQueryOption("City,Address/City,WorkAddress/City", context);
+            var customers = (new List<Customer>
+            {
+                new Customer
+                {
+                    CustomerId = 1,
+                    City = "B",
+                    Address = new Address {City = "B"},
+                    WorkAddress = new Address {City = "B"}
+                },
+                new Customer
+                {
+                    CustomerId = 2,
+                    City = "B",
+                    Address = new Address {City = "B"},
+                    WorkAddress = new Address {City = "A"}
+                },
+                new Customer
+                {
+                    CustomerId = 3,
+                    City = "B",
+                    Address = new Address {City = "A"},
+                    WorkAddress = new Address {City = "A"}
+                },
+                new Customer
+                {
+                    CustomerId = 4,
+                    City = "A",
+                    Address = new Address {City = "A"},
+                    WorkAddress = new Address {City = "A"}
+                }
+            }).AsQueryable();
+
+            // Act
+            var results = orderByOption.ApplyTo(customers).ToArray();
+
+            // Assert
+            Assert.Equal(4, results[0].CustomerId);
+            Assert.Equal(3, results[1].CustomerId);
+            Assert.Equal(2, results[2].CustomerId);
+            Assert.Equal(1, results[3].CustomerId);
         }
 
         [Fact]

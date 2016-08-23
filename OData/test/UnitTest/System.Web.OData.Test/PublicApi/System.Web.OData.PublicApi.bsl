@@ -2159,6 +2159,7 @@ public interface System.Web.OData.Query.ITruncatedCollection : IEnumerable {
 }
 
 public abstract class System.Web.OData.Query.OrderByNode {
+	protected OrderByNode (Microsoft.OData.UriParser.OrderByClause orderByClause)
 	protected OrderByNode (Microsoft.OData.UriParser.OrderByDirection direction)
 
 	Microsoft.OData.UriParser.OrderByDirection Direction  { public get; }

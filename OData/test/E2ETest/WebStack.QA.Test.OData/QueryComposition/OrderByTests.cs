@@ -76,8 +76,33 @@ namespace WebStack.QA.Test.OData.QueryComposition
                             || previousElement.Address.Country.Name.CompareTo(currentElement.Address.Country.Name) < 1);
             }
         }
-    }
 
+        [Fact]
+        public void CanOrderByDuplicatePropertiesSimiliarPath()
+        {
+            string query =
+                "/odata/OrderByCustomers?$orderby=Country/Name, Address/Country/Name asc, WorkAddress/Country/Name asc";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + query);
+            HttpResponseMessage response = Client.SendAsync(request).Result;
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            dynamic parsedContent = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Assert.NotNull(parsedContent.value);
+            for (int i = 1; i < parsedContent.value.Count; i++)
+            {
+                dynamic previousElement = parsedContent.value[i - 1];
+                dynamic currentElement = parsedContent.value[i];
+                Assert.True(previousElement.Country.Name.CompareTo(currentElement.Country.Name) < 1
+                            ||
+                            previousElement.Country.Name.Equals(currentElement.Country.Name) &&
+                            previousElement.Address.Country.Name.CompareTo(currentElement.Address.Country.Name) < 1
+                            ||
+                            previousElement.Country.Name.Equals(currentElement.Country.Name) &&
+                            previousElement.Address.Country.Name.Equals(currentElement.Address.Country.Name) &&
+                            previousElement.WorkAddress.Country.Name.CompareTo(currentElement.WorkAddress.Country.Name) < 1);
+            }
+        }
+    }
 
     public class OrderByCustomersController : ODataController
     {
@@ -91,6 +116,11 @@ namespace WebStack.QA.Test.OData.QueryComposition
                       {
                           Id = j,
                           Name = "Customer " + i,
+                          Country = new OrderByCountry
+                          {
+                              Name = "Country " + j % 3,
+                              State = "State " + j
+                          },
                           Address = new OrderByAddress
                           {
                               FirstLine = "FirstLine " + j,
@@ -99,6 +129,17 @@ namespace WebStack.QA.Test.OData.QueryComposition
                               Country = new OrderByCountry
                               {
                                   Name = "Country " + j % 2,
+                                  State = "State " + j
+                              }
+                          },
+                          WorkAddress = new OrderByAddress
+                          {
+                              FirstLine = "FirstLine " + j,
+                              SecondLine = "SecondLine " + i,
+                              ZipCode = (13 * 7 * j).ToString(),
+                              Country = new OrderByCountry
+                              {
+                                  Name = "Country " + j,
                                   State = "State " + j
                               }
                           },
@@ -128,7 +169,9 @@ namespace WebStack.QA.Test.OData.QueryComposition
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public OrderByCountry Country { get; set; }
         public OrderByAddress Address { get; set; }
+        public OrderByAddress WorkAddress { get; set; }
         public IList<OrderByOrder> Orders { get; set; }
     }
 

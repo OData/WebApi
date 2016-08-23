@@ -33,6 +33,7 @@ namespace System.Web.OData.TestCommon
             EdmComplexType account = new EdmComplexType("NS", "Account", null, false, true);
             account.AddStructuralProperty("Bank", EdmPrimitiveTypeKind.String);
             account.AddStructuralProperty("CardNum", EdmPrimitiveTypeKind.Int64);
+            account.AddStructuralProperty("BankAddress", new EdmComplexTypeReference(address, isNullable: true));
             model.AddElement(account);
 
             EdmComplexType specialAccount = new EdmComplexType("NS", "SpecialAccount", account, false, true);

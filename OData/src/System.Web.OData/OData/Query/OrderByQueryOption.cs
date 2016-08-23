@@ -205,7 +205,7 @@ namespace System.Web.OData.Query
             bool alreadyOrdered = false;
             IQueryable querySoFar = query;
 
-            HashSet<IEdmProperty> propertiesSoFar = new HashSet<IEdmProperty>();
+            HashSet<object> propertiesSoFar = new HashSet<object>();
             HashSet<string> openPropertiesSoFar = new HashSet<string>();
             bool orderByItSeen = false;
 
@@ -216,15 +216,17 @@ namespace System.Web.OData.Query
 
                 if (propertyNode != null)
                 {
-                    IEdmProperty property = propertyNode.Property;
+                    // Use autonomy class to achieve value equality for HasSet.
+                    var edmPropertyWithPath = new { propertyNode.Property, propertyNode.PropertyPath };
                     OrderByDirection direction = propertyNode.Direction;
 
                     // This check prevents queries with duplicate properties (e.g. $orderby=Id,Id,Id,Id...) from causing stack overflows
-                    if (propertiesSoFar.Contains(property))
+                    if (propertiesSoFar.Contains(edmPropertyWithPath))
                     {
-                        throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, property.Name));
+                        throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, edmPropertyWithPath.PropertyPath));
                     }
-                    propertiesSoFar.Add(property);
+
+                    propertiesSoFar.Add(edmPropertyWithPath);
 
                     if (propertyNode.OrderByClause != null)
                     {
@@ -232,8 +234,9 @@ namespace System.Web.OData.Query
                     }
                     else
                     {
-                        querySoFar = ExpressionHelpers.OrderByProperty(querySoFar, Context.Model, property, direction, Context.ElementClrType, alreadyOrdered);
+                        querySoFar = ExpressionHelpers.OrderByProperty(querySoFar, Context.Model, edmPropertyWithPath.Property, direction, Context.ElementClrType, alreadyOrdered);
                     }
+
                     alreadyOrdered = true;
                 }
                 else if (openPropertyNode != null)
@@ -241,8 +244,9 @@ namespace System.Web.OData.Query
                     // This check prevents queries with duplicate properties (e.g. $orderby=Id,Id,Id,Id...) from causing stack overflows
                     if (openPropertiesSoFar.Contains(openPropertyNode.PropertyName))
                     {
-                        throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, openPropertyNode.PropertyName));
+                        throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, openPropertyNode.PropertyPath));
                     }
+
                     openPropertiesSoFar.Add(openPropertyNode.PropertyName);
                     Contract.Assert(openPropertyNode.OrderByClause != null);
                     querySoFar = AddOrderByQueryForProperty(query, querySettings, openPropertyNode.OrderByClause, querySoFar, openPropertyNode.Direction, alreadyOrdered);

@@ -378,28 +378,28 @@ namespace WebStack.QA.Test.OData.Containment
 
                 var payoutPIOfPremiumAccount = premiumAccount["PayoutPI"];
 
-                Assert.Equal(serviceRootUri + "/Accounts(200)/WebStack.QA.Test.OData.Containment.PremiumAccount/PayoutPI/WebStack.QA.Test.OData.Containment.Delete",
+                Assert.Equal(serviceRootUri + "/Accounts(200)/PayoutPI/WebStack.QA.Test.OData.Containment.Delete",
                     (string)payoutPIOfPremiumAccount["#WebStack.QA.Test.OData.Containment.Delete"]["target"]);
 
-                Assert.Equal("Accounts(200)/WebStack.QA.Test.OData.Containment.PremiumAccount/PayoutPI", (string)payoutPIOfPremiumAccount["@odata.editLink"]);
-                Assert.Equal("Accounts(200)/WebStack.QA.Test.OData.Containment.PremiumAccount/PayoutPI", (string)payoutPIOfPremiumAccount["@odata.id"]);
+                Assert.Equal("Accounts(200)/PayoutPI", (string)payoutPIOfPremiumAccount["@odata.editLink"]);
+                Assert.Equal("Accounts(200)/PayoutPI", (string)payoutPIOfPremiumAccount["@odata.id"]);
                 Assert.Equal("#WebStack.QA.Test.OData.Containment.PaymentInstrument", (string)payoutPIOfPremiumAccount["@odata.type"]);
 
                 var payinPIsOfPremiumAccont = premiumAccount["PayinPIs"];
 
-                Assert.Equal(serviceRootUri + "/Accounts(200)/WebStack.QA.Test.OData.Containment.PremiumAccount/PayinPIs(201)/WebStack.QA.Test.OData.Containment.Delete",
+                Assert.Equal(serviceRootUri + "/Accounts(200)/PayinPIs(201)/WebStack.QA.Test.OData.Containment.Delete",
                     (string)payinPIsOfPremiumAccont[0]["#WebStack.QA.Test.OData.Containment.Delete"]["target"]);
 
-                Assert.Equal("Accounts(200)/WebStack.QA.Test.OData.Containment.PremiumAccount/PayinPIs(201)", (string)payinPIsOfPremiumAccont[0]["@odata.editLink"]);
-                Assert.Equal("Accounts(200)/WebStack.QA.Test.OData.Containment.PremiumAccount/PayinPIs(201)", (string)payinPIsOfPremiumAccont[0]["@odata.id"]);
+                Assert.Equal("Accounts(200)/PayinPIs(201)", (string)payinPIsOfPremiumAccont[0]["@odata.editLink"]);
+                Assert.Equal("Accounts(200)/PayinPIs(201)", (string)payinPIsOfPremiumAccont[0]["@odata.id"]);
                 Assert.Equal("#WebStack.QA.Test.OData.Containment.PaymentInstrument", (string)payinPIsOfPremiumAccont[0]["@odata.type"]);
 
                 var giftCard = premiumAccount["GiftCard"];
-                string expected = "Accounts(200)/WebStack.QA.Test.OData.Containment.PremiumAccount/GiftCard";
+                string expected = "Accounts(200)/GiftCard";
                 string actual = (string)giftCard["@odata.editLink"];
                 Assert.True(expected == actual, string.Format("odata.editLink of GiftCard, exptected: {0}, actual: {1}, request url: {2}", expected, actual, requestUri));
 
-                expected = "Accounts(200)/WebStack.QA.Test.OData.Containment.PremiumAccount/GiftCard";
+                expected = "Accounts(200)/GiftCard";
                 actual = (string)giftCard["@odata.id"];
                 Assert.True(expected == actual, string.Format("odata.id link of GiftCard, exptected: {0}, actual: {1}, request url: {2}", expected, actual, requestUri));
 

@@ -3185,30 +3185,6 @@ namespace System.Web.OData.Builder.Conventions
             Assert.True(property.Type.IsNullable);
             Assert.Equal("Edm.TimeOfDay", property.Type.FullName());
         }
-
-        public class A
-        {
-            public int aProperty { get; set; }
-        }
-
-        public class B : A
-        {
-            public string bProperty { get; set; }
-        }
-
-
-        [Fact]
-        public void CanConfig_DateTimeRelatedProperties_Correctly2()
-        {
-            // Arrange
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
-            builder.ComplexType<A>();
-
-            // Act
-            IEdmModel model = builder.GetEdmModel();
-
-            Assert.NotNull(model);
-        }
     }
 
     public enum UserType

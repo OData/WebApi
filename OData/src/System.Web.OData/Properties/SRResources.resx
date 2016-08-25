@@ -655,11 +655,11 @@
   <data name="ParameterAliasMustBeInCurlyBraces" xml:space="preserve">
     <value>Parameter alias '{0}' in segment '{1}' does not start with '{{' or ends with '}}'.</value>
   </data>
-  <data name="EmptyKeyTemplate" xml:space="preserve"> 
-    <value>Key template value in key segment '{0}' is empty.</value> 
+  <data name="EmptyKeyTemplate" xml:space="preserve">
+    <value>Key template value in key segment '{0}' is empty.</value>
   </data>
-  <data name="KeyTemplateMustBeInCurlyBraces" xml:space="preserve"> 
-    <value>Key template value in key segment '{0}' does not start with '{{' or ends with '}}'.</value> 
+  <data name="KeyTemplateMustBeInCurlyBraces" xml:space="preserve">
+    <value>Key template value in key segment '{0}' does not start with '{{' or ends with '}}'.</value>
   </data>
   <data name="UnresolvedPathSegmentInTemplate" xml:space="preserve">
     <value>Found an unresolved path segment '{0}' in the OData path template '{1}'.</value>
@@ -828,5 +828,8 @@
   </data>
   <data name="UriFunctionClrBinderAlreadyBound" xml:space="preserve">
     <value>The function '{0}' is already bound to another method.</value>
+  </data>
+  <data name="CanNotParseInteger" xml:space="preserve">
+    <value>Failed to convert '{0}' to an integer.</value>
   </data>
 </root>

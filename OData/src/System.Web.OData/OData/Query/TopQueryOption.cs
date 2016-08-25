@@ -96,9 +96,9 @@ namespace System.Web.OData.Query
                 {
                     long? topValue = _queryOptionParser.ParseTop();
 
-                    if (topValue.HasValue)
+                    if (topValue.HasValue && topValue > int.MaxValue)
                     {
-                        Contract.Assert(topValue.Value <= Int32.MaxValue);
+                        throw new ODataException(Error.Format(SRResources.CanNotParseInteger, RawValue));
                     }
 
                     _value = (int?)topValue;

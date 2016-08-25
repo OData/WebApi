@@ -96,9 +96,9 @@ namespace System.Web.OData.Query
                 {
                     long? skipValue = _queryOptionParser.ParseSkip();
 
-                    if (skipValue.HasValue)
+                    if (skipValue.HasValue && skipValue > int.MaxValue)
                     {
-                        Contract.Assert(skipValue.Value <= Int32.MaxValue);
+                        throw new ODataException(Error.Format(SRResources.CanNotParseInteger, RawValue));
                     }
 
                     _value = (int?)skipValue;

@@ -984,16 +984,16 @@ namespace System.Web.OData.Formatter.Serialization
         private static IEdmStructuredType GetODataPathType(ODataSerializerContext serializerContext)
         {
             Contract.Assert(serializerContext != null);
-            if (serializerContext.ResourceProperty != null)
+            if (serializerContext.EdmProperty != null)
             {
                 // we are in an nested complex or expanded navigation property.
-                if (serializerContext.ResourceProperty.Type.IsCollection())
+                if (serializerContext.EdmProperty.Type.IsCollection())
                 {
-                    return serializerContext.ResourceProperty.Type.AsCollection().ElementType().ToStructuredType();
+                    return serializerContext.EdmProperty.Type.AsCollection().ElementType().ToStructuredType();
                 }
                 else
                 {
-                    return serializerContext.ResourceProperty.Type.AsStructured().StructuredDefinition();
+                    return serializerContext.EdmProperty.Type.AsStructured().StructuredDefinition();
                 }
             }
             else

@@ -30,7 +30,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             // Act & Assert
             Assert.ThrowsArgumentNull(
-                () => new ODataSerializerContext(resource: null, selectExpandClause: selectExpand, resourceProperty: navProp), "resource");
+                () => new ODataSerializerContext(resource: null, selectExpandClause: selectExpand, edmProperty: navProp), "resource");
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.Same(navProp, nestedContext.NavigationProperty);
             Assert.Same(selectExpand, nestedContext.SelectExpandClause);
             Assert.Same(model.Orders, nestedContext.NavigationSource);
-            Assert.Same(navProp, nestedContext.ResourceProperty);
+            Assert.Same(navProp, nestedContext.EdmProperty);
         }
 
         [Fact]
@@ -106,7 +106,7 @@ namespace System.Web.OData.Formatter.Serialization
             Assert.Null(nestedContext.NavigationProperty);
             Assert.Same(selectExpand, nestedContext.SelectExpandClause);
             Assert.Null(nestedContext.NavigationSource);
-            Assert.Same(complexProperty, nestedContext.ResourceProperty);
+            Assert.Same(complexProperty, nestedContext.EdmProperty);
         }
 
         [Fact]

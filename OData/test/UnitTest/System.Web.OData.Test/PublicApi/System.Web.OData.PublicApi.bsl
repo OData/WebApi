@@ -3132,8 +3132,9 @@ public class System.Web.OData.Formatter.Serialization.ODataResourceSetSerializer
 
 public class System.Web.OData.Formatter.Serialization.ODataSerializerContext {
 	public ODataSerializerContext ()
-	public ODataSerializerContext (ResourceContext resource, Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmProperty resourceProperty)
+	public ODataSerializerContext (ResourceContext resource, Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmProperty edmProperty)
 
+	Microsoft.OData.Edm.IEdmProperty EdmProperty  { public get; public set; }
 	ResourceContext ExpandedResource  { public get; public set; }
 	System.Collections.Generic.IDictionary`2[[System.Object],[System.Object]] Items  { public get; }
 	ODataMetadataLevel MetadataLevel  { public get; public set; }
@@ -3143,7 +3144,6 @@ public class System.Web.OData.Formatter.Serialization.ODataSerializerContext {
 	ODataPath Path  { public get; public set; }
 	System.Net.Http.HttpRequestMessage Request  { public get; public set; }
 	System.Web.Http.Controllers.HttpRequestContext RequestContext  { public get; public set; }
-	Microsoft.OData.Edm.IEdmProperty ResourceProperty  { public get; public set; }
 	string RootElementName  { public get; public set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public get; public set; }
 	bool SkipExpensiveAvailabilityChecks  { public get; public set; }

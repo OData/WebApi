@@ -33,11 +33,11 @@ namespace System.Web.OData.Formatter.Serialization
         /// </summary>
         /// <param name="resource">The resource whose navigation property is being expanded.</param>
         /// <param name="selectExpandClause">The <see cref="SelectExpandClause"/> for the navigation property being expanded.</param>
-        /// <param name="resourceProperty">The complex being nested or the navigation property being expanded.
+        /// <param name="edmProperty">The complex property being nested or the navigation property being expanded.
         /// If the resource property is the dynamic complex, the resource property is null.
         /// </param>
         /// <remarks>This constructor is used to construct the serializer context for writing nested and expanded properties.</remarks>
-        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty resourceProperty)
+        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty)
         {
             if (resource == null)
             {
@@ -58,11 +58,11 @@ namespace System.Web.OData.Formatter.Serialization
 
             ExpandedResource = resource; // parent resource
             SelectExpandClause = selectExpandClause;
-            ResourceProperty = resourceProperty; // should be nested property
+            EdmProperty = edmProperty; // should be nested property
 
             if (context.NavigationSource != null)
             {
-                IEdmNavigationProperty navigationProperty = resourceProperty as IEdmNavigationProperty;
+                IEdmNavigationProperty navigationProperty = edmProperty as IEdmNavigationProperty;
                 if (navigationProperty != null)
                 {
                     NavigationSource = context.NavigationSource.FindNavigationTarget(NavigationProperty);
@@ -128,7 +128,7 @@ namespace System.Web.OData.Formatter.Serialization
         /// <summary>
         /// Gets or sets the complex property being nested or navigation property being expanded.
         /// </summary>
-        public IEdmProperty ResourceProperty { get; set; }
+        public IEdmProperty EdmProperty { get; set; }
 
         /// <summary>
         /// Gets or sets the navigation property being expanded.
@@ -137,7 +137,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             get
             {
-                return ResourceProperty as IEdmNavigationProperty;
+                return EdmProperty as IEdmNavigationProperty;
             }
         }
 

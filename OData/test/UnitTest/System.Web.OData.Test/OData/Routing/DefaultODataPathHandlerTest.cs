@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter;
 using System.Web.OData.Routing.Template;
+using System.Web.OData.Test.TestCommon;
 using System.Web.OData.TestCommon;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -2269,12 +2270,9 @@ namespace System.Web.OData.Routing
         {
             // Arrange & Act
             DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
-            pathHandler.UriResolver = new ODataUriResolver
-            {
-                EnableCaseInsensitive = true
-            };
+            ODataUriResolver resolver = new CaseInsensitiveResolver();
 
-            ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path);
+            ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path, resolver);
 
             // Assert
             Assert.NotNull(odataPath);
@@ -2313,13 +2311,10 @@ namespace System.Web.OData.Routing
         {
             // Arrange
             DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
-            pathHandler.UriResolver = new UnqualifiedODataUriResolver
-            {
-                EnableCaseInsensitive = true
-            };
+            ODataUriResolver resolver = new UnqualifiedCaseInsensitiveResolver();
 
             // Act
-            ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path);
+            ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path, resolver);
 
             // Assert
             Assert.NotNull(odataPath);
@@ -2358,10 +2353,10 @@ namespace System.Web.OData.Routing
         {
             // Arrange
             DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
-            pathHandler.UriResolver = new StringAsEnumResolver();
+            StringAsEnumResolver resolver = new StringAsEnumResolver();
 
             // Act
-            ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path);
+            ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path, resolver);
 
             // Assert
             Assert.NotNull(odataPath);

@@ -21,13 +21,8 @@ namespace System.Web.OData.Routing
     /// <summary>
     /// Parses an OData path as an <see cref="ODataPath"/> into an OData link.
     /// </summary>
-    public class DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler, IODataUriResolver
+    public class DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler
     {
-        /// <summary>
-        /// Gets or sets the resolver for Uri parsing
-        /// </summary>
-        public ODataUriResolver UriResolver { get; set; }
-
         /// <summary>
         /// Gets or Sets the <see cref="ODataUrlKeyDelimiter"/> to use while parsing, specifically
         /// whether to recognize keys as segments or not.
@@ -108,7 +103,6 @@ namespace System.Web.OData.Routing
             Uri fullUri = null;
             NameValueCollection queryString = null;
             IEdmModel model = requestContainer.GetRequiredService<IEdmModel>();
-
             if (template)
             {
                 uriParser = new ODataUriParser(model, new Uri(odataPath, UriKind.Relative), requestContainer);
@@ -126,11 +120,6 @@ namespace System.Web.OData.Routing
                 fullUri = new Uri(serviceRootUri, odataPath);
                 queryString = fullUri.ParseQueryString();
                 uriParser = new ODataUriParser(model, serviceRootUri, fullUri, requestContainer);
-            }
-
-            if (UriResolver != null)
-            {
-                uriParser.Resolver = UriResolver;
             }
 
             if (UrlKeyDelimiter != null)

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.OData;
 
 namespace System.Web.OData.Routing
 {
@@ -26,5 +27,11 @@ namespace System.Web.OData.Routing
         /// <param name="path">The OData path to convert into a link.</param>
         /// <returns>The generated OData link.</returns>
         string Link(ODataPath path);
+
+        /// <summary>
+        /// Gets or Sets the <see cref="ODataUrlKeyDelimiter"/> to use while parsing, specifically
+        /// whether to recognize keys as segments or not.
+        /// </summary>
+        ODataUrlKeyDelimiter UrlKeyDelimiter { get; set; }
     }
 }

@@ -11,12 +11,12 @@ using System.Web.Http.Dispatcher;
 using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.UriParser;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
+using WebStack.QA.Test.OData.UriParserExtension;
 using Xunit;
 using Xunit.Extensions;
 
@@ -40,10 +40,14 @@ namespace WebStack.QA.Test.OData.Routing
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             config.Services.Replace(typeof(IAssembliesResolver), resolver);
 
-            config.SetUriResolver(new ODataUriResolver { EnableCaseInsensitive = true });
-
             config.Routes.Clear();
-            config.MapODataServiceRoute("odata", "", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+
+            config.MapODataServiceRoute("odata", "",
+                builder =>
+                    builder.AddService(ServiceLifetime.Singleton, sp => GetModel())
+                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
+                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config))
+                        .AddService(ServiceLifetime.Singleton, sp => new CaseInsensitiveResolver()));
         }
 
         private static IEdmModel GetModel()

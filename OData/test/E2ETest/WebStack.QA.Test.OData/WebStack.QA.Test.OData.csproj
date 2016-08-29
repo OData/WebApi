@@ -216,6 +216,7 @@
     <Compile Include="Swagger\SwaggerPathHandler.cs" />
     <Compile Include="Swagger\SwaggerPathSegment.cs" />
     <Compile Include="Swagger\SwaggerRoutingConvention.cs" />
+    <Compile Include="UriParserExtension\CaseInsensitiveResolver.cs" />
     <Compile Include="UriParserExtension\CaseInsensitiveTest.cs" />
     <Compile Include="UriParserExtension\EnumPrefixFreeTest.cs" />
     <Compile Include="UriParserExtension\UnqualifiedCallTest.cs" />

@@ -14,6 +14,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query.Validators;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -77,15 +78,7 @@ namespace System.Web.OData.Query
                 context.NavigationSource,
                 queryParameters);
 
-            HttpConfiguration configuration = Request.GetConfiguration();
-            if (configuration != null)
-            {
-                ODataUriResolverSettings resolverSettings = configuration.GetResolverSettings();
-                if (resolverSettings.UriResolver != null)
-                {
-                    _queryOptionParser.Resolver = resolverSettings.UriResolver;
-                }
-            }
+            _queryOptionParser.Resolver = request.GetRequestContainer().GetRequiredService<ODataUriResolver>();
 
             BuildQueryOptions(queryParameters);
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -10,6 +11,8 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData;
 using System.Web.OData.Extensions;
+using System.Web.OData.Routing.Conventions;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Nuwa;
@@ -45,12 +48,17 @@ namespace WebStack.QA.Test.OData.AlternateKeys
             configuration.Services.Replace(typeof (IAssembliesResolver), resolver);
 
             IEdmModel model = AlternateKeysEdmModel.GetEdmModel();
-            configuration.SetUriResolver(new AlternateKeysODataUriResolver(model));
 
             configuration.Routes.Clear();
 
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
-            configuration.MapODataServiceRoute("odata", "odata", model: model);
+
+            configuration.MapODataServiceRoute("odata", "odata",
+                builder =>
+                    builder.AddService(ServiceLifetime.Singleton, sp => model)
+                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
+                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", configuration))
+                        .AddService<ODataUriResolver>(ServiceLifetime.Singleton, sp => new AlternateKeysODataUriResolver(model)));
 
             configuration.EnsureInitialized();
         }

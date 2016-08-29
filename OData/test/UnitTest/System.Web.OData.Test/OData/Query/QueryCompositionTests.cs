@@ -11,12 +11,14 @@ using System.Web.Http.Filters;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
+using System.Web.OData.Test.TestCommon;
 using System.Web.OData.TestCommon;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
+using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace System.Web.OData.Query
 {
@@ -62,13 +64,13 @@ namespace System.Web.OData.Query
         {
             // Arrange
             const string caseInSensitive = "?$fIlTer=iD Eq 33";
-            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", useCustomEdmModel: true));
-            HttpClient client = new HttpClient(server);
-
-            server.Configuration.SetUriResolver(new ODataUriResolver
+            ODataUriResolver resolver = new ODataUriResolver
             {
                 EnableCaseInsensitive = false
-            });
+            };
+            HttpServer server =
+                new HttpServer(InitializeConfiguration("QueryCompositionCustomer", true, resolver));
+            HttpClient client = new HttpClient(server);
 
             // Act
             HttpResponseMessage response = GetResponse(client, server.Configuration,
@@ -84,13 +86,9 @@ namespace System.Web.OData.Query
         {
             // Arrange
             const string caseInSensitive = "?$fIlTer=iD Eq 33";
-            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", useCustomEdmModel: true));
+            ODataUriResolver resolver = new CaseInsensitiveResolver();
+            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", true, resolver));
             HttpClient client = new HttpClient(server);
-
-            server.Configuration.SetUriResolver(new ODataUriResolver
-            {
-                EnableCaseInsensitive = true
-            });
 
             // Act
             HttpResponseMessage response = GetResponse(client, server.Configuration,
@@ -216,7 +214,8 @@ namespace System.Web.OData.Query
             Assert.Equal(expectedResults, results);
         }
 
-        private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel)
+        private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel, 
+            ODataUriResolver resolver = null)
         {
             var controllers = new[]
             {
@@ -245,7 +244,17 @@ namespace System.Web.OData.Query
                     modelBuilder.EntitySet<QueryCompositionCustomer>(typeof(QueryCompositionCustomer).Name);
                     _queryCompositionCustomerModel = modelBuilder.GetEdmModel();
                 }
-                config.EnableODataDependencyInjectionSupport("default", _queryCompositionCustomerModel);
+                if (resolver == null)
+                {
+                    config.EnableODataDependencyInjectionSupport("default", _queryCompositionCustomerModel);
+                }
+                else
+                {
+                    config.EnableODataDependencyInjectionSupport("default",
+                        b => b.AddService(ServiceLifetime.Singleton, sp => _queryCompositionCustomerModel)
+                            .AddService(ServiceLifetime.Singleton, sp => resolver));
+                }
+
                 config.Filters.Add(new SetModelFilter(_queryCompositionCustomerModel));
             }
             else

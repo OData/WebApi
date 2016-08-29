@@ -172,7 +172,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// Copy the <see cref="ExpandConfiguration"/>s of navigation properties.
         /// </summary>
-        public void CopyExpandConfigurations(Dictionary<string, ExpandConfiguration> expandConfigurations)
+        internal void CopyExpandConfigurations(Dictionary<string, ExpandConfiguration> expandConfigurations)
         {
             _expandConfigurations.Clear();
             foreach (var expandConfiguration in expandConfigurations)
@@ -184,7 +184,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// Copy the $orderby configuration of properties.
         /// </summary>
-        public void CopyOrderByConfigurations(Dictionary<string, bool> orderByConfigurations)
+        internal void CopyOrderByConfigurations(Dictionary<string, bool> orderByConfigurations)
         {
             _orderByConfigurations.Clear();
             foreach (var orderByConfiguration in orderByConfigurations)
@@ -196,7 +196,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// Copy the $select configuration of properties.
         /// </summary>
-        public void CopySelectConfigurations(Dictionary<string, SelectExpandType> selectConfigurations)
+        internal void CopySelectConfigurations(Dictionary<string, SelectExpandType> selectConfigurations)
         {
             _selectConfigurations.Clear();
             foreach (var selectConfiguration in selectConfigurations)
@@ -208,7 +208,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// Copy the $filter configuration of properties.
         /// </summary>
-        public void CopyFilterConfigurations(Dictionary<string, bool> filterConfigurations)
+        internal void CopyFilterConfigurations(Dictionary<string, bool> filterConfigurations)
         {
             _filterConfigurations.Clear();
             foreach (var filterConfiguration in filterConfigurations)

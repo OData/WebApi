@@ -9,7 +9,10 @@ using System.Web.Http;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
+using System.Web.OData.Test.TestCommon;
 using System.Web.OData.TestCommon.Models;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
@@ -99,23 +102,30 @@ namespace System.Web.OData
                 typeof(RoutingCustomersController),
             }.GetHttpConfiguration();
 
+            ODataUriResolver resolver = new ODataUriResolver();
             if (unqualifiedNameCall)
             {
-                config.SetUriResolver(new UnqualifiedODataUriResolver
+                resolver = new UnqualifiedODataUriResolver();
+                if (caseInsensitive)
                 {
-                    EnableCaseInsensitive = caseInsensitive
-                });
+                    resolver = new UnqualifiedCaseInsensitiveResolver();
+                }
             }
             else
             {
-                config.SetUriResolver(new ODataUriResolver
+                if (caseInsensitive)
                 {
-                    EnableCaseInsensitive = caseInsensitive
-                });
+                    resolver = new CaseInsensitiveResolver();
+                }
             }
 
             config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            config.MapODataServiceRoute("odata", "odata", model);
+            config.MapODataServiceRoute("odata", "odata",
+                builder =>
+                    builder.AddService(ServiceLifetime.Singleton, sp => model)
+                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
+                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config))
+                        .AddService(ServiceLifetime.Singleton, sp => resolver));
             return config;
         }
 
@@ -178,7 +188,7 @@ namespace System.Web.OData
         public void ExtensionResolver_ReturnsSameResult_ForCaseSensitiveAndCaseInsensitive(string queryOption, string caseInsensitive)
         {
             // Arrange
-            HttpClient caseSensitiveclient = new HttpClient(new HttpServer(GetQueryOptionConfiguration(caseInsensitive: false)));
+            HttpClient caseSensitiveclient = new HttpClient(new HttpServer(GetQueryOptionConfiguration(caseInsensitive: true)));
             HttpClient caseInsensitiveclient = new HttpClient(new HttpServer(GetQueryOptionConfiguration(caseInsensitive: true)));
 
             // Act
@@ -199,12 +209,19 @@ namespace System.Web.OData
         private static HttpConfiguration GetQueryOptionConfiguration(bool caseInsensitive)
         {
             HttpConfiguration config = new[] { typeof(ParserExtenstionCustomersController) }.GetHttpConfiguration();
-            config.SetUriResolver(new ODataUriResolver
+            ODataUriResolver resolver = new ODataUriResolver();
+            if (caseInsensitive)
             {
-                EnableCaseInsensitive = caseInsensitive
-            });
+                resolver = new CaseInsensitiveResolver();
+            }
+
             config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
-            config.MapODataServiceRoute("query", "query", GetEdmModel());
+            config.MapODataServiceRoute("query", "query",
+                builder =>
+                    builder.AddService(ServiceLifetime.Singleton, sp => GetEdmModel())
+                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
+                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("query", config))
+                        .AddService(ServiceLifetime.Singleton, sp => resolver));
             return config;
         }
 
@@ -220,12 +237,18 @@ namespace System.Web.OData
             // Arrange
             IEdmModel model = GetEdmModel();
             HttpConfiguration config = new[] { typeof(ParserExtenstionCustomersController) }.GetHttpConfiguration();
+            ODataUriResolver resolver = new ODataUriResolver();
             if (enableEnumPrefix)
             {
-                config.SetUriResolver(new StringAsEnumResolver());
+                resolver = new StringAsEnumResolver();
             }
 
-            config.MapODataServiceRoute("odata", "odata", model);
+            config.MapODataServiceRoute("odata", "odata",
+                builder =>
+                    builder.AddService(ServiceLifetime.Singleton, sp => model)
+                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
+                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config))
+                        .AddService(ServiceLifetime.Singleton, sp => resolver));
             HttpClient client = new HttpClient(new HttpServer(config));
 
             // Act
@@ -263,12 +286,18 @@ namespace System.Web.OData
             // Arrange
             IEdmModel model = GetEdmModel();
             HttpConfiguration config = new[] { typeof(ParserExtenstionCustomersController) }.GetHttpConfiguration();
+            ODataUriResolver resolver = new ODataUriResolver();
             if (enableEnumPrefix)
             {
-                config.SetUriResolver(new StringAsEnumResolver());
+                resolver = new StringAsEnumResolver();
             }
 
-            config.MapODataServiceRoute("odata", "odata", model);
+            config.MapODataServiceRoute("odata", "odata",
+                builder =>
+                    builder.AddService(ServiceLifetime.Singleton, sp => model)
+                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
+                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config))
+                        .AddService(ServiceLifetime.Singleton, sp => resolver));
             HttpClient client = new HttpClient(new HttpServer(config));
 
             // Act

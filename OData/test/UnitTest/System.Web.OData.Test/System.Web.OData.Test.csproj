@@ -354,6 +354,8 @@
     <Compile Include="PublicApi\PublicApiTest.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="TestCommon\CustomersModelWithInheritance.cs" />
+    <Compile Include="TestCommon\CaseInsensitiveResolver.cs" />
+    <Compile Include="TestCommon\UnqualifiedCaseInsensitiveResolver.cs" />
     <Compile Include="TestCommon\SimpleOpenAddress.cs" />
     <Compile Include="TestCommon\ODataModelBuilderMocks.cs" />
     <Compile Include="TestCommon\SimpleOpenCustomer.cs" />

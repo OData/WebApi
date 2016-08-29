@@ -51,6 +51,7 @@ namespace System.Web.OData
 
             // Act
             HttpResponseMessage response = client.GetAsync(Uri).Result;
+            Console.WriteLine(response.Content.ReadAsStringAsync().Result);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);

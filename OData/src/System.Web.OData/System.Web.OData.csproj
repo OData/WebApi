@@ -149,7 +149,6 @@
     <Compile Include="OData\IEdmDeltaDeletedEntityObject.cs" />
     <Compile Include="OData\IEdmDeltaDeletedLink.cs" />
     <Compile Include="OData\IEdmDeltaLinkBase.cs" />
-    <Compile Include="OData\ODataUriResolverSettings.cs" />
     <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="OData\Batch\ODataBatchHandler.cs" />
     <Compile Include="OData\Batch\ODataBatchHttpRequestMessageExtensions.cs" />
@@ -294,7 +293,6 @@
     <Compile Include="OData\Routing\Conventions\NavigationSourceRoutingConvention.cs" />
     <Compile Include="OData\Routing\Conventions\SingletonRoutingConvention.cs" />
     <Compile Include="OData\Routing\DefaultODataPathHandler.cs" />
-    <Compile Include="OData\Routing\IODataUriResolver.cs" />
     <Compile Include="OData\Routing\ODataParameterValue.cs" />
     <Compile Include="OData\Routing\DefaultODataPathValidator.cs" />
     <Compile Include="OData\Routing\ODataPathSegmentExtensions.cs" />

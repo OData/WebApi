@@ -56,17 +56,12 @@ namespace System.Web.OData.Routing.Conventions
                 throw Error.ArgumentNull("configuration");
             }
 
-            // if setting is not on local, use the global configuration setting.
-            ODataUriResolverSettings settings = configuration.GetResolverSettings();
-            IODataUriResolver pathResolver = pathTemplateHandler as IODataUriResolver;
-            if (pathResolver != null && pathResolver.UriResolver == null)
+            IODataPathHandler pathHandler = pathTemplateHandler as IODataPathHandler;
+            // if settings is not on local, use the global configuration settings.
+            if (pathHandler != null && pathHandler.UrlKeyDelimiter == null)
             {
-                pathResolver.UriResolver = settings.UriResolver;
-            }
-
-            if (pathResolver != null && pathResolver.UrlKeyDelimiter == null)
-            {
-                pathResolver.UrlKeyDelimiter = settings.UrlKeyDelimiter;
+                ODataUrlKeyDelimiter urlKeyDelimiter = configuration.GetUrlKeyDelimiter();
+                pathHandler.UrlKeyDelimiter = urlKeyDelimiter;
             }
 
             Action<HttpConfiguration> oldInitializer = configuration.Initializer;

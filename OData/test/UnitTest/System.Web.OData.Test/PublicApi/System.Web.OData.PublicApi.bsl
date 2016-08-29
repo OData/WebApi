@@ -1792,11 +1792,6 @@ public sealed class System.Web.OData.Extensions.HttpConfigurationExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static void SetUriResolver (System.Web.Http.HttpConfiguration configuration, Microsoft.OData.UriParser.ODataUriResolver uriResolver)
-
-	[
-	ExtensionAttribute(),
-	]
 	public static void SetUrlKeyDelimiter (System.Web.Http.HttpConfiguration configuration, Microsoft.OData.ODataUrlKeyDelimiter urlKeyDelimiter)
 
 	[
@@ -2236,11 +2231,6 @@ public class System.Web.OData.Query.ModelBoundQuerySettings {
 	System.Collections.Generic.Dictionary`2[[System.String],[System.Boolean]] OrderByConfigurations  { public get; }
 	System.Nullable`1[[System.Int32]] PageSize  { public get; public set; }
 	System.Collections.Generic.Dictionary`2[[System.String],[System.Web.OData.Query.SelectExpandType]] SelectConfigurations  { public get; }
-
-	public void CopyExpandConfigurations (System.Collections.Generic.Dictionary`2[[System.String],[System.Web.OData.Query.ExpandConfiguration]] expandConfigurations)
-	public void CopyFilterConfigurations (System.Collections.Generic.Dictionary`2[[System.String],[System.Boolean]] filterConfigurations)
-	public void CopyOrderByConfigurations (System.Collections.Generic.Dictionary`2[[System.String],[System.Boolean]] orderByConfigurations)
-	public void CopySelectConfigurations (System.Collections.Generic.Dictionary`2[[System.String],[System.Web.OData.Query.SelectExpandType]] selectConfigurations)
 }
 
 [
@@ -2603,17 +2593,14 @@ public class System.Web.OData.Results.UpdatedODataResult`1 : IHttpActionResult {
 }
 
 public interface System.Web.OData.Routing.IODataPathHandler {
+	Microsoft.OData.ODataUrlKeyDelimiter UrlKeyDelimiter  { public abstract get; public abstract set; }
+
 	string Link (ODataPath path)
 	ODataPath Parse (string serviceRoot, string odataPath, System.IServiceProvider requestContainer)
 }
 
 public interface System.Web.OData.Routing.IODataPathTemplateHandler {
 	ODataPathTemplate ParseTemplate (string odataPathTemplate, System.IServiceProvider requestContainer)
-}
-
-public interface System.Web.OData.Routing.IODataUriResolver {
-	Microsoft.OData.UriParser.ODataUriResolver UriResolver  { public abstract get; public abstract set; }
-	Microsoft.OData.ODataUrlKeyDelimiter UrlKeyDelimiter  { public abstract get; public abstract set; }
 }
 
 [
@@ -2677,10 +2664,9 @@ public sealed class System.Web.OData.Routing.ODataSegmentKinds {
 	public static string Value = "$value"
 }
 
-public class System.Web.OData.Routing.DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler, IODataUriResolver {
+public class System.Web.OData.Routing.DefaultODataPathHandler : IODataPathHandler, IODataPathTemplateHandler {
 	public DefaultODataPathHandler ()
 
-	Microsoft.OData.UriParser.ODataUriResolver UriResolver  { public virtual get; public virtual set; }
 	Microsoft.OData.ODataUrlKeyDelimiter UrlKeyDelimiter  { public virtual get; public virtual set; }
 
 	public virtual string Link (ODataPath path)

@@ -35,7 +35,7 @@ namespace System.Web.OData.Extensions
 
         private const string TimeZoneInfoKey = "System.Web.OData.TimeZoneInfo";
 
-        private const string ResolverSettingsKey = "System.Web.OData.ResolverSettingsKey";
+        private const string UrlKeyDelimiterKey = "System.Web.OData.UrlKeyDelimiterKey";
 
         private const string ContinueOnErrorKey = "System.Web.OData.ContinueOnErrorKey";
 
@@ -405,24 +405,7 @@ namespace System.Web.OData.Extensions
                 throw Error.ArgumentNull("configuration");
             }
 
-            ODataUriResolverSettings settings = configuration.GetResolverSettings();
-            settings.UrlKeyDelimiter = urlKeyDelimiter;
-        }
-
-        /// <summary>
-        /// Sets the Uri resolver for the Uri parser on the configuration.
-        /// </summary>
-        /// <param name="configuration">The server configuration.</param>
-        /// <param name="uriResolver">The <see cref="ODataUriResolver"/></param>
-        public static void SetUriResolver(this HttpConfiguration configuration, ODataUriResolver uriResolver)
-        {
-            if (configuration == null)
-            {
-                throw Error.ArgumentNull("configuration");
-            }
-
-            ODataUriResolverSettings settings = configuration.GetResolverSettings();
-            settings.UriResolver = uriResolver;
+            configuration.Properties[UrlKeyDelimiterKey] = urlKeyDelimiter;
         }
 
         /// <summary>
@@ -445,7 +428,7 @@ namespace System.Web.OData.Extensions
             return false;
         }
 
-        internal static ODataUriResolverSettings GetResolverSettings(this HttpConfiguration configuration)
+        internal static ODataUrlKeyDelimiter GetUrlKeyDelimiter(this HttpConfiguration configuration)
         {
             if (configuration == null)
             {
@@ -453,14 +436,13 @@ namespace System.Web.OData.Extensions
             }
 
             object value;
-            if (configuration.Properties.TryGetValue(ResolverSettingsKey, out value))
+            if (configuration.Properties.TryGetValue(UrlKeyDelimiterKey, out value))
             {
-                return value as ODataUriResolverSettings;
+                return value as ODataUrlKeyDelimiter;
             }
 
-            ODataUriResolverSettings defaultSettings = new ODataUriResolverSettings();
-            configuration.Properties[ResolverSettingsKey] = defaultSettings;
-            return defaultSettings;
+            configuration.Properties[UrlKeyDelimiterKey] = null;
+            return null;
         }
 
         /// <summary>
@@ -542,18 +524,12 @@ namespace System.Web.OData.Extensions
 
             // 2) Resolve the path handler and set URI resolver to it.
             IODataPathHandler pathHandler = rootContainer.GetRequiredService<IODataPathHandler>();
-
+            
             // if settings is not on local, use the global configuration settings.
-            ODataUriResolverSettings settings = configuration.GetResolverSettings();
-            IODataUriResolver pathResolver = pathHandler as IODataUriResolver;
-            if (pathResolver != null && pathResolver.UriResolver == null)
+            if (pathHandler != null && pathHandler.UrlKeyDelimiter == null)
             {
-                pathResolver.UriResolver = settings.UriResolver;
-            }
-
-            if (pathResolver != null && pathResolver.UrlKeyDelimiter == null)
-            {
-                pathResolver.UrlKeyDelimiter = settings.UrlKeyDelimiter;
+                ODataUrlKeyDelimiter urlKeyDelimiter = configuration.GetUrlKeyDelimiter();
+                pathHandler.UrlKeyDelimiter = urlKeyDelimiter;
             }
 
             // 3) Resolve some required services and create the route constraint.

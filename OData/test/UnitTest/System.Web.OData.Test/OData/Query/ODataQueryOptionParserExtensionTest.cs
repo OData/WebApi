@@ -4,8 +4,8 @@
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
-using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
@@ -90,14 +90,14 @@ namespace System.Web.OData.Query
             string uri = "Http://localhost/RoutingCustomers?" + queryOption;
 
             HttpConfiguration configuration = new HttpConfiguration();
-            configuration.SetUriResolver(new ODataUriResolver
+            ODataUriResolver resolver = new ODataUriResolver
             {
                 EnableCaseInsensitive = true
-            });
+            };
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.SetConfiguration(configuration);
-            request.EnableHttpDependencyInjectionSupport();
+            request.EnableHttpDependencyInjectionSupport(b => b.AddService(ServiceLifetime.Singleton, sp => resolver));
 
             IEdmModel model = ODataRoutingModel.GetModel();
 

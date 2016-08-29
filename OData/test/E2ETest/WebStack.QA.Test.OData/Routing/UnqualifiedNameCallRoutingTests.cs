@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
@@ -8,6 +9,8 @@ using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Newtonsoft.Json.Linq;
@@ -36,8 +39,11 @@ namespace WebStack.QA.Test.OData.Routing
 
             config.Services.Replace(typeof(IAssembliesResolver), resolver);
             config.Routes.Clear();
-            config.SetUriResolver(new UnqualifiedODataUriResolver());
-            config.MapODataServiceRoute("odata", "odata", GetModel());
+            config.MapODataServiceRoute("odata", "odata", builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => GetModel())
+                    .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
+                        ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config))
+                    .AddService<ODataUriResolver>(ServiceLifetime.Singleton, sp => new UnqualifiedODataUriResolver()));
         }
 
         private static IEdmModel GetModel()

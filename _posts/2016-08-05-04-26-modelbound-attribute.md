@@ -4,9 +4,7 @@ layout: post
 category: "4. OData features"
 ---
 
-Since Web API OData V6.0.0 which depends on [OData Lib 7.0.0 beta](https://www.nuget.org/packages/Microsoft.OData.Core/7.0.0-beta), we add a new feature named ModelBoundAttribute, use this feature, we can control the query setting through those attributes to make our service more secure and even control the query result by set page size, automatic select, automatic expand.
-
-Now we only have nightly nuget page: https://www.myget.org/F/aspnetwebstacknightly/
+Since [Web API OData V6.0.0 beta](https://www.nuget.org/packages/Microsoft.AspNet.OData/6.0.0-beta2) which depends on [OData Lib 7.0.0](https://www.nuget.org/packages/Microsoft.OData.Core/7.0.0), we add a new feature named ModelBoundAttribute, use this feature, we can control the query setting through those attributes to make our service more secure and even control the query result by set page size, automatic select, automatic expand.
 
 Let's see how to use this feature.
 

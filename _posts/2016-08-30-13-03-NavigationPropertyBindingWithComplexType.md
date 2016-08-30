@@ -19,7 +19,7 @@ The following APIs are used to add navigation property binding in model builder.
 
 So, we can do as:
 
-```C#
+{% highlight csharp %}
 public class Customer
 {
   public int Id { get; set; }
@@ -39,7 +39,8 @@ ODataModelBuilder builder = new ODataModelBuilder();
 var customers = builder.EntitySet<Cusomter>("Customers");
 customers.HasManyBinding(c => c.Orders, "Orders");
 customers.HasRequiredBinding(c => c.SingleOrder, "SingleOrders");
-```
+{% endhighlight %}
+
 We can get the following result:
 
 ```xml
@@ -58,53 +59,55 @@ Before 6.0.0, it doesn't support to:
 
 1. Add the complex property into binding path
 2. Add the type cast into binding path
-```
+
 
 ### Multiple navigation property binding path in model builder
 
 In [Web API OData V6.0.0 beta](https://www.nuget.org/packages/Microsoft.AspNet.OData/6.0.0-beta2), we add a new generic type class to configure the multiple binding path:
 
-```C#
+{% highlight csharp %}
 BindingPathConfiguration{TStructuralType}
-```
+{% endhighlight %}
 
 In this class, it provides the following APIs to add binding path:
-```c#
+
+{% highlight csharp %}
 1. HasManyPath()
 2. HasSinglePath()
-```
+{% endhighlight %}
 
 It also provides the following APIs to bind the navigation property with multiple binding path to a targe navigation source.
 
-```C#
+{% highlight csharp %}
 1. HasManyBinding()
 2. HasRequiredBinding()
 3. HasOptionalBinding()
-```
+{% endhighlight %}
 
 So, the normal navigation property binding configuration flow is：
 
-1. Call `Binding` from `NavigationSourceConfiguration{TEntityType}` to get a instance of BindingPathConfiguration{TEntityType}
+1. Call `Binding` from `NavigationSourceConfiguration{TEntityType}` to get an instance of BindingPathConfiguration{TEntityType}
 2. Call `HasManyPath()/HasSinglePath` from BindingPathConfiguration{TEntityType}` to add a binding path
 3. Repeat step-2 if necessary
 4. Call `HasManyBinding()/HasRequiredBinding()/HasOptionalBinding()` to add the target navigation source.
 
 Here's an example:
 
-```C#
+{% highlight csharp %}
 builder.EntitySet<Customer>("Customers")
    .Binding
    .HasManyPath(c => c.Locations)
    .HasSinglePath(a => a.LocationInfo)
    .HasRequiredBinding(c => c.City, "Cities");
-```
+{% endhighlight %}
 
 ### Example
 
 Let's have the following CLR classes as the model:
 
 #### Entity types
-```C#
+
+{% highlight csharp %}
 public class Cusomter
 {
   public int Id { get; set; }
@@ -121,10 +124,11 @@ public class City
 {
   public int Id { get; set; }
 }
-```
+{% endhighlight %}
 
 #### Complex types
-```C#
+
+{% highlight csharp %}
 public class Animal
 {
 }
@@ -148,12 +152,12 @@ public class UsAddress : Address
 {
   public City SubCity { get; set; }
 }
-```
+{% endhighlight %}
 
 
 #### Add navigation property binding:
 
-```C#
+{% highlight csharp %}
 customers.HasManyPath((VipCustomer v) => v.VipLocations).HasRequiredBinding(a => a.City, "A");
 customers.HasManyPath((VipCustomer v) => v.VipLocations).HasRequiredBinding((UsAddress a) => a.SubCity, "B");
 
@@ -166,7 +170,7 @@ pet.HasRequiredPath((Horse h) => h.HorseAddress).HasRequiredBinding(c => c.SubCi
 
 pet.HasManyPath((Horse h) => h.HorseAddresses).HasRequiredBinding(c => c.SubCity, "HorseCities");
   
-```
+{% endhighlight %}
 
 So, we can get the following target binding:
 
@@ -188,7 +192,8 @@ So, we can get the following target binding:
 </Schema>
 ```
 
-Where: As example shown
+Where: As example shown:
+
 1. It supports single property with multiple binding path.
 2. It supports collection property with mutliple binding path.
 3. It also supports mulitple binding path with inheritance type.
@@ -200,5 +205,5 @@ Besides, the `HasManyPath()/HasSinglePath()` has onverload methods to configure 
 
 In convention model builder, it will automatically traverl all property binding paths to add a binding for the navigation proeprty.
 
-There's an unit test that you can refer to: https://github.com/OData/WebApi/blob/OData60/OData/test/UnitTest/System.Web.OData.Test/OData/MetadataControllerTest.cs#L1070-L1114
+There's an [unit test](https://github.com/OData/WebApi/blob/OData60/OData/test/UnitTest/System.Web.OData.Test/OData/MetadataControllerTest.cs#L1070-L1114) that you can refer to. 
 

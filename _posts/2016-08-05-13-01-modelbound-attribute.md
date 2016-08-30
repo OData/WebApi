@@ -1,7 +1,8 @@
 ---
-title : "13.1 ModelBound Attribute"
 layout: post
-category: "13. 6.x Features"
+title : "13.1 Model Bound Attributes"
+description: "Model bound attributes"
+category: "13. 6.x Features "
 ---
 
 Since [Web API OData V6.0.0 beta](https://www.nuget.org/packages/Microsoft.AspNet.OData/6.0.0-beta2) which depends on [OData Lib 7.0.0](https://www.nuget.org/packages/Microsoft.OData.Core/7.0.0), we add a new feature named ModelBoundAttribute, use this feature, we can control the query setting through those attributes to make our service more secure and even control the query result by set page size, automatic select, automatic expand.

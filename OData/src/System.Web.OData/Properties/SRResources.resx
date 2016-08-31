@@ -829,7 +829,4 @@
   <data name="UriFunctionClrBinderAlreadyBound" xml:space="preserve">
     <value>The function '{0}' is already bound to another method.</value>
   </data>
-  <data name="CanNotParseInteger" xml:space="preserve">
-    <value>Failed to convert '{0}' to an integer.</value>
-  </data>
 </root>

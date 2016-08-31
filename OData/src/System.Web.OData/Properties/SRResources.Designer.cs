@@ -277,15 +277,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to convert &apos;{0}&apos; to an integer..
-        /// </summary>
-        internal static string CanNotParseInteger {
-            get {
-                return ResourceManager.GetString("CanNotParseInteger", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Cannot apply PATCH to navigation property &apos;{0}&apos; on entity type &apos;{1}&apos;..
         /// </summary>
         internal static string CannotPatchNavigationProperties {

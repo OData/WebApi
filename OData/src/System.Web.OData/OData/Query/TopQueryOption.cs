@@ -98,7 +98,11 @@ namespace System.Web.OData.Query
 
                     if (topValue.HasValue && topValue > int.MaxValue)
                     {
-                        throw new ODataException(Error.Format(SRResources.CanNotParseInteger, RawValue));
+                        throw new ODataException(Error.Format(
+                            SRResources.SkipTopLimitExceeded,
+                            int.MaxValue,
+                            AllowedQueryOptions.Skip,
+                            RawValue));
                     }
 
                     _value = (int?)topValue;

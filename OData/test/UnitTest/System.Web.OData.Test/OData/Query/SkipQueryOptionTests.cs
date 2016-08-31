@@ -102,6 +102,7 @@ namespace System.Web.OData.Query
         [InlineData("''")]
         [InlineData(" ")]
         [InlineData("-1")]
+        [InlineData("6926906880")]
         public void Value_ThrowsODataException_ForInvalidValues(string skipValue)
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();

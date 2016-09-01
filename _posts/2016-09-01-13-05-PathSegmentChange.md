@@ -10,13 +10,13 @@ Since [Web API OData V6.0.0 beta](https://www.nuget.org/packages/Microsoft.AspNe
 In Web API OData V5.x, there are a lot of path segment classes defined to wrapper the corresponding path segment classes defined in ODL.
 for example:
 
-{% highlight csharp %}
+```C#
 * BatchPathSegment
 * BoundActionPathSegment
 * BoundFunctionPathSegment
 * KeyValuePathSegment
 * ...
-{% endhighlight %}
+```
 
 Where, 
 
@@ -27,7 +27,7 @@ Where,
 
 Web API OData will directly use the path segment classes defined in ODL as follows:
 
-{% highlight csharp %}
+```C#
 
 * BatchReferenceSegment
 * BatchSegment
@@ -47,4 +47,4 @@ Web API OData will directly use the path segment classes defined in ODL as follo
 * TypeSegment
 * ValueSegment
 
-{% endhighlight %}
+```

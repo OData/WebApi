@@ -13,7 +13,6 @@ Let's have an example to illustrate how to configure navigation property on comp
 
 We use the following CRL classes as the CLR model:
 
-```C#
 {% highlight csharp %}
 
 public class Address
@@ -28,7 +27,7 @@ public class City
 }
 
 {% endhighlight %}	
-```C#
+
 Where:
 
 * **Address** is a complex type.
@@ -39,19 +38,23 @@ Where:
 The following APIs are used to add navigation properties for complex type:
 
 {% highlight csharp %}
+
 1. HasMany()
 2. HasRequired()
 3. HasOptional()
+
 {% endhighlight %}	
 
 So, we can do as:
 
 {% highlight csharp %}
+
 ODataModelBuilder builder = new ODataModelBuilder();
 builder.EntityType<City>().HasKey(c => c.Id);
 var address = builder.ComplexType<Address>();
 address.HasRequired(a => a.CityInfo);
 address.HasMany(a => a.Cities);
+
 {% endhighlight %}	
 
 We can get the following result:

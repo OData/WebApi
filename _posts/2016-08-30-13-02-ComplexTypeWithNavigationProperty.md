@@ -72,9 +72,12 @@ We can get the following result:
 Convention model builder will automatically map the class type properties in complex type as navigation properties if the declaring type of such navigation property has key defined. 
 
 So, as the above example, we can use the following codes to define a convention model:
+
 ```C#
+
 ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
 builder.ComplexType<Address>(); // just add a starting point
+
 ```
 
 As result, We can get the following result:

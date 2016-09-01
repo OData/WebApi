@@ -8,7 +8,9 @@ category: "13. 6.x Features "
 Since [Web API OData V6.0.0 beta](https://www.nuget.org/packages/Microsoft.AspNet.OData/6.0.0-beta2), Web API OData supports the composite key convention binding.
 
 Let's have an example:
+
 ```C#
+
 public class Customer
 {
     public string StringProp { get; set; }

@@ -20,6 +20,7 @@ The following APIs are used to add navigation property binding in model builder.
 So, we can do as:
 
 {% highlight csharp %}
+
 public class Customer
 {
   public int Id { get; set; }
@@ -34,11 +35,11 @@ public class Order
   public int Id { get; set; }
 }
 
-
 ODataModelBuilder builder = new ODataModelBuilder();
 var customers = builder.EntitySet<Cusomter>("Customers");
 customers.HasManyBinding(c => c.Orders, "Orders");
 customers.HasRequiredBinding(c => c.SingleOrder, "SingleOrders");
+
 {% endhighlight %}
 
 We can get the following result:
@@ -66,22 +67,28 @@ Before 6.0.0, it doesn't support to:
 In [Web API OData V6.0.0 beta](https://www.nuget.org/packages/Microsoft.AspNet.OData/6.0.0-beta2), we add a new generic type class to configure the multiple binding path:
 
 {% highlight csharp %}
+
 BindingPathConfiguration{TStructuralType}
+
 {% endhighlight %}
 
 In this class, it provides the following APIs to add binding path:
 
 {% highlight csharp %}
+
 1. HasManyPath()
 2. HasSinglePath()
+
 {% endhighlight %}
 
 It also provides the following APIs to bind the navigation property with multiple binding path to a targe navigation source.
 
 {% highlight csharp %}
+
 1. HasManyBinding()
 2. HasRequiredBinding()
 3. HasOptionalBinding()
+
 {% endhighlight %}
 
 So, the normal navigation property binding configuration flow is：
@@ -94,11 +101,13 @@ So, the normal navigation property binding configuration flow is：
 Here's an example:
 
 {% highlight csharp %}
+
 builder.EntitySet<Customer>("Customers")
    .Binding
    .HasManyPath(c => c.Locations)
    .HasSinglePath(a => a.LocationInfo)
    .HasRequiredBinding(c => c.City, "Cities");
+   
 {% endhighlight %}
 
 ### Example
@@ -108,6 +117,7 @@ Let's have the following CLR classes as the model:
 #### Entity types
 
 {% highlight csharp %}
+
 public class Cusomter
 {
   public int Id { get; set; }
@@ -124,11 +134,13 @@ public class City
 {
   public int Id { get; set; }
 }
+
 {% endhighlight %}
 
 #### Complex types
 
 {% highlight csharp %}
+
 public class Animal
 {
 }
@@ -152,12 +164,13 @@ public class UsAddress : Address
 {
   public City SubCity { get; set; }
 }
-{% endhighlight %}
 
+{% endhighlight %}
 
 #### Add navigation property binding:
 
 {% highlight csharp %}
+
 customers.HasManyPath((VipCustomer v) => v.VipLocations).HasRequiredBinding(a => a.City, "A");
 customers.HasManyPath((VipCustomer v) => v.VipLocations).HasRequiredBinding((UsAddress a) => a.SubCity, "B");
 

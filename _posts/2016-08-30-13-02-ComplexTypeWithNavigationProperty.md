@@ -13,6 +13,7 @@ Let's have an example to illustrate how to configure navigation property on comp
 
 We use the following CRL classes as the CLR model:
 
+{% highlight csharp %}
 ```C#
 public class Address
 {
@@ -24,8 +25,8 @@ public class City
 {
   public int Id { get; set; }
 }
-
 ```
+{% endhighlight %}	
 
 Where:
 
@@ -36,21 +37,21 @@ Where:
 
 The following APIs are used to add navigation properties for complex type:
 
-```C#
+{% highlight csharp %}
 1. HasMany()
 2. HasRequired()
 3. HasOptional()
-```
+{% endhighlight %}	
 
 So, we can do as:
 
-```C#
+{% highlight csharp %}
 ODataModelBuilder builder = new ODataModelBuilder();
 builder.EntityType<City>().HasKey(c => c.Id);
 var address = builder.ComplexType<Address>();
 address.HasRequired(a => a.CityInfo);
 address.HasMany(a => a.Cities);
-```
+{% endhighlight %}	
 
 We can get the following result:
 
@@ -71,14 +72,14 @@ We can get the following result:
 
 Convention model builder will automatically map the class type properties in complex type as navigation properties if the declaring type of such navigation property has key defined. 
 
-So, as the above example, we can use the following codes to define a convention model:
+So, as the above example, we can use the following codes to define a convention model: 
 
-```C#
+{% highlight csharp %}
 
 ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
 builder.ComplexType<Address>(); // just add a starting point
 
-```
+{% endhighlight %}	
 
 As result, We can get the following result:
 

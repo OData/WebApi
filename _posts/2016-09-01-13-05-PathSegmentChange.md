@@ -19,12 +19,13 @@ for example:
 {% endhighlight %}
 
 Where, 
+
 1. Some segments are just used to wrapper the corresponding segments defined in ODL, such as BatchPathSegment.
-2. Soem segments are used to do some conversion, such as BoundFunctionPathSegment, KeyValuePathSegment.
+2. Some segments are used to do some conversions, such as BoundFunctionPathSegment, KeyValuePathSegment.
 
-**However**, ODL defines the same segments and Web API OData needn't to such conversion. So, all segment classed defined in Web API OData are removed in v6.0.0-beta.
+**However**, ODL defines the same segments and Web API OData needn't to do such conversion. So, all segment classes defined in Web API OData are removed in v6.x.
 
-Web API OData will directly use the path segment classes defined in ODL. Below are the whole segment list:
+Web API OData will directly use the path segment classes defined in ODL as follows:
 
 {% highlight csharp %}
 

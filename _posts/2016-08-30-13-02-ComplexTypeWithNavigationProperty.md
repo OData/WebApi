@@ -13,8 +13,9 @@ Let's have an example to illustrate how to configure navigation property on comp
 
 We use the following CRL classes as the CLR model:
 
-{% highlight csharp %}
 ```C#
+{% highlight csharp %}
+
 public class Address
 {
   public City CityInfo { get; set; }
@@ -25,9 +26,9 @@ public class City
 {
   public int Id { get; set; }
 }
-```
-{% endhighlight %}	
 
+{% endhighlight %}	
+```C#
 Where:
 
 * **Address** is a complex type.

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.AspNetCore.OData.Routing.Conventions;
@@ -9,6 +12,9 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.OData.Extensions
 {
+    /// <summary>
+    /// Provides extension methods to add odata services.
+    /// </summary>
     public static class ODataServiceCollectionExtensions
     {
         public static ODataServiceBuilder AddOData(

@@ -1,9 +1,11 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
@@ -11,17 +13,27 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.OData.Routing
 {
+    /// <summary>
+    /// A route implementation for OData routes. It supports passing in a route prefix for the route as well
+    /// as a path constraint that parses the request path as OData.
+    /// </summary>
     public class ODataRoute : IRouter
     {
         private readonly string _routePrefix;
         private readonly IEdmModel _model;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataRoute" /> class.
+        /// </summary>
+        /// <param name="routePrefix">The route prefix.</param>
+        /// <param name="model">The Edm model.</param>
         public ODataRoute(string routePrefix, IEdmModel model)
         {
             _routePrefix = routePrefix;
             _model = model;
         }
 
+        /// <inheritdoc />
         public async Task RouteAsync(RouteContext context)
         {
             var request = context.HttpContext.Request;
@@ -51,6 +63,7 @@ namespace Microsoft.AspNetCore.OData.Routing
             
         }
 
+        /// <inheritdoc />
         public VirtualPathData GetVirtualPath(VirtualPathContext context)
         {
             return null;

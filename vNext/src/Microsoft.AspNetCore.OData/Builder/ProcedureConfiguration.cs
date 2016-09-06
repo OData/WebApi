@@ -19,6 +19,7 @@ namespace Microsoft.AspNetCore.OData.Builder
     {
         private List<ParameterConfiguration> _parameters = new List<ParameterConfiguration>();
         private BindingParameterConfiguration _bindingParameter;
+        private string _namespace;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ProcedureConfiguration" /> class.
@@ -77,7 +78,16 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// </summary>
         public string FullyQualifiedName
         {
-            get { return ModelBuilder.Namespace + "." + Name; }
+            get { return Namespace + "." + Name; }
+        }
+
+        /// <summary>
+        /// The Namespace by default is the ModelBuilder's Namespace.
+        /// </summary>
+        public string Namespace
+        {
+            get { return _namespace ?? ModelBuilder.Namespace; }
+            set { _namespace = value; }
         }
 
         /// <summary>
@@ -241,6 +251,20 @@ namespace Microsoft.AspNetCore.OData.Builder
             ParameterConfiguration parameter = new NonbindingParameterConfiguration(name, parameterType);
             _parameters.Add(parameter);
             return parameter;
+        }
+
+        /// <summary>
+        /// Adds a new non-binding parameter
+        /// </summary>  
+        public ParameterConfiguration Parameter(Type clrParameterType, string name)
+        {
+            if (clrParameterType == null)
+            {
+                throw Error.ArgumentNull("clrParameterType");
+            }
+
+            IEdmTypeConfiguration parameterType = GetProcedureTypeConfiguration(clrParameterType);
+            return AddParameter(name, parameterType);
         }
 
         /// <summary>

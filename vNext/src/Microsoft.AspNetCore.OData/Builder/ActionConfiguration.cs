@@ -22,7 +22,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// </summary>
         /// <param name="builder">The ODataModelBuilder to which this ActionConfiguration should be added.</param>
         /// <param name="name">The name of this ActionConfiguration.</param>
-        internal ActionConfiguration(ODataModelBuilder builder, string name)
+        public ActionConfiguration(ODataModelBuilder builder, string name)
             : base(builder, name)
         {
         }

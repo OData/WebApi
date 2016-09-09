@@ -995,7 +995,7 @@ namespace System.Web.OData.Query
         }
 
         [Fact]
-        public void OnActionExecuted_SingleResult_WithEmptyQueryResult_SetsContentNullIfODataPathIsPresent()
+        public void OnActionExecuted_SingleResult_WithEmptyQueryResult_SetsNotFound()
         {
             // Arrange
             var customers = Enumerable.Empty<Customer>().AsQueryable();
@@ -1011,9 +1011,7 @@ namespace System.Web.OData.Query
             attribute.OnActionExecuted(actionExecutedContext);
 
             // Assert
-            ObjectContent content = actionExecutedContext.Response.Content as ObjectContent;
-            Assert.NotNull(content);
-            Assert.Null(content.Value);
+            Assert.Equal(HttpStatusCode.NotFound, actionExecutedContext.Response.StatusCode);
         }
 
         [Fact]

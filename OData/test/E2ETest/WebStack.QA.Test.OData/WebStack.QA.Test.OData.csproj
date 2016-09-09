@@ -211,6 +211,10 @@
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesController.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesModel.cs" />
     <Compile Include="Routing\DynamicProperties\DynamicPropertiesTest.cs" />
+    <Compile Include="SingleResult\SingleResultController.cs" />
+    <Compile Include="SingleResult\SingleResultDataModel.cs" />
+    <Compile Include="SingleResult\SingleResultEdmModel.cs" />
+    <Compile Include="SingleResult\SingleResultTests.cs" />
     <Compile Include="Swagger\SwaggerController.cs" />
     <Compile Include="Swagger\SwaggerMetadataTest.cs" />
     <Compile Include="Swagger\SwaggerPathHandler.cs" />

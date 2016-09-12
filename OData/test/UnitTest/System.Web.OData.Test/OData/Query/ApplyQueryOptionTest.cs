@@ -184,12 +184,39 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
+                        "$apply=groupby((Name))&$orderby=Name",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}},
+                            new Dictionary<string, object> {{"Name", "Middle"}},
+                        }
+                    },
+                    {
                         "$apply=groupby((Name), aggregate(CustomerId with sum as Total, CustomerId with sum as Total2))&$orderby=Total",
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
                             new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
                             new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total, CustomerId with sum as Total2))&$orderby=Total, Total2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$orderby=Name, Total",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
                         }
                     },
                     //{

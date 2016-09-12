@@ -608,18 +608,31 @@ namespace System.Web.OData.Query.Expressions
         private MemberInitExpression ExtractContainerExpression(MethodCallExpression expression, string containerName)
         {
             var memberInitExpression = ((expression.Arguments[1] as UnaryExpression).Operand as LambdaExpression).Body as MemberInitExpression;
-            return (memberInitExpression.Bindings.FirstOrDefault(m => m.Member.Name == containerName) as MemberAssignment).Expression as MemberInitExpression;
+            var containerAssigment = memberInitExpression.Bindings.FirstOrDefault(m => m.Member.Name == containerName) as MemberAssignment;
+            if (containerAssigment != null)
+            {
+                return containerAssigment.Expression as MemberInitExpression;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         private void CollectAssigments(Expression source, MemberInitExpression expression)
         {
+            if (expression == null)
+            {
+                return;
+            }
+
             string nameToAdd = null;
             Type resultType = null;
             MemberInitExpression nextExpression = null;
-            foreach(var expr in expression.Bindings.OfType<MemberAssignment>())
+            foreach (var expr in expression.Bindings.OfType<MemberAssignment>())
             {
                 var initExpr = expr.Expression as MemberInitExpression;
-                if (initExpr != null )
+                if (initExpr != null)
                 {
                     nextExpression = initExpr;
                     //CollectAssigments(source, initExpr);

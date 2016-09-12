@@ -3,6 +3,8 @@
 
 using System.Collections.Concurrent;
 using Microsoft.OData.Edm;
+using System.Diagnostics;
+using System.Web.OData.Query.Expressions;
 
 namespace System.Web.OData.Formatter
 {
@@ -13,6 +15,12 @@ namespace System.Web.OData.Formatter
 
         public IEdmTypeReference GetEdmType(Type clrType, IEdmModel model)
         {
+            // Dynamicly generated types don't have corresponding IEdmType
+            if (clrType.IsGenericType && typeof(DynamicTypeWrapper).IsAssignableFrom(clrType.GenericTypeArguments[0]))
+            {
+                return null;
+            }
+
             IEdmTypeReference edmType;
             if (!_cache.TryGetValue(clrType, out edmType))
             {

@@ -275,7 +275,7 @@ namespace System.Web.OData.Query
             Context.UpdateQuerySettings(querySettings, query);
 
             LambdaExpression orderByExpression =
-                FilterBinder.Bind(orderbyClause, Context.ElementClrType, Context.RequestContainer);
+                FilterBinder.Bind(query, orderbyClause, Context.ElementClrType, Context.RequestContainer);
             querySoFar = ExpressionHelpers.OrderBy(querySoFar, orderByExpression, direction, Context.ElementClrType,
                 alreadyOrdered);
             return querySoFar;

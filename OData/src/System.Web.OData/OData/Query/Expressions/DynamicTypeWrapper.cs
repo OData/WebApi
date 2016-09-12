@@ -10,9 +10,31 @@ namespace System.Web.OData.Query.Expressions
     /// <summary>
     /// Represents a container class that contains properties that are grouped by using $apply.
     /// </summary>
-    public class DynamicTypeWrapper
+    internal class DynamicTypeWrapper
     {
-        private readonly Dictionary<string, object> _values = new Dictionary<string, object>();
+        private Dictionary<string, object> _values;// = new Dictionary<string, object>();
+        protected static readonly IPropertyMapper DefaultPropertyMapper = new IdentityPropertyMapper();
+
+
+        /// <summary>
+        /// Gets or sets the property container that contains the properties being expanded. 
+        /// </summary>
+        public virtual PropertyContainer GroupByContainer { get; set; }
+
+        /// <summary>
+        /// Gets or sets the property container that contains the properties being expanded. 
+        /// </summary>
+        public virtual PropertyContainer Container { get; set; }
+
+        public Dictionary<string, object> Values
+        {
+            get
+            {
+                EnsureValues();
+                return this._values;
+            }
+        }
+
 
         /// <summary>
         /// Get property value
@@ -23,6 +45,7 @@ namespace System.Web.OData.Query.Expressions
         [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate", Justification = "Generics not appropriate here")]
         public bool TryGetPropertyValue(string propertyName, out object value)
         {
+            EnsureValues();
             return this._values.TryGetValue(propertyName, out value);
         }
 
@@ -53,12 +76,13 @@ namespace System.Web.OData.Query.Expressions
         /// <returns></returns>
         public override bool Equals(object obj)
         {
+            EnsureValues();
             var compareWith = obj as DynamicTypeWrapper;
             if (compareWith == null)
             {
                 return false;
             }
-
+            compareWith.EnsureValues();
             var dictionary1 = this._values;
             var dictionary2 = compareWith._values;
             return dictionary1.Count() == dictionary2.Count() && !dictionary1.Except(dictionary2).Any();
@@ -70,6 +94,7 @@ namespace System.Web.OData.Query.Expressions
         /// <returns></returns>
         public override int GetHashCode()
         {
+            EnsureValues();
             long hash = 1870403278L; //Arbitrary number from Anonymous Type GetHashCode implementation
             foreach (var v in this._values.Values)
             {
@@ -78,5 +103,22 @@ namespace System.Web.OData.Query.Expressions
 
             return (int)hash;
         }
+
+        private void EnsureValues()
+        {
+            if (_values == null)
+            {
+                this._values = this.GroupByContainer.ToDictionary(DefaultPropertyMapper);
+
+                if (this.Container != null)
+                {
+                    _values = _values.Concat(this.Container.ToDictionary(DefaultPropertyMapper)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                }
+            }
+        }
+    }
+
+    internal class AggregationWrapper: DynamicTypeWrapper
+    {
     }
 }

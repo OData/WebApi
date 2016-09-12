@@ -66,10 +66,12 @@ namespace System.Web.OData.Query.Expressions
                         }
                     }
 
-                    _groupByClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(Model,
-                        _groupingProperties, null);
-                    ResultClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(Model,
-                        _groupingProperties, _aggregateExpressions);
+                    _groupByClrType = typeof(DynamicTypeWrapper);
+                    ResultClrType = typeof(AggregationWrapper);
+                    //_groupByClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(Model,
+                    //    _groupingProperties, null);
+                    //ResultClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(Model,
+                    //    _groupingProperties, _aggregateExpressions);
                     break;
                 default:
                     throw new NotSupportedException(String.Format(CultureInfo.InvariantCulture,
@@ -118,22 +120,31 @@ namespace System.Web.OData.Query.Expressions
             var groupingType = typeof(IGrouping<,>).MakeGenericType(this._groupByClrType, this._elementType);
             ParameterExpression accum = Expression.Parameter(groupingType, "$it");
 
-            List<MemberAssignment> wrapperTypeMemberAssignments = null;
+            List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
 
             // Setting GroupByContainer property when previous step was grouping
             var propertyAccessor = Expression.Property(accum, "Key");
-            wrapperTypeMemberAssignments = CreateSelectMemberAssigments(ResultClrType, propertyAccessor,
-                _groupingProperties);
+            var wrapperProperty2 = this.ResultClrType.GetProperty("GroupByContainer");
+
+            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty2, Expression.Property(Expression.Property(accum, "Key"), "GroupByContainer")));
+
+            //wrapperTypeMemberAssignments = CreateSelectMemberAssigments(ResultClrType, propertyAccessor,
+            //    _groupingProperties);
 
             // Setting Container property when we have aggregation clauses
             if (_aggregateExpressions != null)
             {
+                var properties = new List<NamedPropertyExpression>();
                 foreach (var aggExpression in _aggregateExpressions)
                 {
-                    wrapperTypeMemberAssignments.Add(
-                        Expression.Bind(ResultClrType.GetMember(aggExpression.Alias).Single(),
-                            CreateAggregationExpression(accum, aggExpression)));
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(aggExpression.Alias), CreateAggregationExpression(accum, aggExpression)));
+                    //wrapperTypeMemberAssignments.Add(
+                    //    Expression.Bind(ResultClrType.GetMember(aggExpression.Alias).Single(),
+                    //        CreateAggregationExpression(accum, aggExpression)));
                 }
+
+                var wrapperProperty = ResultClrType.GetProperty("Container");
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreatePropertyContainer(properties)));
             }
 
             var selectLambda =
@@ -323,14 +334,17 @@ namespace System.Web.OData.Query.Expressions
                 //                                          Prop3 = $it.NavProp.Prop3
                 //                                          ...
                 //                                      }) 
+                var properties = new List<NamedPropertyExpression>();
+                foreach (var gProp in _groupingProperties)
+                {
+                    var propertyName = gProp.Name;
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.Property(this._lambdaParameter, propertyName)));
+                }
 
-                List<MemberAssignment> wrapperTypeMemberAssignments = CreateGroupByMemberAssignments(_groupByClrType,
-                    _groupingProperties);
-
-                groupLambda =
-                    Expression.Lambda(
-                        Expression.MemberInit(Expression.New(this._groupByClrType), wrapperTypeMemberAssignments),
-                        this._lambdaParameter);
+                List<MemberAssignment> wta = new List<MemberAssignment>();
+                var wrapperProperty = typeof(DynamicTypeWrapper).GetProperty("GroupByContainer");
+                wta.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreatePropertyContainer(properties)));
+                groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(typeof(DynamicTypeWrapper)), wta), _lambdaParameter);
             }
             else
             {

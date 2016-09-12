@@ -162,7 +162,7 @@ namespace System.Web.OData.Query.Expressions
             return namedPropertyGenericType.MakeGenericType(elementType);
         }
 
-        private class NamedProperty<T> : PropertyContainer
+        internal class NamedProperty<T> : PropertyContainer
         {
             public string Name { get; set; }
 
@@ -239,7 +239,7 @@ namespace System.Web.OData.Query.Expressions
         // create null's of NamedProperty<T>. So, you cannot generate an expression like new NamedProperty<int> { Next = null }. The exception that EF throws looks like this,
         // "The type 'NamedProperty`1[SystemInt32...]' appears in two structurally incompatible initializations within a single LINQ to Entities query. 
         // A type can be initialized in two places in the same query, but only if the same properties are set in both places and those properties are set in the same order."
-        private class NamedPropertyWithNext<T> : NamedProperty<T>
+        internal class NamedPropertyWithNext<T> : NamedProperty<T>
         {
             public PropertyContainer Next { get; set; }
 

@@ -67,10 +67,6 @@ namespace System.Web.OData.Query.Expressions
 
                     _groupByClrType = typeof(DynamicTypeWrapper);
                     ResultClrType = typeof(AggregationWrapper);
-                    //_groupByClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(Model,
-                    //    _groupingProperties, null);
-                    //ResultClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(Model,
-                    //    _groupingProperties, _aggregateExpressions);
                     break;
                 default:
                     throw new NotSupportedException(String.Format(CultureInfo.InvariantCulture,
@@ -333,15 +329,11 @@ namespace System.Web.OData.Query.Expressions
                 //                                          Prop3 = $it.NavProp.Prop3
                 //                                          ...
                 //                                      }) 
-                var properties = new List<NamedPropertyExpression>();
-                foreach (var gProp in _groupingProperties)
-                {
-                    var propertyName = gProp.Name;
-                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.Property(this._lambdaParameter, propertyName)));
-                }
+                List<NamedPropertyExpression> properties = CreateGroupByMemberAssignments2(_groupingProperties);
 
-                List<MemberAssignment> wta = new List<MemberAssignment>();
+                
                 var wrapperProperty = typeof(DynamicTypeWrapper).GetProperty("GroupByContainer");
+                List<MemberAssignment> wta = new List<MemberAssignment>();
                 wta.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreatePropertyContainer(properties)));
                 groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(typeof(DynamicTypeWrapper)), wta), _lambdaParameter);
             }
@@ -353,6 +345,28 @@ namespace System.Web.OData.Query.Expressions
             }
 
             return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, this._groupByClrType);
+        }
+
+        private List<NamedPropertyExpression> CreateGroupByMemberAssignments2(IEnumerable<GroupByPropertyNode> nodes)
+        {
+            var properties = new List<NamedPropertyExpression>();
+            foreach (var gProp in nodes)
+            {
+                var propertyName = gProp.Name;
+                if (gProp.Expression != null)
+                {
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), BindAccessor(gProp.Expression)));
+                }
+                else
+                {
+                    var wrapperProperty = typeof(DynamicTypeWrapper).GetProperty("GroupByContainer");
+                    List<MemberAssignment> wta = new List<MemberAssignment>();
+                    wta.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreatePropertyContainer(CreateGroupByMemberAssignments2(gProp.ChildTransformations))));
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.MemberInit(Expression.New(typeof(DynamicTypeWrapper)), wta)));
+                }
+            }
+
+            return properties;
         }
 
         private List<MemberAssignment> CreateGroupByMemberAssignments(Type type,

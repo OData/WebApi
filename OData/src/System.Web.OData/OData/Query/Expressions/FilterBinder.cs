@@ -619,7 +619,7 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
-        private void CollectAssigments(Expression source, MemberInitExpression expression)
+        private void CollectAssigments(Expression source, MemberInitExpression expression, string prefix = null)
         {
             if (expression == null)
             {
@@ -629,13 +629,13 @@ namespace System.Web.OData.Query.Expressions
             string nameToAdd = null;
             Type resultType = null;
             MemberInitExpression nextExpression = null;
+            Expression nestedExpression = null;
             foreach (var expr in expression.Bindings.OfType<MemberAssignment>())
             {
                 var initExpr = expr.Expression as MemberInitExpression;
-                if (initExpr != null)
+                if (initExpr != null && expr.Member.Name == "Next")
                 {
                     nextExpression = initExpr;
-                    //CollectAssigments(source, initExpr);
                 }
                 else if (expr.Member.Name == "Name")
                 {
@@ -644,6 +644,10 @@ namespace System.Web.OData.Query.Expressions
                 else if (expr.Member.Name == "Value")
                 {
                     resultType = expr.Expression.Type;
+                    if (typeof(DynamicTypeWrapper).IsAssignableFrom(resultType))
+                    {
+                        nestedExpression = expr.Expression;
+                    }
                 }
             }
 
@@ -656,14 +660,28 @@ namespace System.Web.OData.Query.Expressions
             {
                 exprType = typeof(PropertyContainer.NamedPropertyWithNext<>).MakeGenericType(resultType);
             }
+            if (typeof(PropertyContainer).IsAssignableFrom(source.Type))
+            {
+                source = Expression.Convert(source, exprType);
+            }
 
-            source = Expression.TypeAs(source, exprType);
+            if (prefix != null)
+            {
+                nameToAdd = prefix + "\\" + nameToAdd;
+            }
 
             this._flattenPropertyContainer.Add(nameToAdd, Expression.Property(source, "Value"));
 
             if (nextExpression != null)
             {
                 CollectAssigments(Expression.Property(source, "Next"), nextExpression);
+            }
+
+            if (nestedExpression != null)
+            {
+                var nestedAccessor = ((nestedExpression as MemberInitExpression).Bindings.First() as MemberAssignment).Expression as MemberInitExpression;
+                var newSource = Expression.Property(Expression.Convert(Expression.Property(source, "Value"), typeof(DynamicTypeWrapper)), "GroupByContainer");
+                CollectAssigments(newSource, nestedAccessor, nameToAdd);
             }
         }
 
@@ -751,7 +769,16 @@ namespace System.Web.OData.Query.Expressions
             string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) && source != _lambdaParameters[ODataItParameterName])
             {
-                Expression propertyAccessExpression = Expression.Property(RemoveInnerNullPropagation(source), propertyName);
+                var cleanSource = RemoveInnerNullPropagation(source);
+                Expression propertyAccessExpression = null;
+                if (_flattenPropertyContainer != null)
+                {
+                    propertyAccessExpression = _flattenPropertyContainer[(property.DeclaringType as IEdmSchemaElement).Name + "\\" + property.Name];
+                }
+                else
+                {
+                    propertyAccessExpression = Expression.Property(cleanSource, propertyName);
+                }
 
                 // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
                 // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property

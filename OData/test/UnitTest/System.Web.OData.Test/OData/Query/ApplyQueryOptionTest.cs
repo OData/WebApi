@@ -115,26 +115,26 @@ namespace System.Web.OData.Test.OData.Query
                             new Dictionary<string, object> { { "Name", "Lowest"} }
                         }
                     },
-                    //{
-                    //    "groupby((Address/City))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Address/City", "redmond"} },
-                    //        new Dictionary<string, object> { { "Address/City", "seattle"} },
-                    //        new Dictionary<string, object> { { "Address/City", "hobart"} },
-                    //        new Dictionary<string, object> { { "Address/City", null} },
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Address/City, Address/State))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Address/City", "redmond"}, { "Address/State", "WA"} },
-                    //        new Dictionary<string, object> { { "Address/City", "seattle"}, { "Address/State", "WA"} },
-                    //        new Dictionary<string, object> { { "Address/City", "hobart"}, { "Address/State", null} },
-                    //        new Dictionary<string, object> { { "Address/City", null}, { "Address/State", null} },
-                    //    }
-                    //},
+                    {
+                        "groupby((Address/City))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Address/City", "redmond"} },
+                            new Dictionary<string, object> { { "Address/City", "seattle"} },
+                            new Dictionary<string, object> { { "Address/City", "hobart"} },
+                            new Dictionary<string, object> { { "Address/City", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/City, Address/State))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Address/City", "redmond"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "Address/City", "seattle"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "Address/City", "hobart"}, { "Address/State", null} },
+                            new Dictionary<string, object> { { "Address/City", null}, { "Address/State", null} },
+                        }
+                    },
                     {
                         "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
@@ -219,23 +219,23 @@ namespace System.Web.OData.Test.OData.Query
                             new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
                         }
                     },
-                    //{
-                    //    "$apply=groupby((Address/City))&$orderby=Address/City",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> {{"Address/City", null}},
-                    //        new Dictionary<string, object> {{"Address/City", "hobart"}},
-                    //        new Dictionary<string, object> {{"Address/City", "redmond"}},
-                    //        new Dictionary<string, object> {{"Address/City", "seattle"}},
-                    //    }
-                    //},
-                    //{
-                    //    "$apply=groupby((Address/City))&$filter=Address/City eq 'redmond'",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> {{"Address/City", "redmond"}},
-                    //    }
-                    //},
+                    {
+                        "$apply=groupby((Address/City))&$orderby=Address/City",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", null}},
+                            new Dictionary<string, object> {{"Address/City", "hobart"}},
+                            new Dictionary<string, object> {{"Address/City", "redmond"}},
+                            new Dictionary<string, object> {{"Address/City", "seattle"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City))&$filter=Address/City eq 'redmond'",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", "redmond"}},
+                        }
+                    },
                     //{
                     //    "$apply=groupby((Name))&$top=1",
                     //    new List<Dictionary<string, object>>

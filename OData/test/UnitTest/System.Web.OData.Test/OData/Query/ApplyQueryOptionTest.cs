@@ -85,36 +85,36 @@ namespace System.Web.OData.Test.OData.Query
                             new Dictionary<string, object> { { "Name", "Middle"} }
                         }
                     },
-                    //{
-                    //    "groupby((Name), aggregate(CustomerId with sum as Total))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 5} },
-                    //        new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} },
-                    //        new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
-                    //    }
-                    //},
-                    //{
-                    //    "filter(Name eq 'Lowest')/groupby((Name))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Name", "Lowest"} }
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Name), aggregate(CustomerId with sum as Total))/filter(Total eq 3)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Name))/filter(Name eq 'Lowest')",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Name", "Lowest"} }
-                    //    }
-                    //},
+                    {
+                        "groupby((Name), aggregate(CustomerId with sum as Total))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 5} },
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} },
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
+                        }
+                    },
+                    {
+                        "filter(Name eq 'Lowest')/groupby((Name))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"} }
+                        }
+                    },
+                    {
+                        "groupby((Name), aggregate(CustomerId with sum as Total))/filter(Total eq 3)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
+                        }
+                    },
+                    {
+                        "groupby((Name))/filter(Name eq 'Lowest')",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"} }
+                        }
+                    },
                     //{
                     //    "groupby((Address/City))",
                     //    new List<Dictionary<string, object>>
@@ -135,28 +135,28 @@ namespace System.Web.OData.Test.OData.Query
                     //        new Dictionary<string, object> { { "Address/City", null}, { "Address/State", null} },
                     //    }
                     //},
-                    //{
-                    //    "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "CustomerId", 30} }
-                    //    }
-                    //},
-                    //{
-                    //    // Note SharePrice and CustomerId have different type
-                    //    "aggregate(SharePrice mul CustomerId with sum as Result)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Result", 15.0M} }
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Website))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Website", null} },
-                    //    }
-                    //},
+                    {
+                        "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", 30} }
+                        }
+                    },
+                    {
+                        // Note SharePrice and CustomerId have different type
+                        "aggregate(SharePrice mul CustomerId with sum as Result)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Result", 15.0M} }
+                        }
+                    },
+                    {
+                        "groupby((Website))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Website", null} },
+                        }
+                    },
                 };
             }
         }

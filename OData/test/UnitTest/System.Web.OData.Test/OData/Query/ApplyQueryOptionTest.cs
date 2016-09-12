@@ -27,55 +27,55 @@ namespace System.Web.OData.Test.OData.Query
             {
                 return new TheoryDataSet<string, List<Dictionary<string, object>>>
                 {
-                    //{
-                    //    "aggregate(CustomerId with sum as CustomerId)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "CustomerId", 10} }
-                    //    }
-                    //},
-                    //{
-                    //    "aggregate(SharePrice with sum as SharePrice)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "SharePrice", 12.5M} }
-                    //    }
-                    //},
-                    //{
-                    //    "aggregate(SharePrice with min as SharePrice)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "SharePrice", 2.5M} }
-                    //    }
-                    //},
-                    // {
-                    //    "aggregate(SharePrice with max as SharePrice)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "SharePrice", 10M} }
-                    //    }
-                    //},
-                    //{
-                    //    "aggregate(SharePrice with average as SharePrice)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "SharePrice", 6.25M} }
-                    //    }
-                    //},
-                    //{
-                    //    "aggregate(SharePrice with average as SharePrice)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "SharePrice", 6.25M} }
-                    //    }
-                    //},
-                    //{
-                    //    "aggregate(CustomerId with sum as Total, SharePrice with countdistinct as SharePriceDistinctCount)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "SharePriceDistinctCount", 3L}, { "Total", 10} }
-                    //    }
-                    //},
+                    {
+                        "aggregate(CustomerId with sum as CustomerId)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", 10} }
+                        }
+                    },
+                    {
+                        "aggregate(SharePrice with sum as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", 12.5M} }
+                        }
+                    },
+                    {
+                        "aggregate(SharePrice with min as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", 2.5M} }
+                        }
+                    },
+                     {
+                        "aggregate(SharePrice with max as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", 10M} }
+                        }
+                    },
+                    {
+                        "aggregate(SharePrice with average as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", 6.25M} }
+                        }
+                    },
+                    {
+                        "aggregate(SharePrice with average as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", 6.25M} }
+                        }
+                    },
+                    {
+                        "aggregate(CustomerId with sum as Total, SharePrice with countdistinct as SharePriceDistinctCount)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePriceDistinctCount", 3L}, { "Total", 10} }
+                        }
+                    },
                     {
                         "groupby((Name))",
                         new List<Dictionary<string, object>>

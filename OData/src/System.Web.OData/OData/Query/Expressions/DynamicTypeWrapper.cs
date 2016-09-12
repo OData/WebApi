@@ -108,7 +108,14 @@ namespace System.Web.OData.Query.Expressions
         {
             if (_values == null)
             {
-                this._values = this.GroupByContainer.ToDictionary(DefaultPropertyMapper);
+                if (this.GroupByContainer != null)
+                {
+                    this._values = this.GroupByContainer.ToDictionary(DefaultPropertyMapper);
+                }
+                else
+                {
+                    this._values = new Dictionary<string, object>();
+                }
 
                 if (this.Container != null)
                 {
@@ -118,7 +125,7 @@ namespace System.Web.OData.Query.Expressions
         }
     }
 
-    internal class AggregationWrapper: DynamicTypeWrapper
+    internal class AggregationWrapper : DynamicTypeWrapper
     {
     }
 }

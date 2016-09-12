@@ -47,8 +47,7 @@ namespace System.Web.OData.Query.Expressions
                 case TransformationNodeKind.Aggregate:
                     var aggregateClause = this._transformation as AggregateTransformationNode;
                     _aggregateExpressions = aggregateClause.Expressions;
-                    ResultClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(Model, null,
-                        _aggregateExpressions);
+                    ResultClrType = typeof(AggregationWrapper);
                     break;
                 case TransformationNodeKind.GroupBy:
                     var groupByClause = this._transformation as GroupByTransformationNode;

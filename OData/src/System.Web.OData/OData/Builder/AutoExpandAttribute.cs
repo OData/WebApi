@@ -10,5 +10,9 @@ namespace System.Web.OData.Builder
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
     public sealed class AutoExpandAttribute : Attribute
     {
+        /// <summary>
+        /// Gets or sets whether the automatic expand will be disabled if there is a $select specify by client.
+        /// </summary>
+        public bool DisableWhenSelectPresent { get; set; }
     }
 }

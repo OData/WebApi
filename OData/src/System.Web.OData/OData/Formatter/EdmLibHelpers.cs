@@ -405,13 +405,14 @@ namespace System.Web.OData.Formatter
             return false;
         }
 
-        public static bool IsAutoExpand(IEdmProperty navigationProperty, IEdmProperty pathProperty,
-            IEdmStructuredType pathStructuredType, IEdmModel edmModel, ModelBoundQuerySettings querySettings = null)
+        public static bool IsAutoExpand(IEdmProperty navigationProperty,
+            IEdmProperty pathProperty, IEdmStructuredType pathStructuredType, IEdmModel edmModel,
+            bool isSelectPresent = false, ModelBoundQuerySettings querySettings = null)
         {
             QueryableRestrictionsAnnotation annotation = GetPropertyRestrictions(navigationProperty, edmModel);
             if (annotation != null && annotation.Restrictions.AutoExpand)
             {
-                return true;
+                return !annotation.Restrictions.DisableAutoExpandWhenSelectIsPresent || !isSelectPresent;
             }
 
             if (querySettings == null)
@@ -429,7 +430,7 @@ namespace System.Web.OData.Formatter
 
         public static IEnumerable<IEdmNavigationProperty> GetAutoExpandNavigationProperties(
             IEdmProperty pathProperty, IEdmStructuredType pathStructuredType, IEdmModel edmModel,
-            ModelBoundQuerySettings querySettings = null)
+            bool isSelectPresent = false, ModelBoundQuerySettings querySettings = null)
         {
             List<IEdmNavigationProperty> autoExpandNavigationProperties = new List<IEdmNavigationProperty>();
             IEdmEntityType baseEntityType = pathStructuredType as IEdmEntityType;
@@ -449,7 +450,8 @@ namespace System.Web.OData.Formatter
                         autoExpandNavigationProperties.AddRange(
                             navigationProperties.Where(
                                 navigationProperty =>
-                                    IsAutoExpand(navigationProperty, pathProperty, entityType, edmModel, querySettings)));
+                                    IsAutoExpand(navigationProperty, pathProperty, entityType, edmModel,
+                                        isSelectPresent, querySettings)));
                     }
                 }
             }

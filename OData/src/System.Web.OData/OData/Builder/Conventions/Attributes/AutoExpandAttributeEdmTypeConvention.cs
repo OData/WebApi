@@ -35,11 +35,12 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             }
 
             EntityTypeConfiguration entityTypeConfiguration = edmTypeConfiguration as EntityTypeConfiguration;
+            AutoExpandAttribute autoExpandAttribute = attribute as AutoExpandAttribute;
             foreach (var property in entityTypeConfiguration.NavigationProperties)
             {
                 if (!property.AddedExplicitly)
                 {
-                    property.AutomaticallyExpand();
+                    property.AutomaticallyExpand(autoExpandAttribute.DisableWhenSelectPresent);
                 }
             }
         }

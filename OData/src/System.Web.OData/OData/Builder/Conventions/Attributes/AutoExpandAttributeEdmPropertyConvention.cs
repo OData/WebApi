@@ -24,7 +24,8 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
             if (!edmProperty.AddedExplicitly)
             {
-                edmProperty.AutomaticallyExpand();
+                AutoExpandAttribute autoExpandAttribute = attribute as AutoExpandAttribute;
+                edmProperty.AutomaticallyExpand(autoExpandAttribute.DisableWhenSelectPresent);
             }
         }
     }

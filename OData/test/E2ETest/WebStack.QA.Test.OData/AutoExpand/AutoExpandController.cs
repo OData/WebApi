@@ -187,16 +187,49 @@ namespace WebStack.QA.Test.OData.AutoExpand
 
         public void Generate()
         {
-            var order = new DerivedOrder
+            var order2 = new DerivedOrder
+            {
+                Id = 2,
+                OrderDetail = new OrderDetail
+                {
+                    Id = 3,
+                    Description = "OrderDetail"
+                },
+                NotShownDetail = new OrderDetail
+                {
+                    Id = 4,
+                    Description = "NotShownOrderDetail4"
+                }
+            };
+
+            var order1 = new DerivedOrder
             {
                 Id = 1,
                 OrderDetail = new OrderDetail
                 {
                     Id = 1,
                     Description = "OrderDetail"
+                },
+                NotShownDetail = new OrderDetail
+                {
+                    Id = 2,
+                    Description = "NotShownOrderDetail2"
                 }
             };
-            _db.NormalOrders.Add(order);
+
+            var order3 = new DerivedOrder2
+            {
+                Id = 3,
+                NotShownDetail = new OrderDetail
+                {
+                    Id = 5,
+                    Description = "NotShownOrderDetail4"
+                }
+            };
+
+            order2.LinkOrder = order1;
+            _db.NormalOrders.Add(order2);
+            _db.NormalOrders.Add(order3);
             _db.SaveChanges();
         }
 

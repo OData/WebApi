@@ -105,6 +105,11 @@ namespace System.Web.OData.Builder
         public bool AutoExpand { get; set; }
 
         /// <summary>
+        /// Gets or sets whether the automatic expand will be disabled if there is a $select specify by client.
+        /// </summary>
+        public bool DisableAutoExpandWhenSelectIsPresent { get; set; }
+
+        /// <summary>
         /// Gets or sets whether the property is nonfilterable. default is false.
         /// </summary>
         public bool NonFilterable

@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Web.Http;
-using Microsoft.OData.Core;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.OData;
 
 namespace Microsoft.AspNetCore.OData.Extensions
 {

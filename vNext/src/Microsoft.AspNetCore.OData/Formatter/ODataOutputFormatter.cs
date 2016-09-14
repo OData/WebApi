@@ -12,10 +12,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
-using Microsoft.AspNetCore.OData.Routing;
-using Microsoft.Extensions.Internal;
-using Microsoft.OData.Core;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.OData;
+using Microsoft.OData.UriParser;
+using ODataPath = Microsoft.AspNetCore.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
@@ -25,8 +25,8 @@ namespace Microsoft.AspNetCore.OData.Formatter
         private readonly ODataSerializerProvider _serializerProvider;
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
 
-        public ODataOutputFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
-            : this(new DefaultODataSerializerProvider(), payloadKinds)
+        public ODataOutputFormatter(IServiceProvider provider, ODataPayloadKind payloadKinds)
+            : this(new DefaultODataSerializerProvider(provider), new[] { payloadKinds })
         {
 
         }
@@ -35,10 +35,11 @@ namespace Microsoft.AspNetCore.OData.Formatter
         {
             _messageWriterSettings = new ODataMessageWriterSettings
             {
-                Indent = true,
-                DisableMessageStreamDisposal = true,
+                // TODO: 
+                //Indent = true,
+                EnableMessageStreamDisposal = false,
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
-                AutoComputePayloadMetadataInJson = true,
+                //AutoComputePayloadMetadataInJson = true,
             };
 
             _serializerProvider = serializerProvider;
@@ -76,7 +77,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             }
             var type = value.GetType();
 
-            ODataSerializer serializer = GetSerializer(type, value, model, new DefaultODataSerializerProvider(), request);
+            ODataSerializer serializer = GetSerializer(type, value, model, new DefaultODataSerializerProvider(context.HttpContext.RequestServices), request);
 
             IUrlHelper urlHelper = context.HttpContext.UrlHelper();
 
@@ -99,13 +100,12 @@ namespace Microsoft.AspNetCore.OData.Formatter
             }
 
             Uri baseAddress = GetBaseAddress(request);
-            ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings(_messageWriterSettings)
-            {
-                PayloadBaseUri = baseAddress,
-                Version = ODataProperties.DefaultODataVersion,
-            };
+            ODataMessageWriterSettings writerSettings = _messageWriterSettings.Clone();
+            writerSettings.BaseUri = baseAddress;
+            writerSettings.Version = ODataProperties.DefaultODataVersion;
+            writerSettings.Validations = writerSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
 
-            string metadataLink = urlHelper.CreateODataLink(request, new MetadataPathSegment());
+            string metadataLink = urlHelper.CreateODataLink(request, MetadataSegment.Instance);
             if (metadataLink == null)
             {
                 throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
@@ -131,7 +131,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                     NavigationSource = targetNavigationSource,
                     Model = model,
                     RootElementName = GetRootElementName(path) ?? "root",
-                    SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
+                    SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.ResourceSet,
                     Path = path,
                     MetadataLevel = ODataMediaTypes.GetMetadataLevel(MediaTypeHeaderValue.Parse(context.ContentType.Value)),
                     SelectExpandClause = request.ODataProperties().SelectExpandClause,
@@ -217,7 +217,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                     }
                     else
                     {
-                        payloadKind = GetClrObjectResponsePayloadKind(type, model, request);
+                        payloadKind = GetClrObjectResponsePayloadKind(type, request);
                     }
 
                     return payloadKind == null ? false : _payloadKinds.Contains(payloadKind.Value);
@@ -252,7 +252,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             {
                 // get the most appropriate serializer given that we support inheritance.
                 type = value == null ? type : value.GetType();
-                serializer = serializerProvider.GetODataPayloadSerializer(model, type, request);
+                serializer = serializerProvider.GetODataPayloadSerializer(type, request);
                 if (serializer == null)
                 {
                     string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataOutputFormatter).Name);
@@ -289,13 +289,10 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
             foreach (ODataPathSegment segment in path.Segments)
             {
-                switch (segment.SegmentKind)
+                if (segment is OperationSegment ||
+                    segment is OperationImportSegment)
                 {
-                    case ODataSegmentKinds._Action:
-                    case ODataSegmentKinds._Function:
-                    case ODataSegmentKinds._UnboundAction:
-                    case ODataSegmentKinds._UnboundFunction:
-                        return true;
+                    return true;
                 }
             }
 
@@ -309,13 +306,17 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 ODataPathSegment lastSegment = path.Segments.LastOrDefault();
                 if (lastSegment != null)
                 {
-                    BoundActionPathSegment actionSegment = lastSegment as BoundActionPathSegment;
+                    OperationSegment actionSegment = lastSegment as OperationSegment;
                     if (actionSegment != null)
                     {
-                        return actionSegment.Action.Name;
+                        IEdmAction action = actionSegment.Operations.Single() as IEdmAction;
+                        if (action != null)
+                        {
+                            return action.Name;
+                        }
                     }
 
-                    PropertyAccessPathSegment propertyAccessSegment = lastSegment as PropertyAccessPathSegment;
+                    PropertySegment propertyAccessSegment = lastSegment as PropertySegment;
                     if (propertyAccessSegment != null)
                     {
                         return propertyAccessSegment.Property.Name;
@@ -341,7 +342,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 }
                 else if (typeof(IEdmEntityObject).IsAssignableFrom(elementType))
                 {
-                    return ODataPayloadKind.Feed;
+                    return ODataPayloadKind.ResourceSet;
                 }
                 else if (typeof(IEdmChangedObject).IsAssignableFrom(elementType))
                 {
@@ -356,14 +357,14 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 }
                 else if (typeof(IEdmEntityObject).IsAssignableFrom(elementType))
                 {
-                    return ODataPayloadKind.Entry;
+                    return ODataPayloadKind.Resource;
                 }
             }
 
             return null;
         }
 
-        private ODataPayloadKind? GetClrObjectResponsePayloadKind(Type type, IEdmModel model, HttpRequest request)
+        private ODataPayloadKind? GetClrObjectResponsePayloadKind(Type type, HttpRequest request)
         {
             // SingleResult<T> should be serialized as T.
             //if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SingleResult<>))
@@ -371,7 +372,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             //    type = type.GetGenericArguments()[0];
             //}
 
-            ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(model, type, request);
+            ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(type, request);
             return serializer == null ? null : (ODataPayloadKind?)serializer.ODataPayloadKind;
         }
     }

@@ -9,10 +9,9 @@ using System.Linq.Expressions;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Query.Expressions;
 using Microsoft.AspNetCore.OData.Query.Validators;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Query
 {
@@ -22,49 +21,16 @@ namespace Microsoft.AspNetCore.OData.Query
     public class OrderByQueryOption
     {
         private OrderByClause _orderByClause;
-        private IList<OrderByNode> _orderByNode;
+        private IList<OrderByNode> _orderByNodes;
         private ODataQueryOptionParser _queryOptionParser;
 
         /// <summary>
-        /// Gets the given <see cref="ODataQueryContext"/>.
+        /// Initialize a new instance of <see cref="OrderByQueryOption"/> based on the raw $orderby value and
+        /// an EdmModel from <see cref="ODataQueryContext"/>.
         /// </summary>
-        public ODataQueryContext Context { get; private set; }
-
-        /// <summary>
-        /// Gets the raw $orderby value.
-        /// </summary>
-        public string RawValue { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the OrderBy Query Validator.
-        /// </summary>
-        public OrderByQueryValidator Validator { get; set; }
-
-        public OrderByClause OrderByClause
-        {
-            get
-            {
-                if (_orderByClause == null)
-                {
-                    _orderByClause = _queryOptionParser.ParseOrderBy();
-                    _orderByClause = TranslateParameterAlias(_orderByClause);
-                }
-                return _orderByClause;
-            }
-        }
-
-        public IList<OrderByNode> OrderByNodes
-        {
-            get
-            {
-                if (_orderByNode == null)
-                {
-                    _orderByNode = OrderByNode.CreateCollection(OrderByClause);
-                }
-                return _orderByNode;
-            }
-        }
-
+        /// <param name="rawValue">The raw value for $orderby query. It can be null or empty.</param>
+        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
+        /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
         public OrderByQueryOption(string rawValue, ODataQueryContext context, ODataQueryOptionParser queryOptionParser)
         {
             if (context == null)
@@ -85,7 +51,90 @@ namespace Microsoft.AspNetCore.OData.Query
             Context = context;
             RawValue = rawValue;
             Validator = new OrderByQueryValidator();
+            // Validator = OrderByQueryValidator.GetOrderByQueryValidator(context); // TODO
             _queryOptionParser = queryOptionParser;
+        }
+
+        // This constructor is intended for unit testing only.
+        internal OrderByQueryOption(string rawValue, ODataQueryContext context)
+        {
+            if (context == null)
+            {
+                throw Error.ArgumentNull("context");
+            }
+
+            if (String.IsNullOrEmpty(rawValue))
+            {
+                throw Error.ArgumentNullOrEmpty("rawValue");
+            }
+
+            Context = context;
+            RawValue = rawValue;
+
+            Validator = new OrderByQueryValidator();
+            // Validator = OrderByQueryValidator.GetOrderByQueryValidator(context); // TODO:
+            _queryOptionParser = new ODataQueryOptionParser(
+                context.Model,
+                context.ElementType,
+                context.NavigationSource,
+                new Dictionary<string, string> { { "$orderby", rawValue } });
+        }
+
+        internal OrderByQueryOption(OrderByQueryOption orderBy)
+        {
+            Context = orderBy.Context;
+            RawValue = orderBy.RawValue;
+            Validator = orderBy.Validator;
+            _queryOptionParser = orderBy._queryOptionParser;
+            _orderByClause = orderBy._orderByClause;
+            _orderByNodes = orderBy._orderByNodes;
+        }
+
+        /// <summary>
+        ///  Gets the given <see cref="ODataQueryContext"/>.
+        /// </summary>
+        public ODataQueryContext Context { get; private set; }
+
+        /// <summary>
+        /// Gets the mutable list of <see cref="OrderByPropertyNode"/> instances for this query option.
+        /// </summary>
+        public IList<OrderByNode> OrderByNodes
+        {
+            get
+            {
+                if (_orderByNodes == null)
+                {
+                    _orderByNodes = OrderByNode.CreateCollection(OrderByClause);
+                }
+                return _orderByNodes;
+            }
+        }
+
+        /// <summary>
+        ///  Gets the raw $orderby value.
+        /// </summary>
+        public string RawValue { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the OrderBy Query Validator.
+        /// </summary>
+        public OrderByQueryValidator Validator { get; set; }
+
+        /// <summary>
+        /// Gets the parsed <see cref="OrderByClause"/> for this query option.
+        /// </summary>
+        public OrderByClause OrderByClause
+        {
+            get
+            {
+                if (_orderByClause == null)
+                {
+                    _orderByClause = _queryOptionParser.ParseOrderBy();
+                    _orderByClause = TranslateParameterAlias(_orderByClause);
+                }
+
+                return _orderByClause;
+            }
         }
 
         /// <summary>
@@ -159,7 +208,7 @@ namespace Microsoft.AspNetCore.OData.Query
             bool alreadyOrdered = false;
             IQueryable querySoFar = query;
 
-            HashSet<IEdmProperty> propertiesSoFar = new HashSet<IEdmProperty>();
+            HashSet<object> propertiesSoFar = new HashSet<object>();
             HashSet<string> openPropertiesSoFar = new HashSet<string>();
             bool orderByItSeen = false;
 
@@ -170,15 +219,17 @@ namespace Microsoft.AspNetCore.OData.Query
 
                 if (propertyNode != null)
                 {
-                    IEdmProperty property = propertyNode.Property;
+                    // Use autonomy class to achieve value equality for HasSet.
+                    var edmPropertyWithPath = new { propertyNode.Property, propertyNode.PropertyPath };
                     OrderByDirection direction = propertyNode.Direction;
 
                     // This check prevents queries with duplicate properties (e.g. $orderby=Id,Id,Id,Id...) from causing stack overflows
-                    if (propertiesSoFar.Contains(property))
+                    if (propertiesSoFar.Contains(edmPropertyWithPath))
                     {
-                        throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, property.Name));
+                        throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, edmPropertyWithPath.PropertyPath));
                     }
-                    propertiesSoFar.Add(property);
+
+                    propertiesSoFar.Add(edmPropertyWithPath);
 
                     if (propertyNode.OrderByClause != null)
                     {
@@ -186,8 +237,9 @@ namespace Microsoft.AspNetCore.OData.Query
                     }
                     else
                     {
-                        querySoFar = ExpressionHelpers.OrderByProperty(querySoFar, Context.Model, property, direction, Context.ElementClrType, alreadyOrdered);
+                        querySoFar = ExpressionHelpers.OrderByProperty(querySoFar, Context.Model, edmPropertyWithPath.Property, direction, Context.ElementClrType, alreadyOrdered);
                     }
+
                     alreadyOrdered = true;
                 }
                 else if (openPropertyNode != null)
@@ -195,8 +247,9 @@ namespace Microsoft.AspNetCore.OData.Query
                     // This check prevents queries with duplicate properties (e.g. $orderby=Id,Id,Id,Id...) from causing stack overflows
                     if (openPropertiesSoFar.Contains(openPropertyNode.PropertyName))
                     {
-                        throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, openPropertyNode.PropertyName));
+                        throw new ODataException(Error.Format(SRResources.OrderByDuplicateProperty, openPropertyNode.PropertyPath));
                     }
+
                     openPropertiesSoFar.Add(openPropertyNode.PropertyName);
                     Contract.Assert(openPropertyNode.OrderByClause != null);
                     querySoFar = AddOrderByQueryForProperty(query, querySettings, openPropertyNode.OrderByClause, querySoFar, openPropertyNode.Direction, alreadyOrdered);
@@ -222,17 +275,11 @@ namespace Microsoft.AspNetCore.OData.Query
         private IQueryable AddOrderByQueryForProperty(IQueryable query, ODataQuerySettings querySettings,
             OrderByClause orderbyClause, IQueryable querySoFar, OrderByDirection direction, bool alreadyOrdered)
         {
-            // Ensure we have decided how to handle null propagation
-            ODataQuerySettings updatedSettings = querySettings;
-            if (querySettings.HandleNullPropagation == HandleNullPropagationOption.Default)
-            {
-                updatedSettings = new ODataQuerySettings(updatedSettings);
-                updatedSettings.HandleNullPropagation =
-                    HandleNullPropagationOptionHelper.GetDefaultHandleNullPropagationOption(query);
-            }
+            // TODO: 
+            //Context.UpdateQuerySettings(querySettings, query);
 
             LambdaExpression orderByExpression =
-                FilterBinder.Bind(orderbyClause, Context.ElementClrType, Context.Model, updatedSettings);
+                FilterBinder.Bind(orderbyClause, Context.ElementClrType, /*Context.RequestContainer*/ null);
             querySoFar = ExpressionHelpers.OrderBy(querySoFar, orderByExpression, direction, Context.ElementClrType,
                 alreadyOrdered);
             return querySoFar;

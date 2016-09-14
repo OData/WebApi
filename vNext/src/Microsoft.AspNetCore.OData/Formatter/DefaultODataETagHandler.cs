@@ -7,9 +7,8 @@ using System.Globalization;
 using Microsoft.Net.Http.Headers;
 using System.Text;
 using Microsoft.AspNetCore.OData.Builder.Conventions;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.OData;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {

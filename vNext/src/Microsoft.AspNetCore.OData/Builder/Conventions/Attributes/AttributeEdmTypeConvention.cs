@@ -11,7 +11,7 @@ namespace Microsoft.AspNetCore.OData.Builder.Conventions.Attributes
     /// </summary>
     /// <typeparam name="TEdmTypeConfiguration">The kind of Edm type that this convention must be applied to.</typeparam>
     internal abstract class AttributeEdmTypeConvention<TEdmTypeConfiguration> : AttributeConvention, IEdmTypeConvention
-        where TEdmTypeConfiguration : StructuralTypeConfiguration
+        where TEdmTypeConfiguration : class, IEdmTypeConfiguration
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AttributeEdmTypeConvention{TEdmTypeConfiguration}"/> class.

@@ -24,7 +24,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 return serializerProvider.GetEdmTypeSerializer(edmObject.GetEdmType());
             }
 
-            return serializerProvider.GetODataPayloadSerializer(model, instance.GetType(), request) as ODataEdmTypeSerializer;
+            return serializerProvider.GetODataPayloadSerializer(instance.GetType(), request) as ODataEdmTypeSerializer;
         }
     }
 }

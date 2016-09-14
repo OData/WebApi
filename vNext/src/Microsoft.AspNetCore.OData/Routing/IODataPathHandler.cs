@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNetCore.OData.Routing

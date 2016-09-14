@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
             {
                 options.InputFormatters.Insert(0, new ModernInputFormatter());
 
-                foreach (var outputFormatter in ODataOutputFormatters.Create())
+                foreach (var outputFormatter in ODataOutputFormatters.Create(services.BuildServiceProvider()))
                 {
                     options.OutputFormatters.Insert(0, outputFormatter);
                 }

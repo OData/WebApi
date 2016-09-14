@@ -5,13 +5,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
 using Microsoft.AspNetCore.OData.Common;
-using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
 {
@@ -34,6 +33,11 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
                 isDynamicProperty = structuredType != null && structuredType.IsOpen;
             }
 
+            if (!isDynamicProperty && edmProperty == null)
+            {
+                throw new ODataException("Does not support untyped value in non-open type.");
+            }
+
             // dynamic properties have null values
             IEdmTypeReference propertyType = edmProperty != null ? edmProperty.Type : null;
 
@@ -44,7 +48,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
             if (isDynamicProperty)
             {
                 SetDynamicProperty(resource, resourceType, propertyKind, propertyName, value, propertyType,
-                    readContext);
+                    readContext.Model);
             }
             else
             {
@@ -54,18 +58,18 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
 
         internal static void SetDynamicProperty(object resource, IEdmStructuredTypeReference resourceType,
             EdmTypeKind propertyKind, string propertyName, object propertyValue, IEdmTypeReference propertyType,
-            ODataDeserializerContext readContext)
+            IEdmModel model)
         {  
             if (propertyKind == EdmTypeKind.Collection && propertyValue.GetType() != typeof(EdmComplexObjectCollection)
                 && propertyValue.GetType() != typeof(EdmEnumObjectCollection))
             {
                 SetDynamicCollectionProperty(resource, propertyName, propertyValue, propertyType.AsCollection(),
-                    resourceType.StructuredDefinition(), readContext);
+                    resourceType.StructuredDefinition(), model);
             }
             else
             {
                 SetDynamicProperty(resource, propertyName, propertyValue, resourceType.StructuredDefinition(),
-                    readContext);
+                    model);
             }
         }
 
@@ -152,24 +156,23 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
 
         internal static void SetDynamicCollectionProperty(object resource, string propertyName, object value,
             IEdmCollectionTypeReference edmPropertyType, IEdmStructuredType structuredType,
-            ODataDeserializerContext readContext)
+            IEdmModel model)
         {
             Contract.Assert(value != null);
-            Contract.Assert(readContext != null);
-            Contract.Assert(readContext.Model != null);
+            Contract.Assert(model != null);
 
             IEnumerable collection = value as IEnumerable;
             Contract.Assert(collection != null);
 
             Type resourceType = resource.GetType();
-            Type elementType = EdmLibHelpers.GetClrType(edmPropertyType.ElementType(), readContext.Model);
+            Type elementType = EdmLibHelpers.GetClrType(edmPropertyType.ElementType(), model);
             Type propertyType = typeof(ICollection<>).MakeGenericType(elementType);
             IEnumerable newCollection;
             if (CollectionDeserializationHelpers.TryCreateInstance(propertyType, edmPropertyType, elementType,
                 out newCollection))
             {
                 collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType);
-                SetDynamicProperty(resource, propertyName, newCollection, structuredType, readContext);
+                SetDynamicProperty(resource, propertyName, newCollection, structuredType, model);
             }
         }
 
@@ -187,7 +190,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
         }
 
         internal static void SetDynamicProperty(object resource, string propertyName, object value,
-            IEdmStructuredType structuredType, ODataDeserializerContext readContext)
+            IEdmStructuredType structuredType, IEdmModel model)
         {
             IDelta delta = resource as IDelta;
             if (delta != null)
@@ -197,7 +200,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
             else
             {
                 PropertyInfo propertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(structuredType,
-                    readContext.Model);
+                    model);
                 if (propertyInfo == null)
                 {
                     return;
@@ -240,13 +243,6 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
                 return null;
             }
 
-            ODataComplexValue complexValue = oDataValue as ODataComplexValue;
-            if (complexValue != null)
-            {
-                typeKind = EdmTypeKind.Complex;
-                return ConvertComplexValue(complexValue, ref propertyType, deserializerProvider, readContext);
-            }
-
             ODataEnumValue enumValue = oDataValue as ODataEnumValue;
             if (enumValue != null)
             {
@@ -260,7 +256,27 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
                 typeKind = EdmTypeKind.Collection;
                 return ConvertCollectionValue(collection, ref propertyType, deserializerProvider, readContext);
             }
-            
+
+            ODataUntypedValue untypedValue = oDataValue as ODataUntypedValue;
+            if (untypedValue != null)
+            {
+                Contract.Assert(!String.IsNullOrEmpty(untypedValue.RawValue));
+
+                if (untypedValue.RawValue.StartsWith("[", StringComparison.Ordinal) ||
+                    untypedValue.RawValue.StartsWith("{", StringComparison.Ordinal))
+                {
+                    throw new ODataException("TODO: "/*Error.Format(SRResources.InvalidODataUntypedValue, untypedValue.RawValue)*/);
+                }
+
+                ODataCollectionValue collectionValue = (ODataCollectionValue)ODataUriUtils.ConvertFromUriLiteral(
+                    String.Format(CultureInfo.InvariantCulture, "[{0}]", untypedValue.RawValue), ODataVersion.V4);
+                foreach (object item in collectionValue.Items)
+                {
+                    oDataValue = item;
+                    break;
+                }
+            }
+
             typeKind = EdmTypeKind.Primitive;
             return oDataValue;
         }
@@ -282,30 +298,6 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
                 PropertyInfo property = resource.GetType().GetProperty(propertyName);
                 return property == null ? null : property.PropertyType;
             }
-        }
-
-        private static object ConvertComplexValue(ODataComplexValue complexValue, ref IEdmTypeReference propertyType,
-            ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
-        {
-            IEdmComplexTypeReference edmComplexType;
-            if (propertyType == null)
-            {
-                // open complex property
-                Contract.Assert(!String.IsNullOrEmpty(complexValue.TypeName),
-                    "ODataLib should have verified that open complex value has a type name since we provided metadata.");
-                IEdmModel model = readContext.Model;
-                IEdmType edmType = model.FindType(complexValue.TypeName);
-                Contract.Assert(edmType.TypeKind == EdmTypeKind.Complex, "ODataLib should have verified that complex value has a complex resource type.");
-                edmComplexType = new EdmComplexTypeReference(edmType as IEdmComplexType, isNullable: true);
-                propertyType = edmComplexType;
-            }
-            else
-            {
-                edmComplexType = propertyType.AsComplex();
-            }
-
-            ODataEdmTypeDeserializer deserializer = deserializerProvider.GetEdmTypeDeserializer(edmComplexType);
-            return deserializer.ReadInline(complexValue, propertyType, readContext);
         }
 
         private static bool CanSetProperty(object resource, string propertyName)
@@ -395,7 +387,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
         }
 
         // The same logic from ODL to get the element type name in a collection.
-        private static string GetCollectionElementTypeName(string typeName, bool isNested)
+        internal static string GetCollectionElementTypeName(string typeName, bool isNested)
         {
             const string CollectionTypeQualifier = "Collection";
             int collectionTypeQualifierLength = CollectionTypeQualifier.Length;

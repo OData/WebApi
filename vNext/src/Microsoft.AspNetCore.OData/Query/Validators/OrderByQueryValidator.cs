@@ -1,14 +1,11 @@
-﻿using Microsoft.AspNetCore.OData.Common;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Formatter;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.OData.Core.UriParser.TreeNodeKinds;
-using Microsoft.OData.Core.UriParser.Visitors;
 using Microsoft.OData.Edm;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.OData;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Query.Validators
 {
@@ -17,6 +14,11 @@ namespace Microsoft.AspNetCore.OData.Query.Validators
     /// </summary>
     public class OrderByQueryValidator
     {
+        /// <summary>
+        /// Validates an <see cref="OrderByQueryOption" />.
+        /// </summary>
+        /// <param name="orderByOption">The $orderby query.</param>
+        /// <param name="validationSettings">The validation settings.</param>
         public virtual void Validate(OrderByQueryOption orderByOption, ODataValidationSettings validationSettings)
         {
             if (orderByOption == null)
@@ -139,12 +141,12 @@ namespace Microsoft.AspNetCore.OData.Query.Validators
                 return null;
             }
 
-            public override SingleValueNode Visit(EntityRangeVariableReferenceNode nodeIn)
+            public override SingleValueNode Visit(ResourceRangeVariableReferenceNode nodeIn)
             {
                 return null;
             }
 
-            public override SingleValueNode Visit(NonentityRangeVariableReferenceNode nodeIn)
+            public override SingleValueNode Visit(NonResourceRangeVariableReferenceNode nodeIn)
             {
                 return null;
             }

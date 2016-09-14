@@ -2,24 +2,23 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Query.Expressions;
-using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.AspNetCore.OData.Formatter;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Query.Expressions
 {
-    using Microsoft.AspNetCore.OData.Formatter;
-
     internal static class ExpressionHelpers
     {
-        public static long Count(IQueryable query, Type type)
+        public static Func<long> Count(IQueryable query, Type type)
         {
             MethodInfo countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(type);
-            return (long)countMethod.Invoke(null, new object[] { query });
+            Func<long> func = () => (long)countMethod.Invoke(null, new object[] { query });
+            return func;
         }
 
         public static IQueryable Skip(IQueryable query, int count, Type type, bool parameterize)
@@ -35,6 +34,23 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
         {
             Expression takeQuery = Take(query.Expression, count, type, parameterize);
             return query.Provider.CreateQuery(takeQuery);
+        }
+
+        public static Expression Skip(Expression source, int count, Type type, bool parameterize)
+        {
+            MethodInfo skipMethod;
+            if (typeof(IQueryable).IsAssignableFrom(source.Type))
+            {
+                skipMethod = ExpressionHelperMethods.QueryableSkipGeneric.MakeGenericMethod(type);
+            }
+            else
+            {
+                skipMethod = ExpressionHelperMethods.EnumerableSkipGeneric.MakeGenericMethod(type);
+            }
+
+            Expression skipValueExpression = parameterize ? LinqParameterContainer.Parameterize(typeof(int), count) : Expression.Constant(count);
+            Expression skipQuery = Expression.Call(null, skipMethod, new[] { source, skipValueExpression });
+            return skipQuery;
         }
 
         public static Expression Take(Expression source, int count, Type elementType, bool parameterize)
@@ -55,39 +71,80 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
         }
 
         public static Expression OrderByPropertyExpression(
-            Expression source,
-            string propertyName,
-            Type elementType,
+            Expression source, 
+            string propertyName, 
+            Type elementType, 
             bool alreadyOrdered = false)
         {
             LambdaExpression orderByLambda = GetPropertyAccessLambda(elementType, propertyName);
+            return OrderBy(source, orderByLambda, elementType, OrderByDirection.Ascending, alreadyOrdered);
+        }
+
+        public static Expression OrderBy(
+            Expression source,
+            LambdaExpression orderByLambda,
+            Type elementType,
+            OrderByDirection direction,
+            bool alreadyOrdered = false)
+        {
             Type returnType = orderByLambda.Body.Type;
             MethodInfo orderByMethod;
-
             if (!alreadyOrdered)
             {
                 if (typeof(IQueryable).IsAssignableFrom(source.Type))
                 {
-                    orderByMethod = ExpressionHelperMethods.QueryableOrderByGeneric.MakeGenericMethod(elementType,
-                        returnType);
+                    if (direction == OrderByDirection.Ascending)
+                    {
+                        orderByMethod = ExpressionHelperMethods.QueryableOrderByGeneric.MakeGenericMethod(elementType,
+                            returnType);
+                    }
+                    else
+                    {
+                        orderByMethod = ExpressionHelperMethods.QueryableOrderByDescendingGeneric.MakeGenericMethod(elementType,
+                            returnType);
+                    }
                 }
                 else
                 {
-                    orderByMethod = ExpressionHelperMethods.EnumerableOrderByGeneric.MakeGenericMethod(elementType,
-                        returnType);
+                    if (direction == OrderByDirection.Ascending)
+                    {
+                        orderByMethod = ExpressionHelperMethods.EnumerableOrderByGeneric.MakeGenericMethod(elementType,
+                            returnType);
+                    }
+                    else
+                    {
+                        orderByMethod = ExpressionHelperMethods.EnumerableOrderByDescendingGeneric.MakeGenericMethod(elementType,
+                            returnType);
+                    }
                 }
             }
             else
             {
                 if (typeof(IQueryable).IsAssignableFrom(source.Type))
                 {
-                    orderByMethod = ExpressionHelperMethods.QueryableThenByGeneric.MakeGenericMethod(elementType,
-                        returnType);
+                    if (direction == OrderByDirection.Ascending)
+                    {
+                        orderByMethod = ExpressionHelperMethods.QueryableThenByGeneric.MakeGenericMethod(elementType,
+                            returnType);
+                    }
+                    else
+                    {
+                        orderByMethod = ExpressionHelperMethods.QueryableThenByDescendingGeneric.MakeGenericMethod(elementType,
+                            returnType);
+                    }
                 }
                 else
                 {
-                    orderByMethod = ExpressionHelperMethods.EnumerableThenByGeneric.MakeGenericMethod(elementType,
-                        returnType);
+                    if (direction == OrderByDirection.Ascending)
+                    {
+                        orderByMethod = ExpressionHelperMethods.EnumerableThenByGeneric.MakeGenericMethod(elementType,
+                            returnType);
+                    }
+                    else
+                    {
+                        orderByMethod = ExpressionHelperMethods.EnumerableThenByDescendingGeneric.MakeGenericMethod(elementType,
+                            returnType);
+                    }
                 }
             }
             return Expression.Call(null, orderByMethod, new[] { source, orderByLambda });
@@ -149,6 +206,29 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             return orderedQuery;
         }
 
+        public static IQueryable GroupBy(IQueryable query, Expression expression, Type type, Type wrapperType)
+        {
+            MethodInfo groupByMethod = ExpressionHelperMethods.QueryableGroupByGeneric.MakeGenericMethod(type, wrapperType);
+            return groupByMethod.Invoke(null, new object[] { query, expression }) as IQueryable;
+        }
+
+        public static IQueryable Select(IQueryable query, LambdaExpression expression, Type type)
+        {
+            MethodInfo selectMethod = ExpressionHelperMethods.QueryableSelectGeneric.MakeGenericMethod(type, expression.Body.Type);
+            return selectMethod.Invoke(null, new object[] { query, expression }) as IQueryable;
+        }
+
+        public static IQueryable Aggregate(IQueryable query, object init, LambdaExpression sumLambda, Type type, Type wrapperType)
+        {
+            Type returnType = sumLambda.Body.Type;
+            MethodInfo sumMethod = ExpressionHelperMethods.QueryableAggregateGeneric.MakeGenericMethod(type, returnType);
+            var agg = sumMethod.Invoke(null, new object[] { query, init, sumLambda });
+
+            MethodInfo converterMethod = ExpressionHelperMethods.EntityAsQueryable.MakeGenericMethod(wrapperType);
+
+            return converterMethod.Invoke(null, new object[] { agg }) as IQueryable;
+        }
+
         public static IQueryable Where(IQueryable query, Expression where, Type type)
         {
             MethodInfo whereMethod = ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(type);
@@ -179,7 +259,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             }
         }
 
-        private static LambdaExpression GetPropertyAccessLambda(Type type, string propertyName)
+        public static LambdaExpression GetPropertyAccessLambda(Type type, string propertyName)
         {
             ParameterExpression odataItParameter = Expression.Parameter(type, "$it");
             MemberExpression propertyAccess = Expression.Property(odataItParameter, propertyName);

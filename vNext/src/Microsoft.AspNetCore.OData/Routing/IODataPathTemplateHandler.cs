@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.OData.Routing.Template;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNetCore.OData.Routing

@@ -8,9 +8,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Expressions;
-using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.OData.Edm.Validation;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
@@ -30,7 +27,9 @@ namespace Microsoft.AspNetCore.OData.Builder
             EdmEntityContainer container = new EdmEntityContainer(builder.Namespace, builder.ContainerName);
 
             // add types and sets, building an index on the way.
-            Dictionary<Type, IEdmType> edmTypeMap = model.AddTypes(builder.StructuralTypes, builder.EnumTypes);
+            IEnumerable<IEdmTypeConfiguration> configTypes = builder.StructuralTypes.Concat<IEdmTypeConfiguration>(builder.EnumTypes);
+            EdmTypeMap edmMap = EdmTypeBuilder.GetTypesAndProperties(configTypes);
+            Dictionary<Type, IEdmType> edmTypeMap = model.AddTypes(edmMap);
 
             // Add EntitySets and build the mapping between the EdmEntitySet and the NavigationSourceConfiguration
             NavigationSourceAndAnnotations[] entitySets = container.AddEntitySetAndAnnotations(builder, edmTypeMap);
@@ -42,16 +41,22 @@ namespace Microsoft.AspNetCore.OData.Builder
             IEnumerable<NavigationSourceAndAnnotations> navigationSources = entitySets.Concat(singletons);
 
             // Build the navigation source map
-            IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(builder, edmTypeMap, navigationSources);
+            IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(edmMap, navigationSources);
 
-            // add procedures
-            model.AddProcedures(builder.Procedures, container, edmTypeMap, navigationSourceMap);
+            // Add the core vocabulary annotations
+            model.AddCoreVocabularyAnnotations(entitySets, edmMap);
+
+            // Add the capabilities vocabulary annotations
+            model.AddCapabilitiesVocabularyAnnotations(entitySets, edmMap);
+
+            // add operations
+            model.AddOperations(builder.Operations, container, edmTypeMap, navigationSourceMap);
 
             // finish up
             model.AddElement(container);
 
             // build the map from IEdmEntityType to IEdmFunctionImport
-            model.SetAnnotationValue<BindableProcedureFinder>(model, new BindableProcedureFinder(model));
+            model.SetAnnotationValue<BindableOperationFinder>(model, new BindableOperationFinder(model));
 
             return model;
         }
@@ -103,8 +108,8 @@ namespace Microsoft.AspNetCore.OData.Builder
             }).ToArray();
         }
 
-        private static IDictionary<string, EdmNavigationSource> GetNavigationSourceMap(this EdmModel model, ODataModelBuilder builder,
-            Dictionary<Type, IEdmType> edmTypeMap, IEnumerable<NavigationSourceAndAnnotations> navigationSourceAndAnnotations)
+        private static IDictionary<string, EdmNavigationSource> GetNavigationSourceMap(this EdmModel model, EdmTypeMap edmMap,
+            IEnumerable<NavigationSourceAndAnnotations> navigationSourceAndAnnotations)
         {
             // index the navigation source by name
             Dictionary<string, EdmNavigationSource> edmNavigationSourceMap = navigationSourceAndAnnotations.ToDictionary(e => e.NavigationSource.Name, e => e.NavigationSource);
@@ -113,55 +118,75 @@ namespace Microsoft.AspNetCore.OData.Builder
             foreach (NavigationSourceAndAnnotations navigationSourceAndAnnotation in navigationSourceAndAnnotations)
             {
                 EdmNavigationSource navigationSource = navigationSourceAndAnnotation.NavigationSource;
-                model.SetAnnotationValue<NavigationSourceUrlAnnotation>(navigationSource, navigationSourceAndAnnotation.Url);
+                model.SetAnnotationValue(navigationSource, navigationSourceAndAnnotation.Url);
                 model.SetNavigationSourceLinkBuilder(navigationSource, navigationSourceAndAnnotation.LinkBuilder);
 
-                AddNavigationBindings(navigationSourceAndAnnotation.Configuration, navigationSource, navigationSourceAndAnnotation.LinkBuilder,
-                    builder, edmTypeMap, edmNavigationSourceMap);
+                AddNavigationBindings(edmMap, navigationSourceAndAnnotation.Configuration, navigationSource, navigationSourceAndAnnotation.LinkBuilder,
+                    edmNavigationSourceMap);
             }
 
             return edmNavigationSourceMap;
         }
 
-        private static void AddNavigationBindings(NavigationSourceConfiguration configuration,
+        private static void AddNavigationBindings(EdmTypeMap edmMap,
+            NavigationSourceConfiguration navigationSourceConfiguration,
             EdmNavigationSource navigationSource,
             NavigationSourceLinkBuilderAnnotation linkBuilder,
-            ODataModelBuilder builder,
-            Dictionary<Type, IEdmType> edmTypeMap,
             Dictionary<string, EdmNavigationSource> edmNavigationSourceMap)
         {
-            foreach (EntityTypeConfiguration entityType in builder.ThisAndBaseAndDerivedTypes(configuration.EntityType))
+            foreach (var binding in navigationSourceConfiguration.Bindings)
             {
-                foreach (NavigationPropertyConfiguration navigationProperty in entityType.NavigationProperties)
+                NavigationPropertyConfiguration navigationProperty = binding.NavigationProperty;
+                bool isContained = navigationProperty.ContainsTarget;
+
+                IEdmType edmType = edmMap.EdmTypes[navigationProperty.DeclaringType.ClrType];
+                IEdmStructuredType structuraType = edmType as IEdmStructuredType;
+                IEdmNavigationProperty edmNavigationProperty = structuraType.NavigationProperties()
+                    .Single(np => np.Name == navigationProperty.Name);
+
+                string bindingPath = ConvertBindingPath(edmMap, binding);
+                if (!isContained)
                 {
-                    NavigationPropertyBindingConfiguration binding = configuration.FindBinding(navigationProperty);
-                    bool isContained = navigationProperty.ContainsTarget;
-                    if (binding != null || isContained)
-                    {
-                        EdmEntityType edmEntityType = edmTypeMap[entityType.ClrType] as EdmEntityType;
-                        IEdmNavigationProperty edmNavigationProperty = edmEntityType.NavigationProperties()
-                            .Single(np => np.Name == navigationProperty.Name);
+                    // calculate the binding path
+                    navigationSource.AddNavigationTarget(
+                        edmNavigationProperty,
+                        edmNavigationSourceMap[binding.TargetNavigationSource.Name],
+                        new EdmPathExpression(bindingPath));
+                }
 
-                        if (!isContained)
-                        {
-                            navigationSource.AddNavigationTarget(
-                                edmNavigationProperty,
-                                edmNavigationSourceMap[binding.TargetNavigationSource.Name]);
-                        }
-
-                        NavigationLinkBuilder linkBuilderFunc = configuration.GetNavigationPropertyLink(navigationProperty);
-                        if (linkBuilderFunc != null)
-                        {
-                            linkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, linkBuilderFunc);
-                        }
-                    }
+                NavigationLinkBuilder linkBuilderFunc = navigationSourceConfiguration.GetNavigationPropertyLink(navigationProperty);
+                if (linkBuilderFunc != null)
+                {
+                    linkBuilder.AddNavigationPropertyLinkBuilder(edmNavigationProperty, linkBuilderFunc);
                 }
             }
         }
 
-        private static void AddProcedureParameters(EdmOperation operation, ProcedureConfiguration procedure, Dictionary<Type, IEdmType> edmTypeMap)
+        private static string ConvertBindingPath(EdmTypeMap edmMap, NavigationPropertyBindingConfiguration binding)
         {
-            foreach (ParameterConfiguration parameter in procedure.Parameters)
+            IList<string> bindings = new List<string>();
+            foreach (var bindingInfo in binding.Path)
+            {
+                Type typeCast = bindingInfo as Type;
+                PropertyInfo propertyInfo = bindingInfo as PropertyInfo;
+
+                if (typeCast != null)
+                {
+                    IEdmType edmType = edmMap.EdmTypes[typeCast];
+                    bindings.Add(edmType.FullTypeName());
+                }
+                else if (propertyInfo != null)
+                {
+                    bindings.Add(edmMap.EdmProperties[propertyInfo].Name);
+                }
+            }
+
+            return String.Join("/", bindings);
+        }
+
+        private static void AddOperationParameters(EdmOperation operation, OperationConfiguration operationConfiguration, Dictionary<Type, IEdmType> edmTypeMap)
+        {
+            foreach (ParameterConfiguration parameter in operationConfiguration.Parameters)
             {
                 bool isParameterOptional = parameter.OptionalParameter;
                 IEdmTypeReference parameterTypeReference = GetEdmTypeReference(edmTypeMap, parameter.TypeConfiguration, nullable: isParameterOptional);
@@ -170,96 +195,118 @@ namespace Microsoft.AspNetCore.OData.Builder
             }
         }
 
-        private static void AddProcedureLinkBuilder(IEdmModel model, IEdmOperation operation, ProcedureConfiguration procedure)
+        private static void AddOperationLinkBuilder(IEdmModel model, IEdmOperation operation, OperationConfiguration operationConfiguration)
         {
-            if (procedure.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity)
+            ActionConfiguration actionConfiguration = operationConfiguration as ActionConfiguration;
+            IEdmAction action = operation as IEdmAction;
+            FunctionConfiguration functionConfiguration = operationConfiguration as FunctionConfiguration;
+            IEdmFunction function = operation as IEdmFunction;
+            if (operationConfiguration.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Entity)
             {
-                ActionConfiguration actionConfiguration = procedure as ActionConfiguration;
-                IEdmAction action = operation as IEdmAction;
-                FunctionConfiguration functionConfiguration = procedure as FunctionConfiguration;
-                IEdmFunction function = operation as IEdmFunction;
                 if (actionConfiguration != null && actionConfiguration.GetActionLink() != null && action != null)
                 {
-                    model.SetActionLinkBuilder(
+                    model.SetOperationLinkBuilder(
                         action,
-                        new ActionLinkBuilder(actionConfiguration.GetActionLink(), actionConfiguration.FollowsConventions));
+                        new OperationLinkBuilder(actionConfiguration.GetActionLink(), actionConfiguration.FollowsConventions));
                 }
                 else if (functionConfiguration != null && functionConfiguration.GetFunctionLink() != null && function != null)
                 {
-                    model.SetFunctionLinkBuilder(
+                    model.SetOperationLinkBuilder(
                         function,
-                        new FunctionLinkBuilder(functionConfiguration.GetFunctionLink(), functionConfiguration.FollowsConventions));
+                        new OperationLinkBuilder(functionConfiguration.GetFunctionLink(), functionConfiguration.FollowsConventions));
+                }
+            }
+            else if (operationConfiguration.BindingParameter.TypeConfiguration.Kind == EdmTypeKind.Collection)
+            {
+                CollectionTypeConfiguration collectionTypeConfiguration =
+                    (CollectionTypeConfiguration)operationConfiguration.BindingParameter.TypeConfiguration;
+
+                if (collectionTypeConfiguration.ElementType.Kind == EdmTypeKind.Entity)
+                {
+                    if (actionConfiguration != null && actionConfiguration.GetFeedActionLink() != null && action != null)
+                    {
+                        model.SetOperationLinkBuilder(
+                            action,
+                            new OperationLinkBuilder(actionConfiguration.GetFeedActionLink(), actionConfiguration.FollowsConventions));
+                    }
+                    else if (functionConfiguration != null && functionConfiguration.GetFeedFunctionLink() != null && function != null)
+                    {
+                        model.SetOperationLinkBuilder(
+                            function,
+                            new OperationLinkBuilder(functionConfiguration.GetFeedFunctionLink(), functionConfiguration.FollowsConventions));
+                    }
                 }
             }
         }
 
-        private static void ValidateProcedureEntitySetPath(IEdmModel model, IEdmOperationImport operationImport, ProcedureConfiguration procedure)
+        private static void ValidateOperationEntitySetPath(IEdmModel model, IEdmOperationImport operationImport, OperationConfiguration operationConfiguration)
         {
-            IEdmOperationParameter procedureParameter;
-            IEnumerable<IEdmNavigationProperty> navPath;
+            IEdmOperationParameter operationParameter;
+            Dictionary<IEdmNavigationProperty, IEdmPathExpression> relativeNavigations;
             IEnumerable<EdmError> edmErrors;
-            if (procedure.EntitySetPath != null && !operationImport.TryGetRelativeEntitySetPath(model, out procedureParameter, out navPath, out edmErrors))
+            if (operationConfiguration.EntitySetPath != null && !operationImport.TryGetRelativeEntitySetPath(model, out operationParameter, out relativeNavigations, out edmErrors))
             {
-                throw Error.InvalidOperation(SRResources.ProcedureHasInvalidEntitySetPath, String.Join("/", procedure.EntitySetPath), procedure.FullyQualifiedName);
+                //throw Error.InvalidOperation(SRResources.OperationHasInvalidEntitySetPath, String.Join("/", operationConfiguration.EntitySetPath), operationConfiguration.FullyQualifiedName);
+                throw Error.InvalidOperation("TODO: ");
             }
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", 
             Justification = "The majority of types referenced by this method are EdmLib types this method needs to know about to operate correctly")]
-        private static void AddProcedures(this EdmModel model, IEnumerable<ProcedureConfiguration> configurations, EdmEntityContainer container,
+        private static void AddOperations(this EdmModel model, IEnumerable<OperationConfiguration> configurations, EdmEntityContainer container,
             Dictionary<Type, IEdmType> edmTypeMap, IDictionary<string, EdmNavigationSource> edmNavigationSourceMap)
         {
             Contract.Assert(model != null, "Model can't be null");
 
             ValidateActionOverload(configurations.OfType<ActionConfiguration>());
 
-            foreach (ProcedureConfiguration procedure in configurations)
+            foreach (OperationConfiguration operationConfiguration in configurations)
             {
                 IEdmTypeReference returnReference = GetEdmTypeReference(edmTypeMap,
-                    procedure.ReturnType,
-                    procedure.ReturnType != null && procedure.OptionalReturn);
-                IEdmExpression expression = GetEdmEntitySetExpression(edmNavigationSourceMap, procedure);
-                IEdmPathExpression pathExpression = procedure.EntitySetPath != null
-                    ? new EdmPathExpression(procedure.EntitySetPath)
+                    operationConfiguration.ReturnType,
+                    operationConfiguration.ReturnType != null && operationConfiguration.OptionalReturn);
+                IEdmExpression expression = GetEdmEntitySetExpression(edmNavigationSourceMap, operationConfiguration);
+                IEdmPathExpression pathExpression = operationConfiguration.EntitySetPath != null
+                    ? new EdmPathExpression(operationConfiguration.EntitySetPath)
                     : null;
 
                 EdmOperationImport operationImport;
 
-                switch (procedure.Kind)
+                switch (operationConfiguration.Kind)
                 {
-                    case ProcedureKind.Action:
-                        operationImport = CreateActionImport(procedure, container, returnReference, expression, pathExpression);
+                    case OperationKind.Action:
+                        operationImport = CreateActionImport(operationConfiguration, container, returnReference, expression, pathExpression);
                         break;
-                    case ProcedureKind.Function:
-                        operationImport = CreateFunctionImport((FunctionConfiguration)procedure, container, returnReference, expression, pathExpression);
+                    case OperationKind.Function:
+                        operationImport = CreateFunctionImport((FunctionConfiguration)operationConfiguration, container, returnReference, expression, pathExpression);
                         break;
-                    case ProcedureKind.ServiceOperation:
+                    case OperationKind.ServiceOperation:
                         Contract.Assert(false, "ServiceOperations are not supported.");
                         goto default;
                     default:
-                        Contract.Assert(false, "Unsupported ProcedureKind");
+                        Contract.Assert(false, "Unsupported OperationKind");
                         return;
                 }
 
                 EdmOperation operation = (EdmOperation)operationImport.Operation;
-                if (procedure.IsBindable && procedure.Title != null & procedure.Title != procedure.Name)
+                if (operationConfiguration.IsBindable && operationConfiguration.Title != null && operationConfiguration.Title != operationConfiguration.Name)
                 {
-                    model.SetOperationTitleAnnotation(operation, new OperationTitleAnnotation(procedure.Title));
+                    model.SetOperationTitleAnnotation(operation, new OperationTitleAnnotation(operationConfiguration.Title));
                 }
 
-                if (procedure.IsBindable &&
-                    procedure.NavigationSource != null &&
-                    edmNavigationSourceMap.ContainsKey(procedure.NavigationSource.Name))
+                if (operationConfiguration.IsBindable &&
+                    operationConfiguration.NavigationSource != null &&
+                    edmNavigationSourceMap.ContainsKey(operationConfiguration.NavigationSource.Name))
                 {
-                    model.SetAnnotationValue(operation, new ReturnedEntitySetAnnotation(procedure.NavigationSource.Name));
+                    model.SetAnnotationValue(operation, new ReturnedEntitySetAnnotation(operationConfiguration.NavigationSource.Name));
                 }
 
-                AddProcedureParameters(operation, procedure, edmTypeMap);
+                AddOperationParameters(operation, operationConfiguration, edmTypeMap);
 
-                if (procedure.IsBindable)
+                if (operationConfiguration.IsBindable)
                 {
-                    AddProcedureLinkBuilder(model, operation, procedure);
-                    ValidateProcedureEntitySetPath(model, operationImport, procedure);
+                    AddOperationLinkBuilder(model, operation, operationConfiguration);
+                    ValidateOperationEntitySetPath(model, operationImport, operationConfiguration);
                 }
                 else
                 {
@@ -271,19 +318,19 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         private static EdmOperationImport CreateActionImport(
-            ProcedureConfiguration procedure,
+            OperationConfiguration operationConfiguration,
             EdmEntityContainer container,
             IEdmTypeReference returnReference,
             IEdmExpression expression,
             IEdmPathExpression pathExpression)
         {
             EdmAction operation = new EdmAction(
-                container.Namespace,
-                procedure.Name,
+                operationConfiguration.Namespace,
+                operationConfiguration.Name,
                 returnReference,
-                procedure.IsBindable,
+                operationConfiguration.IsBindable,
                 pathExpression);
-            return new EdmActionImport(container, procedure.Name, operation, expression);
+            return new EdmActionImport(container, operationConfiguration.Name, operation, expression);
         }
 
         private static EdmOperationImport CreateFunctionImport(
@@ -294,7 +341,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             IEdmPathExpression pathExpression)
         {
             EdmFunction operation = new EdmFunction(
-                    container.Namespace,
+                    function.Namespace,
                     function.Name,
                     returnReference,
                     function.IsBindable,
@@ -329,7 +376,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                 }
             }
 
-            // 2. validate each bound overload action specifies a diffrent binding parameter type
+            // 2. validate each bound overload action specifies a different binding parameter type
             ActionConfiguration[] boundActions = configurations.Where(a => a.IsBindable).ToArray();
             if (boundActions.Length > 0)
             {
@@ -361,13 +408,9 @@ namespace Microsoft.AspNetCore.OData.Builder
             }
         }
 
-        private static Dictionary<Type, IEdmType> AddTypes(this EdmModel model, IEnumerable<StructuralTypeConfiguration> types,
-            IEnumerable<EnumTypeConfiguration> enumTypes)
+        private static Dictionary<Type, IEdmType> AddTypes(this EdmModel model, EdmTypeMap edmTypeMap)
         {
-            IEnumerable<IEdmTypeConfiguration> configTypes = types.Concat<IEdmTypeConfiguration>(enumTypes);
-
             // build types
-            EdmTypeMap edmTypeMap = EdmTypeBuilder.GetTypesAndProperties(configTypes);
             Dictionary<Type, IEdmType> edmTypes = edmTypeMap.EdmTypes;
 
             // Add an annotate types
@@ -471,27 +514,252 @@ namespace Microsoft.AspNetCore.OData.Builder
             }
         }
 
-        private static IEdmExpression GetEdmEntitySetExpression(IDictionary<string, EdmNavigationSource> navigationSources, ProcedureConfiguration procedure)
+        private static void AddCoreVocabularyAnnotations(this EdmModel model, NavigationSourceAndAnnotations[] entitySets, EdmTypeMap edmTypeMap)
         {
-            if (procedure.NavigationSource != null)
+            Contract.Assert(model != null);
+            Contract.Assert(edmTypeMap != null);
+
+            if (entitySets == null)
+            {
+                return;
+            }
+
+            foreach (NavigationSourceAndAnnotations source in entitySets)
+            {
+                IEdmEntitySet entitySet = source.NavigationSource as IEdmEntitySet;
+                if (entitySet == null)
+                {
+                    continue;
+                }
+
+                EntitySetConfiguration entitySetConfig = source.Configuration as EntitySetConfiguration;
+                if (entitySetConfig == null)
+                {
+                    continue;
+                }
+
+                model.AddOptimisticConcurrencyAnnotation(entitySet, entitySetConfig, edmTypeMap);
+            }
+        }
+
+        private static void AddOptimisticConcurrencyAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<StructuralPropertyConfiguration> concurrencyPropertyies =
+                entityTypeConfig.Properties.OfType<StructuralPropertyConfiguration>().Where(property => property.ConcurrencyToken);
+
+            IList<IEdmStructuralProperty> edmProperties = new List<IEdmStructuralProperty>();
+
+            foreach (StructuralPropertyConfiguration property in concurrencyPropertyies)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    var item = value as IEdmStructuralProperty;
+                    if (item != null)
+                    {
+                        edmProperties.Add(item);
+                    }
+                }
+            }
+
+            if (edmProperties.Any())
+            {
+                model.SetOptimisticConcurrencyAnnotation(target, edmProperties);
+            }
+        }
+
+        private static void AddCapabilitiesVocabularyAnnotations(this EdmModel model, NavigationSourceAndAnnotations[] entitySets, EdmTypeMap edmTypeMap)
+        {
+            Contract.Assert(model != null);
+            Contract.Assert(edmTypeMap != null);
+
+            if (entitySets == null)
+            {
+                return;
+            }
+
+            foreach (NavigationSourceAndAnnotations source in entitySets)
+            {
+                IEdmEntitySet entitySet = source.NavigationSource as IEdmEntitySet;
+                if (entitySet == null)
+                {
+                    continue;
+                }
+
+                EntitySetConfiguration entitySetConfig = source.Configuration as EntitySetConfiguration;
+                if (entitySetConfig == null)
+                {
+                    continue;
+                }
+
+                model.AddCountRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddNavigationRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddFilterRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddSortRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddExpandRestrictionsAnnotation(entitySet, entitySetConfig, edmTypeMap);
+            }
+        }
+
+        private static void AddCountRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<PropertyConfiguration> notCountableProperties = entityTypeConfig.Properties.Where(property => property.NotCountable);
+
+            IList<IEdmProperty> nonCountableProperties = new List<IEdmProperty>();
+            IList<IEdmNavigationProperty> nonCountableNavigationProperties = new List<IEdmNavigationProperty>();
+            foreach (PropertyConfiguration property in notCountableProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null && value.Type.TypeKind() == EdmTypeKind.Collection)
+                    {
+                        if (value.PropertyKind == EdmPropertyKind.Navigation)
+                        {
+                            nonCountableNavigationProperties.Add((IEdmNavigationProperty)value);
+                        }
+                        else
+                        {
+                            nonCountableProperties.Add(value);
+                        }
+                    }
+                }
+            }
+
+            if (nonCountableProperties.Any() || nonCountableNavigationProperties.Any())
+            {
+                model.SetCountRestrictionsAnnotation(target, true, nonCountableProperties, nonCountableNavigationProperties);
+            }
+        }
+
+        private static void AddNavigationRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<PropertyConfiguration> notNavigableProperties = entityTypeConfig.Properties.Where(property => property.NotNavigable);
+
+            IList<Tuple<IEdmNavigationProperty, CapabilitiesNavigationType>> properties =
+                new List<Tuple<IEdmNavigationProperty, CapabilitiesNavigationType>>();
+            foreach (PropertyConfiguration property in notNavigableProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null && value.PropertyKind == EdmPropertyKind.Navigation)
+                    {
+                        properties.Add(new Tuple<IEdmNavigationProperty, CapabilitiesNavigationType>(
+                            (IEdmNavigationProperty)value, CapabilitiesNavigationType.Recursive));
+                    }
+                }
+            }
+
+            if (properties.Any())
+            {
+                model.SetNavigationRestrictionsAnnotation(target, CapabilitiesNavigationType.Recursive, properties);
+            }
+        }
+
+        private static void AddFilterRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+
+            IEnumerable<PropertyConfiguration> notFilterProperties = entityTypeConfig.Properties.Where(property => property.NonFilterable);
+
+            IList<IEdmProperty> properties = new List<IEdmProperty>();
+            foreach (PropertyConfiguration property in notFilterProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null)
+                    {
+                        properties.Add(value);
+                    }
+                }
+            }
+
+            if (properties.Any())
+            {
+                model.SetFilterRestrictionsAnnotation(target, true, true, null, properties);
+            }
+        }
+
+        private static void AddSortRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+            IEnumerable<PropertyConfiguration> nonSortableProperties = entityTypeConfig.Properties.Where(property => property.Unsortable);
+            IList<IEdmProperty> properties = new List<IEdmProperty>();
+            foreach (PropertyConfiguration property in nonSortableProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null)
+                    {
+                        properties.Add(value);
+                    }
+                }
+            }
+
+            if (properties.Any())
+            {
+                model.SetSortRestrictionsAnnotation(target, true, null, null, properties);
+            }
+        }
+
+        private static void AddExpandRestrictionsAnnotation(this EdmModel model, IEdmEntitySet target,
+            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        {
+            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+            IEnumerable<PropertyConfiguration> nonExpandableProperties = entityTypeConfig.Properties.Where(property => property.NotExpandable);     
+            IList<IEdmNavigationProperty> properties = new List<IEdmNavigationProperty>();
+            foreach (PropertyConfiguration property in nonExpandableProperties)
+            {
+                IEdmProperty value;
+                if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
+                {
+                    if (value != null && value.PropertyKind == EdmPropertyKind.Navigation)
+                    {
+                        properties.Add((IEdmNavigationProperty)value);
+                    }
+                }
+            }
+
+            if (properties.Any())
+            {
+                model.SetExpandRestrictionsAnnotation(target, true, properties);
+            }
+        }
+
+        private static IEdmExpression GetEdmEntitySetExpression(IDictionary<string, EdmNavigationSource> navigationSources, OperationConfiguration operationConfiguration)
+        {
+            if (operationConfiguration.NavigationSource != null)
             {
                 EdmNavigationSource navigationSource;
-                if (navigationSources.TryGetValue(procedure.NavigationSource.Name, out navigationSource))
+                if (navigationSources.TryGetValue(operationConfiguration.NavigationSource.Name, out navigationSource))
                 {
                     EdmEntitySet entitySet = navigationSource as EdmEntitySet;
                     if (entitySet != null)
                     {
-                        return new EdmEntitySetReferenceExpression(entitySet);
+                        return new EdmPathExpression(entitySet.Name);
                     }
                 }
                 else
                 {
-                    throw Error.InvalidOperation(SRResources.EntitySetNotFoundForName, procedure.NavigationSource.Name);
+                    throw Error.InvalidOperation(SRResources.EntitySetNotFoundForName, operationConfiguration.NavigationSource.Name);
                 }
             }
-            else if (procedure.EntitySetPath != null)
+            else if (operationConfiguration.EntitySetPath != null)
             {
-                return new EdmPathExpression(procedure.EntitySetPath);
+                return new EdmPathExpression(operationConfiguration.EntitySetPath);
             }
 
             return null;
@@ -581,15 +849,20 @@ namespace Microsoft.AspNetCore.OData.Builder
 
         internal static IEnumerable<IEdmAction> GetAvailableActions(this IEdmModel model, IEdmEntityType entityType)
         {
-            return model.GetAvailableProcedures(entityType).OfType<IEdmAction>();
+            return model.GetAvailableOperations(entityType, false).OfType<IEdmAction>();
         }
 
         internal static IEnumerable<IEdmFunction> GetAvailableFunctions(this IEdmModel model, IEdmEntityType entityType)
         {
-            return model.GetAvailableProcedures(entityType).OfType<IEdmFunction>();
+            return model.GetAvailableOperations(entityType, false).OfType<IEdmFunction>();
         }
 
-        internal static IEnumerable<IEdmOperation> GetAvailableProcedures(this IEdmModel model, IEdmEntityType entityType)
+        internal static IEnumerable<IEdmOperation> GetAvailableOperationsBoundToCollection(this IEdmModel model, IEdmEntityType entityType)
+        {
+            return model.GetAvailableOperations(entityType, true);
+        }
+
+        internal static IEnumerable<IEdmOperation> GetAvailableOperations(this IEdmModel model, IEdmEntityType entityType, bool boundToCollection = false)
         {
             if (model == null)
             {
@@ -601,14 +874,21 @@ namespace Microsoft.AspNetCore.OData.Builder
                 throw Error.ArgumentNull("entityType");
             }
 
-            BindableProcedureFinder annotation = model.GetAnnotationValue<BindableProcedureFinder>(model);
+            BindableOperationFinder annotation = model.GetAnnotationValue<BindableOperationFinder>(model);
             if (annotation == null)
             {
-                annotation = new BindableProcedureFinder(model);
+                annotation = new BindableOperationFinder(model);
                 model.SetAnnotationValue(model, annotation);
             }
 
-            return annotation.FindProcedures(entityType);
+            if (boundToCollection)
+            {
+                return annotation.FindOperationsBoundToCollection(entityType);
+            }
+            else
+            {
+                return annotation.FindOperations(entityType);
+            }
         }
     }
 }

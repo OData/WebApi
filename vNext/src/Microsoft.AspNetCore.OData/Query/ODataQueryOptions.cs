@@ -7,9 +7,11 @@ using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
 using System.Globalization;
+using Microsoft.AspNetCore.OData.Query.Expressions;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Query
 {

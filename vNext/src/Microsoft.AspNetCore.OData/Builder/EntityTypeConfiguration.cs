@@ -49,15 +49,9 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         /// <summary>
-        /// Gets the collection of <see cref="NavigationPropertyConfiguration"/> of this entity type.
+        /// Gets or sets a value indicating whether this type is a media type.
         /// </summary>
-        public virtual IEnumerable<NavigationPropertyConfiguration> NavigationProperties
-        {
-            get
-            {
-                return ExplicitProperties.Values.OfType<NavigationPropertyConfiguration>();
-            }
-        }
+        public virtual bool HasStream { get; set; }
 
         /// <summary>
         /// Gets the collection of keys for this entity type.
@@ -100,6 +94,16 @@ namespace Microsoft.AspNetCore.OData.Builder
         public virtual EntityTypeConfiguration Abstract()
         {
             AbstractImpl();
+            return this;
+        }
+
+        /// <summary>
+        /// Marks this entity type as media type.
+        /// </summary>
+        /// <returns>Returns itself so that multiple calls can be chained.</returns>
+        public virtual EntityTypeConfiguration MediaType()
+        {
+            HasStream = true;
             return this;
         }
 
@@ -205,78 +209,6 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         /// <summary>
-        /// Adds a non-contained EDM navigation property to this entity type.
-        /// </summary>
-        /// <param name="navigationProperty">The backing CLR property.</param>
-        /// <param name="multiplicity">The <see cref="EdmMultiplicity"/> of the navigation property.</param>
-        /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
-        public virtual NavigationPropertyConfiguration AddNavigationProperty(PropertyInfo navigationProperty, EdmMultiplicity multiplicity)
-        {
-            return AddNavigationProperty(navigationProperty, multiplicity, containsTarget: false);
-        }
-
-        /// <summary>
-        /// Adds a contained EDM navigation property to this entity type.
-        /// </summary>
-        /// <param name="navigationProperty">The backing CLR property.</param>
-        /// <param name="multiplicity">The <see cref="EdmMultiplicity"/> of the navigation property.</param>
-        /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
-        public virtual NavigationPropertyConfiguration AddContainedNavigationProperty(PropertyInfo navigationProperty, EdmMultiplicity multiplicity)
-        {
-            return AddNavigationProperty(navigationProperty, multiplicity, containsTarget: true);
-        }
-
-        private NavigationPropertyConfiguration AddNavigationProperty(PropertyInfo navigationProperty, EdmMultiplicity multiplicity, bool containsTarget)
-        {
-            if (navigationProperty == null)
-            {
-                throw Error.ArgumentNull("navigationProperty");
-            }
-
-            if (!navigationProperty.DeclaringType.IsAssignableFrom(ClrType))
-            {
-                throw Error.Argument("navigationProperty", SRResources.PropertyDoesNotBelongToType, navigationProperty.Name, ClrType.FullName);
-            }
-
-            ValidatePropertyNotAlreadyDefinedInBaseTypes(navigationProperty);
-            ValidatePropertyNotAlreadyDefinedInDerivedTypes(navigationProperty);
-
-            PropertyConfiguration propertyConfig;
-            NavigationPropertyConfiguration navigationPropertyConfig;
-
-            if (ExplicitProperties.ContainsKey(navigationProperty))
-            {
-                propertyConfig = ExplicitProperties[navigationProperty];
-                if (propertyConfig.Kind != PropertyKind.Navigation)
-                {
-                    throw Error.Argument("navigationProperty", SRResources.MustBeNavigationProperty, navigationProperty.Name, ClrType.FullName);
-                }
-
-                navigationPropertyConfig = propertyConfig as NavigationPropertyConfiguration;
-                if (navigationPropertyConfig.Multiplicity != multiplicity)
-                {
-                    throw Error.Argument("navigationProperty", SRResources.MustHaveMatchingMultiplicity, navigationProperty.Name, multiplicity);
-                }
-            }
-            else
-            {
-                navigationPropertyConfig = new NavigationPropertyConfiguration(
-                    navigationProperty,
-                    multiplicity,
-                    this);
-                if (containsTarget)
-                {
-                    navigationPropertyConfig = navigationPropertyConfig.Contained();
-                }
-
-                ExplicitProperties[navigationProperty] = navigationPropertyConfig;
-                // make sure the related type is configured
-                ModelBuilder.AddEntityType(navigationPropertyConfig.RelatedClrType);
-            }
-            return navigationPropertyConfig;
-        }
-
-        /// <summary>
         /// Removes the property from the entity.
         /// </summary>
         /// <param name="propertyInfo">The <see cref="PropertyInfo"/> of the property to be removed.</param>
@@ -284,6 +216,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         {
             base.RemoveProperty(propertyInfo);
             _keys.RemoveAll(p => p.PropertyInfo == propertyInfo);
+            _enumKeys.RemoveAll(p => p.PropertyInfo == propertyInfo);
         }
     }
 }

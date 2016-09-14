@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.OData.Core.UriParser.Metadata;
-using Microsoft.OData.Core.UriParser.Semantic;
-using Microsoft.OData.Core.UriParser.TreeNodeKinds;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData
 {

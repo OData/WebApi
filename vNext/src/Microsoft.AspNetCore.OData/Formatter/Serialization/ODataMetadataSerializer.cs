@@ -2,13 +2,13 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using Microsoft.OData.Core;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.OData;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
-    /// Represents an <see cref="Microsoft.OData.Core.ODataSerializer"/> for serializing $metadata. 
+    /// Represents an <see cref="ODataSerializer"/> for serializing $metadata. 
     /// </summary>
     public class ODataMetadataSerializer : ODataSerializer
     {

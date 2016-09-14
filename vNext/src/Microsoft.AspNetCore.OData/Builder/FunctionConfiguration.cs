@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.OData.Builder
     /// FunctionConfigurations are exposed via $metadata as a <Function/> element for bound function and <FunctionImport/> element for unbound function.
     /// </remarks>
     /// </summary>
-    public class FunctionConfiguration : ProcedureConfiguration
+    public class FunctionConfiguration : OperationConfiguration
     {
         /// <summary>
         /// Initializes a new instance of <see cref="FunctionConfiguration" /> class.
@@ -28,9 +28,9 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         /// <inheritdoc />
-        public override ProcedureKind Kind
+        public override OperationKind Kind
         {
-            get { return ProcedureKind.Function; }
+            get { return OperationKind.Function; }
         }
 
         /// <inheritdoc />
@@ -58,7 +58,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         public bool SupportedInOrderBy { get; set; }
 
         /// <summary>
-        /// Gets/Set a value indicating whether the procedure is included in service document or not.
+        /// Gets/Set a value indicating whether the operation is included in service document or not.
         /// Meaningful only for function imports; ignore for bound functions.
         /// </summary>
         public bool IncludeInServiceDocument { get; set; }
@@ -66,7 +66,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <summary>
         /// Register a factory that creates functions links.
         /// </summary>
-        public FunctionConfiguration HasFunctionLink(Func<EntityInstanceContext, Uri> functionLinkFactory, bool followsConventions)
+        public FunctionConfiguration HasFunctionLink(Func<ResourceContext, Uri> functionLinkFactory, bool followsConventions)
         {
             if (functionLinkFactory == null)
             {
@@ -75,9 +75,10 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             if (!IsBindable || BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Entity)
             {
-                throw Error.InvalidOperation(SRResources.HasActionLinkRequiresBindToEntity, Name);
+                throw Error.InvalidOperation("TODO: "/*SRResources.HasFunctionLinkRequiresBindToEntity, Name*/);
             }
-            LinkFactory = functionLinkFactory;
+
+            OperationLinkBuilder = new OperationLinkBuilder(functionLinkFactory, followsConventions);
             FollowsConventions = followsConventions;
             return this;
         }
@@ -86,9 +87,50 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// Retrieves the currently registered function link factory.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
-        public Func<EntityInstanceContext, Uri> GetFunctionLink()
+        public Func<ResourceContext, Uri> GetFunctionLink()
         {
-            return LinkFactory;
+            if (OperationLinkBuilder == null)
+            {
+                return null;
+            }
+
+            return OperationLinkBuilder.LinkFactory;
+        }
+
+        /// <summary>
+        /// Register a factory that creates feed functions links.
+        /// </summary>
+        public FunctionConfiguration HasFeedFunctionLink(Func<ResourceSetContext, Uri> functionLinkFactory, bool followsConventions)
+        {
+            if (functionLinkFactory == null)
+            {
+                throw new ArgumentNullException("functionLinkFactory");
+            }
+
+            if (!IsBindable ||
+                BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Collection ||
+                ((CollectionTypeConfiguration)BindingParameter.TypeConfiguration).ElementType.Kind != EdmTypeKind.Entity)
+            {
+                throw Error.InvalidOperation("TODO: "/*SRResources.HasFunctionLinkRequiresBindToCollectionOfEntity, Name*/);
+            }
+
+            OperationLinkBuilder = new OperationLinkBuilder(functionLinkFactory, followsConventions);
+            FollowsConventions = followsConventions;
+            return this;
+        }
+
+        /// <summary>
+        /// Retrieves the currently registered feed function link factory.
+        /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
+        public Func<ResourceSetContext, Uri> GetFeedFunctionLink()
+        {
+            if (OperationLinkBuilder == null)
+            {
+                return null;
+            }
+
+            return OperationLinkBuilder.FeedLinkFactory;
         }
 
         /// <summary>
@@ -119,11 +161,25 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// Established the return type of the Function.
         /// <remarks>Used when the return type is a single Primitive or ComplexType.</remarks>
         /// </summary>
+        public FunctionConfiguration Returns(Type clrReturnType)
+        {
+            if (clrReturnType == null)
+            {
+                throw Error.ArgumentNull("clrReturnType");
+            }
+
+            ReturnsImplementation(clrReturnType);
+            return this;
+        }
+
+        /// <summary>
+        /// Established the return type of the Function.
+        /// <remarks>Used when the return type is a single Primitive or ComplexType.</remarks>
+        /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
         public FunctionConfiguration Returns<TReturnType>()
         {
-            ReturnsImplementation<TReturnType>();
-            return this;
+            return this.Returns(typeof(TReturnType));
         }
 
         /// <summary>

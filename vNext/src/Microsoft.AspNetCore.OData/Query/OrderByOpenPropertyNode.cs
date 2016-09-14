@@ -2,8 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.OData.Common;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Query
 {
@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.OData.Query
         /// </summary>
         /// <param name="orderByClause">The order by clause for this open property.</param>
         public OrderByOpenPropertyNode(OrderByClause orderByClause)
-            : base(orderByClause.Direction)
+            : base(orderByClause)
         {
             if (orderByClause == null)
             {
@@ -31,6 +31,7 @@ namespace Microsoft.AspNetCore.OData.Query
             {
                 throw new ODataException(SRResources.OrderByClauseNotSupported);
             }
+
             PropertyName = openPropertyExpression.Name;
         }
 

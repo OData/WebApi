@@ -55,8 +55,8 @@ namespace Microsoft.AspNetCore.OData.Builder
             // Add navigation link builders for all navigation properties of entity.
             foreach (IEdmNavigationProperty navigationProperty in elementType.NavigationProperties())
             {
-                Func<EntityInstanceContext, IEdmNavigationProperty, Uri> navigationLinkFactory =
-                    (entityInstanceContext, navProperty) => entityInstanceContext.GenerateNavigationPropertyLink(navProperty, includeCast: false);
+                Func<ResourceContext, IEdmNavigationProperty, Uri> navigationLinkFactory =
+                    (resourceContext, navProperty) => resourceContext.GenerateNavigationPropertyLink(navProperty, includeCast: false);
                 AddNavigationPropertyLinkBuilder(navigationProperty, new NavigationLinkBuilder(navigationLinkFactory, followsConventions: true));
             }
 
@@ -67,14 +67,14 @@ namespace Microsoft.AspNetCore.OData.Builder
                 foreach (IEdmNavigationProperty navigationProperty in derivedEntityType.DeclaredNavigationProperties())
                 {
                     derivedTypesDefineNavigationProperty = true;
-                    Func<EntityInstanceContext, IEdmNavigationProperty, Uri> navigationLinkFactory =
-                    (entityInstanceContext, navProperty) => entityInstanceContext.GenerateNavigationPropertyLink(navProperty, includeCast: true);
+                    Func<ResourceContext, IEdmNavigationProperty, Uri> navigationLinkFactory =
+                    (resourceContext, navProperty) => resourceContext.GenerateNavigationPropertyLink(navProperty, includeCast: true);
                     AddNavigationPropertyLinkBuilder(navigationProperty, new NavigationLinkBuilder(navigationLinkFactory, followsConventions: true));
                 }
             }
 
-            Func<EntityInstanceContext, Uri> selfLinkFactory =
-                (entityInstanceContext) => entityInstanceContext.GenerateSelfLink(includeCast: derivedTypesDefineNavigationProperty);
+            Func<ResourceContext, Uri> selfLinkFactory =
+                (resourceContext) => resourceContext.GenerateSelfLink(includeCast: derivedTypesDefineNavigationProperty);
             _idLinkBuilder = new SelfLinkBuilder<Uri>(selfLinkFactory, followsConventions: true);
         }
 
@@ -125,9 +125,9 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         /// <summary>
-        /// Constructs the <see cref="EntitySelfLinks" /> for a particular <see cref="EntityInstanceContext" /> and <see cref="ODataMetadataLevel" />.
+        /// Constructs the <see cref="EntitySelfLinks" /> for a particular <see cref="ResourceContext" /> and <see cref="ODataMetadataLevel" />.
         /// </summary>
-        public virtual EntitySelfLinks BuildEntitySelfLinks(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel)
+        public virtual EntitySelfLinks BuildEntitySelfLinks(ResourceContext instanceContext, ODataMetadataLevel metadataLevel)
         {
             EntitySelfLinks selfLinks = new EntitySelfLinks();
             selfLinks.IdLink = BuildIdLink(instanceContext, metadataLevel);
@@ -137,9 +137,9 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         /// <summary>
-        /// Constructs the IdLink for a particular <see cref="EntityInstanceContext" /> and <see cref="ODataMetadataLevel" />.
+        /// Constructs the IdLink for a particular <see cref="ResourceContext" /> and <see cref="ODataMetadataLevel" />.
         /// </summary>
-        public virtual Uri BuildIdLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel)
+        public virtual Uri BuildIdLink(ResourceContext instanceContext, ODataMetadataLevel metadataLevel)
         {
             if (instanceContext == null)
             {
@@ -158,15 +158,15 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         // Build an id link unconditionally, it doesn't depend on metadata level but does require a non-null link builder.
-        internal Uri BuildIdLink(EntityInstanceContext instanceContext)
+        internal Uri BuildIdLink(ResourceContext instanceContext)
         {
             return BuildIdLink(instanceContext, ODataMetadataLevel.FullMetadata);
         }
 
         /// <summary>
-        /// Constructs the EditLink URL for a particular <see cref="EntityInstanceContext" /> and <see cref="ODataMetadataLevel" />.
+        /// Constructs the EditLink URL for a particular <see cref="ResourceContext" /> and <see cref="ODataMetadataLevel" />.
         /// </summary>
-        public virtual Uri BuildEditLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, Uri idLink)
+        public virtual Uri BuildEditLink(ResourceContext instanceContext, ODataMetadataLevel metadataLevel, Uri idLink)
         {
             if (instanceContext == null)
             {
@@ -187,15 +187,15 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         // Build an edit link unconditionally, it doesn't depend on metadata level but does require a non-null link builder.
-        internal Uri BuildEditLink(EntityInstanceContext instanceContext)
+        internal Uri BuildEditLink(ResourceContext instanceContext)
         {
             return BuildEditLink(instanceContext, ODataMetadataLevel.FullMetadata, null);
         }
 
         /// <summary>
-        /// Constructs a ReadLink URL for a particular <see cref="EntityInstanceContext" /> and <see cref="ODataMetadataLevel" />.
+        /// Constructs a ReadLink URL for a particular <see cref="ResourceContext" /> and <see cref="ODataMetadataLevel" />.
         /// </summary>
-        public virtual Uri BuildReadLink(EntityInstanceContext instanceContext, ODataMetadataLevel metadataLevel, Uri editLink)
+        public virtual Uri BuildReadLink(ResourceContext instanceContext, ODataMetadataLevel metadataLevel, Uri editLink)
         {
             if (instanceContext == null)
             {
@@ -216,15 +216,15 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         // Build a read link unconditionally, it doesn't depend on metadata level but does require a non-null link builder.
-        internal Uri BuildReadLink(EntityInstanceContext instanceContext)
+        internal Uri BuildReadLink(ResourceContext instanceContext)
         {
             return BuildReadLink(instanceContext, ODataMetadataLevel.FullMetadata, null);
         }
 
         /// <summary>
-        /// Constructs a NavigationLink for a particular <see cref="EntityInstanceContext" />, <see cref="IEdmNavigationProperty" /> and <see cref="ODataMetadataLevel" />.
+        /// Constructs a NavigationLink for a particular <see cref="ResourceContext" />, <see cref="IEdmNavigationProperty" /> and <see cref="ODataMetadataLevel" />.
         /// </summary>
-        public virtual Uri BuildNavigationLink(EntityInstanceContext instanceContext, IEdmNavigationProperty navigationProperty, ODataMetadataLevel metadataLevel)
+        public virtual Uri BuildNavigationLink(ResourceContext instanceContext, IEdmNavigationProperty navigationProperty, ODataMetadataLevel metadataLevel)
         {
             if (instanceContext == null)
             {
@@ -237,9 +237,9 @@ namespace Microsoft.AspNetCore.OData.Builder
             }
 
             NavigationLinkBuilder navigationLinkBuilder;
-            if (_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder) &&
-                (metadataLevel == ODataMetadataLevel.FullMetadata ||
-                (metadataLevel == ODataMetadataLevel.MinimalMetadata && !navigationLinkBuilder.FollowsConventions)))
+            if (_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder)
+                && !navigationLinkBuilder.FollowsConventions
+                && (metadataLevel == ODataMetadataLevel.MinimalMetadata || metadataLevel == ODataMetadataLevel.FullMetadata))
             {
                 return navigationLinkBuilder.Factory(instanceContext, navigationProperty);
             }
@@ -249,9 +249,26 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         // Build a naviation link unconditionally, it doesn't depend on metadata level but does require a non-null link builder.
-        internal Uri BuildNavigationLink(EntityInstanceContext instanceContext, IEdmNavigationProperty navigationProperty)
+        internal Uri BuildNavigationLink(ResourceContext instanceContext, IEdmNavigationProperty navigationProperty)
         {
-            return BuildNavigationLink(instanceContext, navigationProperty, ODataMetadataLevel.FullMetadata);
+            if (instanceContext == null)
+            {
+                throw Error.ArgumentNull("instanceContext");
+            }
+
+            if (navigationProperty == null)
+            {
+                throw Error.ArgumentNull("navigationProperty");
+            }
+
+            NavigationLinkBuilder navigationLinkBuilder;
+            if (_navigationPropertyLinkBuilderLookup.TryGetValue(navigationProperty, out navigationLinkBuilder))
+            {
+                return navigationLinkBuilder.Factory(instanceContext, navigationProperty);
+            }
+
+            // Return null to let ODL decide when and how to build the navigation link.
+            return null;
         }
     }
 }

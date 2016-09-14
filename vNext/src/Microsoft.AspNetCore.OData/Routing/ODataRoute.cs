@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Routing
 {

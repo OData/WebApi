@@ -1,23 +1,20 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
-using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Common;
-using Microsoft.AspNetCore.OData.Formatter;
-using Microsoft.AspNetCore.OData.Formatter.Serialization;
-using Microsoft.OData.Core;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
+using System.Linq;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
-    using System;
-
     /// <summary>
-    /// ODataSerializer for serializing collection of Entities or Complex types or primitives.
+    /// ODataSerializer for serializing collection of primitive or enum types.
     /// </summary>
     public class ODataCollectionSerializer : ODataEdmTypeSerializer
     {
@@ -56,23 +53,18 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType,
             ODataSerializerContext writeContext)
         {
-            if (graph == null)
-            {
-                throw new SerializationException(Error.Format(SRResources.NullCollectionsCannotBeSerialized));
-            }
-
             IEnumerable enumerable = graph as IEnumerable;
-            if (enumerable == null)
+            if (enumerable == null && graph != null)
             {
                 throw Error.Argument("graph", SRResources.ArgumentMustBeOfType, typeof(IEnumerable).Name);
             }
+
             if (expectedType == null)
             {
                 throw Error.ArgumentNull("expectedType");
             }
 
             IEdmTypeReference elementType = GetElementType(expectedType);
-
             return CreateODataCollectionValue(enumerable, elementType, writeContext);
         }
 
@@ -91,15 +83,31 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writer");
             }
 
-            ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
+            ODataCollectionStart collectionStart = new ODataCollectionStart { Name = writeContext.RootElementName };
 
-            writer.WriteStart(new ODataCollectionStart { Name = writeContext.RootElementName });
-
-            if (collectionValue != null)
+            if (writeContext.Request != null)
             {
-                foreach (object item in collectionValue.Items)
+                if (writeContext.Request.ODataProperties().NextLink != null)
                 {
-                    writer.WriteItem(item);
+                    collectionStart.NextPageLink = writeContext.Request.ODataProperties().NextLink;
+                }
+
+                if (writeContext.Request.ODataProperties().TotalCount != null)
+                {
+                    collectionStart.Count = writeContext.Request.ODataProperties().TotalCount;
+                }
+            }
+
+            writer.WriteStart(collectionStart);
+            if (graph != null)
+            {
+                ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
+                if (collectionValue != null)
+                {
+                    foreach (object item in collectionValue.Items)
+                    {
+                        writer.WriteItem(item);
+                    }
                 }
             }
 
@@ -125,7 +133,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 throw Error.ArgumentNull("elementType");
             }
 
-            var valueCollection = new List<object>();
+            ArrayList valueCollection = new ArrayList();
 
             if (enumerable != null)
             {
@@ -136,7 +144,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     {
                         if (elementType.IsNullable)
                         {
-                            valueCollection.Add(null);
+                            valueCollection.Add(value: null);
                             continue;
                         }
 
@@ -165,19 +173,37 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             // string typeName = _edmCollectionType.FullName();
             // But ODataLib currently doesn't support .FullName() for collections. As a workaround, we construct the
             // collection type name the hard way.
-            // Work around for primitive type arrays
-            string typeName = "Collection(" + elementType.FullName().Replace("System","Edm") + ")";
+            string typeName = "Collection(" + elementType.FullName() + ")";
 
             // ODataCollectionValue is only a V3 property, arrays inside Complex Types or Entity types are only supported in V3
             // if a V1 or V2 Client requests a type that has a collection within it ODataLib will throw.
             ODataCollectionValue value = new ODataCollectionValue
             {
-                Items = valueCollection,
+                Items = valueCollection.Cast<object>(),
                 TypeName = typeName
             };
 
             AddTypeNameAnnotationAsNeeded(value, writeContext.MetadataLevel);
             return value;
+        }
+
+        internal override ODataProperty CreateProperty(object graph, IEdmTypeReference expectedType, string elementName,
+            ODataSerializerContext writeContext)
+        {
+            Contract.Assert(elementName != null);
+            var property = CreateODataValue(graph, expectedType, writeContext);
+            if (property != null)
+            {
+                return new ODataProperty
+                {
+                    Name = elementName,
+                    Value = property
+                };
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -209,10 +235,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     typeName = value.TypeName;
                 }
 
-                value.SetAnnotation<SerializationTypeNameAnnotation>(new SerializationTypeNameAnnotation
-                {
-                    TypeName = typeName
-                });
+                value.TypeAnnotation = new ODataTypeAnnotation(typeName);
             }
         }
 
@@ -253,7 +276,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 return feedType.AsCollection().ElementType();
             }
 
-            string message = Error.Format(SRResources.CannotWriteType, typeof(ODataFeedSerializer).Name, feedType.FullName());
+            string message = Error.Format(SRResources.CannotWriteType, typeof(ODataResourceSetSerializer).Name, feedType.FullName());
             throw new SerializationException(message);
         }
     }

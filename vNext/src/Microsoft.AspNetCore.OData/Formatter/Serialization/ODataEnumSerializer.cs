@@ -4,22 +4,22 @@
 using System;
 using System.Diagnostics.Contracts;
 using System.Reflection;
-using Microsoft.OData.Core;
 using Microsoft.OData.Edm;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.OData;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
-    /// Represents an <see cref="Microsoft.OData.Core.ODataSerializer"/> for serializing <see cref="IEdmEnumType" />'s.
+    /// Represents an <see cref="ODataSerializer"/> for serializing <see cref="IEdmEnumType" />'s.
     /// </summary>
     public class ODataEnumSerializer : ODataEdmTypeSerializer
     {
         /// <summary>
         /// Initializes a new instance of <see cref="ODataEnumSerializer"/>.
         /// </summary>
-        public ODataEnumSerializer()
-            : base(ODataPayloadKind.Property)
+        public ODataEnumSerializer(ODataSerializerProvider serializerProvider)
+            : base(ODataPayloadKind.Property, serializerProvider)
         {
         }
 
@@ -124,10 +124,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     typeName = enumType.FullName();
                 }
 
-                enumValue.SetAnnotation(new SerializationTypeNameAnnotation
-                {
-                    TypeName = typeName
-                });
+                enumValue.TypeAnnotation = new ODataTypeAnnotation(typeName);
             }
         }
 

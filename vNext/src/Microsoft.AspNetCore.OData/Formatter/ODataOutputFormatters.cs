@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.AspNetCore.OData.Formatter.Deserialization;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
@@ -25,9 +25,9 @@ namespace Microsoft.AspNetCore.OData.Formatter
         /// The default serializer provider is <see cref="DefaultODataSerializerProvider"/>.
         /// </summary>
         /// <returns>A list of output formatters to handle OData.</returns>
-        public static IList<ODataOutputFormatter> Create()
+        public static IList<ODataOutputFormatter> Create(IServiceProvider provider)
         {
-            return Create(DefaultODataSerializerProvider.Instance);
+            return Create(new DefaultODataSerializerProvider(provider));
         }
 
         /// <summary>
@@ -68,8 +68,8 @@ namespace Microsoft.AspNetCore.OData.Formatter
         {
             ODataOutputFormatter formatter = CreateFormatterWithoutMediaTypes(
                 serializerProvider,
-                ODataPayloadKind.Feed,
-                ODataPayloadKind.Entry,
+                ODataPayloadKind.ResourceSet,
+                ODataPayloadKind.Resource,
                 ODataPayloadKind.Property,
                 ODataPayloadKind.EntityReferenceLink,
                 ODataPayloadKind.EntityReferenceLinks,

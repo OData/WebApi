@@ -9,11 +9,10 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.OData.Edm;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Formatter;
 
 namespace Microsoft.AspNetCore.OData.Builder
 {
-    using Microsoft.AspNetCore.OData.Formatter;
-
     /// <summary>
     /// Represents an <see cref="IEdmEnumType"/> that can be built using <see cref="ODataModelBuilder"/>.
     /// </summary>

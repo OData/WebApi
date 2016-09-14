@@ -4,9 +4,9 @@
   "description": "Microsoft.AspNetCore.OData",
 
   "dependencies": {
-    "Microsoft.OData.Core": "6.15.0",
-    "Microsoft.OData.Edm": "6.15.0",
-    "Microsoft.Spatial": "6.15.0",
+    "Microsoft.OData.Core": "7.0.0",
+    "Microsoft.OData.Edm": "7.0.0",
+    "Microsoft.Spatial": "7.0.0",
     "Microsoft.AspNetCore.Mvc": "1.0.0",
     "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0"
   },

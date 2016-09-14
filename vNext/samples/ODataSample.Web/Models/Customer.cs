@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace ODataSample.Web.Models
 {
     using Microsoft.AspNetCore.OData.Builder;
-    using Microsoft.OData.Edm.Library;
+    using Microsoft.OData.Edm;
 
     public class Customer
     {

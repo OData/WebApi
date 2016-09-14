@@ -4,9 +4,9 @@
 using System;
 using System.Runtime.Serialization;
 using System.Web.Http;
-using Microsoft.OData.Core;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.OData;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
@@ -16,7 +16,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
     public class ODataErrorSerializer : ODataSerializer
     {
         /// <summary>
-        /// Initializes a new instance of the class <see cref="Microsoft.OData.Core.ODataSerializer"/>.
+        /// Initializes a new instance of the class <see cref="ODataSerializer"/>.
         /// </summary>
         public ODataErrorSerializer()
             : base(ODataPayloadKind.Error)

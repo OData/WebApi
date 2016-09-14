@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.OData.Core;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.OData;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
@@ -15,9 +15,9 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 || payloadKind == ODataPayloadKind.Collection
                 || payloadKind == ODataPayloadKind.EntityReferenceLink
                 || payloadKind == ODataPayloadKind.EntityReferenceLinks
-                || payloadKind == ODataPayloadKind.Entry
+                || payloadKind == ODataPayloadKind.Resource
                 || payloadKind == ODataPayloadKind.Error
-                || payloadKind == ODataPayloadKind.Feed
+                || payloadKind == ODataPayloadKind.ResourceSet
                 || payloadKind == ODataPayloadKind.MetadataDocument
                 || payloadKind == ODataPayloadKind.Parameter
                 || payloadKind == ODataPayloadKind.Property

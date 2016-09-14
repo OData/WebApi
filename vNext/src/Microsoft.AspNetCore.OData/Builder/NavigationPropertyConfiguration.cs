@@ -15,7 +15,7 @@ namespace Microsoft.AspNetCore.OData.Builder
     using Microsoft.AspNetCore.OData.Formatter;
 
     /// <summary>
-    /// Represents the configuration for a navigation property of an entity type.
+    /// Represents the configuration for a navigation property of a structural type.
     /// </summary>
     /// <remarks>This configuration functionality is exposed by the model builder Fluent API, see <see cref="ODataModelBuilder"/>.</remarks>
     public class NavigationPropertyConfiguration : PropertyConfiguration
@@ -29,8 +29,8 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// </summary>
         /// <param name="property">The backing CLR property.</param>
         /// <param name="multiplicity">The <see cref="EdmMultiplicity"/>.</param>
-        /// <param name="declaringType">The declaring entity type.</param>
-        public NavigationPropertyConfiguration(PropertyInfo property, EdmMultiplicity multiplicity, EntityTypeConfiguration declaringType)
+        /// <param name="declaringType">The declaring structural type.</param>
+        public NavigationPropertyConfiguration(PropertyInfo property, EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
             : base(property, declaringType)
         {
             if (property == null)
@@ -46,24 +46,13 @@ namespace Microsoft.AspNetCore.OData.Builder
                 Type elementType;
                 if (!_relatedType.IsCollection(out elementType))
                 {
-                    throw Error.Argument("property", SRResources.ManyToManyNavigationPropertyMustReturnCollection, property.Name, property.DeclaringType.Name);
+                    throw Error.Argument("property", SRResources.ManyToManyNavigationPropertyMustReturnCollection, property.Name, property.ReflectedType.Name);
                 }
 
                 _relatedType = elementType;
             }
 
             OnDeleteAction = EdmOnDeleteAction.None;
-        }
-
-        /// <summary>
-        /// Gets the declaring entity type.
-        /// </summary>
-        public EntityTypeConfiguration DeclaringEntityType
-        {
-            get
-            {
-                return DeclaringType as EntityTypeConfiguration;
-            }
         }
 
         /// <summary>
@@ -211,7 +200,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             if (Multiplicity == EdmMultiplicity.Many)
             {
                 throw Error.NotSupported(SRResources.ReferentialConstraintOnManyNavigationPropertyNotSupported,
-                    Name, DeclaringEntityType.ClrType.FullName);
+                    Name, DeclaringType.ClrType.FullName);
             }
 
             if (ValidateConstraint(constraint))
@@ -219,12 +208,12 @@ namespace Microsoft.AspNetCore.OData.Builder
                 return this;
             }
 
-            EntityTypeConfiguration principalEntity = DeclaringEntityType.ModelBuilder.StructuralTypes
+            EntityTypeConfiguration principalEntity = DeclaringType.ModelBuilder.StructuralTypes
                     .OfType<EntityTypeConfiguration>().FirstOrDefault(e => e.ClrType == RelatedClrType);
             Contract.Assert(principalEntity != null);
 
             PrimitivePropertyConfiguration principal = principalEntity.AddProperty(constraint.Value);
-            PrimitivePropertyConfiguration dependent = DeclaringEntityType.AddProperty(constraint.Key);
+            PrimitivePropertyConfiguration dependent = DeclaringType.AddProperty(constraint.Key);
 
             // If the navigation property on which the referential constraint is defined or the principal property
             // is nullable, then the dependent property MUST be nullable.

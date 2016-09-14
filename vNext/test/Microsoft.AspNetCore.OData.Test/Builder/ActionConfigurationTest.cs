@@ -9,8 +9,6 @@ using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Models;
 using Microsoft.AspNetCore.OData.TestCommon;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Expressions;
-using Microsoft.OData.Edm.Library;
 using Moq;
 using Xunit;
 
@@ -32,7 +30,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             // Assert
             Assert.Equal("Format", action.Name);
-            Assert.Equal(ProcedureKind.Action, action.Kind);
+            Assert.Equal(OperationKind.Action, action.Kind);
             Assert.NotNull(action.Parameters);
             Assert.Empty(action.Parameters);
             Assert.Null(action.ReturnType);
@@ -43,8 +41,8 @@ namespace Microsoft.AspNetCore.OData.Builder
             Assert.Equal("MyNamespace.Format", action.FullyQualifiedName);
             Assert.Equal("MyNamespaceII", actionII.Namespace);
             Assert.Equal("MyNamespaceII.FormatII", actionII.FullyQualifiedName);
-            Assert.NotNull(builder.Procedures);
-            Assert.Equal(2, builder.Procedures.Count());
+            Assert.NotNull(builder.Operations);
+            Assert.Equal(2, builder.Operations.Count());
         }
 
         [Fact]
@@ -53,11 +51,11 @@ namespace Microsoft.AspNetCore.OData.Builder
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
             ODataModelBuilder builder2 = new ODataModelBuilder();
-            ProcedureConfiguration toRemove = builder2.Action("ToRemove");
+            OperationConfiguration toRemove = builder2.Action("ToRemove");
 
             // Act
-            bool removedByName = builder.RemoveProcedure("ToRemove");
-            bool removed = builder.RemoveProcedure(toRemove);
+            bool removedByName = builder.RemoveOperation("ToRemove");
+            bool removed = builder.RemoveOperation(toRemove);
 
             //Assert
             Assert.False(removedByName);
@@ -382,10 +380,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             Assert.Equal("ActionName", action.Name);
             Assert.NotNull(action.Action.ReturnType);
             Assert.NotNull(action.EntitySet);
-            Assert.Equal("Customers", (action.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.Name);
-            Assert.Equal(
-                typeof(Customer).FullName,
-                (action.EntitySet as IEdmEntitySetReferenceExpression).ReferencedEntitySet.EntityType().FullName());
+            Assert.Equal("Customers", (action.EntitySet as IEdmPathExpression).Path);
             Assert.Empty(action.Action.Parameters);
         }
 
@@ -618,7 +613,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             var actionBuilder = movie.Action("ActionName");
             actionBuilder.Parameter(paramType, "p1");
 
-            MethodInfo method = typeof(ProcedureConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
+            MethodInfo method = typeof(OperationConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
             method.MakeGenericMethod(paramType).Invoke(actionBuilder, new[] { "p2" });
 
             // Act

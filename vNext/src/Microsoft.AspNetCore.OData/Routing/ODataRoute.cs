@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Routing
@@ -17,6 +18,23 @@ namespace Microsoft.AspNetCore.OData.Routing
     /// A route implementation for OData routes. It supports passing in a route prefix for the route as well
     /// as a path constraint that parses the request path as OData.
     /// </summary>
+    public class ODataRoute : Route
+    {
+        public ODataRoute(IRouter target, string routePrefix, ODataRouteConstraint constraint, IInlineConstraintResolver resolver)
+            : base(target, GetRouteTemplate(routePrefix), inlineConstraintResolver: resolver)
+        {
+            Constraints.Add(ODataRouteConstants.ConstraintName, constraint);
+        }
+
+        private static string GetRouteTemplate(string prefix)
+        {
+            return String.IsNullOrEmpty(prefix) ?
+                ODataRouteConstants.ODataPathTemplate :
+                prefix + '/' + ODataRouteConstants.ODataPathTemplate;
+        }
+    }
+
+    /*
     public class ODataRoute : IRouter
     {
         private readonly string _routePrefix;
@@ -68,5 +86,5 @@ namespace Microsoft.AspNetCore.OData.Routing
         {
             return null;
         }
-    }
+    }*/
 }

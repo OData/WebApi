@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 
         public ActionDescriptor SelectAction(RouteContext routeContext)
         {
-            var odataPath = routeContext.HttpContext.Request.ODataProperties().NewPath;
+            var odataPath = routeContext.HttpContext.Request.ODataProperties().Path;
             var controllerName = string.Empty;
             var methodName = routeContext.HttpContext.Request.Method;
             var routeTemplate = string.Empty;

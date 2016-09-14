@@ -25,9 +25,9 @@ namespace Microsoft.AspNetCore.OData.Formatter
         /// The default serializer provider is <see cref="DefaultODataSerializerProvider"/>.
         /// </summary>
         /// <returns>A list of output formatters to handle OData.</returns>
-        public static IList<ODataOutputFormatter> Create(IServiceProvider provider)
+        public static IList<ODataOutputFormatter> Create(/*IServiceProvider provider*/)
         {
-            return Create(new DefaultODataSerializerProvider(provider));
+            return Create(new DefaultODataSerializerProvider());
         }
 
         /// <summary>

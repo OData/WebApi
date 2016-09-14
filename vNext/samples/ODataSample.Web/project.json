@@ -2,6 +2,9 @@
   "dependencies": {
     "Microsoft.AspNetCore.Mvc": "1.0.0",
     "Microsoft.AspNetCore.OData": "6.0.0-alpha1-rtm",
+    "Microsoft.OData.Core": "7.0.0",
+    "Microsoft.OData.Edm": "7.0.0",
+    "Microsoft.Spatial": "7.0.0",
     "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0",
     "Microsoft.Extensions.Logging": "1.0.0",

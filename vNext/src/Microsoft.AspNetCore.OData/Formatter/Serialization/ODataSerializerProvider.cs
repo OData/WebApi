@@ -12,6 +12,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
     /// </summary>
     public abstract class ODataSerializerProvider
     {
+        public abstract IServiceProvider ServiceProvider { get; set; }
+
         /// <summary>
         /// Gets an <see cref="ODataEdmTypeSerializer"/> for the given edmType.
         /// </summary>

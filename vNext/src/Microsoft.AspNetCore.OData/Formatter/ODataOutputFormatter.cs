@@ -25,8 +25,8 @@ namespace Microsoft.AspNetCore.OData.Formatter
         private readonly ODataSerializerProvider _serializerProvider;
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
 
-        public ODataOutputFormatter(IServiceProvider provider, ODataPayloadKind payloadKinds)
-            : this(new DefaultODataSerializerProvider(provider), new[] { payloadKinds })
+        public ODataOutputFormatter(/*IServiceProvider provider,*/ ODataPayloadKind payloadKinds)
+            : this(new DefaultODataSerializerProvider(), new[] { payloadKinds })
         {
 
         }
@@ -77,7 +77,8 @@ namespace Microsoft.AspNetCore.OData.Formatter
             }
             var type = value.GetType();
 
-            ODataSerializer serializer = GetSerializer(type, value, model, new DefaultODataSerializerProvider(context.HttpContext.RequestServices), request);
+            _serializerProvider.ServiceProvider = context.HttpContext.RequestServices;
+            ODataSerializer serializer = GetSerializer(type, value, model, _serializerProvider, request);
 
             IUrlHelper urlHelper = context.HttpContext.UrlHelper();
 

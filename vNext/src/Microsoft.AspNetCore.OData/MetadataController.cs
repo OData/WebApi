@@ -20,6 +20,5 @@ namespace Microsoft.AspNetCore.OData
         {
             return this._model;
         }
-
-}
+    }
 }

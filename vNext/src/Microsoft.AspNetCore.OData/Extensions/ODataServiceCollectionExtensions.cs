@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -26,7 +27,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
             {
                 options.InputFormatters.Insert(0, new ModernInputFormatter());
 
-                foreach (var outputFormatter in ODataOutputFormatters.Create(services.BuildServiceProvider()))
+                foreach (var outputFormatter in ODataOutputFormatters.Create(/*services.BuildServiceProvider()*/))
                 {
                     options.OutputFormatters.Insert(0, outputFormatter);
                 }
@@ -36,9 +37,25 @@ namespace Microsoft.AspNetCore.OData.Extensions
             services.AddSingleton<IActionSelector, ODataActionSelector>();
             services.AddSingleton<IODataRoutingConvention, DefaultODataRoutingConvention>();
             services.AddSingleton<IETagHandler, DefaultODataETagHandler>();
+
+            // Routing
             services.AddSingleton<IODataPathHandler, DefaultODataPathHandler>();
+
+            // Assembly
             services.AddSingleton<IAssemblyProvider, DefaultAssemblyProvider>();
+
+            // Serializer
+            services.AddSingleton<ODataMetadataSerializer>();
+
             return new ODataServiceBuilder(services);
+        }
+
+        public static ODataServiceBuilder AddOData([NotNull] this IServiceCollection services,
+            Action<IServiceCollection> configSerivces)
+        {
+            ODataServiceBuilder builder = services.AddOData();
+            configSerivces(services); // for customers override services
+            return builder;
         }
 
         public static void AddApiContext<T>(

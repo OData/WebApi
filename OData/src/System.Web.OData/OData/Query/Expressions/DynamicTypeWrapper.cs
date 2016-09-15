@@ -125,28 +125,6 @@ namespace System.Web.OData.Query.Expressions
         }
     }
 
-    internal class NestedWrapper : DynamicTypeWrapper
-    {
-        public virtual PropertyContainer.NamedPropertyWithSameNext NestedContainer
-        {
-            get; set;
-        }
-
-        public override PropertyContainer.NamedPropertyWithSameNext GroupByContainer
-        {
-            get
-            {
-                return this.NestedContainer;
-            }
-
-            set
-            {
-                //this.NestedContainer = value as PropertyContainer;
-                throw new NotSupportedException();
-            }
-        }
-    }
-
     internal class AggregationWrapper : DynamicTypeWrapper
     {
     }

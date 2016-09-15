@@ -619,18 +619,6 @@ namespace System.Web.OData.Query.Expressions
             return null;
         }
 
-        private static readonly Dictionary<string, Type> _typesCache = new Dictionary<string, Type>()
-        {
-            {"String", typeof(string) },
-            {"Int32", typeof(int) },
-            {"Int64", typeof(long) },
-            {"Guid", typeof(Guid) },
-            {"Boolean", typeof(bool) },
-            {"DateTimeOffset", typeof(DateTimeOffset) },
-            {"Object", typeof(object) },
-            {"NestedWrapper", typeof(NestedWrapper) },
-        };
-
         private void CollectAssigments(Expression source, MemberInitExpression expression, string prefix = null)
         {
             if (expression == null)
@@ -683,7 +671,7 @@ namespace System.Web.OData.Query.Expressions
                 nameToAdd = prefix + "\\" + nameToAdd;
             }
 
-            if (resultType == typeof(NestedWrapper))
+            if (typeof(DynamicTypeWrapper).IsAssignableFrom(resultType))
             {
                 this._flattenPropertyContainer.Add(nameToAdd, Expression.Property(source, "NestedValue"));
             }
@@ -700,7 +688,7 @@ namespace System.Web.OData.Query.Expressions
             if (nestedExpression != null)
             {
                 var nestedAccessor = ((nestedExpression as MemberInitExpression).Bindings.First() as MemberAssignment).Expression as MemberInitExpression;
-                var newSource = Expression.Property(Expression.Property(source, "NestedValue"), "NestedContainer");
+                var newSource = Expression.Property(Expression.Property(source, "NestedValue"), "GroupByContainer");
                 CollectAssigments(newSource, nestedAccessor, nameToAdd);
             }
         }

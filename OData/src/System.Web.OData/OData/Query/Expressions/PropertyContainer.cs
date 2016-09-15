@@ -134,7 +134,7 @@ namespace System.Web.OData.Query.Expressions
             Type namedPropertyType = null;
             if (next != null)
             {
-                if (property.Value.Type == typeof(NestedWrapper))
+                if (property.Value.Type == typeof(DynamicTypeWrapper))
                 {
                     namedPropertyType = typeof(NamedPropertyWithNested);
                 }
@@ -145,7 +145,7 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                if (property.Value.Type == typeof(NestedWrapper))
+                if (property.Value.Type == typeof(DynamicTypeWrapper))
                 {
                     namedPropertyType = typeof(NamedPropertyLastWithNested);
                 }
@@ -158,7 +158,7 @@ namespace System.Web.OData.Query.Expressions
 
             memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Name"), property.Name));
 
-            if (property.Value.Type == typeof(NestedWrapper))
+            if (property.Value.Type == typeof(DynamicTypeWrapper))
             {
                 memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("NestedValue"), property.Value));
             }
@@ -320,11 +320,11 @@ namespace System.Web.OData.Query.Expressions
 
         internal class NamedPropertyWithSameNext : NamedProperty<object>
         {
-            public NestedWrapper NestedValue
+            public DynamicTypeWrapper NestedValue
             {
                 get
                 {
-                    return (NestedWrapper)this.Value;
+                    return (DynamicTypeWrapper)this.Value;
                 }
                 set
                 {

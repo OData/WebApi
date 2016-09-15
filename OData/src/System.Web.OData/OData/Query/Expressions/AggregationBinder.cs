@@ -33,6 +33,8 @@ namespace System.Web.OData.Query.Expressions
         private const string Linq2ObjectsQueryProviderNamespace = "System.Linq";
 
         private bool _linqToObjectMode = false;
+        private IQueryable _baseQuery;
+        private IDictionary<string, Expression> _flattenPropertyContainer;
 
         internal AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType,
             IEdmModel model, TransformationNode transformation)
@@ -52,7 +54,7 @@ namespace System.Web.OData.Query.Expressions
                 case TransformationNodeKind.Aggregate:
                     var aggregateClause = this._transformation as AggregateTransformationNode;
                     _aggregateExpressions = aggregateClause.Expressions;
-                    ResultClrType = typeof(AggregationWrapper);
+                    ResultClrType = typeof(NoGroupByAggregationWrapper);
                     break;
                 case TransformationNodeKind.GroupBy:
                     var groupByClause = this._transformation as GroupByTransformationNode;
@@ -78,7 +80,7 @@ namespace System.Web.OData.Query.Expressions
                         SRResources.NotSupportedTransformationKind, transformation.Kind));
             }
 
-            _groupByClrType = _groupByClrType ?? typeof(DynamicTypeWrapper);
+            _groupByClrType = _groupByClrType ?? typeof(NoGroupByWrapper);
         }
 
         /// <summary>
@@ -97,6 +99,8 @@ namespace System.Web.OData.Query.Expressions
         public IQueryable Bind(IQueryable query)
         {
             this._linqToObjectMode = query.Provider.GetType().Namespace == Linq2ObjectsQueryProviderNamespace;
+            this._baseQuery = query;
+            this._flattenPropertyContainer = GetFlattenProperties(this._baseQuery, this._lambdaParameter);
 
             // Answer is query.GroupBy($it => new DynamicType1() {...}).Select($it => new DynamicType2() {...})
             // We are doing Grouping even if only aggregate was specified to have a IQuaryable after aggregation
@@ -278,7 +282,14 @@ namespace System.Web.OData.Query.Expressions
                     return CreatePropertyAccessExpression(BindAccessor(singleComplexNode.Source), singleComplexNode.Property);
                 case QueryNodeKind.SingleValueOpenPropertyAccess:
                     var openNode = node as SingleValueOpenPropertyAccessNode;
-                    return Expression.Property(BindAccessor(openNode.Source), openNode.Name);
+                    if (_flattenPropertyContainer == null)
+                    {
+                        return Expression.Property(BindAccessor(openNode.Source), openNode.Name);
+                    }
+                    else
+                    {
+                        return _flattenPropertyContainer[openNode.Name];
+                    }
                 case QueryNodeKind.SingleNavigationNode:
                     var navNode = node as SingleNavigationNode;
                     return CreatePropertyAccessExpression(BindAccessor(navNode.Source), navNode.NavigationProperty);
@@ -300,11 +311,20 @@ namespace System.Web.OData.Query.Expressions
         private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property)
         {
             string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);
+            string propertyPath = propertyName;
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) &&
                 source != this._lambdaParameter)
             {
-                Expression propertyAccessExpression = Expression.Property(RemoveInnerNullPropagation(source),
-                    propertyName);
+                Expression cleanSource = RemoveInnerNullPropagation(source);
+                Expression propertyAccessExpression = null;
+                if (_flattenPropertyContainer != null)
+                {
+                    propertyAccessExpression = _flattenPropertyContainer[propertyPath];
+                }
+                else
+                {
+                    propertyAccessExpression = Expression.Property(cleanSource, propertyName);
+                }
 
                 // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
                 // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
@@ -318,7 +338,14 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                return ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+                if (_flattenPropertyContainer != null)
+                {
+                    return _flattenPropertyContainer[propertyPath];
+                }
+                else
+                {
+                    return ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+                }
             }
         }
 
@@ -397,6 +424,111 @@ namespace System.Web.OData.Query.Expressions
             }
 
             return wrapperTypeMemberAssignments;
+        }
+
+
+        internal static IDictionary<string, Expression> GetFlattenProperties(IQueryable baseQuery, ParameterExpression source)
+        {
+            if (baseQuery == null)
+            {
+                return null;
+            }
+
+            if (!typeof(DynamicTypeWrapper).IsAssignableFrom(baseQuery.ElementType))
+            {
+                return null;
+            }
+
+            var expression = baseQuery.Expression as MethodCallExpression;
+            if (expression == null)
+            {
+                return null;
+            }
+
+            var result = new Dictionary<string, Expression>();
+            CollectAssigments(result, Expression.Property(source, "GroupByContainer"), ExtractContainerExpression(expression.Arguments[0] as MethodCallExpression, "GroupByContainer"));
+            CollectAssigments(result, Expression.Property(source, "Container"), ExtractContainerExpression(expression, "Container"));
+
+            return result;
+        }
+
+        private static MemberInitExpression ExtractContainerExpression(MethodCallExpression expression, string containerName)
+        {
+            var memberInitExpression = ((expression.Arguments[1] as UnaryExpression).Operand as LambdaExpression).Body as MemberInitExpression;
+            if (memberInitExpression != null)
+            {
+                var containerAssigment = memberInitExpression.Bindings.FirstOrDefault(m => m.Member.Name == containerName) as MemberAssignment;
+                if (containerAssigment != null)
+                {
+                    return containerAssigment.Expression as MemberInitExpression;
+                }
+            }
+            return null;
+        }
+
+        private static void CollectAssigments(IDictionary<string, Expression> flattenPropertyContainer, Expression source, MemberInitExpression expression, string prefix = null)
+        {
+            if (expression == null)
+            {
+                return;
+            }
+
+            string nameToAdd = null;
+            Type resultType = null;
+            MemberInitExpression nextExpression = null;
+            Expression nestedExpression = null;
+            foreach (var expr in expression.Bindings.OfType<MemberAssignment>())
+            {
+                var initExpr = expr.Expression as MemberInitExpression;
+                if (initExpr != null && expr.Member.Name == "Next")
+                {
+                    nextExpression = initExpr;
+                }
+                else if (expr.Member.Name == "Name")
+                {
+                    nameToAdd = (expr.Expression as ConstantExpression).Value as string;
+                }
+                else if (expr.Member.Name == "Value" || expr.Member.Name == "NestedValue")
+                {
+                    resultType = expr.Expression.Type;
+                    if (resultType == typeof(object) && expr.Expression.NodeType == ExpressionType.Convert)
+                    {
+                        resultType = ((UnaryExpression)expr.Expression).Operand.Type;
+                    }
+                    if (typeof(DynamicTypeWrapper).IsAssignableFrom(resultType))
+                    {
+                        nestedExpression = expr.Expression;
+                    }
+                }
+            }
+
+            Type exprType = typeof(AggregationPropertyContainer);
+
+            if (prefix != null)
+            {
+                nameToAdd = prefix + "\\" + nameToAdd;
+            }
+
+            if (typeof(DynamicTypeWrapper).IsAssignableFrom(resultType))
+            {
+                flattenPropertyContainer.Add(nameToAdd, Expression.Property(source, "NestedValue"));
+            }
+            else
+            {
+                flattenPropertyContainer.Add(nameToAdd, Expression.Convert(Expression.Property(source, "Value"), resultType));
+            }
+
+            if (nextExpression != null)
+            {
+                CollectAssigments(flattenPropertyContainer, Expression.Property(source, "Next"), nextExpression);
+            }
+
+            if (nestedExpression != null)
+            {
+                var nestedAccessor = ((nestedExpression as MemberInitExpression).Bindings.First() as MemberAssignment).Expression as MemberInitExpression;
+                var newSource = Expression.Property(Expression.Property(source, "NestedValue"), "GroupByContainer");
+                CollectAssigments(flattenPropertyContainer, newSource, nestedAccessor, nameToAdd);
+            }
         }
     }
 }

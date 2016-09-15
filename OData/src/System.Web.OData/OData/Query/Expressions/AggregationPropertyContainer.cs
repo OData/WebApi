@@ -15,7 +15,7 @@ namespace System.Web.OData.Query.Expressions
     /// Reperesent properties used in groupby and aggregate clauses to make them accessiable in further clauses/transformations
     /// </summary>
     /// <remakrs>
-    /// When we have $apply=groupby((Prop1,Prop2, Prop3))&$orderby=Prop1, Prop2
+    /// When we have $apply=groupby((Prop1,Prop2, Prop3))&amp;$orderby=Prop1, Prop2
     /// We will have following expression in .GroupBy
     /// $it => new AggregationPropertyContainer() {
     ///     Name = "Prop1", 

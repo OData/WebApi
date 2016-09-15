@@ -160,10 +160,41 @@ namespace WebStack.QA.Test.OData.Aggregation
             // Assert
             
             var result = response.Content.ReadAsAsync<JObject>().Result;
+            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var results = result["value"] as JArray;
             Assert.Equal(1, results.Count);
             Assert.Equal("4500", results[0]["TotalAmount"].ToString());
+        }
+
+
+        [Fact]
+        public void AggregateAggregatedWithGRoupByPropertyWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl +
+                    "?$apply=groupby((Name), aggregate(Order/Price with sum as TotalPrice))/groupby((Name),aggregate(TotalPrice with sum as TotalAmount))",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+
+            var result = response.Content.ReadAsAsync<JObject>().Result;
+            System.Console.WriteLine(result);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Equal(2, results.Count);
+            Assert.Equal("2000", results[0]["TotalAmount"].ToString());
+            Assert.Equal("2500", results[1]["TotalAmount"].ToString());
+            Assert.Equal("Customer0", results[0]["Name"].ToString());
+            Assert.Equal("Customer1", results[1]["Name"].ToString());
         }
 
         [Theory]
@@ -196,11 +227,11 @@ namespace WebStack.QA.Test.OData.Aggregation
         }
 
         [Theory]
-        //[InlineData("?$apply=aggregate(Order/Price with sum as Result)", "4500")]
-        //[InlineData("?$apply=aggregate(Order/Price with min as Result)", "100")]
-        //[InlineData("?$apply=aggregate(Order/Price with max as Result)", "900")]
-        //[InlineData("?$apply=aggregate(Order/Price with average as Result)", "500")]
-        //[InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)", "9")]
+        [InlineData("?$apply=aggregate(Order/Price with sum as Result)", "4500")]
+        [InlineData("?$apply=aggregate(Order/Price with min as Result)", "100")]
+        [InlineData("?$apply=aggregate(Order/Price with max as Result)", "900")]
+        [InlineData("?$apply=aggregate(Order/Price with average as Result)", "500")]
+        [InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)", "9")]
         [InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)&$orderby=Result", "9")]
         public void AggregateMethodWorks(string query, string expectedResult)
         {

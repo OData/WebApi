@@ -124,8 +124,16 @@ namespace System.Web.OData.Query.Expressions
             }
         }
     }
+    internal class NoGroupByWrapper : DynamicTypeWrapper
+    {
 
+    }
     internal class AggregationWrapper : DynamicTypeWrapper
     {
     }
+
+    internal class NoGroupByAggregationWrapper : DynamicTypeWrapper
+    {
+    }
+
 }

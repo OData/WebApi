@@ -490,6 +490,40 @@ namespace System.Web.OData.Test.OData.Query
             Assert.Equal("Middle", results[2]["Name"].ToString());
         }
 
+        [Fact]
+        public void ApplyToSerializationWorksForCompelxTypes()
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            HttpConfiguration config =
+                new[] { typeof(MetadataController), typeof(CustomersController) }.GetHttpConfiguration();
+
+            config.MapODataServiceRoute("odata", "odata", model);
+            var client = new HttpClient(new HttpServer(config));
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                "http://localhost/odata/Customers?$apply=groupby((Address/City), aggregate(CustomerId with sum as TotalId))");
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.NotNull(response);
+            var result = response.Content.ReadAsAsync<JObject>().Result;
+            var results = result["value"] as JArray;
+            Assert.Equal(4, results.Count);
+            Assert.Equal("1", results[0]["TotalId"].ToString());
+            var address0 = results[0]["Address"] as JObject;
+            Assert.Equal("redmond", address0["City"].ToString());
+        }
+
         private object GetValue(DynamicTypeWrapper wrapper, string path)
         {
             var parts = path.Split('/');

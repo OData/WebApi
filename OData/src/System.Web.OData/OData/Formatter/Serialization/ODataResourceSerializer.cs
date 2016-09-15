@@ -202,7 +202,7 @@ namespace System.Web.OData.Formatter.Serialization
                     };
 
                     writer.WriteStart(nestedResourceInfo);
-                    WriteComplexAndExpandedNavigationProperty(property, null, resourceContext, writer);
+                    WriteDynamicComplexProperty(dynamicTypeProperties[property], property.Type, resourceContext, writer);
                     writer.WriteEnd();
                 }
             }

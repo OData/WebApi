@@ -50,26 +50,6 @@ namespace System.Web.OData.Query.Expressions
         }
 
         /// <summary>
-        /// Get property value.
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
-        public object GetPropertyValue(string propertyName)
-        {
-            return this._values[propertyName];
-        }
-
-        /// <summary>
-        /// Set property value
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <param name="value"></param>
-        public void SetPropertyValue(string propertyName, object value)
-        {
-            this._values[propertyName] = value;
-        }
-
-        /// <summary>
         /// Compares to wrappers
         /// </summary>
         /// <param name="obj"></param>

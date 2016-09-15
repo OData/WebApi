@@ -593,7 +593,7 @@ namespace System.Web.OData.Query.Expressions
 
         private void EnsureFlattenPropertyContainer(ParameterExpression source)
         {
-            if (_flattenPropertyContainer == null && _baseQuery != null && typeof(AggregationWrapper).IsAssignableFrom(_baseQuery.ElementType))
+            if (_flattenPropertyContainer == null && _baseQuery != null && typeof(DynamicTypeWrapper).IsAssignableFrom(_baseQuery.ElementType))
             {
                 _flattenPropertyContainer = new Dictionary<string, Expression>();
 
@@ -619,6 +619,18 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
+        private static readonly Dictionary<string, Type> _typesCache = new Dictionary<string, Type>()
+        {
+            {"String", typeof(string) },
+            {"Int32", typeof(int) },
+            {"Int64", typeof(long) },
+            {"Guid", typeof(Guid) },
+            {"Boolean", typeof(bool) },
+            {"DateTimeOffset", typeof(DateTimeOffset) },
+            {"Object", typeof(object) },
+            {"NestedWrapper", typeof(NestedWrapper) },
+        };
+
         private void CollectAssigments(Expression source, MemberInitExpression expression, string prefix = null)
         {
             if (expression == null)
@@ -641,9 +653,13 @@ namespace System.Web.OData.Query.Expressions
                 {
                     nameToAdd = (expr.Expression as ConstantExpression).Value as string;
                 }
-                else if (expr.Member.Name == "Value")
+                else if (expr.Member.Name == "Value" || expr.Member.Name == "NestedValue")
                 {
                     resultType = expr.Expression.Type;
+                    if (resultType == typeof(object) && expr.Expression.NodeType == ExpressionType.Convert)
+                    {
+                        resultType = ((UnaryExpression)expr.Expression).Operand.Type;
+                    }
                     if (typeof(DynamicTypeWrapper).IsAssignableFrom(resultType))
                     {
                         nestedExpression = expr.Expression;
@@ -651,26 +667,30 @@ namespace System.Web.OData.Query.Expressions
                 }
             }
 
-            Type exprType;
-            if (nextExpression == null)
-            {
-                exprType = typeof(PropertyContainer.NamedProperty<>).MakeGenericType(resultType);
-            }
-            else
-            {
-                exprType = typeof(PropertyContainer.NamedPropertyWithNext<>).MakeGenericType(resultType);
-            }
-            if (typeof(PropertyContainer).IsAssignableFrom(source.Type))
-            {
-                source = Expression.Convert(source, exprType);
-            }
+            Type exprType = typeof(PropertyContainer.NamedPropertyWithSameNext);
+            //if (nextExpression == null)
+            //{
+            //    exprType = typeof(PropertyContainer.NamedProperty<>).MakeGenericType(resultType);
+            //}
+            //else
+            //{
+            //    exprType = typeof(PropertyContainer.NamedPropertyWithNext<>).MakeGenericType(resultType);
+            //}
+            //source = Expression.Convert(source, exprType);
 
             if (prefix != null)
             {
                 nameToAdd = prefix + "\\" + nameToAdd;
             }
 
-            this._flattenPropertyContainer.Add(nameToAdd, Expression.Property(source, "Value"));
+            if (resultType == typeof(NestedWrapper))
+            {
+                this._flattenPropertyContainer.Add(nameToAdd, Expression.Property(source, "NestedValue"));
+            }
+            else
+            {
+                this._flattenPropertyContainer.Add(nameToAdd, Expression.Convert(Expression.Property(source, "Value"), resultType));
+            }
 
             if (nextExpression != null)
             {
@@ -680,7 +700,7 @@ namespace System.Web.OData.Query.Expressions
             if (nestedExpression != null)
             {
                 var nestedAccessor = ((nestedExpression as MemberInitExpression).Bindings.First() as MemberAssignment).Expression as MemberInitExpression;
-                var newSource = Expression.Property(Expression.Convert(Expression.Property(source, "Value"), typeof(DynamicTypeWrapper)), "GroupByContainer");
+                var newSource = Expression.Property(Expression.Property(source, "NestedValue"), "NestedContainer");
                 CollectAssigments(newSource, nestedAccessor, nameToAdd);
             }
         }
@@ -749,7 +769,7 @@ namespace System.Web.OData.Query.Expressions
         public virtual Expression BindPropertyAccessQueryNode(SingleValuePropertyAccessNode propertyAccessNode)
         {
             Expression source = Bind(propertyAccessNode.Source);
-            return CreatePropertyAccessExpression(source, propertyAccessNode.Property);
+            return CreatePropertyAccessExpression(source, propertyAccessNode.Property, GetFullPropertyPath(propertyAccessNode));
         }
 
         /// <summary>
@@ -761,19 +781,53 @@ namespace System.Web.OData.Query.Expressions
         public virtual Expression BindSingleComplexNode(SingleComplexNode singleComplexNode)
         {
             Expression source = Bind(singleComplexNode.Source);
-            return CreatePropertyAccessExpression(source, singleComplexNode.Property);
+            return CreatePropertyAccessExpression(source, singleComplexNode.Property, GetFullPropertyPath(singleComplexNode));
         }
 
-        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property)
+        private string GetFullPropertyPath(SingleValueNode node)
+        {
+            string path = null;
+            SingleValueNode parent = null;
+            switch (node.Kind)
+            {
+                case QueryNodeKind.SingleComplexNode:
+                    path = ((SingleComplexNode)node).Property.Name;
+                    break;
+                case QueryNodeKind.SingleValuePropertyAccess:
+                    path = ((SingleValuePropertyAccessNode)node).Property.Name;
+                    parent = ((SingleValuePropertyAccessNode)node).Source;
+                    break;
+                case QueryNodeKind.SingleNavigationNode:
+                    path = ((SingleNavigationNode)node).NavigationProperty.Name;
+                    parent = ((SingleNavigationNode)node).Source;
+                    break;
+
+            }
+
+            if (parent != null)
+            {
+                var parentPath = GetFullPropertyPath(parent);
+                if (parentPath != null)
+                {
+                    path = parentPath + "\\" + path;
+                }
+            }
+
+            return path;
+        }
+
+        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property, string propertyPath = null)
         {
             string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);
+            propertyPath = propertyPath ?? propertyName;
+
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) && source != _lambdaParameters[ODataItParameterName])
             {
                 var cleanSource = RemoveInnerNullPropagation(source);
                 Expression propertyAccessExpression = null;
                 if (_flattenPropertyContainer != null)
                 {
-                    propertyAccessExpression = _flattenPropertyContainer[(property.DeclaringType as IEdmSchemaElement).Name + "\\" + property.Name];
+                    propertyAccessExpression = _flattenPropertyContainer[propertyPath];
                 }
                 else
                 {
@@ -794,7 +848,7 @@ namespace System.Web.OData.Query.Expressions
             {
                 if (_flattenPropertyContainer != null)
                 {
-                    return _flattenPropertyContainer[propertyName];
+                    return _flattenPropertyContainer[propertyPath];
                 }
                 else
                 {

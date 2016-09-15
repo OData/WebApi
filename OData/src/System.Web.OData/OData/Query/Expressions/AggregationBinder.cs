@@ -29,6 +29,10 @@ namespace System.Web.OData.Query.Expressions
         private IEnumerable<GroupByPropertyNode> _groupingProperties;
 
         private Type _groupByClrType;
+        
+        private const string Linq2ObjectsQueryProviderNamespace = "System.Linq";
+
+        private bool _linqToObjectMode = false;
 
         internal AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType,
             IEdmModel model, TransformationNode transformation)
@@ -41,6 +45,7 @@ namespace System.Web.OData.Query.Expressions
             _transformation = transformation;
 
             this._lambdaParameter = Expression.Parameter(this._elementType, "$it");
+
 
             switch (transformation.Kind)
             {
@@ -91,6 +96,8 @@ namespace System.Web.OData.Query.Expressions
 
         public IQueryable Bind(IQueryable query)
         {
+            this._linqToObjectMode = query.Provider.GetType().Namespace == Linq2ObjectsQueryProviderNamespace;
+
             // Answer is query.GroupBy($it => new DynamicType1() {...}).Select($it => new DynamicType2() {...})
             // We are doing Grouping even if only aggregate was specified to have a IQuaryable after aggregation
             IQueryable grouping = BindGroupBy(query);
@@ -111,7 +118,6 @@ namespace System.Web.OData.Query.Expressions
             //                      ...
             //                      Alias1 = $it.AsQuaryable().Sum(i => i.AggregatableProperty)
             //                  })
-
             var groupingType = typeof(IGrouping<,>).MakeGenericType(this._groupByClrType, this._elementType);
             ParameterExpression accum = Expression.Parameter(groupingType, "$it");
 
@@ -139,7 +145,7 @@ namespace System.Web.OData.Query.Expressions
                 }
 
                 var wrapperProperty = ResultClrType.GetProperty("Container");
-                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreatePropertyContainer(properties)));
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreateNextNamedPropertyContainer(properties)));
             }
 
             var selectLambda =
@@ -255,7 +261,9 @@ namespace System.Web.OData.Query.Expressions
                     throw new ODataException(Error.Format(SRResources.AggregationMethodNotSupported, expression.Method));
             }
 
-            return aggregationExpression;
+            return this._linqToObjectMode 
+                ? Expression.Convert(aggregationExpression, typeof(object))
+                : aggregationExpression;
         }
 
         private Expression BindAccessor(SingleValueNode node)
@@ -334,7 +342,7 @@ namespace System.Web.OData.Query.Expressions
                 
                 var wrapperProperty = typeof(DynamicTypeWrapper).GetProperty("GroupByContainer");
                 List<MemberAssignment> wta = new List<MemberAssignment>();
-                wta.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreatePropertyContainer(properties)));
+                wta.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreateNextNamedPropertyContainer(properties)));
                 groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(typeof(DynamicTypeWrapper)), wta), _lambdaParameter);
             }
             else
@@ -359,10 +367,10 @@ namespace System.Web.OData.Query.Expressions
                 }
                 else
                 {
-                    var wrapperProperty = typeof(DynamicTypeWrapper).GetProperty("GroupByContainer");
+                    var wrapperProperty = typeof(NestedWrapper).GetProperty("NestedContainer");
                     List<MemberAssignment> wta = new List<MemberAssignment>();
-                    wta.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreatePropertyContainer(CreateGroupByMemberAssignments2(gProp.ChildTransformations))));
-                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.MemberInit(Expression.New(typeof(DynamicTypeWrapper)), wta)));
+                    wta.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreateNextNamedPropertyContainer(CreateGroupByMemberAssignments2(gProp.ChildTransformations))));
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.MemberInit(Expression.New(typeof(NestedWrapper)), wta)));
                 }
             }
 

@@ -93,7 +93,7 @@ namespace System.Web.OData.Query.Expressions
 
                 if (property.CountOption != null && property.CountOption.Value)
                 {
-                     memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("TotalCount"), property.TotalCount));
+                    memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("TotalCount"), property.TotalCount));
                 }
             }
             else
@@ -105,6 +105,73 @@ namespace System.Web.OData.Query.Expressions
             {
                 memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Next"), next));
             }
+            if (property.NullCheck != null)
+            {
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("IsNull"), property.NullCheck));
+            }
+
+            return Expression.MemberInit(Expression.New(namedPropertyType), memberBindings);
+        }
+
+        public static Expression CreateNextNamedPropertyContainer(IList<NamedPropertyExpression> properties)
+        {
+            Expression container = null;
+
+            // build the linked list of properties.
+            foreach (NamedPropertyExpression property in properties)
+            {
+                container = CreateNextNamedPropertyCreationExpression(property, container);
+            }
+
+            return container;
+        }
+
+        private static Expression CreateNextNamedPropertyCreationExpression(NamedPropertyExpression property, Expression next)
+        {
+            Contract.Assert(property != null);
+            Contract.Assert(property.Value != null);
+
+            Type namedPropertyType = null;
+            if (next != null)
+            {
+                if (property.Value.Type == typeof(NestedWrapper))
+                {
+                    namedPropertyType = typeof(NamedPropertyWithNested);
+                }
+                else
+                {
+                    namedPropertyType = typeof(NamedPropertyWithSameNext);
+                }
+            }
+            else
+            {
+                if (property.Value.Type == typeof(NestedWrapper))
+                {
+                    namedPropertyType = typeof(NamedPropertyLastWithNested);
+                }
+                else
+                {
+                    namedPropertyType = typeof(NamedPropertyLast);
+                }
+            }
+            List<MemberBinding> memberBindings = new List<MemberBinding>();
+
+            memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Name"), property.Name));
+
+            if (property.Value.Type == typeof(NestedWrapper))
+            {
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("NestedValue"), property.Value));
+            }
+            else
+            {
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Value"), property.Value));
+            }
+
+            if (next != null)
+            {
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Next"), next));
+            }
+
             if (property.NullCheck != null)
             {
                 memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("IsNull"), property.NullCheck));
@@ -250,6 +317,50 @@ namespace System.Web.OData.Query.Expressions
                 Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
             }
         }
+
+        internal class NamedPropertyWithSameNext : NamedProperty<object>
+        {
+            public NestedWrapper NestedValue
+            {
+                get
+                {
+                    return (NestedWrapper)this.Value;
+                }
+                set
+                {
+                    Value = value;
+                }
+            }
+
+            public NamedPropertyWithSameNext Next { get; set; }
+
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
+                bool includeAutoSelected)
+            {
+                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                if (Next != null)
+                {
+                    Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                }
+            }
+        }
+
+        internal class NamedPropertyLast : NamedPropertyWithSameNext
+        {
+
+        }
+
+        internal class NamedPropertyLastWithNested : NamedPropertyWithSameNext
+        {
+
+        }
+
+
+        internal class NamedPropertyWithNested : NamedPropertyWithSameNext
+        {
+
+        }
+
 
         private class AutoSelectedNamedPropertyWithNext<T> : AutoSelectedNamedProperty<T>
         {

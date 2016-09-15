@@ -26,7 +26,7 @@ namespace System.Web.OData.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "groupby((ProductName))",
                 ".GroupBy($it => new DynamicTypeWrapper() {ProductName = $it.ProductName, })"
-                + ".Select($it => new DynamicTypeWrapper() {ProductName = $it.Key.ProductName, })");
+                + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
         }
 
         [Fact]
@@ -108,7 +108,7 @@ namespace System.Web.OData.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "aggregate(SupplierID with sum as SupplierID, CategoryID with sum as CategoryID)",
                 ".GroupBy($it => new DynamicTypeWrapper())"
-                + ".Select($it => new DynamicTypeWrapper() {SupplierID = $it.AsQueryable().Sum($it => $it.SupplierID), CategoryID = $it.AsQueryable().Sum($it => $it.CategoryID), })");
+                + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, Container = new NamedPropertyWithNext`1() {Name = CategoryID, Value = $it.AsQueryable().Sum($it => $it.CategoryID), Next = new NamedProperty`1() {Name = SupplierID, Value = $it.AsQueryable().Sum($it => $it.SupplierID), }, }, })");
         }
 
         [Fact]

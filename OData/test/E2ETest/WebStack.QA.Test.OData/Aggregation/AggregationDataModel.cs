@@ -5,7 +5,7 @@ namespace WebStack.QA.Test.OData.Aggregation
     public class AggregationContext : DbContext
     {
         public static string ConnectionString =
-            @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=AggregationTest";
+            @"Data Source=.;Integrated Security=True;Initial Catalog=AggregationTest";
 
         public AggregationContext()
             : base(ConnectionString)

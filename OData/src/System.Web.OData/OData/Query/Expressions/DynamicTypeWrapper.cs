@@ -19,12 +19,12 @@ namespace System.Web.OData.Query.Expressions
         /// <summary>
         /// Gets or sets the property container that contains the properties being expanded. 
         /// </summary>
-        public virtual PropertyContainer GroupByContainer { get; set; }
+        public virtual PropertyContainer.NamedPropertyWithSameNext GroupByContainer { get; set; }
 
         /// <summary>
         /// Gets or sets the property container that contains the properties being expanded. 
         /// </summary>
-        public virtual PropertyContainer Container { get; set; }
+        public virtual PropertyContainer.NamedPropertyWithSameNext Container { get; set; }
 
         public Dictionary<string, object> Values
         {
@@ -121,6 +121,28 @@ namespace System.Web.OData.Query.Expressions
                 {
                     _values = _values.Concat(this.Container.ToDictionary(DefaultPropertyMapper)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                 }
+            }
+        }
+    }
+
+    internal class NestedWrapper : DynamicTypeWrapper
+    {
+        public virtual PropertyContainer.NamedPropertyWithSameNext NestedContainer
+        {
+            get; set;
+        }
+
+        public override PropertyContainer.NamedPropertyWithSameNext GroupByContainer
+        {
+            get
+            {
+                return this.NestedContainer;
+            }
+
+            set
+            {
+                //this.NestedContainer = value as PropertyContainer;
+                throw new NotSupportedException();
             }
         }
     }

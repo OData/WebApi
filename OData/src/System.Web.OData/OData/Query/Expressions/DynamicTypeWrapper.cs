@@ -19,12 +19,12 @@ namespace System.Web.OData.Query.Expressions
         /// <summary>
         /// Gets or sets the property container that contains the properties being expanded. 
         /// </summary>
-        public virtual PropertyContainer.NamedPropertyWithSameNext GroupByContainer { get; set; }
+        public virtual AggregationPropertyContainer GroupByContainer { get; set; }
 
         /// <summary>
         /// Gets or sets the property container that contains the properties being expanded. 
         /// </summary>
-        public virtual PropertyContainer.NamedPropertyWithSameNext Container { get; set; }
+        public virtual AggregationPropertyContainer Container { get; set; }
 
         public Dictionary<string, object> Values
         {

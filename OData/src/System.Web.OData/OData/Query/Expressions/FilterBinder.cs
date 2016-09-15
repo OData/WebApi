@@ -654,7 +654,7 @@ namespace System.Web.OData.Query.Expressions
                 }
             }
 
-            Type exprType = typeof(PropertyContainer.NamedPropertyWithSameNext);
+            Type exprType = typeof(AggregationPropertyContainer);
 
             if (prefix != null)
             {

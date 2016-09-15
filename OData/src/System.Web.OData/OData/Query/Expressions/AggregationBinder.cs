@@ -143,7 +143,7 @@ namespace System.Web.OData.Query.Expressions
                 }
 
                 var wrapperProperty = ResultClrType.GetProperty("Container");
-                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreateNextNamedPropertyContainer(properties)));
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(properties)));
             }
 
             var selectLambda =
@@ -340,7 +340,7 @@ namespace System.Web.OData.Query.Expressions
                 
                 var wrapperProperty = typeof(DynamicTypeWrapper).GetProperty("GroupByContainer");
                 List<MemberAssignment> wta = new List<MemberAssignment>();
-                wta.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreateNextNamedPropertyContainer(properties)));
+                wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(properties)));
                 groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(typeof(DynamicTypeWrapper)), wta), _lambdaParameter);
             }
             else
@@ -367,7 +367,7 @@ namespace System.Web.OData.Query.Expressions
                 {
                     var wrapperProperty = typeof(DynamicTypeWrapper).GetProperty("GroupByContainer");
                     List<MemberAssignment> wta = new List<MemberAssignment>();
-                    wta.Add(Expression.Bind(wrapperProperty, PropertyContainer.CreateNextNamedPropertyContainer(CreateGroupByMemberAssignments2(gProp.ChildTransformations))));
+                    wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(CreateGroupByMemberAssignments2(gProp.ChildTransformations))));
                     properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.MemberInit(Expression.New(typeof(DynamicTypeWrapper)), wta)));
                 }
             }

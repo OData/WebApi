@@ -99,6 +99,7 @@
     <Compile Include="OData\Formatter\Serialization\ODataSerializerProviderProxy.cs" />
     <Compile Include="OData\ODataQueryContextExtensions.cs" />
     <Compile Include="OData\Query\CountAttribute.cs" />
+    <Compile Include="OData\Query\Expressions\AggregationPropertyContainer.cs" />
     <Compile Include="OData\Query\SelectAttribute.cs" />
     <Compile Include="OData\Query\ExpandConfiguration.cs" />
     <Compile Include="OData\Query\QueryOptionSetting.cs" />

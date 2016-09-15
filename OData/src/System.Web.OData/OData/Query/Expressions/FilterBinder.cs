@@ -608,15 +608,15 @@ namespace System.Web.OData.Query.Expressions
         private MemberInitExpression ExtractContainerExpression(MethodCallExpression expression, string containerName)
         {
             var memberInitExpression = ((expression.Arguments[1] as UnaryExpression).Operand as LambdaExpression).Body as MemberInitExpression;
-            var containerAssigment = memberInitExpression.Bindings.FirstOrDefault(m => m.Member.Name == containerName) as MemberAssignment;
-            if (containerAssigment != null)
+            if (memberInitExpression != null)
             {
-                return containerAssigment.Expression as MemberInitExpression;
+                var containerAssigment = memberInitExpression.Bindings.FirstOrDefault(m => m.Member.Name == containerName) as MemberAssignment;
+                if (containerAssigment != null)
+                {
+                    return containerAssigment.Expression as MemberInitExpression;
+                }
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
 
         private static readonly Dictionary<string, Type> _typesCache = new Dictionary<string, Type>()

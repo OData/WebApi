@@ -601,7 +601,6 @@ namespace System.Web.OData.Query.Expressions
 
                 CollectAssigments(Expression.Property(source, "GroupByContainer"), ExtractContainerExpression(expression.Arguments[0] as MethodCallExpression, "GroupByContainer"));
                 CollectAssigments(Expression.Property(source, "Container"), ExtractContainerExpression(expression, "Container"));
-                //
             }
         }
 
@@ -656,15 +655,6 @@ namespace System.Web.OData.Query.Expressions
             }
 
             Type exprType = typeof(PropertyContainer.NamedPropertyWithSameNext);
-            //if (nextExpression == null)
-            //{
-            //    exprType = typeof(PropertyContainer.NamedProperty<>).MakeGenericType(resultType);
-            //}
-            //else
-            //{
-            //    exprType = typeof(PropertyContainer.NamedPropertyWithNext<>).MakeGenericType(resultType);
-            //}
-            //source = Expression.Convert(source, exprType);
 
             if (prefix != null)
             {

@@ -132,9 +132,6 @@ namespace System.Web.OData.Query.Expressions
                 wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty2, Expression.Property(Expression.Property(accum, "Key"), "GroupByContainer")));
             }
 
-            //wrapperTypeMemberAssignments = CreateSelectMemberAssigments(ResultClrType, propertyAccessor,
-            //    _groupingProperties);
-
             // Setting Container property when we have aggregation clauses
             if (_aggregateExpressions != null)
             {
@@ -142,9 +139,7 @@ namespace System.Web.OData.Query.Expressions
                 foreach (var aggExpression in _aggregateExpressions)
                 {
                     properties.Add(new NamedPropertyExpression(Expression.Constant(aggExpression.Alias), CreateAggregationExpression(accum, aggExpression)));
-                    //wrapperTypeMemberAssignments.Add(
-                    //    Expression.Bind(ResultClrType.GetMember(aggExpression.Alias).Single(),
-                    //        CreateAggregationExpression(accum, aggExpression)));
+                  
                 }
 
                 var wrapperProperty = ResultClrType.GetProperty("Container");

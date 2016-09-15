@@ -116,11 +116,15 @@ namespace System.Web.OData.Query.Expressions
             // Should return following expression
             // .Select($it => New DynamicType2() 
             //                  {
-            //                      Prop1 = $it.Prop1,
-            //                      Prop2 = $it.Prop2,
-            //                      Prop3 = $it.NavProp.Prop3
-            //                      ...
-            //                      Alias1 = $it.AsQuaryable().Sum(i => i.AggregatableProperty)
+            //                      GroupByContainer = $it.Key.GroupByContainer // If groupby section present
+            //                      Container => new AggregationPropertyContainer() {
+            //                          Name = "Alias1", 
+            //                          Value = $it.AsQuaryable().Sum(i => i.AggregatableProperty), 
+            //                          Next = new LastInChain() {
+            //                              Name = "Alias2",
+            //                              Value = $it.AsQuaryable().Sum(i => i.AggregatableProperty)
+            //                          }
+            //                      }
             //                  })
             var groupingType = typeof(IGrouping<,>).MakeGenericType(this._groupByClrType, this._elementType);
             ParameterExpression accum = Expression.Parameter(groupingType, "$it");
@@ -355,12 +359,20 @@ namespace System.Web.OData.Query.Expressions
             if (_groupingProperties != null && _groupingProperties.Any())
             {
                 // Generates expression
-                // .GroupBy($it => new DynamicType1()
+                // .GroupBy($it => new DynamicTypeWrapper()
                 //                                      {
-                //                                          Prop1 = $it.Prop1,
-                //                                          Prop2 = $it.Prop2,
-                //                                          Prop3 = $it.NavProp.Prop3
-                //                                          ...
+                //                                           GroupByContainer => new AggregationPropertyContainer() {
+                //                                               Name = "Prop1", 
+                //                                               Value = $it.Prop1,
+                //                                               Next = new AggregationPropertyContainer() {
+                //                                                   Name = "Prop2",
+                //                                                   Value = $it.Prop2, // int
+                //                                                   Next = new LastInChain() {
+                //                                                       Name = "Prop3",
+                //                                                       Value = $it.Prop3
+                //                                                   }
+                //                                               }
+                //                                           }
                 //                                      }) 
                 List<NamedPropertyExpression> properties = CreateGroupByMemberAssignments2(_groupingProperties);
 
@@ -373,7 +385,7 @@ namespace System.Web.OData.Query.Expressions
             else
             {
                 // We do not have properties to aggregate
-                // .GroupBy($it => new GroupByWrapper())
+                // .GroupBy($it => new NoGroupByWrapper())
                 groupLambda = Expression.Lambda(Expression.New(this._groupByClrType), this._lambdaParameter);
             }
 

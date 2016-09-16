@@ -45,11 +45,11 @@ namespace System.Web.OData.Query.Expressions
     /// </remakrs>
     internal class AggregationPropertyContainer : NamedProperty<object>
     {
-        public DynamicTypeWrapper NestedValue
+        public GroupByWrapper NestedValue
         {
             get
             {
-                return (DynamicTypeWrapper)this.Value;
+                return (GroupByWrapper)this.Value;
             }
             set
             {
@@ -102,7 +102,7 @@ namespace System.Web.OData.Query.Expressions
             Type namedPropertyType = null;
             if (next != null)
             {
-                if (property.Value.Type == typeof(DynamicTypeWrapper))
+                if (property.Value.Type == typeof(GroupByWrapper))
                 {
                     namedPropertyType = typeof(NestedProperty);
                 }
@@ -113,7 +113,7 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                if (property.Value.Type == typeof(DynamicTypeWrapper))
+                if (property.Value.Type == typeof(GroupByWrapper))
                 {
                     namedPropertyType = typeof(NestedPropertyLastInChain);
                 }
@@ -126,7 +126,7 @@ namespace System.Web.OData.Query.Expressions
 
             memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Name"), property.Name));
 
-            if (property.Value.Type == typeof(DynamicTypeWrapper))
+            if (property.Value.Type == typeof(GroupByWrapper))
             {
                 memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("NestedValue"), property.Value));
             }

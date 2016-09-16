@@ -25,7 +25,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "groupby((ProductName))",
-                ".GroupBy($it => new DynamicTypeWrapper() {GroupByContainer = new LastInChain() {Name = ProductName, Value = $it.ProductName, }, })"
+                ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = ProductName, Value = $it.ProductName, }, })"
                 + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
         }
 
@@ -34,7 +34,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "groupby((ProductName, SupplierID))",
-                ".GroupBy($it => new DynamicTypeWrapper() {GroupByContainer = new AggregationPropertyContainer() {Name = SupplierID, Value = $it.SupplierID, Next = new LastInChain() {Name = ProductName, Value = $it.ProductName, }, }, })"
+                ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new AggregationPropertyContainer() {Name = SupplierID, Value = $it.SupplierID, Next = new LastInChain() {Name = ProductName, Value = $it.ProductName, }, }, })"
                 + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
         }
 
@@ -43,7 +43,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "groupby((Category/CategoryName))",
-                ".GroupBy($it => new DynamicTypeWrapper() {GroupByContainer = new NestedPropertyLastInChain() {Name = Category, NestedValue = new DynamicTypeWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.Category.CategoryName, }, }, }, })"
+                ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new NestedPropertyLastInChain() {Name = Category, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.Category.CategoryName, }, }, }, })"
                 + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
         }
 
@@ -52,7 +52,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "groupby((Category/CategoryName, SupplierAddress/State))",
-                ".GroupBy($it => new DynamicTypeWrapper() {GroupByContainer = new NestedProperty() {Name = SupplierAddress, NestedValue = new DynamicTypeWrapper() {GroupByContainer = new LastInChain() {Name = State, Value = $it.SupplierAddress.State, }, }, Next = new NestedPropertyLastInChain() {Name = Category, NestedValue = new DynamicTypeWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.Category.CategoryName, }, }, }, }, })"
+                ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new NestedProperty() {Name = SupplierAddress, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = State, Value = $it.SupplierAddress.State, }, }, Next = new NestedPropertyLastInChain() {Name = Category, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.Category.CategoryName, }, }, }, }, })"
                 + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
         }
 
@@ -116,7 +116,7 @@ namespace System.Web.OData.Query.Expressions
         {
             var filters = VerifyQueryDeserialization(
                 "groupby((ProductName), aggregate(SupplierID with sum as SupplierID))",
-                ".GroupBy($it => new DynamicTypeWrapper() {GroupByContainer = new LastInChain() {Name = ProductName, Value = $it.ProductName, }, })"
+                ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = ProductName, Value = $it.ProductName, }, })"
                 + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, Container = new LastInChain() {Name = SupplierID, Value = Convert($it.AsQueryable().Sum($it => $it.SupplierID)), }, })");
         }
 

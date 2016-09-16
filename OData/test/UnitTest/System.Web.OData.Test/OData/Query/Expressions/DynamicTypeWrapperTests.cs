@@ -13,7 +13,7 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         {
             var expectedValue = "TestValue";
             var propName = "TestProp";
-            var wrapper = new DynamicTypeWrapper();
+            var wrapper = new GroupByWrapper();
             wrapper.GroupByContainer = new AggregationPropertyContainer()
             {
                 Name = propName,
@@ -30,7 +30,7 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         {
             var expectedValue = "TestValue";
             var propName = "TestProp";
-            var wrapper = new DynamicTypeWrapper();
+            var wrapper = new GroupByWrapper();
             wrapper.GroupByContainer = new AggregationPropertyContainer()
             {
                 Name = propName,
@@ -48,14 +48,14 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         {
             var expectedValue = "TestValue";
             var propName = "TestProp";
-            var wrapper = new DynamicTypeWrapper();
+            var wrapper = new GroupByWrapper();
             wrapper.GroupByContainer = new AggregationPropertyContainer()
             {
                 Name = propName,
                 Value = expectedValue
             };
 
-            var wrapper2 = new DynamicTypeWrapper();
+            var wrapper2 = new GroupByWrapper();
             wrapper2.GroupByContainer = new AggregationPropertyContainer()
             {
                 Name = propName,
@@ -70,14 +70,14 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         {
             var expectedValue = "TestValue";
             var propName = "TestProp";
-            var wrapper = new DynamicTypeWrapper();
+            var wrapper = new GroupByWrapper();
             wrapper.GroupByContainer = new AggregationPropertyContainer()
             {
                 Name = propName,
                 Value = expectedValue
             };
 
-            var wrapper2 = new DynamicTypeWrapper();
+            var wrapper2 = new GroupByWrapper();
             wrapper2.GroupByContainer = new AggregationPropertyContainer()
             {
                 Name = propName,

@@ -180,7 +180,6 @@
     <Compile Include="OData\ODataUriFunctions.cs" />
     <Compile Include="OData\Query\Expressions\UriFunctionsBinder.cs" />
     <Compile Include="OData\Query\Expressions\IdentityPropertyMapper.cs" />
-    <Compile Include="OData\Query\Expressions\AggregationDynamicTypeProvider.cs" />
     <Compile Include="OData\Query\DefaultQuerySettings.cs" />
     <Compile Include="OData\Query\IPropertyMapper.cs" />
     <Compile Include="OData\Query\ICountOptionCollection.cs" />

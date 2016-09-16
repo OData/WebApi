@@ -72,7 +72,7 @@ namespace System.Web.OData.Query.Expressions
                         }
                     }
 
-                    _groupByClrType = typeof(DynamicTypeWrapper);
+                    _groupByClrType = typeof(GroupByWrapper);
                     ResultClrType = typeof(AggregationWrapper);
                     break;
                 default:
@@ -377,10 +377,10 @@ namespace System.Web.OData.Query.Expressions
                 List<NamedPropertyExpression> properties = CreateGroupByMemberAssignments2(_groupingProperties);
 
                 
-                var wrapperProperty = typeof(DynamicTypeWrapper).GetProperty("GroupByContainer");
+                var wrapperProperty = typeof(GroupByWrapper).GetProperty("GroupByContainer");
                 List<MemberAssignment> wta = new List<MemberAssignment>();
                 wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(properties)));
-                groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(typeof(DynamicTypeWrapper)), wta), _lambdaParameter);
+                groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(typeof(GroupByWrapper)), wta), _lambdaParameter);
             }
             else
             {
@@ -404,10 +404,10 @@ namespace System.Web.OData.Query.Expressions
                 }
                 else
                 {
-                    var wrapperProperty = typeof(DynamicTypeWrapper).GetProperty("GroupByContainer");
+                    var wrapperProperty = typeof(GroupByWrapper).GetProperty("GroupByContainer");
                     List<MemberAssignment> wta = new List<MemberAssignment>();
                     wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(CreateGroupByMemberAssignments2(gProp.ChildTransformations))));
-                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.MemberInit(Expression.New(typeof(DynamicTypeWrapper)), wta)));
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.MemberInit(Expression.New(typeof(GroupByWrapper)), wta)));
                 }
             }
 
@@ -446,7 +446,7 @@ namespace System.Web.OData.Query.Expressions
                 return null;
             }
 
-            if (!typeof(DynamicTypeWrapper).IsAssignableFrom(baseQuery.ElementType))
+            if (!typeof(GroupByWrapper).IsAssignableFrom(baseQuery.ElementType))
             {
                 return null;
             }
@@ -507,7 +507,7 @@ namespace System.Web.OData.Query.Expressions
                     {
                         resultType = ((UnaryExpression)expr.Expression).Operand.Type;
                     }
-                    if (typeof(DynamicTypeWrapper).IsAssignableFrom(resultType))
+                    if (typeof(GroupByWrapper).IsAssignableFrom(resultType))
                     {
                         nestedExpression = expr.Expression;
                     }
@@ -521,7 +521,7 @@ namespace System.Web.OData.Query.Expressions
                 nameToAdd = prefix + "\\" + nameToAdd;
             }
 
-            if (typeof(DynamicTypeWrapper).IsAssignableFrom(resultType))
+            if (typeof(GroupByWrapper).IsAssignableFrom(resultType))
             {
                 flattenPropertyContainer.Add(nameToAdd, Expression.Property(source, "NestedValue"));
             }

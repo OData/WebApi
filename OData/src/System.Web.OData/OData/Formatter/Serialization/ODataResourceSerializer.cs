@@ -140,8 +140,6 @@ namespace System.Web.OData.Formatter.Serialization
             foreach (var prop in dynamicObject.Values)
             {
                 ODataProperty property = null;
-                //if (dynamicObject.TryGetPropertyValue(prop.Name, out value))
-                //{
                 if (prop.Value != null && EdmLibHelpers.IsDynamicTypeWrapper(prop.Value.GetType()))
                 {
                     IEdmProperty edmProperty = entityType.Properties()
@@ -161,7 +159,6 @@ namespace System.Web.OData.Formatter.Serialization
 
                     properties.Add(property);
                 }
-                //}
             }
             return properties;
         }

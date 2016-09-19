@@ -98,6 +98,8 @@ namespace System.Web.OData.Query.Expressions
 
         public IQueryable Bind(IQueryable query)
         {
+            Contract.Assert(query != null);
+
             this._linqToObjectMode = query.Provider.GetType().Namespace == Linq2ObjectsQueryProviderNamespace;
             this._baseQuery = query;
             this._flattenPropertyContainer = GetFlattenProperties(this._baseQuery, this._lambdaParameter);

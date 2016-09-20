@@ -15,15 +15,29 @@ namespace Microsoft.AspNetCore.OData.Routing
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataRoute"/> class.
         /// </summary>
-        /// <param name="target"></param>
-        /// <param name="routePrefix"></param>
-        /// <param name="constraint"></param>
-        /// <param name="resolver"></param>
+        /// <param name="target">The target router.</param>
+        /// <param name="routePrefix">The route prefix.</param>
+        /// <param name="constraint">The OData route constraint.</param>
+        /// <param name="resolver">The inline constraint resolver.</param>
         public ODataRoute(IRouter target, string routePrefix, ODataRouteConstraint constraint, IInlineConstraintResolver resolver)
             : base(target, GetRouteTemplate(routePrefix), inlineConstraintResolver: resolver)
         {
+            RoutePrefix = routePrefix;
+
+            RouteConstraint = constraint;
+
             Constraints.Add(ODataRouteConstants.ConstraintName, constraint);
         }
+
+        /// <summary>
+        /// Gets the route prefix.
+        /// </summary>
+        public string RoutePrefix { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="ODataRouteConstraint"/> on this route.
+        /// </summary>
+        public ODataRouteConstraint RouteConstraint { get; private set; }
 
         private static string GetRouteTemplate(string prefix)
         {

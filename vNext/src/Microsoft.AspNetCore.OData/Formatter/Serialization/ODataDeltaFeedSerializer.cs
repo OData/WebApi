@@ -5,7 +5,6 @@ using Microsoft.OData;
 using System;
 using System.Collections;
 using System.Diagnostics.Contracts;
-using System.Net.Http;
 using System.Runtime.Serialization;
 using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.OData.Edm;
@@ -26,8 +25,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <summary>
         /// Initializes a new instance of <see cref="ODataDeltaFeedSerializer"/>.
         /// </summary>
-        /// <param name="serializerProvider">The <see cref="ODataSerializerProvider"/> to use to write nested entries.</param>
-        public ODataDeltaFeedSerializer(ODataSerializerProvider serializerProvider)
+        /// <param name="serializerProvider">The <see cref="IODataSerializerProvider"/> to use to write nested entries.</param>
+        public ODataDeltaFeedSerializer(IODataSerializerProvider serializerProvider)
             : base(ODataPayloadKind.Delta, serializerProvider)
         {
         }
@@ -153,7 +152,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     case EdmDeltaEntityKind.Entry:
                         {
                             IEdmEntityTypeReference elementType = GetEntityType(feedType);
-                            ODataResourceSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType) as ODataResourceSerializer;
+                            ODataResourceSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType, writeContext.Context) as ODataResourceSerializer;
                             if (entrySerializer == null)
                             {
                                 throw new SerializationException(

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -15,105 +14,85 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
-    /// <summary>
-    /// The default <see cref="ODataSerializerProvider"/>.
-    /// </summary>
-    public class DefaultODataSerializerProvider : ODataSerializerProvider
+    public class DefaultODataSerializerProvider : IODataSerializerProvider
     {
-        // private readonly IServiceProvider _rootContainer;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultODataSerializerProvider"/> class.
-        /// </summary>
-        /// <param name="rootContainer">The root container.</param>
-        public DefaultODataSerializerProvider(/*IServiceProvider rootContainer*/)
-        {
-            /*
-            if (rootContainer == null)
-            {
-                throw Error.ArgumentNull("rootContainer");
-            }
-
-            _rootContainer = rootContainer;*/
-        }
-
-        public override IServiceProvider ServiceProvider { get; set; }
-
-        /// <inheritdoc />
-        public override ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmType)
+        public ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmType, HttpContext context)
         {
             if (edmType == null)
             {
                 throw Error.ArgumentNull("edmType");
             }
 
+            IServiceProvider provider = context.RequestServices;
+
             switch (edmType.TypeKind())
             {
                 case EdmTypeKind.Enum:
-                    return ServiceProvider.GetRequiredService<ODataEnumSerializer>();
+                    return provider.GetRequiredService<ODataEnumSerializer>();
 
                 case EdmTypeKind.Primitive:
-                    return ServiceProvider.GetRequiredService<ODataPrimitiveSerializer>();
+                    return provider.GetRequiredService<ODataPrimitiveSerializer>();
 
                 case EdmTypeKind.Collection:
                     IEdmCollectionTypeReference collectionType = edmType.AsCollection();
                     if (collectionType.Definition.IsDeltaFeed())
                     {
-                        return ServiceProvider.GetRequiredService<ODataDeltaFeedSerializer>();
+                        return provider.GetRequiredService<ODataDeltaFeedSerializer>();
                     }
                     else if (collectionType.ElementType().IsEntity() || collectionType.ElementType().IsComplex())
                     {
-                        return ServiceProvider.GetRequiredService<ODataResourceSetSerializer>();
+                        return provider.GetRequiredService<ODataResourceSetSerializer>();
                     }
                     else
                     {
-                        return ServiceProvider.GetRequiredService<ODataCollectionSerializer>();
+                        return provider.GetRequiredService<ODataCollectionSerializer>();
                     }
 
                 case EdmTypeKind.Complex:
                 case EdmTypeKind.Entity:
-                    return ServiceProvider.GetRequiredService<ODataResourceSerializer>();
+                    return provider.GetRequiredService<ODataResourceSerializer>();
 
                 default:
                     return null;
             }
         }
 
-        /// <inheritdoc />
-        public override ODataSerializer GetODataPayloadSerializer(Type type, HttpRequest request)
+        public ODataSerializer GetODataPayloadSerializer(Type type, HttpContext context)
         {
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
             }
-            if (request == null)
+            if (context == null)
             {
-                throw Error.ArgumentNull("request");
+                throw Error.ArgumentNull("context");
             }
 
-            EnsureServiceProvider(request);
+            IServiceProvider provider = context.RequestServices;
 
             // handle the special types.
             if (type == typeof(ODataServiceDocument))
             {
-                return ServiceProvider.GetRequiredService<ODataServiceDocumentSerializer>();
+                return provider.GetRequiredService<ODataServiceDocumentSerializer>();
             }
             else if (type == typeof(Uri) || type == typeof(ODataEntityReferenceLink))
             {
-                return ServiceProvider.GetRequiredService<ODataEntityReferenceLinkSerializer>();
+                return provider.GetRequiredService<ODataEntityReferenceLinkSerializer>();
             }
             else if (typeof(IEnumerable<Uri>).IsAssignableFrom(type) || type == typeof(ODataEntityReferenceLinks))
             {
-                return ServiceProvider.GetRequiredService<ODataEntityReferenceLinksSerializer>();
+                return provider.GetRequiredService<ODataEntityReferenceLinksSerializer>();
             }
             else if (type == typeof(ODataError) || type == typeof(HttpError))
             {
-                return ServiceProvider.GetRequiredService<ODataErrorSerializer>();
+                return provider.GetRequiredService<ODataErrorSerializer>();
             }
             else if (typeof(IEdmModel).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
             {
-                return ServiceProvider.GetRequiredService<ODataMetadataSerializer>();
+                return provider.GetRequiredService<ODataMetadataSerializer>();
             }
+
+            HttpRequest request = context.Request;
 
             // if it is not a special type, assume it has a corresponding EdmType.
             IEdmModel model = request.ODataProperties().Model;
@@ -126,27 +105,17 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     ODataRawValueMediaTypeMapping.IsRawValueRequest(request)) ||
                     ODataCountMediaTypeMapping.IsCountRequest(request))
                 {
-                    return ServiceProvider.GetRequiredService<ODataRawValueSerializer>();
+                    return provider.GetRequiredService<ODataRawValueSerializer>();
                 }
                 else
                 {
-                    return GetEdmTypeSerializer(edmType);
+                    return GetEdmTypeSerializer(edmType, context);
                 }
             }
             else
             {
                 return null;
             }
-        }
-
-        private void EnsureServiceProvider(HttpRequest request)
-        {
-            if (ServiceProvider != null)
-            {
-                return;
-            }
-
-            ServiceProvider = request.HttpContext.RequestServices;
         }
     }
 }

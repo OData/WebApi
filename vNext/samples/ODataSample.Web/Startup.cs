@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.OData.Edm;
 using ODataSample.Web.Models;
-using Microsoft.AspNetCore.OData.Builder;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Builder;
+using Microsoft.AspNetCore.OData.Routing.Conventions;
 
 namespace ODataSample.Web
 {
@@ -18,7 +22,14 @@ namespace ODataSample.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddOData();
+            // services.AddOData();
+            services.AddOData(options => options.RoutingConventions.Insert(0, new CustomRoutingConvention()));
+
+            /* How to add customer's routing convention
+            services.AddOData(
+                options =>
+                    options.RoutingConventions = new List<IODataRoutingConvention> {new CustomRoutingConvention()});
+            */
 
             services.AddSingleton<SampleContext>();
         }

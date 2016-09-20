@@ -1,11 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Reflection;
 using Microsoft.OData.Edm;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData;
@@ -30,8 +26,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// Initializes a new instance of the <see cref="ODataEdmTypeSerializer"/> class.
         /// </summary>
         /// <param name="payloadKind">The kind of OData payload that this serializer generates.</param>
-        /// <param name="serializerProvider">The <see cref="ODataSerializerProvider"/> to use to write inner objects.</param>
-        protected ODataEdmTypeSerializer(ODataPayloadKind payloadKind, ODataSerializerProvider serializerProvider)
+        /// <param name="serializerProvider">The <see cref="IODataSerializerProvider"/> to use to write inner objects.</param>
+        protected ODataEdmTypeSerializer(ODataPayloadKind payloadKind, IODataSerializerProvider serializerProvider)
             : this(payloadKind)
         {
             if (serializerProvider == null)
@@ -43,9 +39,9 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Gets the <see cref="ODataSerializerProvider"/> that can be used to write inner objects.
+        /// Gets the <see cref="IODataSerializerProvider"/> that can be used to write inner objects.
         /// </summary>
-        public ODataSerializerProvider SerializerProvider { get; private set; }
+        public IODataSerializerProvider SerializerProvider { get; private set; }
 
         /// <summary>
         /// Writes the given object specified by the parameter graph as a part of an existing OData message using the given

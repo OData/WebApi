@@ -22,7 +22,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// Initializes a new instance of the <see cref="ODataCollectionSerializer"/> class.
         /// </summary>
         /// <param name="serializerProvider">The serializer provider to use to serialize nested objects.</param>
-        public ODataCollectionSerializer(ODataSerializerProvider serializerProvider)
+        public ODataCollectionSerializer(IODataSerializerProvider serializerProvider)
             : base(ODataPayloadKind.Collection, serializerProvider)
         {
         }
@@ -154,7 +154,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     IEdmTypeReference actualType = writeContext.GetEdmType(item, item.GetType());
                     Contract.Assert(actualType != null);
 
-                    itemSerializer = itemSerializer ?? SerializerProvider.GetEdmTypeSerializer(actualType);
+                    itemSerializer = itemSerializer ?? SerializerProvider.GetEdmTypeSerializer(actualType, writeContext.Context);
                     if (itemSerializer == null)
                     {
                         throw new SerializationException(

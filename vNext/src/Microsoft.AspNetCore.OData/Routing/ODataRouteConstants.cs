@@ -16,7 +16,8 @@ namespace Microsoft.AspNetCore.OData.Routing
         /// <summary>
         /// Wildcard route template for the OData path route variable.
         /// </summary>
-        public static readonly string ODataPathTemplate = "{*" + ODataRouteConstants.ODataPath + "}";
+        //public static readonly string ODataPathTemplate = "{*" + ODataRouteConstants.ODataPath + "}";
+        public static readonly string ODataPathTemplate = "{" + ODataRouteConstants.ODataPath + "}";
 
         /// <summary>
         /// Parameter name to use for the OData path route constraint.
@@ -62,5 +63,30 @@ namespace Microsoft.AspNetCore.OData.Routing
         /// Route data key for the dynamic property name when manipulating open type.
         /// </summary>
         public static readonly string DynamicProperty = "dynamicProperty";
+
+        /// <summary>
+        /// "Get"
+        /// </summary>
+        public const string HttpGet = "GET";
+
+        /// <summary>
+        /// "Delete"
+        /// </summary>
+        public const string HttpDelete = "DELETE";
+
+        /// <summary>
+        /// "Patch"
+        /// </summary>
+        public const string HttpPatch = "PATCH";
+
+        /// <summary>
+        /// "Post"
+        /// </summary>
+        public const string HttpPost = "POST";
+
+        /// <summary>
+        /// "Put"
+        /// </summary>
+        public const string HttpPut = "PUT";
     }
 }

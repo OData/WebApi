@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using Microsoft.OData.Edm;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Routing.Template;
@@ -13,8 +14,6 @@ using ODL = Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Routing
 {
-    using System.Linq;
-
     /// <summary>
     /// Parses an OData path as an <see cref="ODataPath"/> and converts an <see cref="ODataPath"/> into an OData link.
     /// </summary>
@@ -64,6 +63,7 @@ namespace Microsoft.AspNetCore.OData.Routing
             {
                 throw Error.ArgumentNull("model");
             }
+
             if (odataPathTemplate == null)
             {
                 throw Error.ArgumentNull("odataPathTemplate");

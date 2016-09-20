@@ -46,6 +46,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 
             ODataSerializerContext context = resource.SerializerContext;
 
+            Context = context.Context;
             Request = context.Request;
             RequestContext = context.RequestContext;
             Url = context.Url;
@@ -70,6 +71,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             }
         }
 
+        public HttpContext Context { get; set; }
+
         /// <summary>
         /// Gets or sets the HTTP Request whose response is being serialized.
         /// </summary>
@@ -81,7 +84,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         public HttpContext RequestContext { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="UrlHelper"/> to use for generating OData links.
+        /// Gets or sets the <see cref="IUrlHelper"/> to use for generating OData links.
         /// </summary>
         public IUrlHelper Url { get; set; }
 

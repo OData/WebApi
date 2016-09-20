@@ -1,15 +1,17 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Linq;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.OData.Routing
 {
@@ -19,23 +21,23 @@ namespace Microsoft.AspNetCore.OData.Routing
     /// </summary>
     public class ODataActionSelector : IActionSelector
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly IActionSelector _selector;
-        private readonly IODataRoutingConvention _convention;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataActionSelector" /> class.
         /// </summary>
-        /// <param name="convention"></param>
+        /// <param name="serviceProvider"></param>
         /// <param name="decisionTreeProvider"></param>
         /// <param name="actionConstraintProviders"></param>
         /// <param name="loggerFactory"></param>
-        public ODataActionSelector(IODataRoutingConvention convention,
+        public ODataActionSelector(IServiceProvider serviceProvider,
             IActionSelectorDecisionTreeProvider decisionTreeProvider,
             ActionConstraintCache actionConstraintProviders,
             ILoggerFactory loggerFactory)
         {
+            _serviceProvider = serviceProvider;
             _selector = new ActionSelector(decisionTreeProvider, actionConstraintProviders, loggerFactory);
-            _convention = convention;
         }
 
         public bool HasValidAction(VirtualPathContext context)
@@ -48,11 +50,27 @@ namespace Microsoft.AspNetCore.OData.Routing
         {
             if (context.HttpContext.ODataProperties().IsValidODataRequest)
             {
-                var list = new List<ActionDescriptor>
+                var options = _serviceProvider.GetRequiredService<IOptions<ODataOptions>>().Value;
+
+                ActionDescriptor actionDescriptor = null;
+                foreach (var convention in options.RoutingConventions)
                 {
-                    _convention.SelectAction(context)
-                };
-                return list.AsReadOnly();
+                    actionDescriptor = convention.SelectAction(context);
+                    if (actionDescriptor != null)
+                    {
+                        break;
+                    }
+                }
+
+                if (actionDescriptor != null)
+                {
+                    var list = new List<ActionDescriptor>
+                    {
+                        actionDescriptor
+                    };
+
+                    return list.AsReadOnly();
+                }
             }
 
             return _selector.SelectCandidates(context);
@@ -65,6 +83,7 @@ namespace Microsoft.AspNetCore.OData.Routing
             {
                 return candidates.First();
             }
+
             return _selector.SelectBestCandidate(context, candidates);
         }
     }

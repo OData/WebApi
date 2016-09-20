@@ -8,25 +8,24 @@ using Microsoft.OData.Edm;
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
-    /// An ODataSerializerProvider is a factory for creating <see cref="ODataSerializer"/>s.
+    /// An serializer factory for creating <see cref="ODataSerializer"/>s.
     /// </summary>
-    public abstract class ODataSerializerProvider
+    public interface IODataSerializerProvider
     {
-        public abstract IServiceProvider ServiceProvider { get; set; }
-
         /// <summary>
         /// Gets an <see cref="ODataEdmTypeSerializer"/> for the given edmType.
         /// </summary>
         /// <param name="edmType">The <see cref="IEdmTypeReference"/>.</param>
+        /// <param name="context">.</param>
         /// <returns>The <see cref="ODataSerializer"/>.</returns>
-        public abstract ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmType);
+        ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmType, HttpContext context);
 
         /// <summary>
         /// Gets an <see cref="ODataSerializer"/> for the given <paramref name="type"/>.
         /// </summary>
         /// <param name="type">The <see cref="Type"/> for which the serializer is being requested.</param>
-        /// <param name="request">The request for which the response is being serialized.</param>
+        /// <param name="context">.</param>
         /// <returns>The <see cref="ODataSerializer"/> for the given type.</returns>
-        public abstract ODataSerializer GetODataPayloadSerializer( Type type, HttpRequest request);
+        ODataSerializer GetODataPayloadSerializer(Type type, HttpContext context);
     }
 }

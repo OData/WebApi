@@ -5,10 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Net.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Formatter.Deserialization;
@@ -79,6 +77,18 @@ namespace Microsoft.AspNetCore.OData
             set
             {
                 SerializerContext.Request = value;
+            }
+        }
+
+        public HttpContext Context
+        {
+            get
+            {
+                return SerializerContext.Context;
+            }
+            set
+            {
+                SerializerContext.Context = value;
             }
         }
 

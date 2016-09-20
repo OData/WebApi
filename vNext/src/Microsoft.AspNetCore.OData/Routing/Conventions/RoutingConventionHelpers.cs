@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter;
@@ -19,10 +19,8 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 {
     internal static class RoutingConventionHelpers
     {
-        public static string SelectAction(this IEdmOperation operation, ILookup<string, ActionDescriptor> actionMap, bool isCollection)
+        public static ControllerActionDescriptor SelectAction(this IEdmOperation operation, IEnumerable<ControllerActionDescriptor> controllerActionDescriptors, bool isCollection)
         {
-            Contract.Assert(actionMap != null);
-
             if (operation == null)
             {
                 return null;
@@ -55,8 +53,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                     ? operation.Name + "OnCollectionOf" + entityType.Name
                     : operation.Name + "On" + entityType.Name;
 
-                return "TODO: ";
-                // return actionMap.FindMatchingAction(targetActionName, operation.Name);
+                return controllerActionDescriptors.FindMatchingAction(targetActionName, operation.Name);
             }
 
             return null;
@@ -153,12 +150,13 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             return true;
         }
 
-        public static void AddKeyValueToRouteData(this HttpContext httpContext, KeySegment segment, string keyName = "key")
+        public static void AddKeyValueToRouteData(this RouteContext routeContext, KeySegment segment, string keyName = "key")
         {
-            Contract.Assert(httpContext != null);
+            Contract.Assert(routeContext != null);
             Contract.Assert(segment != null);
 
-            IDictionary<string, object> routingConventionsStore = httpContext.Request.ODataProperties().RoutingConventionsStore;
+            HttpRequest request = routeContext.HttpContext.Request;
+            IDictionary<string, object> routingConventionsStore = request.ODataProperties().RoutingConventionsStore;
 
             IEdmEntityType entityType = segment.EdmType as IEdmEntityType;
             Contract.Assert(entityType != null);
@@ -191,7 +189,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                     newKeyName = keyName;
                 }
 
-                AddKeyValues(newKeyName, keyValuePair.Value, keyProperty.Type, httpContext.GetRouteData().Values, routingConventionsStore);
+                AddKeyValues(newKeyName, keyValuePair.Value, keyProperty.Type, routeContext.RouteData.Values, routingConventionsStore);
             }
         }
 
@@ -227,12 +225,13 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             odataValues[prefixName] = odataValue;
         }
 
-        public static void AddFunctionParameterToRouteData(this HttpContext httpContext, OperationSegment functionSegment)
+        public static void AddFunctionParameterToRouteData(this RouteContext routeContext, OperationSegment functionSegment)
         {
-            Contract.Assert(httpContext != null);
+            Contract.Assert(routeContext != null);
             Contract.Assert(functionSegment != null);
 
-            IDictionary<string, object> routingConventionsStore = httpContext.Request.ODataProperties().RoutingConventionsStore;
+            HttpRequest request = routeContext.HttpContext.Request;
+            IDictionary<string, object> routingConventionsStore = request.ODataProperties().RoutingConventionsStore;
 
             IEdmFunction function = functionSegment.Operations.First() as IEdmFunction;
             if (function == null)
@@ -245,7 +244,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                 string name = parameter.Name;
                 object value = functionSegment.GetParameterValue(name);
 
-                AddFunctionParameters(function, name, value, httpContext.GetRouteData().Values,
+                AddFunctionParameters(function, name, value, routeContext.RouteData.Values,
                     routingConventionsStore, null);
             }
         }
@@ -335,46 +334,6 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 
             return parameterMappings;
         }
-        /*
-        public static object TranslateNode(object node)
-        {
-            Contract.Assert(node != null);
-
-            ConstantNode constantNode = node as ConstantNode;
-            if (constantNode != null)
-            {
-                UriTemplateExpression uriTemplateExpression = constantNode.Value as UriTemplateExpression;
-                if (uriTemplateExpression != null)
-                {
-                    return uriTemplateExpression.LiteralText;
-                }
-
-                // Make the enum prefix free to work.
-                ODataEnumValue enumValue = constantNode.Value as ODataEnumValue;
-                if (enumValue != null)
-                {
-                    return ODataUriUtils.ConvertToUriLiteral(enumValue, ODataVersion.V4);
-                }
-
-                return constantNode.LiteralText;
-            }
-
-            ConvertNode convertNode = node as ConvertNode;
-            if (convertNode != null)
-            {
-                return TranslateNode(convertNode.Source);
-            }
-
-            ParameterAliasNode parameterAliasNode = node as ParameterAliasNode;
-            if (parameterAliasNode != null)
-            {
-                return parameterAliasNode.Alias;
-            }
-
-            //return node.ToString();
-            throw Error.NotSupported(SRResources.CannotRecognizeNodeType, typeof(ODataPathSegmentHandler),
-                node.GetType().FullName);
-        }*/
 
         public static bool IsRouteParameter(string parameterName)
         {

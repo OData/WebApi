@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.OData.Edm;
@@ -24,7 +25,7 @@ namespace Microsoft.AspNetCore.OData.Routing
         private readonly IEdmModel _model;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataRoute" /> class.
+        /// Initializes a new instance of the <see cref="ODataRouteConstraint" /> class.
         /// </summary>
         /// <param name="routePrefix">The route prefix.</param>
         /// <param name="model">The Edm model.</param>
@@ -34,6 +35,17 @@ namespace Microsoft.AspNetCore.OData.Routing
             _model = model;
         }
 
+        /// <summary>
+        /// Determines whether this instance equals a specified route.
+        /// </summary>
+        /// <param name="httpContext">The http context.</param>
+        /// <param name="route">The route to compare.</param>
+        /// <param name="routeKey">The name of the route key.</param>
+        /// <param name="values">A list of parameter values.</param>
+        /// <param name="routeDirection">The route direction.</param>
+        /// <returns>
+        /// True if this instance equals a specified route; otherwise, false.
+        /// </returns> 
         public bool Match(HttpContext httpContext, IRouter route, string routeKey, RouteValueDictionary values,
             RouteDirection routeDirection)
         {
@@ -79,17 +91,21 @@ namespace Microsoft.AspNetCore.OData.Routing
                     // Therefore a straightforward string comparison won't always work.  See RemoveODataPath() for
                     // details of chosen approach.
                     HttpRequest request = httpContext.Request;
+
+                    string serviceRoot = GetServiceRoot(request);
+
                     // string requestLeftPart = request.Path..GetLeftPart(UriPartial.Path);
-                    string serviceRoot = request.Path;
+                    //string serviceRoot = request.Path;
+                    /*
                     if (!String.IsNullOrEmpty(odataPathString))
                     {
                         serviceRoot = RemoveODataPath(serviceRoot, odataPathString);
-                    }
+                    }*/
 
                     // As mentioned above, we also need escaped ODataPath.
                     // The requestLeftPart and request.RequestUri.Query are both escaped.
                     // The ODataPath for service documents is empty.
-                    string oDataPathAndQuery = serviceRoot.Substring(serviceRoot.Length);
+                    string oDataPathAndQuery = odataPathValue.ToString();
                     if (request.QueryString.HasValue)
                     {
                         // Ensure path handler receives the query string as well as the path.
@@ -106,9 +122,6 @@ namespace Microsoft.AspNetCore.OData.Routing
 
                     IODataPathHandler pathHandler = httpContext.RequestServices.GetRequiredService<IODataPathHandler>();
 
-                    // TODO: 
-                    serviceRoot = "http://any";
-                    oDataPathAndQuery = odataPathString;
                     odataPath = pathHandler.Parse(_model, serviceRoot, oDataPathAndQuery);
                 }
                 catch (ODataException odataException)
@@ -132,6 +145,22 @@ namespace Microsoft.AspNetCore.OData.Routing
                 // This constraint only applies to incomming request.
                 return true;
             }
+        }
+
+        private string GetServiceRoot(HttpRequest request)
+        {
+            StringBuilder sb =  new StringBuilder(request.Scheme);
+            sb.Append("://")
+                .Append(request.Host);
+
+            if (!String.IsNullOrEmpty(_routePrefix))
+            {
+                sb.Append("/" + _routePrefix);
+            }
+
+            sb.Append("/");
+
+            return sb.ToString();
         }
 
         // Find the substring of the given URI string before the given ODataPath.  Tests rely on the following:

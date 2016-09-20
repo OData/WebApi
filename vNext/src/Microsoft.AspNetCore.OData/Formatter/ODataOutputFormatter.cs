@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Edm;
 using System;
@@ -13,25 +16,22 @@ using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
 using ODataPath = Microsoft.AspNetCore.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
+    /// <summary>
+    ///  Writes an object in a given OData format to the output stream.
+    /// </summary>
     public class ODataOutputFormatter : TextOutputFormatter
     {
         private readonly ODataMessageWriterSettings _messageWriterSettings;
-        private readonly ODataSerializerProvider _serializerProvider;
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
 
-        public ODataOutputFormatter(/*IServiceProvider provider,*/ ODataPayloadKind payloadKinds)
-            : this(new DefaultODataSerializerProvider(), new[] { payloadKinds })
-        {
-
-        }
-
-        public ODataOutputFormatter(ODataSerializerProvider serializerProvider, IEnumerable<ODataPayloadKind> payloadKinds)
+        public ODataOutputFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
         {
             _messageWriterSettings = new ODataMessageWriterSettings
             {
@@ -42,7 +42,6 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 //AutoComputePayloadMetadataInJson = true,
             };
 
-            _serializerProvider = serializerProvider;
             _payloadKinds = payloadKinds;
         }
 
@@ -77,8 +76,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             }
             var type = value.GetType();
 
-            _serializerProvider.ServiceProvider = context.HttpContext.RequestServices;
-            ODataSerializer serializer = GetSerializer(type, value, model, _serializerProvider, request);
+            ODataSerializer serializer = GetSerializer(type, value, context);
 
             IUrlHelper urlHelper = context.HttpContext.UrlHelper();
 
@@ -126,6 +124,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             {
                 ODataSerializerContext writeContext = new ODataSerializerContext()
                 {
+                    Context = context.HttpContext,
                     Request = request,
                     RequestContext = request.HttpContext,
                     Url = urlHelper,
@@ -201,6 +200,9 @@ namespace Microsoft.AspNetCore.OData.Formatter
             {
                 type = context.Object.GetType();
             }
+
+            OutputFormatterWriteContext outputContext = context as OutputFormatterWriteContext;
+
             var request = ((OutputFormatterWriteContext)context).HttpContext.Request;
 
             if (request != null)
@@ -218,7 +220,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                     }
                     else
                     {
-                        payloadKind = GetClrObjectResponsePayloadKind(type, request);
+                        payloadKind = GetClrObjectResponsePayloadKind(type, outputContext);
                     }
 
                     return payloadKind == null ? false : _payloadKinds.Contains(payloadKind.Value);
@@ -228,9 +230,11 @@ namespace Microsoft.AspNetCore.OData.Formatter
             return false;
         }
 
-        private ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider, HttpRequest request)
+        private ODataSerializer GetSerializer(Type type, object value, OutputFormatterWriteContext context)
         {
             ODataSerializer serializer;
+
+            IODataSerializerProvider serviceProvider = context.HttpContext.RequestServices.GetRequiredService<IODataSerializerProvider>();
 
             IEdmObject edmObject = value as IEdmObject;
             if (edmObject != null)
@@ -242,7 +246,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                         edmObject.GetType().FullName, typeof(IEdmObject).Name));
                 }
 
-                serializer = serializerProvider.GetEdmTypeSerializer(edmType);
+                serializer = serviceProvider.GetEdmTypeSerializer(edmType, context.HttpContext);
                 if (serializer == null)
                 {
                     string message = Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString(), typeof(ODataOutputFormatter).Name);
@@ -253,7 +257,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             {
                 // get the most appropriate serializer given that we support inheritance.
                 type = value == null ? type : value.GetType();
-                serializer = serializerProvider.GetODataPayloadSerializer(type, request);
+                serializer = serviceProvider.GetODataPayloadSerializer(type, context.HttpContext);
                 if (serializer == null)
                 {
                     string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataOutputFormatter).Name);
@@ -365,7 +369,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             return null;
         }
 
-        private ODataPayloadKind? GetClrObjectResponsePayloadKind(Type type, HttpRequest request)
+        private ODataPayloadKind? GetClrObjectResponsePayloadKind(Type type, OutputFormatterWriteContext context)
         {
             // SingleResult<T> should be serialized as T.
             //if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SingleResult<>))
@@ -373,7 +377,10 @@ namespace Microsoft.AspNetCore.OData.Formatter
             //    type = type.GetGenericArguments()[0];
             //}
 
-            ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(type, request);
+            IODataSerializerProvider provider =
+                context.HttpContext.RequestServices.GetRequiredService<IODataSerializerProvider>();
+
+            ODataSerializer serializer = provider.GetODataPayloadSerializer(type, context.HttpContext);
             return serializer == null ? null : (ODataPayloadKind?)serializer.ODataPayloadKind;
         }
     }

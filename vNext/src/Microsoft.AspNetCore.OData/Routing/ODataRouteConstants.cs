@@ -16,8 +16,7 @@ namespace Microsoft.AspNetCore.OData.Routing
         /// <summary>
         /// Wildcard route template for the OData path route variable.
         /// </summary>
-        //public static readonly string ODataPathTemplate = "{*" + ODataRouteConstants.ODataPath + "}";
-        public static readonly string ODataPathTemplate = "{" + ODataRouteConstants.ODataPath + "}";
+        public static readonly string ODataPathTemplate = "{*" + ODataRouteConstants.ODataPath + "}";
 
         /// <summary>
         /// Parameter name to use for the OData path route constraint.

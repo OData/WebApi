@@ -4,6 +4,7 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.OData;
     using ODataSample.Web.Models;
+    using Microsoft.AspNetCore.OData.Routing;
 
     [EnableQuery]
     [Route("odata/Customers")]
@@ -37,8 +38,9 @@
         }
 
         // GET odata//FindCustomersWithProduct(productId=1)
-        [HttpGet("FindCustomersWithProduct(ProductId={productId})")]
-        public IActionResult FindCustomersWithProduct(int productId)
+        // [HttpGet("FindCustomersWithProduct(ProductId={productId})")]
+        [ODataRoute("Customers/Default.FindCustomersWithProductId(productId={productId})")]
+        public IActionResult FindCustomersWithProductAny(int productId)
         {
             var customer = _sampleContext.FindCustomersWithProduct(productId);
             if (customer == null)
@@ -47,6 +49,19 @@
             }
 
             return new ObjectResult(customer);
+        }
+
+        [ODataRoute("Customers({customerId})/Default.GetCustomerName(format={format})")]
+        public IActionResult GetCustomerNameAny(int customerId, string format)
+        {
+            var customer = _sampleContext.FindCustomer(customerId);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            string name = customer.FirstName + format + customer.LastName;
+            return Ok(name);
         }
 
         // PUT odata//FindCustomersWithProduct(productId=1)

@@ -19,7 +19,9 @@ namespace ODataSample.Web.Models
 
         private readonly List<Customer> _customers = new List<Customer>
         {
-            new Customer { CustomerId = 1, FirstName = "Var1", LastName = "Var2" }
+            new Customer { CustomerId = 1, FirstName = "Mark", LastName = "Stand" },
+            new Customer { CustomerId = 2, FirstName = "Peter", LastName = "Huward" },
+            new Customer { CustomerId = 3, FirstName = "Sam", LastName = "Xu" }
         };
 
         public SampleContext()

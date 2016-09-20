@@ -100,10 +100,12 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                         routeContext.HttpContext.RequestServices.GetRequiredService<IODataPathTemplateHandler>();
                 }
 
+                IEdmModel model = routeContext.HttpContext.RequestServices.GetRequiredService<ODataProperties>().Model;
+
                 IEnumerable<ControllerActionDescriptor> actionDescriptors =
                     ActionDescriptorCollectionProvider.ActionDescriptors.Items.OfType<ControllerActionDescriptor>();
 
-                _attributeMappings = BuildAttributeMappings(actionDescriptors);
+                _attributeMappings = BuildAttributeMappings(actionDescriptors, model);
             }
 
             HttpRequest request = routeContext.HttpContext.Request;
@@ -176,18 +178,18 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             }
         }
 
-        private IEnumerable<ODataPathTemplate> GetODataPathTemplates(string prefix, ControllerActionDescriptor descriptor)
+        private IEnumerable<ODataPathTemplate> GetODataPathTemplates(string prefix, ControllerActionDescriptor descriptor, IEdmModel mode)
         {
             Contract.Assert(descriptor != null);
 
             IEnumerable<ODataRouteAttribute> routeAttributes = descriptor.MethodInfo.GetCustomAttributes<ODataRouteAttribute>(inherit: false);
             return
                 routeAttributes
-                .Select(route => GetODataPathTemplate(prefix, route.PathTemplate, descriptor))
+                .Select(route => GetODataPathTemplate(prefix, route.PathTemplate, descriptor, mode))
                 .Where(template => template != null);
         }
 
-        private ODataPathTemplate GetODataPathTemplate(string prefix, string pathTemplate, ControllerActionDescriptor action)
+        private ODataPathTemplate GetODataPathTemplate(string prefix, string pathTemplate, ControllerActionDescriptor action, IEdmModel model)
         {
             if (prefix != null && !pathTemplate.StartsWith("/", StringComparison.Ordinal))
             {
@@ -215,8 +217,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 
             try
             {
-
-                IEdmModel model = new EdmModel(); // TODO:
+                //IEdmModel model = new EdmModel(); // TODO:
                 odataPathTemplate = ODataPathTemplateHandler.ParseTemplate(model, pathTemplate);
             }
             catch (ODataException e)
@@ -233,7 +234,8 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 
         // TODO: do we need to use the [FromServices]
         //private IDictionary<ODataPathTemplate, ActionDescriptor> BuildAttributeMappings([FromServices] IActionDescriptorCollectionProvider actionCollectionProvider)
-        private IDictionary<ODataPathTemplate, ControllerActionDescriptor> BuildAttributeMappings(IEnumerable<ControllerActionDescriptor> actionDescriptors)
+        private IDictionary<ODataPathTemplate, ControllerActionDescriptor> BuildAttributeMappings(IEnumerable<ControllerActionDescriptor> actionDescriptors,
+            IEdmModel model)
         {
             Dictionary<ODataPathTemplate, ControllerActionDescriptor> attributeMappings =
                 new Dictionary<ODataPathTemplate, ControllerActionDescriptor>();
@@ -247,7 +249,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 
                 foreach (string prefix in GetODataRoutePrefixes(actionDescriptor))
                 {
-                    IEnumerable<ODataPathTemplate> pathTemplates = GetODataPathTemplates(prefix, actionDescriptor);
+                    IEnumerable<ODataPathTemplate> pathTemplates = GetODataPathTemplates(prefix, actionDescriptor, model);
                     foreach (ODataPathTemplate pathTemplate in pathTemplates)
                     {
                         attributeMappings.Add(pathTemplate, actionDescriptor);

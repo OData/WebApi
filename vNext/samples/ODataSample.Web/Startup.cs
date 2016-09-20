@@ -56,6 +56,17 @@ namespace ODataSample.Web
             var builder = new ODataConventionModelBuilder(assemblyProvider);
             builder.EntitySet<Customer>("Customers");
             builder.EntitySet<Product>("Products");
+
+            // Functions
+            var function = builder.EntityType<Customer>().Collection.Function("FindCustomersWithProductId");
+            function.Parameter<int>("productId");
+            function.ReturnsFromEntitySet<Customer>("Customers");
+
+
+            function = builder.EntityType<Customer>().Function("GetCustomerName");
+            function.Parameter<string>("format");
+            function.Returns<string>();
+
             return builder.GetEdmModel();
         }
     }

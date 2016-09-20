@@ -1,17 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
-using Microsoft.OData.Edm;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.OData.Common;
-using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
@@ -23,7 +15,20 @@ namespace Microsoft.AspNetCore.OData.Formatter
     {
         public override Task<InputFormatterResult> ReadRequestBodyAsync(InputFormatterContext context, Encoding encoding)
         {
-            throw new NotImplementedException();
+            try
+            {
+                object value = ReadRequestBody(context);
+                return InputFormatterResult.SuccessAsync(value);
+            }
+            catch (Exception ex)
+            {
+                return InputFormatterResult.FailureAsync();
+            }
+        }
+
+        private object ReadRequestBody(InputFormatterContext contex)
+        {
+            return null;
         }
     }
 }

@@ -31,6 +31,9 @@ namespace Microsoft.AspNetCore.OData.Formatter
         private readonly ODataMessageWriterSettings _messageWriterSettings;
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataOutputFormatter"/> class.
+        /// </summary>
         public ODataOutputFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
         {
             _messageWriterSettings = new ODataMessageWriterSettings

@@ -68,12 +68,8 @@ namespace Microsoft.AspNetCore.OData.Routing
                 }
 
                 string odataPathString = odataPathValue as string;
-                if (odataPathString == null)
-                {
-                    return false;
-                }
-
                 ODataPath odataPath;
+
                 try
                 {
                     // Service root is the current RequestUri, less the query string and the ODataPath (always the
@@ -105,7 +101,12 @@ namespace Microsoft.AspNetCore.OData.Routing
                     // As mentioned above, we also need escaped ODataPath.
                     // The requestLeftPart and request.RequestUri.Query are both escaped.
                     // The ODataPath for service documents is empty.
-                    string oDataPathAndQuery = odataPathValue.ToString();
+                    string oDataPathAndQuery = String.Empty;
+                    if (!String.IsNullOrEmpty(odataPathString))
+                    {
+                        oDataPathAndQuery = odataPathString;
+                    }
+
                     if (request.QueryString.HasValue)
                     {
                         // Ensure path handler receives the query string as well as the path.

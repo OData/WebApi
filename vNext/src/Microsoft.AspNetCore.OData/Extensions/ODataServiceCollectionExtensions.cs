@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.OData.Abstracts;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Formatter.Deserialization;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -42,12 +43,14 @@ namespace Microsoft.AspNetCore.OData.Extensions
             // SerializerProvider
             services.AddSingleton<IODataSerializerProvider, DefaultODataSerializerProvider>();
 
+            // Deserializer provider
+            services.AddSingleton<IODataDeserializerProvider, DefaultODataDeserializerProvider>();
 
             services.AddMvcCore(options =>
             {
                 options.InputFormatters.Insert(0, new ModernInputFormatter());
 
-                foreach (var outputFormatter in ODataOutputFormatters.Create(/*services.BuildServiceProvider()*/))
+                foreach (var outputFormatter in ODataOutputFormatters.Create())
                 {
                     options.OutputFormatters.Insert(0, outputFormatter);
                 }
@@ -179,6 +182,13 @@ namespace Microsoft.AspNetCore.OData.Extensions
 
         private static void AddDefaultDeserializers(IServiceCollection services)
         {
+            services.AddSingleton<ODataResourceDeserializer>();
+            services.AddSingleton<ODataEnumDeserializer>();
+            services.AddSingleton<ODataPrimitiveDeserializer>();
+            services.AddSingleton<ODataResourceSetDeserializer>();
+            services.AddSingleton<ODataCollectionDeserializer>();
+            services.AddSingleton<ODataEntityReferenceLinkDeserializer>();
+            services.AddSingleton<ODataActionPayloadDeserializer>();
         }
     }
 }

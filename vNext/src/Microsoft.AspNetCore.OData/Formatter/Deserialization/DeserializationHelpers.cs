@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
     internal static class DeserializationHelpers
     {
         internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource,
-            ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
+            IODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
             IEdmProperty edmProperty = resourceType.FindProperty(property.Name);
 
@@ -234,7 +234,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
             }
         }
 
-        internal static object ConvertValue(object oDataValue, ref IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider,
+        internal static object ConvertValue(object oDataValue, ref IEdmTypeReference propertyType, IODataDeserializerProvider deserializerProvider,
             ODataDeserializerContext readContext, out EdmTypeKind typeKind)
         {
             if (oDataValue == null)
@@ -332,7 +332,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
         }
 
         private static object ConvertCollectionValue(ODataCollectionValue collection,
-            ref IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider,
+            ref IEdmTypeReference propertyType, IODataDeserializerProvider deserializerProvider,
             ODataDeserializerContext readContext)
         {
             IEdmCollectionTypeReference collectionType;
@@ -363,7 +363,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
         }
 
         private static object ConvertEnumValue(ODataEnumValue enumValue, ref IEdmTypeReference propertyType,
-            ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
+            IODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
             IEdmEnumTypeReference edmEnumType;
             if (propertyType == null)

@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
         /// Initializes a new instance of the <see cref="ODataResourceSetDeserializer"/> class.
         /// </summary>
         /// <param name="deserializerProvider">The deserializer provider to use to read inner objects.</param>
-        public ODataResourceSetDeserializer(ODataDeserializerProvider deserializerProvider)
+        public ODataResourceSetDeserializer(IODataDeserializerProvider deserializerProvider)
             : base(ODataPayloadKind.ResourceSet, deserializerProvider)
         {
         }

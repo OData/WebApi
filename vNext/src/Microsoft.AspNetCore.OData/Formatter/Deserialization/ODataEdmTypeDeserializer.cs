@@ -25,8 +25,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
         /// Initializes a new instance of the <see cref="ODataEdmTypeDeserializer"/> class.
         /// </summary>
         /// <param name="payloadKind">The kind of OData payload this deserializer handles.</param>
-        /// <param name="deserializerProvider">The <see cref="ODataDeserializerProvider"/>.</param>
-        protected ODataEdmTypeDeserializer(ODataPayloadKind payloadKind, ODataDeserializerProvider deserializerProvider)
+        /// <param name="deserializerProvider">The <see cref="IODataDeserializerProvider"/>.</param>
+        protected ODataEdmTypeDeserializer(ODataPayloadKind payloadKind, IODataDeserializerProvider deserializerProvider)
             : this(payloadKind)
         {
             if (deserializerProvider == null)
@@ -38,9 +38,9 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
         }
 
         /// <summary>
-        /// The <see cref="ODataDeserializerProvider"/> to use for deserializing inner items.
+        /// The <see cref="IODataDeserializerProvider"/> to use for deserializing inner items.
         /// </summary>
-        public ODataDeserializerProvider DeserializerProvider { get; private set; }
+        public IODataDeserializerProvider DeserializerProvider { get; private set; }
 
         /// <summary>
         /// Deserializes the item into a new object of type corresponding to <paramref name="edmType"/>.

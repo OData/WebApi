@@ -10,14 +10,14 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
     /// <summary>
     /// Represents a factory that creates an <see cref="ODataDeserializer"/>.
     /// </summary>
-    public abstract class ODataDeserializerProvider
+    public interface IODataDeserializerProvider
     {
         /// <summary>
         /// Gets the <see cref="ODataEdmTypeDeserializer"/> for the given EDM type.
         /// </summary>
         /// <param name="edmType">The EDM type.</param>
         /// <returns>An <see cref="ODataEdmTypeDeserializer"/> that can deserialize the given EDM type.</returns>
-        public abstract ODataEdmTypeDeserializer GetEdmTypeDeserializer(IEdmTypeReference edmType);
+        ODataEdmTypeDeserializer GetEdmTypeDeserializer(IEdmTypeReference edmType);
 
         /// <summary>
         /// Gets an <see cref="ODataDeserializer"/> for the given type.
@@ -26,6 +26,6 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
         /// <param name="type">The CLR type.</param>
         /// <param name="request">The request being deserialized.</param>
         /// <returns>An <see cref="ODataDeserializer"/> that can deserialize the given type.</returns>
-        public abstract ODataDeserializer GetODataDeserializer(IEdmModel model, Type type, HttpRequest request);
+        ODataDeserializer GetODataDeserializer(IEdmModel model, Type type, HttpRequest request);
     }
 }

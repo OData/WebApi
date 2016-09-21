@@ -20,7 +20,7 @@ using Microsoft.OData.Edm.Vocabularies;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
-    internal static class EdmLibHelpers
+    public static class EdmLibHelpers
     {
         private static readonly EdmCoreModel _coreModel = EdmCoreModel.Instance;
 

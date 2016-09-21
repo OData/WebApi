@@ -192,6 +192,11 @@ namespace Microsoft.AspNetCore.OData
         {
             List<Type> result = new List<Type>();
 
+            if (assembliesResolver == null)
+            {
+                return result;
+            }
+
             // Go through all assemblies referenced by the application and search for types matching a predicate
             IEnumerable<Assembly> assemblies = assembliesResolver.CandidateAssemblies;
             foreach (Assembly assembly in assemblies)

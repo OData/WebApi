@@ -95,11 +95,11 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <c>true</c> has more relaxed
         /// inference rules and also treats all types as entity types. This constructor is intended for use by unit testing only.</remarks>
         public ODataConventionModelBuilder(IAssemblyProvider assemblyProvider, bool isQueryCompositionMode)
-        {
+        {/*
             if (assemblyProvider == null)
             {
                 throw Error.ArgumentNull("assemblyProvider");
-            }
+            }*/
 
             Initialize(assemblyProvider, isQueryCompositionMode);
         }

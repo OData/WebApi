@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.OData.Builder
     /// <summary>
     /// This class builds a cache that allows for efficient look up of bindable operation by EntityType. 
     /// </summary>
-    internal class BindableOperationFinder
+    public class BindableOperationFinder
     {
         private Dictionary<IEdmEntityType, List<IEdmOperation>> _map = new Dictionary<IEdmEntityType, List<IEdmOperation>>();
 

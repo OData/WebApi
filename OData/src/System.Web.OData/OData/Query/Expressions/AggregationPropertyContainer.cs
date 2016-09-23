@@ -69,6 +69,17 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
+        public override object GetValue()
+        {
+            // Value is object and when Value is populated form the DB by EF or other ORM, it will not auto converted to null as in case of real type
+            if (Value == DBNull.Value)
+            {
+                return null;
+            }
+
+            return base.GetValue();
+        }
+
         private class LastInChain : AggregationPropertyContainer
         {
         }

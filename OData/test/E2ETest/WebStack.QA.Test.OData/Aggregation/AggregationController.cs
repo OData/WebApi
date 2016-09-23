@@ -48,6 +48,23 @@ namespace WebStack.QA.Test.OData.Aggregation
                 _db.Customers.Add(customer);
             }
 
+            _db.Customers.Add(new Customer()
+            {
+                Id = 10,
+                Name = null,
+                Address = new Address
+                {
+                    Name = "City1" ,
+                    Street = "Street",
+                },
+                Order = new Order
+                {
+                    Id = 10,
+                    Name = "Order" + 10 % 2,
+                    Price = 0
+                },
+            });
+
             _db.SaveChanges();
         }
 

@@ -46,14 +46,18 @@ namespace WebStack.QA.Test.OData.Aggregation
             HttpResponseMessage response = client.SendAsync(request).Result;
 
             // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var result = response.Content.ReadAsAsync<JObject>().Result;
+            System.Console.WriteLine(result);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            
             var results = result["value"] as JArray;
-            Assert.Equal(2, results.Count);
-            Assert.Equal("2000", results[0]["TotalPrice"].ToString());
-            Assert.Equal("Customer0", results[0]["Name"].ToString());
-            Assert.Equal("2500", results[1]["TotalPrice"].ToString());
-            Assert.Equal("Customer1", results[1]["Name"].ToString());
+            Assert.Equal(3, results.Count);
+            Assert.Equal("0", results[0]["TotalPrice"].ToString());
+            Assert.Equal(null, results[0]["Name"]);
+            Assert.Equal("2000", results[1]["TotalPrice"].ToString());
+            Assert.Equal("Customer0", results[1]["Name"].ToString());
+            Assert.Equal("2500", results[2]["TotalPrice"].ToString());
+            Assert.Equal("Customer1", results[2]["Name"].ToString());
         }
 
         [Fact]
@@ -76,7 +80,7 @@ namespace WebStack.QA.Test.OData.Aggregation
             var result = response.Content.ReadAsAsync<JObject>().Result;
             var results = result["value"] as JArray;
             Assert.Equal(2, results.Count);
-            Assert.Equal("20", results[0]["TotalId"].ToString());
+            Assert.Equal("30", results[0]["TotalId"].ToString());
             Assert.Equal("25", results[1]["TotalId"].ToString());
             var order0 = results[0]["Order"] as JObject;
             var order1 = results[1]["Order"] as JObject;
@@ -105,7 +109,7 @@ namespace WebStack.QA.Test.OData.Aggregation
             var results = result["value"] as JArray;
             Assert.Equal(2, results.Count);
             Assert.Equal("20", results[0]["TotalId"].ToString());
-            Assert.Equal("25", results[1]["TotalId"].ToString());
+            Assert.Equal("35", results[1]["TotalId"].ToString());
             var address0 = results[0]["Address"] as JObject;
             var address1 = results[1]["Address"] as JObject;
             Assert.Equal("City0", address0["Name"].ToString());
@@ -132,13 +136,16 @@ namespace WebStack.QA.Test.OData.Aggregation
             System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var results = result["value"] as JArray;
-            Assert.Equal(2, results.Count);
-            Assert.Equal("20", results[0]["TotalId"].ToString());
-            Assert.Equal("25", results[1]["TotalId"].ToString());
+            Assert.Equal(3, results.Count);
+            Assert.Equal("10", results[0]["TotalId"].ToString());
+            Assert.Equal("20", results[1]["TotalId"].ToString());
+            Assert.Equal("25", results[2]["TotalId"].ToString());
             var order0 = results[0]["Order"] as JObject;
             var order1 = results[1]["Order"] as JObject;
+            var order2 = results[2]["Order"] as JObject;
             Assert.Equal("Order0", order0["Name"].ToString());
-            Assert.Equal("Order1", order1["Name"].ToString());
+            Assert.Equal("Order0", order1["Name"].ToString());
+            Assert.Equal("Order1", order2["Name"].ToString());
         }
 
         [Fact]
@@ -190,11 +197,13 @@ namespace WebStack.QA.Test.OData.Aggregation
             System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var results = result["value"] as JArray;
-            Assert.Equal(2, results.Count);
-            Assert.Equal("2000", results[0]["TotalAmount"].ToString());
-            Assert.Equal("2500", results[1]["TotalAmount"].ToString());
-            Assert.Equal("Customer0", results[0]["Name"].ToString());
-            Assert.Equal("Customer1", results[1]["Name"].ToString());
+            Assert.Equal(3, results.Count);
+            Assert.Equal("0", results[0]["TotalAmount"].ToString());
+            Assert.Equal("2000", results[1]["TotalAmount"].ToString());
+            Assert.Equal("2500", results[2]["TotalAmount"].ToString());
+            Assert.Equal(null, results[0]["Name"]);
+            Assert.Equal("Customer0", results[1]["Name"].ToString());
+            Assert.Equal("Customer1", results[2]["Name"].ToString());
         }
 
         [Theory]
@@ -228,11 +237,11 @@ namespace WebStack.QA.Test.OData.Aggregation
 
         [Theory]
         [InlineData("?$apply=aggregate(Order/Price with sum as Result)", "4500")]
-        [InlineData("?$apply=aggregate(Order/Price with min as Result)", "100")]
+        [InlineData("?$apply=aggregate(Order/Price with min as Result)", "0")]
         [InlineData("?$apply=aggregate(Order/Price with max as Result)", "900")]
-        [InlineData("?$apply=aggregate(Order/Price with average as Result)", "500")]
-        [InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)", "9")]
-        [InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)&$orderby=Result", "9")]
+        [InlineData("?$apply=aggregate(Order/Price with average as Result)", "450")]
+        [InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)", "10")]
+        [InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)&$orderby=Result", "10")]
         public void AggregateMethodWorks(string query, string expectedResult)
         {
             // Arrange

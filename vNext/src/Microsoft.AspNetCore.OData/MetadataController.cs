@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
@@ -18,14 +19,7 @@ namespace Microsoft.AspNetCore.OData
     // [Route("odata/$metadata")]
     public class MetadataController : Controller
     {
-        private readonly IEdmModel _model;
         private static readonly Version _defaultEdmxVersion = new Version(4, 0);
-
-        public MetadataController([NotNull]ODataProperties odataProperties)
-        {
-            this._model = odataProperties.Model;
-            this._model.SetEdmxVersion(_defaultEdmxVersion);
-        }
 
         /// <summary>
         /// Generates the OData $metadata document.
@@ -35,7 +29,7 @@ namespace Microsoft.AspNetCore.OData
             Justification = "Property not appropriate")]
         public IEdmModel GetMetadata()
         {
-            return _model;
+            return GetModel();
         }
 
         /// <summary>
@@ -46,7 +40,7 @@ namespace Microsoft.AspNetCore.OData
             Justification = "Property not appropriate")]
         public ODataServiceDocument GetServiceDocument()
         {
-            IEdmModel model = this._model;
+            IEdmModel model = GetModel();
             ODataServiceDocument serviceDocument = new ODataServiceDocument();
             IEdmEntityContainer container = model.EntityContainer;
 
@@ -106,6 +100,18 @@ namespace Microsoft.AspNetCore.OData
             };
 
             return info;
+        }
+
+        private IEdmModel GetModel()
+        {
+            IEdmModel model = Request.ODataFeature().Model;
+            if (model == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
+            }
+
+            model.SetEdmxVersion(_defaultEdmxVersion);
+            return model;
         }
     }
 }

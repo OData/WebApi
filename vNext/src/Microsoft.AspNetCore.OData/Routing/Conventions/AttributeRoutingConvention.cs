@@ -100,7 +100,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                         routeContext.HttpContext.RequestServices.GetRequiredService<IODataPathTemplateHandler>();
                 }
 
-                IEdmModel model = routeContext.HttpContext.RequestServices.GetRequiredService<ODataProperties>().Model;
+                IEdmModel model = routeContext.HttpContext.ODataFeature().Model;
 
                 IEnumerable<ControllerActionDescriptor> actionDescriptors =
                     ActionDescriptorCollectionProvider.ActionDescriptors.Items.OfType<ControllerActionDescriptor>();
@@ -109,11 +109,11 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             }
 
             HttpRequest request = routeContext.HttpContext.Request;
-            ODataPath odataPath = routeContext.HttpContext.Request.ODataProperties().Path;
+            ODataPath odataPath = routeContext.HttpContext.ODataFeature().Path;
             Dictionary<string, object> values = new Dictionary<string, object>();
 
             var routeData = routeContext.RouteData;
-            var routingConventionsStore = request.ODataProperties().RoutingConventionsStore;
+            var routingConventionsStore = request.ODataFeature().RoutingConventionsStore;
 
             foreach (KeyValuePair<ODataPathTemplate, ControllerActionDescriptor> attributeMapping in _attributeMappings)
             {

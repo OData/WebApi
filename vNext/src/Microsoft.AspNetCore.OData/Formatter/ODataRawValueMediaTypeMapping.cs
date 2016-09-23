@@ -42,7 +42,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
         internal static bool IsRawValueRequest(HttpRequest request)
         {
-            ODataPath path = request.ODataProperties().Path;
+            ODataPath path = request.ODataFeature().Path;
             return path != null && path.Segments.LastOrDefault() is ValueSegment;
         }
 

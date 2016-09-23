@@ -87,14 +87,14 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 
             if (writeContext.Request != null)
             {
-                if (writeContext.Request.ODataProperties().NextLink != null)
+                if (writeContext.Context.ODataFeature().NextLink != null)
                 {
-                    collectionStart.NextPageLink = writeContext.Request.ODataProperties().NextLink;
+                    collectionStart.NextPageLink = writeContext.Context.ODataFeature().NextLink;
                 }
 
-                if (writeContext.Request.ODataProperties().TotalCount != null)
+                if (writeContext.Context.ODataFeature().TotalCount != null)
                 {
-                    collectionStart.Count = writeContext.Request.ODataProperties().TotalCount;
+                    collectionStart.Count = writeContext.Context.ODataFeature().TotalCount;
                 }
             }
 

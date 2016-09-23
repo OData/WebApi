@@ -156,7 +156,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             Contract.Assert(segment != null);
 
             HttpRequest request = routeContext.HttpContext.Request;
-            IDictionary<string, object> routingConventionsStore = request.ODataProperties().RoutingConventionsStore;
+            IDictionary<string, object> routingConventionsStore = request.ODataFeature().RoutingConventionsStore;
 
             IEdmEntityType entityType = segment.EdmType as IEdmEntityType;
             Contract.Assert(entityType != null);
@@ -231,7 +231,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             Contract.Assert(functionSegment != null);
 
             HttpRequest request = routeContext.HttpContext.Request;
-            IDictionary<string, object> routingConventionsStore = request.ODataProperties().RoutingConventionsStore;
+            IDictionary<string, object> routingConventionsStore = request.ODataFeature().RoutingConventionsStore;
 
             IEdmFunction function = functionSegment.Operations.First() as IEdmFunction;
             if (function == null)

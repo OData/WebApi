@@ -3,14 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using ODataPath = Microsoft.AspNetCore.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNetCore.OData
-{
+{/*
     public class ODataProperties
     {
         internal const string ODataServiceVersionHeader = "OData-Version";
@@ -35,9 +34,9 @@ namespace Microsoft.AspNetCore.OData
         public string RoutePrefix { get; set; }
 
         /// <summary>
-        /// Gets the data store used by <see cref="IODataRoutingConvention"/>s to store any custom route data.
+        /// Gets the data store used to store any custom route data.
         /// </summary>
         /// <value>Initially an empty <c>IDictionary&lt;string, object&gt;</c>.</value>
         public IDictionary<string, object> RoutingConventionsStore { get; } = new Dictionary<string, object>();
-    }
+    }*/
 }

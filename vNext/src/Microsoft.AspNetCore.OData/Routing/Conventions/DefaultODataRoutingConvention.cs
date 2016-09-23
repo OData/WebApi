@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 
         public ActionDescriptor SelectAction(RouteContext routeContext)
         {
-            var odataPath = routeContext.HttpContext.Request.ODataProperties().Path;
+            var odataPath = routeContext.HttpContext.Request.ODataFeature().Path;
             var controllerName = string.Empty;
             var methodName = routeContext.HttpContext.Request.Method;
             var routeTemplate = string.Empty;
@@ -50,7 +50,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                 {
                     // Handling unbound functions without related entity set
                     controllerName = operationImportSegment.EntitySet != null ?
-                        operationImportSegment.EntitySet.Name : routeContext.HttpContext.Request.ODataProperties().RoutePrefix;
+                        operationImportSegment.EntitySet.Name : routeContext.HttpContext.Request.ODataFeature().RoutePrefix;
                     var edmOperationImport = operationImportSegment.OperationImports.FirstOrDefault();
                     if (edmOperationImport != null)
                     {

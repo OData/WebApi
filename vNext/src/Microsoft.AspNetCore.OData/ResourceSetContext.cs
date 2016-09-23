@@ -19,9 +19,9 @@ namespace Microsoft.AspNetCore.OData
         public HttpRequest Request { get; set; }
 
         /// <summary>
-        /// Gets or sets the request context.
+        /// Gets or sets the <see cref="HttpContext"/>.
         /// </summary>
-        public HttpContext RequestContext { get; set; }
+        public HttpContext Context { get; set; }
 
         /// <summary>
         /// Gets the <see cref="IEdmEntitySetBase"/> this instance belongs to.
@@ -29,7 +29,7 @@ namespace Microsoft.AspNetCore.OData
         public IEdmEntitySetBase EntitySetBase { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="UrlHelper"/> to be used for generating links while serializing this
+        /// Gets or sets the <see cref="IUrlHelper"/> to be used for generating links while serializing this
         /// feed instance.
         /// </summary>
         public IUrlHelper Url { get; set; }
@@ -46,7 +46,7 @@ namespace Microsoft.AspNetCore.OData
         {
             get
             {
-                return Request.ODataProperties().Model;
+                return Context.ODataFeature().Model;
             }
         }
     }

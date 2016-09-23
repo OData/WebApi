@@ -29,7 +29,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 
             // TODO: do we need to match the action parameters? to match ODataActionParameters or one by one?
 
-            ODataPath odataPath = routeContext.HttpContext.Request.ODataProperties().Path;
+            ODataPath odataPath = routeContext.HttpContext.ODataFeature().Path;
             HttpRequest request = routeContext.HttpContext.Request;
             string httpMethod = request.Method.ToUpperInvariant();
             if (httpMethod == ODataRouteConstants.HttpPost)

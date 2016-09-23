@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.AspNetCore.OData.Routing.Conventions;
+using Microsoft.AspNetCore.Routing;
 
 namespace ODataSample.Web
 {
@@ -40,15 +41,20 @@ namespace ODataSample.Web
 
             IAssemblyProvider provider = app.ApplicationServices.GetRequiredService<IAssemblyProvider>();
             IEdmModel model = GetEdmModel(provider);
-            
-            app.UseOData("odata", model);
+            IEdmModel model2 = GetPeopleEdmModel(provider);
 
-            /*
-            app.UseOData<ISampleService>("odata");
+            // Single
+            app.UseMvc(builder => builder.MapODataRoute("odata", model));
+
+            // Multiple: Option-1
             app.UseMvc(builder =>
             {
-                builder.MapODataRoute<ISampleService>("odata");
-            });*/
+                builder.MapODataRoute("a", model);
+                builder.MapODataRoute(model2);
+            });
+
+            // Multiple: Option-2
+            app.UseMvc(builder => builder.MapODataRoute("odata1", model).MapODataRoute(model2));
         }
 
         private static IEdmModel GetEdmModel(IAssemblyProvider assemblyProvider)
@@ -66,6 +72,14 @@ namespace ODataSample.Web
             function = builder.EntityType<Customer>().Function("GetCustomerName");
             function.Parameter<string>("format");
             function.Returns<string>();
+
+            return builder.GetEdmModel();
+        }
+
+        private static IEdmModel GetPeopleEdmModel(IAssemblyProvider assemblyProvider)
+        {
+            var builder = new ODataConventionModelBuilder(assemblyProvider);
+            builder.EntitySet<Person>("People");
 
             return builder.GetEdmModel();
         }

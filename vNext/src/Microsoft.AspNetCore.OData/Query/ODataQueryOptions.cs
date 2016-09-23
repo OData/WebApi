@@ -239,7 +239,7 @@ namespace Microsoft.AspNetCore.OData.Query
                     case "$expand":
                         RawValues.Expand = kvp.Value;
                         // TODO Parse the select statement if any
-                        Request.ODataProperties().SelectExpandClause = _queryOptionParser.ParseSelectAndExpand();
+                        Request.ODataFeature().SelectExpandClause = _queryOptionParser.ParseSelectAndExpand();
                         SelectExpand = new SelectExpandQueryOption(string.Empty, kvp.Value, Context, _queryOptionParser, Request);
                         break;
                     case "$format":

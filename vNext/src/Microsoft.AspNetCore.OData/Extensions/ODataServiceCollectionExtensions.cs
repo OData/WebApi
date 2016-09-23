@@ -4,7 +4,6 @@
 using System;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Routing;
-using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.OData.Abstracts;
 using Microsoft.AspNetCore.OData.Common;
@@ -13,6 +12,7 @@ using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Microsoft.OData;
 
 namespace Microsoft.AspNetCore.OData.Extensions
 {
@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
         /// Adds essential OData services to the specified <see cref="IServiceCollection" />.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
-        /// <returns>An <see cref="IODataCoreBuilder"/> that can be used to further configure the MVC services.</returns>
+        /// <returns>An <see cref="IODataCoreBuilder"/> that can be used to further configure the OData services.</returns>
         public static IODataCoreBuilder AddOData(this IServiceCollection services)
         {
             if (services == null)
@@ -33,12 +33,12 @@ namespace Microsoft.AspNetCore.OData.Extensions
                 throw Error.ArgumentNull(nameof(services));
             }
 
+            // add the default OData lib services into service collection.
+            IContainerBuilder builder = new DefaultContainerBuilder(services);
+            builder.AddDefaultODataServices();
+
             // Options
             services.TryAddEnumerable(ServiceDescriptor.Transient<IConfigureOptions<ODataOptions>, ODataOptionsSetup>());
-
-            services.AddScoped<ODataProperties>();
-
-            //services.AddTransient<IConfigureOptions<ODataOptions>, ODataOptionsSetup>();
 
             // SerializerProvider
             services.AddSingleton<IODataSerializerProvider, DefaultODataSerializerProvider>();
@@ -57,17 +57,12 @@ namespace Microsoft.AspNetCore.OData.Extensions
                 //options.OutputFormatters.Insert(0, new ModernOutputFormatter());
             });
 
-
             services.AddSingleton<IActionSelector, ODataActionSelector>();
-            // services.AddSingleton<IODataRoutingConvention, DefaultODataRoutingConvention>();
             services.AddSingleton<IETagHandler, DefaultODataETagHandler>();
-
-            // Routing Conventions
-            // services.AddDefaultRoutingConventions();
 
             // Routing
             services.AddSingleton<IODataPathHandler, DefaultODataPathHandler>();
-            services.AddSingleton<IODataPathTemplateHandler, DefaultODataPathHandler>();
+            services.AddSingleton<IODataPathTemplateHandler, DefaultODataPathTemplateHandler>();
 
             // Assembly
             services.AddSingleton<IAssemblyProvider, DefaultAssemblyProvider>();
@@ -119,42 +114,6 @@ namespace Microsoft.AspNetCore.OData.Extensions
             where T : class
         {
             builder.Register<T>(prefix);
-        }
-
-        public static void ConfigureOData(
-            [NotNull] this IServiceCollection services,
-            [NotNull] Action<ODataOptions> setupAction)
-        {
-            services.Configure(setupAction);
-        }
-
-        private static IServiceCollection AddDefaultRoutingConventions(this IServiceCollection services)
-        {
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataRoutingConvention, AttributeRoutingConvention>());
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataRoutingConvention, MetadataRoutingConvention>());
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataRoutingConvention, EntitySetRoutingConvention>());
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataRoutingConvention, SingletonRoutingConvention>());
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataRoutingConvention, EntityRoutingConvention>());
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataRoutingConvention, NavigationRoutingConvention>());
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataRoutingConvention, PropertyRoutingConvention>());
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataRoutingConvention, DynamicPropertyRoutingConvention>());
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataRoutingConvention, RefRoutingConvention>());
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataRoutingConvention, ActionRoutingConvention>());
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataRoutingConvention, FunctionRoutingConvention>());
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataRoutingConvention, UnmappedRequestRoutingConvention>());
-
-            return services;
         }
 
         internal static void AddODataCoreServices(this IServiceCollection services)

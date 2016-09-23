@@ -203,9 +203,9 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 }
                 else if (writeContext.Request != null)
                 {
-                    feed.NextPageLink = writeContext.Request.ODataProperties().NextLink;
+                    feed.NextPageLink = writeContext.Context.ODataFeature().NextLink;
 
-                    long? countValue = writeContext.Request.ODataProperties().TotalCount;
+                    long? countValue = writeContext.Context.ODataFeature().TotalCount;
                     if (countValue.HasValue)
                     {
                         feed.Count = countValue.Value;

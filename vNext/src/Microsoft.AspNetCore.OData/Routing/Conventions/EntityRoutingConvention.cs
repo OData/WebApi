@@ -27,7 +27,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                 throw Error.ArgumentNull("routeContext");
             }
 
-            ODataPath odataPath = routeContext.HttpContext.Request.ODataProperties().Path;
+            ODataPath odataPath = routeContext.HttpContext.Request.ODataFeature().Path;
             HttpRequest request = routeContext.HttpContext.Request;
 
             if (odataPath.PathTemplate == "~/entityset/key" ||

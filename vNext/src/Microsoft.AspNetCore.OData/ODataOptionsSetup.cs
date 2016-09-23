@@ -11,10 +11,6 @@ namespace Microsoft.AspNetCore.OData
     /// </summary>
     public class ODataOptionsSetup : IConfigureOptions<ODataOptions>
     {
-        public static void ConfigureOData(ODataOptions options)
-        {
-        }
-
         public void Configure(ODataOptions options)
         {
             // Set up the default routing conventions

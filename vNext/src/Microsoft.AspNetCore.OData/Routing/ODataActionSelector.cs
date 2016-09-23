@@ -48,7 +48,7 @@ namespace Microsoft.AspNetCore.OData.Routing
         /// <inheritdoc />
         public IReadOnlyList<ActionDescriptor> SelectCandidates(RouteContext context)
         {
-            if (context.HttpContext.ODataProperties().IsValidODataRequest)
+            if (context.HttpContext.ODataFeature().IsValidODataRequest)
             {
                 var options = _serviceProvider.GetRequiredService<IOptions<ODataOptions>>().Value;
 
@@ -79,7 +79,7 @@ namespace Microsoft.AspNetCore.OData.Routing
         /// <inheritdoc />
         public ActionDescriptor SelectBestCandidate(RouteContext context, IReadOnlyList<ActionDescriptor> candidates)
         {
-            if (context.HttpContext.ODataProperties().IsValidODataRequest)
+            if (context.HttpContext.ODataFeature().IsValidODataRequest)
             {
                 return candidates.First();
             }

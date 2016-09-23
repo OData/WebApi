@@ -4,6 +4,7 @@
 using System;
 using System.Text;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.OData.Abstracts;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.AspNetCore.OData.Common;
@@ -122,7 +123,6 @@ namespace Microsoft.AspNetCore.OData.Routing
                     }
 
                     IODataPathHandler pathHandler = httpContext.RequestServices.GetRequiredService<IODataPathHandler>();
-
                     odataPath = pathHandler.Parse(_model, serviceRoot, oDataPathAndQuery);
                 }
                 catch (ODataException odataException)
@@ -132,14 +132,19 @@ namespace Microsoft.AspNetCore.OData.Routing
 
                 if (odataPath != null)
                 {
-                    httpContext.ODataProperties().Model = _model;
-                    httpContext.ODataProperties().RoutePrefix = _routePrefix;
-                    httpContext.ODataProperties().Path = odataPath;
-                    httpContext.ODataProperties().IsValidODataRequest = true;
+                    IODataFeature odataFeature = httpContext.ODataFeature();
+                    odataFeature.Model = _model;
+                    odataFeature.IsValidODataRequest = true;
+                    odataFeature.Path = odataPath;
+                    odataFeature.RoutePrefix = _routePrefix;
                     return true;
                 }
-
-                return false;
+                else
+                {
+                    IODataFeature odataFeature = httpContext.ODataFeature();
+                    odataFeature.IsValidODataRequest = false;
+                    return false;
+                }
             }
             else
             {

@@ -55,10 +55,11 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
         private void WriteResponseBody(OutputFormatterWriteContext context)
         {
+            HttpContext httpContext = context.HttpContext;
             HttpRequest request = context.HttpContext.Request;
             HttpResponse response = context.HttpContext.Response;
 
-            IEdmModel model = request.ODataProperties().Model;
+            IEdmModel model = context.HttpContext.ODataFeature().Model;
             if (model == null)
             {
                 throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
@@ -83,7 +84,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
             IUrlHelper urlHelper = context.HttpContext.UrlHelper();
 
-            ODataPath path = request.ODataProperties().Path;
+            ODataPath path = httpContext.ODataFeature().Path;
             IEdmNavigationSource targetNavigationSource = path == null ? null : path.NavigationSource;
 
             string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(request);
@@ -104,7 +105,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             Uri baseAddress = GetBaseAddress(request);
             ODataMessageWriterSettings writerSettings = _messageWriterSettings.Clone();
             writerSettings.BaseUri = baseAddress;
-            writerSettings.Version = ODataProperties.DefaultODataVersion;
+            writerSettings.Version = ODataVersion.V4;
             writerSettings.Validations = writerSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
 
             string metadataLink = urlHelper.CreateODataLink(request, MetadataSegment.Instance);
@@ -118,7 +119,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 ServiceRoot = baseAddress,
 
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
-                SelectAndExpand = request.ODataProperties().SelectExpandClause,
+                SelectAndExpand = httpContext.ODataFeature().SelectExpandClause,
                 Path = (path == null) ? null : path.ODLPath
                 //Path = (path == null || IsOperationPath(path)) ? null : path.ODLPath,
             };
@@ -128,8 +129,6 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 ODataSerializerContext writeContext = new ODataSerializerContext()
                 {
                     Context = context.HttpContext,
-                    Request = request,
-                    RequestContext = request.HttpContext,
                     Url = urlHelper,
                     NavigationSource = targetNavigationSource,
                     Model = model,
@@ -137,7 +136,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                     SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.ResourceSet,
                     Path = path,
                     MetadataLevel = ODataMediaTypes.GetMetadataLevel(MediaTypeHeaderValue.Parse(context.ContentType.Value)),
-                    SelectExpandClause = request.ODataProperties().SelectExpandClause,
+                    SelectExpandClause = request.ODataFeature().SelectExpandClause,
                 };
 
                 serializer.WriteObject(graph, type, messageWriter, writeContext);
@@ -185,8 +184,8 @@ namespace Microsoft.AspNetCore.OData.Formatter
             //}
 
             response.Headers.Append(
-                ODataProperties.ODataServiceVersionHeader,
-                ODataUtils.ODataVersionToString(ODataProperties.DefaultODataVersion));
+                ODataFeature.ODataServiceVersionHeader,
+                ODataUtils.ODataVersionToString(ODataFeature.DefaultODataVersion));
 
             base.WriteResponseHeaders(context);
         }
@@ -210,7 +209,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
             if (request != null)
             {
-                IEdmModel model = request.ODataProperties().Model;
+                IEdmModel model = request.ODataFeature().Model;
                 if (model != null)
                 {
                     ODataPayloadKind? payloadKind = null;

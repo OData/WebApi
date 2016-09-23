@@ -95,7 +95,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             HttpRequest request = context.Request;
 
             // if it is not a special type, assume it has a corresponding EdmType.
-            IEdmModel model = request.ODataProperties().Model;
+            IEdmModel model = request.ODataFeature().Model;
             ClrTypeCache typeMappingCache = model.GetTypeMappingCache();
             IEdmTypeReference edmType = typeMappingCache.GetEdmType(type, model);
 
@@ -103,7 +103,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             {
                 if (((edmType.IsPrimitive() || edmType.IsEnum()) &&
                     ODataRawValueMediaTypeMapping.IsRawValueRequest(request)) ||
-                    ODataCountMediaTypeMapping.IsCountRequest(request))
+                    ODataCountMediaTypeMapping.IsCountRequest(context))
                 {
                     return provider.GetRequiredService<ODataRawValueSerializer>();
                 }

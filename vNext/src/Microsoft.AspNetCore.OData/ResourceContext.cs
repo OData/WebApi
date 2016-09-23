@@ -74,10 +74,6 @@ namespace Microsoft.AspNetCore.OData
             {
                 return SerializerContext.Request;
             }
-            set
-            {
-                SerializerContext.Request = value;
-            }
         }
 
         public HttpContext Context

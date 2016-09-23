@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.Routing;
 
 namespace Microsoft.AspNetCore.OData.Routing
@@ -22,10 +23,13 @@ namespace Microsoft.AspNetCore.OData.Routing
         public ODataRoute(IRouter target, string routePrefix, ODataRouteConstraint constraint, IInlineConstraintResolver resolver)
             : base(target, GetRouteTemplate(routePrefix), inlineConstraintResolver: resolver)
         {
+            if (constraint == null)
+            {
+                throw Error.ArgumentNull("constraint");
+            }
+
             RoutePrefix = routePrefix;
-
             RouteConstraint = constraint;
-
             Constraints.Add(ODataRouteConstants.ConstraintName, constraint);
         }
 

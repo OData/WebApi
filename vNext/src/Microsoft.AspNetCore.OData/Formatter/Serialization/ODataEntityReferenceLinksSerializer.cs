@@ -55,7 +55,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 
                     if (writeContext.Request != null)
                     {
-                        entityReferenceLinks.Count = writeContext.Request.ODataProperties().TotalCount;
+                        entityReferenceLinks.Count = writeContext.Context.ODataFeature().TotalCount;
                     }
                 }
 

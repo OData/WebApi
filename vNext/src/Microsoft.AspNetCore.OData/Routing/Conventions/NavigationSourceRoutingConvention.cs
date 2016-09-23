@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                 throw Error.ArgumentNull("routeContext");
             }
 
-            ODataPath odataPath = routeContext.HttpContext.Request.ODataProperties().Path;
+            ODataPath odataPath = routeContext.HttpContext.Request.ODataFeature().Path;
 
             string controllerName = null;
 

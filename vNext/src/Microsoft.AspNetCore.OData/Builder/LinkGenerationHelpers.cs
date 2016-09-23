@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.OData.Builder.Conventions;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Formatter.Deserialization;
-using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using ODataPath = Microsoft.AspNetCore.OData.Routing.ODataPath;
@@ -537,7 +536,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             this ResourceSetContext feedContext,
             IList<ODataPathSegment> odataPath)
         {
-            GenerateBaseODataPathSegmentsForNonSingletons(feedContext.Request.ODataProperties().Path,
+            GenerateBaseODataPathSegmentsForNonSingletons(feedContext.Request.ODataFeature().Path,
                 feedContext.EntitySetBase,
                 odataPath);
         }

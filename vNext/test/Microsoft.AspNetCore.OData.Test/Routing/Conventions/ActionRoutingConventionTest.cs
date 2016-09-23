@@ -39,7 +39,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             // Arrange
             HttpContext context = CreateHttpContext(requestMethod);
             HttpRequest request = context.Request;
-            request.ODataProperties().Path = new ODataPath();
+            request.ODataFeature().Path = new ODataPath();
 
             RouteContext routeContext = new RouteContext(context);
             IEnumerable<ControllerActionDescriptor> actionDescriptors = Enumerable.Empty<ControllerActionDescriptor>();
@@ -61,8 +61,9 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             HttpRequest request = context.Request;
 
             IEdmModel model = ODataRoutingModel.GetModel(null);
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model, _serviceRoot, "RoutingCustomers/Default.GetVIPs");
-            request.ODataProperties().Path = odataPath;
+            IODataPathHandler pathHandler = context.RequestServices.GetRequiredService<IODataPathHandler>();
+            ODataPath odataPath = pathHandler.Parse(model, _serviceRoot, "RoutingCustomers/Default.GetVIPs");
+            context.ODataFeature().Path = odataPath;
 
             ControllerActionDescriptor descriptor = new ControllerActionDescriptor();
             descriptor.ControllerName = "RoutingCustomers";
@@ -85,11 +86,12 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             // Arrange
             ActionRoutingConvention actionConvention = new ActionRoutingConvention();
             HttpContext context = CreateHttpContext("Post");
-            HttpRequest request = context.Request;
 
             IEdmModel model = new CustomersModelWithInheritance().Model;
-            ODataPath odataPath = new DefaultODataPathHandler().Parse(model, _serviceRoot, "VipCustomer/NS.upgrade");
-            request.ODataProperties().Path = odataPath;
+            //IODataPathHandler pathHandler = context.RequestServices.GetRequiredService<IODataPathHandler>();
+            IODataPathHandler pathHandler = new DefaultODataPathHandler(context.RequestServices);
+            ODataPath odataPath = pathHandler.Parse(model, _serviceRoot, "VipCustomer/NS.upgrade");
+            context.ODataFeature().Path = odataPath;
 
             ControllerActionDescriptor descriptor = new ControllerActionDescriptor();
             descriptor.ControllerName = "VipCustomer";
@@ -119,11 +121,11 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             {
                 // Arrange
                 HttpContext context = CreateHttpContext("Post");
-                HttpRequest request = context.Request;
 
                 IEdmModel model = ODataRoutingModel.GetModel(null);
-                ODataPath odataPath = new DefaultODataPathHandler().Parse(model, _serviceRoot, path);
-                request.ODataProperties().Path = odataPath;
+                IODataPathHandler pathHandler = context.RequestServices.GetRequiredService<IODataPathHandler>();
+                ODataPath odataPath = pathHandler.Parse(model, _serviceRoot, path);
+                context.ODataFeature().Path = odataPath;
 
                 RouteContext routeContext = new RouteContext(context);
                 IEnumerable<ControllerActionDescriptor> actionDescriptors = Enumerable.Empty<ControllerActionDescriptor>();
@@ -148,8 +150,6 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             context.RequestServices = serviceProvider;
             context.Features.Get<IHttpRequestFeature>().Method = requestMethod;
 
-            HttpRequest request = context.Request;
-            request.ODataProperties().Path = new ODataPath();
             return context;
         }
     }

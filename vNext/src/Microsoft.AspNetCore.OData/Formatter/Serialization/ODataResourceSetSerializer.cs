@@ -181,7 +181,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 ResourceSetContext resourceSetContext = new ResourceSetContext
                 {
                     Request = writeContext.Request,
-                    RequestContext = writeContext.RequestContext,
+                    Context = writeContext.Context,
                     EntitySetBase = writeContext.NavigationSource as IEdmEntitySetBase,
                     Url = writeContext.Url,
                     ResourceSetInstance = resourceSetInstance
@@ -215,9 +215,9 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 }
                 else if (writeContext.Request != null)
                 {
-                    resourceSet.NextPageLink = writeContext.Request.ODataProperties().NextLink;
+                    resourceSet.NextPageLink = writeContext.Context.ODataFeature().NextLink;
 
-                    long? countValue = writeContext.Request.ODataProperties().TotalCount;
+                    long? countValue = writeContext.Context.ODataFeature().TotalCount;
                     if (countValue.HasValue)
                     {
                         resourceSet.Count = countValue.Value;

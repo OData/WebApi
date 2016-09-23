@@ -32,7 +32,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                 throw Error.ArgumentNull("routeContext");
             }
 
-            ODataPath odataPath = routeContext.HttpContext.Request.ODataProperties().Path;
+            ODataPath odataPath = routeContext.HttpContext.Request.ODataFeature().Path;
             HttpRequest request = routeContext.HttpContext.Request;
             string httpMethod = request.Method.ToUpperInvariant();
 
@@ -103,7 +103,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                 var key = ODataParameterValue.ParameterValuePrefix + ODataRouteConstants.DynamicProperty;
                 var value = new ODataParameterValue(dynamicPropertSegment.Identifier, EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
                 routeContext.RouteData.Values[key] = value;
-                request.ODataProperties().RoutingConventionsStore[key] = value;
+                request.ODataFeature().RoutingConventionsStore[key] = value;
                 return actionDescriptor;
             }
 

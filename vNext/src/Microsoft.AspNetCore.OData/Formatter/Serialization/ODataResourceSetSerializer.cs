@@ -114,7 +114,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                 });
             }
 
-            ODataEdmTypeSerializer resourceSerializer = SerializerProvider.GetEdmTypeSerializer(elementType, writeContext.Context);
+            ODataEdmTypeSerializer resourceSerializer = SerializerProvider.GetEdmTypeSerializer(writeContext.Context, elementType);
             if (resourceSerializer == null)
             {
                 throw new SerializationException(

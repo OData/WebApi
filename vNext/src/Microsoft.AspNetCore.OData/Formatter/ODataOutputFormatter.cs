@@ -248,7 +248,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                         edmObject.GetType().FullName, typeof(IEdmObject).Name));
                 }
 
-                serializer = serviceProvider.GetEdmTypeSerializer(edmType, context.HttpContext);
+                serializer = serviceProvider.GetEdmTypeSerializer(context.HttpContext, edmType);
                 if (serializer == null)
                 {
                     string message = Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString(), typeof(ODataOutputFormatter).Name);
@@ -259,7 +259,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             {
                 // get the most appropriate serializer given that we support inheritance.
                 type = value == null ? type : value.GetType();
-                serializer = serviceProvider.GetODataPayloadSerializer(type, context.HttpContext);
+                serializer = serviceProvider.GetODataPayloadSerializer(context.HttpContext, type);
                 if (serializer == null)
                 {
                     string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataOutputFormatter).Name);
@@ -382,7 +382,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             IODataSerializerProvider provider =
                 context.HttpContext.RequestServices.GetRequiredService<IODataSerializerProvider>();
 
-            ODataSerializer serializer = provider.GetODataPayloadSerializer(type, context.HttpContext);
+            ODataSerializer serializer = provider.GetODataPayloadSerializer(context.HttpContext, type);
             return serializer == null ? null : (ODataPayloadKind?)serializer.ODataPayloadKind;
         }
     }

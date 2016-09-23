@@ -15,17 +15,17 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
         /// <summary>
         /// Gets an <see cref="ODataEdmTypeSerializer"/> for the given edmType.
         /// </summary>
+        /// <param name="context">The <see cref="HttpContext"/>.</param>
         /// <param name="edmType">The <see cref="IEdmTypeReference"/>.</param>
-        /// <param name="context">.</param>
         /// <returns>The <see cref="ODataSerializer"/>.</returns>
-        ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmType, HttpContext context);
+        ODataEdmTypeSerializer GetEdmTypeSerializer(HttpContext context, IEdmTypeReference edmType);
 
         /// <summary>
         /// Gets an <see cref="ODataSerializer"/> for the given <paramref name="type"/>.
         /// </summary>
+        /// <param name="context">The <see cref="HttpContext"/>.</param>
         /// <param name="type">The <see cref="Type"/> for which the serializer is being requested.</param>
-        /// <param name="context">.</param>
         /// <returns>The <see cref="ODataSerializer"/> for the given type.</returns>
-        ODataSerializer GetODataPayloadSerializer(Type type, HttpContext context);
+        ODataSerializer GetODataPayloadSerializer(HttpContext context, Type type);
     }
 }

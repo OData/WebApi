@@ -154,7 +154,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     IEdmTypeReference actualType = writeContext.GetEdmType(item, item.GetType());
                     Contract.Assert(actualType != null);
 
-                    itemSerializer = itemSerializer ?? SerializerProvider.GetEdmTypeSerializer(actualType, writeContext.Context);
+                    itemSerializer = itemSerializer ?? SerializerProvider.GetEdmTypeSerializer(writeContext.Context, actualType);
                     if (itemSerializer == null)
                     {
                         throw new SerializationException(

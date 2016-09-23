@@ -21,10 +21,10 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             IEdmObject edmObject = instance as IEdmObject;
             if (edmObject != null)
             {
-                return serializerProvider.GetEdmTypeSerializer(edmObject.GetEdmType(), context);
+                return serializerProvider.GetEdmTypeSerializer(context, edmObject.GetEdmType());
             }
 
-            return serializerProvider.GetODataPayloadSerializer(instance.GetType(), context) as ODataEdmTypeSerializer;
+            return serializerProvider.GetODataPayloadSerializer(context, instance.GetType()) as ODataEdmTypeSerializer;
         }
     }
 }

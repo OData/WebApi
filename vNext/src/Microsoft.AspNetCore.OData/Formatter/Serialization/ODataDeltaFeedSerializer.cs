@@ -152,7 +152,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
                     case EdmDeltaEntityKind.Entry:
                         {
                             IEdmEntityTypeReference elementType = GetEntityType(feedType);
-                            ODataResourceSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType, writeContext.Context) as ODataResourceSerializer;
+                            ODataResourceSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(writeContext.Context, elementType) as ODataResourceSerializer;
                             if (entrySerializer == null)
                             {
                                 throw new SerializationException(

@@ -40,9 +40,9 @@ namespace Microsoft.AspNetCore.OData.Formatter
         /// <returns>True if the request is an OData raw value request.</returns>
         protected abstract bool IsMatch(PropertySegment propertySegment);
 
-        internal static bool IsRawValueRequest(HttpRequest request)
+        internal static bool IsRawValueRequest(HttpContext context)
         {
-            ODataPath path = request.ODataFeature().Path;
+            ODataPath path = context.ODataFeature().Path;
             return path != null && path.Segments.LastOrDefault() is ValueSegment;
         }
 

@@ -12,7 +12,7 @@ namespace Microsoft.AspNetCore.OData.Extensions
     /// <summary>
     /// The default container builder implementation based on the Microsoft dependency injection framework.
     /// </summary>
-    internal class DefaultContainerBuilder : IContainerBuilder
+    public class DefaultContainerBuilder : IContainerBuilder
     {
         private readonly IServiceCollection _services;
 

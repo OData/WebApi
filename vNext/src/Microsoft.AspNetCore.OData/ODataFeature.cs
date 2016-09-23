@@ -21,6 +21,11 @@ namespace Microsoft.AspNetCore.OData
         internal const string ODataServiceVersionHeader = "OData-Version";
         internal const ODataVersion DefaultODataVersion = ODataVersion.V4;
 
+        public ODataFeature()
+        {
+            Model = EdmCoreModel.Instance; // default Edm model
+        }
+
         /// <summary>
         /// Gets or sets the EDM model.
         /// </summary>

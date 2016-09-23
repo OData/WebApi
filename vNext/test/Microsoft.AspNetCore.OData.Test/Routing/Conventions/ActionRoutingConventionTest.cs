@@ -144,6 +144,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
             HttpContext context = new DefaultHttpContext();
 
             IServiceCollection services = new ServiceCollection();
+            services.AddOptions();
             services.AddOData();
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 

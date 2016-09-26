@@ -213,6 +213,10 @@ namespace WebStack.QA.Test.OData.Aggregation
                     "/filter(Address/Name ne 'City1')")]
         [InlineData("?$apply=groupby((Order/Name), aggregate(Id with sum as TotalId))" +
                     "/filter(Order/Name ne 'Order0')")]
+        [InlineData("?$apply=groupby((Order/Name), aggregate(Id with sum as TotalId))" +
+                    "/filter(Order/Name ne 'Order0')&$orderby=Order/Name")]
+        [InlineData("?$apply=groupby((Order/Name), aggregate(Id with sum as TotalId))" +
+                    "&$filter=Order/Name ne 'Order0'&$orderby=Order/Name")]
         public void FilterWorks(string query)
         {
             // Arrange

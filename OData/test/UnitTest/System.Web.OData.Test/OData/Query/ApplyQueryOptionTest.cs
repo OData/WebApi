@@ -230,6 +230,31 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
+                        "$apply=groupby((Address/City))&$filter=Address/City eq 'redmond'&$orderby=Address/City",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", "redmond"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City, Address/State))&$filter=Address/State eq 'WA'&$orderby=Address/City",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", "redmond"}, {"Address/State", "WA"}},
+                            new Dictionary<string, object> {{"Address/City", "seattle"}, {"Address/State", "WA"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City, Address/State))&$orderby=Address/State desc, Address/City",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", "redmond"}, {"Address/State", "WA"}},
+                            new Dictionary<string, object> {{"Address/City", "seattle"}, {"Address/State", "WA"}},
+                            new Dictionary<string, object> {{"Address/City", null}, {"Address/State", null}},
+                            new Dictionary<string, object> {{"Address/City", "hobart"}, {"Address/State", null}},
+                        }
+                    },
+                    {
                         "$apply=groupby((Address/City))&$filter=Address/City eq 'redmond'",
                         new List<Dictionary<string, object>>
                         {

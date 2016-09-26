@@ -459,8 +459,15 @@ namespace System.Web.OData.Query.Expressions
                 return null;
             }
 
+            // After $apply we could have other clauses, like $filter, $orderby etc.
+            // Extract last groupby expression
+            while (expression.Method.Name == "Where")
+            {
+                expression = expression.Arguments.FirstOrDefault() as MethodCallExpression;
+            }
+
             var result = new Dictionary<string, Expression>();
-            CollectAssigments(result, Expression.Property(source, "GroupByContainer"), ExtractContainerExpression(expression.Arguments[0] as MethodCallExpression, "GroupByContainer"));
+            CollectAssigments(result, Expression.Property(source, "GroupByContainer"), ExtractContainerExpression(expression.Arguments.FirstOrDefault() as MethodCallExpression, "GroupByContainer"));
             CollectAssigments(result, Expression.Property(source, "Container"), ExtractContainerExpression(expression, "Container"));
 
             return result;
@@ -534,7 +541,7 @@ namespace System.Web.OData.Query.Expressions
 
             if (nextExpression != null)
             {
-                CollectAssigments(flattenPropertyContainer, Expression.Property(source, "Next"), nextExpression);
+                CollectAssigments(flattenPropertyContainer, Expression.Property(source, "Next"), nextExpression, prefix);
             }
 
             if (nestedExpression != null)

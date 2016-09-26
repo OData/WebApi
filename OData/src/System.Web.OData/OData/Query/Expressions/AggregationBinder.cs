@@ -460,10 +460,15 @@ namespace System.Web.OData.Query.Expressions
             }
 
             // After $apply we could have other clauses, like $filter, $orderby etc.
-            // Extract last groupby expression
+            // Skip of filter expressions
             while (expression.Method.Name == "Where")
             {
                 expression = expression.Arguments.FirstOrDefault() as MethodCallExpression;
+            }
+
+            if (expression == null)
+            {
+                return null;
             }
 
             var result = new Dictionary<string, Expression>();

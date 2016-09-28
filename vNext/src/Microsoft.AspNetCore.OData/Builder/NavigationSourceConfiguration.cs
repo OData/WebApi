@@ -244,7 +244,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                 throw Error.ArgumentNull("targetNavigationSource");
             }
 
-            IList<MemberInfo> bindingPath = new List<MemberInfo> { navigationConfiguration.PropertyInfo };
+            IList<object> bindingPath = new List<object> { navigationConfiguration.PropertyInfo };
             if (navigationConfiguration.DeclaringType != EntityType)
             {
                 bindingPath.Insert(0, navigationConfiguration.DeclaringType.ClrType);
@@ -261,7 +261,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <param name="bindingPath">The binding path.</param>
         /// <returns>The <see cref="NavigationPropertyBindingConfiguration"/> so that it can be further configured.</returns>
         public virtual NavigationPropertyBindingConfiguration AddBinding(NavigationPropertyConfiguration navigationConfiguration,
-            NavigationSourceConfiguration targetNavigationSource, IList<MemberInfo> bindingPath)
+            NavigationSourceConfiguration targetNavigationSource, IList<object> bindingPath)
         {
             if (navigationConfiguration == null)
             {
@@ -378,7 +378,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <param name="bindingPath">The binding path.</param>
         /// <returns>The <see cref="NavigationPropertyBindingConfiguration"/> so that it can be further configured.</returns>
         public virtual NavigationPropertyBindingConfiguration FindBinding(NavigationPropertyConfiguration navigationConfiguration,
-            IList<MemberInfo> bindingPath)
+            IList<object> bindingPath)
         {
             if (navigationConfiguration == null)
             {
@@ -520,7 +520,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             return navigationPropertyLinkBuilder;
         }
 
-        private void VerifyBindingPath(NavigationPropertyConfiguration navigationConfiguration, IList<MemberInfo> bindingPath)
+        private void VerifyBindingPath(NavigationPropertyConfiguration navigationConfiguration, IList<object> bindingPath)
         {
             Contract.Assert(navigationConfiguration != null);
             Contract.Assert(bindingPath != null);
@@ -535,7 +535,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             bindingPath.Aggregate(EntityType.ClrType, VerifyBindingSegment);
         }
 
-        private static Type VerifyBindingSegment(Type current, MemberInfo info)
+        private static Type VerifyBindingSegment(Type current, object info)
         {
             Contract.Assert(current != null);
             Contract.Assert(info != null);

@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// </summary>
         /// <param name="bindingPath">The binding path list.</param>
         /// <returns>The binding path string. like "A.B/C/D.E".</returns>
-        public static string ConvertBindingPath(this IEnumerable<MemberInfo> bindingPath)
+        public static string ConvertBindingPath(this IEnumerable<object> bindingPath)
         {
             if (bindingPath == null)
             {
@@ -27,12 +27,23 @@ namespace Microsoft.AspNetCore.OData.Builder
             return String.Join("/", bindingPath.Select(e => e.GetQualifiedName()));
         }
 
-        private static string GetQualifiedName(this MemberInfo memberInfo)
+        private static string GetQualifiedName(this object memberInfo)
         {
             Contract.Assert(memberInfo != null);
 
             Type type = memberInfo as Type;
-            return type != null ? (type.Namespace + "." + type.Name) : memberInfo.Name;
+            if (type != null)
+            {
+                return (type.Namespace + "." + type.Name);
+            }
+
+            MemberInfo memInfo = memberInfo as MemberInfo;
+            if (memInfo != null)
+            {
+                return memInfo.Name;
+            }
+
+            return String.Empty;
         }
     }
 }

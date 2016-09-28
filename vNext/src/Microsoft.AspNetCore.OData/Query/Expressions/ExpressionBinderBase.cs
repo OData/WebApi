@@ -99,9 +99,9 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             Type rightUnderlyingType = Nullable.GetUnderlyingType(right.Type) ?? right.Type;
 
             // Convert to integers unless Enum type is required
-            if ((leftUnderlyingType.IsEnum || rightUnderlyingType.IsEnum) && binaryOperator != BinaryOperatorKind.Has)
+            if ((leftUnderlyingType.GetTypeInfo().IsEnum || rightUnderlyingType.GetTypeInfo().IsEnum) && binaryOperator != BinaryOperatorKind.Has)
             {
-                Type enumType = leftUnderlyingType.IsEnum ? leftUnderlyingType : rightUnderlyingType;
+                Type enumType = leftUnderlyingType.GetTypeInfo().IsEnum ? leftUnderlyingType : rightUnderlyingType;
                 Type enumUnderlyingType = Enum.GetUnderlyingType(enumType);
                 left = ConvertToEnumUnderlyingType(left, enumType, enumUnderlyingType);
                 right = ConvertToEnumUnderlyingType(right, enumType, enumUnderlyingType);
@@ -271,7 +271,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
 
                 Expression convertedExpression = null;
 
-                if (sourceType.IsEnum)
+                if (sourceType.GetTypeInfo().IsEnum)
                 {
                     // we handle enum conversions ourselves
                     convertedExpression = source;
@@ -693,7 +693,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
 
         internal static bool IsNullable(Type t)
         {
-            if (!t.IsValueType || (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>)))
+            if (!t.GetTypeInfo().IsValueType || (t.GetTypeInfo().IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>)))
             {
                 return true;
             }

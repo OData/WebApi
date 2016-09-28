@@ -3,7 +3,7 @@
 
 using System;
 using System.Runtime.Serialization;
-using System.Web.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.OData;
@@ -38,7 +38,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             ODataError oDataError = graph as ODataError;
             if (oDataError == null)
             {
-                HttpError httpError = graph as HttpError;
+                SerializableError httpError = graph as SerializableError;
                 if (httpError == null)
                 {
                     string message = Error.Format(SRResources.ErrorTypeMustBeODataErrorOrHttpError, graph.GetType().FullName);

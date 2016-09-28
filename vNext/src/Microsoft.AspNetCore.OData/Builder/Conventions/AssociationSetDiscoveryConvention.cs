@@ -21,9 +21,9 @@ namespace Microsoft.AspNetCore.OData.Builder.Conventions
     {
         public void Apply(NavigationSourceConfiguration configuration, ODataModelBuilder model)
         {
-            IList<Tuple<StructuralTypeConfiguration, IList<MemberInfo>, NavigationPropertyConfiguration>> navigations =
-                new List<Tuple<StructuralTypeConfiguration, IList<MemberInfo>, NavigationPropertyConfiguration>>();
-            Stack<MemberInfo> path = new Stack<MemberInfo>();
+            IList<Tuple<StructuralTypeConfiguration, IList<object>, NavigationPropertyConfiguration>> navigations =
+                new List<Tuple<StructuralTypeConfiguration, IList<object>, NavigationPropertyConfiguration>>();
+            Stack<object> path = new Stack<object>();
             model.FindAllNavigationProperties(configuration.EntityType, navigations, path);
             foreach (var navigation in navigations)
             {

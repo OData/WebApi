@@ -56,7 +56,7 @@ namespace Microsoft.AspNetCore.OData.Builder.Conventions
             Contract.Assert(value != null);
 
             Type type = value.GetType();
-            if (type.IsEnum)
+            if (type.GetTypeInfo().IsEnum)
             {
                 value = new ODataEnumValue(value.ToString(), type.EdmFullName());
             }

@@ -5,6 +5,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData;
+using System.Reflection;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
 {
@@ -36,7 +37,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Deserialization
                 throw new ValidationException(Error.Format(SRResources.PropertyMustBeEnum, value.GetType().Name, "ODataEnumValue"));
             }
 
-            if (!enumType.IsEnum)
+            if (!enumType.GetTypeInfo().IsEnum)
             {
                 throw Error.InvalidOperation(Error.Format(SRResources.TypeMustBeEnumOrNullableEnum, type.Name));
             }

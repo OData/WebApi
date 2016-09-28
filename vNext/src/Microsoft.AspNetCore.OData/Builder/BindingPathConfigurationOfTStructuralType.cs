@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         private readonly NavigationSourceConfiguration _navigationSource;
         private readonly StructuralTypeConfiguration<TStructuralType> _structuralType;
         private readonly ODataModelBuilder _modelBuilder;
-        private readonly IList<MemberInfo> _bindingPath;
+        private readonly IList<object> _bindingPath;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BindingPathConfiguration{TStructuralType}"/> class.
@@ -31,7 +31,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         public BindingPathConfiguration(ODataModelBuilder modelBuilder,
             StructuralTypeConfiguration<TStructuralType> structuralType,
             NavigationSourceConfiguration navigationSource)
-            : this(modelBuilder, structuralType, navigationSource, new List<MemberInfo>())
+            : this(modelBuilder, structuralType, navigationSource, new List<object>())
         {
         }
 
@@ -45,7 +45,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         public BindingPathConfiguration(ODataModelBuilder modelBuilder,
             StructuralTypeConfiguration<TStructuralType> structuralType,
             NavigationSourceConfiguration navigationSource,
-            IList<MemberInfo> bindingPath)
+            IList<object> bindingPath)
         {
             if (modelBuilder == null)
             {
@@ -76,7 +76,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <summary>
         /// Gets the list of binding path information.
         /// </summary>
-        public IList<MemberInfo> Path
+        public IList<object> Path
         {
             get { return _bindingPath; }
         }
@@ -129,7 +129,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             PropertyInfo pathProperty = PropertySelectorVisitor.GetSelectedProperty(pathExpression);
 
-            IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
+            IList<object> bindingPath = new List<object>(_bindingPath);
             bindingPath.Add(pathProperty);
 
             StructuralTypeConfiguration<TTargetType> target;
@@ -191,7 +191,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             PropertyInfo pathProperty = PropertySelectorVisitor.GetSelectedProperty(pathExpression);
 
-            IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
+            IList<object> bindingPath = new List<object>(_bindingPath);
             bindingPath.Add(typeof(TDerivedType));
             bindingPath.Add(pathProperty);
 
@@ -263,7 +263,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             PropertyInfo pathProperty = PropertySelectorVisitor.GetSelectedProperty(pathExpression);
 
-            IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
+            IList<object> bindingPath = new List<object>(_bindingPath);
             bindingPath.Add(pathProperty);
 
             StructuralTypeConfiguration<TTargetType> target;
@@ -335,7 +335,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             PropertyInfo pathProperty = PropertySelectorVisitor.GetSelectedProperty(pathExpression);
 
-            IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
+            IList<object> bindingPath = new List<object>(_bindingPath);
             bindingPath.Add(typeof(TDerivedType));
             bindingPath.Add(pathProperty);
 
@@ -402,7 +402,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             NavigationPropertyConfiguration navigation = _structuralType.HasMany(navigationExpression);
 
-            IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
+            IList<object> bindingPath = new List<object>(_bindingPath);
             bindingPath.Add(navigation.PropertyInfo);
 
             NavigationSourceConfiguration entitySet = _modelBuilder.EntitySet<TTargetType>(targetEntitySet).Configuration;
@@ -450,7 +450,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             NavigationPropertyConfiguration navigation = derivedConfiguration.HasMany(navigationExpression);
 
-            IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
+            IList<object> bindingPath = new List<object>(_bindingPath);
             bindingPath.Add(typeof(TDerivedType));
             bindingPath.Add(navigation.PropertyInfo);
 
@@ -488,7 +488,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             NavigationPropertyConfiguration navigation = this._structuralType.HasRequired(navigationExpression);
 
-            IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
+            IList<object> bindingPath = new List<object>(_bindingPath);
             bindingPath.Add(navigation.PropertyInfo);
 
             NavigationSourceConfiguration entitySet = _modelBuilder.EntitySet<TTargetType>(targetEntitySet).Configuration;
@@ -536,7 +536,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             NavigationPropertyConfiguration navigation = derivedConfiguration.HasRequired(navigationExpression);
 
-            IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
+            IList<object> bindingPath = new List<object>(_bindingPath);
             bindingPath.Add(typeof(TDerivedType));
             bindingPath.Add(navigation.PropertyInfo);
 
@@ -573,7 +573,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             NavigationPropertyConfiguration navigation = this._structuralType.HasOptional(navigationExpression);
 
-            IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
+            IList<object> bindingPath = new List<object>(_bindingPath);
             bindingPath.Add(navigation.PropertyInfo);
 
             NavigationSourceConfiguration entitySet = _modelBuilder.EntitySet<TTargetType>(targetEntitySet).Configuration;
@@ -621,7 +621,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             NavigationPropertyConfiguration navigation = derivedConfiguration.HasOptional(navigationExpression);
 
-            IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
+            IList<object> bindingPath = new List<object>(_bindingPath);
             bindingPath.Add(typeof(TDerivedType));
             bindingPath.Add(navigation.PropertyInfo);
 

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Web.Http;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.AspNetCore.OData.Common;

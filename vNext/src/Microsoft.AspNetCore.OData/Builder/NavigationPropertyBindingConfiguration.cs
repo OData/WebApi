@@ -21,7 +21,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <param name="navigationSource">The target navigation source of the binding.</param>
         public NavigationPropertyBindingConfiguration(NavigationPropertyConfiguration navigationProperty,
             NavigationSourceConfiguration navigationSource)
-            : this(navigationProperty, navigationSource, new MemberInfo[] { navigationProperty.PropertyInfo })
+            : this(navigationProperty, navigationSource, new object[] { navigationProperty.PropertyInfo })
         {
         }
 
@@ -32,7 +32,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <param name="navigationSource">The target navigation source of the binding.</param>
         /// <param name="path">The path of current binding.</param>
         public NavigationPropertyBindingConfiguration(NavigationPropertyConfiguration navigationProperty,
-            NavigationSourceConfiguration navigationSource, IList<MemberInfo> path)
+            NavigationSourceConfiguration navigationSource, IList<object> path)
         {
             if (navigationProperty == null)
             {
@@ -67,7 +67,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <summary>
         /// Gets the path of current binding.
         /// </summary>
-        public IList<MemberInfo> Path { get; private set; }
+        public IList<object> Path { get; private set; }
 
         /// <summary>
         /// Gets the path of current binding, like "A.B/C/D.E".

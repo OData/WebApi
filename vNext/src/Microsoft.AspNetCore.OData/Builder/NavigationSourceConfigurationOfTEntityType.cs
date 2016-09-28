@@ -100,7 +100,7 @@ namespace Microsoft.AspNetCore.OData.Builder
 
             NavigationPropertyConfiguration navigation = derivedEntityType.HasMany(navigationExpression);
 
-            IList<MemberInfo> bindingPath = new List<MemberInfo>
+            IList<object> bindingPath = new List<object>
             {
                 typeof(TDerivedEntityType),
                 navigation.PropertyInfo
@@ -199,7 +199,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             NavigationPropertyConfiguration navigation = derivedEntityType.HasMany(navigationExpression);
-            IList<MemberInfo> bindingPath = new List<MemberInfo>
+            IList<object> bindingPath = new List<object>
             {
                 typeof(TDerivedEntityType),
                 navigation.PropertyInfo
@@ -268,7 +268,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             NavigationPropertyConfiguration navigation = derivedEntityType.HasRequired(navigationExpression);
-            IList<MemberInfo> bindingPath = new List<MemberInfo>
+            IList<object> bindingPath = new List<object>
             {
                 typeof(TDerivedEntityType),
                 navigation.PropertyInfo
@@ -338,7 +338,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             NavigationPropertyConfiguration navigation = derivedEntityType.HasRequired(navigationExpression);
-            IList<MemberInfo> bindingPath = new List<MemberInfo>
+            IList<object> bindingPath = new List<object>
             {
                 typeof(TDerivedEntityType),
                 navigation.PropertyInfo
@@ -407,7 +407,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             NavigationPropertyConfiguration navigation = derivedEntityType.HasOptional(navigationExpression);
-            IList<MemberInfo> bindingPath = new List<MemberInfo>
+            IList<object> bindingPath = new List<object>
             {
                 typeof(TDerivedEntityType),
                 navigation.PropertyInfo
@@ -477,7 +477,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             NavigationPropertyConfiguration navigation = derivedEntityType.HasOptional(navigationExpression);
-            IList<MemberInfo> bindingPath = new List<MemberInfo>
+            IList<object> bindingPath = new List<object>
             {
                 typeof(TDerivedEntityType),
                 navigation.PropertyInfo
@@ -546,7 +546,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             NavigationPropertyConfiguration navigation = derivedEntityType.HasRequired(navigationExpression);
-            IList<MemberInfo> bindingPath = new List<MemberInfo>
+            IList<object> bindingPath = new List<object>
             {
                 typeof(TDerivedEntityType),
                 navigation.PropertyInfo
@@ -616,7 +616,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
             NavigationPropertyConfiguration navigation = derivedEntityType.HasRequired(navigationExpression);
-            IList<MemberInfo> bindingPath = new List<MemberInfo>
+            IList<object> bindingPath = new List<object>
             {
                 typeof(TDerivedEntityType),
                 navigation.PropertyInfo
@@ -760,7 +760,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <param name="bindingPath">The navigation binding path.</param>
         /// <returns>The binding if found.</returns>
         public NavigationPropertyBindingConfiguration FindBinding(NavigationPropertyConfiguration navigationConfiguration,
-            IList<MemberInfo> bindingPath)
+            IList<object> bindingPath)
         {
             return _configuration.FindBinding(navigationConfiguration, bindingPath);
         }

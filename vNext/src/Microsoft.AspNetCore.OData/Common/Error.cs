@@ -96,11 +96,11 @@ namespace Microsoft.AspNetCore.OData.Common
         /// <returns>The logged <see cref="Exception"/>.</returns>
         internal static ArgumentException InvalidEnumArgument(string parameterName, int invalidValue, Type enumClass)
         {
-#if DNXCORE50
+//#if DNXCORE50
             return new ArgumentException(Error.Format(CommonWebApiResources.InvalidEnumArgument, parameterName, invalidValue, enumClass.Name), parameterName);
-#else
-            return new InvalidEnumArgumentException(parameterName, invalidValue, enumClass);
-#endif
+// #else
+           // return new InvalidEnumArgumentException(parameterName, invalidValue, enumClass);
+// #endif
         }
 
         /// <summary>

@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Web.Http;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.OData;
@@ -93,7 +93,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             {
                 return provider.GetRequiredService<ODataEntityReferenceLinksSerializer>();
             }
-            else if (type == typeof(ODataError) || type == typeof(HttpError))
+            else if (type == typeof(ODataError) || type == typeof(SerializableError))
             {
                 return provider.GetRequiredService<ODataErrorSerializer>();
             }

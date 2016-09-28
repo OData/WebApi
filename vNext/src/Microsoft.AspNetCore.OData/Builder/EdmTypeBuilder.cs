@@ -205,7 +205,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             IEdmTypeReference elementTypeReference = null;
             Type clrType = TypeHelper.GetUnderlyingTypeOrSelf(collectionProperty.ElementType);
 
-            if (clrType.IsEnum)
+            if (clrType.GetTypeInfo().IsEnum)
             {
                 IEdmType edmType = GetEdmType(clrType);
 

@@ -565,7 +565,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                 throw Error.ArgumentNull("navigationProperty");
             }
 
-            if (!navigationProperty.ReflectedType.IsAssignableFrom(ClrType))
+            if (!navigationProperty.DeclaringType.IsAssignableFrom(ClrType))
             {
                 throw Error.Argument("navigationProperty", SRResources.PropertyDoesNotBelongToType, navigationProperty.Name, ClrType.FullName);
             }

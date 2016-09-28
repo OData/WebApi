@@ -661,7 +661,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                     if (property.PropertyType.IsCollection(out elementType))
                     {
                         Type elementUnderlyingTypeOrSelf = TypeHelper.GetUnderlyingTypeOrSelf(elementType);
-                        if (elementUnderlyingTypeOrSelf.IsEnum)
+                        if (elementUnderlyingTypeOrSelf.GetTypeInfo().IsEnum)
                         {
                             AddEnumType(elementUnderlyingTypeOrSelf);
                         }

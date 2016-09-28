@@ -15,8 +15,8 @@ namespace Microsoft.AspNetCore.OData.Builder
     {
         public static void FindAllNavigationProperties(this ODataModelBuilder builder,
             StructuralTypeConfiguration configuration,
-            IList<Tuple<StructuralTypeConfiguration, IList<MemberInfo>, NavigationPropertyConfiguration>> navigations,
-            Stack<MemberInfo> path)
+            IList<Tuple<StructuralTypeConfiguration, IList<object>, NavigationPropertyConfiguration>> navigations,
+            Stack<object> path)
         {
             if (builder == null)
             {
@@ -56,8 +56,8 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         private static void FindNavigationProperties(this ODataModelBuilder builder, StructuralTypeConfiguration configuration,
-            IList<Tuple<StructuralTypeConfiguration, IList<MemberInfo>, NavigationPropertyConfiguration>> navs,
-            Stack<MemberInfo> path)
+            IList<Tuple<StructuralTypeConfiguration, IList<object>, NavigationPropertyConfiguration>> navs,
+            Stack<object> path)
         {
             Contract.Assert(builder != null);
             Contract.Assert(configuration != null);
@@ -75,10 +75,10 @@ namespace Microsoft.AspNetCore.OData.Builder
                 if (nav != null)
                 {
                     // how about the containment?
-                    IList<MemberInfo> bindingPath = path.Reverse().ToList();
+                    IList<object> bindingPath = path.Reverse().ToList();
 
                     navs.Add(
-                        new Tuple<StructuralTypeConfiguration, IList<MemberInfo>, NavigationPropertyConfiguration>(configuration,
+                        new Tuple<StructuralTypeConfiguration, IList<object>, NavigationPropertyConfiguration>(configuration,
                             bindingPath, nav));
                 }
                 else if (complex != null)

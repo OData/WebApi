@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.OData.Routing
     public class ODataRouteConstraint : IRouteConstraint
     {
         // "%2F"
-        private static readonly string _escapedSlash = Uri.HexEscape('/');
+        private static readonly string _escapedSlash = Uri.EscapeUriString("/"); // .HexEscape('/');
 
         private readonly string _routePrefix;
         private readonly IEdmModel _model;

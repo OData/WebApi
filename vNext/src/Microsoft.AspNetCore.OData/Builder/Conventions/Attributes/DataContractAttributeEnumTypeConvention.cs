@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using Microsoft.AspNetCore.OData.Common;
 
@@ -62,7 +63,7 @@ namespace Microsoft.AspNetCore.OData.Builder.Conventions.Attributes
             foreach (EnumMemberConfiguration member in allMembers)
             {
                 EnumMemberAttribute enumMemberAttribute =
-                    enumTypeConfiguration.ClrType.GetField(member.Name)
+                    enumTypeConfiguration.ClrType.GetTypeInfo().GetField(member.Name)
                         .GetCustomAttributes(typeof(EnumMemberAttribute), inherit: true)
                         .FirstOrDefault() as EnumMemberAttribute;
                 if (!member.AddedExplicitly)

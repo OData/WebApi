@@ -4,7 +4,6 @@
 using System;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 
 namespace Microsoft.AspNetCore.OData
 {

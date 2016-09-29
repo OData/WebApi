@@ -1,6 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Builder;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Csdl;
 
 namespace Microsoft.AspNetCore.OData
 {
@@ -8,18 +19,99 @@ namespace Microsoft.AspNetCore.OData
     // [Route("odata/$metadata")]
     public class MetadataController : Controller
     {
-        private readonly IEdmModel _model;
+        private static readonly Version _defaultEdmxVersion = new Version(4, 0);
 
-        public MetadataController([NotNull]ODataProperties odataProperties)
+        /// <summary>
+        /// Generates the OData $metadata document.
+        /// </summary>
+        /// <returns>The <see cref="IEdmModel"/> representing $metadata.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate",
+            Justification = "Property not appropriate")]
+        public IEdmModel GetMetadata()
         {
-           this._model = odataProperties.Model;
+            return GetModel();
         }
 
-        // not work: public IEdmModel Get => this._model;
-        public IEdmModel Get()
+        /// <summary>
+        /// Generates the OData service document.
+        /// </summary>
+        /// <returns>The service document for the service.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate",
+            Justification = "Property not appropriate")]
+        public ODataServiceDocument GetServiceDocument()
         {
-            return this._model;
+            IEdmModel model = GetModel();
+            ODataServiceDocument serviceDocument = new ODataServiceDocument();
+            IEdmEntityContainer container = model.EntityContainer;
+
+            // Add EntitySets into service document
+            serviceDocument.EntitySets = container.EntitySets().Select(
+                e => GetODataEntitySetInfo(model.GetNavigationSourceUrl(e).ToString(), e.Name));
+
+            // Add Singletons into the service document
+            IEnumerable<IEdmSingleton> singletons = container.Elements.OfType<IEdmSingleton>();
+            serviceDocument.Singletons = singletons.Select(
+                e => GetODataSingletonInfo(model.GetNavigationSourceUrl(e).ToString(), e.Name));
+
+            // Add FunctionImports into service document
+            // ODL spec says:
+            // The edm:FunctionImport for a parameterless function MAY include the IncludeInServiceDocument attribute
+            // whose Boolean value indicates whether the function import is advertised in the service document.
+            // If no value is specified for this attribute, its value defaults to false.
+
+            // Find all parameterless functions with "IncludeInServiceDocument = true"
+            IEnumerable<IEdmFunctionImport> functionImports = container.Elements.OfType<IEdmFunctionImport>()
+                .Where(f => !f.Function.Parameters.Any() && f.IncludeInServiceDocument);
+
+            serviceDocument.FunctionImports = functionImports.Distinct(new FunctionImportComparer())
+                .Select(f => GetODataFunctionImportInfo(f.Name));
+
+            return serviceDocument;
         }
 
-}
+        private static ODataEntitySetInfo GetODataEntitySetInfo(string url, string name)
+        {
+            ODataEntitySetInfo info = new ODataEntitySetInfo
+            {
+                Name = name, // Required for JSON support
+                Url = new Uri(url, UriKind.Relative)
+            };
+
+            return info;
+        }
+
+        private static ODataSingletonInfo GetODataSingletonInfo(string url, string name)
+        {
+            ODataSingletonInfo info = new ODataSingletonInfo
+            {
+                Name = name,
+                Url = new Uri(url, UriKind.Relative)
+            };
+
+            return info;
+        }
+
+        private static ODataFunctionImportInfo GetODataFunctionImportInfo(string name)
+        {
+            ODataFunctionImportInfo info = new ODataFunctionImportInfo
+            {
+                Name = name,
+                Url = new Uri(name, UriKind.Relative) // Relative to the OData root
+            };
+
+            return info;
+        }
+
+        private IEdmModel GetModel()
+        {
+            IEdmModel model = Request.ODataFeature().Model;
+            if (model == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
+            }
+
+            model.SetEdmxVersion(_defaultEdmxVersion);
+            return model;
+        }
+    }
 }

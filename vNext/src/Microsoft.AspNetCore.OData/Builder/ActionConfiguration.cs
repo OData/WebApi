@@ -12,25 +12,25 @@ namespace Microsoft.AspNetCore.OData.Builder
     /// <summary>
     /// ActionConfiguration represents an OData action that you wish to expose via your service.
     /// <remarks>
-    /// ActionConfigurations are exposed via $metadata as a <Action/> element for bound function and <ActionImport/> element for unbound function.
+    /// ActionConfigurations are exposed via $metadata as a <Action/> element for bound action and <ActionImport/> element for unbound action.
     /// </remarks> 
     /// </summary>
-    public class ActionConfiguration : ProcedureConfiguration
+    public class ActionConfiguration : OperationConfiguration
     {
         /// <summary>
         /// Initializes a new instance of <see cref="ActionConfiguration" /> class.
         /// </summary>
         /// <param name="builder">The ODataModelBuilder to which this ActionConfiguration should be added.</param>
         /// <param name="name">The name of this ActionConfiguration.</param>
-        internal ActionConfiguration(ODataModelBuilder builder, string name)
+        public ActionConfiguration(ODataModelBuilder builder, string name)
             : base(builder, name)
         {
         }
 
         /// <inheritdoc />
-        public override ProcedureKind Kind
+        public override OperationKind Kind
         {
-            get { return ProcedureKind.Action; }
+            get { return OperationKind.Action; }
         }
 
         /// <inheritdoc />
@@ -42,17 +42,19 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <summary>
         /// Register a factory that creates actions links.
         /// </summary>
-        public ActionConfiguration HasActionLink(Func<EntityInstanceContext, Uri> actionLinkFactory, bool followsConventions)
+        public ActionConfiguration HasActionLink(Func<ResourceContext, Uri> actionLinkFactory, bool followsConventions)
         {
             if (actionLinkFactory == null)
             {
                 throw new ArgumentNullException("actionLinkFactory");
             }
+
             if (!IsBindable || BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Entity)
             {
                 throw Error.InvalidOperation(SRResources.HasActionLinkRequiresBindToEntity, Name);
             }
-            LinkFactory = actionLinkFactory;
+
+            OperationLinkBuilder = new OperationLinkBuilder(actionLinkFactory, followsConventions);
             FollowsConventions = followsConventions;
             return this;
         }
@@ -61,9 +63,50 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// Retrieves the currently registered action link factory.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
-        public Func<EntityInstanceContext, Uri> GetActionLink()
+        public Func<ResourceContext, Uri> GetActionLink()
         {
-            return LinkFactory;
+            if (OperationLinkBuilder == null)
+            {
+                return null;
+            }
+
+            return OperationLinkBuilder.LinkFactory;
+        }
+
+        /// <summary>
+        /// Register a factory that creates feed actions links.
+        /// </summary>
+        public ActionConfiguration HasFeedActionLink(Func<ResourceSetContext, Uri> actionLinkFactory, bool followsConventions)
+        {
+            if (actionLinkFactory == null)
+            {
+                throw new ArgumentNullException("actionLinkFactory");
+            }
+
+            if (!IsBindable ||
+                BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Collection ||
+                ((CollectionTypeConfiguration)BindingParameter.TypeConfiguration).ElementType.Kind != EdmTypeKind.Entity)
+            {
+                throw Error.InvalidOperation(/*SRResources.HasActionLinkRequiresBindToCollectionOfEntity, Name*/"TODO: ");
+            }
+
+            OperationLinkBuilder = new OperationLinkBuilder(actionLinkFactory, followsConventions);
+            FollowsConventions = followsConventions;
+            return this;
+        }
+
+        /// <summary>
+        /// Retrieves the currently registered feed action link factory.
+        /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Consistent with EF Has/Get pattern")]
+        public Func<ResourceSetContext, Uri> GetFeedActionLink()
+        {
+            if (OperationLinkBuilder == null)
+            {
+                return null;
+            }
+
+            return OperationLinkBuilder.FeedLinkFactory;
         }
 
         /// <summary>
@@ -133,19 +176,33 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// Established the return type of the Action.
         /// <remarks>Used when the return type is a single Primitive or ComplexType.</remarks>
         /// </summary>
-        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
-        public ActionConfiguration Returns<TReturnType>()
+        public ActionConfiguration Returns(Type clrReturnType)
         {
-            Type returnType = typeof(TReturnType);
-            IEdmTypeConfiguration configuration = ModelBuilder.GetTypeConfigurationOrNull(returnType);
+            if (clrReturnType == null)
+            {
+                throw Error.ArgumentNull("clrReturnType");
+            }
+
+            IEdmTypeConfiguration configuration = ModelBuilder.GetTypeConfigurationOrNull(clrReturnType);
 
             if (configuration is EntityTypeConfiguration)
             {
                 throw Error.InvalidOperation(SRResources.ReturnEntityWithoutEntitySet, configuration.FullName);
             }
 
-            ReturnsImplementation<TReturnType>();
+            ReturnsImplementation(clrReturnType);
             return this;
+        }
+
+        /// <summary>
+        /// Established the return type of the Action.
+        /// <remarks>Used when the return type is a single Primitive or ComplexType.</remarks>
+        /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
+        public ActionConfiguration Returns<TReturnType>()
+        {
+            Type returnType = typeof(TReturnType);
+            return this.Returns(returnType);
         }
 
         /// <summary>

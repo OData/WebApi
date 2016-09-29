@@ -1,15 +1,17 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Edm;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System.Globalization;
+using Microsoft.AspNetCore.OData.Query.Expressions;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Query
 {
@@ -73,6 +75,14 @@ namespace Microsoft.AspNetCore.OData.Query
         /// </summary>
         public FilterQueryOption Filter { get; private set; }
 
+        /// <summary>
+        /// Gets the <see cref="OrderByQueryOption"/>.
+        /// </summary>
+        public OrderByQueryOption OrderBy { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="SelectExpandQueryOption"/>.
+        /// </summary>
         public SelectExpandQueryOption SelectExpand { get; private set; }
 
         /// <summary>
@@ -147,6 +157,11 @@ namespace Microsoft.AspNetCore.OData.Query
                 query = Filter.ApplyTo(query, querySettings, _assemblyProvider);
             }
 
+            if (OrderBy != null)
+            {
+                query = OrderBy.ApplyTo(query, querySettings);
+            }
+
             if (Skip.HasValue)
             {
                 query = ExpressionHelpers.Skip(query, Skip.Value, Context.ElementClrType, false);
@@ -188,6 +203,7 @@ namespace Microsoft.AspNetCore.OData.Query
                     case "$orderby":
                         ThrowIfEmpty(kvp.Value, "$orderby");
                         RawValues.OrderBy = kvp.Value;
+                        OrderBy = new OrderByQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
                     case "$top":
                         ThrowIfEmpty(kvp.Value, "$top");
@@ -223,7 +239,7 @@ namespace Microsoft.AspNetCore.OData.Query
                     case "$expand":
                         RawValues.Expand = kvp.Value;
                         // TODO Parse the select statement if any
-                        Request.ODataProperties().SelectExpandClause = _queryOptionParser.ParseSelectAndExpand();
+                        Request.ODataFeature().SelectExpandClause = _queryOptionParser.ParseSelectAndExpand();
                         SelectExpand = new SelectExpandQueryOption(string.Empty, kvp.Value, Context, _queryOptionParser, Request);
                         break;
                     case "$format":

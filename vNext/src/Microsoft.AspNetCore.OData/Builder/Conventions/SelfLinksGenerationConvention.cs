@@ -6,12 +6,14 @@ using System.Linq;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Routing;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Builder.Conventions
 {
     internal class SelfLinksGenerationConvention : INavigationSourceConvention
     {
-        public void Apply(INavigationSourceConfiguration configuration, ODataModelBuilder model)
+        public void Apply(NavigationSourceConfiguration configuration, ODataModelBuilder model)
         {
             if (configuration == null)
             {
@@ -24,7 +26,7 @@ namespace Microsoft.AspNetCore.OData.Builder.Conventions
             {
                 entitySet.HasFeedSelfLink(feedContext =>
                 {
-                    string selfLink = feedContext.Url.CreateODataLink(new EntitySetPathSegment(feedContext.EntitySetBase));
+                    string selfLink = feedContext.Url.CreateODataLink(new EntitySetSegment(feedContext.EntitySetBase as IEdmEntitySet));
 
                     if (selfLink == null)
                     {

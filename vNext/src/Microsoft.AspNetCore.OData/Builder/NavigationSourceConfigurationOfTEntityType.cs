@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.OData.Edm;
 using Microsoft.AspNetCore.OData.Common;
 
@@ -16,9 +17,10 @@ namespace Microsoft.AspNetCore.OData.Builder
     /// </summary>
     public abstract class NavigationSourceConfiguration<TEntityType> where TEntityType : class
     {
-        private NavigationSourceConfiguration _configuration;
-        private EntityTypeConfiguration<TEntityType> _entityType;
-        private ODataModelBuilder _modelBuilder;
+        private readonly NavigationSourceConfiguration _configuration;
+        private readonly EntityTypeConfiguration<TEntityType> _entityType;
+        private readonly ODataModelBuilder _modelBuilder;
+        private readonly BindingPathConfiguration<TEntityType> _binding;
 
         internal NavigationSourceConfiguration(ODataModelBuilder modelBuilder, NavigationSourceConfiguration configuration)
         {
@@ -35,6 +37,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             _configuration = configuration;
             _modelBuilder = modelBuilder;
             _entityType = new EntityTypeConfiguration<TEntityType>(modelBuilder, _configuration.EntityType);
+            _binding = new BindingPathConfiguration<TEntityType>(modelBuilder, _entityType, _configuration);
         }
 
         /// <summary>
@@ -51,6 +54,18 @@ namespace Microsoft.AspNetCore.OData.Builder
         internal NavigationSourceConfiguration Configuration
         {
             get { return _configuration; }
+        }
+
+        /// <summary>
+        /// Gets a binding path configuration through which you can configure
+        /// binding paths for the navigation property of this navigation source.
+        /// </summary>
+        public BindingPathConfiguration<TEntityType> Binding
+        {
+            get
+            {
+                return _binding;
+            }
         }
 
         /// <summary>
@@ -83,8 +98,16 @@ namespace Microsoft.AspNetCore.OData.Builder
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
-            return this.Configuration.AddBinding(derivedEntityType.HasMany(navigationExpression),
-                _modelBuilder.EntitySet<TTargetType>(entitySetName)._configuration);
+            NavigationPropertyConfiguration navigation = derivedEntityType.HasMany(navigationExpression);
+
+            IList<object> bindingPath = new List<object>
+            {
+                typeof(TDerivedEntityType),
+                navigation.PropertyInfo
+            };
+
+            return this.Configuration.AddBinding(navigation,
+                _modelBuilder.EntitySet<TTargetType>(entitySetName)._configuration, bindingPath);
         }
 
         /// <summary>
@@ -175,7 +198,14 @@ namespace Microsoft.AspNetCore.OData.Builder
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
-            return this.Configuration.AddBinding(derivedEntityType.HasMany(navigationExpression), targetEntitySet.Configuration);
+            NavigationPropertyConfiguration navigation = derivedEntityType.HasMany(navigationExpression);
+            IList<object> bindingPath = new List<object>
+            {
+                typeof(TDerivedEntityType),
+                navigation.PropertyInfo
+            };
+
+            return this.Configuration.AddBinding(navigation, targetEntitySet.Configuration, bindingPath);
         }
 
         /// <summary>
@@ -237,8 +267,15 @@ namespace Microsoft.AspNetCore.OData.Builder
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
-            return this.Configuration.AddBinding(derivedEntityType.HasRequired(navigationExpression),
-                _modelBuilder.EntitySet<TTargetType>(entitySetName).Configuration);
+            NavigationPropertyConfiguration navigation = derivedEntityType.HasRequired(navigationExpression);
+            IList<object> bindingPath = new List<object>
+            {
+                typeof(TDerivedEntityType),
+                navigation.PropertyInfo
+            };
+
+            return this.Configuration.AddBinding(navigation,
+                _modelBuilder.EntitySet<TTargetType>(entitySetName).Configuration, bindingPath);
         }
 
         /// <summary>
@@ -300,8 +337,14 @@ namespace Microsoft.AspNetCore.OData.Builder
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
-            return this.Configuration.AddBinding(derivedEntityType.HasRequired(navigationExpression),
-                targetEntitySet.Configuration);
+            NavigationPropertyConfiguration navigation = derivedEntityType.HasRequired(navigationExpression);
+            IList<object> bindingPath = new List<object>
+            {
+                typeof(TDerivedEntityType),
+                navigation.PropertyInfo
+            };
+
+            return this.Configuration.AddBinding(navigation, targetEntitySet.Configuration, bindingPath);
         }
 
         /// <summary>
@@ -363,8 +406,15 @@ namespace Microsoft.AspNetCore.OData.Builder
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
-            return this.Configuration.AddBinding(derivedEntityType.HasOptional(navigationExpression),
-                _modelBuilder.EntitySet<TTargetType>(entitySetName).Configuration);
+            NavigationPropertyConfiguration navigation = derivedEntityType.HasOptional(navigationExpression);
+            IList<object> bindingPath = new List<object>
+            {
+                typeof(TDerivedEntityType),
+                navigation.PropertyInfo
+            };
+
+            return this.Configuration.AddBinding(navigation,
+                _modelBuilder.EntitySet<TTargetType>(entitySetName).Configuration, bindingPath);
         }
 
         /// <summary>
@@ -426,8 +476,14 @@ namespace Microsoft.AspNetCore.OData.Builder
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
-            return this.Configuration.AddBinding(derivedEntityType.HasOptional(navigationExpression),
-                targetEntitySet.Configuration);
+            NavigationPropertyConfiguration navigation = derivedEntityType.HasOptional(navigationExpression);
+            IList<object> bindingPath = new List<object>
+            {
+                typeof(TDerivedEntityType),
+                navigation.PropertyInfo
+            };
+
+            return this.Configuration.AddBinding(navigation, targetEntitySet.Configuration, bindingPath);
         }
 
         /// <summary>
@@ -489,8 +545,15 @@ namespace Microsoft.AspNetCore.OData.Builder
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
-            return this.Configuration.AddBinding(derivedEntityType.HasRequired(navigationExpression),
-                _modelBuilder.Singleton<TTargetType>(singletonName).Configuration);
+            NavigationPropertyConfiguration navigation = derivedEntityType.HasRequired(navigationExpression);
+            IList<object> bindingPath = new List<object>
+            {
+                typeof(TDerivedEntityType),
+                navigation.PropertyInfo
+            };
+
+            return this.Configuration.AddBinding(navigation,
+                _modelBuilder.Singleton<TTargetType>(singletonName).Configuration, bindingPath);
         }
 
         /// <summary>
@@ -552,8 +615,14 @@ namespace Microsoft.AspNetCore.OData.Builder
             EntityTypeConfiguration<TDerivedEntityType> derivedEntityType =
                 _modelBuilder.EntityType<TDerivedEntityType>().DerivesFrom<TEntityType>();
 
-            return this.Configuration.AddBinding(derivedEntityType.HasRequired(navigationExpression),
-                targetSingleton.Configuration);
+            NavigationPropertyConfiguration navigation = derivedEntityType.HasRequired(navigationExpression);
+            IList<object> bindingPath = new List<object>
+            {
+                typeof(TDerivedEntityType),
+                navigation.PropertyInfo
+            };
+
+            return this.Configuration.AddBinding(navigation, targetSingleton.Configuration, bindingPath);
         }
 
         /// <summary>
@@ -564,14 +633,14 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// otherwise, <c>false</c>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
-        public void HasEditLink(Func<EntityInstanceContext<TEntityType>, Uri> editLinkFactory, bool followsConventions)
+        public void HasEditLink(Func<ResourceContext<TEntityType>, Uri> editLinkFactory, bool followsConventions)
         {
             if (editLinkFactory == null)
             {
                 throw Error.ArgumentNull("editLinkFactory");
             }
 
-            _configuration.HasEditLink(new SelfLinkBuilder<Uri>((entity) => editLinkFactory(UpCastEntityInstanceContext(entity)), followsConventions));
+            _configuration.HasEditLink(new SelfLinkBuilder<Uri>((context) => editLinkFactory(UpCastEntityContext(context)), followsConventions));
         }
 
         /// <summary>
@@ -582,15 +651,15 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// otherwise, <c>false</c>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
-        public void HasReadLink(Func<EntityInstanceContext<TEntityType>, Uri> readLinkFactory, bool followsConventions)
+        public void HasReadLink(Func<ResourceContext<TEntityType>, Uri> readLinkFactory, bool followsConventions)
         {
             if (readLinkFactory == null)
             {
                 throw Error.ArgumentNull("readLinkFactory");
             }
 
-            _configuration.HasReadLink(new SelfLinkBuilder<Uri>((entity) =>
-                readLinkFactory(UpCastEntityInstanceContext(entity)), followsConventions));
+            _configuration.HasReadLink(new SelfLinkBuilder<Uri>((context) =>
+                readLinkFactory(UpCastEntityContext(context)), followsConventions));
         }
 
         /// <summary>
@@ -601,15 +670,15 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// otherwise, <c>false</c>.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
-        public void HasIdLink(Func<EntityInstanceContext<TEntityType>, Uri> idLinkFactory, bool followsConventions)
+        public void HasIdLink(Func<ResourceContext<TEntityType>, Uri> idLinkFactory, bool followsConventions)
         {
             if (idLinkFactory == null)
             {
                 throw Error.ArgumentNull("idLinkFactory");
             }
 
-            _configuration.HasIdLink(new SelfLinkBuilder<Uri>((entity) =>
-                idLinkFactory(UpCastEntityInstanceContext(entity)), followsConventions));
+            _configuration.HasIdLink(new SelfLinkBuilder<Uri>((context) =>
+                idLinkFactory(UpCastEntityContext(context)), followsConventions));
         }
 
         /// <summary>
@@ -622,7 +691,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
         public void HasNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty,
-            Func<EntityInstanceContext<TEntityType>, IEdmNavigationProperty, Uri> navigationLinkFactory, bool followsConventions)
+            Func<ResourceContext<TEntityType>, IEdmNavigationProperty, Uri> navigationLinkFactory, bool followsConventions)
         {
             if (navigationProperty == null)
             {
@@ -634,8 +703,8 @@ namespace Microsoft.AspNetCore.OData.Builder
                 throw Error.ArgumentNull("navigationLinkFactory");
             }
 
-            _configuration.HasNavigationPropertyLink(navigationProperty, new NavigationLinkBuilder((entity, property) =>
-                navigationLinkFactory(UpCastEntityInstanceContext(entity), property), followsConventions));
+            _configuration.HasNavigationPropertyLink(navigationProperty, new NavigationLinkBuilder((context, property) =>
+                navigationLinkFactory(UpCastEntityContext(context), property), followsConventions));
         }
 
         /// <summary>
@@ -648,7 +717,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
         public void HasNavigationPropertiesLink(IEnumerable<NavigationPropertyConfiguration> navigationProperties,
-            Func<EntityInstanceContext<TEntityType>, IEdmNavigationProperty, Uri> navigationLinkFactory, bool followsConventions)
+            Func<ResourceContext<TEntityType>, IEdmNavigationProperty, Uri> navigationLinkFactory, bool followsConventions)
         {
             if (navigationProperties == null)
             {
@@ -661,49 +730,48 @@ namespace Microsoft.AspNetCore.OData.Builder
             }
 
             _configuration.HasNavigationPropertiesLink(navigationProperties, new NavigationLinkBuilder((entity, property) =>
-                navigationLinkFactory(UpCastEntityInstanceContext(entity), property), followsConventions));
+                navigationLinkFactory(UpCastEntityContext(entity), property), followsConventions));
         }
 
         /// <summary>
-        /// Finds the <see cref="NavigationPropertyBindingConfiguration"/> for the navigation property with the given name.
+        /// Finds the bindings <see cref="NavigationPropertyBindingConfiguration"/> for the navigation property with the given name.
         /// </summary>
         /// <param name="propertyName">The name of the navigation property.</param>
-        /// <returns>The binding, if found; otherwise, null.</returns>
-        public NavigationPropertyBindingConfiguration FindBinding(string propertyName)
+        /// <returns>The bindings, if found; otherwise, empty.</returns>
+        public IEnumerable<NavigationPropertyBindingConfiguration> FindBindings(string propertyName)
         {
-            return _configuration.FindBinding(propertyName);
+            return _configuration.FindBindings(propertyName);
         }
 
         /// <summary>
-        /// Finds the <see cref="NavigationPropertyBindingConfiguration"/> for the given navigation property and
-        /// creates it if it does not exist.
+        /// Finds the bindings <see cref="NavigationPropertyBindingConfiguration"/> for the given navigation property
         /// </summary>
         /// <param name="navigationConfiguration">The navigation property.</param>
-        /// <returns>The binding if found else the created binding.</returns>
-        public NavigationPropertyBindingConfiguration FindBinding(NavigationPropertyConfiguration navigationConfiguration)
+        /// <returns>The bindings if found</returns>
+        public IEnumerable<NavigationPropertyBindingConfiguration> FindBinding(NavigationPropertyConfiguration navigationConfiguration)
         {
-            return _configuration.FindBinding(navigationConfiguration, autoCreate: true);
+            return _configuration.FindBinding(navigationConfiguration);
         }
 
         /// <summary>
         /// Finds the <see cref="NavigationPropertyBindingConfiguration"/> for the given navigation property.
         /// </summary>
         /// <param name="navigationConfiguration">The navigation property.</param>
-        /// <param name="autoCreate">Represents a value specifying if the binding should be created if it is not found.</param>
+        /// <param name="bindingPath">The navigation binding path.</param>
         /// <returns>The binding if found.</returns>
         public NavigationPropertyBindingConfiguration FindBinding(NavigationPropertyConfiguration navigationConfiguration,
-            bool autoCreate)
+            IList<object> bindingPath)
         {
-            return _configuration.FindBinding(navigationConfiguration, autoCreate);
+            return _configuration.FindBinding(navigationConfiguration, bindingPath);
         }
 
-        private static EntityInstanceContext<TEntityType> UpCastEntityInstanceContext(EntityInstanceContext context)
+        private static ResourceContext<TEntityType> UpCastEntityContext(ResourceContext context)
         {
-            return new EntityInstanceContext<TEntityType>
+            return new ResourceContext<TEntityType>
             {
                 SerializerContext = context.SerializerContext,
                 EdmObject = context.EdmObject,
-                EntityType = context.EntityType
+                StructuredType = context.StructuredType
             };
         }
     }

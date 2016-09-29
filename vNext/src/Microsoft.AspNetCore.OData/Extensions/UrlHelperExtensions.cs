@@ -9,11 +9,12 @@ using Microsoft.AspNetCore.OData.Routing;
 using System.Diagnostics.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Extensions
 {
     /// <summary>
-    /// Provides extension methods for the <see cref="UrlHelper"/> class.
+    /// Provides extension methods for the <see cref="IUrlHelper"/> class.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class UrlHelperExtensions
@@ -27,13 +28,13 @@ namespace Microsoft.AspNetCore.OData.Extensions
 
             Contract.Assert(request != null);
 
-            string routeName = request.ODataProperties().Path.PathTemplate;
+            string routeName = request.ODataFeature().Path.PathTemplate;
             if (String.IsNullOrEmpty(routeName))
             {
                 throw Error.InvalidOperation(SRResources.RequestMustHaveODataRouteName);
             }
 
-            var routePrefix = request.ODataProperties().RoutePrefix;
+            var routePrefix = request.ODataFeature().RoutePrefix;
             
             //return CreateODataLink(urlHelper, routeName, pathHandler, segments);
             return request.Scheme + "://" + request.Host + "/" + routePrefix + "/";  

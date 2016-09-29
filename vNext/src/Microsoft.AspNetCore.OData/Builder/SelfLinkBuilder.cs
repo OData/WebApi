@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// </summary>
         /// <param name="linkFactory">The link factory.</param>
         /// <param name="followsConventions">Whether the factory follows odata conventions for link generation.</param>
-        public SelfLinkBuilder(Func<EntityInstanceContext, T> linkFactory, bool followsConventions)
+        public SelfLinkBuilder(Func<ResourceContext, T> linkFactory, bool followsConventions)
         {
             if (linkFactory == null)
             {
@@ -31,7 +31,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <summary>
         /// Gets the factory for generating links.
         /// </summary>
-        public Func<EntityInstanceContext, T> Factory { get; private set; }
+        public Func<ResourceContext, T> Factory { get; private set; }
 
         /// <summary>
         /// Gets a boolean indicating whether the link factory follows OData conventions or not.

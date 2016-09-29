@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.Edm;
 using System;
@@ -12,36 +15,36 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
-using Microsoft.AspNetCore.OData.Routing;
-using Microsoft.Extensions.Internal;
-using Microsoft.OData.Core;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData;
+using Microsoft.OData.UriParser;
+using ODataPath = Microsoft.AspNetCore.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
+    /// <summary>
+    ///  Writes an object in a given OData format to the output stream.
+    /// </summary>
     public class ODataOutputFormatter : TextOutputFormatter
     {
         private readonly ODataMessageWriterSettings _messageWriterSettings;
-        private readonly ODataSerializerProvider _serializerProvider;
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataOutputFormatter"/> class.
+        /// </summary>
         public ODataOutputFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
-            : this(new DefaultODataSerializerProvider(), payloadKinds)
-        {
-
-        }
-
-        public ODataOutputFormatter(ODataSerializerProvider serializerProvider, IEnumerable<ODataPayloadKind> payloadKinds)
         {
             _messageWriterSettings = new ODataMessageWriterSettings
             {
-                Indent = true,
-                DisableMessageStreamDisposal = true,
+                // TODO: 
+                //Indent = true,
+                EnableMessageStreamDisposal = false,
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
-                AutoComputePayloadMetadataInJson = true,
+                //AutoComputePayloadMetadataInJson = true,
             };
 
-            _serializerProvider = serializerProvider;
             _payloadKinds = payloadKinds;
         }
 
@@ -52,10 +55,11 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
         private void WriteResponseBody(OutputFormatterWriteContext context)
         {
+            HttpContext httpContext = context.HttpContext;
             HttpRequest request = context.HttpContext.Request;
             HttpResponse response = context.HttpContext.Response;
 
-            IEdmModel model = request.ODataProperties().Model;
+            IEdmModel model = context.HttpContext.ODataFeature().Model;
             if (model == null)
             {
                 throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
@@ -76,11 +80,11 @@ namespace Microsoft.AspNetCore.OData.Formatter
             }
             var type = value.GetType();
 
-            ODataSerializer serializer = GetSerializer(type, value, model, new DefaultODataSerializerProvider(), request);
+            ODataSerializer serializer = GetSerializer(type, value, context);
 
             IUrlHelper urlHelper = context.HttpContext.UrlHelper();
 
-            ODataPath path = request.ODataProperties().Path;
+            ODataPath path = httpContext.ODataFeature().Path;
             IEdmNavigationSource targetNavigationSource = path == null ? null : path.NavigationSource;
 
             string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(request);
@@ -99,13 +103,12 @@ namespace Microsoft.AspNetCore.OData.Formatter
             }
 
             Uri baseAddress = GetBaseAddress(request);
-            ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings(_messageWriterSettings)
-            {
-                PayloadBaseUri = baseAddress,
-                Version = ODataProperties.DefaultODataVersion,
-            };
+            ODataMessageWriterSettings writerSettings = _messageWriterSettings.Clone();
+            writerSettings.BaseUri = baseAddress;
+            writerSettings.Version = ODataVersion.V4;
+            writerSettings.Validations = writerSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
 
-            string metadataLink = urlHelper.CreateODataLink(request, new MetadataPathSegment());
+            string metadataLink = urlHelper.CreateODataLink(request, MetadataSegment.Instance);
             if (metadataLink == null)
             {
                 throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
@@ -116,7 +119,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 ServiceRoot = baseAddress,
 
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
-                SelectAndExpand = request.ODataProperties().SelectExpandClause,
+                SelectAndExpand = httpContext.ODataFeature().SelectExpandClause,
                 Path = (path == null) ? null : path.ODLPath
                 //Path = (path == null || IsOperationPath(path)) ? null : path.ODLPath,
             };
@@ -125,16 +128,15 @@ namespace Microsoft.AspNetCore.OData.Formatter
             {
                 ODataSerializerContext writeContext = new ODataSerializerContext()
                 {
-                    Request = request,
-                    RequestContext = request.HttpContext,
+                    Context = context.HttpContext,
                     Url = urlHelper,
                     NavigationSource = targetNavigationSource,
                     Model = model,
                     RootElementName = GetRootElementName(path) ?? "root",
-                    SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
+                    SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.ResourceSet,
                     Path = path,
                     MetadataLevel = ODataMediaTypes.GetMetadataLevel(MediaTypeHeaderValue.Parse(context.ContentType.Value)),
-                    SelectExpandClause = request.ODataProperties().SelectExpandClause,
+                    SelectExpandClause = request.ODataFeature().SelectExpandClause,
                 };
 
                 serializer.WriteObject(graph, type, messageWriter, writeContext);
@@ -182,8 +184,8 @@ namespace Microsoft.AspNetCore.OData.Formatter
             //}
 
             response.Headers.Append(
-                ODataProperties.ODataServiceVersionHeader,
-                ODataUtils.ODataVersionToString(ODataProperties.DefaultODataVersion));
+                ODataFeature.ODataServiceVersionHeader,
+                ODataUtils.ODataVersionToString(ODataFeature.DefaultODataVersion));
 
             base.WriteResponseHeaders(context);
         }
@@ -200,11 +202,14 @@ namespace Microsoft.AspNetCore.OData.Formatter
             {
                 type = context.Object.GetType();
             }
+
+            OutputFormatterWriteContext outputContext = context as OutputFormatterWriteContext;
+
             var request = ((OutputFormatterWriteContext)context).HttpContext.Request;
 
             if (request != null)
             {
-                IEdmModel model = request.ODataProperties().Model;
+                IEdmModel model = request.ODataFeature().Model;
                 if (model != null)
                 {
                     ODataPayloadKind? payloadKind = null;
@@ -217,7 +222,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                     }
                     else
                     {
-                        payloadKind = GetClrObjectResponsePayloadKind(type, model, request);
+                        payloadKind = GetClrObjectResponsePayloadKind(type, outputContext);
                     }
 
                     return payloadKind == null ? false : _payloadKinds.Contains(payloadKind.Value);
@@ -227,9 +232,11 @@ namespace Microsoft.AspNetCore.OData.Formatter
             return false;
         }
 
-        private ODataSerializer GetSerializer(Type type, object value, IEdmModel model, ODataSerializerProvider serializerProvider, HttpRequest request)
+        private ODataSerializer GetSerializer(Type type, object value, OutputFormatterWriteContext context)
         {
             ODataSerializer serializer;
+
+            IODataSerializerProvider serviceProvider = context.HttpContext.RequestServices.GetRequiredService<IODataSerializerProvider>();
 
             IEdmObject edmObject = value as IEdmObject;
             if (edmObject != null)
@@ -241,7 +248,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                         edmObject.GetType().FullName, typeof(IEdmObject).Name));
                 }
 
-                serializer = serializerProvider.GetEdmTypeSerializer(edmType);
+                serializer = serviceProvider.GetEdmTypeSerializer(context.HttpContext, edmType);
                 if (serializer == null)
                 {
                     string message = Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString(), typeof(ODataOutputFormatter).Name);
@@ -252,7 +259,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             {
                 // get the most appropriate serializer given that we support inheritance.
                 type = value == null ? type : value.GetType();
-                serializer = serializerProvider.GetODataPayloadSerializer(model, type, request);
+                serializer = serviceProvider.GetODataPayloadSerializer(context.HttpContext, type);
                 if (serializer == null)
                 {
                     string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataOutputFormatter).Name);
@@ -289,13 +296,10 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
             foreach (ODataPathSegment segment in path.Segments)
             {
-                switch (segment.SegmentKind)
+                if (segment is OperationSegment ||
+                    segment is OperationImportSegment)
                 {
-                    case ODataSegmentKinds._Action:
-                    case ODataSegmentKinds._Function:
-                    case ODataSegmentKinds._UnboundAction:
-                    case ODataSegmentKinds._UnboundFunction:
-                        return true;
+                    return true;
                 }
             }
 
@@ -309,13 +313,17 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 ODataPathSegment lastSegment = path.Segments.LastOrDefault();
                 if (lastSegment != null)
                 {
-                    BoundActionPathSegment actionSegment = lastSegment as BoundActionPathSegment;
+                    OperationSegment actionSegment = lastSegment as OperationSegment;
                     if (actionSegment != null)
                     {
-                        return actionSegment.Action.Name;
+                        IEdmAction action = actionSegment.Operations.Single() as IEdmAction;
+                        if (action != null)
+                        {
+                            return action.Name;
+                        }
                     }
 
-                    PropertyAccessPathSegment propertyAccessSegment = lastSegment as PropertyAccessPathSegment;
+                    PropertySegment propertyAccessSegment = lastSegment as PropertySegment;
                     if (propertyAccessSegment != null)
                     {
                         return propertyAccessSegment.Property.Name;
@@ -341,7 +349,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 }
                 else if (typeof(IEdmEntityObject).IsAssignableFrom(elementType))
                 {
-                    return ODataPayloadKind.Feed;
+                    return ODataPayloadKind.ResourceSet;
                 }
                 else if (typeof(IEdmChangedObject).IsAssignableFrom(elementType))
                 {
@@ -356,14 +364,14 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 }
                 else if (typeof(IEdmEntityObject).IsAssignableFrom(elementType))
                 {
-                    return ODataPayloadKind.Entry;
+                    return ODataPayloadKind.Resource;
                 }
             }
 
             return null;
         }
 
-        private ODataPayloadKind? GetClrObjectResponsePayloadKind(Type type, IEdmModel model, HttpRequest request)
+        private ODataPayloadKind? GetClrObjectResponsePayloadKind(Type type, OutputFormatterWriteContext context)
         {
             // SingleResult<T> should be serialized as T.
             //if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SingleResult<>))
@@ -371,7 +379,10 @@ namespace Microsoft.AspNetCore.OData.Formatter
             //    type = type.GetGenericArguments()[0];
             //}
 
-            ODataSerializer serializer = _serializerProvider.GetODataPayloadSerializer(model, type, request);
+            IODataSerializerProvider provider =
+                context.HttpContext.RequestServices.GetRequiredService<IODataSerializerProvider>();
+
+            ODataSerializer serializer = provider.GetODataPayloadSerializer(context.HttpContext, type);
             return serializer == null ? null : (ODataPayloadKind?)serializer.ODataPayloadKind;
         }
     }

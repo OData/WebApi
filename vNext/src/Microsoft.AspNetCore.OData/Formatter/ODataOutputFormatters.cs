@@ -3,9 +3,7 @@
 
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.AspNetCore.OData.Formatter.Deserialization;
-using Microsoft.AspNetCore.OData.Formatter.Serialization;
-using Microsoft.OData.Core;
+using Microsoft.OData;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
@@ -22,27 +20,16 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
         /// <summary>
         /// Creates a list of media type formatters to handle OData.
-        /// The default serializer provider is <see cref="DefaultODataSerializerProvider"/>.
         /// </summary>
-        /// <returns>A list of output formatters to handle OData.</returns>
-        public static IList<ODataOutputFormatter> Create()
-        {
-            return Create(DefaultODataSerializerProvider.Instance);
-        }
-
-        /// <summary>
-        /// Creates a list of media type formatters to handle OData with the given <paramref name="serializerProvider"/>.
-        /// </summary>
-        /// <param name="serializerProvider">The serializer provider to use.</param>
         /// <returns>A list of media type formatters to handle OData.</returns>
-        public static IList<ODataOutputFormatter> Create(ODataSerializerProvider serializerProvider)
+        public static IList<ODataOutputFormatter> Create()
         {
             return new List<ODataOutputFormatter>()
             {
                 // Place JSON formatter first so it gets used when the request doesn't ask for a specific content type
-                CreateApplicationJson(serializerProvider),
-                CreateApplicationXml(serializerProvider),
-                CreateRawValue(serializerProvider)
+                CreateApplicationJson(),
+                CreateApplicationXml(),
+                CreateRawValue()
             };
         }
 
@@ -54,9 +41,9 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 throwOnInvalidBytes: true));
         }
 
-        private static ODataOutputFormatter CreateRawValue(ODataSerializerProvider serializerProvider)
+        private static ODataOutputFormatter CreateRawValue()
         {
-            ODataOutputFormatter formatter = CreateFormatterWithoutMediaTypes(serializerProvider, ODataPayloadKind.Value);
+            ODataOutputFormatter formatter = CreateFormatterWithoutMediaTypes(ODataPayloadKind.Value);
             //formatter.MediaTypeMappings.Add(new ODataPrimitiveValueMediaTypeMapping());
             //formatter.MediaTypeMappings.Add(new ODataEnumValueMediaTypeMapping());
             //formatter.MediaTypeMappings.Add(new ODataBinaryValueMediaTypeMapping());
@@ -64,12 +51,11 @@ namespace Microsoft.AspNetCore.OData.Formatter
             return formatter;
         }
 
-        private static ODataOutputFormatter CreateApplicationJson(ODataSerializerProvider serializerProvider)
+        private static ODataOutputFormatter CreateApplicationJson()
         {
             ODataOutputFormatter formatter = CreateFormatterWithoutMediaTypes(
-                serializerProvider,
-                ODataPayloadKind.Feed,
-                ODataPayloadKind.Entry,
+                ODataPayloadKind.ResourceSet,
+                ODataPayloadKind.Resource,
                 ODataPayloadKind.Property,
                 ODataPayloadKind.EntityReferenceLink,
                 ODataPayloadKind.EntityReferenceLinks,
@@ -100,10 +86,9 @@ namespace Microsoft.AspNetCore.OData.Formatter
             return formatter;
         }
 
-        private static ODataOutputFormatter CreateApplicationXml(ODataSerializerProvider serializerProvider)
+        private static ODataOutputFormatter CreateApplicationXml()
         {
             ODataOutputFormatter formatter = CreateFormatterWithoutMediaTypes(
-                serializerProvider,
                 ODataPayloadKind.MetadataDocument);
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationXml);
 
@@ -113,9 +98,9 @@ namespace Microsoft.AspNetCore.OData.Formatter
             return formatter;
         }
 
-        private static ODataOutputFormatter CreateFormatterWithoutMediaTypes(ODataSerializerProvider serializerProvider, params ODataPayloadKind[] payloadKinds)
+        private static ODataOutputFormatter CreateFormatterWithoutMediaTypes(params ODataPayloadKind[] payloadKinds)
         {
-            ODataOutputFormatter formatter = new ODataOutputFormatter(serializerProvider, payloadKinds);
+            ODataOutputFormatter formatter = new ODataOutputFormatter(payloadKinds);
             AddSupportedEncodings(formatter);
             return formatter;
         }

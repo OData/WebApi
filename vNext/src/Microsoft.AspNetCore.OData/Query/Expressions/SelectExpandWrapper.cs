@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -61,7 +60,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
                 IEdmEntityType entityType = model.FindDeclaredType(TypeName) as IEdmEntityType;
                 if (entityType == null)
                 {
-                    throw Error.InvalidOperation(SRResources.EntityTypeNotInModel, TypeName);
+                    throw Error.InvalidOperation("TODO: "/*SRResources.ResourceTypeNotInModel, TypeName*/);
                 }
 
                 return new EdmEntityTypeReference(entityType, isNullable: false);

@@ -3,13 +3,13 @@
 
 using System;
 using System.Runtime.Serialization;
-using Microsoft.OData.Core;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.OData;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
-    /// Represents an <see cref="Microsoft.OData.Core.ODataSerializer"/> for serializing $ref response.
+    /// Represents an <see cref="ODataSerializer"/> for serializing $ref response.
     /// </summary>
     // For example, the response to the url http://localhost/Products(10)/Category/$ref gets serialized using this.</remarks>
     public class ODataEntityReferenceLinkSerializer : ODataSerializer

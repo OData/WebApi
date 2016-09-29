@@ -33,7 +33,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// Adds a self link to the feed.
         /// </summary>
         /// <param name="feedSelfLinkFactory">The builder used to generate the link URL.</param>
-        public virtual void HasFeedSelfLink(Func<FeedContext, string> feedSelfLinkFactory)
+        public virtual void HasFeedSelfLink(Func<ResourceSetContext, string> feedSelfLinkFactory)
         {
             if (feedSelfLinkFactory == null)
             {
@@ -47,7 +47,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// Adds a self link to the feed.
         /// </summary>
         /// <param name="feedSelfLinkFactory">The builder used to generate the link URL.</param>
-        public virtual void HasFeedSelfLink(Func<FeedContext, Uri> feedSelfLinkFactory)
+        public virtual void HasFeedSelfLink(Func<ResourceSetContext, Uri> feedSelfLinkFactory)
         {
             if (feedSelfLinkFactory == null)
             {

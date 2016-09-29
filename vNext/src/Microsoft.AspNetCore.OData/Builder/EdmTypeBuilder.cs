@@ -9,8 +9,6 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.OData.Edm.Library.Values;
 
 namespace Microsoft.AspNetCore.OData.Builder
 {
@@ -52,9 +50,9 @@ namespace Microsoft.AspNetCore.OData.Builder
                 CreateEdmTypeBody(config);
             }
 
-            foreach (EntityTypeConfiguration entity in _configurations.OfType<EntityTypeConfiguration>())
+            foreach (StructuralTypeConfiguration structrual in _configurations.OfType<StructuralTypeConfiguration>())
             {
-                CreateNavigationProperty(entity);
+                CreateNavigationProperty(structrual);
             }
 
             return _types;
@@ -153,23 +151,17 @@ namespace Microsoft.AspNetCore.OData.Builder
                 switch (property.Kind)
                 {
                     case PropertyKind.Primitive:
-                        PrimitivePropertyConfiguration primitiveProperty = property as PrimitivePropertyConfiguration;
-                        EdmPrimitiveTypeKind typeKind = GetTypeKind(primitiveProperty.PropertyInfo.PropertyType);
+                        PrimitivePropertyConfiguration primitiveProperty = (PrimitivePropertyConfiguration)property;
+                        EdmPrimitiveTypeKind typeKind = primitiveProperty.TargetEdmTypeKind ??
+                                                        GetTypeKind(primitiveProperty.PropertyInfo.PropertyType);
                         IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance.GetPrimitive(
                             typeKind,
                             primitiveProperty.OptionalProperty);
 
-                        // Set concurrency token if is entity type, and concurrency token is true
-                        EdmConcurrencyMode concurrencyMode = EdmConcurrencyMode.None;
-                        if (config.Kind == EdmTypeKind.Entity && primitiveProperty.ConcurrencyToken)
-                        {
-                            concurrencyMode = EdmConcurrencyMode.Fixed;
-                        }
                         edmProperty = type.AddStructuralProperty(
                             primitiveProperty.Name,
                             primitiveTypeReference,
-                            defaultValue: null,
-                            concurrencyMode: concurrencyMode);
+                            defaultValue: null);
                         break;
 
                     case PropertyKind.Complex:
@@ -186,7 +178,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                         break;
 
                     case PropertyKind.Enum:
-                        edmProperty = CreateStructuralTypeEnumPropertyBody(type, config, (EnumPropertyConfiguration)property);
+                        edmProperty = CreateStructuralTypeEnumPropertyBody(type, (EnumPropertyConfiguration)property);
                         break;
 
                     default:
@@ -257,7 +249,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                 new EdmCollectionTypeReference(new EdmCollectionType(elementTypeReference)));
         }
 
-        private IEdmProperty CreateStructuralTypeEnumPropertyBody(EdmStructuredType type, StructuralTypeConfiguration config, EnumPropertyConfiguration enumProperty)
+        private IEdmProperty CreateStructuralTypeEnumPropertyBody(EdmStructuredType type, EnumPropertyConfiguration enumProperty)
         {
             Type enumPropertyType = TypeHelper.GetUnderlyingTypeOrSelf(enumProperty.RelatedClrType);
             IEdmType edmType = GetEdmType(enumPropertyType);
@@ -270,18 +262,10 @@ namespace Microsoft.AspNetCore.OData.Builder
             IEdmEnumType enumType = (IEdmEnumType)edmType;
             IEdmTypeReference enumTypeReference = new EdmEnumTypeReference(enumType, enumProperty.OptionalProperty);
 
-            // Set concurrency token if is entity type, and concurrency token is true
-            EdmConcurrencyMode enumConcurrencyMode = EdmConcurrencyMode.None;
-            if (config.Kind == EdmTypeKind.Entity && enumProperty.ConcurrencyToken)
-            {
-                enumConcurrencyMode = EdmConcurrencyMode.Fixed;
-            }
-
             return type.AddStructuralProperty(
                 enumProperty.Name,
                 enumTypeReference,
-                defaultValue: null,
-                concurrencyMode: enumConcurrencyMode);
+                defaultValue: null);
         }
 
         private void CreateComplexTypeBody(EdmComplexType type, ComplexTypeConfiguration config)
@@ -306,11 +290,11 @@ namespace Microsoft.AspNetCore.OData.Builder
             type.AddKeys(keys);
         }
 
-        private void CreateNavigationProperty(EntityTypeConfiguration config)
+        private void CreateNavigationProperty(StructuralTypeConfiguration config)
         {
             Contract.Assert(config != null);
 
-            EdmEntityType type = (EdmEntityType)(GetEdmType(config.ClrType));
+            EdmStructuredType type = (EdmStructuredType)(GetEdmType(config.ClrType));
 
             foreach (NavigationPropertyConfiguration navProp in config.NavigationProperties)
             {
@@ -400,7 +384,7 @@ namespace Microsoft.AspNetCore.OData.Builder
                 }
 
                 EdmEnumMember edmMember = new EdmEnumMember(type, member.Name,
-                    new EdmIntegerConstant(value));
+                    new EdmEnumMemberValue(value));
                 type.AddMember(edmMember);
                 _members[member.MemberInfo] = edmMember;
             }

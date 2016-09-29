@@ -103,7 +103,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
             using (var xmlWriter = XmlWriter.Create(writer))
             {
                 IEnumerable<EdmError> errors;
-                EdmxWriter.TryWriteEdmx(model, xmlWriter, EdmxTarget.OData, out errors);
+                CsdlWriter.TryWriteCsdl(model, xmlWriter, CsdlTarget.OData, out errors);
             }
         }
     }

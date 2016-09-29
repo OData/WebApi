@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNetCore.OData.Builder
 {
@@ -37,6 +38,11 @@ namespace Microsoft.AspNetCore.OData.Builder
         {
             get { return PropertyInfo.PropertyType; }
         }
+
+        /// <summary>
+        /// Gets the target Edm type kind of this property. Call the extension methods to set this property.
+        /// </summary>
+        public EdmPrimitiveTypeKind? TargetEdmTypeKind { get; internal set; }
 
         /// <summary>
         /// Configures the property to be optional.

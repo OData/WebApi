@@ -4,7 +4,8 @@
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Routing;
+using Microsoft.OData.UriParser;
+using ODataPath = Microsoft.AspNetCore.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
@@ -32,10 +33,10 @@ namespace Microsoft.AspNetCore.OData.Formatter
         //    return IsCountRequest(request) ? 1 : 0;
         //}
 
-        internal static bool IsCountRequest(HttpRequest request)
+        internal static bool IsCountRequest(HttpContext context)
         {
-            ODataPath path = request.ODataProperties().Path;
-            return path != null && path.Segments.LastOrDefault() is CountPathSegment;
+            ODataPath path = context.ODataFeature().Path;
+            return path != null && path.Segments.LastOrDefault() is CountSegment;
         }
     }
 }

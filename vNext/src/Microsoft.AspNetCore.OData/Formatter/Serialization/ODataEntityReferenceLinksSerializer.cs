@@ -5,14 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using Microsoft.OData.Core;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.OData;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     /// <summary>
-    /// Represents an <see cref="Microsoft.OData.Core.ODataSerializer"/> for serializing $ref response for a collection navigation property.
+    /// Represents an <see cref="ODataSerializer"/> for serializing $ref response for a collection navigation property.
     /// </summary>
     public class ODataEntityReferenceLinksSerializer : ODataSerializer
     {
@@ -55,7 +55,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 
                     if (writeContext.Request != null)
                     {
-                        entityReferenceLinks.Count = writeContext.Request.ODataProperties().TotalCount;
+                        entityReferenceLinks.Count = writeContext.Context.ODataFeature().TotalCount;
                     }
                 }
 

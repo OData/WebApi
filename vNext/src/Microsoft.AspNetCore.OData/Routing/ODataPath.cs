@@ -1,34 +1,33 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.Contracts;
-using System.Text;
 using Microsoft.OData.Edm;
-using Semantic = Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.AspNetCore.OData.Common;
+using Semantic = Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Routing
 {
     /// <summary>
     /// Provides an object representation for an OData path with additional information about the EDM type and entity set for the path.
-    /// TODO: Replace with ODataPath in ODL
     /// </summary>
     [ODataPathParameterBinding]
-    public class ODataPath
+    public class ODataPath : IEnumerable<Semantic.ODataPathSegment>
     {
-        private ReadOnlyCollection<ODataPathSegment> _segments;
-        private IEdmType _edmType;
-        private IEdmNavigationSource _navigationSource;
-        private string _pathTemplate;
+        private readonly ReadOnlyCollection<Semantic.ODataPathSegment> _segments;
+        private readonly IEdmType _edmType;
+        private readonly IEdmNavigationSource _navigationSource;
+        private readonly string _pathLiteral;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataPath" /> class.
         /// </summary>
         /// <param name="segments">The path segments for the path.</param>
-        public ODataPath(params ODataPathSegment[] segments)
-            : this(segments as IList<ODataPathSegment>)
+        public ODataPath(params Semantic.ODataPathSegment[] segments)
+            : this(segments as IEnumerable<Semantic.ODataPathSegment>)
         {
         }
 
@@ -36,113 +35,115 @@ namespace Microsoft.AspNetCore.OData.Routing
         /// Initializes a new instance of the <see cref="ODataPath" /> class.
         /// </summary>
         /// <param name="segments">The path segments for the path.</param>
-        public ODataPath(IList<ODataPathSegment> segments)
+        public ODataPath(IEnumerable<Semantic.ODataPathSegment> segments)
         {
             if (segments == null)
             {
                 throw Error.ArgumentNull("segments");
             }
 
-            foreach (ODataPathSegment segment in segments)
+            var oDataPathSegments = segments as IList<Semantic.ODataPathSegment> ?? segments.ToList();
+
+            _edmType = oDataPathSegments.Any() ? oDataPathSegments.Last().EdmType : null;
+
+            _segments = new ReadOnlyCollection<Semantic.ODataPathSegment>(oDataPathSegments);
+
+            ODataPathSegmentHandler handler = new ODataPathSegmentHandler();
+            foreach (var segment in oDataPathSegments)
             {
-                _edmType = segment.GetEdmType(_edmType);
-                _navigationSource = segment.GetNavigationSource(_navigationSource);
+                UnresolvedPathSegment pathSegment = segment as UnresolvedPathSegment;
+                if (pathSegment != null)
+                {
+                    handler.Handle(pathSegment);
+                }
+                else
+                {
+                    segment.HandleWith(handler);
+                }
             }
 
-            _segments = new ReadOnlyCollection<ODataPathSegment>(segments);
+            _navigationSource = handler.NavigationSource;
+            PathTemplate = handler.PathTemplate;
+            _pathLiteral = handler.PathLiteral;
         }
 
         /// <summary>
-        /// Gets or sets the EDM type of the path.
+        /// Gets the EDM type of the path.
         /// </summary>
         public IEdmType EdmType
         {
-            get
-            {
-                return _edmType;
-            }
+            get { return _edmType; }
         }
 
         /// <summary>
-        /// Gets or sets the navigation source of the path.
+        /// Gets the navigation source of the path.
         /// </summary>
         public IEdmNavigationSource NavigationSource
         {
-            get
-            {
-                return _navigationSource;
-            }
-        }
-
-        /// <summary>
-        /// Gets the path template describing the types of segments in the path.
-        /// </summary>
-        public string PathTemplate
-        {
-            get
-            {
-                if (_pathTemplate == null)
-                {
-                    StringBuilder templateBuilder = new StringBuilder("~");
-                    foreach (ODataPathSegment segment in Segments)
-                    {
-                        templateBuilder.Append("/");
-                        templateBuilder.Append(segment.SegmentKind);
-                    }
-                    _pathTemplate = templateBuilder.ToString();
-                }
-                return _pathTemplate;
-            }
+            get { return _navigationSource; }
         }
 
         /// <summary>
         /// Gets the path segments for the OData path.
         /// </summary>
-        public ReadOnlyCollection<ODataPathSegment> Segments
+        public ReadOnlyCollection<Semantic.ODataPathSegment> Segments
         {
-            get
-            {
-                return _segments;
-            }
+            get { return _segments; }
         }
 
-        internal Semantic.ODataPath ODLPath { get; set; }
+        /// <summary>
+        /// Gets the first segment in the path. Returns null if the path is empty.
+        /// </summary> 
+        public Semantic.ODataPathSegment FirstSegment
+        {
+            get { return this._segments.Count == 0 ? null : this._segments[0]; }
+        }
+
+        /// <summary>
+        /// Get the last segment in the path. Returns null if the path is empty.
+        /// </summary> 
+        public Semantic.ODataPathSegment LastSegment
+        {
+            get { return this._segments.Count == 0 ? null : this._segments[this._segments.Count - 1]; }
+        }
+
+        /// <summary>
+        /// Get the number of segments in this path.
+        /// </summary>
+        public int Count
+        {
+            get { return this._segments.Count; }
+        }
+
+        /// <summary>
+        /// Gets the path template describing the types of segments in the path.
+        /// </summary>
+        public virtual string PathTemplate { get; }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            StringBuilder pathBuilder = new StringBuilder();
-            Contract.Assert(_segments != null);
-
-            bool firstSegment = true;
-
-            foreach (ODataPathSegment segment in _segments)
-            {
-                if (segment == null)
-                {
-                    continue;
-                }
-
-                if (segment is KeyValuePathSegment)
-                {
-                    pathBuilder.Append('(');
-                    pathBuilder.Append(segment.ToString());
-                    pathBuilder.Append(')');
-                }
-                else
-                {
-                    if (!firstSegment)
-                    {
-                        pathBuilder.Append('/');
-                    }
-
-                    pathBuilder.Append(segment.ToString());
-                }
-
-                firstSegment = false;
-            }
-
-            return pathBuilder.ToString();
+            return _pathLiteral;
         }
+
+        /// <summary>
+        /// Get the segments enumerator.
+        /// </summary>
+        /// <returns>The segments enumerator.</returns>
+        public IEnumerator<Semantic.ODataPathSegment> GetEnumerator()
+        {
+            return this._segments.GetEnumerator();
+        }
+
+        /// <summary>
+        /// get the segments enumerator.
+        /// </summary>
+        /// <returns>The segments enumerator.</returns>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        internal Semantic.ODataPath ODLPath { get; set; }
     }
 }

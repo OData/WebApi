@@ -1,31 +1,26 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Vocabularies.V1;
+using Microsoft.Spatial;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Xml.Linq;
+using Microsoft.AspNetCore.OData.Builder;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Query.Expressions;
+using Microsoft.OData.Edm.Vocabularies;
+
 namespace Microsoft.AspNetCore.OData.Formatter
 {
-    using Microsoft.AspNetCore.Mvc;
-    using Mvc.Infrastructure;
-    using Microsoft.AspNetCore.OData.Builder;
-    using Microsoft.AspNetCore.OData.Common;
-    using Microsoft.AspNetCore.OData.Query.Expressions;
-    using Microsoft.OData.Edm;
-    using Microsoft.OData.Edm.Annotations;
-    using Microsoft.OData.Edm.Expressions;
-    using Microsoft.OData.Edm.Library;
-    using Microsoft.OData.Edm.Vocabularies.V1;
-    using Microsoft.Spatial;
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
-    using System.Globalization;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
-    using System.Xml.Linq;
-    using TypeHelper = Microsoft.AspNetCore.OData.TypeHelper;
-
-    internal static class EdmLibHelpers
+    public static class EdmLibHelpers
     {
         private static readonly EdmCoreModel _coreModel = EdmCoreModel.Instance;
 
@@ -417,12 +412,6 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
         private static ConcurrentDictionary<IEdmEntitySet, IEnumerable<IEdmStructuralProperty>> _concurrencyProperties;
 
-        public static IEnumerable<IEdmStructuralProperty> GetConcurrencyProperties(this IEdmEntityType type)
-        {
-            return type.StructuralProperties()
-                .Where(s => s.ConcurrencyMode == EdmConcurrencyMode.Fixed && s.Type.IsPrimitive());
-        }
-
         public static IEnumerable<IEdmStructuralProperty> GetConcurrencyProperties(this IEdmModel model, IEdmEntitySet entitySet)
         {
             Contract.Assert(model != null);
@@ -436,8 +425,8 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
             IList<IEdmStructuralProperty> results = new List<IEdmStructuralProperty>();
             IEdmEntityType entityType = entitySet.EntityType();
-            var annotations = model.FindVocabularyAnnotations<IEdmValueAnnotation>(entitySet, CoreVocabularyModel.ConcurrencyTerm);
-            IEdmValueAnnotation annotation = annotations.FirstOrDefault();
+            var annotations = model.FindVocabularyAnnotations<IEdmVocabularyAnnotation>(entitySet, CoreVocabularyModel.ConcurrencyTerm);
+            IEdmVocabularyAnnotation annotation = annotations.FirstOrDefault();
             if (annotation != null)
             {
                 IEdmCollectionExpression properties = annotation.Value as IEdmCollectionExpression;
@@ -450,7 +439,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                         {
                             // So far, we only consider the single path, because only the direct properties from declaring type are used.
                             // However we have an issue tracking on: https://github.com/OData/WebApi/issues/472
-                            string propertyName = pathExpression.Path.Single();
+                            string propertyName = pathExpression.PathSegments.First();
                             IEdmProperty edmProperty = entityType.FindProperty(propertyName);
                             IEdmStructuralProperty structuralProperty = edmProperty as IEdmStructuralProperty;
                             if (structuralProperty != null)

@@ -9,9 +9,9 @@ namespace Microsoft.AspNetCore.OData.Builder.Conventions
     /// <summary>
     /// The FunctionLinkGenerationConvention calls function.HasFunctionLink(..) if the function binds to a single entity and has not previously been configured.
     /// </summary>
-    internal class FunctionLinkGenerationConvention : IProcedureConvention
+    internal class FunctionLinkGenerationConvention : IOperationConvention
     {
-        public void Apply(ProcedureConfiguration configuration, ODataModelBuilder model)
+        public void Apply(OperationConfiguration configuration, ODataModelBuilder model)
         {
             FunctionConfiguration function = configuration as FunctionConfiguration;
 

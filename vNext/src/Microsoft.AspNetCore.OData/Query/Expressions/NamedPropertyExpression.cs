@@ -24,6 +24,8 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
 
         public Expression Value { get; private set; }
 
+        public Expression TotalCount { get; set; }
+
         // Checks whether this property is null or not. This is required for expanded navigation properties that are null as entityframework cannot
         // create null's of type SelectExpandWrapper<ExpandedProperty> i.e. an expression like 
         //       => new NamedProperty<Customer> { Value = order.Customer == null : null : new SelectExpandWrapper<Customer> { .... } } 
@@ -35,5 +37,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
         public int? PageSize { get; set; }
 
         public bool AutoSelected { get; set; }
+
+        public bool? CountOption { get; set; }
     }
 }

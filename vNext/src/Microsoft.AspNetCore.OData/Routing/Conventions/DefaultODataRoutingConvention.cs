@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -7,7 +10,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OData.Core.UriParser.Semantic;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Routing.Conventions
 {
@@ -23,7 +26,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 
         public ActionDescriptor SelectAction(RouteContext routeContext)
         {
-            var odataPath = routeContext.HttpContext.Request.ODataProperties().NewPath;
+            var odataPath = routeContext.HttpContext.Request.ODataFeature().Path;
             var controllerName = string.Empty;
             var methodName = routeContext.HttpContext.Request.Method;
             var routeTemplate = string.Empty;
@@ -47,7 +50,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                 {
                     // Handling unbound functions without related entity set
                     controllerName = operationImportSegment.EntitySet != null ?
-                        operationImportSegment.EntitySet.Name : routeContext.HttpContext.Request.ODataProperties().RoutePrefix;
+                        operationImportSegment.EntitySet.Name : routeContext.HttpContext.Request.ODataFeature().RoutePrefix;
                     var edmOperationImport = operationImportSegment.OperationImports.FirstOrDefault();
                     if (edmOperationImport != null)
                     {

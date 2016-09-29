@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using Microsoft.OData.Edm;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Routing
 {
@@ -29,7 +29,7 @@ namespace Microsoft.AspNetCore.OData.Routing
         /// <summary>
         /// Gets the segment kind for the current segment.
         /// </summary>
-        public override string SegmentKind
+        public virtual string SegmentKind
         {
             get
             {
@@ -46,18 +46,6 @@ namespace Microsoft.AspNetCore.OData.Routing
             private set;
         }
 
-        /// <inheritdoc/>
-        public override IEdmType GetEdmType(IEdmType previousEdmType)
-        {
-            return null;
-        }
-
-        /// <inheritdoc/>
-        public override IEdmNavigationSource GetNavigationSource(IEdmNavigationSource previousNavigationSource)
-        {
-            return null;
-        }
-
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
@@ -69,10 +57,36 @@ namespace Microsoft.AspNetCore.OData.Routing
             return SegmentValue;
         }
 
-        /// <inheritdoc/>
-        public override bool TryMatch(ODataPathSegment pathSegment, IDictionary<string, object> values)
+        /// <summary>
+        /// Translate a <see cref="UnresolvedPathSegment" /> an implementation of <see cref="PathSegmentTranslator{T}" />
+        /// </summary>
+        /// <typeparam name="T">Type that the translator will return after visiting this token.</typeparam>
+        /// <param name="translator">An implementation of the translator interface.</param>
+        /// <returns>An object whose type is determined by the type parameter of the translator.</returns>
+        public override T TranslateWith<T>(PathSegmentTranslator<T> translator)
         {
-            return false;
+            if (typeof(T) == typeof(string))
+            {
+                return (T)(object)SegmentValue;
+            }
+
+            return default(T);
+        }
+
+        /// <summary>
+        /// Handle a <see cref="UnresolvedPathSegment" /> an implementation of <see cref="PathSegmentHandler" />
+        /// </summary>
+        /// <param name="handler">An implementation of the handler interface.</param>
+        public override void HandleWith(PathSegmentHandler handler)
+        {
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IEdmType" /> of this <see cref="UnresolvedPathSegment" />.
+        /// </summary>
+        public override IEdmType EdmType
+        {
+            get { return null; }
         }
     }
 }

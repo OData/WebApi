@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Routing;
-using Microsoft.OData.Core.UriParser.Semantic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.OData.Routing

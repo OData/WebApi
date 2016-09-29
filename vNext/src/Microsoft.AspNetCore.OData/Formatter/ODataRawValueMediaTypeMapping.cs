@@ -4,7 +4,8 @@
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Routing;
+using Microsoft.OData.UriParser;
+using ODataPath = Microsoft.AspNetCore.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNetCore.OData.Formatter
 {
@@ -37,12 +38,12 @@ namespace Microsoft.AspNetCore.OData.Formatter
         /// </summary>
         /// <param name="propertySegment">The <see cref="PropertyAccessPathSegment"/> of the path.</param>
         /// <returns>True if the request is an OData raw value request.</returns>
-        protected abstract bool IsMatch(PropertyAccessPathSegment propertySegment);
+        protected abstract bool IsMatch(PropertySegment propertySegment);
 
-        internal static bool IsRawValueRequest(HttpRequest request)
+        internal static bool IsRawValueRequest(HttpContext context)
         {
-            ODataPath path = request.ODataProperties().Path;
-            return path != null && path.Segments.LastOrDefault() is ValuePathSegment;
+            ODataPath path = context.ODataFeature().Path;
+            return path != null && path.Segments.LastOrDefault() is ValueSegment;
         }
 
         //private static PropertyAccessPathSegment GetProperty(HttpRequestMessage request)

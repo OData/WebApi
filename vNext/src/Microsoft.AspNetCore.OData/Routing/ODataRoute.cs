@@ -1,59 +1,53 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Internal;
-using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData.Routing.Conventions;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
+using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Edm;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.OData.Routing
 {
-    public class ODataRoute : IRouter
+    /// <summary>
+    /// A route implementation for OData routes. It supports passing in a route prefix for the route as well
+    /// as a path constraint that parses the request path as OData.
+    /// </summary>
+    public class ODataRoute : Route
     {
-        private readonly string _routePrefix;
-        private readonly IEdmModel _model;
-
-        public ODataRoute(string routePrefix, IEdmModel model)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataRoute"/> class.
+        /// </summary>
+        /// <param name="target">The target router.</param>
+        /// <param name="routePrefix">The route prefix.</param>
+        /// <param name="constraint">The OData route constraint.</param>
+        /// <param name="resolver">The inline constraint resolver.</param>
+        public ODataRoute(IRouter target, string routePrefix, ODataRouteConstraint constraint, IInlineConstraintResolver resolver)
+            : base(target, GetRouteTemplate(routePrefix), inlineConstraintResolver: resolver)
         {
-            _routePrefix = routePrefix;
-            _model = model;
-        }
-
-        public async Task RouteAsync(RouteContext context)
-        {
-            var request = context.HttpContext.Request;
-
-            Uri uri;
-            PathString remaining;
-            if (!request.Path.StartsWithSegments(PathString.FromUriComponent("/" + _routePrefix), out remaining))
+            if (constraint == null)
             {
-                // Fallback to other routes.
-                return;
+                throw Error.ArgumentNull("constraint");
             }
 
-            uri = new Uri(remaining.ToString(), UriKind.Relative);
-
-            context.HttpContext.ODataProperties().Model = _model;
-            context.HttpContext.ODataProperties().RoutePrefix = _routePrefix;
-
-            var parser = new ODataUriParser(_model, uri);
-            var path = parser.ParsePath();
-            context.HttpContext.ODataProperties().NewPath = path;
-            context.HttpContext.ODataProperties().Path =
-                context.HttpContext.ODataPathHandler().Parse(_model, "http://service-root/", remaining.ToString());
-            context.HttpContext.ODataProperties().IsValidODataRequest = true;
-
-            var m = context.HttpContext.RequestServices.GetRequiredService<MvcRouteHandler>();
-            await m.RouteAsync(context);
-            
+            RoutePrefix = routePrefix;
+            RouteConstraint = constraint;
+            Constraints.Add(ODataRouteConstants.ConstraintName, constraint);
         }
 
-        public VirtualPathData GetVirtualPath(VirtualPathContext context)
+        /// <summary>
+        /// Gets the route prefix.
+        /// </summary>
+        public string RoutePrefix { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="ODataRouteConstraint"/> on this route.
+        /// </summary>
+        public ODataRouteConstraint RouteConstraint { get; private set; }
+
+        private static string GetRouteTemplate(string prefix)
         {
-            return null;
+            return String.IsNullOrEmpty(prefix) ?
+                ODataRouteConstants.ODataPathTemplate :
+                prefix + '/' + ODataRouteConstants.ODataPathTemplate;
         }
     }
 }

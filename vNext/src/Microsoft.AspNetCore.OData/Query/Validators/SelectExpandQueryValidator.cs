@@ -2,18 +2,16 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.OData.Formatter;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.OData.Common;
+using Microsoft.OData;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNetCore.OData.Query.Validators
 {
-
-
     /// <summary>
     /// Represents a validator used to validate a <see cref="SelectExpandQueryOption" /> based on the <see cref="ODataValidationSettings"/>.
     /// </summary>

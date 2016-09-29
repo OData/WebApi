@@ -4,7 +4,7 @@
 namespace Microsoft.AspNetCore.OData.Builder
 {
     /// <summary>
-    /// Represents a non-binding procedure parameter.
+    /// Represents a non-binding operation parameter.
     /// <remarks>
     /// Non binding parameters are provided in the POST body for Actions
     /// Non binding parameters are provided in 3 ways for Functions

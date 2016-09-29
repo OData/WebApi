@@ -88,6 +88,18 @@ namespace Microsoft.AspNetCore.OData
             return underlyingTypeOrSelf.GetTypeInfo().IsEnum;
         }
 
+        public static bool IsDateTime(Type type)
+        {
+            Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
+            return Type.GetTypeCode(underlyingTypeOrSelf) == TypeCode.DateTime;
+        }
+
+        public static bool IsTimeSpan(Type type)
+        {
+            Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
+            return underlyingTypeOrSelf == typeof(TimeSpan);
+        }
+
         /// <summary>
         /// Determines whether the given type is a primitive type or
         /// is a <see cref="string"/>, <see cref="DateTime"/>, <see cref="Decimal"/>,
@@ -179,6 +191,11 @@ namespace Microsoft.AspNetCore.OData
         internal static IEnumerable<Type> GetLoadedTypes(IAssemblyProvider assembliesResolver)
         {
             List<Type> result = new List<Type>();
+
+            if (assembliesResolver == null)
+            {
+                return result;
+            }
 
             // Go through all assemblies referenced by the application and search for types matching a predicate
             IEnumerable<Assembly> assemblies = assembliesResolver.CandidateAssemblies;

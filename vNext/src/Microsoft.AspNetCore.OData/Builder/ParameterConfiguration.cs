@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.OData.Builder
     using Microsoft.AspNetCore.OData.Formatter;
 
     /// <summary>
-    /// Represents a parameter to a Procedure
+    /// Represents a parameter to a Operation
     /// </summary>
     public abstract class ParameterConfiguration
     {

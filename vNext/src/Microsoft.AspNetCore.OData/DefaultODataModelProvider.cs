@@ -28,7 +28,7 @@ namespace Microsoft.AspNetCore.OData
                 if (!method.IsSpecialName)
                 {
                     var entityClrType = TypeHelper.GetImplementedIEnumerableType(method.ReturnType) ?? method.ReturnType;
-                    ProcedureConfiguration configuration = null;
+                    OperationConfiguration configuration = null;
                     PrimitiveTypeConfiguration primitiveEntityType = null;
                     EntityTypeConfiguration entityType = null;
 

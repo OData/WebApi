@@ -40,7 +40,7 @@ namespace Microsoft.AspNetCore.OData
                 if (value != null)
                 {
                     var elementClrType = TypeHelper.GetImplementedIEnumerableType(value.GetType()) ?? value.GetType();
-                    var model = request.ODataProperties().Model;
+                    var model = request.ODataFeature().Model;
                     if (model == null)
                     {
                         throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
@@ -48,7 +48,7 @@ namespace Microsoft.AspNetCore.OData
                     var queryContext = new ODataQueryContext(
                         model,
                         elementClrType,
-                        request.ODataProperties().Path);
+                        request.ODataFeature().Path);
 
                     var queryOptions = new ODataQueryOptions(queryContext, request);
 

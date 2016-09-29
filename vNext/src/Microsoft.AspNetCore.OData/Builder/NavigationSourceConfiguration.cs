@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.OData.Common;
@@ -13,7 +14,7 @@ namespace Microsoft.AspNetCore.OData.Builder
     /// <summary>
     /// Allows configuration to be performed for a navigation source (entity set, singleton) in a model.
     /// </summary>
-    public abstract class NavigationSourceConfiguration : INavigationSourceConfiguration
+    public abstract class NavigationSourceConfiguration
     {
         private readonly ODataModelBuilder _modelBuilder;
         private string _url;
@@ -22,8 +23,10 @@ namespace Microsoft.AspNetCore.OData.Builder
         private SelfLinkBuilder<Uri> _readLinkBuilder;
         private SelfLinkBuilder<Uri> _idLinkBuilder;
 
-        private readonly Dictionary<NavigationPropertyConfiguration, NavigationPropertyBindingConfiguration>
-            _navigationPropertyBindings;
+        private readonly
+            Dictionary<NavigationPropertyConfiguration, Dictionary<string, NavigationPropertyBindingConfiguration>>
+            _navigationPropertyBindings = new Dictionary<NavigationPropertyConfiguration, Dictionary<string, NavigationPropertyBindingConfiguration>>();
+
         private readonly Dictionary<NavigationPropertyConfiguration, NavigationLinkBuilder> _navigationPropertyLinkBuilders;
 
         /// <summary>
@@ -79,7 +82,6 @@ namespace Microsoft.AspNetCore.OData.Builder
             _editLinkBuilder = null;
             _readLinkBuilder = null;
             _navigationPropertyLinkBuilders = new Dictionary<NavigationPropertyConfiguration, NavigationLinkBuilder>();
-            _navigationPropertyBindings = new Dictionary<NavigationPropertyConfiguration, NavigationPropertyBindingConfiguration>();
         }
 
         /// <summary>
@@ -87,10 +89,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// </summary>
         public IEnumerable<NavigationPropertyBindingConfiguration> Bindings
         {
-            get
-            {
-                return _navigationPropertyBindings.Values;
-            }
+            get { return _navigationPropertyBindings.Values.SelectMany(e => e.Values); }
         }
 
         /// <summary>
@@ -115,7 +114,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings",
             MessageId = "0#", Justification = "This Url property is not required to be a valid Uri")]
-        public virtual INavigationSourceConfiguration HasUrl(string url)
+        public virtual NavigationSourceConfiguration HasUrl(string url)
         {
             _url = url;
             return this;
@@ -126,7 +125,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// </summary>
         /// <param name="editLinkBuilder">The builder used to generate the edit link.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual INavigationSourceConfiguration HasEditLink(SelfLinkBuilder<Uri> editLinkBuilder)
+        public virtual NavigationSourceConfiguration HasEditLink(SelfLinkBuilder<Uri> editLinkBuilder)
         {
             if (editLinkBuilder == null)
             {
@@ -142,7 +141,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// </summary>
         /// <param name="readLinkBuilder">The builder used to generate the read link.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual INavigationSourceConfiguration HasReadLink(SelfLinkBuilder<Uri> readLinkBuilder)
+        public virtual NavigationSourceConfiguration HasReadLink(SelfLinkBuilder<Uri> readLinkBuilder)
         {
             if (readLinkBuilder == null)
             {
@@ -158,7 +157,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// </summary>
         /// <param name="idLinkBuilder">The builder used to generate the ID.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual INavigationSourceConfiguration HasIdLink(SelfLinkBuilder<Uri> idLinkBuilder)
+        public virtual NavigationSourceConfiguration HasIdLink(SelfLinkBuilder<Uri> idLinkBuilder)
         {
             if (idLinkBuilder == null)
             {
@@ -175,7 +174,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <param name="navigationProperty">The navigation property for which the navigation link is being generated.</param>
         /// <param name="navigationLinkBuilder">The builder used to generate the navigation link.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual INavigationSourceConfiguration HasNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty,
+        public virtual NavigationSourceConfiguration HasNavigationPropertyLink(NavigationPropertyConfiguration navigationProperty,
             NavigationLinkBuilder navigationLinkBuilder)
         {
             if (navigationProperty == null)
@@ -188,11 +187,11 @@ namespace Microsoft.AspNetCore.OData.Builder
                 throw Error.ArgumentNull("navigationLinkBuilder");
             }
 
-            EntityTypeConfiguration declaringEntityType = navigationProperty.DeclaringEntityType;
-            if (!(declaringEntityType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringEntityType)))
+            StructuralTypeConfiguration declaringType = navigationProperty.DeclaringType;
+            if (!(declaringType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringType)))
             {
                 throw Error.Argument("navigationProperty", SRResources.NavigationPropertyNotInHierarchy,
-                    declaringEntityType.FullName, EntityType.FullName, Name);
+                    declaringType.FullName, EntityType.FullName, Name);
             }
 
             _navigationPropertyLinkBuilders[navigationProperty] = navigationLinkBuilder;
@@ -205,7 +204,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <param name="navigationProperties">The navigation properties for which the navigation link is being generated.</param>
         /// <param name="navigationLinkBuilder">The builder used to generate the navigation link.</param>
         /// <returns>Returns itself so that multiple calls can be chained.</returns>
-        public virtual INavigationSourceConfiguration HasNavigationPropertiesLink(
+        public virtual NavigationSourceConfiguration HasNavigationPropertiesLink(
             IEnumerable<NavigationPropertyConfiguration> navigationProperties, NavigationLinkBuilder navigationLinkBuilder)
         {
             if (navigationProperties == null)
@@ -233,7 +232,7 @@ namespace Microsoft.AspNetCore.OData.Builder
         /// <param name="targetNavigationSource">The target navigation source.</param>
         /// <returns>The <see cref="NavigationPropertyBindingConfiguration"/> so that it can be further configured.</returns>
         public virtual NavigationPropertyBindingConfiguration AddBinding(NavigationPropertyConfiguration navigationConfiguration,
-            INavigationSourceConfiguration targetNavigationSource)
+            NavigationSourceConfiguration targetNavigationSource)
         {
             if (navigationConfiguration == null)
             {
@@ -245,32 +244,76 @@ namespace Microsoft.AspNetCore.OData.Builder
                 throw Error.ArgumentNull("targetNavigationSource");
             }
 
-            EntityTypeConfiguration declaringEntityType = navigationConfiguration.DeclaringEntityType;
-            if (!(declaringEntityType.IsAssignableFrom(EntityType) || EntityType.IsAssignableFrom(declaringEntityType)))
+            IList<object> bindingPath = new List<object> { navigationConfiguration.PropertyInfo };
+            if (navigationConfiguration.DeclaringType != EntityType)
             {
-                throw Error.Argument("navigationConfiguration", SRResources.NavigationPropertyNotInHierarchy,
-                    declaringEntityType.FullName, EntityType.FullName, Name);
+                bindingPath.Insert(0, navigationConfiguration.DeclaringType.ClrType);
             }
 
-            NavigationPropertyBindingConfiguration navigationPropertyBinding;
-            if (_navigationPropertyBindings.TryGetValue(navigationConfiguration, out navigationPropertyBinding))
+            return AddBinding(navigationConfiguration, targetNavigationSource, bindingPath);
+        }
+
+        /// <summary>
+        /// Binds the given navigation property to the target navigation source.
+        /// </summary>
+        /// <param name="navigationConfiguration">The navigation property.</param>
+        /// <param name="targetNavigationSource">The target navigation source.</param>
+        /// <param name="bindingPath">The binding path.</param>
+        /// <returns>The <see cref="NavigationPropertyBindingConfiguration"/> so that it can be further configured.</returns>
+        public virtual NavigationPropertyBindingConfiguration AddBinding(NavigationPropertyConfiguration navigationConfiguration,
+            NavigationSourceConfiguration targetNavigationSource, IList<object> bindingPath)
+        {
+            if (navigationConfiguration == null)
             {
-                if (navigationPropertyBinding.TargetNavigationSource != targetNavigationSource)
+                throw Error.ArgumentNull("navigationConfiguration");
+            }
+
+            if (targetNavigationSource == null)
+            {
+                throw Error.ArgumentNull("targetNavigationSource");
+            }
+
+            if (bindingPath == null || !bindingPath.Any())
+            {
+                throw Error.ArgumentNull("bindingPath");
+            }
+
+            VerifyBindingPath(navigationConfiguration, bindingPath);
+
+            string path = bindingPath.ConvertBindingPath();
+
+            Dictionary<string, NavigationPropertyBindingConfiguration> navigationPropertyBindingMap;
+            NavigationPropertyBindingConfiguration navigationPropertyBinding;
+            if (_navigationPropertyBindings.TryGetValue(navigationConfiguration, out navigationPropertyBindingMap))
+            {
+                if (navigationPropertyBindingMap.TryGetValue(path, out navigationPropertyBinding))
                 {
-                    throw Error.NotSupported(SRResources.RebindingNotSupported);
+                    if (navigationPropertyBinding.TargetNavigationSource != targetNavigationSource)
+                    {
+                        throw Error.NotSupported(SRResources.RebindingNotSupported);
+                    }
+                }
+                else
+                {
+                    navigationPropertyBinding = new NavigationPropertyBindingConfiguration(navigationConfiguration,
+                        targetNavigationSource, bindingPath);
+                    _navigationPropertyBindings[navigationConfiguration][path] = navigationPropertyBinding;
                 }
             }
             else
             {
-                navigationPropertyBinding = new NavigationPropertyBindingConfiguration(navigationConfiguration, targetNavigationSource);
-                _navigationPropertyBindings[navigationConfiguration] = navigationPropertyBinding;
+                _navigationPropertyBindings[navigationConfiguration] =
+                    new Dictionary<string, NavigationPropertyBindingConfiguration>();
+                navigationPropertyBinding = new NavigationPropertyBindingConfiguration(navigationConfiguration,
+                    targetNavigationSource, bindingPath);
+                _navigationPropertyBindings[navigationConfiguration][path] = navigationPropertyBinding;
             }
 
             return navigationPropertyBinding;
         }
 
         /// <summary>
-        /// Removes the binding for the given navigation property.
+        /// Removes the bindings for the given navigation property.
         /// </summary>
         /// <param name="navigationConfiguration">The navigation property</param>
         public virtual void RemoveBinding(NavigationPropertyConfiguration navigationConfiguration)
@@ -284,36 +327,82 @@ namespace Microsoft.AspNetCore.OData.Builder
         }
 
         /// <summary>
-        /// Finds the binding for the given navigation property and tries to create it if it doesnot exist.
+        /// Removes the binding for the given navigation property and the given binding path.
         /// </summary>
         /// <param name="navigationConfiguration">The navigation property.</param>
-        /// <returns>The <see cref="NavigationPropertyBindingConfiguration"/> so that it can be further configured.</returns>
-        public virtual NavigationPropertyBindingConfiguration FindBinding(NavigationPropertyConfiguration navigationConfiguration)
-        {
-            return FindBinding(navigationConfiguration, autoCreate: true);
-        }
-
-        /// <summary>
-        /// Finds the binding for the given navigation property.
-        /// </summary>
-        /// <param name="autoCreate">Tells whether the binding should be auto created if it does not exist.</param>
-        /// <param name="navigationConfiguration">The navigation property.</param>
-        /// <returns>The <see cref="NavigationPropertyBindingConfiguration"/> so that it can be further configured.</returns>
-        public virtual NavigationPropertyBindingConfiguration FindBinding(NavigationPropertyConfiguration navigationConfiguration,
-            bool autoCreate)
+        /// <param name="bindingPath">The binding path.</param>
+        public virtual void RemoveBinding(NavigationPropertyConfiguration navigationConfiguration, string bindingPath)
         {
             if (navigationConfiguration == null)
             {
                 throw Error.ArgumentNull("navigationConfiguration");
             }
 
-            NavigationPropertyBindingConfiguration bindingConfiguration;
-            if (_navigationPropertyBindings.TryGetValue(navigationConfiguration, out bindingConfiguration))
+            Dictionary<string, NavigationPropertyBindingConfiguration> navigationPropertyBindingMap;
+            if (_navigationPropertyBindings.TryGetValue(navigationConfiguration, out navigationPropertyBindingMap))
             {
-                return bindingConfiguration;
+                navigationPropertyBindingMap.Remove(bindingPath);
+
+                if (!navigationPropertyBindingMap.Any())
+                {
+                    _navigationPropertyBindings.Remove(navigationConfiguration);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds the bindings <see cref="NavigationPropertyBindingConfiguration"/> for the given navigation property.
+        /// </summary>
+        /// <param name="navigationConfiguration">The navigation property.</param>
+        /// <returns>The list of <see cref="NavigationPropertyBindingConfiguration"/> so that it can be further configured.</returns>
+        public virtual IEnumerable<NavigationPropertyBindingConfiguration> FindBinding(NavigationPropertyConfiguration navigationConfiguration)
+        {
+            if (navigationConfiguration == null)
+            {
+                throw Error.ArgumentNull("navigationConfiguration");
             }
 
-            if (!autoCreate)
+            Dictionary<string, NavigationPropertyBindingConfiguration> navigationPropertyBindings;
+            if (_navigationPropertyBindings.TryGetValue(navigationConfiguration, out navigationPropertyBindings))
+            {
+                return navigationPropertyBindings.Values;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Finds the binding for the given navigation property and tries to create it if it does not exist.
+        /// </summary>
+        /// <param name="navigationConfiguration">The navigation property.</param>
+        /// <param name="bindingPath">The binding path.</param>
+        /// <returns>The <see cref="NavigationPropertyBindingConfiguration"/> so that it can be further configured.</returns>
+        public virtual NavigationPropertyBindingConfiguration FindBinding(NavigationPropertyConfiguration navigationConfiguration,
+            IList<object> bindingPath)
+        {
+            if (navigationConfiguration == null)
+            {
+                throw Error.ArgumentNull("navigationConfiguration");
+            }
+
+            if (bindingPath == null)
+            {
+                throw Error.ArgumentNullOrEmpty("bindingPath");
+            }
+
+            string path = bindingPath.ConvertBindingPath();
+
+            Dictionary<string, NavigationPropertyBindingConfiguration> navigationPropertyBindings;
+            if (_navigationPropertyBindings.TryGetValue(navigationConfiguration, out navigationPropertyBindings))
+            {
+                NavigationPropertyBindingConfiguration bindingConfiguration;
+                if (navigationPropertyBindings.TryGetValue(path, out bindingConfiguration))
+                {
+                    return bindingConfiguration;
+                }
+            }
+
+            if (_modelBuilder.BindingOptions == NavigationPropertyBindingOption.None)
             {
                 return null;
             }
@@ -321,7 +410,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             bool hasSingletonAttribute = navigationConfiguration.PropertyInfo.GetCustomAttributes<SingletonAttribute>().Any();
             Type entityType = navigationConfiguration.RelatedClrType;
 
-            INavigationSourceConfiguration[] matchedNavigationSources;
+            NavigationSourceConfiguration[] matchedNavigationSources;
             if (hasSingletonAttribute)
             {
                 matchedNavigationSources = _modelBuilder.Singletons.Where(es => es.EntityType.ClrType == entityType).ToArray();
@@ -331,23 +420,41 @@ namespace Microsoft.AspNetCore.OData.Builder
                 matchedNavigationSources = _modelBuilder.EntitySets.Where(es => es.EntityType.ClrType == entityType).ToArray();
             }
 
-            if (matchedNavigationSources.Length == 1)
+            if (matchedNavigationSources.Length >= 1)
             {
-                return AddBinding(navigationConfiguration, matchedNavigationSources[0]);
-            }
-            else if (matchedNavigationSources.Length == 0)
-            {
-                return null;
-            }
-            else
-            {
+                if (matchedNavigationSources.Length == 1 ||
+                    _modelBuilder.BindingOptions == NavigationPropertyBindingOption.Auto)
+                {
+                    return AddBinding(navigationConfiguration, matchedNavigationSources[0], bindingPath);
+                }
+
                 throw Error.NotSupported(
-                    SRResources.CannotAutoCreateMultipleCandidates,
-                    navigationConfiguration.Name,
-                    navigationConfiguration.DeclaringEntityType.FullName,
-                    Name,
-                    String.Join(", ", matchedNavigationSources.Select(s => s.Name)));
+                        SRResources.CannotAutoCreateMultipleCandidates,
+                        path,
+                        navigationConfiguration.DeclaringType.FullName,
+                        Name,
+                        String.Join(", ", matchedNavigationSources.Select(s => s.Name)));
             }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the bindings <see cref="NavigationPropertyBindingConfiguration"/> for the navigation property with the given name.
+        /// </summary>
+        /// <param name="propertyName">The name of the navigation property.</param>
+        /// <returns>The bindings <see cref="NavigationPropertyBindingConfiguration" />.</returns>
+        public virtual IEnumerable<NavigationPropertyBindingConfiguration> FindBindings(string propertyName)
+        {
+            foreach (var navigationPropertyBinding in _navigationPropertyBindings)
+            {
+                if (navigationPropertyBinding.Key.Name == propertyName)
+                {
+                    return navigationPropertyBinding.Value.Values;
+                }
+            }
+
+            return Enumerable.Empty<NavigationPropertyBindingConfiguration>();
         }
 
         /// <summary>
@@ -413,14 +520,59 @@ namespace Microsoft.AspNetCore.OData.Builder
             return navigationPropertyLinkBuilder;
         }
 
-        /// <summary>
-        /// Gets the <see cref="NavigationPropertyBindingConfiguration"/> for the navigation property with the given name.
-        /// </summary>
-        /// <param name="propertyName">The name of the navigation property.</param>
-        /// <returns>The <see cref="NavigationPropertyBindingConfiguration" />.</returns>
-        public virtual NavigationPropertyBindingConfiguration FindBinding(string propertyName)
+        private void VerifyBindingPath(NavigationPropertyConfiguration navigationConfiguration, IList<object> bindingPath)
         {
-            return Bindings.Single(b => b.NavigationProperty.Name == propertyName);
+            Contract.Assert(navigationConfiguration != null);
+            Contract.Assert(bindingPath != null);
+
+            PropertyInfo navigation = bindingPath.Last() as PropertyInfo;
+            if (navigation == null || navigation != navigationConfiguration.PropertyInfo)
+            {
+                throw Error.Argument("navigationConfiguration", "TODO: "/*SRResources.NavigationPropertyBindingPathIsNotValid,
+                    bindingPath.ConvertBindingPath(), navigationConfiguration.Name*/);
+            }
+
+            bindingPath.Aggregate(EntityType.ClrType, VerifyBindingSegment);
+        }
+
+        private static Type VerifyBindingSegment(Type current, object info)
+        {
+            Contract.Assert(current != null);
+            Contract.Assert(info != null);
+
+            Type derivedType = info as Type;
+            if (derivedType != null)
+            {
+                if (!(derivedType.IsAssignableFrom(current) || current.IsAssignableFrom(derivedType)))
+                {
+                    throw Error.InvalidOperation("TODO: "/*SRResources.NavigationPropertyBindingPathNotInHierarchy,
+                        derivedType.FullName, info.Name, current.FullName*/);
+                }
+
+                return derivedType;
+            }
+
+            PropertyInfo propertyInfo = info as PropertyInfo;
+            if (propertyInfo == null)
+            {
+                throw Error.NotSupported("TODO: "/*SRResources.NavigationPropertyBindingPathNotSupported, info.Name, info.MemberType*/);
+            }
+
+            Type declaringType = propertyInfo.DeclaringType;
+            if (declaringType == null ||
+                !(declaringType.IsAssignableFrom(current) || current.IsAssignableFrom(declaringType)))
+            {
+                throw Error.InvalidOperation("TODO: "/*SRResources.NavigationPropertyBindingPathNotInHierarchy,
+                    declaringType == null ? "Unknown Type" : declaringType.FullName, info.Name, current.FullName*/);
+            }
+
+            Type elementType;
+            if (propertyInfo.PropertyType.IsCollection(out elementType))
+            {
+                return elementType;
+            }
+
+            return propertyInfo.PropertyType;
         }
     }
 }

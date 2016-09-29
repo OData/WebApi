@@ -9,8 +9,8 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
     internal static class ODataSerializerProviderExtensions
     {
-        public static ODataEdmTypeSerializer GetEdmTypeSerializer(this ODataSerializerProvider serializerProvider,
-            IEdmModel model, object instance, HttpRequest request)
+        public static ODataEdmTypeSerializer GetEdmTypeSerializer(this IODataSerializerProvider serializerProvider,
+            IEdmModel model, object instance, HttpContext context)
         {
             Contract.Assert(serializerProvider != null);
             Contract.Assert(model != null);
@@ -21,10 +21,10 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             IEdmObject edmObject = instance as IEdmObject;
             if (edmObject != null)
             {
-                return serializerProvider.GetEdmTypeSerializer(edmObject.GetEdmType());
+                return serializerProvider.GetEdmTypeSerializer(context, edmObject.GetEdmType());
             }
 
-            return serializerProvider.GetODataPayloadSerializer(model, instance.GetType(), request) as ODataEdmTypeSerializer;
+            return serializerProvider.GetODataPayloadSerializer(context, instance.GetType()) as ODataEdmTypeSerializer;
         }
     }
 }

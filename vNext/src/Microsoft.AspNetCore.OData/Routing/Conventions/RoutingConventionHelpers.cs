@@ -1,0 +1,344 @@
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Linq;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.OData.Common;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Formatter;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+
+namespace Microsoft.AspNetCore.OData.Routing.Conventions
+{
+    internal static class RoutingConventionHelpers
+    {
+        public static ControllerActionDescriptor SelectAction(this IEdmOperation operation, IEnumerable<ControllerActionDescriptor> controllerActionDescriptors, bool isCollection)
+        {
+            if (operation == null)
+            {
+                return null;
+            }
+
+            // The binding parameter is the first parameter by convention
+            IEdmOperationParameter bindingParameter = operation.Parameters.FirstOrDefault();
+            if (operation.IsBound && bindingParameter != null)
+            {
+                IEdmEntityType entityType = null;
+                if (!isCollection)
+                {
+                    entityType = bindingParameter.Type.Definition as IEdmEntityType;
+                }
+                else
+                {
+                    IEdmCollectionType bindingParameterType = bindingParameter.Type.Definition as IEdmCollectionType;
+                    if (bindingParameterType != null)
+                    {
+                        entityType = bindingParameterType.ElementType.Definition as IEdmEntityType;
+                    }
+                }
+
+                if (entityType == null)
+                {
+                    return null;
+                }
+
+                string targetActionName = isCollection
+                    ? operation.Name + "OnCollectionOf" + entityType.Name
+                    : operation.Name + "On" + entityType.Name;
+
+                return controllerActionDescriptors.FindMatchingAction(targetActionName, operation.Name);
+            }
+
+            return null;
+        }
+
+        public static bool TryMatch(
+            IDictionary<string, string> templateParameters,
+            IDictionary<string, object> parameters,
+            IDictionary<string, object> matches)
+        {
+            Contract.Assert(templateParameters != null);
+            Contract.Assert(parameters != null);
+            Contract.Assert(matches != null);
+
+            if (templateParameters.Count != parameters.Count)
+            {
+                return false;
+            }
+
+            Dictionary<string, object> routeData = new Dictionary<string, object>();
+            foreach (KeyValuePair<string, string> templateParameter in templateParameters)
+            {
+                string nameInSegment = templateParameter.Key;
+
+                object value;
+                if (!parameters.TryGetValue(nameInSegment, out value))
+                {
+                    // parameter not found. not a match.
+                    return false;
+                }
+
+                string nameInRouteData = templateParameter.Value;
+                routeData.Add(nameInRouteData, value);
+            }
+
+            foreach (KeyValuePair<string, object> kvp in routeData)
+            {
+                matches[kvp.Key] = kvp.Value;
+            }
+
+            return true;
+        }
+
+        public static bool TryMatch(this KeySegment keySegment, IDictionary<string, string> mapping, IDictionary<string, object> values)
+        {
+            Contract.Assert(keySegment != null);
+            Contract.Assert(mapping != null);
+            Contract.Assert(values != null);
+
+            if (keySegment.Keys.Count() != mapping.Count)
+            {
+                return false;
+            }
+
+            IEdmEntityType entityType = keySegment.EdmType as IEdmEntityType;
+
+            Dictionary<string, object> routeData = new Dictionary<string, object>();
+            foreach (KeyValuePair<string, object> key in keySegment.Keys)
+            {
+                string mappingName;
+                if (!mapping.TryGetValue(key.Key, out mappingName))
+                {
+                    // mapping name is not found. it's not a match.
+                    return false;
+                }
+
+                IEdmTypeReference typeReference;
+                // get the key property from the entity type
+                if (entityType != null)
+                {
+                    IEdmStructuralProperty keyProperty = entityType.Key().FirstOrDefault(k => k.Name == key.Key);
+                    if (keyProperty == null)
+                    {
+                        // If it's an alternate key
+                        keyProperty = entityType.Properties().OfType<IEdmStructuralProperty>().FirstOrDefault(p => p.Name == key.Key);
+                    }
+
+                    Contract.Assert(keyProperty != null);
+                    typeReference = keyProperty.Type;
+                }
+                else
+                {
+                    typeReference = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(key.Value.GetType());
+                }
+
+                AddKeyValues(mappingName, key.Value, typeReference, routeData, routeData);
+            }
+
+            foreach (KeyValuePair<string, object> kvp in routeData)
+            {
+                values[kvp.Key] = kvp.Value;
+            }
+
+            return true;
+        }
+
+        public static void AddKeyValueToRouteData(this RouteContext routeContext, KeySegment segment, string keyName = "key")
+        {
+            Contract.Assert(routeContext != null);
+            Contract.Assert(segment != null);
+
+            HttpRequest request = routeContext.HttpContext.Request;
+            IDictionary<string, object> routingConventionsStore = request.ODataFeature().RoutingConventionsStore;
+
+            IEdmEntityType entityType = segment.EdmType as IEdmEntityType;
+            Contract.Assert(entityType != null);
+
+            int keyCount = segment.Keys.Count();
+            foreach (var keyValuePair in segment.Keys)
+            {
+                bool alternateKey = false; 
+                // get the key property from the entity type
+                IEdmStructuralProperty keyProperty = entityType.Key().FirstOrDefault(k => k.Name == keyValuePair.Key);
+                if (keyProperty == null)
+                {
+                    // If it's alternate key.
+                    keyProperty = entityType.Properties().OfType<IEdmStructuralProperty>().FirstOrDefault(p => p.Name == keyValuePair.Key);
+                    alternateKey = true;
+                }
+                Contract.Assert(keyProperty != null);
+
+                // if there's only one key, just use the given key name, for example: "key, relatedKey"
+                // otherwise, to append the key name after the given key name.
+                // so for multiple keys, the parameter name is "keyId1, keyId2..."
+                // for navigation property, the parameter name is "relatedKeyId1, relatedKeyId2 ..."
+                string newKeyName;
+                if (alternateKey || keyCount > 1)
+                {
+                    newKeyName = keyName + keyValuePair.Key;
+                }
+                else
+                {
+                    newKeyName = keyName;
+                }
+
+                AddKeyValues(newKeyName, keyValuePair.Value, keyProperty.Type, routeContext.RouteData.Values, routingConventionsStore);
+            }
+        }
+
+        private static void AddKeyValues(string name, object value, IEdmTypeReference edmTypeReference, IDictionary<string, object> routeValues,
+            IDictionary<string, object> odataValues)
+        {
+            Contract.Assert(routeValues != null);
+            Contract.Assert(odataValues != null);
+
+            object routeValue = null;
+            object odataValue = null;
+            ConstantNode node = value as ConstantNode;
+            if (node != null)
+            {
+                ODataEnumValue enumValue = node.Value as ODataEnumValue;
+                if (enumValue != null)
+                {
+                    odataValue = new ODataParameterValue(enumValue, edmTypeReference);
+                    routeValue = enumValue.Value;
+                }
+            }
+            else
+            {
+                odataValue = new ODataParameterValue(value, edmTypeReference);
+                routeValue = value;
+            }
+
+            // for without FromODataUri
+            routeValues[name] = routeValue;
+
+            // For FromODataUri
+            string prefixName = ODataParameterValue.ParameterValuePrefix + name;
+            odataValues[prefixName] = odataValue;
+        }
+
+        public static void AddFunctionParameterToRouteData(this RouteContext routeContext, OperationSegment functionSegment)
+        {
+            Contract.Assert(routeContext != null);
+            Contract.Assert(functionSegment != null);
+
+            HttpRequest request = routeContext.HttpContext.Request;
+            IDictionary<string, object> routingConventionsStore = request.ODataFeature().RoutingConventionsStore;
+
+            IEdmFunction function = functionSegment.Operations.First() as IEdmFunction;
+            if (function == null)
+            {
+                return;
+            }
+
+            foreach (OperationSegmentParameter parameter in functionSegment.Parameters)
+            {
+                string name = parameter.Name;
+                object value = functionSegment.GetParameterValue(name);
+
+                AddFunctionParameters(function, name, value, routeContext.RouteData.Values,
+                    routingConventionsStore, null);
+            }
+        }
+
+        public static void AddFunctionParameters(IEdmFunction function, string paramName, object paramValue, 
+            IDictionary<string, object> routeData, IDictionary<string, object> values, IDictionary<string, string> paramMapping)
+        {
+            Contract.Assert(function != null);
+
+            // using the following codes to support [FromODataUriAttribute]
+            IEdmOperationParameter edmParam = function.FindParameter(paramName);
+            Contract.Assert(edmParam != null);
+            ODataParameterValue parameterValue = new ODataParameterValue(paramValue, edmParam.Type);
+
+            string name = paramName;
+            if (paramMapping != null)
+            {
+                Contract.Assert(paramMapping.ContainsKey(paramName));
+                name = paramMapping[paramName];
+            }
+
+            string prefixName = ODataParameterValue.ParameterValuePrefix + name;
+            values[prefixName] = parameterValue;
+
+            // using the following codes to support [FromUriAttribute]
+            if (!routeData.ContainsKey(name))
+            {
+                routeData.Add(name, paramValue);
+            }
+
+            ODataNullValue nullValue = paramValue as ODataNullValue;
+            if (nullValue != null)
+            {
+                routeData[name] = null;
+            }
+
+            ODataEnumValue enumValue = paramValue as ODataEnumValue;
+            if (enumValue != null)
+            {
+                // Remove the type name of the ODataEnumValue and keep the value.
+                routeData[name] = enumValue.Value;
+            }
+        }
+
+        public static IDictionary<string, string> BuildParameterMappings(
+            IEnumerable<OperationSegmentParameter> parameters, string segment)
+        {
+            Contract.Assert(parameters != null);
+
+            Dictionary<string, string> parameterMappings = new Dictionary<string, string>();
+
+            foreach (OperationSegmentParameter parameter in parameters)
+            {
+                string parameterName = parameter.Name;
+                string nameInRouteData = null;
+
+                ConstantNode node = parameter.Value as ConstantNode;
+                if (node != null)
+                {
+                    UriTemplateExpression uriTemplateExpression = node.Value as UriTemplateExpression;
+                    if (uriTemplateExpression != null)
+                    {
+                        nameInRouteData = uriTemplateExpression.LiteralText.Trim();
+                    }
+                }
+                else
+                {
+                    // Just for easy constructor the function parameters
+                    nameInRouteData = parameter.Value as string;
+                }
+
+                if (nameInRouteData == null || !IsRouteParameter(nameInRouteData))
+                {
+                    throw new ODataException(
+                        Error.Format(SRResources.ParameterAliasMustBeInCurlyBraces, parameter.Value, segment));
+                }
+
+                nameInRouteData = nameInRouteData.Substring(1, nameInRouteData.Length - 2);
+                if (String.IsNullOrEmpty(nameInRouteData))
+                {
+                    throw new ODataException(
+                            Error.Format(SRResources.EmptyParameterAlias, parameter.Value, segment));
+                }
+
+                parameterMappings[parameterName] = nameInRouteData;
+            }
+
+            return parameterMappings;
+        }
+
+        public static bool IsRouteParameter(string parameterName)
+        {
+            return parameterName.StartsWith("{", StringComparison.Ordinal) &&
+                    parameterName.EndsWith("}", StringComparison.Ordinal);
+        }
+    }
+}

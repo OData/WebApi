@@ -394,6 +394,77 @@ namespace System.Web.OData.Test.OData.Query
                             new Dictionary<string, object> {{"Address/City", "seattle"}, {"Address/State", "WA"}},
                         }
                     },
+                    {
+                        "$apply=groupby((Name))&$orderby=Name",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))&$skip=2&$orderby=Name",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Middle"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))&$orderby=Name desc",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Middle"}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))&$skip=2&$orderby=Name desc",
+                        new List<Dictionary<string, object>>
+                        {
+
+                            new Dictionary<string, object> {{"Name", "Highest"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((CustomerId, Name))&$orderby=CustomerId",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Lowest"}, { "CustomerId", 1}},
+                            new Dictionary<string, object> {{"Name", "Highest"}, { "CustomerId", 2}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((CustomerId, Name))&$orderby=Name",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, { "CustomerId", 2}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, { "CustomerId", 1}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((CustomerId, Name))&$orderby=Name&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Lowest"}, { "CustomerId", 4}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, { "CustomerId", 5}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City))&$orderby=Address/City",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", null}},
+                            new Dictionary<string, object> {{"Address/City", "hobart"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City, Address/State))&$orderby=Address/State",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", null}, {"Address/State", null}},
+                            new Dictionary<string, object> {{"Address/City", "hobart"}, {"Address/State", null}},
+                        }
+                    },
                 };
             }
         }

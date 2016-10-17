@@ -401,7 +401,7 @@ namespace System.Web.OData.Query
             if (lastTransform.Kind == TransformationNodeKind.Aggregate)
             {
                 var aggregateClause = lastTransform as AggregateTransformationNode;
-                foreach(var expr in aggregateClause.Expressions)
+                foreach (var expr in aggregateClause.Expressions)
                 {
                     result.Add(expr.Alias);
                 }
@@ -540,12 +540,12 @@ namespace System.Web.OData.Query
         // Generates the OrderByQueryOption to use by default for $skip or $top
         // when no other $orderby is available.  It will produce a stable sort.
         // This may return a null if there are no available properties.
-        private OrderByQueryOption GenerateDefaultOrderBy(ODataQueryContext context, List<string> applySortOptions )
+        private OrderByQueryOption GenerateDefaultOrderBy(ODataQueryContext context, List<string> applySortOptions)
         {
             string orderByRaw = String.Empty;
             if (applySortOptions != null)
             {
-                orderByRaw = String.Join(",",applySortOptions);
+                orderByRaw = String.Join(",", applySortOptions);
                 return new OrderByQueryOption(orderByRaw, context, Apply.RawValue);
             }
             else
@@ -571,31 +571,54 @@ namespace System.Web.OData.Query
         /// <param name="context">The <see cref="ODataQueryContext"/>.</param>
         /// <param name="applySortOptions"></param>
         /// <returns>An <see cref="OrderByQueryOption"/> that will produce a stable sort.</returns>
-        private static OrderByQueryOption EnsureStableSortOrderBy(OrderByQueryOption orderBy, ODataQueryContext context, List<string> applySortOptions)
+        private OrderByQueryOption EnsureStableSortOrderBy(OrderByQueryOption orderBy, ODataQueryContext context, List<string> applySortOptions)
         {
             Contract.Assert(orderBy != null);
             Contract.Assert(context != null);
 
             // Strategy: create a hash of all properties already used in the given OrderBy
             // and remove them from the list of properties we need to add to make the sort stable.
-            HashSet<string> usedPropertyNames =
-                new HashSet<string>(orderBy.OrderByNodes.OfType<OrderByPropertyNode>().Select(node => node.Property.Name));
-
-            IEnumerable<IEdmStructuralProperty> propertiesToAdd = GetAvailableOrderByProperties(context).Where(prop => !usedPropertyNames.Contains(prop.Name));
-
-            if (propertiesToAdd.Any())
+            Func<OrderByPropertyNode, string> propertyFunc = null;
+            if(applySortOptions != null)
             {
-                // The existing query options has too few properties to create a stable sort.
-                // Clone the given one and add the remaining properties to end, thereby making
-                // the sort stable but preserving the user's original intent for the major
-                // sort order.
-                orderBy = new OrderByQueryOption(orderBy);
+                propertyFunc = node => node.PropertyPath;
+            }
+            else
+            {
+                propertyFunc = node => node.Property.Name;
 
-                foreach (IEdmStructuralProperty property in propertiesToAdd)
+            }
+            HashSet<string> usedPropertyNames =
+            new HashSet<string>(orderBy.OrderByNodes.OfType<OrderByPropertyNode>().Select(propertyFunc));
+
+            if (applySortOptions != null)
+            {
+                var propertyPathsToAdd = applySortOptions.Where(p => !usedPropertyNames.Contains(p)).OrderBy(p => p);
+                if (propertyPathsToAdd.Any())
                 {
-                    orderBy.OrderByNodes.Add(new OrderByPropertyNode(property, OrderByDirection.Ascending));
+                    var orderByRaw = orderBy.RawValue + "," + string.Join(",", propertyPathsToAdd);
+                    orderBy = new OrderByQueryOption(orderByRaw, context, Apply.RawValue);
                 }
             }
+            else
+            {
+                IEnumerable<IEdmStructuralProperty> propertiesToAdd = GetAvailableOrderByProperties(context).Where(prop => !usedPropertyNames.Contains(prop.Name));
+                if (propertiesToAdd.Any())
+                {
+                    // The existing query options has too few properties to create a stable sort.
+                    // Clone the given one and add the remaining properties to end, thereby making
+                    // the sort stable but preserving the user's original intent for the major
+                    // sort order.
+                    orderBy = new OrderByQueryOption(orderBy);
+
+                    foreach (IEdmStructuralProperty property in propertiesToAdd)
+                    {
+                        orderBy.OrderByNodes.Add(new OrderByPropertyNode(property, OrderByDirection.Ascending));
+                    }
+                }
+            }
+
+
 
             return orderBy;
         }

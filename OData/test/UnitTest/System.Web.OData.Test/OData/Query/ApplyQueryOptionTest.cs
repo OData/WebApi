@@ -31,14 +31,14 @@ namespace System.Web.OData.Test.OData.Query
                         "aggregate(CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "CustomerId", 10} }
+                            new Dictionary<string, object> { { "CustomerId", 15} }
                         }
                     },
                     {
                         "aggregate(SharePrice with sum as SharePrice)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "SharePrice", 12.5M} }
+                            new Dictionary<string, object> { { "SharePrice", 22.5M} }
                         }
                     },
                     {
@@ -59,21 +59,14 @@ namespace System.Web.OData.Test.OData.Query
                         "aggregate(SharePrice with average as SharePrice)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "SharePrice", 6.25M} }
-                        }
-                    },
-                    {
-                        "aggregate(SharePrice with average as SharePrice)",
-                        new List<Dictionary<string, object>>
-                        {
-                            new Dictionary<string, object> { { "SharePrice", 6.25M} }
+                            new Dictionary<string, object> { { "SharePrice", 7.5M} }
                         }
                     },
                     {
                         "aggregate(CustomerId with sum as Total, SharePrice with countdistinct as SharePriceDistinctCount)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "SharePriceDistinctCount", 3L}, { "Total", 10} }
+                            new Dictionary<string, object> { { "SharePriceDistinctCount", 3L}, { "Total", 15} }
                         }
                     },
                     {
@@ -89,7 +82,7 @@ namespace System.Web.OData.Test.OData.Query
                         "groupby((Name), aggregate(CustomerId with sum as Total))",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 5} },
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 10} },
                             new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} },
                             new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
                         }
@@ -139,7 +132,7 @@ namespace System.Web.OData.Test.OData.Query
                         "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "CustomerId", 30} }
+                            new Dictionary<string, object> { { "CustomerId", 55} }
                         }
                     },
                     {
@@ -147,7 +140,7 @@ namespace System.Web.OData.Test.OData.Query
                         "aggregate(SharePrice mul CustomerId with sum as Result)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Result", 15.0M} }
+                            new Dictionary<string, object> { { "Result", 65.0M} }
                         }
                     },
                     {
@@ -179,7 +172,7 @@ namespace System.Web.OData.Test.OData.Query
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
-                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
                             new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
                         }
                     },
@@ -198,7 +191,7 @@ namespace System.Web.OData.Test.OData.Query
                         {
                             new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
                             new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
-                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
                         }
                     },
                     {
@@ -207,7 +200,7 @@ namespace System.Web.OData.Test.OData.Query
                         {
                             new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
                             new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
-                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
                         }
                     },
                     {
@@ -215,7 +208,7 @@ namespace System.Web.OData.Test.OData.Query
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
-                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
                             new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
                         }
                     },
@@ -290,14 +283,14 @@ namespace System.Web.OData.Test.OData.Query
                         "$apply=aggregate(CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "CustomerId", 10} }
+                            new Dictionary<string, object> { { "CustomerId", 15} }
                         }
                     },
                     {
                         "$apply=aggregate(CustomerId with sum as Total)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Total", 10} }
+                            new Dictionary<string, object> { { "Total", 15} }
                         }
                     },
                     {
@@ -305,7 +298,7 @@ namespace System.Web.OData.Test.OData.Query
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
-                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
                         }
                     },
                     {
@@ -343,7 +336,7 @@ namespace System.Web.OData.Test.OData.Query
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
-                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
                         }
                     },
                     {
@@ -400,11 +393,11 @@ namespace System.Web.OData.Test.OData.Query
                 {
                     // Primitive properties
                     { "Name eq 'Highest'", new int[] { 2 } },
-                    { "endswith(Name, 'est')", new int[] { 1, 2, 4 } },
+                    { "endswith(Name, 'est')", new int[] { 1, 2, 4, 5 } },
 
                     // Complex properties
-                    { "Address/City eq 'redmond'", new int[] { 1 } },
-                    { "contains(Address/City, 'e')", new int[] { 1, 2 } },
+                    { "Address/City eq 'redmond'", new int[] { 1, 5 } },
+                    { "contains(Address/City, 'e')", new int[] { 1, 2, 5 } },
 
                     // Primitive property collections
                     { "Aliases/any(alias: alias eq 'alias34')", new int[] { 3, 4 } },
@@ -462,6 +455,15 @@ namespace System.Web.OData.Test.OData.Query
                     CustomerId = 4,
                     Name = "Lowest",
                     Aliases = new List<string> { "alias34", "alias4" }
+                };
+                customerList.Add(c);
+
+                c = new Customer
+                {
+                    CustomerId = 5,
+                    Name = "Lowest",
+                    SharePrice = 10,
+                    Address = new Address { City = "redmond", State = "WA" },
                 };
                 customerList.Add(c);
 
@@ -659,7 +661,7 @@ namespace System.Web.OData.Test.OData.Query
             var result = response.Content.ReadAsAsync<JObject>().Result;
             var results = result["value"] as JArray;
             Assert.Equal(3, results.Count);
-            Assert.Equal("5", results[0]["TotalId"].ToString());
+            Assert.Equal("10", results[0]["TotalId"].ToString());
             Assert.Equal("Lowest", results[0]["Name"].ToString());
             Assert.Equal("2", results[1]["TotalId"].ToString());
             Assert.Equal("Highest", results[1]["Name"].ToString());
@@ -696,7 +698,7 @@ namespace System.Web.OData.Test.OData.Query
             var result = response.Content.ReadAsAsync<JObject>().Result;
             var results = result["value"] as JArray;
             Assert.Equal(4, results.Count);
-            Assert.Equal("1", results[0]["TotalId"].ToString());
+            Assert.Equal("6", results[0]["TotalId"].ToString());
             var address0 = results[0]["Address"] as JObject;
             Assert.Equal("redmond", address0["City"].ToString());
         }

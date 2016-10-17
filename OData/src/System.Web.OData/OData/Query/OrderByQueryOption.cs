@@ -54,6 +54,34 @@ namespace System.Web.OData.Query
             _queryOptionParser = queryOptionParser;
         }
 
+        internal OrderByQueryOption(string rawValue, ODataQueryContext context, string applyRaw)
+        {
+            if (context == null)
+            {
+                throw Error.ArgumentNull("context");
+            }
+
+            if (String.IsNullOrEmpty(rawValue))
+            {
+                throw Error.ArgumentNullOrEmpty("rawValue");
+            }
+
+            if (applyRaw == null)
+            {
+                throw Error.ArgumentNullOrEmpty("applyRaw");
+            }
+
+            Context = context;
+            RawValue = rawValue;
+            Validator = OrderByQueryValidator.GetOrderByQueryValidator(context);
+            _queryOptionParser = new ODataQueryOptionParser(
+                context.Model,
+                context.ElementType,
+                context.NavigationSource,
+                new Dictionary<string, string> { { "$orderby", rawValue }, { "$apply", applyRaw } });
+            _queryOptionParser.ParseApply();
+        }
+
         // This constructor is intended for unit testing only.
         internal OrderByQueryOption(string rawValue, ODataQueryContext context)
         {

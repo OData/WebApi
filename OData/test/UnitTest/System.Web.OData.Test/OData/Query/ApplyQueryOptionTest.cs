@@ -280,6 +280,93 @@ namespace System.Web.OData.Test.OData.Query
             }
         }
 
+        public static TheoryDataSet<string, List<Dictionary<string, object>>> CustomerTestAppliesForPaging
+        {
+            get
+            {
+                return new TheoryDataSet<string, List<Dictionary<string, object>>>
+                {
+                    {
+                        "$apply=aggregate(CustomerId with sum as CustomerId)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", 10} }
+                        }
+                    },
+                    {
+                        "$apply=aggregate(CustomerId with sum as Total)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Total", 10} }
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Middle"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", null}},
+                            new Dictionary<string, object> {{"Address/City", "hobart"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", "redmond"}},
+                            new Dictionary<string, object> {{"Address/City", "seattle"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City, Address/State))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", null}, {"Address/State", null}},
+                            new Dictionary<string, object> {{"Address/City", "hobart"}, {"Address/State", null}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City, Address/State))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", "redmond"}, {"Address/State", "WA"}},
+                            new Dictionary<string, object> {{"Address/City", "seattle"}, {"Address/State", "WA"}},
+                        }
+                    },
+                };
+            }
+        }
+
+
         // Legal filter queries usable against CustomerFilterTestData.
         // Tuple is: filter, expected list of customer ID's
         public static TheoryDataSet<string, int[]> CustomerTestFilters
@@ -426,6 +513,48 @@ namespace System.Web.OData.Test.OData.Query
             IQueryable queryable = options.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
 
 
+            // Assert
+            Assert.NotNull(queryable);
+            var actualCustomers = Assert.IsAssignableFrom<IEnumerable<DynamicTypeWrapper>>(queryable).ToList();
+
+            Assert.Equal(aggregation.Count(), actualCustomers.Count());
+
+            var aggEnum = actualCustomers.GetEnumerator();
+
+            foreach (var expected in aggregation)
+            {
+                aggEnum.MoveNext();
+                var agg = aggEnum.Current;
+                foreach (var key in expected.Keys)
+                {
+                    object value = GetValue(agg, key);
+                    Assert.Equal(expected[key], value);
+                }
+            }
+        }
+
+        [Theory]
+        [PropertyData("CustomerTestAppliesForPaging")]
+        public void StableSortingAndPagingApplyTo_Returns_Correct_Queryable(string filter, List<Dictionary<string, object>> aggregation)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer));
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + filter);
+            request.EnableHttpDependencyInjectionSupport();
+
+            var options = new ODataQueryOptions(context, request);
+
+            IEnumerable<Customer> customers = CustomerApplyTestData;
+            // Act
+            IQueryable queryable = options.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True, PageSize = 2 });
+            
             // Assert
             Assert.NotNull(queryable);
             var actualCustomers = Assert.IsAssignableFrom<IEnumerable<DynamicTypeWrapper>>(queryable).ToList();

@@ -269,9 +269,14 @@ namespace System.Web.OData.Query.Expressions
                     throw new ODataException(Error.Format(SRResources.AggregationMethodNotSupported, expression.Method));
             }
 
-            return this._linqToObjectMode 
-                ? Expression.Convert(aggregationExpression, typeof(object))
-                : aggregationExpression;
+            return WrapConvert(aggregationExpression);
+        }
+
+        private Expression WrapConvert(Expression expression)
+        {
+            return this._linqToObjectMode
+                ? Expression.Convert(expression, typeof(object))
+                : expression;
         }
 
         private Expression BindAccessor(SingleValueNode node)
@@ -402,7 +407,7 @@ namespace System.Web.OData.Query.Expressions
                 var propertyName = gProp.Name;
                 if (gProp.Expression != null)
                 {
-                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), BindAccessor(gProp.Expression)));
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), WrapConvert(BindAccessor(gProp.Expression))));
                 }
                 else
                 {
@@ -415,31 +420,6 @@ namespace System.Web.OData.Query.Expressions
 
             return properties;
         }
-
-        private List<MemberAssignment> CreateGroupByMemberAssignments(Type type,
-            IEnumerable<GroupByPropertyNode> properties)
-        {
-            List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
-            foreach (var node in properties)
-            {
-                var member = type.GetMember(node.Name).Single();
-
-                if (node.Expression != null)
-                {
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(member, BindAccessor(node.Expression)));
-                }
-                else
-                {
-                    var memberType = (member as PropertyInfo).PropertyType;
-                    var expr = Expression.MemberInit(Expression.New(memberType),
-                        CreateGroupByMemberAssignments(memberType, node.ChildTransformations));
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(member, expr));
-                }
-            }
-
-            return wrapperTypeMemberAssignments;
-        }
-
 
         internal static IDictionary<string, Expression> GetFlattenProperties(IQueryable baseQuery, ParameterExpression source)
         {

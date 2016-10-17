@@ -301,6 +301,21 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total, CustomerId with sum as Total2))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total, CustomerId with sum as Total2))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
+                        }
+                    },
+                    {
                         "$apply=groupby((Name))",
                         new List<Dictionary<string, object>>
                         {
@@ -313,6 +328,14 @@ namespace System.Web.OData.Test.OData.Query
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> {{"Name", "Middle"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((CustomerId, Name))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Lowest"}, { "CustomerId", 1}},
+                            new Dictionary<string, object> {{"Name", "Highest"}, { "CustomerId", 2}},
                         }
                     },
                     {

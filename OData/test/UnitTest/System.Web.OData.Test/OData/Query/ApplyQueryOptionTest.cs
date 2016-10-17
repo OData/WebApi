@@ -332,6 +332,22 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
+                        "$apply=groupby((Name, CustomerId))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest" }, { "CustomerId", 2}},
+                            new Dictionary<string, object> {{"Name", "Lowest" }, { "CustomerId", 1}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name, CustomerId))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Lowest" }, { "CustomerId", 4}},
+                            new Dictionary<string, object> {{"Name", "Lowest" }, { "CustomerId", 5}},
+                        }
+                    },
+                    {
                         "$apply=groupby((Name), aggregate(CustomerId with sum as Total))",
                         new List<Dictionary<string, object>>
                         {

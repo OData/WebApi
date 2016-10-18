@@ -363,25 +363,28 @@ namespace System.Web.OData.Query
                 }
             }
 
-            int pageSize = -1;
-            if (querySettings.PageSize.HasValue)
+            if (!querySettings.PostponePaging)
             {
-                pageSize = querySettings.PageSize.Value;
-            }
-            else if (querySettings.ModelBoundPageSize.HasValue)
-            {
-                pageSize = querySettings.ModelBoundPageSize.Value;
-            }
-
-            if (pageSize > 0)
-            {
-                bool resultsLimited;
-                result = LimitResults(result, pageSize, out resultsLimited);
-                if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri &&
-                    Request.ODataProperties().NextLink == null)
+                int pageSize = -1;
+                if (querySettings.PageSize.HasValue)
                 {
-                    Uri nextPageLink = Request.GetNextPageLink(pageSize);
-                    Request.ODataProperties().NextLink = nextPageLink;
+                    pageSize = querySettings.PageSize.Value;
+                }
+                else if (querySettings.ModelBoundPageSize.HasValue)
+                {
+                    pageSize = querySettings.ModelBoundPageSize.Value;
+                }
+
+                if (pageSize > 0)
+                {
+                    bool resultsLimited;
+                    result = LimitResults(result, pageSize, out resultsLimited);
+                    if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri &&
+                        Request.ODataProperties().NextLink == null)
+                    {
+                        Uri nextPageLink = Request.GetNextPageLink(pageSize);
+                        Request.ODataProperties().NextLink = nextPageLink;
+                    }
                 }
             }
 

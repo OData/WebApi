@@ -103,6 +103,15 @@ namespace System.Web.OData.Query
                     propertyName = complexNode.Property.Name;
                     source = complexNode.Source;
                 }
+                else
+                {
+                    var navNode = expression as SingleNavigationNode;
+                    if (navNode != null)
+                    {
+                        propertyName = navNode.NavigationProperty.Name;
+                        source = navNode.Source;
+                    }
+                }
             }
 
             var parentPath = RestorePropertyPath(source);

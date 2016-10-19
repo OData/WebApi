@@ -4,25 +4,9 @@ using System.Web.OData;
 
 namespace WebStack.QA.Test.OData.Aggregation
 {
-    public class CustomersController : ODataController
+    public class BaseCustomersController : ODataController
     {
-        private readonly AggregationContext _db = new AggregationContext();
-
-        [EnableQuery]
-        public IQueryable<Customer> Get()
-        {
-            ResetDataSource();
-            var db = new AggregationContext();
-            return db.Customers;
-        }
-
-        [EnableQuery]
-        public SingleResult<Customer> Get(int key)
-        {
-            ResetDataSource();
-            var db = new AggregationContext();
-            return SingleResult.Create(db.Customers.Where(c => c.Id == key));
-        }
+        protected readonly AggregationContext _db = new AggregationContext();
 
         public void Generate()
         {
@@ -54,7 +38,7 @@ namespace WebStack.QA.Test.OData.Aggregation
                 Name = null,
                 Address = new Address
                 {
-                    Name = "City1" ,
+                    Name = "City1",
                     Street = "Street",
                 },
                 Order = new Order
@@ -68,7 +52,7 @@ namespace WebStack.QA.Test.OData.Aggregation
             _db.SaveChanges();
         }
 
-        private void ResetDataSource()
+        protected void ResetDataSource()
         {
             if (_db.Database.Exists())
             {
@@ -79,4 +63,25 @@ namespace WebStack.QA.Test.OData.Aggregation
             Generate();
         }
     }
+
+    public class CustomersController : BaseCustomersController
+    {
+        [EnableQuery]
+        public IQueryable<Customer> Get()
+        {
+            ResetDataSource();
+            var db = new AggregationContext();
+            return db.Customers;
+        }
+
+        [EnableQuery]
+        public SingleResult<Customer> Get(int key)
+        {
+            ResetDataSource();
+            var db = new AggregationContext();
+            return SingleResult.Create(db.Customers.Where(c => c.Id == key));
+        }
+    }
+
+  
 }

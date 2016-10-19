@@ -122,7 +122,9 @@
     <Compile Include="Aggregation\AggregationController.cs" />
     <Compile Include="Aggregation\AggregationDataModel.cs" />
     <Compile Include="Aggregation\AggregationEdmModel.cs" />
+    <Compile Include="Aggregation\PagedAggregationTests.cs" />
     <Compile Include="Aggregation\AggregationTests.cs" />
+    <Compile Include="Aggregation\PagedCustomersController.cs" />
     <Compile Include="AlternateKeys\AlternateKeysDataSource.cs" />
     <Compile Include="AlternateKeys\AlternateKeysEdmModel.cs" />
     <Compile Include="AlternateKeys\AlternateKeysTest.cs" />

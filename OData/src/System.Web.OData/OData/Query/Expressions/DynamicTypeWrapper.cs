@@ -111,7 +111,6 @@ namespace System.Web.OData.Query.Expressions
 
     internal class NoGroupByWrapper : GroupByWrapper
     {
-
     }
     internal class AggregationWrapper : GroupByWrapper
     {
@@ -120,5 +119,4 @@ namespace System.Web.OData.Query.Expressions
     internal class NoGroupByAggregationWrapper : GroupByWrapper
     {
     }
-
 }

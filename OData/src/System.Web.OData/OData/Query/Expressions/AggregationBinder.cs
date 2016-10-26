@@ -30,8 +30,6 @@ namespace System.Web.OData.Query.Expressions
 
         private Type _groupByClrType;
         
-        private const string Linq2ObjectsQueryProviderNamespace = "System.Linq";
-
         private bool _linqToObjectMode = false;
         private IQueryable _baseQuery;
         private IDictionary<string, Expression> _flattenPropertyContainer;
@@ -47,7 +45,6 @@ namespace System.Web.OData.Query.Expressions
             _transformation = transformation;
 
             this._lambdaParameter = Expression.Parameter(this._elementType, "$it");
-
 
             switch (transformation.Kind)
             {
@@ -100,7 +97,7 @@ namespace System.Web.OData.Query.Expressions
         {
             Contract.Assert(query != null);
 
-            this._linqToObjectMode = query.Provider.GetType().Namespace == Linq2ObjectsQueryProviderNamespace;
+            this._linqToObjectMode = query.Provider.GetType().Namespace == HandleNullPropagationOptionHelper.Linq2ObjectsQueryProviderNamespace;
             this._baseQuery = query;
             this._flattenPropertyContainer = GetFlattenProperties(this._baseQuery, this._lambdaParameter);
 
@@ -137,9 +134,9 @@ namespace System.Web.OData.Query.Expressions
             var propertyAccessor = Expression.Property(accum, "Key");
             if (this._groupingProperties != null && this._groupingProperties.Any())
             {
-                var wrapperProperty2 = this.ResultClrType.GetProperty("GroupByContainer");
+                var wrapperProperty = this.ResultClrType.GetProperty("GroupByContainer");
 
-                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty2, Expression.Property(Expression.Property(accum, "Key"), "GroupByContainer")));
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Property(Expression.Property(accum, "Key"), "GroupByContainer")));
             }
 
             // Setting Container property when we have aggregation clauses
@@ -149,7 +146,6 @@ namespace System.Web.OData.Query.Expressions
                 foreach (var aggExpression in _aggregateExpressions)
                 {
                     properties.Add(new NamedPropertyExpression(Expression.Constant(aggExpression.Alias), CreateAggregationExpression(accum, aggExpression)));
-                  
                 }
 
                 var wrapperProperty = ResultClrType.GetProperty("Container");
@@ -501,6 +497,7 @@ namespace System.Web.OData.Query.Expressions
                     {
                         resultType = ((UnaryExpression)expr.Expression).Operand.Type;
                     }
+
                     if (typeof(GroupByWrapper).IsAssignableFrom(resultType))
                     {
                         nestedExpression = expr.Expression;
@@ -508,7 +505,6 @@ namespace System.Web.OData.Query.Expressions
                 }
             }
 
-            Type exprType = typeof(AggregationPropertyContainer);
 
             if (prefix != null)
             {

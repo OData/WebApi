@@ -133,6 +133,7 @@ namespace System.Web.OData.Query.Expressions
                     namedPropertyType = typeof(LastInChain);
                 }
             }
+
             List<MemberBinding> memberBindings = new List<MemberBinding>();
 
             memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Name"), property.Name));

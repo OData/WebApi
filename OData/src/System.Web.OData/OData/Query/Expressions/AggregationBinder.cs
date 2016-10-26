@@ -283,10 +283,10 @@ namespace System.Web.OData.Query.Expressions
                     return this._lambdaParameter;
                 case QueryNodeKind.SingleValuePropertyAccess:
                     var propAccessNode = node as SingleValuePropertyAccessNode;
-                    return CreatePropertyAccessExpression(BindAccessor(propAccessNode.Source), propAccessNode.Property);
+                    return CreatePropertyAccessExpression(BindAccessor(propAccessNode.Source), propAccessNode.Property, GetFullPropertyPath(propAccessNode));
                 case QueryNodeKind.SingleComplexNode:
                     var singleComplexNode = node as SingleComplexNode;
-                    return CreatePropertyAccessExpression(BindAccessor(singleComplexNode.Source), singleComplexNode.Property);
+                    return CreatePropertyAccessExpression(BindAccessor(singleComplexNode.Source), singleComplexNode.Property, GetFullPropertyPath(singleComplexNode));
                 case QueryNodeKind.SingleValueOpenPropertyAccess:
                     var openNode = node as SingleValueOpenPropertyAccessNode;
                     if (_flattenPropertyContainer == null)
@@ -315,10 +315,10 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
-        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property)
+        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property, string propertyPath = null)
         {
             string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);
-            string propertyPath = propertyName;
+            propertyPath = propertyPath ?? propertyName;
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) &&
                 source != this._lambdaParameter)
             {

@@ -675,38 +675,6 @@ namespace System.Web.OData.Query.Expressions
             return CreatePropertyAccessExpression(source, singleComplexNode.Property, GetFullPropertyPath(singleComplexNode));
         }
 
-        private string GetFullPropertyPath(SingleValueNode node)
-        {
-            string path = null;
-            SingleValueNode parent = null;
-            switch (node.Kind)
-            {
-                case QueryNodeKind.SingleComplexNode:
-                    path = ((SingleComplexNode)node).Property.Name;
-                    break;
-                case QueryNodeKind.SingleValuePropertyAccess:
-                    path = ((SingleValuePropertyAccessNode)node).Property.Name;
-                    parent = ((SingleValuePropertyAccessNode)node).Source;
-                    break;
-                case QueryNodeKind.SingleNavigationNode:
-                    path = ((SingleNavigationNode)node).NavigationProperty.Name;
-                    parent = ((SingleNavigationNode)node).Source;
-                    break;
-
-            }
-
-            if (parent != null)
-            {
-                var parentPath = GetFullPropertyPath(parent);
-                if (parentPath != null)
-                {
-                    path = parentPath + "\\" + path;
-                }
-            }
-
-            return path;
-        }
-
         private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property, string propertyPath = null)
         {
             string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);

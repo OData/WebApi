@@ -53,7 +53,7 @@ namespace WebStack.QA.Test.OData.Aggregation
             var results = result["value"] as JArray;
             Assert.Equal(3, results.Count);
             Assert.Equal("0", results[0]["TotalPrice"].ToString());
-            Assert.Equal(null, results[0]["Name"]);
+            Assert.Equal(string.Empty, results[0]["Name"].ToString());
             Assert.Equal("2000", results[1]["TotalPrice"].ToString());
             Assert.Equal("Customer0", results[1]["Name"].ToString());
             Assert.Equal("2500", results[2]["TotalPrice"].ToString());
@@ -201,7 +201,7 @@ namespace WebStack.QA.Test.OData.Aggregation
             Assert.Equal("0", results[0]["TotalAmount"].ToString());
             Assert.Equal("2000", results[1]["TotalAmount"].ToString());
             Assert.Equal("2500", results[2]["TotalAmount"].ToString());
-            Assert.Equal(null, results[0]["Name"]);
+            Assert.Equal(string.Empty, results[0]["Name"].ToString());
             Assert.Equal("Customer0", results[1]["Name"].ToString());
             Assert.Equal("Customer1", results[2]["Name"].ToString());
         }

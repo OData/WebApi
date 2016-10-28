@@ -39,7 +39,7 @@ namespace System.Web.OData.Query.Expressions
         }
 
         /// <summary>
-        /// Remove modle from container.
+        /// Remove model from container.
         /// </summary>
         /// <param name="model"></param>
         public static void RemoveModel(IEdmModel model)

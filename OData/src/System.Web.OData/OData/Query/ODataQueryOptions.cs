@@ -352,7 +352,10 @@ namespace System.Web.OData.Query
                 result = Top.ApplyTo(result, querySettings);
             }
 
-            AddAutoSelectExpandProperties();
+            if (!IsAggregated(apply))
+            {
+                AddAutoSelectExpandProperties();
+            }
 
             if (SelectExpand != null)
             {
@@ -391,16 +394,21 @@ namespace System.Web.OData.Query
             return result;
         }
 
-        private List<string> GetApplySortOptions(ApplyClause apply)
+        private bool IsAggregated(ApplyClause apply)
         {
             Func<TransformationNode, bool> transformPredicate = t => t.Kind == TransformationNodeKind.Aggregate || t.Kind == TransformationNodeKind.GroupBy;
-            if (apply == null || !apply.Transformations.Any(transformPredicate))
+            return apply != null && apply.Transformations.Any(transformPredicate);
+        }
+
+        private List<string> GetApplySortOptions(ApplyClause apply)
+        {
+            if (!IsAggregated(apply))
             {
                 return null;
             }
 
             var result = new List<string>();
-            var lastTransform = apply.Transformations.Last(transformPredicate);
+            var lastTransform = apply.Transformations.Last(t => t.Kind == TransformationNodeKind.Aggregate || t.Kind == TransformationNodeKind.GroupBy);
             if (lastTransform.Kind == TransformationNodeKind.Aggregate)
             {
                 var aggregateClause = lastTransform as AggregateTransformationNode;

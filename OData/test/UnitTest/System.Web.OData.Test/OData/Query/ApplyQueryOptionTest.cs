@@ -14,6 +14,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 using Address = System.Web.OData.Builder.TestModels.Address;
+using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Test.OData.Query
 {
@@ -675,6 +676,51 @@ namespace System.Web.OData.Test.OData.Query
             // Act
             IQueryable queryable = options.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True, PageSize = 2 });
             
+            // Assert
+            Assert.NotNull(queryable);
+            var actualCustomers = Assert.IsAssignableFrom<IEnumerable<DynamicTypeWrapper>>(queryable).ToList();
+
+            Assert.Equal(aggregation.Count(), actualCustomers.Count());
+
+            var aggEnum = actualCustomers.GetEnumerator();
+
+            foreach (var expected in aggregation)
+            {
+                aggEnum.MoveNext();
+                var agg = aggEnum.Current;
+                foreach (var key in expected.Keys)
+                {
+                    object value = GetValue(agg, key);
+                    Assert.Equal(expected[key], value);
+                }
+            }
+        }
+
+        [Theory]
+        [PropertyData("CustomerTestAppliesForPaging")]
+        public void StableSortingAndPagingApplyToWithAutoSelect_Returns_Correct_Queryable(string filter, List<Dictionary<string, object>> aggregation)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            var customerEdmType = (EdmEntityType)(((IEdmCollectionType)model.EntityContainer.FindEntitySet("Customers").Type).ElementType.Definition);
+            model.SetAnnotationValue(customerEdmType, new ModelBoundQuerySettings() { DefaultSelectType = SelectExpandType.Automatic });
+
+            var context = new ODataQueryContext(model, typeof(Customer));
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + filter);
+            request.EnableHttpDependencyInjectionSupport();
+
+            var options = new ODataQueryOptions(context, request);
+
+            IEnumerable<Customer> customers = CustomerApplyTestData;
+            // Act
+            IQueryable queryable = options.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True, PageSize = 2 });
+
             // Assert
             Assert.NotNull(queryable);
             var actualCustomers = Assert.IsAssignableFrom<IEnumerable<DynamicTypeWrapper>>(queryable).ToList();

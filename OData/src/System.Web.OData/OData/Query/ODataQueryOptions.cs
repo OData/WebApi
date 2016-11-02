@@ -43,6 +43,8 @@ namespace System.Web.OData.Query
 
         private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
 
+        private static readonly Func<TransformationNode, bool> _aggregateTransformPredicate = t => t.Kind == TransformationNodeKind.Aggregate || t.Kind == TransformationNodeKind.GroupBy;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
         /// the <see cref="ODataQueryContext"/>.
@@ -396,8 +398,7 @@ namespace System.Web.OData.Query
 
         private bool IsAggregated(ApplyClause apply)
         {
-            Func<TransformationNode, bool> transformPredicate = t => t.Kind == TransformationNodeKind.Aggregate || t.Kind == TransformationNodeKind.GroupBy;
-            return apply != null && apply.Transformations.Any(transformPredicate);
+            return apply != null && apply.Transformations.Any(_aggregateTransformPredicate);
         }
 
         private List<string> GetApplySortOptions(ApplyClause apply)
@@ -408,7 +409,7 @@ namespace System.Web.OData.Query
             }
 
             var result = new List<string>();
-            var lastTransform = apply.Transformations.Last(t => t.Kind == TransformationNodeKind.Aggregate || t.Kind == TransformationNodeKind.GroupBy);
+            var lastTransform = apply.Transformations.Last(_aggregateTransformPredicate);
             if (lastTransform.Kind == TransformationNodeKind.Aggregate)
             {
                 var aggregateClause = lastTransform as AggregateTransformationNode;

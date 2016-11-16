@@ -362,7 +362,7 @@ namespace System.Web.OData.Query.Expressions
                 //                                               }
                 //                                           }
                 //                                      }) 
-                List<NamedPropertyExpression> properties = CreateGroupByMemberAssignments2(_groupingProperties);
+                List<NamedPropertyExpression> properties = CreateGroupByMemberAssignments(_groupingProperties);
 
 
                 var wrapperProperty = typeof(GroupByWrapper).GetProperty("GroupByContainer");
@@ -380,7 +380,7 @@ namespace System.Web.OData.Query.Expressions
             return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, this._groupByClrType);
         }
 
-        private List<NamedPropertyExpression> CreateGroupByMemberAssignments2(IEnumerable<GroupByPropertyNode> nodes)
+        private List<NamedPropertyExpression> CreateGroupByMemberAssignments(IEnumerable<GroupByPropertyNode> nodes)
         {
             var properties = new List<NamedPropertyExpression>();
             foreach (var gProp in nodes)
@@ -394,7 +394,7 @@ namespace System.Web.OData.Query.Expressions
                 {
                     var wrapperProperty = typeof(GroupByWrapper).GetProperty("GroupByContainer");
                     List<MemberAssignment> wta = new List<MemberAssignment>();
-                    wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(CreateGroupByMemberAssignments2(gProp.ChildTransformations))));
+                    wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(CreateGroupByMemberAssignments(gProp.ChildTransformations))));
                     properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.MemberInit(Expression.New(typeof(GroupByWrapper)), wta)));
                 }
             }

@@ -476,12 +476,14 @@ namespace System.Web.OData.Query.Expressions
                     path = ((SingleComplexNode)node).Property.Name;
                     break;
                 case QueryNodeKind.SingleValuePropertyAccess:
-                    path = ((SingleValuePropertyAccessNode)node).Property.Name;
-                    parent = ((SingleValuePropertyAccessNode)node).Source;
+                    var propertyNode = ((SingleValuePropertyAccessNode)node);
+                    path = propertyNode.Property.Name;
+                    parent = propertyNode.Source;
                     break;
                 case QueryNodeKind.SingleNavigationNode:
-                    path = ((SingleNavigationNode)node).NavigationProperty.Name;
-                    parent = ((SingleNavigationNode)node).Source;
+                    var navNode = ((SingleNavigationNode)node);
+                    path = navNode.NavigationProperty.Name;
+                    parent = navNode.Source;
                     break;
             }
 

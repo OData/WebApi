@@ -16,6 +16,8 @@ namespace System.Web.OData.Formatter.Serialization
     /// </summary>
     public class ODataPrimitiveSerializer : ODataEdmTypeSerializer
     {
+        private static readonly ODataNullValue NullValue = new ODataNullValue();
+
         /// <summary>
         /// Initializes a new instance of <see cref="ODataPrimitiveSerializer"/>.
         /// </summary>
@@ -57,7 +59,7 @@ namespace System.Web.OData.Formatter.Serialization
             ODataPrimitiveValue value = CreateODataPrimitiveValue(graph, expectedType.AsPrimitive(), writeContext);
             if (value == null)
             {
-                return new ODataNullValue();
+                return NullValue;
             }
 
             return value;

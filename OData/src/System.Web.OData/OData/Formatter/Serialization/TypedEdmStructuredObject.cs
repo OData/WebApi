@@ -14,11 +14,12 @@ namespace System.Web.OData.Formatter.Serialization
     /// </summary>
     internal abstract class TypedEdmStructuredObject : IEdmStructuredObject
     {
-        private static readonly ConcurrentDictionary<Tuple<string, Type>, Func<object, object>> _propertyGetterCache =
-            new ConcurrentDictionary<Tuple<string, Type>, Func<object, object>>();
+        private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, Func<object, object>>> _propertyGetterCache =
+            new ConcurrentDictionary<Type, ConcurrentDictionary<string, Func<object, object>>>();
 
         private IEdmStructuredTypeReference _edmType;
         private Type _type;
+        private ConcurrentDictionary<string, Func<object, object>> _typePropertyGetterCache = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypedEdmStructuredObject"/> class.
@@ -63,7 +64,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             Contract.Assert(_type != null);
 
-            Func<object, object> getter = GetOrCreatePropertyGetter(_type, propertyName, _edmType, Model);
+            Func<object, object> getter = GetOrCreatePropertyGetter(_type, propertyName, _edmType, Model, ref _typePropertyGetterCache);
             if (getter == null)
             {
                 value = null;
@@ -80,24 +81,34 @@ namespace System.Web.OData.Formatter.Serialization
             Type type,
             string propertyName,
             IEdmStructuredTypeReference edmType,
-            IEdmModel model)
+            IEdmModel model,
+            ref ConcurrentDictionary<string, Func<object, object>> propertyGetterCache)
         {
-            Tuple<string, Type> key = Tuple.Create(propertyName, type);
-            Func<object, object> getter;
-
-            if (!_propertyGetterCache.TryGetValue(key, out getter))
+            if (propertyGetterCache == null)
             {
-                IEdmProperty property = edmType.FindProperty(propertyName);
-                if (property != null && model != null)
-                {
-                    propertyName = EdmLibHelpers.GetClrPropertyName(property, model) ?? propertyName;
-                }
-
-                getter = CreatePropertyGetter(type, propertyName);
-                _propertyGetterCache[key] = getter;
+                propertyGetterCache = _propertyGetterCache.GetOrAdd(type, t => new ConcurrentDictionary<string, Func<object, object>>());
             }
 
-            return getter;
+            return propertyGetterCache.GetOrAdd(propertyName, name =>
+            {
+                IEdmProperty property = edmType.FindProperty(name);
+                if (property != null && model != null)
+                {
+                    name = EdmLibHelpers.GetClrPropertyName(property, model) ?? name;
+                }
+
+                return CreatePropertyGetter(type, name);
+            });
+        }
+
+        internal static Func<object, object> GetOrCreatePropertyGetter(
+                          Type type,
+                          string propertyName,
+                          IEdmStructuredTypeReference edmType,
+                          IEdmModel model)
+        {
+            ConcurrentDictionary<string, Func<object, object>> propertyGetterCache = null;
+            return GetOrCreatePropertyGetter(type, propertyName, edmType, model, ref propertyGetterCache);
         }
 
         private static Func<object, object> CreatePropertyGetter(Type type, string propertyName)

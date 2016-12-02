@@ -754,17 +754,14 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(structuralProperties != null);
             Contract.Assert(resourceContext != null);
 
-            List<ODataProperty> properties = new List<ODataProperty>();
             foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
             {
                 ODataProperty property = CreateStructuralProperty(structuralProperty, resourceContext);
                 if (property != null)
                 {
-                    properties.Add(property);
+                    yield return property;
                 }
             }
-
-            return properties;
         }
 
         /// <summary>

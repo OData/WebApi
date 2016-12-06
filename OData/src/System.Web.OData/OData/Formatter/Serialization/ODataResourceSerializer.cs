@@ -528,11 +528,14 @@ namespace System.Web.OData.Formatter.Serialization
         {
             Contract.Assert(resourceContext != null);
 
-            IEnumerable<ODataNestedResourceInfo> navigationLinks = CreateNavigationLinks(navigationProperties, resourceContext);
-            foreach (ODataNestedResourceInfo navigationLink in navigationLinks)
+            if (resourceContext.SerializerContext.MetadataLevel == ODataMetadataLevel.FullMetadata)
             {
-                writer.WriteStart(navigationLink);
-                writer.WriteEnd();
+                IEnumerable<ODataNestedResourceInfo> navigationLinks = CreateNavigationLinks(navigationProperties, resourceContext);
+                foreach (ODataNestedResourceInfo navigationLink in navigationLinks)
+                {
+                    writer.WriteStart(navigationLink);
+                    writer.WriteEnd();
+                }
             }
         }
 

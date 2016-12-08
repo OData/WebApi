@@ -23,6 +23,7 @@ namespace System.Web.OData.Query.Expressions
     /// </summary>
     internal class SelectExpandBinder
     {
+        private const int MaxEFColumns = 80; 
         private SelectExpandQueryOption _selectExpandQuery;
         private ODataQueryContext _context;
         private IEdmModel _model;
@@ -750,7 +751,11 @@ namespace System.Web.OData.Query.Expressions
                 return true;
             }
 
-            if (selectExpandClause.AllSelected || selectExpandClause.SelectedItems.OfType<WildcardSelectItem>().Any())
+            if (selectExpandClause.AllSelected || selectExpandClause.SelectedItems.OfType<WildcardSelectItem>().Any()
+                // EF fails with StackOverflow when tries to generate SELECT clause with more than MaxEFColumns columns
+                // Convert long $select=... to $select=* as woraround until https://github.com/dotnet/corefx/pull/11091 will be ported to .NET and included in official version
+                || selectExpandClause.SelectedItems.OfType<PathSelectItem>().Count() > MaxEFColumns
+                )
             {
                 return true;
             }

@@ -23,6 +23,9 @@ namespace System.Web.OData.Query.Expressions
     /// </summary>
     internal class SelectExpandBinder
     {
+        // EF fails with StackOverflow when tries to generate SELECT clause with more than ~90 columns
+        // Need to convert long $select=... to $select=* as woraround until https://github.com/dotnet/corefx/pull/11091 will be ported to .NET and included in official version
+        // Keeping number smaller than 80 to leave space for automatically added properties like keys
         private const int MaxEFColumns = 80; 
         private SelectExpandQueryOption _selectExpandQuery;
         private ODataQueryContext _context;

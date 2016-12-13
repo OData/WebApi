@@ -3,10 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Web.Http;
 using System.Web.OData.Builder;
-using System.Web.OData.Extensions;
 using System.Web.OData.Properties;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -33,6 +31,23 @@ namespace System.Web.OData.Formatter.Serialization
             SelectedActions = new HashSet<IEdmAction>();
             SelectedFunctions = new HashSet<IEdmFunction>();
             SelectedDynamicProperties = new HashSet<string>();
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="SelectExpandNode"/> class by copying the state of another instance. This is
+        /// intended for scenarios that wish to modify state without updating the values cached within ODataResourceSerializer.
+        /// </summary>
+        /// <param name="selectExpandNodeToCopy">The instance from which the state for the new instance will be copied.</param>
+        public SelectExpandNode(SelectExpandNode selectExpandNodeToCopy)
+        {
+            ExpandedNavigationProperties = new Dictionary<IEdmNavigationProperty, SelectExpandClause>(selectExpandNodeToCopy.ExpandedNavigationProperties);
+            SelectedActions = new HashSet<IEdmAction>(selectExpandNodeToCopy.SelectedActions);
+            SelectAllDynamicProperties = selectExpandNodeToCopy.SelectAllDynamicProperties;
+            SelectedComplexProperties = new HashSet<IEdmStructuralProperty>(selectExpandNodeToCopy.SelectedComplexProperties);
+            SelectedDynamicProperties = new HashSet<string>(selectExpandNodeToCopy.SelectedDynamicProperties);
+            SelectedFunctions = new HashSet<IEdmFunction>(selectExpandNodeToCopy.SelectedFunctions);
+            SelectedNavigationProperties = new HashSet<IEdmNavigationProperty>(selectExpandNodeToCopy.SelectedNavigationProperties);
+            SelectedStructuralProperties = new HashSet<IEdmStructuralProperty>(selectExpandNodeToCopy.SelectedStructuralProperties);
         }
 
         /// <summary>

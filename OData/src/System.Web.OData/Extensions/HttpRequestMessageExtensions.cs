@@ -261,7 +261,7 @@ namespace System.Web.OData.Extensions
         {
             if (request.Properties.ContainsKey(RequestContainerKey))
             {
-                throw Error.InvalidOperation(SRResources.RequestContainerAlreadyExists);
+                throw new ODataException(SRResources.RequestContainerAlreadyExists);
             }
 
             IServiceScope requestScope = request.CreateRequestScope(routeName);

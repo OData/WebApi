@@ -2,7 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Reflection;
 using System.Web.Http.Internal;
 using Microsoft.OData.Edm;
@@ -14,12 +17,12 @@ namespace System.Web.OData.Formatter.Serialization
     /// </summary>
     internal abstract class TypedEdmStructuredObject : IEdmStructuredObject
     {
-        private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, Func<object, object>>> _propertyGetterCache =
-            new ConcurrentDictionary<Type, ConcurrentDictionary<string, Func<object, object>>>();
+        private static readonly ConcurrentDictionary<Type, Dictionary<string, Func<object, object>>> _propertyGetterCache =
+            new ConcurrentDictionary<Type, Dictionary<string, Func<object, object>>>();
 
         private IEdmStructuredTypeReference _edmType;
         private Type _type;
-        private ConcurrentDictionary<string, Func<object, object>> _typePropertyGetterCache = null;
+        private Dictionary<string, Func<object, object>> _typePropertyGetterCache = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypedEdmStructuredObject"/> class.
@@ -82,23 +85,32 @@ namespace System.Web.OData.Formatter.Serialization
             string propertyName,
             IEdmStructuredTypeReference edmType,
             IEdmModel model,
-            ref ConcurrentDictionary<string, Func<object, object>> propertyGetterCache)
+            ref Dictionary<string, Func<object, object>> propertyGetterCache)
         {
             if (propertyGetterCache == null)
             {
-                propertyGetterCache = _propertyGetterCache.GetOrAdd(type, t => new ConcurrentDictionary<string, Func<object, object>>());
+                propertyGetterCache = _propertyGetterCache.GetOrAdd(type, t =>
+                {
+                    // Creating all property getters on first access to the type
+                    // It will allows us to avoid growing dictionary from 0 to number of properties that means copy data over and over as soon as capacity reached
+                    // Also we could use Dictionary instead of ConcurrentDictionary that adds less overhead
+
+                    // First get all properties
+                    var properties = edmType.StructuredDefinition().Properties().ToList();
+                    // Create dictionary with right capacity
+                    var result = new Dictionary<string, Func<object, object>>(properties.Count); 
+
+                    // Fill dictionary with getters for each property
+                    foreach (IEdmProperty property in properties)
+                    {
+                        var name = EdmLibHelpers.GetClrPropertyName(property, model) ?? property.Name;
+                        result.Add(property.Name, CreatePropertyGetter(type, name));
+                    }
+                    return result;
+                });
             }
 
-            return propertyGetterCache.GetOrAdd(propertyName, name =>
-            {
-                IEdmProperty property = edmType.FindProperty(name);
-                if (property != null && model != null)
-                {
-                    name = EdmLibHelpers.GetClrPropertyName(property, model) ?? name;
-                }
-
-                return CreatePropertyGetter(type, name);
-            });
+            return propertyGetterCache[propertyName];
         }
 
         internal static Func<object, object> GetOrCreatePropertyGetter(
@@ -107,7 +119,7 @@ namespace System.Web.OData.Formatter.Serialization
                           IEdmStructuredTypeReference edmType,
                           IEdmModel model)
         {
-            ConcurrentDictionary<string, Func<object, object>> propertyGetterCache = null;
+            Dictionary<string, Func<object, object>> propertyGetterCache = null;
             return GetOrCreatePropertyGetter(type, propertyName, edmType, model, ref propertyGetterCache);
         }
 

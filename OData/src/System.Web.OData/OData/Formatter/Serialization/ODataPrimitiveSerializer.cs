@@ -49,7 +49,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+        public override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
         {
             if (!expectedType.IsPrimitive())
             {

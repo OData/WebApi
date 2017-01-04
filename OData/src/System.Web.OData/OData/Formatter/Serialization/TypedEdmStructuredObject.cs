@@ -87,18 +87,25 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmModel model,
             ref Dictionary<string, Func<object, object>> propertyGetterCache)
         {
+            EnsurePropertyGettingCachePopulated(type, edmType, model, ref propertyGetterCache);
+
+            return propertyGetterCache[propertyName];
+        }
+
+        private static void EnsurePropertyGettingCachePopulated(Type type, IEdmStructuredTypeReference edmType, IEdmModel model, ref Dictionary<string, Func<object, object>> propertyGetterCache)
+        {
             if (propertyGetterCache == null)
             {
                 propertyGetterCache = _propertyGetterCache.GetOrAdd(type, t =>
                 {
                     // Creating all property getters on first access to the type
                     // It will allows us to avoid growing dictionary from 0 to number of properties that means copy data over and over as soon as capacity reached
-                    // Also we could use Dictionary instead of ConcurrentDictionary that adds less overhead
+                    // Also we don't need ConcurrentDictionary for nested getters cache and use Dictionary that adds less overhead
 
                     // First get all properties
                     var properties = edmType.StructuredDefinition().Properties().ToList();
                     // Create dictionary with right capacity
-                    var result = new Dictionary<string, Func<object, object>>(properties.Count); 
+                    var result = new Dictionary<string, Func<object, object>>(properties.Count);
 
                     // Fill dictionary with getters for each property
                     foreach (IEdmProperty property in properties)
@@ -109,8 +116,6 @@ namespace System.Web.OData.Formatter.Serialization
                     return result;
                 });
             }
-
-            return propertyGetterCache[propertyName];
         }
 
         internal static Func<object, object> GetOrCreatePropertyGetter(

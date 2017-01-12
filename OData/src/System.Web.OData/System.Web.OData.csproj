@@ -5,7 +5,7 @@
     <ProjectGuid>{D23E28F1-CCD0-43E0-8C0D-36731EC91318}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Web.OData</RootNamespace>
-    <AssemblyName>System.Web.OData</AssemblyName>
+    <AssemblyName>Microsoft.TeamFoundation.Web.OData</AssemblyName>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>

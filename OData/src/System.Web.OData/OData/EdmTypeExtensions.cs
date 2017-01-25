@@ -24,5 +24,20 @@ namespace System.Web.OData
             }
             return (type.GetType() == typeof(EdmDeltaCollectionType));
         }
+
+        /// <summary>
+        /// Method to determine whether the current type is containing a Delta Entry
+        /// </summary>
+        /// <param name="type">IEdmType to be compared</param>
+        /// <returns>True or False if type is same as <see cref="EdmDeltaEntityObject"/></returns>
+        public static bool IsDeltaObject(this IEdmObject type)
+        {
+            if (type == null)
+            {
+                throw Error.ArgumentNull("type");
+            }
+            return (type is EdmDeltaEntityObject || type is EdmDeltaComplexObject);
+        }
+
     }
 }

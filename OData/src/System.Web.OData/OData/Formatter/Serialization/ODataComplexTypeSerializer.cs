@@ -90,9 +90,16 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             IEdmComplexObject complexObject = graph as IEdmComplexObject ?? new TypedEdmComplexObject(graph, complexType, writeContext.Model);
-
+            List<IEdmProperty> settableProperties = new List<IEdmProperty>(complexType.ComplexDefinition().Properties());
+            if (complexObject.IsDeltaObject())
+            {
+                IDelta deltaProperty = graph as IDelta;
+                Contract.Assert(deltaProperty != null);
+                IEnumerable<string> changedProperties = deltaProperty.GetChangedPropertyNames();
+                settableProperties = settableProperties.Where(p => changedProperties.Contains(p.Name)).ToList();
+            }
             List<ODataProperty> propertyCollection = new List<ODataProperty>();
-            foreach (IEdmProperty property in complexType.ComplexDefinition().Properties())
+            foreach (IEdmProperty property in settableProperties)
             {
                 IEdmTypeReference propertyType = property.Type;
                 ODataEdmTypeSerializer propertySerializer = SerializerProvider.GetEdmTypeSerializer(propertyType);

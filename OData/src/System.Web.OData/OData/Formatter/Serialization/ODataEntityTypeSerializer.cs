@@ -565,6 +565,15 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(entityInstanceContext != null);
 
             List<ODataProperty> properties = new List<ODataProperty>();
+
+            if (entityInstanceContext.EdmObject.IsDeltaObject())
+            {
+                IDelta deltaObject = entityInstanceContext.EdmObject as IDelta;
+                Contract.Assert(deltaObject != null);
+                IEnumerable<string> changedProperties = deltaObject.GetChangedPropertyNames();
+                structuralProperties = structuralProperties.Where(p => changedProperties.Contains(p.Name));
+            }
+
             foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
             {
                 ODataProperty property = CreateStructuralProperty(structuralProperty, entityInstanceContext);

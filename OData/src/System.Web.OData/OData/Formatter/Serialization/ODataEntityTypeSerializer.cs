@@ -566,7 +566,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             List<ODataProperty> properties = new List<ODataProperty>();
 
-            if (entityInstanceContext.EdmObject.IsDeltaObject())
+            if (null != entityInstanceContext.EdmObject && entityInstanceContext.EdmObject.IsDeltaResource())
             {
                 IDelta deltaObject = entityInstanceContext.EdmObject as IDelta;
                 Contract.Assert(deltaObject != null);

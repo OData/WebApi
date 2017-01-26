@@ -14,9 +14,9 @@ namespace System.Web.OData
     public class EdmDeltaComplexObject : EdmComplexObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
+        /// Initializes a new instance of the <see cref="EdmDeltaComplexObject"/> class.
         /// </summary>
-        /// <param name="edmType">The <see cref="IEdmStructuredType"/> of this object.</param>
+        /// <param name="edmType">The <see cref="IEdmComplexType"/> of this object.</param>
         public EdmDeltaComplexObject(IEdmComplexType edmType)
             : this(edmType, isNullable: false)
         {

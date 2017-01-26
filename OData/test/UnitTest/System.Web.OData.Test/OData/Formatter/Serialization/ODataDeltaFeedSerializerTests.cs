@@ -38,6 +38,11 @@ namespace System.Web.OData.Formatter.Serialization
                     FirstName = "Foo",
                     LastName = "Bar",
                     ID = 10,
+                    HomeAddress = new Address()
+                    {
+                        Street="Street",
+                        ZipCode=null,
+                    }
                 },
                 new Customer()
                 {
@@ -51,6 +56,10 @@ namespace System.Web.OData.Formatter.Serialization
             EdmDeltaEntityObject newCustomer = new EdmDeltaEntityObject(_customerSet.EntityType());
             newCustomer.TrySetPropertyValue("ID", 10);
             newCustomer.TrySetPropertyValue("FirstName", "Foo");
+            EdmDeltaComplexObject newCustomerAddress = new EdmDeltaComplexObject(_model.FindType("Default.Address") as IEdmComplexType);
+            newCustomerAddress.TrySetPropertyValue("Street", "Street");
+            newCustomerAddress.TrySetPropertyValue("ZipCode", null);
+            newCustomer.TrySetPropertyValue("HomeAddress", newCustomerAddress);
             _deltaFeedCustomers.Add(newCustomer);
 
              _customersType = _model.GetEdmTypeReference(typeof(Customer[])).AsCollection();

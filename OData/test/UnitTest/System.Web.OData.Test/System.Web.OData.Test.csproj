@@ -343,6 +343,7 @@
     <Compile Include="PublicApi\PublicApiTest.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="TestCommon\CustomersModelWithInheritance.cs" />
+    <Compile Include="OData\EdmDeltaComplexObjectTest.cs" />
     <Compile Include="TestCommon\SimpleOpenAddress.cs" />
     <Compile Include="TestCommon\ODataModelBuilderMocks.cs" />
     <Compile Include="TestCommon\SimpleOpenCustomer.cs" />

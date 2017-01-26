@@ -83,7 +83,7 @@ namespace System.Web.OData.Builder
                 Assert.Null(generatedIdLink);
             }
         }
-
+        
         [Theory]
         [InlineData(true, ODataMetadataLevel.FullMetadata)]
         [InlineData(true, ODataMetadataLevel.MinimalMetadata)]

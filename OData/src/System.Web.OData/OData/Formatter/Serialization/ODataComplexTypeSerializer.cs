@@ -91,7 +91,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             IEdmComplexObject complexObject = graph as IEdmComplexObject ?? new TypedEdmComplexObject(graph, complexType, writeContext.Model);
             List<IEdmProperty> settableProperties = new List<IEdmProperty>(complexType.ComplexDefinition().Properties());
-            if (complexObject.IsDeltaObject())
+            if (complexObject.IsDeltaResource())
             {
                 IDelta deltaProperty = graph as IDelta;
                 Contract.Assert(deltaProperty != null);

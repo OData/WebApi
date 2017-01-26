@@ -144,23 +144,10 @@ namespace System.Web.OData.Builder
             {
                 throw Error.ArgumentNull("instanceContext");
             }
-
-            bool writeId = false;
-            if (instanceContext.EdmObject.IsDeltaObject())
-            {
-                IDelta deltaObject = instanceContext.EdmObject as IDelta;
-                IEdmEntityType entityType = instanceContext.EntityType as IEdmEntityType;
-                if (null != entityType)
-                {
-                    IEnumerable<string> keyProperties = entityType.DeclaredKey.Select(k => k.Name).AsList<string>();
-                    if (keyProperties.Any(k => !deltaObject.GetChangedPropertyNames().Contains(k)))
-                        writeId = true;
-                }
-            }
-
+            
             if (_idLinkBuilder != null &&
                 (metadataLevel == ODataMetadataLevel.FullMetadata ||
-                (metadataLevel == ODataMetadataLevel.MinimalMetadata && (!_idLinkBuilder.FollowsConventions || writeId) ) ))
+                (metadataLevel == ODataMetadataLevel.MinimalMetadata && !_idLinkBuilder.FollowsConventions)))
             {
                 return _idLinkBuilder.Factory(instanceContext);
             }

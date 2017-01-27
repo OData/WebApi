@@ -255,6 +255,9 @@ namespace System.Web.OData.Extensions
         /// <param name="request">The request.</param>
         /// <param name="routeName">The name of the route.</param>
         /// <returns>The request container created.</returns>
+        /// <exception cref="ODataException">
+        /// <paramref name="request"/> already has requestContainer property.
+        /// </exception>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
             Justification = "requestScope will be disposed when the request ends.")]
         public static IServiceProvider CreateRequestContainer(this HttpRequestMessage request, string routeName)

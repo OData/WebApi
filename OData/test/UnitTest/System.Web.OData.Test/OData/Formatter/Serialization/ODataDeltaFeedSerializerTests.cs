@@ -318,7 +318,7 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void WriteDeltaFeedInline_Sets_DeltaLink_OnWriteEnd()
+        public void WriteDeltaFeedInline_Sets_DeltaLink()
         {
             // Arrange
             IEnumerable instance = new object[0];
@@ -328,7 +328,7 @@ namespace System.Web.OData.Formatter.Serialization
             serializer.Setup(s => s.CreateODataDeltaFeed(instance, _customersType, _writeContext)).Returns(deltafeed);
             var mockWriter = new Mock<ODataDeltaWriter>();
 
-            mockWriter.Setup(m => m.WriteStart(It.Is<ODataDeltaFeed>(f => f.NextPageLink == null))).Verifiable();
+            mockWriter.Setup(m => m.WriteStart(deltafeed));
             mockWriter
                 .Setup(m => m.WriteEnd())
                 .Callback(() =>

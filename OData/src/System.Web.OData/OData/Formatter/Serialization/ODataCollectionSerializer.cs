@@ -91,7 +91,7 @@ namespace System.Web.OData.Formatter.Serialization
                 {
                     collectionStart.NextPageLink = writeContext.Request.ODataProperties().NextLink;
                 }
-
+                
                 if (writeContext.Request.ODataProperties().TotalCount != null)
                 {
                     collectionStart.Count = writeContext.Request.ODataProperties().TotalCount;

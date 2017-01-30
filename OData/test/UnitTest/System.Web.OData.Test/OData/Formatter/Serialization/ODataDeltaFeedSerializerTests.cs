@@ -318,6 +318,34 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void WriteDeltaFeedInline_Sets_DeltaLink_OnWriteEnd()
+        {
+            // Arrange
+            IEnumerable instance = new object[0];
+            ODataDeltaFeed deltafeed = new ODataDeltaFeed { DeltaLink = new Uri("http://deltalink.com/") };
+            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(new DefaultODataSerializerProvider());
+            serializer.CallBase = true;
+            serializer.Setup(s => s.CreateODataDeltaFeed(instance, _customersType, _writeContext)).Returns(deltafeed);
+            var mockWriter = new Mock<ODataDeltaWriter>();
+
+            mockWriter.Setup(m => m.WriteStart(It.Is<ODataDeltaFeed>(f => f.NextPageLink == null))).Verifiable();
+            mockWriter
+                .Setup(m => m.WriteEnd())
+                .Callback(() =>
+                {
+                    Assert.Equal("http://deltalink.com/", deltafeed.DeltaLink.AbsoluteUri);
+                })
+                .Verifiable();
+
+            // Act
+            serializer.Object.WriteDeltaFeedInline(instance, _customersType, mockWriter.Object, _writeContext);
+
+            // Assert
+            mockWriter.Verify();
+        }
+
+
+        [Fact]
         public void CreateODataDeltaFeed_Sets_CountValueForPageResult()
         {
             // Arrange

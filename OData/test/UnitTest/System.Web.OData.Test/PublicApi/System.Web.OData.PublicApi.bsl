@@ -950,7 +950,7 @@ public abstract class System.Web.OData.Builder.ProcedureConfiguration {
 	string Namespace  { public get; public set; }
 	NavigationSourceConfiguration NavigationSource  { public get; public set; }
 	bool OptionalReturn  { public get; public set; }
-	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.ParameterConfiguration]] Parameters  { public virtual get; }
+	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.ParameterConfiguration]] Parameters  { [IteratorStateMachineAttribute(),]public virtual get; }
 	ProcedureLinkBuilder ProcedureLinkBuilder  { protected get; protected set; }
 	IEdmTypeConfiguration ReturnType  { public get; public set; }
 	string Title  { public get; public set; }
@@ -1743,6 +1743,7 @@ public sealed class System.Web.OData.Extensions.UrlHelperExtensions {
 
 public class System.Web.OData.Extensions.HttpRequestMessageProperties {
 	Microsoft.OData.Core.UriParser.Aggregation.ApplyClause ApplyClause  { public get; public set; }
+	System.Uri DeltaLink  { public get; public set; }
 	Microsoft.OData.Edm.IEdmModel Model  { public get; public set; }
 	System.Uri NextLink  { public get; public set; }
 	ODataPath Path  { public get; public set; }
@@ -2589,21 +2590,81 @@ public class System.Web.OData.Routing.ODataPathSegmentTranslator : Microsoft.ODa
 	public ODataPathSegmentTranslator (Microsoft.OData.Edm.IEdmModel model, bool enableUriTemplateParsing, System.Collections.Generic.IDictionary`2[[System.String],[Microsoft.OData.Core.UriParser.Semantic.SingleValueNode]] parameterAliasNodes)
 
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.BatchReferenceSegment segment)
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.BatchSegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.CountSegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.EntitySetSegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.KeySegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.MetadataSegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertyLinkSegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.NavigationPropertySegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.OpenPropertySegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.OperationImportSegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.OperationSegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.PathTemplateSegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.PropertySegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.SingletonSegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.TypeSegment segment)
+
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.Generic.IEnumerable`1[[System.Web.OData.Routing.ODataPathSegment]] Translate (Microsoft.OData.Core.UriParser.Semantic.ValueSegment segment)
+
 	public static ODataPath TranslateODataLibPathToWebApiPath (Microsoft.OData.Core.UriParser.Semantic.ODataPath path, Microsoft.OData.Edm.IEdmModel model, UnresolvedPathSegment unresolvedPathSegment, Microsoft.OData.Core.UriParser.Semantic.KeySegment id, bool enableUriTemplateParsing, System.Collections.Generic.IDictionary`2[[System.String],[Microsoft.OData.Core.UriParser.Semantic.SingleValueNode]] parameterAliasNodes)
 }
 
@@ -2818,7 +2879,11 @@ public class System.Web.OData.Formatter.Deserialization.ODataCollectionDeseriali
 	public ODataCollectionDeserializer (ODataDeserializerProvider deserializerProvider)
 
 	public virtual object Read (Microsoft.OData.Core.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.IEnumerable ReadCollectionValue (Microsoft.OData.Core.ODataCollectionValue collectionValue, Microsoft.OData.Edm.IEdmTypeReference elementType, ODataDeserializerContext readContext)
+
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }
 
@@ -2877,7 +2942,11 @@ public class System.Web.OData.Formatter.Deserialization.ODataEnumDeserializer : 
 public class System.Web.OData.Formatter.Deserialization.ODataFeedDeserializer : ODataEdmTypeDeserializer {
 	public ODataFeedDeserializer (ODataDeserializerProvider deserializerProvider)
 
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.IEnumerable ReadFeed (ODataFeedWithEntries feed, Microsoft.OData.Edm.IEdmEntityTypeReference elementType, ODataDeserializerContext readContext)
+
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }
 

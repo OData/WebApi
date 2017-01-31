@@ -25,6 +25,7 @@ namespace System.Web.OData.Extensions
     {
         // Maintain the System.Web.OData. prefix in any new properties to avoid conflicts with user properties
         // and those of the v3 assembly.
+        private const string DeltaLinkKey = "System.Web.OData.DeltaLink";
         private const string ModelKey = "System.Web.OData.Model";
         private const string NextLinkKey = "System.Web.OData.NextLink";
         private const string PathHandlerKey = "System.Web.OData.PathHandler";
@@ -200,6 +201,22 @@ namespace System.Web.OData.Extensions
             set
             {
                 _request.Properties[NextLinkKey] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the delta link for the OData response.
+        /// </summary>
+        /// <value><c>null</c> if no delta link should be sent back to the client.</value>
+        public Uri DeltaLink
+        {
+            get
+            {
+                return GetValueOrNull<Uri>(DeltaLinkKey);
+            }
+            set
+            {
+                _request.Properties[DeltaLinkKey] = value;
             }
         }
 

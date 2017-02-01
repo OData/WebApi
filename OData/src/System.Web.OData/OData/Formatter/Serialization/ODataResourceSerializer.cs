@@ -122,13 +122,98 @@ namespace System.Web.OData.Formatter.Serialization
             if (selectExpandNode != null)
             {
                 ODataResource resource = CreateResource(selectExpandNode, resourceContext);
+
                 if (resource != null)
                 {
                     writer.WriteStart(resource);
-                    //TODO: Need to add support to write Navigation Links using Delta Writer
+                    WriteDeltaComplexProperties(selectExpandNode.SelectedComplexProperties, resourceContext, writer);
+                    //TODO: Need to add support to write Navigation Links, etc. using Delta Writer
                     //https://github.com/OData/odata.net/issues/155
+                    //CLEANUP: merge delta logic with regular logic; requires common base between ODataWriter and ODataDeltaWriter
+                    //WriteDynamicComplexProperties(resourceContext, writer);
+                    //WriteNavigationLinks(selectExpandNode.SelectedNavigationProperties, resourceContext, writer);
+                    //WriteExpandedNavigationProperties(selectExpandNode.ExpandedNavigationProperties, resourceContext, writer);
+
                     writer.WriteEnd();
                 }
+            }
+        }
+
+        private void WriteDeltaComplexProperties(IEnumerable<IEdmStructuralProperty> complexProperties,
+            ResourceContext resourceContext, ODataDeltaWriter writer)
+        {
+            Contract.Assert(complexProperties != null);
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            if (null != resourceContext.EdmObject && resourceContext.EdmObject.IsDeltaResource())
+            {
+                IDelta deltaObject = resourceContext.EdmObject as IDelta;
+                IEnumerable<string> changedProperties = deltaObject.GetChangedPropertyNames();
+                complexProperties = complexProperties.Where(p => changedProperties.Contains(p.Name));
+            }
+
+            foreach (IEdmStructuralProperty complexProperty in complexProperties)
+            {
+                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
+                {
+                    IsCollection = complexProperty.Type.IsCollection(),
+                    Name = complexProperty.Name
+                };
+
+                writer.WriteStart(nestedResourceInfo);
+                WriteDeltaComplexAndExpandedNavigationProperty(complexProperty, null, resourceContext, writer);
+                writer.WriteEnd();
+            }
+        }
+
+        private void WriteDeltaComplexAndExpandedNavigationProperty(IEdmProperty edmProperty, SelectExpandClause selectExpandClause,
+            ResourceContext resourceContext, ODataDeltaWriter writer)
+        {
+            Contract.Assert(edmProperty != null);
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            object propertyValue = resourceContext.GetPropertyValue(edmProperty.Name);
+
+            if (propertyValue == null || propertyValue is NullEdmComplexObject)
+            {
+                if (edmProperty.Type.IsCollection())
+                {
+                    // A complex or navigation property whose Type attribute specifies a collection, the collection always exists,
+                    // it may just be empty.
+                    // If a collection of complex or entities can be related, it is represented as a JSON array. An empty
+                    // collection of resources (one that contains no resource) is represented as an empty JSON array.
+                    writer.WriteStart(new ODataResourceSet
+                    {
+                        TypeName = edmProperty.Type.FullName()
+                    });
+                }
+                else
+                {
+                    // If at most one resource can be related, the value is null if no resource is currently related.
+                    writer.WriteStart(deltaResource: null);
+                }
+
+                writer.WriteEnd();
+            }
+            else
+            {
+                // create the serializer context for the complex and expanded item.
+                ODataSerializerContext nestedWriteContext = new ODataSerializerContext(resourceContext, selectExpandClause, edmProperty);
+
+                // write object.
+
+                // TODO: enable overriding serializer based on type. Currentlky requires serializer supports WriteDeltaObjectinline, because it takes an ODataDeltaWriter
+                // ODataEdmTypeSerializer serializer = SerializerProvider.GetEdmTypeSerializer(edmProperty.Type);
+                // if (serializer == null)
+                // {
+                //     throw new SerializationException(
+                //         Error.Format(SRResources.TypeCannotBeSerialized, edmProperty.Type.ToTraceString(), typeof(ODataResourceSerializer).Name));
+                // }
+                // serializer.WriteDeltaObjectInline(propertyValue, edmProperty.Type, writer, nestedWriteContext);
+
+                WriteDeltaObjectInline(propertyValue, edmProperty.Type, writer, nestedWriteContext);
             }
         }
 
@@ -547,6 +632,13 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
+            if (null != resourceContext.EdmObject && resourceContext.EdmObject.IsDeltaResource())
+            {
+                IDelta deltaObject = resourceContext.EdmObject as IDelta;
+                IEnumerable<string> changedProperties = deltaObject.GetChangedPropertyNames();
+                complexProperties = complexProperties.Where(p => changedProperties.Contains(p.Name));
+            }
+
             foreach (IEdmStructuralProperty complexProperty in complexProperties)
             {
                 ODataNestedResourceInfo nestedResourceInfo  = new ODataNestedResourceInfo
@@ -759,6 +851,14 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
 
             List<ODataProperty> properties = new List<ODataProperty>();
+
+            if (null != resourceContext.EdmObject && resourceContext.EdmObject.IsDeltaResource())
+            {
+                IDelta deltaObject = resourceContext.EdmObject as IDelta;
+                IEnumerable<string> changedProperties = deltaObject.GetChangedPropertyNames();
+                structuralProperties = structuralProperties.Where(p => changedProperties.Contains(p.Name));
+            }
+
             foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
             {
                 ODataProperty property = CreateStructuralProperty(structuralProperty, resourceContext);

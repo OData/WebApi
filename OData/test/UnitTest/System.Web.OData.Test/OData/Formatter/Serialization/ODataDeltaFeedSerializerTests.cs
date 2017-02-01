@@ -39,6 +39,11 @@ namespace System.Web.OData.Formatter.Serialization
                     FirstName = "Foo",
                     LastName = "Bar",
                     ID = 10,
+                    HomeAddress = new Address()
+                    {
+                        Street = "Street",
+                        ZipCode = null,
+                    }
                 },
                 new Customer()
                 {
@@ -52,6 +57,10 @@ namespace System.Web.OData.Formatter.Serialization
             EdmDeltaEntityObject newCustomer = new EdmDeltaEntityObject(_customerSet.EntityType());
             newCustomer.TrySetPropertyValue("ID", 10);
             newCustomer.TrySetPropertyValue("FirstName", "Foo");
+            EdmDeltaComplexObject newCustomerAddress = new EdmDeltaComplexObject(_model.FindType("Default.Address") as IEdmComplexType);
+            newCustomerAddress.TrySetPropertyValue("Street", "Street");
+            newCustomerAddress.TrySetPropertyValue("ZipCode", null);
+            newCustomer.TrySetPropertyValue("HomeAddress", newCustomerAddress);
             _deltaFeedCustomers.Add(newCustomer);
 
              _customersType = _model.GetEdmTypeReference(typeof(Customer[])).AsCollection();
@@ -300,6 +309,33 @@ namespace System.Web.OData.Formatter.Serialization
                 .Callback(() =>
                 {
                     Assert.Equal("http://nextlink.com/", deltafeed.NextPageLink.AbsoluteUri);
+                })
+                .Verifiable();
+
+            // Act
+            serializer.Object.WriteDeltaFeedInline(instance, _customersType, mockWriter.Object, _writeContext);
+
+            // Assert
+            mockWriter.Verify();
+        }
+
+        [Fact]
+        public void WriteDeltaFeedInline_Sets_DeltaLink()
+        {
+            // Arrange
+            IEnumerable instance = new object[0];
+            ODataDeltaResourceSet deltafeed = new ODataDeltaResourceSet { DeltaLink = new Uri("http://deltalink.com/") };
+            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(_serializerProvider);
+            serializer.CallBase = true;
+            serializer.Setup(s => s.CreateODataDeltaFeed(instance, _customersType, _writeContext)).Returns(deltafeed);
+            var mockWriter = new Mock<ODataDeltaWriter>();
+
+            mockWriter.Setup(m => m.WriteStart(deltafeed));
+            mockWriter
+                .Setup(m => m.WriteEnd())
+                .Callback(() =>
+                {
+                    Assert.Equal("http://deltalink.com/", deltafeed.DeltaLink.AbsoluteUri);
                 })
                 .Verifiable();
 

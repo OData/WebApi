@@ -163,6 +163,7 @@
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayTest.cs" />
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayWithEfTest.cs" />
     <Compile Include="DateAndTimeOfDay\DateWithEfTest.cs" />
+    <Compile Include="DeltaQueryTests\DeltaQueryTests.cs" />
     <Compile Include="DependencyInjection\CustomizeCountQueryValidatorTest.cs" />
     <Compile Include="DependencyInjection\CustomizeSerializerTest.cs" />
     <Compile Include="DependencyInjection\DependencyInjectionController.cs" />

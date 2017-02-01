@@ -12,7 +12,7 @@ namespace System.Web.OData
     public static class EdmTypeExtensions
     {
         /// <summary>
-        /// Method to determine whether the current type is containing a Delta Feed
+        /// Method to determine whether the current type is a Delta Feed
         /// </summary>
         /// <param name="type">IEdmType to be compared</param>
         /// <returns>True or False if type is same as <see cref="EdmDeltaCollectionType"/></returns>
@@ -23,6 +23,20 @@ namespace System.Web.OData
                 throw Error.ArgumentNull("type");
             }
             return (type.GetType() == typeof(EdmDeltaCollectionType));
+        }
+        
+        /// <summary>
+        /// Method to determine whether the current Edm object is a Delta Entry
+        /// </summary>
+        /// <param name="resource">IEdmObject to be compared</param>
+        /// <returns>True or False if type is same as <see cref="EdmDeltaEntityObject"/> or <see cref="EdmDeltaComplexObject"/></returns>
+        public static bool IsDeltaResource(this IEdmObject resource)
+        {
+            if (resource == null)
+            {
+                throw Error.ArgumentNull("resource");
+            }
+            return (resource is EdmDeltaEntityObject || resource is EdmDeltaComplexObject);
         }
     }
 }

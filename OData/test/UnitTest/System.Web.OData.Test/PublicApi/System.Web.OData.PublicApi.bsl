@@ -162,6 +162,11 @@ public sealed class System.Web.OData.EdmTypeExtensions {
 	ExtensionAttribute(),
 	]
 	public static bool IsDeltaFeed (Microsoft.OData.Edm.IEdmType type)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static bool IsDeltaResource (IEdmObject resource)
 }
 
 public sealed class System.Web.OData.ODataUriFunctions {
@@ -241,6 +246,15 @@ public class System.Web.OData.EdmComplexObjectCollection : System.Collections.Ob
 	public EdmComplexObjectCollection (Microsoft.OData.Edm.IEdmCollectionTypeReference edmType, System.Collections.Generic.IList`1[[System.Web.OData.IEdmComplexObject]] list)
 
 	public virtual Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
+}
+
+[
+NonValidatingParameterBindingAttribute(),
+]
+public class System.Web.OData.EdmDeltaComplexObject : EdmComplexObject, IDynamicMetaObjectProvider, IDelta, IEdmComplexObject, IEdmObject, IEdmStructuredObject {
+	public EdmDeltaComplexObject (Microsoft.OData.Edm.IEdmComplexType edmType)
+	public EdmDeltaComplexObject (Microsoft.OData.Edm.IEdmComplexTypeReference edmType)
+	public EdmDeltaComplexObject (Microsoft.OData.Edm.IEdmComplexType edmType, bool isNullable)
 }
 
 [
@@ -931,7 +945,7 @@ public abstract class System.Web.OData.Builder.OperationConfiguration {
 	NavigationSourceConfiguration NavigationSource  { public get; public set; }
 	OperationLinkBuilder OperationLinkBuilder  { protected get; protected set; }
 	bool OptionalReturn  { public get; public set; }
-	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.ParameterConfiguration]] Parameters  { public virtual get; }
+	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.ParameterConfiguration]] Parameters  { [IteratorStateMachineAttribute(),]public virtual get; }
 	IEdmTypeConfiguration ReturnType  { public get; public set; }
 	string Title  { public get; public set; }
 
@@ -1919,6 +1933,7 @@ public sealed class System.Web.OData.Extensions.UrlHelperExtensions {
 
 public class System.Web.OData.Extensions.HttpRequestMessageProperties {
 	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public get; public set; }
+	System.Uri DeltaLink  { public get; public set; }
 	System.Uri NextLink  { public get; public set; }
 	ODataPath Path  { public get; public set; }
 	string RouteName  { public get; public set; }
@@ -2902,7 +2917,11 @@ public class System.Web.OData.Formatter.Deserialization.ODataCollectionDeseriali
 	public ODataCollectionDeserializer (ODataDeserializerProvider deserializerProvider)
 
 	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.IEnumerable ReadCollectionValue (Microsoft.OData.ODataCollectionValue collectionValue, Microsoft.OData.Edm.IEdmTypeReference elementType, ODataDeserializerContext readContext)
+
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }
 
@@ -2962,6 +2981,9 @@ public class System.Web.OData.Formatter.Deserialization.ODataResourceSetDeserial
 
 	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
+	[
+	IteratorStateMachineAttribute(),
+	]
 	public virtual System.Collections.IEnumerable ReadResourceSet (ODataResourceSetWrapper resourceSet, Microsoft.OData.Edm.IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
 }
 

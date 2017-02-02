@@ -211,9 +211,16 @@ namespace System.Web.OData.Formatter.Serialization
                 //     throw new SerializationException(
                 //         Error.Format(SRResources.TypeCannotBeSerialized, edmProperty.Type.ToTraceString(), typeof(ODataResourceSerializer).Name));
                 // }
-                // serializer.WriteDeltaObjectInline(propertyValue, edmProperty.Type, writer, nestedWriteContext);
-
-                WriteDeltaObjectInline(propertyValue, edmProperty.Type, writer, nestedWriteContext);
+                if (edmProperty.Type.IsCollection())
+                {
+                    ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(SerializerProvider);
+                    serializer.WriteDeltaFeedInline(propertyValue, edmProperty.Type, writer, nestedWriteContext);
+                }
+                else
+                {
+                    ODataResourceSerializer serializer = new ODataResourceSerializer(SerializerProvider);
+                    serializer.WriteDeltaObjectInline(propertyValue, edmProperty.Type, writer, nestedWriteContext);
+                }
             }
         }
 

@@ -65,34 +65,53 @@ namespace WebStack.QA.Test.OData
             Assert.True(response.IsSuccessStatusCode);
             dynamic results = response.Content.ReadAsAsync<JObject>().Result;
 
-            Assert.True(results.value.Count == 5);
+            Assert.True(results.value.Count == 5, "There should be 5 entries in the response");
 
             var changeEntity = results.value[0];
-            Assert.Equal(3, ((JToken)changeEntity).Count());
-            Assert.Equal(1, changeEntity.Id.Value);
-            Assert.Equal("Name", changeEntity.Name.Value);
-            Assert.Equal(2, ((JToken)changeEntity.Address).Count());
-            Assert.Equal("State", changeEntity.Address.State.Value);
-            Assert.True(changeEntity.Address.ZipCode.Value == (int?)null);
+            Assert.True(((JToken)changeEntity).Count() == 4, "The changed entity should have 4 properties written.");
+            Assert.True(changeEntity.Id.Value == 1, "The ID Of changed entity should be 1.");
+            Assert.True(changeEntity.Name.Value == "Name", "The Name of changed entity should be 'Name'");
+            Assert.True(((JToken)changeEntity.Address).Count() == 2, "The changed entity's Address should have 2 properties written.");
+            Assert.True(changeEntity.Address.State.Value == "State", "The changed entity's Address.State should be 'State'.");
+            Assert.True(changeEntity.Address.ZipCode.Value == (int?)null, "The changed entity's Address.ZipCode should be null.");
+
+            var phoneNumbers = changeEntity.PhoneNumbers;
+            Assert.True(((JToken)phoneNumbers).Count() == 2, "The changed entity should have 2 phone numbers");
+            Assert.True(phoneNumbers[0].Value == "123-4567", "The first phone number should be '123-4567'");
+            Assert.True(phoneNumbers[1].Value == "765-4321", "The second phone number should be '765-4321'");
 
             var newEntity = results.value[1];
-            Assert.Equal(10, newEntity.Id.Value);
-            Assert.Equal("NewCustomer", newEntity.Name.Value);
-            Assert.Equal(2, ((JToken)newEntity).Count());
+            Assert.True(((JToken)newEntity).Count() == 3, "The new entity should have 3 properties written");
+            Assert.True(newEntity.Id.Value == 10, "The ID of the new entity should be 10");
+            Assert.True(newEntity.Name.Value == "NewCustomer", "The name of the new entity should be 'NewCustomer'");
+
+            var places = newEntity.FavoritePlaces;
+            Assert.True(((JToken)places).Count() == 2, "The new entity should have 2 favorite places");
+
+            var place1 = places[0];
+            Assert.True(((JToken)place1).Count() == 2, "The first favorite place should have 2 properties written.");
+            Assert.True(place1.State.Value == "State", "The first favorite place's state should be 'State'.");
+            Assert.True(place1.ZipCode.Value == (int?)null, "The first favorite place's Address.ZipCode should be null.");
+
+            var place2 = places[1];
+            Assert.True(((JToken)place2).Count() == 3, "The second favorite place should have 3 properties written.");
+            Assert.True(place2.City.Value == "City2", "The second favorite place's Address.City should be 'City2'.");
+            Assert.True(place2.State.Value == "State2", "The second favorite place's Address.State should be 'State2'.");
+            Assert.True(place2.ZipCode.Value == 12345, "The second favorite place's Address.ZipCode should be 12345.");
 
             var deletedEntity = results.value[2];
-            Assert.Equal("7", deletedEntity.id.Value);
-            Assert.Equal("changed", deletedEntity.reason.Value);
+            Assert.True(deletedEntity.id.Value == "7", "The ID of the deleted entity should be 7");
+            Assert.True(deletedEntity.reason.Value == "changed", "The reason for the deleted entity shoudl be 'changed'");
 
             var deletedLink = results.value[3];
-            Assert.Equal("http://localhost/odata/DeltaCustomers(1)", deletedLink.source.Value);
-            Assert.Equal("http://localhost/odata/DeltaOrders(1)", deletedLink.target.Value);
-            Assert.Equal("Orders", deletedLink.relationship.Value);
+            Assert.True(deletedLink.source.Value == "http://localhost/odata/DeltaCustomers(1)", "The source of the deleted link should be 'http://localhost/odata/DeltaCustomers(1)'");
+            Assert.True(deletedLink.target.Value == "http://localhost/odata/DeltaOrders(1)", "The target of the deleted link should be 'http://localhost/odata/DeltaOrders(1)'");
+            Assert.True(deletedLink.relationship.Value == "Orders", "The relationship of the deleted link should be 'Orders'");
 
             var addedLink = results.value[4];
-            Assert.Equal("http://localhost/odata/DeltaCustomers(10)", addedLink.source.Value);
-            Assert.Equal("http://localhost/odata/DeltaOrders(1)", addedLink.target.Value);
-            Assert.Equal("Orders", addedLink.relationship.Value);
+            Assert.True(addedLink.source.Value == "http://localhost/odata/DeltaCustomers(10)", "The source of the added link should be 'http://localhost/odata/DeltaCustomers(10)'");
+            Assert.True(addedLink.target.Value == "http://localhost/odata/DeltaOrders(1)", "The target of the added link should be 'http://localhost/odata/DeltaOrders(1)'");
+            Assert.True(addedLink.relationship.Value == "Orders", "The relationship of the added link should be 'Orders'");
         }
     }
 
@@ -101,9 +120,9 @@ namespace WebStack.QA.Test.OData
 
         public IHttpActionResult Get()
         {
-            List<IEdmChangedObject> changedObjects = new List<IEdmChangedObject>();
             IEdmEntityType entityType = Request.GetModel().FindDeclaredType("WebStack.QA.Test.OData.TestCustomer") as IEdmEntityType;
             IEdmComplexType addressType = Request.GetModel().FindDeclaredType("WebStack.QA.Test.OData.TestAddress") as IEdmComplexType;
+            EdmChangedObjectCollection changedObjects = new EdmChangedObjectCollection(entityType);
 
             EdmDeltaComplexObject a = new EdmDeltaComplexObject(addressType);
             a.TrySetPropertyValue("State", "State");
@@ -113,11 +132,21 @@ namespace WebStack.QA.Test.OData
             changedEntity.TrySetPropertyValue("Id", 1);
             changedEntity.TrySetPropertyValue("Name", "Name");
             changedEntity.TrySetPropertyValue("Address", a);
+            changedEntity.TrySetPropertyValue("PhoneNumbers", new List<String> { "123-4567", "765-4321" });
             changedObjects.Add(changedEntity);
+
+            EdmComplexObjectCollection places = new EdmComplexObjectCollection(new EdmCollectionTypeReference(new EdmCollectionType(new EdmComplexTypeReference(addressType,true))));
+            EdmDeltaComplexObject b = new EdmDeltaComplexObject(addressType);
+            b.TrySetPropertyValue("City", "City2");
+            b.TrySetPropertyValue("State", "State2");
+            b.TrySetPropertyValue("ZipCode", 12345);
+            places.Add(a);
+            places.Add(b);
 
             var newEntity = new EdmDeltaEntityObject(entityType);
             newEntity.TrySetPropertyValue("Id", 10);
             newEntity.TrySetPropertyValue("Name", "NewCustomer");
+            newEntity.TrySetPropertyValue("FavoritePlaces", places);
             changedObjects.Add(newEntity);
 
             var deletedEntity = new EdmDeltaDeletedEntityObject(entityType);
@@ -137,7 +166,7 @@ namespace WebStack.QA.Test.OData
             addedLink.Relationship = "Orders";
             changedObjects.Add(addedLink);
 
-            return Ok(new EdmChangedObjectCollection(entityType, changedObjects));
+            return Ok(changedObjects);
         }
     }
 
@@ -146,8 +175,10 @@ namespace WebStack.QA.Test.OData
         public int Id { get; set; }
         public string Name { get; set; }
         public int Age { get; set; }
+        public virtual IList<string> PhoneNumbers {get; set;}
         public virtual IList<TestOrder> Orders { get; set; }
         public virtual TestAddress Address { get; set; }
+        public virtual IList<TestAddress> FavoritePlaces { get; set; }
     }
 
     public class TestOrder

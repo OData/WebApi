@@ -14,6 +14,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 using Address = System.Web.OData.Builder.TestModels.Address;
+using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Test.OData.Query
 {
@@ -31,14 +32,14 @@ namespace System.Web.OData.Test.OData.Query
                         "aggregate(CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "CustomerId", 10} }
+                            new Dictionary<string, object> { { "CustomerId", 15} }
                         }
                     },
                     {
                         "aggregate(SharePrice with sum as SharePrice)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "SharePrice", 12.5M} }
+                            new Dictionary<string, object> { { "SharePrice", 22.5M} }
                         }
                     },
                     {
@@ -59,21 +60,14 @@ namespace System.Web.OData.Test.OData.Query
                         "aggregate(SharePrice with average as SharePrice)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "SharePrice", 6.25M} }
-                        }
-                    },
-                    {
-                        "aggregate(SharePrice with average as SharePrice)",
-                        new List<Dictionary<string, object>>
-                        {
-                            new Dictionary<string, object> { { "SharePrice", 6.25M} }
+                            new Dictionary<string, object> { { "SharePrice", 7.5M} }
                         }
                     },
                     {
                         "aggregate(CustomerId with sum as Total, SharePrice with countdistinct as SharePriceDistinctCount)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "SharePriceDistinctCount", 3L}, { "Total", 10} }
+                            new Dictionary<string, object> { { "SharePriceDistinctCount", 3L}, { "Total", 15} }
                         }
                     },
                     {
@@ -89,7 +83,7 @@ namespace System.Web.OData.Test.OData.Query
                         "groupby((Name), aggregate(CustomerId with sum as Total))",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 5} },
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 10} },
                             new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} },
                             new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
                         }
@@ -136,10 +130,18 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
+                        "groupby((Address/City, Address/State))/groupby((Address/State), aggregate(Address/City with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "Address/State", null} },
+                        }
+                    },
+                    {
                         "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "CustomerId", 30} }
+                            new Dictionary<string, object> { { "CustomerId", 55} }
                         }
                     },
                     {
@@ -147,7 +149,7 @@ namespace System.Web.OData.Test.OData.Query
                         "aggregate(SharePrice mul CustomerId with sum as Result)",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> { { "Result", 15.0M} }
+                            new Dictionary<string, object> { { "Result", 65.0M} }
                         }
                     },
                     {
@@ -179,17 +181,44 @@ namespace System.Web.OData.Test.OData.Query
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
-                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
                             new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
                         }
                     },
                     {
-                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$orderby=Total",
+                        "$apply=groupby((Name))&$orderby=Name",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}},
+                            new Dictionary<string, object> {{"Name", "Middle"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total, CustomerId with sum as Total2))&$orderby=Total",
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
                             new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
-                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 5}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total, CustomerId with sum as Total2))&$orderby=Total, Total2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$orderby=Name, Total",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
                         }
                     },
                     {
@@ -203,30 +232,252 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
-                        "$apply=groupby((Address/City))&$filter=Address/City eq 'redmond'",
+                        "$apply=groupby((Address/City))&$filter=Address/City eq 'redmond'&$orderby=Address/City",
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> {{"Address/City", "redmond"}},
                         }
                     },
                     {
-                        "$apply=groupby((Name))&$top=1",
+                        "$apply=groupby((Address/City, Address/State))&$filter=Address/State eq 'WA'&$orderby=Address/City",
                         new List<Dictionary<string, object>>
                         {
+                            new Dictionary<string, object> {{"Address/City", "redmond"}, {"Address/State", "WA"}},
+                            new Dictionary<string, object> {{"Address/City", "seattle"}, {"Address/State", "WA"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City, Address/State))&$orderby=Address/State desc, Address/City",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", "redmond"}, {"Address/State", "WA"}},
+                            new Dictionary<string, object> {{"Address/City", "seattle"}, {"Address/State", "WA"}},
+                            new Dictionary<string, object> {{"Address/City", null}, {"Address/State", null}},
+                            new Dictionary<string, object> {{"Address/City", "hobart"}, {"Address/State", null}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City))&$filter=Address/City eq 'redmond'",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", "redmond"}},
+                        }
+                    },
+                    //{
+                    //    "$apply=groupby((Name))&$top=1",
+                    //    new List<Dictionary<string, object>>
+                    //    {
+                    //        new Dictionary<string, object> {{"Name", "Highest"}},
+                    //    }
+                    //},
+                    //{
+                    //    "$apply=groupby((Name))&$skip=1",
+                    //    new List<Dictionary<string, object>>
+                    //    {
+                    //        new Dictionary<string, object> {{"Name", "Lowest"}},
+                    //        new Dictionary<string, object> {{"Name", "Middle"}},
+                    //    }
+                    //},
+                };
+            }
+        }
+
+        public static TheoryDataSet<string, List<Dictionary<string, object>>> CustomerTestAppliesForPaging
+        {
+            get
+            {
+                return new TheoryDataSet<string, List<Dictionary<string, object>>>
+                {
+                    {
+                        "$apply=aggregate(CustomerId with sum as CustomerId)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", 15} }
+                        }
+                    },
+                    {
+                        "$apply=aggregate(CustomerId with sum as Total)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Total", 15} }
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total, CustomerId with sum as Total2))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total, CustomerId with sum as Total2))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Middle"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((CustomerId, Name))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Lowest"}, { "CustomerId", 1}},
+                            new Dictionary<string, object> {{"Name", "Highest"}, { "CustomerId", 2}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name, CustomerId))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest" }, { "CustomerId", 2}},
+                            new Dictionary<string, object> {{"Name", "Lowest" }, { "CustomerId", 1}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name, CustomerId))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Lowest" }, { "CustomerId", 4}},
+                            new Dictionary<string, object> {{"Name", "Lowest" }, { "CustomerId", 5}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", null}},
+                            new Dictionary<string, object> {{"Address/City", "hobart"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", "redmond"}},
+                            new Dictionary<string, object> {{"Address/City", "seattle"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City, Address/State))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", null}, {"Address/State", null}},
+                            new Dictionary<string, object> {{"Address/City", "hobart"}, {"Address/State", null}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City, Address/State))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", "redmond"}, {"Address/State", "WA"}},
+                            new Dictionary<string, object> {{"Address/City", "seattle"}, {"Address/State", "WA"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))&$orderby=Name",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))&$skip=2&$orderby=Name",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Middle"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))&$orderby=Name desc",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Middle"}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name))&$skip=2&$orderby=Name desc",
+                        new List<Dictionary<string, object>>
+                        {
+
                             new Dictionary<string, object> {{"Name", "Highest"}},
                         }
                     },
                     {
-                        "$apply=groupby((Name))&$skip=1",
+                        "$apply=groupby((CustomerId, Name))&$orderby=CustomerId",
                         new List<Dictionary<string, object>>
                         {
-                            new Dictionary<string, object> {{"Name", "Lowest"}},
-                            new Dictionary<string, object> {{"Name", "Middle"}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, { "CustomerId", 1}},
+                            new Dictionary<string, object> {{"Name", "Highest"}, { "CustomerId", 2}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((CustomerId, Name))&$orderby=Name",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, { "CustomerId", 2}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, { "CustomerId", 1}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((CustomerId, Name))&$orderby=Name&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Lowest"}, { "CustomerId", 4}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, { "CustomerId", 5}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City))&$orderby=Address/City",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", null}},
+                            new Dictionary<string, object> {{"Address/City", "hobart"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Address/City, Address/State))&$orderby=Address/State",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Address/City", null}, {"Address/State", null}},
+                            new Dictionary<string, object> {{"Address/City", "hobart"}, {"Address/State", null}},
                         }
                     },
                 };
             }
         }
+
 
         // Legal filter queries usable against CustomerFilterTestData.
         // Tuple is: filter, expected list of customer ID's
@@ -238,11 +489,11 @@ namespace System.Web.OData.Test.OData.Query
                 {
                     // Primitive properties
                     { "Name eq 'Highest'", new int[] { 2 } },
-                    { "endswith(Name, 'est')", new int[] { 1, 2, 4 } },
+                    { "endswith(Name, 'est')", new int[] { 1, 2, 4, 5 } },
 
                     // Complex properties
-                    { "Address/City eq 'redmond'", new int[] { 1 } },
-                    { "contains(Address/City, 'e')", new int[] { 1, 2 } },
+                    { "Address/City eq 'redmond'", new int[] { 1, 5 } },
+                    { "contains(Address/City, 'e')", new int[] { 1, 2, 5 } },
 
                     // Primitive property collections
                     { "Aliases/any(alias: alias eq 'alias34')", new int[] { 3, 4 } },
@@ -300,6 +551,15 @@ namespace System.Web.OData.Test.OData.Query
                     CustomerId = 4,
                     Name = "Lowest",
                     Aliases = new List<string> { "alias34", "alias4" }
+                };
+                customerList.Add(c);
+
+                c = new Customer
+                {
+                    CustomerId = 5,
+                    Name = "Lowest",
+                    SharePrice = 10,
+                    Address = new Address { City = "redmond", State = "WA" },
                 };
                 customerList.Add(c);
 
@@ -395,6 +655,93 @@ namespace System.Web.OData.Test.OData.Query
         }
 
         [Theory]
+        [PropertyData("CustomerTestAppliesForPaging")]
+        public void StableSortingAndPagingApplyTo_Returns_Correct_Queryable(string filter, List<Dictionary<string, object>> aggregation)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer));
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + filter);
+            request.EnableHttpDependencyInjectionSupport();
+
+            var options = new ODataQueryOptions(context, request);
+
+            IEnumerable<Customer> customers = CustomerApplyTestData;
+            // Act
+            IQueryable queryable = options.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True, PageSize = 2 });
+            
+            // Assert
+            Assert.NotNull(queryable);
+            var actualCustomers = Assert.IsAssignableFrom<IEnumerable<DynamicTypeWrapper>>(queryable).ToList();
+
+            Assert.Equal(aggregation.Count(), actualCustomers.Count());
+
+            var aggEnum = actualCustomers.GetEnumerator();
+
+            foreach (var expected in aggregation)
+            {
+                aggEnum.MoveNext();
+                var agg = aggEnum.Current;
+                foreach (var key in expected.Keys)
+                {
+                    object value = GetValue(agg, key);
+                    Assert.Equal(expected[key], value);
+                }
+            }
+        }
+
+        [Theory]
+        [PropertyData("CustomerTestAppliesForPaging")]
+        public void StableSortingAndPagingApplyToWithAutoSelect_Returns_Correct_Queryable(string filter, List<Dictionary<string, object>> aggregation)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            var customerEdmType = (EdmEntityType)(((IEdmCollectionType)model.EntityContainer.FindEntitySet("Customers").Type).ElementType.Definition);
+            model.SetAnnotationValue(customerEdmType, new ModelBoundQuerySettings() { DefaultSelectType = SelectExpandType.Automatic });
+
+            var context = new ODataQueryContext(model, typeof(Customer));
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + filter);
+            request.EnableHttpDependencyInjectionSupport();
+
+            var options = new ODataQueryOptions(context, request);
+
+            IEnumerable<Customer> customers = CustomerApplyTestData;
+            // Act
+            IQueryable queryable = options.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True, PageSize = 2 });
+
+            // Assert
+            Assert.NotNull(queryable);
+            var actualCustomers = Assert.IsAssignableFrom<IEnumerable<DynamicTypeWrapper>>(queryable).ToList();
+
+            Assert.Equal(aggregation.Count(), actualCustomers.Count());
+
+            var aggEnum = actualCustomers.GetEnumerator();
+
+            foreach (var expected in aggregation)
+            {
+                aggEnum.MoveNext();
+                var agg = aggEnum.Current;
+                foreach (var key in expected.Keys)
+                {
+                    object value = GetValue(agg, key);
+                    Assert.Equal(expected[key], value);
+                }
+            }
+        }
+
+        [Theory]
         [PropertyData("CustomerTestFilters")]
         public void ApplyTo_Returns_Correct_Queryable_ForFilter(string filter, int[] customerIds)
         {
@@ -455,12 +802,46 @@ namespace System.Web.OData.Test.OData.Query
             var result = response.Content.ReadAsAsync<JObject>().Result;
             var results = result["value"] as JArray;
             Assert.Equal(3, results.Count);
-            Assert.Equal("5", results[0]["TotalId"].ToString());
+            Assert.Equal("10", results[0]["TotalId"].ToString());
             Assert.Equal("Lowest", results[0]["Name"].ToString());
             Assert.Equal("2", results[1]["TotalId"].ToString());
             Assert.Equal("Highest", results[1]["Name"].ToString());
             Assert.Equal("3", results[2]["TotalId"].ToString());
             Assert.Equal("Middle", results[2]["Name"].ToString());
+        }
+
+        [Fact]
+        public void ApplyToSerializationWorksForCompelxTypes()
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            HttpConfiguration config =
+                new[] { typeof(MetadataController), typeof(CustomersController) }.GetHttpConfiguration();
+
+            config.MapODataServiceRoute("odata", "odata", model);
+            var client = new HttpClient(new HttpServer(config));
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
+                "http://localhost/odata/Customers?$apply=groupby((Address/City), aggregate(CustomerId with sum as TotalId))");
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.NotNull(response);
+            var result = response.Content.ReadAsAsync<JObject>().Result;
+            var results = result["value"] as JArray;
+            Assert.Equal(4, results.Count);
+            Assert.Equal("6", results[0]["TotalId"].ToString());
+            var address0 = results[0]["Address"] as JObject;
+            Assert.Equal("redmond", address0["City"].ToString());
         }
 
         private object GetValue(DynamicTypeWrapper wrapper, string path)

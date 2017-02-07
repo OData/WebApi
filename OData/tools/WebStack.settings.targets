@@ -39,7 +39,7 @@
     <!-- Everything is delay signed by default -->
     <SignAssembly>true</SignAssembly>
     <DelaySign>true</DelaySign>
-    <AssemblyOriginatorKeyFile>$(WebStackRootPath)\tools\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>D:\VSO\src\Toolsets\Signing\FinalPublicKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <!-- Per-configuration properties -->

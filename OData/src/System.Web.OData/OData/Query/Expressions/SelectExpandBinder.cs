@@ -23,6 +23,10 @@ namespace System.Web.OData.Query.Expressions
     /// </summary>
     internal class SelectExpandBinder
     {
+        // EF fails with StackOverflow when tries to generate SELECT clause with more than ~90 columns
+        // Need to convert long $select=... to $select=* as woraround until https://github.com/dotnet/corefx/pull/11091 will be ported to .NET and included in official version
+        // Keeping number smaller than 80 to leave space for automatically added properties like keys
+        private const int MaxEFColumns = 80; 
         private SelectExpandQueryOption _selectExpandQuery;
         private ODataQueryContext _context;
         private IEdmModel _model;
@@ -203,8 +207,8 @@ namespace System.Web.OData.Query.Expressions
                             ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(clrElementType),
                             nullablePropertyValue)
                         : nullablePropertyValue;
-
-                Expression filterPredicate = FilterBinder.Bind(filterClause, clrElementType, _context.RequestContainer);
+                // TODO: Implement proper support for $select/$expand after $apply
+                Expression filterPredicate = FilterBinder.Bind(null, filterClause, clrElementType, _context.RequestContainer);
                 MethodCallExpression filterResult = Expression.Call(
                     ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(clrElementType),
                     filterSource,
@@ -470,8 +474,9 @@ namespace System.Web.OData.Query.Expressions
         {
             if (orderbyClause != null)
             {
+                // TODO: Implement proper support for $select/$expand after $apply
                 LambdaExpression orderByExpression =
-                    FilterBinder.Bind(orderbyClause, elementType, _context.RequestContainer);
+                    FilterBinder.Bind(null, orderbyClause, elementType, _context.RequestContainer);
                 source = ExpressionHelpers.OrderBy(source, orderByExpression, elementType, orderbyClause.Direction);
             }
 
@@ -749,7 +754,11 @@ namespace System.Web.OData.Query.Expressions
                 return true;
             }
 
-            if (selectExpandClause.AllSelected || selectExpandClause.SelectedItems.OfType<WildcardSelectItem>().Any())
+            if (selectExpandClause.AllSelected || selectExpandClause.SelectedItems.OfType<WildcardSelectItem>().Any()
+                // EF fails with StackOverflow when tries to generate SELECT clause with more than MaxEFColumns columns
+                // Convert long $select=... to $select=* as woraround until https://github.com/dotnet/corefx/pull/11091 will be ported to .NET and included in official version
+                || selectExpandClause.SelectedItems.OfType<PathSelectItem>().Count() > MaxEFColumns
+                )
             {
                 return true;
             }

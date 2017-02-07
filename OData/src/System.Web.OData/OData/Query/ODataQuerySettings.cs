@@ -110,6 +110,14 @@ namespace System.Web.OData.Query
             }
         }
 
+        /// <summary>
+        /// Enables or disables postponing paging to allow a caller do it on his own
+        /// </summary>
+        public bool PostponePaging
+        {
+            get; set;
+        }
+
         internal void CopyFrom(ODataQuerySettings settings)
         {
             EnsureStableOrdering = settings.EnsureStableOrdering;

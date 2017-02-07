@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using Microsoft.OData.UriParser.Aggregation;
 
 namespace System.Web.OData.Query
 {
@@ -41,6 +42,8 @@ namespace System.Web.OData.Query
         private ODataQueryOptionParser _queryOptionParser;
 
         private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
+
+        private static readonly Func<TransformationNode, bool> _aggregateTransformPredicate = t => t.Kind == TransformationNodeKind.Aggregate || t.Kind == TransformationNodeKind.GroupBy;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
@@ -280,11 +283,14 @@ namespace System.Web.OData.Query
 
             // First apply $apply
             // Section 3.15 of the spec http://docs.oasis-open.org/odata/odata-data-aggregation-ext/v4.0/cs01/odata-data-aggregation-ext-v4.0-cs01.html#_Toc378326311
+            ApplyClause apply = null;
+
             if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
             {
                 result = Apply.ApplyTo(result, querySettings);
                 Request.ODataProperties().ApplyClause = Apply.ApplyClause;
                 this.Context.ElementClrType = Apply.ResultClrType;
+                apply = Apply.ApplyClause;
             }
 
             // Construct the actual query and apply them in the following order: filter, orderby, skip, top
@@ -326,9 +332,11 @@ namespace System.Web.OData.Query
                 // properties necessary to make a stable sort.
                 // Instead of failing early here if we cannot generate the OrderBy,
                 // let the IQueryable backend fail (if it has to).
+                List<string> applySortOptions = GetApplySortOptions(apply);
+
                 orderBy = orderBy == null
-                            ? GenerateDefaultOrderBy(Context)
-                            : EnsureStableSortOrderBy(orderBy, Context);
+                            ? GenerateDefaultOrderBy(Context, applySortOptions)
+                            : EnsureStableSortOrderBy(orderBy, Context, applySortOptions);
             }
 
             if (IsAvailableODataQueryOption(orderBy, AllowedQueryOptions.OrderBy))
@@ -346,7 +354,10 @@ namespace System.Web.OData.Query
                 result = Top.ApplyTo(result, querySettings);
             }
 
-            AddAutoSelectExpandProperties();
+            if (!IsAggregated(apply))
+            {
+                AddAutoSelectExpandProperties();
+            }
 
             if (SelectExpand != null)
             {
@@ -357,29 +368,80 @@ namespace System.Web.OData.Query
                 }
             }
 
-            int pageSize = -1;
-            if (querySettings.PageSize.HasValue)
+            if (!querySettings.PostponePaging)
             {
-                pageSize = querySettings.PageSize.Value;
-            }
-            else if (querySettings.ModelBoundPageSize.HasValue)
-            {
-                pageSize = querySettings.ModelBoundPageSize.Value;
-            }
-
-            if (pageSize > 0)
-            {
-                bool resultsLimited;
-                result = LimitResults(result, pageSize, out resultsLimited);
-                if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri &&
-                    Request.ODataProperties().NextLink == null)
+                int pageSize = -1;
+                if (querySettings.PageSize.HasValue)
                 {
-                    Uri nextPageLink = Request.GetNextPageLink(pageSize);
-                    Request.ODataProperties().NextLink = nextPageLink;
+                    pageSize = querySettings.PageSize.Value;
+                }
+                else if (querySettings.ModelBoundPageSize.HasValue)
+                {
+                    pageSize = querySettings.ModelBoundPageSize.Value;
+                }
+
+                if (pageSize > 0)
+                {
+                    bool resultsLimited;
+                    result = LimitResults(result, pageSize, out resultsLimited);
+                    if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri &&
+                        Request.ODataProperties().NextLink == null)
+                    {
+                        Uri nextPageLink = Request.GetNextPageLink(pageSize);
+                        Request.ODataProperties().NextLink = nextPageLink;
+                    }
                 }
             }
 
             return result;
+        }
+
+        private bool IsAggregated(ApplyClause apply)
+        {
+            return apply != null && apply.Transformations.Any(_aggregateTransformPredicate);
+        }
+
+        private List<string> GetApplySortOptions(ApplyClause apply)
+        {
+            if (!IsAggregated(apply))
+            {
+                return null;
+            }
+
+            var result = new List<string>();
+            var lastTransform = apply.Transformations.Last(_aggregateTransformPredicate);
+            if (lastTransform.Kind == TransformationNodeKind.Aggregate)
+            {
+                var aggregateClause = lastTransform as AggregateTransformationNode;
+                foreach (var expr in aggregateClause.Expressions)
+                {
+                    result.Add(expr.Alias);
+                }
+            }
+            else if (lastTransform.Kind == TransformationNodeKind.GroupBy)
+            {
+                var groupByClause = lastTransform as GroupByTransformationNode;
+                var groupingProperties = groupByClause.GroupingProperties;
+                ExtractGroupingProperties(result, groupingProperties);
+            }
+
+            return result;
+        }
+
+        private static void ExtractGroupingProperties(List<string> result, IEnumerable<GroupByPropertyNode> groupingProperties, string prefix = null)
+        {
+            foreach (var gp in groupingProperties)
+            {
+                var fullPath = prefix != null ? prefix + "/" + gp.Name : gp.Name;
+                if (gp.ChildTransformations != null && gp.ChildTransformations.Any())
+                {
+                    ExtractGroupingProperties(result, gp.ChildTransformations, fullPath);
+                }
+                else
+                {
+                    result.Add(fullPath);
+                }
+            }
         }
 
         /// <summary>
@@ -490,15 +552,13 @@ namespace System.Web.OData.Query
         // Generates the OrderByQueryOption to use by default for $skip or $top
         // when no other $orderby is available.  It will produce a stable sort.
         // This may return a null if there are no available properties.
-        private static OrderByQueryOption GenerateDefaultOrderBy(ODataQueryContext context)
+        private OrderByQueryOption GenerateDefaultOrderBy(ODataQueryContext context, List<string> applySortOptions)
         {
             string orderByRaw = String.Empty;
-            if (EdmLibHelpers.IsDynamicTypeWrapper(context.ElementClrType))
+            if (applySortOptions != null)
             {
-                orderByRaw = String.Join(",",
-                    context.ElementClrType.GetProperties()
-                        .Where(property => EdmLibHelpers.GetEdmPrimitiveTypeOrNull(property.PropertyType) != null)
-                        .Select(property => property.Name));
+                orderByRaw = String.Join(",", applySortOptions);
+                return new OrderByQueryOption(orderByRaw, context, Apply.RawValue);
             }
             else
             {
@@ -521,32 +581,56 @@ namespace System.Web.OData.Query
         /// </summary>
         /// <param name="orderBy">The <see cref="OrderByQueryOption"/> to evaluate.</param>
         /// <param name="context">The <see cref="ODataQueryContext"/>.</param>
+        /// <param name="applySortOptions"></param>
         /// <returns>An <see cref="OrderByQueryOption"/> that will produce a stable sort.</returns>
-        private static OrderByQueryOption EnsureStableSortOrderBy(OrderByQueryOption orderBy, ODataQueryContext context)
+        private OrderByQueryOption EnsureStableSortOrderBy(OrderByQueryOption orderBy, ODataQueryContext context, List<string> applySortOptions)
         {
             Contract.Assert(orderBy != null);
             Contract.Assert(context != null);
 
             // Strategy: create a hash of all properties already used in the given OrderBy
             // and remove them from the list of properties we need to add to make the sort stable.
-            HashSet<string> usedPropertyNames =
-                new HashSet<string>(orderBy.OrderByNodes.OfType<OrderByPropertyNode>().Select(node => node.Property.Name));
-
-            IEnumerable<IEdmStructuralProperty> propertiesToAdd = GetAvailableOrderByProperties(context).Where(prop => !usedPropertyNames.Contains(prop.Name));
-
-            if (propertiesToAdd.Any())
+            Func<OrderByPropertyNode, string> propertyFunc = null;
+            if(applySortOptions != null)
             {
-                // The existing query options has too few properties to create a stable sort.
-                // Clone the given one and add the remaining properties to end, thereby making
-                // the sort stable but preserving the user's original intent for the major
-                // sort order.
-                orderBy = new OrderByQueryOption(orderBy);
+                propertyFunc = node => node.PropertyPath;
+            }
+            else
+            {
+                propertyFunc = node => node.Property.Name;
 
-                foreach (IEdmStructuralProperty property in propertiesToAdd)
+            }
+            HashSet<string> usedPropertyNames =
+            new HashSet<string>(orderBy.OrderByNodes.OfType<OrderByPropertyNode>().Select(propertyFunc));
+
+            if (applySortOptions != null)
+            {
+                var propertyPathsToAdd = applySortOptions.Where(p => !usedPropertyNames.Contains(p)).OrderBy(p => p);
+                if (propertyPathsToAdd.Any())
                 {
-                    orderBy.OrderByNodes.Add(new OrderByPropertyNode(property, OrderByDirection.Ascending));
+                    var orderByRaw = orderBy.RawValue + "," + string.Join(",", propertyPathsToAdd);
+                    orderBy = new OrderByQueryOption(orderByRaw, context, Apply.RawValue);
                 }
             }
+            else
+            {
+                IEnumerable<IEdmStructuralProperty> propertiesToAdd = GetAvailableOrderByProperties(context).Where(prop => !usedPropertyNames.Contains(prop.Name));
+                if (propertiesToAdd.Any())
+                {
+                    // The existing query options has too few properties to create a stable sort.
+                    // Clone the given one and add the remaining properties to end, thereby making
+                    // the sort stable but preserving the user's original intent for the major
+                    // sort order.
+                    orderBy = new OrderByQueryOption(orderBy);
+
+                    foreach (IEdmStructuralProperty property in propertiesToAdd)
+                    {
+                        orderBy.OrderByNodes.Add(new OrderByPropertyNode(property, OrderByDirection.Ascending));
+                    }
+                }
+            }
+
+
 
             return orderBy;
         }

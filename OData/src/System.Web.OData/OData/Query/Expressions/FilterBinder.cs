@@ -33,6 +33,8 @@ namespace System.Web.OData.Query.Expressions
         private Stack<Dictionary<string, ParameterExpression>> _parametersStack = new Stack<Dictionary<string, ParameterExpression>>();
         private Dictionary<string, ParameterExpression> _lambdaParameters;
         private Type _filterType;
+        private IQueryable _baseQuery;
+        private IDictionary<string, Expression> _flattenPropertyContainer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterBinder"/> class.
@@ -43,7 +45,7 @@ namespace System.Web.OData.Query.Expressions
         {
         }
 
-        internal static Expression Bind(FilterClause filterClause, Type filterType, IServiceProvider requestContainer)
+        internal static Expression Bind(IQueryable baseQuery, FilterClause filterClause, Type filterType, IServiceProvider requestContainer)
         {
             if (filterClause == null)
             {
@@ -60,11 +62,12 @@ namespace System.Web.OData.Query.Expressions
 
             FilterBinder binder = requestContainer.GetRequiredService<FilterBinder>();
             binder._filterType = filterType;
+            binder._baseQuery = baseQuery;
 
             return BindFilterClause(binder, filterClause, filterType);
         }
 
-        internal static LambdaExpression Bind(OrderByClause orderBy, Type elementType, IServiceProvider requestContainer)
+        internal static LambdaExpression Bind(IQueryable baseQuery, OrderByClause orderBy, Type elementType, IServiceProvider requestContainer)
         {
             Contract.Assert(orderBy != null);
             Contract.Assert(elementType != null);
@@ -72,6 +75,7 @@ namespace System.Web.OData.Query.Expressions
 
             FilterBinder binder = requestContainer.GetRequiredService<FilterBinder>();
             binder._filterType = elementType;
+            binder._baseQuery = baseQuery;
 
             return BindOrderByClause(binder, orderBy, elementType);
         }
@@ -254,8 +258,15 @@ namespace System.Web.OData.Query.Expressions
         {
             if (EdmLibHelpers.IsDynamicTypeWrapper(_filterType))
             {
-                var property = Expression.Property(Bind(openNode.Source), openNode.Name);
-                return property;
+                if (_flattenPropertyContainer != null)
+                {
+                    return _flattenPropertyContainer[openNode.Name];
+                }
+                else
+                {
+                    var property = Expression.Property(Bind(openNode.Source), openNode.Name);
+                    return property;
+                }
             }
             PropertyInfo prop = GetDynamicPropertyContainer(openNode);
 
@@ -574,8 +585,15 @@ namespace System.Web.OData.Query.Expressions
             _lambdaParameters = new Dictionary<string, ParameterExpression>();
             _lambdaParameters.Add(rangeVariable.Name, filterParameter);
 
+            EnsureFlattenPropertyContainer(filterParameter);
+
             Expression body = Bind(expression);
             return Expression.Lambda(body, filterParameter);
+        }
+
+        private void EnsureFlattenPropertyContainer(ParameterExpression source)
+        {
+            _flattenPropertyContainer = _flattenPropertyContainer ?? AggregationBinder.GetFlattenProperties(_baseQuery, source);
         }
 
         private Expression ApplyNullPropagationForFilterBody(Expression body)
@@ -642,7 +660,7 @@ namespace System.Web.OData.Query.Expressions
         public virtual Expression BindPropertyAccessQueryNode(SingleValuePropertyAccessNode propertyAccessNode)
         {
             Expression source = Bind(propertyAccessNode.Source);
-            return CreatePropertyAccessExpression(source, propertyAccessNode.Property);
+            return CreatePropertyAccessExpression(source, propertyAccessNode.Property, GetFullPropertyPath(propertyAccessNode));
         }
 
         /// <summary>
@@ -654,15 +672,26 @@ namespace System.Web.OData.Query.Expressions
         public virtual Expression BindSingleComplexNode(SingleComplexNode singleComplexNode)
         {
             Expression source = Bind(singleComplexNode.Source);
-            return CreatePropertyAccessExpression(source, singleComplexNode.Property);
+            return CreatePropertyAccessExpression(source, singleComplexNode.Property, GetFullPropertyPath(singleComplexNode));
         }
 
-        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property)
+        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property, string propertyPath = null)
         {
             string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);
+            propertyPath = propertyPath ?? propertyName;
+
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) && source != _lambdaParameters[ODataItParameterName])
             {
-                Expression propertyAccessExpression = Expression.Property(RemoveInnerNullPropagation(source), propertyName);
+                var cleanSource = RemoveInnerNullPropagation(source);
+                Expression propertyAccessExpression = null;
+                if (_flattenPropertyContainer != null)
+                {
+                    propertyAccessExpression = _flattenPropertyContainer[propertyPath];
+                }
+                else
+                {
+                    propertyAccessExpression = Expression.Property(cleanSource, propertyName);
+                }
 
                 // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
                 // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
@@ -676,7 +705,14 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                return ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+                if (_flattenPropertyContainer != null)
+                {
+                    return _flattenPropertyContainer[propertyPath];
+                }
+                else
+                {
+                    return ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+                }
             }
         }
 
@@ -789,7 +825,7 @@ namespace System.Web.OData.Query.Expressions
 
                     throw new NotImplementedException(Error.Format(SRResources.ODataFunctionNotSupported, node.Name));
             }
-            }
+        }
 
         private Expression BindCastSingleValue(SingleValueFunctionCallNode node)
         {

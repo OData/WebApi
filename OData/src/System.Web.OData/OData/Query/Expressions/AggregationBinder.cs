@@ -29,6 +29,10 @@ namespace System.Web.OData.Query.Expressions
         private IEnumerable<GroupByPropertyNode> _groupingProperties;
 
         private Type _groupByClrType;
+        
+        private bool _linqToObjectMode = false;
+        private IQueryable _baseQuery;
+        private IDictionary<string, Expression> _flattenPropertyContainer;
 
         internal AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType,
             IEdmModel model, TransformationNode transformation)
@@ -47,8 +51,7 @@ namespace System.Web.OData.Query.Expressions
                 case TransformationNodeKind.Aggregate:
                     var aggregateClause = this._transformation as AggregateTransformationNode;
                     _aggregateExpressions = aggregateClause.Expressions;
-                    ResultClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(Model, null,
-                        _aggregateExpressions);
+                    ResultClrType = typeof(NoGroupByAggregationWrapper);
                     break;
                 case TransformationNodeKind.GroupBy:
                     var groupByClause = this._transformation as GroupByTransformationNode;
@@ -66,17 +69,15 @@ namespace System.Web.OData.Query.Expressions
                         }
                     }
 
-                    _groupByClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(Model,
-                        _groupingProperties, null);
-                    ResultClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(Model,
-                        _groupingProperties, _aggregateExpressions);
+                    _groupByClrType = typeof(GroupByWrapper);
+                    ResultClrType = typeof(AggregationWrapper);
                     break;
                 default:
                     throw new NotSupportedException(String.Format(CultureInfo.InvariantCulture,
                         SRResources.NotSupportedTransformationKind, transformation.Kind));
             }
 
-            _groupByClrType = _groupByClrType ?? typeof(DynamicTypeWrapper);
+            _groupByClrType = _groupByClrType ?? typeof(NoGroupByWrapper);
         }
 
         /// <summary>
@@ -94,6 +95,12 @@ namespace System.Web.OData.Query.Expressions
 
         public IQueryable Bind(IQueryable query)
         {
+            Contract.Assert(query != null);
+
+            this._linqToObjectMode = query.Provider.GetType().Namespace == HandleNullPropagationOptionHelper.Linq2ObjectsQueryProviderNamespace;
+            this._baseQuery = query;
+            this._flattenPropertyContainer = GetFlattenProperties(this._baseQuery, this._lambdaParameter);
+
             // Answer is query.GroupBy($it => new DynamicType1() {...}).Select($it => new DynamicType2() {...})
             // We are doing Grouping even if only aggregate was specified to have a IQuaryable after aggregation
             IQueryable grouping = BindGroupBy(query);
@@ -108,32 +115,41 @@ namespace System.Web.OData.Query.Expressions
             // Should return following expression
             // .Select($it => New DynamicType2() 
             //                  {
-            //                      Prop1 = $it.Prop1,
-            //                      Prop2 = $it.Prop2,
-            //                      Prop3 = $it.NavProp.Prop3
-            //                      ...
-            //                      Alias1 = $it.AsQuaryable().Sum(i => i.AggregatableProperty)
+            //                      GroupByContainer = $it.Key.GroupByContainer // If groupby section present
+            //                      Container => new AggregationPropertyContainer() {
+            //                          Name = "Alias1", 
+            //                          Value = $it.AsQuaryable().Sum(i => i.AggregatableProperty), 
+            //                          Next = new LastInChain() {
+            //                              Name = "Alias2",
+            //                              Value = $it.AsQuaryable().Sum(i => i.AggregatableProperty)
+            //                          }
+            //                      }
             //                  })
-
             var groupingType = typeof(IGrouping<,>).MakeGenericType(this._groupByClrType, this._elementType);
             ParameterExpression accum = Expression.Parameter(groupingType, "$it");
 
-            List<MemberAssignment> wrapperTypeMemberAssignments = null;
+            List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
 
             // Setting GroupByContainer property when previous step was grouping
             var propertyAccessor = Expression.Property(accum, "Key");
-            wrapperTypeMemberAssignments = CreateSelectMemberAssigments(ResultClrType, propertyAccessor,
-                _groupingProperties);
+            if (this._groupingProperties != null && this._groupingProperties.Any())
+            {
+                var wrapperProperty = this.ResultClrType.GetProperty("GroupByContainer");
+
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Property(Expression.Property(accum, "Key"), "GroupByContainer")));
+            }
 
             // Setting Container property when we have aggregation clauses
             if (_aggregateExpressions != null)
             {
+                var properties = new List<NamedPropertyExpression>();
                 foreach (var aggExpression in _aggregateExpressions)
                 {
-                    wrapperTypeMemberAssignments.Add(
-                        Expression.Bind(ResultClrType.GetMember(aggExpression.Alias).Single(),
-                            CreateAggregationExpression(accum, aggExpression)));
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(aggExpression.Alias), CreateAggregationExpression(accum, aggExpression)));
                 }
+
+                var wrapperProperty = ResultClrType.GetProperty("Container");
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(properties)));
             }
 
             var selectLambda =
@@ -261,7 +277,14 @@ namespace System.Web.OData.Query.Expressions
                     throw new ODataException(Error.Format(SRResources.AggregationMethodNotSupported, expression.Method));
             }
 
-            return aggregationExpression;
+            return WrapConvert(aggregationExpression);
+        }
+
+        private Expression WrapConvert(Expression expression)
+        {
+            return this._linqToObjectMode
+                ? Expression.Convert(expression, typeof(object))
+                : expression;
         }
 
         private Expression BindAccessor(SingleValueNode node)
@@ -272,14 +295,22 @@ namespace System.Web.OData.Query.Expressions
                     return this._lambdaParameter;
                 case QueryNodeKind.SingleValuePropertyAccess:
                     var propAccessNode = node as SingleValuePropertyAccessNode;
-                    return CreatePropertyAccessExpression(BindAccessor(propAccessNode.Source), propAccessNode.Property);
+                    return CreatePropertyAccessExpression(BindAccessor(propAccessNode.Source), propAccessNode.Property, GetFullPropertyPath(propAccessNode));
                 case QueryNodeKind.SingleComplexNode:
                     var singleComplexNode = node as SingleComplexNode;
-                    return CreatePropertyAccessExpression(BindAccessor(singleComplexNode.Source), singleComplexNode.Property);
+                    return CreatePropertyAccessExpression(BindAccessor(singleComplexNode.Source), singleComplexNode.Property, GetFullPropertyPath(singleComplexNode));
                 case QueryNodeKind.SingleValueOpenPropertyAccess:
                     var openNode = node as SingleValueOpenPropertyAccessNode;
                     return Expression.Property(BindAccessor(openNode.Source), openNode.Name);
                 case QueryNodeKind.None:
+                    if (_flattenPropertyContainer == null)
+                    {
+                        return Expression.Property(BindAccessor(openNode.Source), openNode.Name);
+                    }
+                    else
+                    {
+                        return _flattenPropertyContainer[openNode.Name];
+                    }
                 case QueryNodeKind.SingleNavigationNode:
                     var navNode = node as SingleNavigationNode;
                     return CreatePropertyAccessExpression(BindAccessor(navNode.Source), navNode.NavigationProperty);
@@ -298,14 +329,23 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
-        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property)
+        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property, string propertyPath = null)
         {
             string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);
+            propertyPath = propertyPath ?? propertyName;
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) &&
                 source != this._lambdaParameter)
             {
-                Expression propertyAccessExpression = Expression.Property(RemoveInnerNullPropagation(source),
-                    propertyName);
+                Expression cleanSource = RemoveInnerNullPropagation(source);
+                Expression propertyAccessExpression = null;
+                if (_flattenPropertyContainer != null)
+                {
+                    propertyAccessExpression = _flattenPropertyContainer[propertyPath];
+                }
+                else
+                {
+                    propertyAccessExpression = Expression.Property(cleanSource, propertyName);
+                }
 
                 // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
                 // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
@@ -319,7 +359,14 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                return ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+                if (_flattenPropertyContainer != null)
+                {
+                    return _flattenPropertyContainer[propertyPath];
+                }
+                else
+                {
+                    return ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+                }
             }
         }
 
@@ -329,54 +376,175 @@ namespace System.Web.OData.Query.Expressions
             if (_groupingProperties != null && _groupingProperties.Any())
             {
                 // Generates expression
-                // .GroupBy($it => new DynamicType1()
+                // .GroupBy($it => new DynamicTypeWrapper()
                 //                                      {
-                //                                          Prop1 = $it.Prop1,
-                //                                          Prop2 = $it.Prop2,
-                //                                          Prop3 = $it.NavProp.Prop3
-                //                                          ...
+                //                                           GroupByContainer => new AggregationPropertyContainer() {
+                //                                               Name = "Prop1", 
+                //                                               Value = $it.Prop1,
+                //                                               Next = new AggregationPropertyContainer() {
+                //                                                   Name = "Prop2",
+                //                                                   Value = $it.Prop2, // int
+                //                                                   Next = new LastInChain() {
+                //                                                       Name = "Prop3",
+                //                                                       Value = $it.Prop3
+                //                                                   }
+                //                                               }
+                //                                           }
                 //                                      }) 
+                List<NamedPropertyExpression> properties = CreateGroupByMemberAssignments2(_groupingProperties);
 
-                List<MemberAssignment> wrapperTypeMemberAssignments = CreateGroupByMemberAssignments(_groupByClrType,
-                    _groupingProperties);
-
-                groupLambda =
-                    Expression.Lambda(
-                        Expression.MemberInit(Expression.New(this._groupByClrType), wrapperTypeMemberAssignments),
-                        this._lambdaParameter);
+                
+                var wrapperProperty = typeof(GroupByWrapper).GetProperty("GroupByContainer");
+                List<MemberAssignment> wta = new List<MemberAssignment>();
+                wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(properties)));
+                groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(typeof(GroupByWrapper)), wta), _lambdaParameter);
             }
             else
             {
                 // We do not have properties to aggregate
-                // .GroupBy($it => new GroupByWrapper())
+                // .GroupBy($it => new NoGroupByWrapper())
                 groupLambda = Expression.Lambda(Expression.New(this._groupByClrType), this._lambdaParameter);
             }
 
             return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, this._groupByClrType);
         }
 
-        private List<MemberAssignment> CreateGroupByMemberAssignments(Type type,
-            IEnumerable<GroupByPropertyNode> properties)
+        private List<NamedPropertyExpression> CreateGroupByMemberAssignments2(IEnumerable<GroupByPropertyNode> nodes)
         {
-            List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
-            foreach (var node in properties)
+            var properties = new List<NamedPropertyExpression>();
+            foreach (var gProp in nodes)
             {
-                var member = type.GetMember(node.Name).Single();
-
-                if (node.Expression != null)
+                var propertyName = gProp.Name;
+                if (gProp.Expression != null)
                 {
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(member, BindAccessor(node.Expression)));
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), WrapConvert(BindAccessor(gProp.Expression))));
                 }
                 else
                 {
-                    var memberType = (member as PropertyInfo).PropertyType;
-                    var expr = Expression.MemberInit(Expression.New(memberType),
-                        CreateGroupByMemberAssignments(memberType, node.ChildTransformations));
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(member, expr));
+                    var wrapperProperty = typeof(GroupByWrapper).GetProperty("GroupByContainer");
+                    List<MemberAssignment> wta = new List<MemberAssignment>();
+                    wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(CreateGroupByMemberAssignments2(gProp.ChildTransformations))));
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.MemberInit(Expression.New(typeof(GroupByWrapper)), wta)));
                 }
             }
 
-            return wrapperTypeMemberAssignments;
+            return properties;
+        }
+
+        internal static IDictionary<string, Expression> GetFlattenProperties(IQueryable baseQuery, ParameterExpression source)
+        {
+            if (baseQuery == null)
+            {
+                return null;
+            }
+
+            if (!typeof(GroupByWrapper).IsAssignableFrom(baseQuery.ElementType))
+            {
+                return null;
+            }
+
+            var expression = baseQuery.Expression as MethodCallExpression;
+            if (expression == null)
+            {
+                return null;
+            }
+
+            // After $apply we could have other clauses, like $filter, $orderby etc.
+            // Skip of filter expressions
+            while (expression.Method.Name == "Where")
+            {
+                expression = expression.Arguments.FirstOrDefault() as MethodCallExpression;
+            }
+
+            if (expression == null)
+            {
+                return null;
+            }
+
+            var result = new Dictionary<string, Expression>();
+            CollectAssigments(result, Expression.Property(source, "GroupByContainer"), ExtractContainerExpression(expression.Arguments.FirstOrDefault() as MethodCallExpression, "GroupByContainer"));
+            CollectAssigments(result, Expression.Property(source, "Container"), ExtractContainerExpression(expression, "Container"));
+
+            return result;
+        }
+
+        private static MemberInitExpression ExtractContainerExpression(MethodCallExpression expression, string containerName)
+        {
+            var memberInitExpression = ((expression.Arguments[1] as UnaryExpression).Operand as LambdaExpression).Body as MemberInitExpression;
+            if (memberInitExpression != null)
+            {
+                var containerAssigment = memberInitExpression.Bindings.FirstOrDefault(m => m.Member.Name == containerName) as MemberAssignment;
+                if (containerAssigment != null)
+                {
+                    return containerAssigment.Expression as MemberInitExpression;
+                }
+            }
+            return null;
+        }
+
+        private static void CollectAssigments(IDictionary<string, Expression> flattenPropertyContainer, Expression source, MemberInitExpression expression, string prefix = null)
+        {
+            if (expression == null)
+            {
+                return;
+            }
+
+            string nameToAdd = null;
+            Type resultType = null;
+            MemberInitExpression nextExpression = null;
+            Expression nestedExpression = null;
+            foreach (var expr in expression.Bindings.OfType<MemberAssignment>())
+            {
+                var initExpr = expr.Expression as MemberInitExpression;
+                if (initExpr != null && expr.Member.Name == "Next")
+                {
+                    nextExpression = initExpr;
+                }
+                else if (expr.Member.Name == "Name")
+                {
+                    nameToAdd = (expr.Expression as ConstantExpression).Value as string;
+                }
+                else if (expr.Member.Name == "Value" || expr.Member.Name == "NestedValue")
+                {
+                    resultType = expr.Expression.Type;
+                    if (resultType == typeof(object) && expr.Expression.NodeType == ExpressionType.Convert)
+                    {
+                        resultType = ((UnaryExpression)expr.Expression).Operand.Type;
+                    }
+
+                    if (typeof(GroupByWrapper).IsAssignableFrom(resultType))
+                    {
+                        nestedExpression = expr.Expression;
+                    }
+                }
+            }
+
+
+            if (prefix != null)
+            {
+                nameToAdd = prefix + "\\" + nameToAdd;
+            }
+
+            if (typeof(GroupByWrapper).IsAssignableFrom(resultType))
+            {
+                flattenPropertyContainer.Add(nameToAdd, Expression.Property(source, "NestedValue"));
+            }
+            else
+            {
+                flattenPropertyContainer.Add(nameToAdd, Expression.Convert(Expression.Property(source, "Value"), resultType));
+            }
+
+            if (nextExpression != null)
+            {
+                CollectAssigments(flattenPropertyContainer, Expression.Property(source, "Next"), nextExpression, prefix);
+            }
+
+            if (nestedExpression != null)
+            {
+                var nestedAccessor = ((nestedExpression as MemberInitExpression).Bindings.First() as MemberAssignment).Expression as MemberInitExpression;
+                var newSource = Expression.Property(Expression.Property(source, "NestedValue"), "GroupByContainer");
+                CollectAssigments(flattenPropertyContainer, newSource, nestedAccessor, nameToAdd);
+            }
         }
     }
 }

@@ -16,6 +16,8 @@ namespace WebStack.QA.Test.OData.AutoExpand
             builder.EntitySet<ChoiceOrder>("OrderChoices");
             builder.EntitySet<NormalOrder>("NormalOrders");
             builder.EntityType<DerivedOrder>();
+            builder.EntityType<DerivedOrder2>();
+            builder.EntitySet<OrderDetail>("OrderDetails");
             builder.EntitySet<People>("People");
             IEdmModel model = builder.GetEdmModel();
             return model;

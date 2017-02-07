@@ -218,6 +218,71 @@ namespace WebStack.QA.Test.OData.AutoExpand
             Assert.Contains("OrderDetail", result);
         }
 
+        [Theory]
+        [InlineData("{0}/autoexpand/NormalOrders?$select=Id", true)]
+        [InlineData("{0}/autoexpand/NormalOrders", false)]
+        [InlineData("{0}/autoexpand/NormalOrders(2)?$select=Id", true)]
+        [InlineData("{0}/autoexpand/NormalOrders(2)", false)]
+        [InlineData("{0}/autoexpand/NormalOrders(3)?$select=Id", true)]
+        [InlineData("{0}/autoexpand/NormalOrders(3)", false)]
+        public void DisableAutoExpandWhenSelectIsPresentTest(string url, bool isSelectPresent)
+        {
+            // Arrange
+            string queryUrl = string.Format(url, BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Act
+            response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            string result = response.Content.ReadAsStringAsync().Result;
+            if (isSelectPresent)
+            {
+                Assert.DoesNotContain("NotShownOrderDetail4", result);
+            }
+            else
+            {
+                Assert.Contains("NotShownOrderDetail4", result);
+            }
+        }
+
+        [Theory]
+        [InlineData("{0}/autoexpand/NormalOrders(2)?$expand=LinkOrder($select=Id)", true)]
+        [InlineData("{0}/autoexpand/NormalOrders(2)?$expand=LinkOrder", false)]
+        public void DisableAutoExpandWhenSelectIsPresentDollarExpandTest(string url, bool isSelectPresent)
+        {
+            // Arrange
+            string queryUrl = string.Format(url, BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Act
+            response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            string result = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains("NotShownOrderDetail4", result);
+            if (isSelectPresent)
+            {
+                Assert.DoesNotContain("NotShownOrderDetail2", result);
+            }
+            else
+            {
+                Assert.Contains("NotShownOrderDetail2", result);
+            }
+        }
+
         private static void VerifyOrderAndChoiceOrder(JObject customer, bool special = false, bool vip = false)
         {
             JObject order = customer["Order"] as JObject;

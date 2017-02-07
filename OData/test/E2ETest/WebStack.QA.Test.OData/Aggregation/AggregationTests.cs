@@ -9,6 +9,9 @@ using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
 using Xunit.Extensions;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace WebStack.QA.Test.OData.Aggregation
 {
@@ -174,6 +177,63 @@ namespace WebStack.QA.Test.OData.Aggregation
             Assert.Equal("4500", results[0]["TotalAmount"].ToString());
         }
 
+        [Fact]
+        public void AggregateVirtualCountWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + "?$apply=aggregate($count as Count)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject json = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JToken value = json["value"].Children().First();
+
+            var anonymousResponse = new { Count = 0 };
+            var responseObj = JsonConvert.DeserializeAnonymousType(value.ToString(), anonymousResponse);
+
+            Assert.Equal(9, responseObj.Count);
+        }
+
+        [Fact]
+        public void GroupByVirtualCountWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + "?$apply=groupby((Name), aggregate($count as Count))",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject json = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            IList<JToken> value = json["value"].Children().ToList();
+
+            var responseObj = new { Name = "", Count = 0 };
+            var dict = value
+                .Select(x => JsonConvert.DeserializeAnonymousType(x.ToString(), responseObj))
+                .ToDictionary(x => x.Name);
+
+            dict.TryGetValue("Customer1", out responseObj);
+            Assert.Equal(responseObj.Count, 5);
+
+            dict.TryGetValue("Customer0", out responseObj);
+            Assert.Equal(responseObj.Count, 4);
+	}
 
         [Fact]
         public void AggregateAggregatedWithGRoupByPropertyWorks()
@@ -192,7 +252,6 @@ namespace WebStack.QA.Test.OData.Aggregation
             HttpResponseMessage response = client.SendAsync(request).Result;
 
             // Assert
-
             var result = response.Content.ReadAsAsync<JObject>().Result;
             System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);

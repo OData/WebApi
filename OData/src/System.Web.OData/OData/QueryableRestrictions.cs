@@ -31,6 +31,7 @@ namespace System.Web.OData
             NotNavigable = propertyConfiguration.NotNavigable;
             NotExpandable = propertyConfiguration.NotExpandable;
             NotCountable = propertyConfiguration.NotCountable;
+            DisableAutoExpandWhenSelectIsPresent = propertyConfiguration.DisableAutoExpandWhenSelectIsPresent;
             _autoExpand = propertyConfiguration.AutoExpand;
         }
 
@@ -85,5 +86,10 @@ namespace System.Web.OData
             get { return !NotExpandable && _autoExpand; }
             set { _autoExpand = value; }
         }
+
+        /// <summary>
+        /// If set to <c>true</c> then automatic expand will be disabled if there is a $select specify by client.
+        /// </summary>
+        public bool DisableAutoExpandWhenSelectIsPresent { get; set; }
     }
 }

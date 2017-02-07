@@ -149,9 +149,13 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Marks the navigation property is automatic expanded.
         /// </summary>
-        public NavigationPropertyConfiguration AutomaticallyExpand()
+        /// <param name="disableWhenSelectIsPresent">If set to <c>true</c> then automatic expand will be disabled
+        /// if there is a $select specify by client.</param>
+        /// <returns></returns>
+        public NavigationPropertyConfiguration AutomaticallyExpand(bool disableWhenSelectIsPresent)
         {
             AutoExpand = true;
+            DisableAutoExpandWhenSelectIsPresent = disableWhenSelectIsPresent;
             return this;
         }
 

@@ -482,6 +482,7 @@ public class System.Web.OData.QueryableRestrictions {
 	public QueryableRestrictions (PropertyConfiguration propertyConfiguration)
 
 	bool AutoExpand  { public get; public set; }
+	bool DisableAutoExpandWhenSelectIsPresent  { public get; public set; }
 	bool NonFilterable  { public get; public set; }
 	bool NotCountable  { public get; public set; }
 	bool NotExpandable  { public get; public set; }
@@ -956,6 +957,7 @@ public abstract class System.Web.OData.Builder.PropertyConfiguration {
 	bool AddedExplicitly  { public get; public set; }
 	bool AutoExpand  { public get; public set; }
 	StructuralTypeConfiguration DeclaringType  { public get; }
+	bool DisableAutoExpandWhenSelectIsPresent  { public get; public set; }
 	bool IsRestricted  { public get; }
 	PropertyKind Kind  { public abstract get; }
 	string Name  { public get; public set; }
@@ -1446,7 +1448,7 @@ public class System.Web.OData.Builder.NavigationPropertyConfiguration : Property
 	System.Collections.Generic.IEnumerable`1[[System.Reflection.PropertyInfo]] PrincipalProperties  { public get; }
 	System.Type RelatedClrType  { public virtual get; }
 
-	public NavigationPropertyConfiguration AutomaticallyExpand ()
+	public NavigationPropertyConfiguration AutomaticallyExpand (bool disableWhenSelectIsPresent)
 	public NavigationPropertyConfiguration CascadeOnDelete ()
 	public NavigationPropertyConfiguration CascadeOnDelete (bool cascade)
 	public NavigationPropertyConfiguration Contained ()
@@ -1611,6 +1613,8 @@ AttributeUsageAttribute(),
 ]
 public sealed class System.Web.OData.Builder.AutoExpandAttribute : System.Attribute, _Attribute {
 	public AutoExpandAttribute ()
+
+	bool DisableWhenSelectPresent  { public get; public set; }
 }
 
 [

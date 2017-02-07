@@ -68,12 +68,23 @@ namespace WebStack.QA.Test.OData.AutoExpand
     public class NormalOrder
     {
         public int Id { get; set; }
+
+        public NormalOrder LinkOrder { get; set; }
     }
 
     public class DerivedOrder : NormalOrder
     {
         [AutoExpand]
         public OrderDetail OrderDetail { get; set; }
+
+        [AutoExpand(DisableWhenSelectPresent = true)]
+        public OrderDetail NotShownDetail { get; set; }
+    }
+
+    [AutoExpand(DisableWhenSelectPresent = true)]
+    public class DerivedOrder2 : NormalOrder
+    {
+        public OrderDetail NotShownDetail { get; set; }
     }
 
     public class OrderDetail

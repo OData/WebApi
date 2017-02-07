@@ -378,7 +378,7 @@ namespace System.Web.OData.Query
             }
 
             var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(null, baseEntityType,
-                model, modelBoundQuerySettings);
+                model, !isAllSelected, modelBoundQuerySettings);
 
             foreach (var navigationProperty in autoExpandNavigationProperties)
             {

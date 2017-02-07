@@ -413,7 +413,7 @@ namespace System.Web.OData
                     try
                     {
                         object queryResult = ExecuteQuery(responseContent.Value, request, actionDescriptor, queryContext);
-                        if (queryResult == null && request.ODataProperties().Path == null)
+                        if (queryResult == null && IsNonODataPathOrSingleResult(request, responseContent.Value))
                         {
                             // This is the case in which a regular OData service uses the EnableQuery attribute.
                             // For OData services ODataNullValueMessageHandler should be plugged in for the service
@@ -800,6 +800,11 @@ namespace System.Web.OData
             }
 
             return false;
+        }
+
+        private static bool IsNonODataPathOrSingleResult(HttpRequestMessage request, object value)
+        {
+            return request.ODataProperties().Path == null || value is SingleResult;
         }
     }
 }

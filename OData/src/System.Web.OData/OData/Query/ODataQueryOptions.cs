@@ -770,7 +770,8 @@ namespace System.Web.OData.Query
             IEdmEntityType baseEntityType = Context.TargetStructuredType as IEdmEntityType;
             var autoExpandRawValue = String.Empty;
             var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(
-                Context.TargetProperty, Context.TargetStructuredType, Context.Model);
+                Context.TargetProperty, Context.TargetStructuredType, Context.Model,
+                !String.IsNullOrEmpty(RawValues.Select));
 
             foreach (var property in autoExpandNavigationProperties)
             {

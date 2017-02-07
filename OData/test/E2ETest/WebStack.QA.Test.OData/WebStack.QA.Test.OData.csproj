@@ -171,6 +171,10 @@
     <Compile Include="DollarLevels\DollarLevelsDataModel.cs" />
     <Compile Include="DollarLevels\DollarLevelsEdmModel.cs" />
     <Compile Include="DollarLevels\DollarLevelsTest.cs" />
+    <Compile Include="EntitySetAggregation\EntitySetAggregationController.cs" />
+    <Compile Include="EntitySetAggregation\EntitySetAggregationDataModel.cs" />
+    <Compile Include="EntitySetAggregation\EntitySetAggregationEdmModel.cs" />
+    <Compile Include="EntitySetAggregation\EntitySetAggregationTests.cs" />
     <Compile Include="ModelBoundQuerySettings\CombinedTest\CombinedController.cs" />
     <Compile Include="ModelBoundQuerySettings\CombinedTest\CombinedEdmModel.cs" />
     <Compile Include="ModelBoundQuerySettings\CombinedTest\CombinedTest.cs" />

@@ -136,14 +136,15 @@ namespace System.Web.OData.Formatter.Serialization
             Dictionary<IEdmProperty, object> dynamicTypeProperties = null)
         {
             var properties = new List<ODataProperty>();
-            var dynamicObject = graph as DynamicTypeWrapper;
+            var dynamicObject = graph as DynamicTypeWrapper ?? (graph as IEnumerable<DynamicTypeWrapper>).Single();
+
             foreach (var prop in graph.GetType().GetProperties())
             {
                 object value;
                 ODataProperty property = null;
                 if (dynamicObject.TryGetPropertyValue(prop.Name, out value))
                 {
-                    if (value != null && EdmLibHelpers.IsDynamicTypeWrapper(value.GetType()))
+                    if (value is DynamicTypeWrapper || value is IEnumerable<DynamicTypeWrapper>)
                     {
                         IEdmProperty edmProperty = entityType.Properties()
                             .FirstOrDefault(p => p.Name.Equals(prop.Name));
@@ -172,6 +173,7 @@ namespace System.Web.OData.Formatter.Serialization
         {
             var dynamicTypeProperties = new Dictionary<IEdmProperty, object>();
             var entityType = expectedType.Definition as EdmEntityType;
+
             var resource = new ODataResource()
             {
                 TypeName = expectedType.FullName(),
@@ -183,7 +185,7 @@ namespace System.Web.OData.Formatter.Serialization
             foreach (var property in dynamicTypeProperties.Keys)
             {
                 var resourceContext = new ResourceContext(writeContext, expectedType.AsEntity(), graph);
-                if (entityType.NavigationProperties().Any(p => p.Type.Equals(property.Type)))
+                if (entityType.NavigationProperties().Any(p => p.Type.Equals(property.Type)) && !(property.Type is EdmCollectionTypeReference))
                 {
                     var navigationProperty = entityType.NavigationProperties().FirstOrDefault(p => p.Type.Equals(property.Type));
                     var navigationLink = CreateNavigationLink(navigationProperty, resourceContext);

@@ -9,6 +9,7 @@ using System.Reflection.Emit;
 using System.Web.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser.Aggregation;
+using Microsoft.OData;
 
 namespace System.Web.OData.Query.Expressions
 {
@@ -34,7 +35,7 @@ namespace System.Web.OData.Query.Expressions
         /// Current performance testing results is 0.5ms per type. We should consider caching types, however trade off is between CPU perfomance and memory usage (might be it will we an option for library user)
         /// </remarks>
         public static Type GetResultType<T>(IEdmModel model, IEnumerable<GroupByPropertyNode> propertyNodes = null,
-            IEnumerable<AggregateExpression> expressions = null, string typeSuffix = null) where T : DynamicTypeWrapper
+            IEnumerable<AggregateExpression> expressions = null, string typeSuffix = null) // where T : DynamicTypeWrapper
         {
             Contract.Assert(model != null);
 
@@ -49,10 +50,28 @@ namespace System.Web.OData.Query.Expressions
             {
                 foreach (var field in expressions)
                 {
-                    if (field.TypeReference.Definition.TypeKind == EdmTypeKind.Primitive)
+                    switch (field.AggregateType)
                     {
-                        var primitiveType = EdmLibHelpers.GetClrType(field.TypeReference, model);
-                        CreateProperty(tb, field.Alias, primitiveType);
+                        case AggregateExpressionType.EntitySetAggregate:
+                        {
+                            var expression = field as EntitySetAggregateExpression;
+                            var complexProp = 
+                                GetResultType<DynamicTypeWrapper>(model, null, expression.Children, field.Alias);
+                            CreateProperty(tb, field.Alias, typeof(IEnumerable<>).MakeGenericType(complexProp));
+                        }
+                        break;
+                        case AggregateExpressionType.PropertyAggregate:
+                        {
+                            var expression = field as PropertyAggregateExpression;
+                            if (expression.TypeReference.Definition.TypeKind == EdmTypeKind.Primitive)
+                            {
+                                var primitiveType = EdmLibHelpers.GetClrType(expression.TypeReference, model);
+                                CreateProperty(tb, expression.Alias, primitiveType);
+                            }
+                        }
+                        break;
+                        default:
+                            throw new ODataException("Aggregation expression type not supported");
                     }
                 }
             }
@@ -78,7 +97,7 @@ namespace System.Web.OData.Query.Expressions
             return tb.CreateType();
         }
 
-        private static TypeBuilder GetTypeBuilder<T>(string typeSignature) where T : DynamicTypeWrapper
+        private static TypeBuilder GetTypeBuilder<T>(string typeSignature) // where T : DynamicTypeWrapper
         {
             var an = new AssemblyName(typeSignature);
 

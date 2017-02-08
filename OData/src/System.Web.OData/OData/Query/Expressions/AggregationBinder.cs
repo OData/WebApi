@@ -301,8 +301,6 @@ namespace System.Web.OData.Query.Expressions
                     return CreatePropertyAccessExpression(BindAccessor(singleComplexNode.Source), singleComplexNode.Property, GetFullPropertyPath(singleComplexNode));
                 case QueryNodeKind.SingleValueOpenPropertyAccess:
                     var openNode = node as SingleValueOpenPropertyAccessNode;
-                    return Expression.Property(BindAccessor(openNode.Source), openNode.Name);
-                case QueryNodeKind.None:
                     if (_flattenPropertyContainer == null)
                     {
                         return Expression.Property(BindAccessor(openNode.Source), openNode.Name);
@@ -311,6 +309,7 @@ namespace System.Web.OData.Query.Expressions
                     {
                         return _flattenPropertyContainer[openNode.Name];
                     }
+                case QueryNodeKind.None:
                 case QueryNodeKind.SingleNavigationNode:
                     var navNode = node as SingleNavigationNode;
                     return CreatePropertyAccessExpression(BindAccessor(navNode.Source), navNode.NavigationProperty);

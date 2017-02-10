@@ -89,6 +89,16 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
+                        "groupby((Name), aggregate($count as Total))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 3L} },
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 1L} },
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 1L } }
+                        }
+                    },
+
+                    {
                         "filter(Name eq 'Lowest')/groupby((Name))",
                         new List<Dictionary<string, object>>
                         {

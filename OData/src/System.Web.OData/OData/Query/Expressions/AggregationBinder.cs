@@ -145,7 +145,7 @@ namespace System.Web.OData.Query.Expressions
                 var properties = new List<NamedPropertyExpression>();
                 foreach (var aggExpression in _aggregateExpressions)
                 {
-                    properties.Add(new NamedPropertyExpression(Expression.Constant(aggExpression.Alias), CreateAggregationExpression(accum, aggExpression)));
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(aggExpression.Alias), WrapConvert(CreateAggregationExpression(accum, aggExpression))));
                 }
 
                 var wrapperProperty = ResultClrType.GetProperty("Container");
@@ -272,7 +272,7 @@ namespace System.Web.OData.Query.Expressions
                     throw new ODataException(Error.Format(SRResources.AggregationMethodNotSupported, expression.Method));
             }
 
-            return WrapConvert(aggregationExpression);
+            return aggregationExpression;
         }
 
         private Expression WrapConvert(Expression expression)

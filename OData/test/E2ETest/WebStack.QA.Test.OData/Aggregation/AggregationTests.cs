@@ -236,7 +236,7 @@ namespace WebStack.QA.Test.OData.Aggregation
 	}
 
         [Fact]
-        public void AggregateAggregatedWithGRoupByPropertyWorks()
+        public void AggregateAggregatedWithGroupByPropertyWorks()
         {
             // Arrange
             string queryUrl =

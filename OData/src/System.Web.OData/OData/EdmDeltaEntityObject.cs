@@ -14,6 +14,7 @@ namespace System.Web.OData
     public class EdmDeltaEntityObject : EdmEntityObject, IEdmChangedObject
     {
         private EdmDeltaType _edmType;
+        private IEdmNavigationSource _navigationSource;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmDeltaEntityObject"/> class.
@@ -51,6 +52,21 @@ namespace System.Web.OData
             {
                 Contract.Assert(_edmType != null);
                 return _edmType.DeltaKind;
+            }
+        }
+
+        /// <summary>
+        /// The navigation source of the entity. If null, then the entity is from the current feed.
+        /// </summary>
+        public IEdmNavigationSource NavigationSource
+        {
+            get
+            {
+                return _navigationSource;
+            }
+            set
+            {
+                _navigationSource = value;
             }
         }
     }

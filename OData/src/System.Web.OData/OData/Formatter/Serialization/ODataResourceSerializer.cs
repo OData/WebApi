@@ -118,6 +118,12 @@ namespace System.Web.OData.Formatter.Serialization
 
             IEdmStructuredTypeReference structuredType = GetResourceType(graph, writeContext);
             ResourceContext resourceContext = new ResourceContext(writeContext, structuredType, graph);
+            EdmDeltaEntityObject deltaResource = graph as EdmDeltaEntityObject;
+            if (deltaResource != null && deltaResource.NavigationSource != null)
+            {
+                resourceContext.NavigationSource = deltaResource.NavigationSource;
+            }
+
             SelectExpandNode selectExpandNode = CreateSelectExpandNode(resourceContext);
             if (selectExpandNode != null)
             {
@@ -388,6 +394,27 @@ namespace System.Web.OData.Formatter.Serialization
                 TypeName = typeName,
                 Properties = CreateStructuralPropertyBag(selectExpandNode.SelectedStructuralProperties, resourceContext),
             };
+
+            ODataResourceSerializationInfo serializationInfo = null;
+            if (resourceContext.NavigationSource != null)
+            {
+                if (serializationInfo == null)
+                {
+                    serializationInfo = new ODataResourceSerializationInfo();
+                }
+                serializationInfo.NavigationSourceName = resourceContext.NavigationSource.Name;
+                serializationInfo.NavigationSourceKind = resourceContext.NavigationSource.NavigationSourceKind();
+                IEdmEntityType sourceType = resourceContext.NavigationSource.EntityType();
+                if (sourceType != null)
+                {
+                    serializationInfo.NavigationSourceEntityTypeName = sourceType.Name;
+                }
+            }
+
+            if (serializationInfo != null)
+            {
+                resource.SetSerializationInfo(serializationInfo);
+            }
 
             // Try to add the dynamic properties if the structural type is open.
             AppendDynamicProperties(resource, selectExpandNode, resourceContext);
@@ -1109,6 +1136,18 @@ namespace System.Web.OData.Formatter.Serialization
                 {
                     // we are in dynamic complex.
                     return null;
+                }
+
+                // figure out the type from the navigation source
+                if(serializerContext.NavigationSource != null)
+                {
+                    IEdmType edmType = serializerContext.NavigationSource.EntityType();
+                    if (edmType.TypeKind == EdmTypeKind.Collection)
+                    {
+                        edmType = (edmType as IEdmCollectionType).ElementType.Definition;
+                    }
+
+                    return edmType as IEdmStructuredType;
                 }
 
                 // figure out the type from the path.

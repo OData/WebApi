@@ -395,13 +395,9 @@ namespace System.Web.OData.Formatter.Serialization
                 Properties = CreateStructuralPropertyBag(selectExpandNode.SelectedStructuralProperties, resourceContext),
             };
 
-            ODataResourceSerializationInfo serializationInfo = null;
-            if (resourceContext.NavigationSource != null)
+            if (resourceContext.EdmObject is EdmDeltaEntityObject && resourceContext.NavigationSource != null)
             {
-                if (serializationInfo == null)
-                {
-                    serializationInfo = new ODataResourceSerializationInfo();
-                }
+                ODataResourceSerializationInfo serializationInfo = new ODataResourceSerializationInfo();
                 serializationInfo.NavigationSourceName = resourceContext.NavigationSource.Name;
                 serializationInfo.NavigationSourceKind = resourceContext.NavigationSource.NavigationSourceKind();
                 IEdmEntityType sourceType = resourceContext.NavigationSource.EntityType();
@@ -409,10 +405,6 @@ namespace System.Web.OData.Formatter.Serialization
                 {
                     serializationInfo.NavigationSourceEntityTypeName = sourceType.Name;
                 }
-            }
-
-            if (serializationInfo != null)
-            {
                 resource.SetSerializationInfo(serializationInfo);
             }
 

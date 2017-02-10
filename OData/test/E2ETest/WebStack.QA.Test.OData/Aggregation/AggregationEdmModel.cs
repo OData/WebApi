@@ -1,12 +1,12 @@
-﻿using System.Web.Http;
-using System.Web.OData.Builder;
-using Microsoft.OData.Edm;
-using System.Collections.Generic;
+﻿using Microsoft.OData.Edm;
 using System;
-using System.Reflection;
-using System.Linq;
-using System.Web.OData;
+using System.Collections.Generic;
 using System.Data.Entity;
+using System.Linq;
+using System.Reflection;
+using System.Web.Http;
+using System.Web.OData;
+using System.Web.OData.Builder;
 
 namespace WebStack.QA.Test.OData.Aggregation
 {

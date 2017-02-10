@@ -31,7 +31,7 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Get an implementation of a method with the specifieds returnType and methodToken.
+        /// Get an implementation of a method with the specifies returnType and methodToken.
         /// If there's no method that matches the requirements, returns null.
         /// </summary>
         public bool GetMethodInfo(string methodToken, Type returnType, out MethodInfo method)

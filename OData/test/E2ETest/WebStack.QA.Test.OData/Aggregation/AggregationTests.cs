@@ -234,7 +234,6 @@ namespace WebStack.QA.Test.OData.Aggregation
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            // TODO assert that error message says that custom methods were not found.
         }
 
         [Theory]
@@ -257,7 +256,6 @@ namespace WebStack.QA.Test.OData.Aggregation
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            // TODO assert that error message says that methods were not found.
         }
 
         [Theory]

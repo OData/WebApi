@@ -189,16 +189,18 @@ namespace System.Web.OData.Query.Expressions
 
         private Expression CreateAggregationExpression(ParameterExpression accum, AggregateExpression expression)
         {
-            LambdaExpression propertyLambda = null;
-            // $count is a virtual property, so there's not a propertyLambda to create.
-            if (expression.Method != AggregationMethod.VirtualPropertyCount)
-            {
-                propertyLambda = Expression.Lambda(BindAccessor(expression.Expression), this._lambdaParameter);
-            }
-
             // I substitute the element type for all generic arguments.                                                
             var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(this._elementType);
             Expression asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
+
+            // $count is a virtual property, so there's not a propertyLambda to create.
+            if (expression.Method == AggregationMethod.VirtualPropertyCount)
+            {
+                var countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(this._elementType);
+                return Expression.Call(null, countMethod, asQuerableExpression);
+            }
+
+            LambdaExpression propertyLambda = Expression.Lambda(BindAccessor(expression.Expression), this._lambdaParameter);
 
             Expression aggregationExpression;
 
@@ -264,13 +266,6 @@ namespace System.Web.OData.Query.Expressions
                     var countMethod =
                         ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(propertyLambda.Body.Type);
                     aggregationExpression = Expression.Call(null, countMethod, distinctExpression);
-                }
-                    break;
-                case AggregationMethod.VirtualPropertyCount:
-                {
-                    var countMethod =
-                        ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(this._elementType);
-                    aggregationExpression = Expression.Call(null, countMethod, asQuerableExpression);
                 }
                     break;
                 default:

@@ -114,8 +114,6 @@ namespace System.Web.OData.Formatter.Serialization
 
             if (elementType.IsComplex())
             {
-                elementType = elementType.AsComplex();
-
                 ODataResourceSet resourceSet = new ODataResourceSet()
                 {
                     TypeName = feedType.FullName()
@@ -137,8 +135,6 @@ namespace System.Web.OData.Formatter.Serialization
             }
             else
             {
-                elementType = elementType.AsEntity();
-
                 ODataDeltaResourceSet deltaFeed = CreateODataDeltaFeed(enumerable, feedType.AsCollection(), writeContext);
                 if (deltaFeed == null)
                 {
@@ -271,6 +267,21 @@ namespace System.Web.OData.Formatter.Serialization
 
             ODataDeltaDeletedEntry deltaDeletedEntry = new ODataDeltaDeletedEntry(
                edmDeltaDeletedEntity.Id, edmDeltaDeletedEntity.Reason);
+
+            ODataDeltaSerializationInfo serializationInfo = null;
+            if (edmDeltaDeletedEntity.NavigationSource != null)
+            {
+                if (serializationInfo == null)
+                {
+                    serializationInfo = new ODataDeltaSerializationInfo();
+                }
+                serializationInfo.NavigationSourceName = edmDeltaDeletedEntity.NavigationSource.Name;
+            }
+
+            if (serializationInfo != null)
+            {
+                deltaDeletedEntry.SetSerializationInfo(serializationInfo);
+            }
 
             if (deltaDeletedEntry != null)
             {

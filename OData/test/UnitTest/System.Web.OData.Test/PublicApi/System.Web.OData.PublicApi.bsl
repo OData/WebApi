@@ -267,6 +267,7 @@ public class System.Web.OData.EdmDeltaDeletedEntityObject : EdmEntityObject, IDy
 
 	EdmDeltaEntityKind DeltaKind  { public virtual get; }
 	string Id  { public virtual get; public virtual set; }
+	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; public set; }
 	Microsoft.OData.DeltaDeletedEntryReason Reason  { public virtual get; public virtual set; }
 }
 
@@ -293,6 +294,7 @@ public class System.Web.OData.EdmDeltaEntityObject : EdmEntityObject, IDynamicMe
 	public EdmDeltaEntityObject (Microsoft.OData.Edm.IEdmEntityType entityType, bool isNullable)
 
 	EdmDeltaEntityKind DeltaKind  { public virtual get; }
+	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; public set; }
 }
 
 [

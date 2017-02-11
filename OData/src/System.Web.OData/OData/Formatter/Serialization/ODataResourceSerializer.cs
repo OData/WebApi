@@ -1130,31 +1130,34 @@ namespace System.Web.OData.Formatter.Serialization
                     return null;
                 }
 
+                IEdmType edmType = null;
+
                 // figure out the type from the navigation source
                 if (serializerContext.NavigationSource != null)
                 {
-                    IEdmType edmType = serializerContext.NavigationSource.EntityType();
+                    edmType = serializerContext.NavigationSource.EntityType();
                     if (edmType.TypeKind == EdmTypeKind.Collection)
                     {
                         edmType = (edmType as IEdmCollectionType).ElementType.Definition;
                     }
-
-                    return edmType as IEdmStructuredType;
                 }
 
                 // figure out the type from the path.
                 if (serializerContext.Path != null)
                 {
-                    IEdmType edmType = serializerContext.Path.EdmType;
-                    if (edmType.TypeKind == EdmTypeKind.Collection)
+                    // Note: The navigation source may be different from the path if the instance has redefined the context
+                    // (for example, in a flattended delta response)
+                    if (serializerContext.NavigationSource == null || serializerContext.NavigationSource == serializerContext.Path.NavigationSource)
                     {
-                        edmType = (edmType as IEdmCollectionType).ElementType.Definition;
+                        edmType = serializerContext.Path.EdmType;
+                        if (edmType.TypeKind == EdmTypeKind.Collection)
+                        {
+                            edmType = (edmType as IEdmCollectionType).ElementType.Definition;
+                        }
                     }
-
-                    return edmType as IEdmStructuredType;
                 }
 
-                return null;
+                return edmType as IEdmStructuredType;
             }
         }
 

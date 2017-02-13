@@ -7,9 +7,9 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Web.OData.Formatter;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser.Aggregation;
-using Microsoft.OData;
 
 namespace System.Web.OData.Query.Expressions
 {
@@ -35,7 +35,7 @@ namespace System.Web.OData.Query.Expressions
         /// Current performance testing results is 0.5ms per type. We should consider caching types, however trade off is between CPU perfomance and memory usage (might be it will we an option for library user)
         /// </remarks>
         public static Type GetResultType<T>(IEdmModel model, IEnumerable<GroupByPropertyNode> propertyNodes = null,
-            IEnumerable<AggregateExpression> expressions = null, string typeSuffix = null) // where T : DynamicTypeWrapper
+            IEnumerable<AggregateExpressionBase> expressions = null, string typeSuffix = null) // where T : DynamicTypeWrapper
         {
             Contract.Assert(model != null);
 
@@ -62,7 +62,7 @@ namespace System.Web.OData.Query.Expressions
                         break;
                         case AggregateExpressionType.PropertyAggregate:
                         {
-                            var expression = field as PropertyAggregateExpression;
+                            var expression = field as AggregateExpression;
                             if (expression.TypeReference.Definition.TypeKind == EdmTypeKind.Primitive)
                             {
                                 var primitiveType = EdmLibHelpers.GetClrType(expression.TypeReference, model);

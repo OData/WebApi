@@ -25,7 +25,7 @@ namespace System.Web.OData.Query.Expressions
 
         private ParameterExpression _lambdaParameter;
 
-        private IEnumerable<AggregateExpression> _aggregateExpressions;
+        private IEnumerable<AggregateExpressionBase> _aggregateExpressions;
         private IEnumerable<GroupByPropertyNode> _groupingProperties;
 
         private Type _groupByClrType;
@@ -46,7 +46,7 @@ namespace System.Web.OData.Query.Expressions
             {
                 case TransformationNodeKind.Aggregate:
                     var aggregateClause = this._transformation as AggregateTransformationNode;
-                    _aggregateExpressions = aggregateClause.Expressions;
+                    _aggregateExpressions = aggregateClause.AggregateExpressions;
                     ResultClrType = 
                         AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(Model, null, _aggregateExpressions);
                     break;
@@ -58,7 +58,7 @@ namespace System.Web.OData.Query.Expressions
                         if (groupByClause.ChildTransformations.Kind == TransformationNodeKind.Aggregate)
                         {
                             _aggregateExpressions =
-                                ((AggregateTransformationNode)groupByClause.ChildTransformations).Expressions;
+                                ((AggregateTransformationNode)groupByClause.ChildTransformations).AggregateExpressions;
                         }
                         else
                         {
@@ -172,12 +172,12 @@ namespace System.Web.OData.Query.Expressions
             return wrapperTypeMemberAssignments;
         }
 
-        private Expression CreateAggregationExpression(ParameterExpression accum, AggregateExpression expression, Type expressionType, Type baseType)
+        private Expression CreateAggregationExpression(ParameterExpression accum, AggregateExpressionBase expression, Type expressionType, Type baseType)
         {
             switch (expression.AggregateType)
             {
                 case AggregateExpressionType.PropertyAggregate:
-                    return CreatePropertyAggregateExpression(accum, expression as PropertyAggregateExpression, baseType);
+                    return CreatePropertyAggregateExpression(accum, expression as AggregateExpression, baseType);
                 case AggregateExpressionType.EntitySetAggregate:
                     return CreateEntitySetAggregateExpression(accum, expression as EntitySetAggregateExpression, expressionType, baseType);
                 default:
@@ -190,7 +190,7 @@ namespace System.Web.OData.Query.Expressions
         {
             // Should return following expression
             //  $it => $it.AsQueryable()
-			//      .SelectMany($it => $it.SomeEntitySet)
+            //      .SelectMany($it => $it.SomeEntitySet)
             //      .GroupBy($gr => new Object())
             //      .Select($p => new DynamicTypeWrapper()
             //      {
@@ -267,7 +267,7 @@ namespace System.Web.OData.Query.Expressions
             return Expression.Call(null, selectMethod, groupedEntitySet, selectLambda);
         }
 
-        private Expression CreatePropertyAggregateExpression(ParameterExpression accum, PropertyAggregateExpression expression, Type baseType)
+        private Expression CreatePropertyAggregateExpression(ParameterExpression accum, AggregateExpression expression, Type baseType)
         {
             var lambdaParameter = baseType == this._elementType ? this._lambdaParameter : Expression.Parameter(baseType, "$it");
             LambdaExpression propertyLambda = Expression.Lambda(BindAccessor(expression.Expression, lambdaParameter), lambdaParameter);

@@ -931,7 +931,7 @@ public abstract class System.Web.OData.Builder.OperationConfiguration {
 	NavigationSourceConfiguration NavigationSource  { public get; public set; }
 	OperationLinkBuilder OperationLinkBuilder  { protected get; protected set; }
 	bool OptionalReturn  { public get; public set; }
-	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.ParameterConfiguration]] Parameters  { [IteratorStateMachineAttribute(),]public virtual get; }
+	System.Collections.Generic.IEnumerable`1[[System.Web.OData.Builder.ParameterConfiguration]] Parameters  { public virtual get; }
 	IEdmTypeConfiguration ReturnType  { public get; public set; }
 	string Title  { public get; public set; }
 
@@ -2902,11 +2902,7 @@ public class System.Web.OData.Formatter.Deserialization.ODataCollectionDeseriali
 	public ODataCollectionDeserializer (ODataDeserializerProvider deserializerProvider)
 
 	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
-	[
-	IteratorStateMachineAttribute(),
-	]
 	public virtual System.Collections.IEnumerable ReadCollectionValue (Microsoft.OData.ODataCollectionValue collectionValue, Microsoft.OData.Edm.IEdmTypeReference elementType, ODataDeserializerContext readContext)
-
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }
 
@@ -2966,9 +2962,6 @@ public class System.Web.OData.Formatter.Deserialization.ODataResourceSetDeserial
 
 	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
-	[
-	IteratorStateMachineAttribute(),
-	]
 	public virtual System.Collections.IEnumerable ReadResourceSet (ODataResourceSetWrapper resourceSet, Microsoft.OData.Edm.IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
 }
 

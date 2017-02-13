@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Reflection;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace System.Web.OData
 {
@@ -12,14 +14,15 @@ namespace System.Web.OData
     /// </summary>
     public class CustomAggregateMethodAnnotation 
     {
-
         private Dictionary<string, IDictionary<Type, MethodInfo>> _tokenToMethodMap 
             = new Dictionary<string, IDictionary<Type, MethodInfo>>();
 
         /// <summary>
         /// CustomAggregateMethodAnnotation simple constructor.
         /// </summary>
-        public CustomAggregateMethodAnnotation() { }
+        public CustomAggregateMethodAnnotation()
+        {
+        }
 
         /// <summary>
         /// Adds all implementations of a method that share the same methodToken.

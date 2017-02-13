@@ -297,7 +297,6 @@ namespace System.Web.OData.Query.Expressions
                     throw new ODataException(Error.Format(SRResources.AggregationMethodNotSupported, expression.Method));
             }
 
-
             return aggregationExpression;
         }
 

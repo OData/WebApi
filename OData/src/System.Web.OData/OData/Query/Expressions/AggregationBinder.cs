@@ -176,9 +176,9 @@ namespace System.Web.OData.Query.Expressions
         {
             switch (expression.AggregateType)
             {
-                case AggregateExpressionType.PropertyAggregate:
+                case AggregateExpressionKind.PropertyAggregate:
                     return CreatePropertyAggregateExpression(accum, expression as AggregateExpression, baseType);
-                case AggregateExpressionType.EntitySetAggregate:
+                case AggregateExpressionKind.EntitySetAggregate:
                     return CreateEntitySetAggregateExpression(accum, expression as EntitySetAggregateExpression, expressionType, baseType);
                 default:
                     throw new ODataException("This type of aggregation is not supported.");

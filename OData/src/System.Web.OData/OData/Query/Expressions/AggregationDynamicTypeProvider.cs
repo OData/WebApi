@@ -52,7 +52,7 @@ namespace System.Web.OData.Query.Expressions
                 {
                     switch (field.AggregateType)
                     {
-                        case AggregateExpressionType.EntitySetAggregate:
+                        case AggregateExpressionKind.EntitySetAggregate:
                         {
                             var expression = field as EntitySetAggregateExpression;
                             var complexProp = 
@@ -60,7 +60,7 @@ namespace System.Web.OData.Query.Expressions
                             CreateProperty(tb, field.Alias, typeof(IEnumerable<>).MakeGenericType(complexProp));
                         }
                         break;
-                        case AggregateExpressionType.PropertyAggregate:
+                        case AggregateExpressionKind.PropertyAggregate:
                         {
                             var expression = field as AggregateExpression;
                             if (expression.TypeReference.Definition.TypeKind == EdmTypeKind.Primitive)

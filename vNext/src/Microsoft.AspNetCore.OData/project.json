@@ -1,6 +1,6 @@
 {
   "title": "Microsoft.AspNetCore.OData",
-  "version": "6.0.0-alpha1-rtm",
+  "version": "6.0.1-alpha2-rtm",
   "description": "Microsoft.AspNetCore.OData",
 
   "dependencies": {
@@ -14,12 +14,14 @@
 
   "frameworks": {
     //"netstandard1.6": {
-    //  "imports": "dnxcore50"
+    //  "imports": [
+    //    "dnxcore50",
+    //    "portable-net45+win8+wpa81"
+    //  ]
     //},
     "net461": {
       "dependencies": {
-        "System.ComponentModel.Annotations": "4.1.0",
-        
+        "System.ComponentModel.Annotations": "4.1.0"
       },
       "frameworkAssemblies": {
         "System.Runtime.Serialization": "4.0.0.0",

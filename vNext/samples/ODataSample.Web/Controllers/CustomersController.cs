@@ -1,4 +1,6 @@
-﻿namespace ODataSample.Web.Controllers
+﻿using System.Linq;
+
+namespace ODataSample.Web.Controllers
 {
     using System.Collections.Generic;
     using Microsoft.AspNetCore.Mvc;
@@ -7,7 +9,7 @@
     using Microsoft.AspNetCore.OData.Routing;
 
     [EnableQuery]
-    [Route("Customers")]
+    [ODataRoute("Customers")]
     public class CustomersController : Controller
     {
         private readonly SampleContext _sampleContext;
@@ -24,10 +26,10 @@
             return _sampleContext.Customers;
         }
 
-        // GET odata/Customers(5)
 
-        [HttpGet("{customerId}")]
-        public Customer Get(int customerId)
+        // GET odata/Customers(5)
+        [ODataRoute("({customerId})")]
+        public Customer GetCustomer(int customerId)
         {
             var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)

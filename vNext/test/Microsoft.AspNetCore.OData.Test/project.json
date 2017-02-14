@@ -1,6 +1,6 @@
 ﻿{
   "dependencies": {
-    "Microsoft.AspNetCore.OData": "6.0.0-*",
+    "Microsoft.AspNetCore.OData": "6.0.1-*",
     "Microsoft.OData.Core": "7.0.0",
     "Microsoft.OData.Edm": "7.0.0",
     "Microsoft.Spatial": "7.0.0",

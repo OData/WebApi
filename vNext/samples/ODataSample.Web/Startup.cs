@@ -62,6 +62,7 @@ namespace ODataSample.Web
             var builder = new ODataConventionModelBuilder(assemblyProvider);
             builder.EntitySet<Customer>("Customers");
             builder.EntitySet<Product>("Products");
+            builder.EntityType<Customer>().HasKey(x => x.CustomerId).Property(x => x.FirstName);
 
             // Functions
             var function = builder.EntityType<Customer>().Collection.Function("FindCustomersWithProductId");

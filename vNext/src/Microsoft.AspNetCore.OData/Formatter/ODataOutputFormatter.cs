@@ -192,6 +192,12 @@ namespace Microsoft.AspNetCore.OData.Formatter
 
         public override bool CanWriteResult(OutputFormatterCanWriteContext context)
         {
+            if (!((OutputFormatterWriteContext)context).HttpContext.ODataFeature()
+                .IsValidODataRequest)
+            {
+                return false;
+            }
+
             Type type = null;
             var pageResult = context.Object as PageResult<object>;
             if (pageResult != null)

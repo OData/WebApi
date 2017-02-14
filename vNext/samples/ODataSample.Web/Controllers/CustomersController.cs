@@ -40,6 +40,43 @@ namespace ODataSample.Web.Controllers
             return customer;
         }
 
+        [HttpPost]
+        [ODataRoute("Default.Ping")]
+        public bool Ping([FromBody]ODataActionParameters data)
+        {
+            if (!ModelState.IsValid)
+            {
+                throw new KeyNotFoundException();
+            }
+
+            var customer = _sampleContext.FindCustomer(int.Parse(data["customerId"].ToString()));
+            if (customer == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        [HttpGet]
+        [ODataRoute("Default.Pong(customerId={customerId})")]
+        public bool Pong(int customerId)
+        {
+            if (!ModelState.IsValid)
+            {
+                throw new KeyNotFoundException();
+            }
+
+            var customer = _sampleContext.FindCustomer(customerId);
+            if (customer == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+
         // GET odata//FindCustomersWithProduct(productId=1)
         // [HttpGet("FindCustomersWithProduct(ProductId={productId})")]
         [ODataRoute("Customers/Default.FindCustomersWithProductId(productId={productId})")]

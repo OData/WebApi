@@ -64,7 +64,16 @@ namespace ODataSample.Web
             builder.EntitySet<Product>("Products");
             builder.EntityType<Customer>().HasKey(x => x.CustomerId).Property(x => x.FirstName);
 
+            var action = builder.EntityType<Customer>().Collection.Action("Ping");
+            action.Parameter<int>("customerId");
+            action.Returns<bool>();
+
             // Functions
+            var fun = builder.EntityType<Customer>().Collection.Function("Pong");
+            fun.Parameter<int>("customerId");
+            fun.Returns<bool>();
+
+
             var function = builder.EntityType<Customer>().Collection.Function("FindCustomersWithProductId");
             function.Parameter<int>("productId");
             function.ReturnsFromEntitySet<Customer>("Customers");

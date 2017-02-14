@@ -3,28 +3,28 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Builder;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.OData.Edm;
 using ODataSample.Web.Models;
-using Microsoft.AspNetCore.OData.Extensions;
-using Microsoft.AspNetCore.OData;
-using Microsoft.AspNetCore.OData.Builder;
-using Microsoft.AspNetCore.OData.Routing.Conventions;
-using Microsoft.AspNetCore.Routing;
 
 namespace ODataSample.Web
 {
     public class Startup
     {
-        public Startup()
-        {
-        }
-
         public void ConfigureServices(IServiceCollection services)
         {
-            // services.AddOData();
-            services.AddOData(options => options.RoutingConventions.Insert(0, new CustomRoutingConvention()));
+            services.AddOData();
+            //services.AddOData(options =>
+            //{
+            //    //options.RoutingConventions.Insert(0, new AttributeRoutingConvention());
+            //   // options.RoutingConventions.Insert(0, new DefaultODataRoutingConvention());
+            //    options.RoutingConventions.Insert(0, new MetadataRoutingConvention());
+            //});
 
             /* How to add customer's routing convention
             services.AddOData(
@@ -39,22 +39,22 @@ namespace ODataSample.Web
         {
             loggerFactory.AddConsole(LogLevel.Debug);
 
-            IAssemblyProvider provider = app.ApplicationServices.GetRequiredService<IAssemblyProvider>();
-            IEdmModel model = GetEdmModel(provider);
-            IEdmModel model2 = GetPeopleEdmModel(provider);
+            var provider = app.ApplicationServices.GetRequiredService<IAssemblyProvider>();
+            var model = GetEdmModel(provider);
+            var model2 = GetPeopleEdmModel(provider);
 
-            // Single
-            app.UseMvc(builder => builder.MapODataRoute("odata", model));
+            //// Single
+            //app.UseMvc(builder => builder.MapODataRoute("odata", model));
 
-            // Multiple: Option-1
-            app.UseMvc(builder =>
-            {
-                builder.MapODataRoute("a", model);
-                builder.MapODataRoute(model2);
-            });
+            //// Multiple: Option-1
+            //app.UseMvc(builder =>
+            //{
+            //    builder.MapODataRoute("a", model);
+            //    builder.MapODataRoute(model2);
+            //});
 
             // Multiple: Option-2
-            app.UseMvc(builder => builder.MapODataRoute("odata1", model).MapODataRoute(model2));
+            app.UseMvc(builder => builder.MapODataRoute("odata", model));
         }
 
         private static IEdmModel GetEdmModel(IAssemblyProvider assemblyProvider)

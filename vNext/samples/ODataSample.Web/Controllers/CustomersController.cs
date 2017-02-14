@@ -7,7 +7,7 @@
     using Microsoft.AspNetCore.OData.Routing;
 
     [EnableQuery]
-    [Route("odata/Customers")]
+    [Route("Customers")]
     public class CustomersController : Controller
     {
         private readonly SampleContext _sampleContext;
@@ -25,16 +25,17 @@
         }
 
         // GET odata/Customers(5)
+
         [HttpGet("{customerId}")]
-        public IActionResult Get(int customerId)
+        public Customer Get(int customerId)
         {
             var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
-                return NotFound();
+                return null;
             }
 
-            return new ObjectResult(customer);
+            return customer;
         }
 
         // GET odata//FindCustomersWithProduct(productId=1)

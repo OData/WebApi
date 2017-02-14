@@ -6,7 +6,7 @@ using ODataSample.Web.Models;
 namespace ODataSample.Web.Controllers
 {
     [EnableQuery]
-    [Route("odata/Products")]
+    [Route("Products")]
     public class ProductsController : Controller
     {
         private readonly SampleContext _sampleContext;

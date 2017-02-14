@@ -1,3 +1,6 @@
+##Newest code is on *aspnetcore* branch!
+
+### Original readme: 
 ## OData Web API
 
 ### Introduction

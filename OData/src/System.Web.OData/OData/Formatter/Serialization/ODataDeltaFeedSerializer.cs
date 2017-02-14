@@ -243,6 +243,13 @@ namespace System.Web.OData.Formatter.Serialization
             ODataDeltaDeletedEntry deltaDeletedEntry = new ODataDeltaDeletedEntry(
                edmDeltaDeletedEntity.Id, edmDeltaDeletedEntity.Reason);
 
+            if (edmDeltaDeletedEntity.NavigationSource != null)
+            {
+                ODataDeltaSerializationInfo serializationInfo = new ODataDeltaSerializationInfo();
+                serializationInfo.NavigationSourceName = edmDeltaDeletedEntity.NavigationSource.Name;
+                deltaDeletedEntry.SetSerializationInfo(serializationInfo);
+            }
+
             if (deltaDeletedEntry != null)
             {
                 writer.WriteDeltaDeletedEntry(deltaDeletedEntry);

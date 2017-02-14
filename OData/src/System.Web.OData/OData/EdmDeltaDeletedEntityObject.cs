@@ -17,6 +17,7 @@ namespace System.Web.OData
         private string _id;
         private DeltaDeletedEntryReason _reason;
         private EdmDeltaType _edmType;
+        private IEdmNavigationSource _navigationSource;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmDeltaDeletedEntityObject"/> class.
@@ -80,6 +81,21 @@ namespace System.Web.OData
             {
                 Contract.Assert(_edmType != null);
                 return _edmType.DeltaKind;
+            }
+        }
+
+        /// <summary>
+        /// The navigation source of the deleted entity. If null, then the deleted entity is from the current feed.
+        /// </summary>
+        public IEdmNavigationSource NavigationSource
+        {
+            get
+            {
+                return _navigationSource;
+            }
+            set
+            {
+                _navigationSource = value;
             }
         }
     }

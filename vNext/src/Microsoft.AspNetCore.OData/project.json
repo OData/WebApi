@@ -13,12 +13,17 @@
   },
 
   "frameworks": {
-    //"netstandard1.6": {
-    //  "imports": [
-    //    "dnxcore50",
-    //    "portable-net45+win8+wpa81"
-    //  ]
-    //},
+    "netstandard1.6": {
+      "dependencies": {
+        "System.Diagnostics.Tools": "4.3.0",
+        "System.ComponentModel.Annotations": "4.3.0",
+        "System.Linq.Queryable": "4.3.0"
+      },
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8+wpa81"
+      ]
+    },
     "net461": {
       "dependencies": {
         "System.ComponentModel.Annotations": "4.1.0"

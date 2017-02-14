@@ -174,7 +174,7 @@ namespace System.Web.OData.Query.Expressions
 
         private Expression CreateAggregationExpression(ParameterExpression accum, AggregateExpressionBase expression, Type expressionType, Type baseType)
         {
-            switch (expression.AggregateType)
+            switch (expression.AggregateKind)
             {
                 case AggregateExpressionKind.PropertyAggregate:
                     return CreatePropertyAggregateExpression(accum, expression as AggregateExpression, baseType);

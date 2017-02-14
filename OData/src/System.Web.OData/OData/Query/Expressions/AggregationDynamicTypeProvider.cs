@@ -50,7 +50,7 @@ namespace System.Web.OData.Query.Expressions
             {
                 foreach (var field in expressions)
                 {
-                    switch (field.AggregateType)
+                    switch (field.AggregateKind)
                     {
                         case AggregateExpressionKind.EntitySetAggregate:
                         {

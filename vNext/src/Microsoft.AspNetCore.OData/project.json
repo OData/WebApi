@@ -9,9 +9,25 @@
     "Microsoft.Spatial": "7.0.0",
     "Microsoft.AspNetCore.Mvc.Core": "1.0.1",
     "Microsoft.Extensions.DependencyInjection": "1.0.0"
+    
   },
 
   "frameworks": {
+    //"netstandard1.6": {
+    //  "imports": "dnxcore50"
+    //},
+    "net461": {
+      "dependencies": {
+        "System.ComponentModel.Annotations": "4.1.0",
+        
+      },
+      "frameworkAssemblies": {
+        "System.Runtime.Serialization": "4.0.0.0",
+        "System.Xml": "4.0.0.0",
+        "System.Xml.Linq": "4.0.0.0",
+        "System.Xml.Serialization": "4.0.0.0"
+      }
+    },
     "netcoreapp1.0": {
       "imports": [
         "dnxcore50",

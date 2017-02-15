@@ -25,6 +25,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ResxGenerator", "tools\Resx
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ODataSample.Web", "samples\ODataSample.Web\ODataSample.Web.xproj", "{46706CA6-2056-4355-B672-3E7C80D4CBF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ODataSample.Consumer", "ODataSample.Consumer\ODataSample.Consumer.csproj", "{AD74BB1C-1D04-46B7-B9A5-6840D82DD30C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{46706CA6-2056-4355-B672-3E7C80D4CBF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46706CA6-2056-4355-B672-3E7C80D4CBF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46706CA6-2056-4355-B672-3E7C80D4CBF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD74BB1C-1D04-46B7-B9A5-6840D82DD30C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD74BB1C-1D04-46B7-B9A5-6840D82DD30C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD74BB1C-1D04-46B7-B9A5-6840D82DD30C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD74BB1C-1D04-46B7-B9A5-6840D82DD30C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,5 +62,6 @@ Global
 		{0B959ACA-F82B-43C4-946A-39066B4FA8C3} = {CB7EBE84-3A72-454A-BDFF-C2A604A98C11}
 		{DACCD7F1-5E28-4AFF-BBA9-CB42F892A20C} = {31922483-4CE7-4B02-88E4-EAF27D5E941B}
 		{46706CA6-2056-4355-B672-3E7C80D4CBF4} = {CDB37674-D801-412C-9B1A-2103A114D41B}
+		{AD74BB1C-1D04-46B7-B9A5-6840D82DD30C} = {CDB37674-D801-412C-9B1A-2103A114D41B}
 	EndGlobalSection
 EndGlobal

@@ -1,17 +1,15 @@
 {
-  "title": "Microsoft.AspNetCore.OData",
+  "name": "Microsoft.AspNetCore.OData.vNext",
+  "title": "Microsoft.AspNetCore.OData.vNext",
   "version": "6.0.1-alpha2-rtm",
-  "description": "Microsoft.AspNetCore.OData",
-
+  "description": "OData Web API (i.e., ASP.NET Web API OData) is a server library built upon ODataLib and Web API.",
   "dependencies": {
     "Microsoft.OData.Core": "7.0.0",
     "Microsoft.OData.Edm": "7.0.0",
     "Microsoft.Spatial": "7.0.0",
     "Microsoft.AspNetCore.Mvc.Core": "1.0.1",
     "Microsoft.Extensions.DependencyInjection": "1.0.0"
-    
   },
-
   "frameworks": {
     "netstandard1.6": {
       "dependencies": {
@@ -47,5 +45,10 @@
         }
       }
     }
+  },
+  "packOptions": {
+    "projectUrl": "https://github.com/kamilhlawiczka/WebApi/tree/aspnetcore",
+    "licenseUrl": "https://opensource.org/licenses/MIT",
+    "tags": [ "AspNetCore", "WebApi", "AspNetCoreWebApi", "OData", "V4" ]
   }
 }

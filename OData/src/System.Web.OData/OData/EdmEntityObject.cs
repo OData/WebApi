@@ -12,7 +12,7 @@ namespace System.Web.OData
     public class EdmEntityObject : EdmStructuredObject, IEdmEntityObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
+        /// Initializes a new instance of the <see cref="EdmEntityObject"/> class.
         /// </summary>
         /// <param name="edmType">The <see cref="IEdmEntityType"/> of this object.</param>
         public EdmEntityObject(IEdmEntityType edmType)
@@ -21,7 +21,7 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
+        /// Initializes a new instance of the <see cref="EdmEntityObject"/> class.
         /// </summary>
         /// <param name="edmType">The <see cref="IEdmEntityTypeReference"/> of this object.</param>
         public EdmEntityObject(IEdmEntityTypeReference edmType)
@@ -30,7 +30,7 @@ namespace System.Web.OData
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EdmStructuredObject"/> class.
+        /// Initializes a new instance of the <see cref="EdmEntityObject"/> class.
         /// </summary>
         /// <param name="edmType">The <see cref="IEdmEntityType"/> of this object.</param>
         /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>

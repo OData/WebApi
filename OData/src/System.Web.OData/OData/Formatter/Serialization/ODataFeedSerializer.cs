@@ -204,6 +204,8 @@ namespace System.Web.OData.Formatter.Serialization
                 {
                     feed.NextPageLink = writeContext.Request.ODataProperties().NextLink;
 
+                    feed.DeltaLink = writeContext.Request.ODataProperties().DeltaLink;
+
                     long? countValue = writeContext.Request.ODataProperties().TotalCount;
                     if (countValue.HasValue)
                     {

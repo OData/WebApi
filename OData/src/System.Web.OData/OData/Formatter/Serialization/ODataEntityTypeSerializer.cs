@@ -128,6 +128,12 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmEntityTypeReference entityType = GetEntityType(graph, writeContext);
             EntityInstanceContext entityInstanceContext = new EntityInstanceContext(writeContext, entityType, graph);
             SelectExpandNode selectExpandNode = CreateSelectExpandNode(entityInstanceContext);
+            EdmDeltaEntityObject deltaResource = graph as EdmDeltaEntityObject;
+            if (deltaResource != null && deltaResource.NavigationSource != null)
+            {
+                entityInstanceContext.NavigationSource = deltaResource.NavigationSource;
+            }
+
             if (selectExpandNode != null)
             {
                 ODataEntry entry = CreateEntry(selectExpandNode, entityInstanceContext);
@@ -305,6 +311,19 @@ namespace System.Web.OData.Formatter.Serialization
                 TypeName = typeName,
                 Properties = CreateStructuralPropertyBag(selectExpandNode.SelectedStructuralProperties, entityInstanceContext),
             };
+
+            if (entityInstanceContext.EdmObject is EdmDeltaEntityObject && entityInstanceContext.NavigationSource != null)
+            {
+                ODataFeedAndEntrySerializationInfo serializationInfo = new ODataFeedAndEntrySerializationInfo();
+                serializationInfo.NavigationSourceName = entityInstanceContext.NavigationSource.Name;
+                serializationInfo.NavigationSourceKind = entityInstanceContext.NavigationSource.NavigationSourceKind();
+                IEdmEntityType sourceType = entityInstanceContext.NavigationSource.EntityType();
+                if (sourceType != null)
+                {
+                    serializationInfo.NavigationSourceEntityTypeName = sourceType.Name;
+                }
+                entry.SetSerializationInfo(serializationInfo);
+            }
 
             // Try to add the dynamic properties if the entity type is open.
             if ((entityInstanceContext.EntityType.IsOpen && selectExpandNode.SelectAllDynamicProperties) ||
@@ -565,6 +584,15 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(entityInstanceContext != null);
 
             List<ODataProperty> properties = new List<ODataProperty>();
+
+            if (null != entityInstanceContext.EdmObject && entityInstanceContext.EdmObject.IsDeltaResource())
+            {
+                IDelta deltaObject = entityInstanceContext.EdmObject as IDelta;
+                Contract.Assert(deltaObject != null);
+                IEnumerable<string> changedProperties = deltaObject.GetChangedPropertyNames();
+                structuralProperties = structuralProperties.Where(p => changedProperties.Contains(p.Name));
+            }
+
             foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
             {
                 ODataProperty property = CreateStructuralProperty(structuralProperty, entityInstanceContext);
@@ -796,17 +824,35 @@ namespace System.Web.OData.Formatter.Serialization
                 // type.
                 return serializerContext.NavigationSource.EntityType();
             }
-            else
+
+            IEdmType edmType = null;
+
+            // figure out the type from the navigation source
+            if (serializerContext.NavigationSource != null)
             {
-                // figure out the type from the path.
-                IEdmType edmType = serializerContext.Path.EdmType;
+                edmType = serializerContext.NavigationSource.EntityType();
                 if (edmType.TypeKind == EdmTypeKind.Collection)
                 {
                     edmType = (edmType as IEdmCollectionType).ElementType.Definition;
                 }
-
-                return edmType as IEdmEntityType;
             }
+
+            // figure out the type from the path.
+            if (serializerContext.Path != null)
+            {
+                // Note: The navigation source may be different from the path if the instance has redefined the context
+                // (for example, in a flattended delta response)
+                if (serializerContext.NavigationSource == null || serializerContext.NavigationSource == serializerContext.Path.NavigationSource)
+                {
+                    edmType = serializerContext.Path.EdmType;
+                    if (edmType.TypeKind == EdmTypeKind.Collection)
+                    {
+                        edmType = (edmType as IEdmCollectionType).ElementType.Definition;
+                    }
+                }
+            }
+
+            return edmType as IEdmEntityType;
         }
 
         internal static void AddTypeNameAnnotationAsNeeded(ODataEntry entry, IEdmEntityType odataPathType,

@@ -144,7 +144,7 @@ namespace System.Web.OData.Builder
             {
                 throw Error.ArgumentNull("instanceContext");
             }
-
+            
             if (_idLinkBuilder != null &&
                 (metadataLevel == ODataMetadataLevel.FullMetadata ||
                 (metadataLevel == ODataMetadataLevel.MinimalMetadata && !_idLinkBuilder.FollowsConventions)))

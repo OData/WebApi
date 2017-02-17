@@ -204,6 +204,7 @@ namespace System.Web.OData.Formatter.Serialization
                 else if (writeContext.Request != null)
                 {
                     feed.NextPageLink = writeContext.Request.ODataProperties().NextLink;
+                    feed.DeltaLink = writeContext.Request.ODataProperties().DeltaLink;
 
                     long? countValue = writeContext.Request.ODataProperties().TotalCount;
                     if (countValue.HasValue)
@@ -241,6 +242,13 @@ namespace System.Web.OData.Formatter.Serialization
 
             ODataDeltaDeletedEntry deltaDeletedEntry = new ODataDeltaDeletedEntry(
                edmDeltaDeletedEntity.Id, edmDeltaDeletedEntity.Reason);
+
+            if (edmDeltaDeletedEntity.NavigationSource != null)
+            {
+                ODataDeltaSerializationInfo serializationInfo = new ODataDeltaSerializationInfo();
+                serializationInfo.NavigationSourceName = edmDeltaDeletedEntity.NavigationSource.Name;
+                deltaDeletedEntry.SetSerializationInfo(serializationInfo);
+            }
 
             if (deltaDeletedEntry != null)
             {

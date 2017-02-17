@@ -1,5 +1,7 @@
 ##Newest code is on *aspnetcore* branch!
 
+nuget : https://www.nuget.org/packages/Microsoft.AspNetCore.OData.vNext/
+
 ### Original readme: 
 ## OData Web API
 

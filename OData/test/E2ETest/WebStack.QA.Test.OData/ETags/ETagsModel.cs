@@ -25,5 +25,6 @@ namespace WebStack.QA.Test.OData.ETags
         public DateTimeOffset DateTimeOffsetProperty { get; set; }
         [ConcurrencyCheck]
         public string StringWithConcurrencyCheckAttributeProperty { get; set; }
+        public ETagsCustomer NestedCustomer { get; set; }
     }
 }

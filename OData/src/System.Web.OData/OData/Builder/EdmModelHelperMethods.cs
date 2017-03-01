@@ -13,6 +13,8 @@ using Microsoft.OData.Edm.Expressions;
 using Microsoft.OData.Edm.Library;
 using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.OData.Edm.Validation;
+using Microsoft.OData.Edm.Library.Annotations;
+using Microsoft.OData.Edm.Csdl;
 
 namespace System.Web.OData.Builder
 {
@@ -46,7 +48,7 @@ namespace System.Web.OData.Builder
             IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(builder, edmTypeMap, navigationSources);
 
             // Add the core vocabulary annotations
-            model.AddCoreVocabularyAnnotations(entitySets, edmMap);
+            model.AddCoreVocabularyAnnotations(navigationSources, edmMap);
 
             // Add the capabilities vocabulary annotations
             model.AddCapabilitiesVocabularyAnnotations(entitySets, edmMap);
@@ -495,38 +497,38 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private static void AddCoreVocabularyAnnotations(this EdmModel model, NavigationSourceAndAnnotations[] entitySets, EdmTypeMap edmTypeMap)
+        private static void AddCoreVocabularyAnnotations(this EdmModel model, IEnumerable<NavigationSourceAndAnnotations> navigationSources, EdmTypeMap edmTypeMap)
         {
             Contract.Assert(model != null);
             Contract.Assert(edmTypeMap != null);
 
-            if (entitySets == null)
+            if (navigationSources == null)
             {
                 return;
             }
 
-            foreach (NavigationSourceAndAnnotations source in entitySets)
+            foreach (NavigationSourceAndAnnotations source in navigationSources)
             {
-                IEdmEntitySet entitySet = source.NavigationSource as IEdmEntitySet;
-                if (entitySet == null)
+                IEdmVocabularyAnnotatable navigationSource = source.NavigationSource as IEdmVocabularyAnnotatable;
+                if (navigationSource == null)
                 {
                     continue;
                 }
 
-                EntitySetConfiguration entitySetConfig = source.Configuration as EntitySetConfiguration;
-                if (entitySetConfig == null)
+                NavigationSourceConfiguration navigationSourceConfig = source.Configuration as NavigationSourceConfiguration;
+                if (navigationSourceConfig == null)
                 {
                     continue;
                 }
 
-                model.AddOptimisticConcurrencyAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddOptimisticConcurrencyAnnotation(navigationSource, navigationSourceConfig, edmTypeMap);
             }
         }
 
-        private static void AddOptimisticConcurrencyAnnotation(this EdmModel model, IEdmEntitySet target,
-            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        private static void AddOptimisticConcurrencyAnnotation(this EdmModel model, IEdmVocabularyAnnotatable target,
+            NavigationSourceConfiguration navigationSourceConfiguration, EdmTypeMap edmTypeMap)
         {
-            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+            EntityTypeConfiguration entityTypeConfig = navigationSourceConfiguration.EntityType;
 
             IEnumerable<StructuralPropertyConfiguration> concurrencyPropertyies =
                 entityTypeConfig.Properties.OfType<StructuralPropertyConfiguration>().Where(property => property.ConcurrencyToken);
@@ -548,7 +550,15 @@ namespace System.Web.OData.Builder
 
             if (edmProperties.Any())
             {
-                model.SetOptimisticConcurrencyAnnotation(target, edmProperties);
+                // todo: fix SetOptimisticConcurrencyAnnotation to support setting concurrency annotations on singletons
+                // model.SetOptimisticConcurrencyAnnotation(target, edmProperties);
+
+                IEdmCollectionExpression collectionExpression = new EdmCollectionExpression(edmProperties.Select(p => new EdmPropertyPathExpression(p.Name)).ToArray());
+                IEdmValueTerm term = Microsoft.OData.Edm.Vocabularies.V1.CoreVocabularyModel.ConcurrencyTerm;
+
+                EdmAnnotation annotation = new EdmAnnotation(target, term, collectionExpression);
+                annotation.SetSerializationLocation(model, EdmVocabularyAnnotationSerializationLocation.Inline);
+                model.SetVocabularyAnnotation(annotation);
             }
         }
 

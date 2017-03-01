@@ -41,6 +41,7 @@ namespace WebStack.QA.Test.OData.ETags
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             EntitySetConfiguration<ETagsCustomer> eTagsCustomersSet = builder.EntitySet<ETagsCustomer>("ETagsCustomers");
+            SingletonConfiguration<ETagsCustomer> eTagsCustomerSingleton = builder.Singleton<ETagsCustomer>("ETagsCustomer");
             EntityTypeConfiguration<ETagsCustomer> eTagsCustomers = eTagsCustomersSet.EntityType;
             eTagsCustomers.Property(c => c.Id).IsConcurrencyToken();
             eTagsCustomers.Property(c => c.Name).IsConcurrencyToken();
@@ -58,14 +59,16 @@ namespace WebStack.QA.Test.OData.ETags
             eTagsCustomers.Property(c => c.UlongProperty).IsConcurrencyToken();
             eTagsCustomers.Property(c => c.GuidProperty).IsConcurrencyToken();
             eTagsCustomers.Property(c => c.DateTimeOffsetProperty).IsConcurrencyToken();
+
             return builder.GetEdmModel();
         }
 
         [Fact]
         public void ModelBuilderTest()
         {
-            const string expectMetadata =
+            const string expectedEntitySetMetadata =
                 "        <EntitySet Name=\"ETagsCustomers\" EntityType=\"WebStack.QA.Test.OData.ETags.ETagsCustomer\">\r\n" +
+                "          <NavigationPropertyBinding Path=\"NestedCustomer\" Target=\"ETagsCustomers\" />\r\n" +
                 "          <Annotation Term=\"Org.OData.Core.V1.OptimisticConcurrency\">\r\n" +
                 "            <Collection>\r\n" +
                 "              <PropertyPath>Id</PropertyPath>\r\n" +
@@ -89,12 +92,39 @@ namespace WebStack.QA.Test.OData.ETags
                 "          </Annotation>\r\n" +
                 "        </EntitySet>";
 
+            const string expectedSingletonMetadata =
+                "        <Singleton Name=\"ETagsCustomer\" Type=\"WebStack.QA.Test.OData.ETags.ETagsCustomer\">\r\n" +
+                "          <NavigationPropertyBinding Path=\"NestedCustomer\" Target=\"ETagsCustomers\" />\r\n" +
+                "          <Annotation Term=\"Org.OData.Core.V1.OptimisticConcurrency\">\r\n" +
+                "            <Collection>\r\n" +
+                "              <PropertyPath>Id</PropertyPath>\r\n" +
+                "              <PropertyPath>Name</PropertyPath>\r\n" +
+                "              <PropertyPath>BoolProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>ByteProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>CharProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>DecimalProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>DoubleProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>ShortProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>LongProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>SbyteProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>FloatProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>UshortProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>UintProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>UlongProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>GuidProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>DateTimeOffsetProperty</PropertyPath>\r\n" +
+                "              <PropertyPath>StringWithConcurrencyCheckAttributeProperty</PropertyPath>\r\n" +
+                "            </Collection>\r\n" +
+                "          </Annotation>\r\n" +
+                "        </Singleton>";
+
             string requestUri = string.Format("{0}/odata/$metadata", this.BaseAddress);
 
             HttpResponseMessage response = this.Client.GetAsync(requestUri).Result;
 
             var content = response.Content.ReadAsStringAsync().Result;
-            Assert.Contains(expectMetadata, content);
+            Assert.Contains(expectedEntitySetMetadata, content);
+            Assert.Contains(expectedSingletonMetadata, content);
 
             var stream = response.Content.ReadAsStreamAsync().Result;
             IODataResponseMessage message = new ODataMessageWrapper(stream, response.Content.Headers);
@@ -170,6 +200,46 @@ namespace WebStack.QA.Test.OData.ETags
             var jsonWithMinimalmetadataETags = jsonWithMinimalmetadataResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
             Assert.Equal(jsonWithMinimalmetadataETags.Count(), jsonWithMinimalmetadataETags.Distinct().Count());
             Assert.Equal(jsonETags, jsonWithMinimalmetadataETags);
+        }
+
+        [Fact]
+        public void SingletonsHaveETags()
+        {
+            string requestUri = this.BaseAddress + "/odata/ETagsCustomers(0)";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            HttpResponseMessage response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            var jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            var jsonETag = jsonResult.GetValue("@odata.etag");
+            Assert.NotNull(jsonETag);
+
+            requestUri = this.BaseAddress + "/odata/ETagsCustomer";
+            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            jsonETag = jsonResult.GetValue("@odata.etag");
+            Assert.NotNull(jsonETag);
+
+            requestUri = this.BaseAddress + "/odata/ETagsCustomers?$expand=NestedCustomer";
+            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            jsonETag = jsonResult.GetValue("value")[0]["NestedCustomer"]["@odata.etag"];
+            Assert.NotNull(jsonETag);
+
+            requestUri = this.BaseAddress + "/odata/ETagsCustomers(0)/NestedCustomer";
+            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            jsonETag = jsonResult.GetValue("@odata.etag");
+            Assert.NotNull(jsonETag);
         }
     }
 }

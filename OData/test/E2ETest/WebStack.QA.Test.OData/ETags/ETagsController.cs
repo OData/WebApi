@@ -17,7 +17,14 @@ namespace WebStack.QA.Test.OData.ETags
                     Name = "Customer Name " + i,
                     ShortProperty = (short)(Int16.MaxValue - i),
                     DoubleProperty = 2.0 * (i + 1),
-                    Notes = Enumerable.Range(0, i + 1).Select(j => "This is note " + (i * 10 + j)).ToList()
+                    Notes = Enumerable.Range(0, i + 1).Select(j => "This is note " + (i * 10 + j)).ToList(),
+                    NestedCustomer = new ETagsCustomer {
+                        Id = i * 10,
+                        Name = "Customer Name " + i * 10,
+                        ShortProperty = (short)(Int16.MaxValue - i * 10),
+                        DoubleProperty = 2.0 * (i * 10 + 1),
+                        Notes = Enumerable.Range(0, i * 10 + 1).Select(j => "This is note " + (i * 100 + j)).ToList()
+                    }
                 }).ToList();
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
@@ -145,5 +152,28 @@ namespace WebStack.QA.Test.OData.ETags
 
             return Ok(customer);
         }
+
+        public IHttpActionResult GetNestedCustomer()
+        {
+            return Ok(customers[0]);
+        }
+    }
+
+    public class ETagsCustomerController : ODataController
+    {
+        public IHttpActionResult Get()
+        {
+            ETagsCustomer customer = new ETagsCustomer
+            {
+                Id = 0,
+                Name = "Customer Name " + 0,
+                ShortProperty = (short)(Int16.MaxValue),
+                DoubleProperty = 2.0,
+                Notes = Enumerable.Range(0, 1).Select(j => "This is note " + (j)).ToList()
+            };
+            
+            return Ok(customer);
+        }
+
     }
 }

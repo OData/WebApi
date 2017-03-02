@@ -530,7 +530,7 @@ namespace System.Web.OData.Builder
 
         private static void AddNavPropAnnotations(this EdmModel model, ODataModelBuilder builder, EdmTypeMap edmTypeMap)
         {
-            IEnumerable<IEdmProperty> containmentNavProps = edmTypeMap.EdmProperties.Select(p=>p.Value).OfType<EdmNavigationProperty>().Where(p => p.ContainsTarget);
+            IEnumerable<IEdmProperty> containmentNavProps = edmTypeMap.EdmProperties.Select(p => p.Value).OfType<EdmNavigationProperty>().Where(p => p.ContainsTarget);
             foreach (var containmentNavProp in containmentNavProps)
             {
                 EntityTypeConfiguration entityTypeConfig = builder.StructuralTypes.OfType<EntityTypeConfiguration>().Where(e => e.FullName == containmentNavProp.Type.FullName()).FirstOrDefault();

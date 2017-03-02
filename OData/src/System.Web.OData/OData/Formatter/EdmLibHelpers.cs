@@ -451,11 +451,15 @@ namespace System.Web.OData.Formatter
 
             IList<IEdmStructuralProperty> results = new List<IEdmStructuralProperty>();
             IEdmEntityType entityType = navigationSource.EntityType();
-            if (navigationSource is IEdmVocabularyAnnotatable)
+            IEdmVocabularyAnnotatable annotatable = navigationSource as IEdmVocabularyAnnotatable;
+            if (navigationSource is IEdmContainedEntitySet)
             {
-                IEnumerable<IEdmValueAnnotation> annotations = model.FindVocabularyAnnotations<IEdmValueAnnotation>(navigationSource as IEdmVocabularyAnnotatable, CoreVocabularyModel.ConcurrencyTerm);
+                annotatable = (navigationSource as IEdmContainedEntitySet).NavigationProperty as EdmNavigationProperty;
+            }
 
-                IEdmValueAnnotation annotation = annotations.FirstOrDefault();
+            if (annotatable != null)
+            {
+                IEdmValueAnnotation annotation = model.FindVocabularyAnnotations<IEdmValueAnnotation>(annotatable, CoreVocabularyModel.ConcurrencyTerm).FirstOrDefault();
                 if (annotation != null)
                 {
                     IEdmCollectionExpression properties = annotation.Value as IEdmCollectionExpression;

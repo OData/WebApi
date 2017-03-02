@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Web.OData.Builder;
 
 namespace WebStack.QA.Test.OData.ETags
 {
@@ -25,6 +26,8 @@ namespace WebStack.QA.Test.OData.ETags
         public DateTimeOffset DateTimeOffsetProperty { get; set; }
         [ConcurrencyCheck]
         public string StringWithConcurrencyCheckAttributeProperty { get; set; }
-        public ETagsCustomer NestedCustomer { get; set; }
+        public ETagsCustomer RelatedCustomer { get; set; }
+        [Contained]
+        public ETagsCustomer ContainedCustomer { get; set; }
     }
 }

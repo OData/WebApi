@@ -9,12 +9,12 @@ using System.Reflection;
 using System.Web.Http;
 using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Csdl;
 using Microsoft.OData.Edm.Expressions;
 using Microsoft.OData.Edm.Library;
+using Microsoft.OData.Edm.Library.Annotations;
 using Microsoft.OData.Edm.Library.Expressions;
 using Microsoft.OData.Edm.Validation;
-using Microsoft.OData.Edm.Library.Annotations;
-using Microsoft.OData.Edm.Csdl;
 
 namespace System.Web.OData.Builder
 {
@@ -46,9 +46,12 @@ namespace System.Web.OData.Builder
 
             // Build the navigation source map
             IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(builder, edmTypeMap, navigationSources);
-
+            
             // Add the core vocabulary annotations
             model.AddCoreVocabularyAnnotations(navigationSources, edmMap);
+
+            // Add the nav property annotations
+            model.AddNavPropAnnotations(builder, edmMap);
 
             // Add the capabilities vocabulary annotations
             model.AddCapabilitiesVocabularyAnnotations(entitySets, edmMap);
@@ -521,15 +524,26 @@ namespace System.Web.OData.Builder
                     continue;
                 }
 
-                model.AddOptimisticConcurrencyAnnotation(navigationSource, navigationSourceConfig, edmTypeMap);
+                model.AddOptimisticConcurrencyAnnotation(navigationSource, navigationSourceConfig.EntityType, edmTypeMap);
+            }
+        }
+
+        private static void AddNavPropAnnotations(this EdmModel model, ODataModelBuilder builder, EdmTypeMap edmTypeMap)
+        {
+            IEnumerable<IEdmProperty> containmentNavProps = edmTypeMap.EdmProperties.Select(p=>p.Value).OfType<EdmNavigationProperty>().Where(p => p.ContainsTarget);
+            foreach (var containmentNavProp in containmentNavProps)
+            {
+                EntityTypeConfiguration entityTypeConfig = builder.StructuralTypes.OfType<EntityTypeConfiguration>().Where(e => e.FullName == containmentNavProp.Type.FullName()).FirstOrDefault();
+                if (entityTypeConfig != null)
+                {
+                    model.AddOptimisticConcurrencyAnnotation(containmentNavProp, entityTypeConfig, edmTypeMap);
+                }
             }
         }
 
         private static void AddOptimisticConcurrencyAnnotation(this EdmModel model, IEdmVocabularyAnnotatable target,
-            NavigationSourceConfiguration navigationSourceConfiguration, EdmTypeMap edmTypeMap)
+            EntityTypeConfiguration entityTypeConfig, EdmTypeMap edmTypeMap)
         {
-            EntityTypeConfiguration entityTypeConfig = navigationSourceConfiguration.EntityType;
-
             IEnumerable<StructuralPropertyConfiguration> concurrencyPropertyies =
                 entityTypeConfig.Properties.OfType<StructuralPropertyConfiguration>().Where(property => property.ConcurrencyToken);
 

@@ -491,7 +491,11 @@ namespace System.Web.OData.Formatter.Serialization
             }
 
             bool nullDynamicPropertyEnabled = false;
-            if (resourceContext.Request != null)
+            if (resourceContext.EdmObject is EdmDeltaComplexObject || resourceContext.EdmObject is EdmDeltaEntityObject)
+            {
+                nullDynamicPropertyEnabled = true;
+            }
+            else if (resourceContext.Request != null)
             {
                 HttpConfiguration configuration = resourceContext.Request.GetConfiguration();
                 if (configuration != null)

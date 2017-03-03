@@ -210,6 +210,7 @@ namespace WebStack.QA.Test.OData.ETags
             request.Headers.Accept.ParseAdd("application/json");
             HttpResponseMessage response = this.Client.SendAsync(request).Result;
             Assert.True(response.IsSuccessStatusCode);
+            Assert.True(response.Headers.Contains("ETag"), "Single ETagsCustomer is missing ETag Header");
             var jsonResult = response.Content.ReadAsAsync<JObject>().Result;
             var jsonETag = jsonResult.GetValue("@odata.etag");
             Assert.True(jsonETag != null, "Single ETagsCustomer from Entity Set is missing ETag");
@@ -219,6 +220,7 @@ namespace WebStack.QA.Test.OData.ETags
             request.Headers.Accept.ParseAdd("application/json");
             response = this.Client.SendAsync(request).Result;
             Assert.True(response.IsSuccessStatusCode);
+            Assert.True(response.Headers.Contains("ETag"), "Singleton ETagsCustomer is missing ETag Header");
             jsonResult = response.Content.ReadAsAsync<JObject>().Result;
             jsonETag = jsonResult.GetValue("@odata.etag");
             Assert.True(jsonETag != null, "Singleton ETagsCustomer is missing ETag");
@@ -246,6 +248,7 @@ namespace WebStack.QA.Test.OData.ETags
             request.Headers.Accept.ParseAdd("application/json");
             response = this.Client.SendAsync(request).Result;
             Assert.True(response.IsSuccessStatusCode);
+            Assert.True(response.Headers.Contains("ETag"), "Selected single contained ETagsCustomer is missing ETag Header");
             jsonResult = response.Content.ReadAsAsync<JObject>().Result;
             jsonETag = jsonResult.GetValue("@odata.etag");
             Assert.True(jsonETag != null, "Selected contained ETagsCustomer missing ETag");
@@ -255,6 +258,7 @@ namespace WebStack.QA.Test.OData.ETags
             request.Headers.Accept.ParseAdd("application/json");
             response = this.Client.SendAsync(request).Result;
             Assert.True(response.IsSuccessStatusCode);
+            Assert.True(response.Headers.Contains("ETag"), "Selected single related ETagsCustomer is missing ETag Header");
             jsonResult = response.Content.ReadAsAsync<JObject>().Result;
             jsonETag = jsonResult.GetValue("@odata.etag");
             Assert.True(jsonETag != null, "Selected related ETagsCustomer missing ETag");

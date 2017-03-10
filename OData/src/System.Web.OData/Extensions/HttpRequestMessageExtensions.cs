@@ -136,10 +136,10 @@ namespace System.Web.OData.Extensions
                 // get property names from request
                 ODataPath odataPath = request.ODataProperties().Path;
                 IEdmModel model = request.ODataProperties().Model;
-                IEdmEntitySet entitySet = odataPath.NavigationSource as IEdmEntitySet;
-                if (model != null && entitySet != null)
+                IEdmNavigationSource source = odataPath.NavigationSource;
+                if (model != null && source != null)
                 {
-                    IList<IEdmStructuralProperty> concurrencyProperties = model.GetConcurrencyProperties(entitySet).ToList();
+                    IList<IEdmStructuralProperty> concurrencyProperties = model.GetConcurrencyProperties(source).ToList();
                     IList<string> concurrencyPropertyNames = concurrencyProperties.OrderBy(c => c.Name).Select(c => c.Name).AsList();
                     ETag etag = new ETag();
 

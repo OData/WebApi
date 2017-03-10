@@ -70,12 +70,15 @@ namespace WebStack.QA.Test.OData
             Assert.True(results.value.Count == 7, "There should be 7 entries in the response");
 
             var changeEntity = results.value[0];
-            Assert.True(((JToken)changeEntity).Count() == 5, "The changed customer should have 4 properties plus type written.");
+            Assert.True(((JToken)changeEntity).Count() == 7, "The changed customer should have 6 properties plus type written.");
             string changeEntityType = changeEntity["@odata.type"].Value as string;
             Assert.True(changeEntityType != null, "The changed customer should have type written");
             Assert.True(changeEntityType.Contains("#WebStack.QA.Test.OData.TestCustomerWithAddress"), "The changed order should be a TestCustomerWithAddress");
             Assert.True(changeEntity.Id.Value == 1, "The ID Of changed customer should be 1.");
-            Assert.True(changeEntity.Name.Value == "Name", "The Name of changed customer should be 'Name'");
+            Assert.True(changeEntity.Name.Value == "Name", "The Name of changed customer should be 'Name'.");
+            Assert.True(changeEntity.OpenProperty.Value == 10, "The OpenProperty property of changed customer should be 10.");
+            Assert.True(changeEntity.NullOpenProperty.Value == null, "The NullOpenProperty property of changed customer should be null.");
+            Assert.True(changeEntity.Name.Value == "Name", "The Name of changed customer should be 'Name'.");
             Assert.True(((JToken)changeEntity.Address).Count() == 2, "The changed entity's Address should have 2 properties written.");
             Assert.True(changeEntity.Address.State.Value == "State", "The changed customer's Address.State should be 'State'.");
             Assert.True(changeEntity.Address.ZipCode.Value == (int?)null, "The changed customer's Address.ZipCode should be null.");
@@ -99,10 +102,12 @@ namespace WebStack.QA.Test.OData
             Assert.True(place1.ZipCode.Value == (int?)null, "The first favorite place's Address.ZipCode should be null.");
 
             var place2 = places[1];
-            Assert.True(((JToken)place2).Count() == 3, "The second favorite place should have 3 properties written.");
+            Assert.True(((JToken)place2).Count() == 5, "The second favorite place should have 5 properties written.");
             Assert.True(place2.City.Value == "City2", "The second favorite place's Address.City should be 'City2'.");
             Assert.True(place2.State.Value == "State2", "The second favorite place's Address.State should be 'State2'.");
             Assert.True(place2.ZipCode.Value == 12345, "The second favorite place's Address.ZipCode should be 12345.");
+            Assert.True(place2.OpenProperty.Value == 10, "The second favorite place's Address.OpenProperty should be 10.");
+            Assert.True(place2.NullOpenProperty.Value == null, "The second favorite place's Address.NullOpenProperty should be null.");
 
             var newOrder = results.value[2];
             Assert.True(((JToken)newOrder).Count() == 3, "The new order should have 2 properties plus context written");
@@ -156,6 +161,8 @@ namespace WebStack.QA.Test.OData
             changedEntity.TrySetPropertyValue("Name", "Name");
             changedEntity.TrySetPropertyValue("Address", a);
             changedEntity.TrySetPropertyValue("PhoneNumbers", new List<String> { "123-4567", "765-4321" });
+            changedEntity.TrySetPropertyValue("OpenProperty", 10);
+            changedEntity.TrySetPropertyValue("NullOpenProperty", null);
             changedObjects.Add(changedEntity);
 
             EdmComplexObjectCollection places = new EdmComplexObjectCollection(new EdmCollectionTypeReference(new EdmCollectionType(new EdmComplexTypeReference(addressType,true))));
@@ -163,6 +170,8 @@ namespace WebStack.QA.Test.OData
             b.TrySetPropertyValue("City", "City2");
             b.TrySetPropertyValue("State", "State2");
             b.TrySetPropertyValue("ZipCode", 12345);
+            b.TrySetPropertyValue("OpenProperty", 10);
+            b.TrySetPropertyValue("NullOpenProperty", null);
             places.Add(a);
             places.Add(b);
 
@@ -213,6 +222,7 @@ namespace WebStack.QA.Test.OData
         public virtual IList<string> PhoneNumbers {get; set;}
         public virtual IList<TestOrder> Orders { get; set; }
         public virtual IList<TestAddress> FavoritePlaces { get; set; }
+        public IDictionary<string, object> DynamicProperties { get; set; }
     }
 
     public class TestCustomerWithAddress : TestCustomer
@@ -231,5 +241,6 @@ namespace WebStack.QA.Test.OData
         public string State { get; set; }
         public string City { get; set; }
         public int? ZipCode { get; set; }
+        public IDictionary<string, object> DynamicProperties { get; set; }
     }
 }

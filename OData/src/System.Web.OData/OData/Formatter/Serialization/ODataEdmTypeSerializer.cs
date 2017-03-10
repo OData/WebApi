@@ -97,7 +97,11 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(writeContext.Model != null);
 
             bool nullDynamicPropertyEnabled = false;
-            if (writeContext.Request != null)
+            if (source is EdmDeltaComplexObject || source is EdmDeltaEntityObject)
+            {
+                nullDynamicPropertyEnabled = true;
+            }
+            else if (writeContext.Request != null)
             {
                 HttpConfiguration configuration = writeContext.Request.GetConfiguration();
                 if (configuration != null)

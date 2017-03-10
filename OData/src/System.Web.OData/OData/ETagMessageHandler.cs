@@ -115,12 +115,11 @@ namespace System.Web.OData
             IETagHandler handler)
         {
             IEdmModel model = entityInstanceContext.EdmModel;
-            IEdmEntitySet entitySet = entityInstanceContext.NavigationSource as IEdmEntitySet;
 
             IEnumerable<IEdmStructuralProperty> concurrencyProperties;
-            if (model != null && entitySet != null)
+            if (model != null && entityInstanceContext.NavigationSource != null)
             {
-                concurrencyProperties = model.GetConcurrencyProperties(entitySet).OrderBy(c => c.Name);
+                concurrencyProperties = model.GetConcurrencyProperties(entityInstanceContext.NavigationSource).OrderBy(c => c.Name);
             }
             else
             {

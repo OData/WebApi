@@ -436,41 +436,49 @@ namespace System.Web.OData.Formatter
             return String.Format(CultureInfo.InvariantCulture, "{0}.{1}", clrType.Namespace, clrType.EdmName());
         }
 
-        private static ConcurrentDictionary<IEdmEntitySet, IEnumerable<IEdmStructuralProperty>> _concurrencyProperties;
+        private static ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>> _concurrencyProperties;
 
-        public static IEnumerable<IEdmStructuralProperty> GetConcurrencyProperties(this IEdmModel model, IEdmEntitySet entitySet)
+        public static IEnumerable<IEdmStructuralProperty> GetConcurrencyProperties(this IEdmModel model, IEdmNavigationSource navigationSource)
         {
             Contract.Assert(model != null);
-            Contract.Assert(entitySet != null);
+            Contract.Assert(navigationSource != null);
 
             IEnumerable<IEdmStructuralProperty> cachedProperties;
-            if (_concurrencyProperties != null && _concurrencyProperties.TryGetValue(entitySet, out cachedProperties))
+            if (_concurrencyProperties != null && _concurrencyProperties.TryGetValue(navigationSource, out cachedProperties))
             {
                 return cachedProperties;
             }
 
             IList<IEdmStructuralProperty> results = new List<IEdmStructuralProperty>();
-            IEdmEntityType entityType = entitySet.EntityType();
-            var annotations = model.FindVocabularyAnnotations<IEdmValueAnnotation>(entitySet, CoreVocabularyModel.ConcurrencyTerm);
-            IEdmValueAnnotation annotation = annotations.FirstOrDefault();
-            if (annotation != null)
+            IEdmEntityType entityType = navigationSource.EntityType();
+            IEdmVocabularyAnnotatable annotatable = navigationSource as IEdmVocabularyAnnotatable;
+            if (navigationSource is IEdmContainedEntitySet)
             {
-                IEdmCollectionExpression properties = annotation.Value as IEdmCollectionExpression;
-                if (properties != null)
+                annotatable = (navigationSource as IEdmContainedEntitySet).NavigationProperty as EdmNavigationProperty;
+            }
+
+            if (annotatable != null)
+            {
+                IEdmValueAnnotation annotation = model.FindVocabularyAnnotations<IEdmValueAnnotation>(annotatable, CoreVocabularyModel.ConcurrencyTerm).FirstOrDefault();
+                if (annotation != null)
                 {
-                    foreach (var property in properties.Elements)
+                    IEdmCollectionExpression properties = annotation.Value as IEdmCollectionExpression;
+                    if (properties != null)
                     {
-                        IEdmPathExpression pathExpression = property as IEdmPathExpression;
-                        if (pathExpression != null)
+                        foreach (var property in properties.Elements)
                         {
-                            // So far, we only consider the single path, because only the direct properties from declaring type are used.
-                            // However we have an issue tracking on: https://github.com/OData/WebApi/issues/472
-                            string propertyName = pathExpression.Path.Single();
-                            IEdmProperty edmProperty = entityType.FindProperty(propertyName);
-                            IEdmStructuralProperty structuralProperty = edmProperty as IEdmStructuralProperty;
-                            if (structuralProperty != null)
+                            IEdmPathExpression pathExpression = property as IEdmPathExpression;
+                            if (pathExpression != null)
                             {
-                                results.Add(structuralProperty);
+                                // So far, we only consider the single path, because only the direct properties from declaring type are used.
+                                // However we have an issue tracking on: https://github.com/OData/WebApi/issues/472
+                                string propertyName = pathExpression.Path.Single();
+                                IEdmProperty edmProperty = entityType.FindProperty(propertyName);
+                                IEdmStructuralProperty structuralProperty = edmProperty as IEdmStructuralProperty;
+                                if (structuralProperty != null)
+                                {
+                                    results.Add(structuralProperty);
+                                }
                             }
                         }
                     }
@@ -479,10 +487,10 @@ namespace System.Web.OData.Formatter
 
             if (_concurrencyProperties == null)
             {
-                _concurrencyProperties = new ConcurrentDictionary<IEdmEntitySet, IEnumerable<IEdmStructuralProperty>>();
+                _concurrencyProperties = new ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>>();
             }
 
-            _concurrencyProperties[entitySet] = results;
+            _concurrencyProperties[navigationSource] = results;
             return results;
         }
 

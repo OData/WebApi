@@ -75,6 +75,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
             var conventions = ODataRoutingConventions.CreateDefault();
+            conventions.Insert(0, new DeleteAllRoutingConvention());
             conventions.Insert(0, new NavigationRoutingConvention2());
             conventions.Insert(0, new LinkRoutingConvention2());
 

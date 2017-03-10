@@ -58,7 +58,7 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmTypeReference feedType = writeContext.GetEdmType(graph, type);
             Contract.Assert(feedType != null);
 
-            IEdmEntityTypeReference entityType = GetEntityType(feedType);
+            IEdmEntityTypeReference entityType = GetResourceType(feedType).AsEntity();
             ODataDeltaWriter writer = messageWriter.CreateODataDeltaWriter(entitySet, entityType.EntityDefinition());
 
             WriteDeltaFeedInline(graph, feedType, writer, writeContext);
@@ -110,70 +110,95 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(enumerable != null);
             Contract.Assert(feedType != null);
 
-            ODataDeltaResourceSet deltaFeed = CreateODataDeltaFeed(enumerable, feedType.AsCollection(), writeContext);
-            if (deltaFeed == null)
+            IEdmStructuredTypeReference elementType = GetResourceType(feedType);
+
+            if (elementType.IsComplex())
             {
-                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, DeltaFeed));
+                ODataResourceSet resourceSet = new ODataResourceSet()
+                {
+                    TypeName = feedType.FullName()
+                };
+
+                writer.WriteStart(resourceSet);
+
+                ODataResourceSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType) as ODataResourceSerializer;
+                if (entrySerializer == null)
+                {
+                    throw new SerializationException(
+                        Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                }
+
+                foreach (object entry in enumerable)
+                {
+                    entrySerializer.WriteDeltaObjectInline(entry, elementType, writer, writeContext);
+                }
             }
-
-            // save this for later to support JSON odata.streaming.
-            Uri nextPageLink = deltaFeed.NextPageLink;
-            deltaFeed.NextPageLink = null;
-
-            //Start writing of the Delta Feed
-            writer.WriteStart(deltaFeed);
-
-            //Iterate over all the entries present and select the appropriate write method.
-            //Write method creates ODataDeltaDeletedEntry / ODataDeltaDeletedLink / ODataDeltaLink or ODataEntry.
-            foreach (object entry in enumerable)
+            else
             {
-                if (entry == null)
+                ODataDeltaResourceSet deltaFeed = CreateODataDeltaFeed(enumerable, feedType.AsCollection(), writeContext);
+                if (deltaFeed == null)
                 {
-                    throw new SerializationException(SRResources.NullElementInCollection);
+                    throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, DeltaFeed));
                 }
 
-                IEdmChangedObject edmChangedObject = entry as IEdmChangedObject;
-                if (edmChangedObject == null)
-                {
-                    throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, enumerable.GetType().FullName));
-                }
+                // save this for later to support JSON odata.streaming.
+                Uri nextPageLink = deltaFeed.NextPageLink;
+                deltaFeed.NextPageLink = null;
 
-                switch (edmChangedObject.DeltaKind)
+                //Start writing of the Delta Feed
+                writer.WriteStart(deltaFeed);
+
+                //Iterate over all the entries present and select the appropriate write method.
+                //Write method creates ODataDeltaDeletedEntry / ODataDeltaDeletedLink / ODataDeltaLink or ODataEntry.
+                foreach (object entry in enumerable)
                 {
-                    case EdmDeltaEntityKind.DeletedEntry:
-                        WriteDeltaDeletedEntry(entry, writer, writeContext);
-                        break;
-                    case EdmDeltaEntityKind.DeletedLinkEntry:
-                        WriteDeltaDeletedLink(entry, writer, writeContext);
-                        break;
-                    case EdmDeltaEntityKind.LinkEntry:
-                        WriteDeltaLink(entry, writer, writeContext);
-                        break;
-                    case EdmDeltaEntityKind.Entry:
-                        {
-                            IEdmEntityTypeReference elementType = GetEntityType(feedType);
-                            ODataResourceSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType) as ODataResourceSerializer;
-                            if (entrySerializer == null)
-                            {
-                                throw new SerializationException(
-                                    Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
-                            }
-                            entrySerializer.WriteDeltaObjectInline(entry, elementType, writer, writeContext);
+                    if (entry == null)
+                    {
+                        throw new SerializationException(SRResources.NullElementInCollection);
+                    }
+
+                    IEdmChangedObject edmChangedObject = entry as IEdmChangedObject;
+                    if (edmChangedObject == null)
+                    {
+                        throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, enumerable.GetType().FullName));
+                    }
+
+                    switch (edmChangedObject.DeltaKind)
+                    {
+                        case EdmDeltaEntityKind.DeletedEntry:
+                            WriteDeltaDeletedEntry(entry, writer, writeContext);
                             break;
-                        }
-                    default:
-                        break;
+                        case EdmDeltaEntityKind.DeletedLinkEntry:
+                            WriteDeltaDeletedLink(entry, writer, writeContext);
+                            break;
+                        case EdmDeltaEntityKind.LinkEntry:
+                            WriteDeltaLink(entry, writer, writeContext);
+                            break;
+                        case EdmDeltaEntityKind.Entry:
+                            {
+                                ODataResourceSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType) as ODataResourceSerializer;
+                                if (entrySerializer == null)
+                                {
+                                    throw new SerializationException(
+                                        Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                                }
+                                entrySerializer.WriteDeltaObjectInline(entry, elementType, writer, writeContext);
+                                break;
+                            }
+                        default:
+                            break;
+                    }
                 }
-            }
 
-            // Subtle and surprising behavior: If the NextPageLink property is set before calling WriteStart(feed),
-            // the next page link will be written early in a manner not compatible with odata.streaming=true. Instead, if
-            // the next page link is not set when calling WriteStart(feed) but is instead set later on that feed
-            // object before calling WriteEnd(), the next page link will be written at the end, as required for
-            // odata.streaming=true support.
-            if (nextPageLink != null)
-            {
-                deltaFeed.NextPageLink = nextPageLink;
+                // Subtle and surprising behavior: If the NextPageLink property is set before calling WriteStart(feed),
+                // the next page link will be written early in a manner not compatible with odata.streaming=true. Instead, if
+                // the next page link is not set when calling WriteStart(feed) but is instead set later on that feed
+                // object before calling WriteEnd(), the next page link will be written at the end, as required for
+                // odata.streaming=true support.
+                if (nextPageLink != null)
+                {
+                    deltaFeed.NextPageLink = nextPageLink;
+                }
             }
 
             //End Writing of the Delta Feed
@@ -204,6 +229,7 @@ namespace System.Web.OData.Formatter.Serialization
                 else if (writeContext.Request != null)
                 {
                     feed.NextPageLink = writeContext.Request.ODataProperties().NextLink;
+                    feed.DeltaLink = writeContext.Request.ODataProperties().DeltaLink;
 
                     long? countValue = writeContext.Request.ODataProperties().TotalCount;
                     if (countValue.HasValue)
@@ -241,6 +267,13 @@ namespace System.Web.OData.Formatter.Serialization
 
             ODataDeltaDeletedEntry deltaDeletedEntry = new ODataDeltaDeletedEntry(
                edmDeltaDeletedEntity.Id, edmDeltaDeletedEntity.Reason);
+
+            if (edmDeltaDeletedEntity.NavigationSource != null)
+            {
+                ODataDeltaSerializationInfo serializationInfo = new ODataDeltaSerializationInfo();
+                serializationInfo.NavigationSourceName = edmDeltaDeletedEntity.NavigationSource.Name;
+                deltaDeletedEntry.SetSerializationInfo(serializationInfo);
+            }
 
             if (deltaDeletedEntry != null)
             {
@@ -300,14 +333,14 @@ namespace System.Web.OData.Formatter.Serialization
             }
         }
 
-        private static IEdmEntityTypeReference GetEntityType(IEdmTypeReference feedType)
+        private static IEdmStructuredTypeReference GetResourceType(IEdmTypeReference feedType)
         {
             if (feedType.IsCollection())
             {
                 IEdmTypeReference elementType = feedType.AsCollection().ElementType();
-                if (elementType.IsEntity())
+                if (elementType.IsEntity() || elementType.IsComplex())
                 {
-                    return elementType.AsEntity();
+                    return elementType.AsStructured();
                 }
             }
 

@@ -491,6 +491,23 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         [Fact]
+        public void CreateODataFeed_Sets_DeltaLinkFromContext()
+        {
+            // Arrange
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(_serializerProvider);
+            Uri expectedDeltaLink = new Uri("http://deltalink.com");
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.ODataProperties().DeltaLink = expectedDeltaLink;
+            var result = new object[0];
+
+            // Act
+            ODataResourceSet feed = serializer.CreateResourceSet(result, _customersType, new ODataSerializerContext { Request = request });
+
+            // Assert
+            Assert.Equal(expectedDeltaLink, feed.DeltaLink);
+        }
+
+        [Fact]
         public void CreateResource_Ignores_NextPageLink_ForInnerResourceSets()
         {
             // Arrange

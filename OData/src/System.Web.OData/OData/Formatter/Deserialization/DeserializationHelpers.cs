@@ -362,7 +362,7 @@ namespace System.Web.OData.Formatter.Deserialization
             int intValue;
             decimal decimalValue;
 
-            if (string.CompareOrdinal(value, "null") == 0)
+            if (String.CompareOrdinal(value, "null") == 0)
             {
                 return null;
             }
@@ -383,14 +383,13 @@ namespace System.Web.OData.Formatter.Deserialization
                 return doubleValue;
             }
 
-            if (!value.StartsWith("\"") || !value.EndsWith("\"") )
+            if (!value.StartsWith("\"") || !value.EndsWith("\""))
             {
                 throw new ODataException(Error.Format(SRResources.InvalidODataUntypedValue, value));
             }
 
-            return value.Substring(1,value.Length-2);
+            return value.Substring(1, value.Length - 2);
         }
-
 
         private static object ConvertEnumValue(ODataEnumValue enumValue, ref IEdmTypeReference propertyType,
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)

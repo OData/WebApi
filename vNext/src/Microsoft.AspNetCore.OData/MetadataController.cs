@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.OData
 {
     [ApiExplorerSettings(IgnoreApi = true)]
     // [Route("odata/$metadata")]
-    public class MetadataController : Controller
+    public class MetadataController : ControllerBase
     {
         private static readonly Version _defaultEdmxVersion = new Version(4, 0);
 

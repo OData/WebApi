@@ -46,7 +46,7 @@ namespace System.Web.OData.Builder
 
             // Build the navigation source map
             IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(builder, edmTypeMap, navigationSources);
-            
+
             // Add the core vocabulary annotations
             model.AddCoreVocabularyAnnotations(navigationSources, edmMap);
 
@@ -565,6 +565,7 @@ namespace System.Web.OData.Builder
             if (edmProperties.Any())
             {
                 // todo: fix SetOptimisticConcurrencyAnnotation to support setting concurrency annotations on singletons
+                // https://github.com/OData/odata.net/issues/770
                 // model.SetOptimisticConcurrencyAnnotation(target, edmProperties);
 
                 IEdmCollectionExpression collectionExpression = new EdmCollectionExpression(edmProperties.Select(p => new EdmPropertyPathExpression(p.Name)).ToArray());

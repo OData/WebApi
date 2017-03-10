@@ -43,16 +43,6 @@ namespace WebStack.QA.Test.OData.ETags
                     defaultHandler: HttpClientFactory.CreatePipeline(
                         innerHandler: new HttpControllerDispatcher(configuration),
                         handlers: new[] { new System.Web.OData.ETagMessageHandler() }));
-            //configuration.
-            //    MapODataServiceRoute(
-            //        routeName: "odata",
-            //        routePrefix: "odata",
-            //        model: model,
-            //        pathHandler: new DefaultODataPathHandler(),
-            //        routingConventions: ODataRoutingConventions.CreateDefault(),
-            //        defaultHandler: HttpClientFactory.CreatePipeline(
-            //            innerHandler: new HttpControllerDispatcher(configuration),
-            //            handlers: new[] { new System.Web.OData.ETagMessageHandler() }));
         }
 
         private static IEdmModel GetEdmModel()

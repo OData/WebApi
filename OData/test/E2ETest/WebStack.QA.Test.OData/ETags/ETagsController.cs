@@ -202,6 +202,7 @@ namespace WebStack.QA.Test.OData.ETags
     {
         private static ETagsCustomer customer = CreateCustomer(0);
 
+        [EnableQuery]
         public IHttpActionResult Get()
         {
             return Ok(customer);

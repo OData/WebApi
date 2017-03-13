@@ -205,6 +205,7 @@ namespace WebStack.QA.Test.OData.ETags
         [Fact]
         public void SingletonsHaveETags()
         {
+            // ETagsCustomers Entity Set
             string requestUri = this.BaseAddress + "/odata/ETagsCustomers(0)";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             request.Headers.Accept.ParseAdd("application/json");
@@ -214,34 +215,6 @@ namespace WebStack.QA.Test.OData.ETags
             var jsonResult = response.Content.ReadAsAsync<JObject>().Result;
             var jsonETag = jsonResult.GetValue("@odata.etag");
             Assert.True(jsonETag != null, "Single ETagsCustomer from Entity Set is missing ETag");
-
-            requestUri = this.BaseAddress + "/odata/ETagsCustomer";
-            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            request.Headers.Accept.ParseAdd("application/json");
-            response = this.Client.SendAsync(request).Result;
-            Assert.True(response.IsSuccessStatusCode);
-            Assert.True(response.Headers.Contains("ETag"), "Singleton ETagsCustomer is missing ETag Header");
-            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
-            jsonETag = jsonResult.GetValue("@odata.etag");
-            Assert.True(jsonETag != null, "Singleton ETagsCustomer is missing ETag");
-
-            requestUri = this.BaseAddress + "/odata/ETagsCustomers?$expand=RelatedCustomer";
-            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            request.Headers.Accept.ParseAdd("application/json");
-            response = this.Client.SendAsync(request).Result;
-            Assert.True(response.IsSuccessStatusCode);
-            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
-            jsonETag = jsonResult.GetValue("value")[0]["RelatedCustomer"]["@odata.etag"];
-            Assert.True(jsonETag != null, "Expanded related ETagsCustomer missing ETag");
-
-            requestUri = this.BaseAddress + "/odata/ETagsCustomers?$expand=ContainedCustomer";
-            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            request.Headers.Accept.ParseAdd("application/json");
-            response = this.Client.SendAsync(request).Result;
-            Assert.True(response.IsSuccessStatusCode);
-            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
-            jsonETag = jsonResult.GetValue("value")[0]["ContainedCustomer"]["@odata.etag"];
-            Assert.True(jsonETag != null, "Expanded contained ETagsCustomer missing ETag");
 
             requestUri = this.BaseAddress + "/odata/ETagsCustomers(0)/ContainedCustomer";
             request = new HttpRequestMessage(HttpMethod.Get, requestUri);
@@ -262,6 +235,91 @@ namespace WebStack.QA.Test.OData.ETags
             jsonResult = response.Content.ReadAsAsync<JObject>().Result;
             jsonETag = jsonResult.GetValue("@odata.etag");
             Assert.True(jsonETag != null, "Selected related ETagsCustomer missing ETag");
+
+            requestUri = this.BaseAddress + "/odata/ETagsCustomers?$expand=RelatedCustomer";
+            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            jsonETag = jsonResult.GetValue("value")[0]["RelatedCustomer"]["@odata.etag"];
+            Assert.True(jsonETag != null, "Expanded related ETagsCustomer missing ETag");
+
+            requestUri = this.BaseAddress + "/odata/ETagsCustomers?$expand=ContainedCustomer";
+            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            jsonETag = jsonResult.GetValue("value")[0]["ContainedCustomer"]["@odata.etag"];
+            Assert.True(jsonETag != null, "Expanded contained ETagsCustomer missing ETag");
+
+            requestUri = this.BaseAddress + "/odata/ETagsCustomers(0)?$expand=RelatedCustomer";
+            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            jsonETag = jsonResult.GetValue("RelatedCustomer")["@odata.etag"];
+            Assert.True(jsonETag != null, "Expanded related ETagsCustomer missing ETag");
+
+            requestUri = this.BaseAddress + "/odata/ETagsCustomers(0)?$expand=ContainedCustomer";
+            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            jsonETag = jsonResult.GetValue("ContainedCustomer")["@odata.etag"];
+            Assert.True(jsonETag != null, "Expanded contained ETagsCustomer missing ETag");
+
+            //ETagsCustomer singleton
+            requestUri = this.BaseAddress + "/odata/ETagsCustomer";
+            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.True(response.Headers.Contains("ETag"), "Singleton ETagsCustomer is missing ETag Header");
+            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            jsonETag = jsonResult.GetValue("@odata.etag");
+            Assert.True(jsonETag != null, "Singleton ETagsCustomer is missing ETag");
+
+            requestUri = this.BaseAddress + "/odata/ETagsCustomer/ContainedCustomer";
+            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.True(response.Headers.Contains("ETag"), "Selected single contained ETagsCustomer is missing ETag Header");
+            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            jsonETag = jsonResult.GetValue("@odata.etag");
+            Assert.True(jsonETag != null, "Selected contained ETagsCustomer missing ETag");
+
+            requestUri = this.BaseAddress + "/odata/ETagsCustomer/RelatedCustomer";
+            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.True(response.Headers.Contains("ETag"), "Selected single related ETagsCustomer is missing ETag Header");
+            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            jsonETag = jsonResult.GetValue("@odata.etag");
+            Assert.True(jsonETag != null, "Selected related ETagsCustomer missing ETag");
+
+            requestUri = this.BaseAddress + "/odata/ETagsCustomer?$expand=RelatedCustomer";
+            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            jsonETag = jsonResult.GetValue("RelatedCustomer")["@odata.etag"];
+            Assert.True(jsonETag != null, "Expanded related ETagsCustomer missing ETag");
+
+            requestUri = this.BaseAddress + "/odata/ETagsCustomer?$expand=ContainedCustomer";
+            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json");
+            response = this.Client.SendAsync(request).Result;
+            Assert.True(response.IsSuccessStatusCode);
+            jsonResult = response.Content.ReadAsAsync<JObject>().Result;
+            jsonETag = jsonResult.GetValue("ContainedCustomer")["@odata.etag"];
+            Assert.True(jsonETag != null, "Expanded contained ETagsCustomer missing ETag");
         }
     }
 }

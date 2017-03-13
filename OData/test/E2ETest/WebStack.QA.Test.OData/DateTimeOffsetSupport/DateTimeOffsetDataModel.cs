@@ -10,7 +10,7 @@ namespace WebStack.QA.Test.OData.DateTimeOffsetSupport
     public class FilesContext : DbContext
     {
         public static string ConnectionString =
-            @"Data Source=.;Integrated Security=True;Initial Catalog=DateTimeOffsetSupport";
+            @"Data Source=(LocalDb)\v11.0;;Integrated Security=True;Initial Catalog=DateTimeOffsetSupport";
 
         public FilesContext() : base(ConnectionString) { }
 

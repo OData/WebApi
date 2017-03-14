@@ -674,7 +674,7 @@ namespace System.Web.OData.Query.Expressions
 
             if (nestedExpression != null)
             {
-                var nestedAccessor = ((nestedExpression as MemberInitExpression).Bindings.First() as MemberAssignment).Expression as MemberInitExpression;
+                var nestedAccessor = (((MemberInitExpression)nestedExpression).Bindings.First() as MemberAssignment).Expression as MemberInitExpression;
                 var newSource = Expression.Property(Expression.Property(source, "NestedValue"), "GroupByContainer");
                 CollectAssigments(flattenPropertyContainer, newSource, nestedAccessor, nameToAdd);
             }

@@ -97,7 +97,7 @@ namespace System.Web.OData.Query.Expressions
 
             this._linqToObjectMode = query.Provider.GetType().Namespace == HandleNullPropagationOptionHelper.Linq2ObjectsQueryProviderNamespace;
             this.baseQuery = query;
-            EnsureFlattenPropertyContainer(this._lambdaParameter);
+            EnsureFlattenedPropertyContainer(this._lambdaParameter);
 
             // Answer is query.GroupBy($it => new DynamicType1() {...}).Select($it => new DynamicType2() {...})
             // We are doing Grouping even if only aggregate was specified to have a IQuaryable after aggregation
@@ -294,7 +294,7 @@ namespace System.Web.OData.Query.Expressions
                     return CreatePropertyAccessExpression(BindAccessor(singleComplexNode.Source), singleComplexNode.Property, GetFullPropertyPath(singleComplexNode));
                 case QueryNodeKind.SingleValueOpenPropertyAccess:
                     var openNode = node as SingleValueOpenPropertyAccessNode;
-                    return GetFlattenPropertyExpression(openNode.Name) ?? Expression.Property(BindAccessor(openNode.Source), openNode.Name);
+                    return GetFlattenedPropertyExpression(openNode.Name) ?? Expression.Property(BindAccessor(openNode.Source), openNode.Name);
                 case QueryNodeKind.None:
                 case QueryNodeKind.SingleNavigationNode:
                     var navNode = node as SingleNavigationNode;
@@ -323,7 +323,7 @@ namespace System.Web.OData.Query.Expressions
             {
                 Expression cleanSource = RemoveInnerNullPropagation(source);
                 Expression propertyAccessExpression = null;
-                propertyAccessExpression = GetFlattenPropertyExpression(propertyPath) ?? Expression.Property(cleanSource, propertyName);
+                propertyAccessExpression = GetFlattenedPropertyExpression(propertyPath) ?? Expression.Property(cleanSource, propertyName);
 
                 // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
                 // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
@@ -337,7 +337,7 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                return GetFlattenPropertyExpression(propertyPath) ?? ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+                return GetFlattenedPropertyExpression(propertyPath) ?? ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
             }
         }
 

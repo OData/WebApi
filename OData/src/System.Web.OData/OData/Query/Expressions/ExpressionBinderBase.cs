@@ -68,7 +68,7 @@ namespace System.Web.OData.Query.Expressions
         /// <summary>
         /// Flattened list of properties from base query, for case when binder is applied for aggregated query.
         /// </summary>
-        protected IDictionary<string, Expression> flattenPropertyContainer;
+        protected IDictionary<string, Expression> flattenedPropertyContainer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExpressionBinderBase"/> class.
@@ -556,15 +556,15 @@ namespace System.Web.OData.Query.Expressions
         /// Analyze previous query and extract grouped properties.
         /// </summary>
         /// <param name="source"></param>
-        protected void EnsureFlattenPropertyContainer(ParameterExpression source)
+        protected void EnsureFlattenedPropertyContainer(ParameterExpression source)
         {
             if (this.baseQuery != null)
             {
-                this.flattenPropertyContainer = this.flattenPropertyContainer ?? this.GetFlattenProperties(source);
+                this.flattenedPropertyContainer = this.flattenedPropertyContainer ?? this.GetFlattenedProperties(source);
             }
         }
 
-        internal IDictionary<string, Expression> GetFlattenProperties(ParameterExpression source)
+        internal IDictionary<string, Expression> GetFlattenedProperties(ParameterExpression source)
         {
             if (this.baseQuery == null)
             {
@@ -686,15 +686,15 @@ namespace System.Web.OData.Query.Expressions
         /// </summary>
         /// <param name="propertyPath"></param>
         /// <returns>Returns null if no aggregations were used so far</returns>
-        protected Expression GetFlattenPropertyExpression(string propertyPath)
+        protected Expression GetFlattenedPropertyExpression(string propertyPath)
         {
-            if (flattenPropertyContainer == null)
+            if (flattenedPropertyContainer == null)
             {
                 return null;
             }
 
             Expression expression;
-            if (flattenPropertyContainer.TryGetValue(propertyPath, out expression))
+            if (flattenedPropertyContainer.TryGetValue(propertyPath, out expression))
             {
                 return expression;
             }

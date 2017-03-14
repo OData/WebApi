@@ -257,7 +257,7 @@ namespace System.Web.OData.Query.Expressions
         {
             if (EdmLibHelpers.IsDynamicTypeWrapper(_filterType))
             {
-                return GetFlattenPropertyExpression(openNode.Name) ?? Expression.Property(Bind(openNode.Source), openNode.Name);
+                return GetFlattenedPropertyExpression(openNode.Name) ?? Expression.Property(Bind(openNode.Source), openNode.Name);
             }
             PropertyInfo prop = GetDynamicPropertyContainer(openNode);
 
@@ -576,7 +576,7 @@ namespace System.Web.OData.Query.Expressions
             _lambdaParameters = new Dictionary<string, ParameterExpression>();
             _lambdaParameters.Add(rangeVariable.Name, filterParameter);
 
-            EnsureFlattenPropertyContainer(filterParameter);
+            EnsureFlattenedPropertyContainer(filterParameter);
 
             Expression body = Bind(expression);
             return Expression.Lambda(body, filterParameter);
@@ -671,7 +671,7 @@ namespace System.Web.OData.Query.Expressions
                 var cleanSource = RemoveInnerNullPropagation(source);
                 Expression propertyAccessExpression = null;
 
-                propertyAccessExpression = GetFlattenPropertyExpression(propertyPath) ?? Expression.Property(cleanSource, propertyName);
+                propertyAccessExpression = GetFlattenedPropertyExpression(propertyPath) ?? Expression.Property(cleanSource, propertyName);
 
                 // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
                 // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
@@ -685,7 +685,7 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                return GetFlattenPropertyExpression(propertyPath) ?? ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+                return GetFlattenedPropertyExpression(propertyPath) ?? ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
             }
         }
 

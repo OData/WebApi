@@ -699,7 +699,7 @@ namespace System.Web.OData.Query.Expressions
                 return expression;
             }
 
-            throw new ODataException($"{propertyPath} isn't available in the current context");
+            throw new ODataException(Error.Format(SRResources.PropertyOrPathWasRemovedFromContext, propertyPath));
         }
 
         private Expression GetProperty(Expression source, string propertyName)

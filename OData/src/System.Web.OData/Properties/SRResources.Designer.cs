@@ -1762,6 +1762,15 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Property or path {0} isn&apos;t available in the current context. It was removed in earlier transformation..
+        /// </summary>
+        internal static string PropertyOrPathWasRemovedFromContext {
+            get {
+                return ResourceManager.GetString("PropertyOrPathWasRemovedFromContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value for OData query &apos;{0}&apos; cannot be empty..
         /// </summary>
         internal static string QueryCannotBeEmpty {

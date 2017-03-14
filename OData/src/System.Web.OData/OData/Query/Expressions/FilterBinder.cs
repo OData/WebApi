@@ -33,8 +33,7 @@ namespace System.Web.OData.Query.Expressions
         private Stack<Dictionary<string, ParameterExpression>> _parametersStack = new Stack<Dictionary<string, ParameterExpression>>();
         private Dictionary<string, ParameterExpression> _lambdaParameters;
         private Type _filterType;
-        private IQueryable _baseQuery;
-        private IDictionary<string, Expression> _flattenPropertyContainer;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterBinder"/> class.
@@ -62,7 +61,7 @@ namespace System.Web.OData.Query.Expressions
 
             FilterBinder binder = requestContainer.GetRequiredService<FilterBinder>();
             binder._filterType = filterType;
-            binder._baseQuery = baseQuery;
+            binder.baseQuery = baseQuery;
 
             return BindFilterClause(binder, filterClause, filterType);
         }
@@ -75,7 +74,7 @@ namespace System.Web.OData.Query.Expressions
 
             FilterBinder binder = requestContainer.GetRequiredService<FilterBinder>();
             binder._filterType = elementType;
-            binder._baseQuery = baseQuery;
+            binder.baseQuery = baseQuery;
 
             return BindOrderByClause(binder, orderBy, elementType);
         }
@@ -258,15 +257,7 @@ namespace System.Web.OData.Query.Expressions
         {
             if (EdmLibHelpers.IsDynamicTypeWrapper(_filterType))
             {
-                if (_flattenPropertyContainer != null)
-                {
-                    return _flattenPropertyContainer[openNode.Name];
-                }
-                else
-                {
-                    var property = Expression.Property(Bind(openNode.Source), openNode.Name);
-                    return property;
-                }
+                return GetFlattenPropertyExpression(openNode.Name) ?? Expression.Property(Bind(openNode.Source), openNode.Name);
             }
             PropertyInfo prop = GetDynamicPropertyContainer(openNode);
 
@@ -591,11 +582,6 @@ namespace System.Web.OData.Query.Expressions
             return Expression.Lambda(body, filterParameter);
         }
 
-        private void EnsureFlattenPropertyContainer(ParameterExpression source)
-        {
-            _flattenPropertyContainer = _flattenPropertyContainer ?? AggregationBinder.GetFlattenProperties(_baseQuery, source);
-        }
-
         private Expression ApplyNullPropagationForFilterBody(Expression body)
         {
             if (IsNullable(body.Type))
@@ -684,14 +670,8 @@ namespace System.Web.OData.Query.Expressions
             {
                 var cleanSource = RemoveInnerNullPropagation(source);
                 Expression propertyAccessExpression = null;
-                if (_flattenPropertyContainer != null)
-                {
-                    propertyAccessExpression = _flattenPropertyContainer[propertyPath];
-                }
-                else
-                {
-                    propertyAccessExpression = Expression.Property(cleanSource, propertyName);
-                }
+
+                propertyAccessExpression = GetFlattenPropertyExpression(propertyPath) ?? Expression.Property(cleanSource, propertyName);
 
                 // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
                 // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
@@ -705,14 +685,7 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                if (_flattenPropertyContainer != null)
-                {
-                    return _flattenPropertyContainer[propertyPath];
-                }
-                else
-                {
-                    return ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
-                }
+                return GetFlattenPropertyExpression(propertyPath) ?? ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
             }
         }
 

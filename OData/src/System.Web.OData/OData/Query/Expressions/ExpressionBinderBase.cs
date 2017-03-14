@@ -61,6 +61,16 @@ namespace System.Web.OData.Query.Expressions
         internal IAssembliesResolver AssembliesResolver { get; set; }
 
         /// <summary>
+        /// Base query used for the binder.
+        /// </summary>
+        protected IQueryable baseQuery;
+
+        /// <summary>
+        /// Flattened list of properties from base query, for case when binder is applied for aggregated query.
+        /// </summary>
+        protected IDictionary<string, Expression> flattenPropertyContainer;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ExpressionBinderBase"/> class.
         /// </summary>
         /// <param name="requestContainer">The request container.</param>
@@ -540,6 +550,156 @@ namespace System.Web.OData.Query.Expressions
 
             Expression[] arguments = new[] { left, flag };
             return MakeFunctionCall(ClrCanonicalFunctions.HasFlag, arguments);
+        }
+
+        /// <summary>
+        /// Analyze previous query and extract grouped properties.
+        /// </summary>
+        /// <param name="source"></param>
+        protected void EnsureFlattenPropertyContainer(ParameterExpression source)
+        {
+            if (this.baseQuery != null)
+            {
+                this.flattenPropertyContainer = this.flattenPropertyContainer ?? this.GetFlattenProperties(source);
+            }
+        }
+
+        internal IDictionary<string, Expression> GetFlattenProperties(ParameterExpression source)
+        {
+            if (this.baseQuery == null)
+            {
+                return null;
+            }
+
+            if (!typeof(GroupByWrapper).IsAssignableFrom(baseQuery.ElementType))
+            {
+                return null;
+            }
+
+            var expression = baseQuery.Expression as MethodCallExpression;
+            if (expression == null)
+            {
+                return null;
+            }
+
+            // After $apply we could have other clauses, like $filter, $orderby etc.
+            // Skip of filter expressions
+            while (expression.Method.Name == "Where")
+            {
+                expression = expression.Arguments.FirstOrDefault() as MethodCallExpression;
+            }
+
+            if (expression == null)
+            {
+                return null;
+            }
+
+            var result = new Dictionary<string, Expression>();
+            CollectAssigments(result, Expression.Property(source, "GroupByContainer"), ExtractContainerExpression(expression.Arguments.FirstOrDefault() as MethodCallExpression, "GroupByContainer"));
+            CollectAssigments(result, Expression.Property(source, "Container"), ExtractContainerExpression(expression, "Container"));
+
+            return result;
+        }
+
+        private static MemberInitExpression ExtractContainerExpression(MethodCallExpression expression, string containerName)
+        {
+            var memberInitExpression = ((expression.Arguments[1] as UnaryExpression).Operand as LambdaExpression).Body as MemberInitExpression;
+            if (memberInitExpression != null)
+            {
+                var containerAssigment = memberInitExpression.Bindings.FirstOrDefault(m => m.Member.Name == containerName) as MemberAssignment;
+                if (containerAssigment != null)
+                {
+                    return containerAssigment.Expression as MemberInitExpression;
+                }
+            }
+            return null;
+        }
+
+        private static void CollectAssigments(IDictionary<string, Expression> flattenPropertyContainer, Expression source, MemberInitExpression expression, string prefix = null)
+        {
+            if (expression == null)
+            {
+                return;
+            }
+
+            string nameToAdd = null;
+            Type resultType = null;
+            MemberInitExpression nextExpression = null;
+            Expression nestedExpression = null;
+            foreach (var expr in expression.Bindings.OfType<MemberAssignment>())
+            {
+                var initExpr = expr.Expression as MemberInitExpression;
+                if (initExpr != null && expr.Member.Name == "Next")
+                {
+                    nextExpression = initExpr;
+                }
+                else if (expr.Member.Name == "Name")
+                {
+                    nameToAdd = (expr.Expression as ConstantExpression).Value as string;
+                }
+                else if (expr.Member.Name == "Value" || expr.Member.Name == "NestedValue")
+                {
+                    resultType = expr.Expression.Type;
+                    if (resultType == typeof(object) && expr.Expression.NodeType == ExpressionType.Convert)
+                    {
+                        resultType = ((UnaryExpression)expr.Expression).Operand.Type;
+                    }
+
+                    if (typeof(GroupByWrapper).IsAssignableFrom(resultType))
+                    {
+                        nestedExpression = expr.Expression;
+                    }
+                }
+            }
+
+
+            if (prefix != null)
+            {
+                nameToAdd = prefix + "\\" + nameToAdd;
+            }
+
+            if (typeof(GroupByWrapper).IsAssignableFrom(resultType))
+            {
+                flattenPropertyContainer.Add(nameToAdd, Expression.Property(source, "NestedValue"));
+            }
+            else
+            {
+                flattenPropertyContainer.Add(nameToAdd, Expression.Convert(Expression.Property(source, "Value"), resultType));
+            }
+
+            if (nextExpression != null)
+            {
+                CollectAssigments(flattenPropertyContainer, Expression.Property(source, "Next"), nextExpression, prefix);
+            }
+
+            if (nestedExpression != null)
+            {
+                var nestedAccessor = ((nestedExpression as MemberInitExpression).Bindings.First() as MemberAssignment).Expression as MemberInitExpression;
+                var newSource = Expression.Property(Expression.Property(source, "NestedValue"), "GroupByContainer");
+                CollectAssigments(flattenPropertyContainer, newSource, nestedAccessor, nameToAdd);
+            }
+        }
+
+
+        /// <summary>
+        /// Gets expression for property from previously aggregated query
+        /// </summary>
+        /// <param name="propertyPath"></param>
+        /// <returns>Returns null if no aggregations were used so far</returns>
+        protected Expression GetFlattenPropertyExpression(string propertyPath)
+        {
+            if (flattenPropertyContainer == null)
+            {
+                return null;
+            }
+
+            Expression expression;
+            if (flattenPropertyContainer.TryGetValue(propertyPath, out expression))
+            {
+                return expression;
+            }
+
+            throw new ODataException($"{propertyPath} isn't available in the current context");
         }
 
         private Expression GetProperty(Expression source, string propertyName)

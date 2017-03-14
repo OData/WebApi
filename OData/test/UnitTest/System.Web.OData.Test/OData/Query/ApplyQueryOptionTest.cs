@@ -15,6 +15,7 @@ using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
 using Address = System.Web.OData.Builder.TestModels.Address;
 using Microsoft.OData.Edm;
+using Microsoft.OData;
 
 namespace System.Web.OData.Test.OData.Query
 {
@@ -577,6 +578,20 @@ namespace System.Web.OData.Test.OData.Query
             }
         }
 
+        public static TheoryDataSet<string> AppliesWithReferencesOnGroupedOut
+        {
+            get
+            {
+                return new TheoryDataSet<string>
+                {
+                    "$apply=groupby((Name))&$filter=CustomerId eq 1",
+                    "$apply=groupby((Name))/filter(CustomerId eq 1)",
+                    "$apply=groupby((Name))/filter(Address/City eq 1)",
+                    "$apply=groupby((Name))/groupby((CustomerId))",
+                };
+            }
+        }
+
         [Theory]
         [PropertyData("CustomerTestApplies")]
         public void ApplyTo_Returns_Correct_Queryable(string filter, List<Dictionary<string, object>> aggregation)
@@ -662,6 +677,33 @@ namespace System.Web.OData.Test.OData.Query
                     Assert.Equal(expected[key], value);
                 }
             }
+        }
+
+        [Theory]
+        [PropertyData("AppliesWithReferencesOnGroupedOut")]
+        public void ClausesWithGroupedOutReferences_Throw_ODataException(string clause)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer));
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + clause);
+            request.EnableHttpDependencyInjectionSupport();
+
+            var options = new ODataQueryOptions(context, request);
+
+            IEnumerable<Customer> customers = CustomerApplyTestData;
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() =>
+            {
+                IQueryable queryable = options.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+            });
         }
 
         [Theory]

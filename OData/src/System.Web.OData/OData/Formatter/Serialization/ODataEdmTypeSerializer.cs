@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
@@ -87,6 +88,8 @@ namespace System.Web.OData.Formatter.Serialization
             };
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",
+            Justification = "The majority of types referenced by this method are EdmLib types this method needs to know about to operate correctly")]
         internal List<ODataProperty> AppendDynamicProperties(object source, IEdmStructuredTypeReference structuredType,
             ODataSerializerContext writeContext, List<ODataProperty> declaredProperties,
             string[] selectedDynamicProperties)

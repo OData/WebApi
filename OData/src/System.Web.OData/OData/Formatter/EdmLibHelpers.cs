@@ -452,9 +452,11 @@ namespace System.Web.OData.Formatter
             IList<IEdmStructuralProperty> results = new List<IEdmStructuralProperty>();
             IEdmEntityType entityType = navigationSource.EntityType();
             IEdmVocabularyAnnotatable annotatable = navigationSource as IEdmVocabularyAnnotatable;
-            if (navigationSource is IEdmContainedEntitySet)
+
+            IEdmContainedEntitySet navigationSourceAsEntitySet = navigationSource as IEdmContainedEntitySet;
+            if (navigationSourceAsEntitySet != null)
             {
-                annotatable = (navigationSource as IEdmContainedEntitySet).NavigationProperty as EdmNavigationProperty;
+                annotatable = navigationSourceAsEntitySet.NavigationProperty as EdmNavigationProperty;
             }
 
             if (annotatable != null)

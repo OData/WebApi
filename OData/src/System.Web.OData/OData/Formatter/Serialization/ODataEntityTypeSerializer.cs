@@ -293,6 +293,8 @@ namespace System.Web.OData.Formatter.Serialization
         /// <param name="selectExpandNode">The <see cref="SelectExpandNode"/> describing the response graph.</param>
         /// <param name="entityInstanceContext">The context for the entity instance being written.</param>
         /// <returns>The created <see cref="ODataEntry"/>.</returns>
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",
+            Justification = "The majority of types referenced by this method are EdmLib types this method needs to know about to operate correctly")]
         public virtual ODataEntry CreateEntry(SelectExpandNode selectExpandNode, EntityInstanceContext entityInstanceContext)
         {
             if (selectExpandNode == null)

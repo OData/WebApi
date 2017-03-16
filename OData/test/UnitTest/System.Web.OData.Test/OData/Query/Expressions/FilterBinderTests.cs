@@ -1096,6 +1096,7 @@ namespace System.Web.OData.Query.Expressions
         [InlineData("hour(DiscontinuedOffset) eq 100", "$it => ($it.DiscontinuedOffset.Hour == 100)")]
         [InlineData("minute(DiscontinuedOffset) eq 100", "$it => ($it.DiscontinuedOffset.Minute == 100)")]
         [InlineData("second(DiscontinuedOffset) eq 100", "$it => ($it.DiscontinuedOffset.Second == 100)")]
+        [InlineData("now() eq 2016-11-08Z", "$it => (DateTimeOffset.UtcNow == 11/08/2016 00:00:00 +00:00)")]
         public void DateTimeOffsetFunctions(string filter, string expression)
         {
             VerifyQueryDeserialization(filter, expression);

@@ -56,7 +56,7 @@ namespace WebStack.QA.Test.OData.Aggregation
             var results = result["value"] as JArray;
             Assert.Equal(3, results.Count);
             Assert.Equal("0", results[0]["TotalPrice"].ToString());
-            Assert.Equal(string.Empty, results[0]["Name"].ToString());
+            Assert.Equal(null, results[0]["Name"]);
             Assert.Equal("2000", results[1]["TotalPrice"].ToString());
             Assert.Equal("Customer0", results[1]["Name"].ToString());
             Assert.Equal("2500", results[2]["TotalPrice"].ToString());
@@ -200,7 +200,7 @@ namespace WebStack.QA.Test.OData.Aggregation
             var anonymousResponse = new { Count = 0 };
             var responseObj = JsonConvert.DeserializeAnonymousType(value.ToString(), anonymousResponse);
 
-            Assert.Equal(9, responseObj.Count);
+            Assert.Equal(10, responseObj.Count);
         }
 
         [Fact]
@@ -209,7 +209,7 @@ namespace WebStack.QA.Test.OData.Aggregation
             // Arrange
             string queryUrl =
                 string.Format(
-                    AggregationTestBaseUrl + "?$apply=groupby((Name), aggregate($count as Count))",
+                    AggregationTestBaseUrl + "?$apply=filter(Name ne null)/groupby((Name), aggregate($count as Count))",
                     BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
@@ -260,7 +260,7 @@ namespace WebStack.QA.Test.OData.Aggregation
             Assert.Equal("0", results[0]["TotalAmount"].ToString());
             Assert.Equal("2000", results[1]["TotalAmount"].ToString());
             Assert.Equal("2500", results[2]["TotalAmount"].ToString());
-            Assert.Equal(string.Empty, results[0]["Name"].ToString());
+            Assert.Equal(null, results[0]["Name"]);
             Assert.Equal("Customer0", results[1]["Name"].ToString());
             Assert.Equal("Customer1", results[2]["Name"].ToString());
         }

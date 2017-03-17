@@ -229,11 +229,13 @@ namespace WebStack.QA.Test.OData.QueryComposition
                 // Ignore<System.Security.Cryptography.X509Certificates.X509Certificate2>() 
                 // on 'System.Web.OData.Builder.ODataModelBuilder'.
                 Assert.True(ae.Message.Contains("The type 'System.DateTime' of property")
-                    || ae.Message.Contains("Found more than one dynamic property container in type"),
+                    || ae.Message.Contains("Found more than one dynamic property container in type")
+                    || ae.Message.Contains("The property 'RightToLeft' on type 'System.Windows.Forms.AxHost' must be an Enum property"),
 
-                    "The exception should contains \"The type 'System.DateTime' of property\", or " +
-                    "\"Found more than one dynamic property container in type\", but actually, it is:" +
-                    ae.Message);
+                   "The exception should contains \"The type 'System.DateTime' of property\", or " +
+                    "\"Found more than one dynamic property container in type\", or +" +
+                    "\"The property 'RightToLeft' on type 'System.Windows.Forms.AxHost' must be an Enum property\", " +
+                    "but actually, it is:" + ae.Message);
             }
         }
     }

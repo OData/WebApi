@@ -1,7 +1,7 @@
 {
   "name": "Microsoft.AspNetCore.OData.vNext",
   "title": "Microsoft.AspNetCore.OData.vNext",
-  "version": "6.0.1-alpha2-rtm",
+  "version": "6.0.1-alpha4-rtm",
   "description": "OData Web API (i.e., ASP.NET Web API OData) is a server library built upon ODataLib and Web API.",
   "dependencies": {
     "Microsoft.OData.Core": "7.0.0",

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-16"?>
+<DevTrackerData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" SolutionTotalEditTime="PT22.732683S" SolutionTotalViewTime="PT5M56.845261S" SolutionTotalDebugTime="PT0S">
+  <FileVersion>
+    <Major>1</Major>
+    <Minor>0</Minor>
+  </FileVersion>
+  <SessionTimeList />
+  <LastSessionTimeList>
+    <DevTrackerDataItem ViewActiveTime="PT5.9632561S" EditActiveTime="PT0S">
+      <ModifiedDate>0001-01-01T00:00:00</ModifiedDate>
+      <EditedCount>0</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Users\jpieczyrak\AppData\Local\Temp\Microsoft.AspNetCore.OData.vNext - Copy.xproj</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName />
+      <CreatedDate>2017-03-20T14:58:20.3647132+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+    <DevTrackerDataItem ViewActiveTime="PT5.2973785S" EditActiveTime="PT0S">
+      <ModifiedDate>0001-01-01T00:00:00</ModifiedDate>
+      <EditedCount>0</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Program Files (x86)\MSBuild\Microsoft\VisualStudio\v14.0\DotNet\Microsoft.DotNet.Common.Targets</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName />
+      <CreatedDate>2017-03-20T13:47:21.095673+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+    <DevTrackerDataItem ViewActiveTime="PT1M12.0415498S" EditActiveTime="PT14.5526829S">
+      <ModifiedDate>2017-03-20T13:48:13.1319793+01:00</ModifiedDate>
+      <ModifiedBy>jpieczyrak</ModifiedBy>
+      <EditedCount>1</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Workspaces\WebApi\vNext\test\Microsoft.AspNetCore.OData.Test\project.json</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName>C:\Workspaces\WebApi\vNext\test\Microsoft.AspNetCore.OData.Test\Microsoft.AspNetCore.OData.Test.xproj</ProjectName>
+      <CreatedDate>2017-03-20T13:18:50.0727338+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+    <DevTrackerDataItem ViewActiveTime="PT4M23.790151S" EditActiveTime="PT8.1779991S">
+      <ModifiedDate>2017-03-20T14:13:38.7681002+01:00</ModifiedDate>
+      <ModifiedBy>jpieczyrak</ModifiedBy>
+      <EditedCount>1</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Workspaces\WebApi\vNext\src\Microsoft.AspNetCore.OData\project.json</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName>C:\Workspaces\WebApi\vNext\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.xproj</ProjectName>
+      <CreatedDate>2017-03-20T13:47:58.1999939+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+    <DevTrackerDataItem ViewActiveTime="PT9.7794447S" EditActiveTime="PT0S">
+      <ModifiedDate>0001-01-01T00:00:00</ModifiedDate>
+      <EditedCount>0</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Users\jpieczyrak\AppData\Local\Temp\WebApiOData - Copy.sln</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName />
+      <CreatedDate>2017-03-20T14:58:10.5727442+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+  </LastSessionTimeList>
+  <TotalTimeList>
+    <DevTrackerDataItem ViewActiveTime="PT5.9632561S" EditActiveTime="PT0S">
+      <ModifiedDate>0001-01-01T00:00:00</ModifiedDate>
+      <EditedCount>0</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Users\jpieczyrak\AppData\Local\Temp\Microsoft.AspNetCore.OData.vNext - Copy.xproj</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName />
+      <CreatedDate>2017-03-20T14:58:20.3647132+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+    <DevTrackerDataItem ViewActiveTime="PT5.2973785S" EditActiveTime="PT0S">
+      <ModifiedDate>0001-01-01T00:00:00</ModifiedDate>
+      <EditedCount>0</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Program Files (x86)\MSBuild\Microsoft\VisualStudio\v14.0\DotNet\Microsoft.DotNet.Common.Targets</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName />
+      <CreatedDate>2017-03-20T13:47:21.095673+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+    <DevTrackerDataItem ViewActiveTime="PT1M12.0415498S" EditActiveTime="PT14.5526829S">
+      <ModifiedDate>2017-03-20T13:48:13.1319793+01:00</ModifiedDate>
+      <ModifiedBy>jpieczyrak</ModifiedBy>
+      <EditedCount>1</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Workspaces\WebApi\vNext\test\Microsoft.AspNetCore.OData.Test\project.json</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName>C:\Workspaces\WebApi\vNext\test\Microsoft.AspNetCore.OData.Test\Microsoft.AspNetCore.OData.Test.xproj</ProjectName>
+      <CreatedDate>2017-03-20T13:18:50.0727338+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+    <DevTrackerDataItem ViewActiveTime="PT4M23.7671343S" EditActiveTime="PT8.1779991S">
+      <ModifiedDate>2017-03-20T14:13:38.7681002+01:00</ModifiedDate>
+      <ModifiedBy>jpieczyrak</ModifiedBy>
+      <EditedCount>1</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Workspaces\WebApi\vNext\src\Microsoft.AspNetCore.OData\project.json</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName>C:\Workspaces\WebApi\vNext\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.xproj</ProjectName>
+      <CreatedDate>2017-03-20T13:47:58.1999939+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+    <DevTrackerDataItem ViewActiveTime="PT9.7794447S" EditActiveTime="PT0S">
+      <ModifiedDate>0001-01-01T00:00:00</ModifiedDate>
+      <EditedCount>0</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Users\jpieczyrak\AppData\Local\Temp\WebApiOData - Copy.sln</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName />
+      <CreatedDate>2017-03-20T14:58:10.5727442+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+  </TotalTimeList>
+  <HistoryTimeList>
+    <DevTrackerDataItem ViewActiveTime="PT5.9632561S" EditActiveTime="PT0S">
+      <ModifiedDate>0001-01-01T00:00:00</ModifiedDate>
+      <EditedCount>0</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Users\jpieczyrak\AppData\Local\Temp\Microsoft.AspNetCore.OData.vNext - Copy.xproj</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName />
+      <CreatedDate>2017-03-20T14:58:20.3647132+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+    <DevTrackerDataItem ViewActiveTime="PT9.7794447S" EditActiveTime="PT0S">
+      <ModifiedDate>0001-01-01T00:00:00</ModifiedDate>
+      <EditedCount>0</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Users\jpieczyrak\AppData\Local\Temp\WebApiOData - Copy.sln</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName />
+      <CreatedDate>2017-03-20T14:58:10.5727442+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+    <DevTrackerDataItem ViewActiveTime="PT4M23.7681353S" EditActiveTime="PT8.1779991S">
+      <ModifiedDate>2017-03-20T14:13:38.7681002+01:00</ModifiedDate>
+      <ModifiedBy>jpieczyrak</ModifiedBy>
+      <EditedCount>1</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Workspaces\WebApi\vNext\src\Microsoft.AspNetCore.OData\project.json</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName>C:\Workspaces\WebApi\vNext\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.xproj</ProjectName>
+      <CreatedDate>2017-03-20T13:47:58.1999939+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+    <DevTrackerDataItem ViewActiveTime="PT5.2973785S" EditActiveTime="PT0S">
+      <ModifiedDate>0001-01-01T00:00:00</ModifiedDate>
+      <EditedCount>0</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Program Files (x86)\MSBuild\Microsoft\VisualStudio\v14.0\DotNet\Microsoft.DotNet.Common.Targets</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName />
+      <CreatedDate>2017-03-20T13:47:21.095673+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+    <DevTrackerDataItem ViewActiveTime="PT1M12.0415498S" EditActiveTime="PT14.5526829S">
+      <ModifiedDate>2017-03-20T13:48:13.1319793+01:00</ModifiedDate>
+      <ModifiedBy>jpieczyrak</ModifiedBy>
+      <EditedCount>1</EditedCount>
+      <ViewedCount>1</ViewedCount>
+      <Item>C:\Workspaces\WebApi\vNext\test\Microsoft.AspNetCore.OData.Test\project.json</Item>
+      <ItemType>ProjectItem</ItemType>
+      <ProjectName>C:\Workspaces\WebApi\vNext\test\Microsoft.AspNetCore.OData.Test\Microsoft.AspNetCore.OData.Test.xproj</ProjectName>
+      <CreatedDate>2017-03-20T13:18:50.0727338+01:00</CreatedDate>
+      <ViewedBy>jpieczyrak</ViewedBy>
+    </DevTrackerDataItem>
+  </HistoryTimeList>
+</DevTrackerData>

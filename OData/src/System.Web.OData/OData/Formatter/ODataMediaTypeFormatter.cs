@@ -501,7 +501,7 @@ namespace System.Web.OData.Formatter
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
                 SelectAndExpand = Request.ODataProperties().SelectExpandClause,
                 Apply = Request.ODataProperties().ApplyClause,
-                Path = (path == null || IsOperationPath(path)) ? null : path.ODLPath,
+                Path = (path == null ? null : path.ODLPath),
             };
 
             MediaTypeHeaderValue contentType = null;

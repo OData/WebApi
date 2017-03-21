@@ -14,8 +14,6 @@ using System.Runtime.CompilerServices;
 using Xunit;
 using Xunit.Extensions;
 using Newtonsoft.Json.Linq;
-using Microsoft.OData;
-using System.Collections.Generic;
 
 namespace WebStack.QA.Test.OData.Formatter
 {
@@ -24,16 +22,21 @@ namespace WebStack.QA.Test.OData.Formatter
     public class ContextUriTests
     {
         [Theory]
-        //[InlineData("Businesses", "#Businesses")]
-        //[InlineData("Businesses(0)", "#Businesses/$entity")]
+        [InlineData("Businesses", "#Businesses")]
+        [InlineData("Businesses(0)", "#Businesses/$entity")]
+        [InlineData("Businesses(0)/Location", "#LocationSet")]
         [InlineData("unboundSetImport()", "#AppointmentSet")]
-        //[InlineData("unboundNoSetImport()", "#Collection(WebStack.QA.Test.OData.Formatter.Appointment)")]
-        //[InlineData("Businesses(0)/Appointments", "#Businesses(0)/Appointments")]
-        //[InlineData("Businesses(0)/Manager/Appointments", "#Businesses(0)/Manager/Appointments")]
-        //[InlineData("Businesses(0)/Default.boundEntity()", "#Businesses(0)/Appointments")]
-        //[InlineData("Businesses(0)/Default.boundNavPath()", "#Businesses(0)/Manager/Appointments")]
-        //[InlineData("Businesses(0)/Default.boundSet()", "#AppointmentSet")]
-        //[InlineData("Businesses(0)/Default.boundNoSet()", "#Collection(WebStack.QA.Test.OData.Formatter.Appointment)")]
+        [InlineData("unboundNoSetImport()", "#Collection(WebStack.QA.Test.OData.Formatter.Appointment)")]
+        [InlineData("Businesses(0)/Appointments", "#Businesses(0)/Appointments")]
+        [InlineData("Businesses(0)/Appointments('Appointment2')", "#Businesses(0)/Appointments/$entity")]
+        [InlineData("Businesses(0)/Appointments('Appointment2')/Attendees", "#Collection(WebStack.QA.Test.OData.Formatter.Person)")]
+        [InlineData("Businesses(0)/Manager/Appointments", "#Businesses(0)/Manager/Appointments")]
+        [InlineData("Businesses(0)/Manager/Appointments('Appointment2')", "#Businesses(0)/Manager/Appointments/$entity")]
+        [InlineData("Businesses(0)/Manager/Appointments('Appointment2')/Attendees", "#Collection(WebStack.QA.Test.OData.Formatter.Person)")]
+        [InlineData("Businesses(0)/Default.boundEntity()", "#Businesses(0)/Appointments")]
+        [InlineData("Businesses(0)/Default.boundNavPath()", "#Businesses(0)/Manager/Appointments")]
+        [InlineData("Businesses(0)/Default.boundSet()", "#AppointmentSet")]
+        [InlineData("Businesses(0)/Default.boundNoSet()", "#Collection(WebStack.QA.Test.OData.Formatter.Appointment)")]
         public void VerifyContextUrl(string query, string contextFragment)
         {
             string contextUrl = GetContextUrl(BaseAddress + "/odata/" + query);
@@ -45,7 +48,7 @@ namespace WebStack.QA.Test.OData.Formatter
             HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, request);
             get.Headers.Add("Accept", "application/json;odata.metadata=minimal");
             HttpResponseMessage response = Client.SendAsync(get).Result;
-            Assert.True(response.IsSuccessStatusCode);
+            Assert.True(response.IsSuccessStatusCode, String.Format("Error in Service: {0}", response.StatusCode));
             dynamic results = response.Content.ReadAsAsync<JObject>().Result;
             return results["@odata.context"].Value as string;
         }
@@ -94,6 +97,8 @@ namespace WebStack.QA.Test.OData.Formatter
             var appointmentType = builder.EntityType<Appointment>();
             var businessType = builder.EntityType<Business>();
             var managerType = builder.EntityType<Manager>();
+            var peopleType = builder.EntityType<Person>();
+            var locationType = builder.EntityType<Location>();
 
             var function1 = businessType.Function("boundEntity");
             function1.ReturnsCollectionViaEntitySetPath<Appointment>("bindingParameter/Appointments");
@@ -119,14 +124,18 @@ namespace WebStack.QA.Test.OData.Formatter
             function6.ReturnsCollection<Appointment>();
             function6.OptionalReturn = false;
 
-            builder.EntitySet<Business>("Businesses");
-            builder.EntitySet<Appointment>("AppointmentSet");
-
+            var appointmentSet = builder.EntitySet<Appointment>("AppointmentSet");
+            var locationSet = builder.EntitySet<Location>("LocationSet");
+            var businessSet = builder.EntitySet<Business>("Businesses");
+            businessSet.HasRequiredBinding(b => b.Location, locationSet);
+            var personSet = builder.EntitySet<Person>("PersonSet");
+            appointmentSet.HasManyBinding(a => a.Attendees, personSet);
+            
             IEdmModel edmModel = builder.GetEdmModel();
             var container = edmModel.EntityContainer as EdmEntityContainer;
             var unboundSet = edmModel.FindOperations("Default.unboundSet").FirstOrDefault() as IEdmFunction;
             var unboundNoSet = edmModel.FindOperations("Default.unboundNoSet").FirstOrDefault() as IEdmFunction;
-            container.AddFunctionImport("unboundSetImport", unboundSet,new EdmPathExpression("AppointmentSet")); 
+            container.AddFunctionImport("unboundSetImport", unboundSet, new EdmPathExpression("AppointmentSet")); 
             container.AddFunctionImport("unboundNoSetImport", unboundNoSet);
 
             return edmModel;
@@ -160,6 +169,22 @@ namespace WebStack.QA.Test.OData.Formatter
             get;
             set;
         }
+
+        public Location Location
+        {
+            get;
+            set;
+        }
+    }
+
+    public class Location
+    {
+        [Key]
+        public string Name
+        {
+            get;
+            set;
+        }
     }
 
     public class Manager
@@ -187,6 +212,22 @@ namespace WebStack.QA.Test.OData.Formatter
             get;
             set;
         }
+
+        public Person[] Attendees
+        {
+            get;
+            set;
+        }
+    }
+
+    public class Person
+    {
+        [Key]
+        public string FullName
+        {
+            get;
+            set;
+        }
     }
 
     #endregion model classes
@@ -199,6 +240,7 @@ namespace WebStack.QA.Test.OData.Formatter
 
         #region business methods
 
+        [EnableQuery]
         [ODataRoute("Businesses")]
         public IQueryable<Business> Get() =>
                 Enumerable.Range(0, 5).Select(i =>
@@ -206,8 +248,7 @@ namespace WebStack.QA.Test.OData.Formatter
                     {
                         Id = i,
                     }).AsQueryable();
-
-
+        
         [EnableQuery]
         [ODataRoute("Businesses({BusinessId})")]
         public SingleResult<Business> GetBusiness([FromODataUri]int BusinessId)
@@ -216,10 +257,18 @@ namespace WebStack.QA.Test.OData.Formatter
             return business.AsSingleResult();
         }
 
+        [EnableQuery]
+        [ODataRoute("Businesses({BusinessId})/Location")]
+        public SingleResult<Location> GetBusinessLocation([FromODataUri]int BusinessId)
+        {
+            var location = new Location { Name = "School" };
+            return location.AsSingleResult();
+        }
         #endregion
 
         #region navigation methods
 
+        [EnableQuery]
         [ODataRoute("Businesses({BusinessId})/Appointments")]
         public IQueryable<Appointment> GetBusinessAppointments([FromODataUri]int BusinessId) =>
                 Enumerable.Range(0, 5).Select(i =>
@@ -231,12 +280,20 @@ namespace WebStack.QA.Test.OData.Formatter
 
         [EnableQuery]
         [ODataRoute("Businesses({BusinessId})/Appointments({AppointmentId})")]
-        public SingleResult<Appointment> GetBusinessAppointment([FromODataUri]int BusinessId,[FromODataUri]string AppointmentId)
+        public SingleResult<Appointment> GetBusinessAppointment([FromODataUri]int BusinessId, [FromODataUri]string AppointmentId)
         {
             var appointment = new Appointment { Id = AppointmentId };
             return appointment.AsSingleResult();
         }
 
+        [EnableQuery]
+        [ODataRoute("Businesses({BusinessId})/Appointments({AppointmentId})/Attendees")]
+        public IQueryable<Person> GetBusinessAppointmentAttendees([FromODataUri]int BusinessId, [FromODataUri]string AppointmentId)
+        {
+            return getAttendees();
+        }
+
+        [EnableQuery]
         [ODataRoute("Businesses({BusinessId})/Manager/Appointments")]
         public IQueryable<Appointment> GetBusinessManagerAppointments([FromODataUri]int BusinessId) =>
                 Enumerable.Range(0, 5).Select(i =>
@@ -244,6 +301,22 @@ namespace WebStack.QA.Test.OData.Formatter
                     {
                         Id = BusinessId + "." + i.ToString(),
                     }).AsQueryable();
+
+        [EnableQuery]
+        [ODataRoute("Businesses({BusinessId})/Manager/Appointments({AppointmentId})")]
+        public SingleResult<Appointment> GetBusinessManagerAppointment([FromODataUri]int BusinessId, [FromODataUri]string AppointmentId)
+        {
+            var appointment = new Appointment { Id = AppointmentId };
+            return appointment.AsSingleResult();
+        }
+
+        [EnableQuery]
+        [ODataRoute("Businesses({BusinessId})/Manager/Appointments({AppointmentId})/Attendees")]
+        public IQueryable<Person> GetBusinessManagerAppointmentAttendees([FromODataUri]int BusinessId, [FromODataUri]string AppointmentId)
+        {
+            return getAttendees();
+        }
+        
         #endregion
 
         #region functions
@@ -255,26 +328,83 @@ namespace WebStack.QA.Test.OData.Formatter
             return Ok(getAppointments());
         }
 
+        //[HttpGet]
+        //[EnableQuery]
+        //[ODataRoute("Businesses({BusinessId})/Default.boundEntity()({AppointmentId})")]
+        //public SingleResult<Appointment> boundEntityAppointment([FromODataUri]int BusinessId, [FromODataUri]string AppointmentId)
+        //{
+        //    return getAppointments().Where(a => a.Id == AppointmentId).FirstOrDefault().AsSingleResult();
+        //}
+
+        //[HttpGet]
+        //[ODataRoute("Businesses({BusinessId})/Default.boundEntity()({AppointmentId})/Attendees")]
+        //public IQueryable<Person> boundEntityAppointmentLocation([FromODataUri]int BusinessId, [FromODataUri]string AppointmentId)
+        //{
+        //    return getAttendees();
+        //}
+
         [HttpGet]
         [ODataRoute("Businesses({BusinessId})/Default.boundNavPath()")]
-        public IQueryable<Appointment> boundNavPath([FromODataUri]int BusinessId)
+        public IHttpActionResult boundNavPath([FromODataUri]int BusinessId)
         {
-            return getAppointments();
+            return Ok(getAppointments());
         }
+
+        //[HttpGet]
+        //[ODataRoute("Businesses({BusinessId})/Default.boundNavPath()({AppointmentId})")]
+        //public IHttpActionResult boundNavPathAppointment([FromODataUri]int BusinessId, [FromODataUri]string AppointmentId)
+        //{
+        //    return Ok(getAppointments().Where(a => a.Id == AppointmentId));
+        //}
+
+        //[HttpGet]
+        //[ODataRoute("Businesses({BusinessId})/Default.boundNavPath()({AppointmentId})/Attendees")]
+        //public IQueryable<Person> boundNavPathAppointmentAttendees([FromODataUri]int BusinessId, [FromODataUri]string AppointmentId)
+        //{
+        //    return getAttendees();
+        //}
 
         [HttpGet]
         [ODataRoute("Businesses({BusinessId})/Default.boundSet()")]
-        public IQueryable<Appointment> boundSet([FromODataUri]int BusinessId)
+        public IHttpActionResult boundSet([FromODataUri]int BusinessId)
         {
-            return getAppointments();
+            return Ok(getAppointments());
         }
+        
+        //[HttpGet]
+        //[ODataRoute("Businesses({BusinessId})/Default.boundSet()({AppointmentId})")]
+        //public IHttpActionResult boundSetAppointment([FromODataUri]int BusinessId, [FromODataUri]string AppointmentId)
+        //{
+        //    return Ok(getAppointments().Where(a => a.Id == AppointmentId));
+        //}
+
+        //[HttpGet]
+        //[ODataRoute("Businesses({BusinessId})/Default.boundSet()({AppointmentId})/Location")]
+        //public IQueryable<Person> boundSetAppointmentAttendees([FromODataUri]int BusinessId, [FromODataUri]string AppointmentId)
+        //{
+        //    return getAttendees();
+        //}
 
         [HttpGet]
         [ODataRoute("Businesses({BusinessId})/Default.boundNoSet()")]
-        public IQueryable<Appointment> boundNoSet([FromODataUri]int BusinessId)
+        public IHttpActionResult boundNoSet([FromODataUri]int BusinessId)
         {
-            return getAppointments();
+            return Ok(getAppointments());
         }
+
+        //[HttpGet]
+        //[ODataRoute("Businesses({BusinessId})/Default.boundNoSet()({AppointmentId})")]
+        //public IHttpActionResult boundNoSetAppointment([FromODataUri]int BusinessId, [FromODataUri]string AppointmentId)
+        //{
+        //    return Ok(getAppointments().Where(a => a.Id == AppointmentId));
+        //}
+
+        //[HttpGet]
+        //[ODataRoute("Businesses({BusinessId})/Default.boundNoSet()({AppointmentId})/Location")]
+        //public IQueryable<Person> boundNoSetAppointmentAttendees([FromODataUri]int BusinessId, [FromODataUri]string AppointmentId)
+        //{
+        //    return getAttendees();
+        //}
 
         #endregion Functions
 
@@ -296,16 +426,29 @@ namespace WebStack.QA.Test.OData.Formatter
             return getAppointments();
         }
 
+
+        #endregion FunctionImports
+
+
         private IQueryable<Appointment> getAppointments()
         {
             return Enumerable.Range(2, 4).Select(i =>
                  new Appointment
                  {
-                     Id = function + "." + i.ToString(),
+                     Id = "Appointment" + i.ToString(),
                  }).AsQueryable();
         }
+
+        private IQueryable<Person> getAttendees()
+        {
+            return Enumerable.Range(1, 3).Select(i =>
+            new Person
+            {
+                FullName = "Person" + i
+            }).AsQueryable();
+        }
     }
-    #endregion FunctionImports
+
 
     #endregion Controller
 

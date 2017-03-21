@@ -235,19 +235,19 @@ namespace WebStack.QA.Test.OData.Formatter
     #region Controllers
     public class ContextUrlTestController : ODataController
     {
-        public int BusinessId => this.GetUrlParameter();
-        public string function => this.Request.RequestUri.Segments.Last();
 
         #region business methods
 
         [EnableQuery]
         [ODataRoute("Businesses")]
-        public IQueryable<Business> Get() =>
-                Enumerable.Range(0, 5).Select(i =>
-                    new Business
-                    {
-                        Id = i,
-                    }).AsQueryable();
+        public IQueryable<Business> Get()
+        {
+            return Enumerable.Range(0, 5).Select(i =>
+                   new Business
+                   {
+                       Id = i,
+                   }).AsQueryable();
+        }
         
         [EnableQuery]
         [ODataRoute("Businesses({BusinessId})")]
@@ -270,12 +270,15 @@ namespace WebStack.QA.Test.OData.Formatter
 
         [EnableQuery]
         [ODataRoute("Businesses({BusinessId})/Appointments")]
-        public IQueryable<Appointment> GetBusinessAppointments([FromODataUri]int BusinessId) =>
+        public IQueryable<Appointment> GetBusinessAppointments([FromODataUri]int BusinessId)
+        {
+            return
                 Enumerable.Range(0, 5).Select(i =>
                     new Appointment
                     {
                         Id = BusinessId + "." + i.ToString(),
                     }).AsQueryable();
+        }
 
 
         [EnableQuery]
@@ -295,12 +298,14 @@ namespace WebStack.QA.Test.OData.Formatter
 
         [EnableQuery]
         [ODataRoute("Businesses({BusinessId})/Manager/Appointments")]
-        public IQueryable<Appointment> GetBusinessManagerAppointments([FromODataUri]int BusinessId) =>
-                Enumerable.Range(0, 5).Select(i =>
-                    new Appointment
-                    {
-                        Id = BusinessId + "." + i.ToString(),
-                    }).AsQueryable();
+        public IQueryable<Appointment> GetBusinessManagerAppointments([FromODataUri]int BusinessId)
+        {
+            return Enumerable.Range(0, 5).Select(i =>
+                     new Appointment
+                     {
+                         Id = BusinessId + "." + i.ToString(),
+                     }).AsQueryable();
+        }
 
         [EnableQuery]
         [ODataRoute("Businesses({BusinessId})/Manager/Appointments({AppointmentId})")]
@@ -454,9 +459,6 @@ namespace WebStack.QA.Test.OData.Formatter
 
     public static class ExtensionMethods
     {
-        public static int GetUrlParameter(this ApiController controller, [CallerMemberName]string parameterName = null) =>
-           (int)controller.RequestContext.RouteData.Values[parameterName] ;
-
         public static SingleResult<T> AsSingleResult<T>(this T value) =>
             new[] { value }.AsSingleResult();
 

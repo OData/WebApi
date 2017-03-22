@@ -13,8 +13,9 @@ namespace ODataSample.Consumer
     {
         static void Main(string[] args)
         {
-            Task.Run(AsyncFunc);
+            var task = Task.Run(AsyncFunc);
             SyncFunc();
+            task.Wait();
         }
 
         public static void SyncFunc()

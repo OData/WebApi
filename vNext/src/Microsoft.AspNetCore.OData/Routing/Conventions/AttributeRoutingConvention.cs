@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Routing.Template;
@@ -124,7 +125,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                 {
                     foreach (var item in values)
                     {
-                        if(item.Key.StartsWith(ODataParameterValue.ParameterValuePrefix, StringComparison.Ordinal) &&
+                        if (item.Key.StartsWith(ODataParameterValue.ParameterValuePrefix, StringComparison.Ordinal) &&
                             item.Value is ODataParameterValue)
                         {
                             routingConventionsStore.Add(item);
@@ -144,8 +145,10 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 
         private static bool IsHttpMethodMatch(ControllerActionDescriptor descriptor, string httpMethod)
         {
-            // TODO:
-            return true;
+            return descriptor.ActionConstraints?
+                            .Where(x => x.GetType() == typeof(HttpMethodActionConstraint))
+                            .SelectMany(h => (h as HttpMethodActionConstraint).HttpMethods)
+                            .Any(h => h == httpMethod) ?? httpMethod == ODataRouteConstants.HttpGet;
         }
 
         private static IEnumerable<string> GetODataRoutePrefixes(ControllerActionDescriptor controllerDescriptor)
@@ -225,7 +228,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                 /*
                 throw Error.InvalidOperation(SRResources.InvalidODataRouteOnAction, pathTemplate, action.ActionName,
                     action.ControllerDescriptor.ControllerName, e.Message);*/
-                    // TODO: 
+                // TODO: 
                 return null;
             }
 

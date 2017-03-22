@@ -72,7 +72,7 @@ namespace System.Web.WebPages
         {
             Contract.Assert(_valueGetter != null, "Must call Initialize before using this object");
 
-            return _valueGetter(instance);
+            return instance == null ? null : _valueGetter(instance);
         }
 
         /// <summary>

@@ -4,6 +4,7 @@
 using System.Reflection;
 using System.Web.Http;
 using Microsoft.OData.Edm;
+using System.Collections.Generic;
 
 namespace System.Web.OData
 {
@@ -30,5 +31,10 @@ namespace System.Web.OData
         /// Gets the backing CLR property info for the EDM property.
         /// </summary>
         public PropertyInfo ClrPropertyInfo { get; private set; }
+
+        /// <summary>
+        /// Gets or sets PropertiesPath
+        /// </summary>
+        public IList<PropertyInfo> PropertiesPath { get; set; }
     }
 }

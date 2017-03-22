@@ -984,5 +984,16 @@ namespace System.Web.OData.Query.Expressions
                 return expression;
             }
         }
+
+        internal static Expression GetPropertyExpression(Expression source, string propertyPath)
+        {
+            string[] propertyNameParts = propertyPath.Split('\\');
+            Expression propertyValue = source;
+            foreach (var pName in propertyNameParts)
+            {
+                propertyValue = Expression.Property(propertyValue, pName);
+            }
+            return propertyValue;
+        }
     }
 }

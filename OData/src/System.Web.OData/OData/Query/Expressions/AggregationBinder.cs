@@ -314,6 +314,7 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
+        // TODO: Implementation here and in FilterBinder looks almost the same => refactor it
         private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property, string propertyPath = null)
         {
             string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);
@@ -337,7 +338,7 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                return GetFlattenedPropertyExpression(propertyPath) ?? ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+                return GetFlattenedPropertyExpression(propertyPath) ?? ConvertNonStandardPrimitives(ExpressionBinderBase.GetPropertyExpression(source, propertyName));
             }
         }
 

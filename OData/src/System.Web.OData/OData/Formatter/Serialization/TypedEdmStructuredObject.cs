@@ -138,16 +138,31 @@ namespace System.Web.OData.Formatter.Serialization
 
         private static Func<object, object> CreatePropertyGetter(Type type, string propertyName)
         {
-            PropertyInfo property = type.GetProperty(propertyName);
-
-            if (property == null)
+            var propertyNameParts = propertyName.Split('\\');
+            Func<object, object> result = null;
+            foreach(var pName in propertyNameParts)
             {
-                return null;
+                PropertyInfo property = type.GetProperty(pName);
+                if (property == null)
+                {
+                    return null;
+                }
+
+                var helper = new PropertyHelper(property);
+                type = property.PropertyType;
+
+                if (result == null)
+                {
+                    result = helper.GetValue;
+                }
+                else
+                {
+                    var f = result;
+                    result = (o) => helper.GetValue(f(o));
+                }
             }
 
-            var helper = new PropertyHelper(property);
-
-            return helper.GetValue;
+            return result;
         }
     }
 }

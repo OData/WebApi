@@ -22,6 +22,7 @@ using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.OData.UriParser;
 using Microsoft.Spatial;
+using System.Linq.Expressions;
 
 namespace System.Web.OData.Formatter
 {
@@ -698,6 +699,10 @@ namespace System.Web.OData.Formatter
                 if (propertyInfo != null)
                 {
                     propertyName = propertyInfo.Name;
+                    if (annotation.PropertiesPath != null && annotation.PropertiesPath.Any())
+                    {
+                        propertyName = string.Join("", annotation.PropertiesPath.Select(p => p.Name + "\\") ) + propertyName;
+                    }
                 }
             }
 

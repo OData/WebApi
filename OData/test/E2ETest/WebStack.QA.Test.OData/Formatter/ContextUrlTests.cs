@@ -459,10 +459,14 @@ namespace WebStack.QA.Test.OData.Formatter
 
     public static class ExtensionMethods
     {
-        public static SingleResult<T> AsSingleResult<T>(this T value) =>
-            new[] { value }.AsSingleResult();
+        public static SingleResult<T> AsSingleResult<T>(this T value)
+        {
+            return new[] { value }.AsSingleResult();
+        }
 
-        public static SingleResult<T> AsSingleResult<T>(this T[] values) =>
-            new SingleResult<T>(values.AsQueryable());
+        public static SingleResult<T> AsSingleResult<T>(this T[] values)
+        {
+            return new SingleResult<T>(values.AsQueryable());
+        }
     }
 }

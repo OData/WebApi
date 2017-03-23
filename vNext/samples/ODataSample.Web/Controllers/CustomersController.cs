@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNet.Mvc;
-using ODataSample.Web.Models;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNet.OData;
-
-namespace ODataSample.Web.Controllers
+﻿namespace ODataSample.Web.Controllers
 {
+    using System.Collections.Generic;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.OData;
+    using ODataSample.Web.Models;
+
     [EnableQuery]
     [Route("odata/Customers")]
     public class CustomersController : Controller
@@ -17,101 +16,149 @@ namespace ODataSample.Web.Controllers
             _sampleContext = sampleContext;
         }
 
-        // GET: api/Customers
+        // GET: odata/Customers
         [HttpGet]
         public IEnumerable<Customer> Get()
         {
             return _sampleContext.Customers;
         }
 
-        // GET api/Customers/5
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        // GET odata/Customers(5)
+        [HttpGet("{customerId}")]
+        public IActionResult Get(int customerId)
         {
-            var customer = _sampleContext.FindCustomer(id);
+            var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer);
         }
 
-        [HttpGet("{id}/FirstName")]
-        public IActionResult GetFirstName(int id)
+        // GET odata//FindCustomersWithProduct(productId=1)
+        [HttpGet("FindCustomersWithProduct(ProductId={productId})")]
+        public IActionResult FindCustomersWithProduct(int productId)
         {
-            var customer = _sampleContext.FindCustomer(id);
+            var customer = _sampleContext.FindCustomersWithProduct(productId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
+            }
+
+            return new ObjectResult(customer);
+        }
+
+        // PUT odata//FindCustomersWithProduct(productId=1)
+        [HttpPut("{customerId}/AddCustomerProduct(ProductId={productId})")]
+        public IActionResult AddCustomerProduct(int customerId, [FromBody] int productId)
+        {
+            var customer = _sampleContext.AddCustomerProduct(customerId, productId);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            return new ObjectResult(customer);
+        }
+
+        // PUT odata//FindCustomersWithProduct(productId=1)
+        [HttpPut("{customerId}/AddCustomerProducts(ProductId={productId})")]
+        public IActionResult AddCustomerProducts(int customerId, [FromBody] List<int> products)
+        {
+            var customer = _sampleContext.FindCustomer(customerId);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            foreach (var productId in products)
+            {
+                _sampleContext.AddCustomerProduct(customerId, productId);
+            }
+
+            return new ObjectResult(customer);
+        }
+
+        // GET odata/Customers(1)/FirstName
+        [HttpGet("{customerId}/FirstName")]
+        public IActionResult GetFirstName(int customerId)
+        {
+            var customer = _sampleContext.FindCustomer(customerId);
+            if (customer == null)
+            {
+                return NotFound();
             }
 
             return new ObjectResult(customer.FirstName);
         }
 
-        [HttpGet("{id}/LastName")]
-        public IActionResult GetLastName(int id)
+        // GET odata/Customers(1)/LastName
+        [HttpGet("{customerId}/LastName")]
+        public IActionResult GetLastName(int customerId)
         {
-            var customer = _sampleContext.FindCustomer(id);
+            var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer.LastName);
         }
 
-        [HttpGet("{id}/CustomerId")]
-        public IActionResult GetCustomerId(int id)
+        // GET odata/Customers(1)/CustomerId
+        [HttpGet("{customerId}/CustomerId")]
+        public IActionResult GetCustomerId(int customerId)
         {
-            var customer = _sampleContext.FindCustomer(id);
+            var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer.CustomerId);
         }
 
-        [HttpGet("{id}/Products")]
-        public IActionResult GetProducts(int id)
+        // GET odata/Customers(1)/Products
+        [HttpGet("{customerId}/Products")]
+        public IActionResult GetProducts(int customerId)
         {
-            var customer = _sampleContext.FindCustomer(id);
+            var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(customer.Products);
         }
 
-        // POST api/Customers
+        // POST odata/Customers
         [HttpPost]
         public IActionResult Post([FromBody]Customer value)
         {
-            var locationUri = $"http://localhost:9091/api/Customers/{value.CustomerId}";
+            var locationUri = $"http://localhost:5000/odata/Customers/{value.CustomerId}";
             return Created(locationUri, _sampleContext.AddCustomer(value));
         }
 
-        // PUT api/Customers/5
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody]Customer value)
+        // PUT odata/Customers/5
+        [HttpPut("{customerId}")]
+        public IActionResult Put(int customerId, [FromBody]Customer value)
         {
-            if (!_sampleContext.UpdateCustomer(id, value))
+            if (!_sampleContext.UpdateCustomer(customerId, value))
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new NoContentResult();
         }
 
-        // DELETE api/Customers/5
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        // DELETE odata/Customers/5
+        [HttpDelete("{customerId}")]
+        public IActionResult Delete(int customerId)
         {
-            if (!_sampleContext.DeleteCustomer(id))
+            if (!_sampleContext.DeleteCustomer(customerId))
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new NoContentResult();

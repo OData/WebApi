@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.OData;
-using Microsoft.Framework.DependencyInjection;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData;
 using ODataSample.Web.Models;
 
 namespace ODataSample.Web.Controllers
@@ -28,49 +24,49 @@ namespace ODataSample.Web.Controllers
         }
 
         // GET api/Products/5
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [HttpGet("{productId}")]
+        public IActionResult Get(int productId)
         {
-            var product = _sampleContext.FindProduct(id);
+            var product = _sampleContext.FindProduct(productId);
             if (product == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(product);
         }
 
-        [HttpGet("{id}/Name")]
-        public IActionResult GetName(int id)
+        [HttpGet("{productId}/Name")]
+        public IActionResult GetName(int productId)
         {
-            var product = _sampleContext.FindProduct(id);
+            var product = _sampleContext.FindProduct(productId);
             if (product == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(product.Name);
         }
 
-        [HttpGet("{id}/Price")]
-        public IActionResult GetPrice(int id)
+        [HttpGet("{productId}/Price")]
+        public IActionResult GetPrice(int productId)
         {
-            var product = _sampleContext.FindProduct(id);
+            var product = _sampleContext.FindProduct(productId);
             if (product == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(product.Price);
         }
 
-        [HttpGet("{id}/ProductId")]
-        public IActionResult GetProductId(int id)
+        [HttpGet("{productId}/ProductId")]
+        public IActionResult GetProductId(int productId)
         {
-            var product = _sampleContext.FindProduct(id);
+            var product = _sampleContext.FindProduct(productId);
             if (product == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new ObjectResult(product.ProductId);
@@ -85,24 +81,24 @@ namespace ODataSample.Web.Controllers
         }
 
         // PUT api/Products/5
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody]Product value)
+        [HttpPut("{productId}")]
+        public IActionResult Put(int productId, [FromBody]Product value)
         {
-            if (!_sampleContext.UpdateProduct(id, value))
+            if (!_sampleContext.UpdateProduct(productId, value))
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new NoContentResult();
         }
 
         // DELETE api/Products/5
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        [HttpDelete("{productId}")]
+        public IActionResult Delete(int productId)
         {
-            if (!_sampleContext.DeleteProduct(id))
+            if (!_sampleContext.DeleteProduct(productId))
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return new NoContentResult();

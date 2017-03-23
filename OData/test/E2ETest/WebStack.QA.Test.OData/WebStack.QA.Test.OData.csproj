@@ -171,6 +171,7 @@
     <Compile Include="DollarLevels\DollarLevelsDataModel.cs" />
     <Compile Include="DollarLevels\DollarLevelsEdmModel.cs" />
     <Compile Include="DollarLevels\DollarLevelsTest.cs" />
+    <Compile Include="ETags\DerivedETagTests.cs" />
     <Compile Include="ETags\DominiosController.cs" />
     <Compile Include="ETags\ETagCurrencyTokenEfContext.cs" />
     <Compile Include="ETags\ETagCurrencyTokenEfContextTest.cs" />

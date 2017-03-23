@@ -9,12 +9,29 @@ using System.Web.OData.Routing;
 
 namespace WebStack.QA.Test.OData.ETags
 {
+    public class ETagsDerivedCustomersController : ODataController
+    {
+        [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
+        public IHttpActionResult Get()
+        {
+            return Ok(ETagsCustomersController.customers.Select(c => Helpers.CreateDerivedCustomer(c)));
+        }
+    }
+
+    public class ETagsDerivedCustomersSingletonController : ODataController
+    {
+        [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
+        public IHttpActionResult Get()
+        {
+            return Ok(ETagsCustomersController.customers.Select(c => Helpers.CreateDerivedCustomer(c)).FirstOrDefault());
+        }
+    }
+
     public class ETagsCustomersController : ODataController
     {
+        internal static IList<ETagsCustomer> customers = Enumerable.Range(0, 10).Select(i => Helpers.CreateCustomer(i)).ToList();
 
-        private static IList<ETagsCustomer> customers = Enumerable.Range(0, 10).Select(i => ETagsCustomerController.CreateCustomer(i)).ToList();
-
-        [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
+        [EnableQuery]
         public IHttpActionResult Get()
         {
             return Ok(customers);
@@ -175,7 +192,7 @@ namespace WebStack.QA.Test.OData.ETags
 
         internal IHttpActionResult ApplyPatch(Delta<ETagsCustomer> patch, ETagsCustomer original, ODataQueryOptions queryOptions)
         {
-            if (!ETagsCustomerController.ValidateEtag(original, queryOptions))
+            if (!Helpers.ValidateEtag(original, queryOptions))
             {
                 return StatusCode(HttpStatusCode.PreconditionFailed);
             }
@@ -187,12 +204,12 @@ namespace WebStack.QA.Test.OData.ETags
 
         public IHttpActionResult ApplyPut(ETagsCustomer eTagsCustomer, ETagsCustomer original, ODataQueryOptions<ETagsCustomer> queryOptions)
         {
-            if (!ETagsCustomerController.ValidateEtag(original, queryOptions))
+            if (!Helpers.ValidateEtag(original, queryOptions))
             {
                 return StatusCode(HttpStatusCode.PreconditionFailed);
             }
 
-            ETagsCustomerController.ReplaceCustomer(original, eTagsCustomer);
+            Helpers.ReplaceCustomer(original, eTagsCustomer);
 
             return Ok(original);
         }
@@ -200,7 +217,7 @@ namespace WebStack.QA.Test.OData.ETags
 
     public class ETagsCustomerController : ODataController
     {
-        private static ETagsCustomer customer = CreateCustomer(0);
+        private static ETagsCustomer customer = Helpers.CreateCustomer(0);
 
         [EnableQuery]
         public IHttpActionResult Get()
@@ -258,7 +275,7 @@ namespace WebStack.QA.Test.OData.ETags
 
         internal IHttpActionResult ApplyPatch(Delta<ETagsCustomer> patch, ETagsCustomer original, ODataQueryOptions queryOptions)
         {
-            if (!ValidateEtag(original, queryOptions))
+            if (!Helpers.ValidateEtag(original, queryOptions))
             {
                 return StatusCode(HttpStatusCode.PreconditionFailed);
             }
@@ -270,18 +287,22 @@ namespace WebStack.QA.Test.OData.ETags
 
         public IHttpActionResult ApplyPut(ETagsCustomer eTagsCustomer, ETagsCustomer original, ODataQueryOptions<ETagsCustomer> queryOptions)
         {
-            if (!ValidateEtag(original, queryOptions))
+            if (!Helpers.ValidateEtag(original, queryOptions))
             {
                 return StatusCode(HttpStatusCode.PreconditionFailed);
             }
 
-            ETagsCustomerController.ReplaceCustomer(original, eTagsCustomer);
+            Helpers.ReplaceCustomer(original, eTagsCustomer);
 
             return Ok(original);
         }
+    }
+
+    internal class Helpers
+    {
         internal static ETagsCustomer CreateCustomer(int i)
         {
-            return new ETagsCustomer
+            return new ETagsDerivedCustomer
             {
                 Id = i,
                 Name = "Customer Name " + i,
@@ -307,26 +328,6 @@ namespace WebStack.QA.Test.OData.ETags
             };
         }
 
-        internal static void ReplaceCustomer(ETagsCustomer customer, ETagsCustomer newCustomer)
-        {
-            customer.Name = newCustomer.Name;
-            customer.Notes = newCustomer.Notes;
-            customer.BoolProperty = newCustomer.BoolProperty;
-            customer.ByteProperty = newCustomer.ByteProperty;
-            customer.CharProperty = newCustomer.CharProperty;
-            customer.DecimalProperty = newCustomer.DecimalProperty;
-            customer.DoubleProperty = newCustomer.DoubleProperty;
-            customer.ShortProperty = newCustomer.ShortProperty;
-            customer.LongProperty = newCustomer.LongProperty;
-            customer.SbyteProperty = newCustomer.SbyteProperty;
-            customer.FloatProperty = newCustomer.FloatProperty;
-            customer.UshortProperty = newCustomer.UshortProperty;
-            customer.UintProperty = newCustomer.UintProperty;
-            customer.UlongProperty = newCustomer.UlongProperty;
-            customer.GuidProperty = newCustomer.GuidProperty;
-            customer.DateTimeOffsetProperty = newCustomer.DateTimeOffsetProperty;
-        }
-
         internal static bool ValidateEtag(ETagsCustomer customer, ODataQueryOptions options)
         {
             if (options.IfMatch != null)
@@ -339,6 +340,35 @@ namespace WebStack.QA.Test.OData.ETags
                 }
             }
             return true;
+        }
+
+        internal static ETagsDerivedCustomer CreateDerivedCustomer(ETagsCustomer customer)
+        {
+            ETagsDerivedCustomer newCustomer = new ETagsDerivedCustomer();
+            newCustomer.Id = customer.Id;
+            newCustomer.Role = customer.Name + customer.Id;
+            ReplaceCustomer(newCustomer, customer);
+            return newCustomer;
+        }
+
+        internal static void ReplaceCustomer(ETagsCustomer newCustomer, ETagsCustomer customer)
+        {
+            newCustomer.Name = customer.Name;
+            newCustomer.Notes = customer.Notes;
+            newCustomer.BoolProperty = customer.BoolProperty;
+            newCustomer.ByteProperty = customer.ByteProperty;
+            newCustomer.CharProperty = customer.CharProperty;
+            newCustomer.DecimalProperty = customer.DecimalProperty;
+            newCustomer.DoubleProperty = customer.DoubleProperty;
+            newCustomer.ShortProperty = customer.ShortProperty;
+            newCustomer.LongProperty = customer.LongProperty;
+            newCustomer.SbyteProperty = customer.SbyteProperty;
+            newCustomer.FloatProperty = customer.FloatProperty;
+            newCustomer.UshortProperty = customer.UshortProperty;
+            newCustomer.UintProperty = customer.UintProperty;
+            newCustomer.UlongProperty = customer.UlongProperty;
+            newCustomer.GuidProperty = customer.GuidProperty;
+            newCustomer.DateTimeOffsetProperty = customer.DateTimeOffsetProperty;
         }
     }
 }

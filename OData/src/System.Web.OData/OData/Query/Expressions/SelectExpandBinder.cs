@@ -398,7 +398,7 @@ namespace System.Web.OData.Query.Expressions
                 // projection can be null if the expanded navigation property is not further projected or expanded.
                 if (projection != null)
                 {
-                    propertyValue = ProjectAsWrapper(propertyValue, projection, propertyToExpand.ToEntityType(), expandItem.NavigationSource as IEdmEntitySet, expandItem);
+                    propertyValue = ProjectAsWrapper(propertyValue, projection, propertyToExpand.ToEntityType(), expandItem.NavigationSource, expandItem);
                 }
 
                 NamedPropertyExpression propertyExpression = new NamedPropertyExpression(propertyName, propertyValue);

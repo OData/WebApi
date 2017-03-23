@@ -8,19 +8,29 @@ using System.Web.OData.Query;
 
 namespace WebStack.QA.Test.OData.ETags
 {
+    public class ETagsDerivedCustomersController : ODataController
+    {
+        [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
+        public IHttpActionResult Get()
+        {
+            return Ok(ETagsCustomersController.customers.Select(c => Helpers.CreateDerivedCustomer(c)));
+        }
+    }
+
+    public class ETagsDerivedCustomersSingletonController : ODataController
+    {
+        [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
+        public IHttpActionResult Get()
+        {
+            return Ok(ETagsCustomersController.customers.Select(c => Helpers.CreateDerivedCustomer(c)).FirstOrDefault());
+        }
+    }
+
     public class ETagsCustomersController : ODataController
     {
-        private static IList<ETagsCustomer> customers = Enumerable.Range(0, 10).Select(i =>
-                new ETagsCustomer
-                {
-                    Id = i,
-                    Name = "Customer Name " + i,
-                    ShortProperty = (short)(Int16.MaxValue - i),
-                    DoubleProperty = 2.0 * (i + 1),
-                    Notes = Enumerable.Range(0, i + 1).Select(j => "This is note " + (i * 10 + j)).ToList()
-                }).ToList();
+        internal static IList<ETagsCustomer> customers = Enumerable.Range(0, 10).Select(i => Helpers.CreateCustomer(i)).ToList();
 
-        [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
+        [EnableQuery]
         public IHttpActionResult Get()
         {
             return Ok(customers);
@@ -146,4 +156,79 @@ namespace WebStack.QA.Test.OData.ETags
             return Ok(customer);
         }
     }
+
+    internal class Helpers
+    {
+        internal static ETagsCustomer CreateCustomer(int i)
+        {
+            return new ETagsDerivedCustomer
+            {
+                Id = i,
+                Name = "Customer Name " + i,
+                ShortProperty = (short)(Int16.MaxValue - i),
+                DoubleProperty = 2.0 * (i + 1),
+                Notes = Enumerable.Range(0, i + 1).Select(j => "This is note " + (i * 10 + j)).ToList(),
+                RelatedCustomer = new ETagsCustomer
+                {
+                    Id = i + 1,
+                    Name = "Customer Name " + i + 1,
+                    ShortProperty = (short)(Int16.MaxValue - (i + 1) * 10),
+                    DoubleProperty = 2.0 * (i + 1) * 10,
+                    Notes = Enumerable.Range(0, (i + 1) * 10).Select(j => "This is note " + ((i + 1) * 10 + j)).ToList()
+                },
+                ContainedCustomer = new ETagsCustomer
+                {
+                    Id = (i + 1) * 100,
+                    Name = "Customer Name " + i * 10,
+                    ShortProperty = (short)(Int16.MaxValue - i * 10),
+                    DoubleProperty = 2.0 * (i * 10 + 1),
+                    Notes = Enumerable.Range(0, i * 10 + 1).Select(j => "This is note " + (i * 100 + j)).ToList()
+                }
+            };
+        }
+
+        internal static bool ValidateEtag(ETagsCustomer customer, ODataQueryOptions options)
+        {
+            if (options.IfMatch != null)
+            {
+                IQueryable<ETagsCustomer> ifMatchCustomers = options.IfMatch.ApplyTo((new ETagsCustomer[] { customer }).AsQueryable()).Cast<ETagsCustomer>();
+
+                if (ifMatchCustomers.Count() == 0)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        internal static ETagsDerivedCustomer CreateDerivedCustomer(ETagsCustomer customer)
+        {
+            ETagsDerivedCustomer newCustomer = new ETagsDerivedCustomer();
+            newCustomer.Id = customer.Id;
+            newCustomer.Role = customer.Name + customer.Id;
+            ReplaceCustomer(newCustomer, customer);
+            return newCustomer;
+        }
+
+        internal static void ReplaceCustomer(ETagsCustomer newCustomer, ETagsCustomer customer)
+        {
+            newCustomer.Name = customer.Name;
+            newCustomer.Notes = customer.Notes;
+            newCustomer.BoolProperty = customer.BoolProperty;
+            newCustomer.ByteProperty = customer.ByteProperty;
+            newCustomer.CharProperty = customer.CharProperty;
+            newCustomer.DecimalProperty = customer.DecimalProperty;
+            newCustomer.DoubleProperty = customer.DoubleProperty;
+            newCustomer.ShortProperty = customer.ShortProperty;
+            newCustomer.LongProperty = customer.LongProperty;
+            newCustomer.SbyteProperty = customer.SbyteProperty;
+            newCustomer.FloatProperty = customer.FloatProperty;
+            newCustomer.UshortProperty = customer.UshortProperty;
+            newCustomer.UintProperty = customer.UintProperty;
+            newCustomer.UlongProperty = customer.UlongProperty;
+            newCustomer.GuidProperty = customer.GuidProperty;
+            newCustomer.DateTimeOffsetProperty = customer.DateTimeOffsetProperty;
+        }
+    }
+
 }

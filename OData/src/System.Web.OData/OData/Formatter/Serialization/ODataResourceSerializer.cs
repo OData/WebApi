@@ -615,12 +615,12 @@ namespace System.Web.OData.Formatter.Serialization
                 }
 
                 IEdmModel model = resourceContext.EdmModel;
-                IEdmEntitySet entitySet = resourceContext.NavigationSource as IEdmEntitySet;
+                IEdmNavigationSource navigationSource = resourceContext.NavigationSource;
 
                 IEnumerable<IEdmStructuralProperty> concurrencyProperties;
-                if (model != null && entitySet != null)
+                if (model != null && navigationSource != null)
                 {
-                    concurrencyProperties = model.GetConcurrencyProperties(entitySet).OrderBy(c => c.Name);
+                    concurrencyProperties = model.GetConcurrencyProperties(navigationSource).OrderBy(c => c.Name);
                 }
                 else
                 {

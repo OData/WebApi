@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Web.OData.Builder;
 
 namespace WebStack.QA.Test.OData.ETags
@@ -25,9 +26,21 @@ namespace WebStack.QA.Test.OData.ETags
         public Guid GuidProperty { get; set; }
         public DateTimeOffset DateTimeOffsetProperty { get; set; }
         [ConcurrencyCheck]
-        public string StringWithConcurrencyCheckAttributeProperty { get; set; }
+        public string StringWithConcurrencyCheckAttributeProperty
+        {
+            get
+            {
+                return Id.ToString() + Name + String.Concat(Notes) + BoolProperty.ToString() + ByteProperty + CharProperty + DecimalProperty + DoubleProperty + ShortProperty + LongProperty + SbyteProperty + FloatProperty + UshortProperty + UintProperty + UlongProperty + GuidProperty + DateTimeOffsetProperty;
+            }
+            set { }
+        }
         public ETagsCustomer RelatedCustomer { get; set; }
         [Contained]
         public ETagsCustomer ContainedCustomer { get; set; }
+    }
+
+    public class ETagsDerivedCustomer : ETagsCustomer
+    {
+        public string Role { get; set; }
     }
 }

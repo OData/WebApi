@@ -11,7 +11,9 @@ using System.Web.Http;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Csdl;
 using Microsoft.OData.Edm.Validation;
+using Microsoft.OData.Edm.Vocabularies;
 
 namespace System.Web.OData.Builder
 {
@@ -45,10 +47,15 @@ namespace System.Web.OData.Builder
             IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(edmMap, navigationSources);
 
             // Add the core vocabulary annotations
-            model.AddCoreVocabularyAnnotations(entitySets, edmMap);
+            model.AddCoreVocabularyAnnotations(navigationSources, edmMap);
+
+            // TODO: support etags on contained nav props
+            // Support for this in 5.x adds annotations to navigation properties. Ideally would add annotations to entity set/singleton for
+            // containing type(s) with nav paths to the contained nav property.
+            // model.AddNavPropAnnotations(builder, edmMap);  // implemented in EdmModelHelperMethods.cs of 5.x branch
 
             // Add the capabilities vocabulary annotations
-            model.AddCapabilitiesVocabularyAnnotations(entitySets, edmMap);
+            model.AddCapabilitiesVocabularyAnnotations(navigationSources, edmMap);
 
             // add operations
             model.AddOperations(builder.Operations, container, edmTypeMap, navigationSourceMap);
@@ -541,38 +548,38 @@ namespace System.Web.OData.Builder
             }
         }
 
-        private static void AddCoreVocabularyAnnotations(this EdmModel model, NavigationSourceAndAnnotations[] entitySets, EdmTypeMap edmTypeMap)
+        private static void AddCoreVocabularyAnnotations(this EdmModel model, IEnumerable<NavigationSourceAndAnnotations> navigationSources, EdmTypeMap edmTypeMap)
         {
             Contract.Assert(model != null);
             Contract.Assert(edmTypeMap != null);
 
-            if (entitySets == null)
+            if (navigationSources == null)
             {
                 return;
             }
 
-            foreach (NavigationSourceAndAnnotations source in entitySets)
+            foreach (NavigationSourceAndAnnotations source in navigationSources)
             {
-                IEdmEntitySet entitySet = source.NavigationSource as IEdmEntitySet;
-                if (entitySet == null)
+                IEdmVocabularyAnnotatable navigationSource = source.NavigationSource as IEdmVocabularyAnnotatable;
+                if (navigationSource == null)
                 {
                     continue;
                 }
 
-                EntitySetConfiguration entitySetConfig = source.Configuration as EntitySetConfiguration;
-                if (entitySetConfig == null)
+                NavigationSourceConfiguration navigationSourceConfig = source.Configuration as NavigationSourceConfiguration;
+                if (navigationSourceConfig == null)
                 {
                     continue;
                 }
 
-                model.AddOptimisticConcurrencyAnnotation(entitySet, entitySetConfig, edmTypeMap);
+                model.AddOptimisticConcurrencyAnnotation(navigationSource, navigationSourceConfig, edmTypeMap);
             }
         }
 
-        private static void AddOptimisticConcurrencyAnnotation(this EdmModel model, IEdmEntitySet target,
-            EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
+        private static void AddOptimisticConcurrencyAnnotation(this EdmModel model, IEdmVocabularyAnnotatable target,
+            NavigationSourceConfiguration navigationSourceConfiguration, EdmTypeMap edmTypeMap)
         {
-            EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
+            EntityTypeConfiguration entityTypeConfig = navigationSourceConfiguration.EntityType;
 
             IEnumerable<StructuralPropertyConfiguration> concurrencyPropertyies =
                 entityTypeConfig.Properties.OfType<StructuralPropertyConfiguration>().Where(property => property.ConcurrencyToken);
@@ -594,21 +601,25 @@ namespace System.Web.OData.Builder
 
             if (edmProperties.Any())
             {
-                model.SetOptimisticConcurrencyAnnotation(target, edmProperties);
+                IEdmCollectionExpression collectionExpression = new EdmCollectionExpression(edmProperties.Select(p => new EdmPropertyPathExpression(p.Name)).ToArray());
+                IEdmTerm term = Microsoft.OData.Edm.Vocabularies.V1.CoreVocabularyModel.ConcurrencyTerm;
+                EdmVocabularyAnnotation annotation = new EdmVocabularyAnnotation(target, term, collectionExpression);
+                annotation.SetSerializationLocation(model, EdmVocabularyAnnotationSerializationLocation.Inline);
+                model.SetVocabularyAnnotation(annotation);
             }
         }
 
-        private static void AddCapabilitiesVocabularyAnnotations(this EdmModel model, NavigationSourceAndAnnotations[] entitySets, EdmTypeMap edmTypeMap)
+        private static void AddCapabilitiesVocabularyAnnotations(this EdmModel model, IEnumerable<NavigationSourceAndAnnotations> navigationSources, EdmTypeMap edmTypeMap)
         {
             Contract.Assert(model != null);
             Contract.Assert(edmTypeMap != null);
 
-            if (entitySets == null)
+            if (navigationSources == null)
             {
                 return;
             }
 
-            foreach (NavigationSourceAndAnnotations source in entitySets)
+            foreach (NavigationSourceAndAnnotations source in navigationSources)
             {
                 IEdmEntitySet entitySet = source.NavigationSource as IEdmEntitySet;
                 if (entitySet == null)

@@ -89,7 +89,7 @@ namespace System.Web.OData.Query.Expressions
             ParameterExpression source = Expression.Parameter(elementType);
 
             // expression looks like -> new Wrapper { Instance = source , Properties = "...", Container = new PropertyContainer { ... } }
-            Expression projectionExpression = ProjectElement(source, _selectExpandQuery.SelectExpandClause, _context.ElementType as IEdmEntityType, navigationSource as IEdmEntitySet);
+            Expression projectionExpression = ProjectElement(source, _selectExpandQuery.SelectExpandClause, _context.ElementType as IEdmEntityType, navigationSource);
 
             // expression looks like -> source => new Wrapper { Instance = source .... }
             LambdaExpression projectionLambdaExpression = Expression.Lambda(projectionExpression, source);
@@ -98,20 +98,20 @@ namespace System.Web.OData.Query.Expressions
         }
 
         internal Expression ProjectAsWrapper(Expression source, SelectExpandClause selectExpandClause,
-            IEdmEntityType entityType, IEdmEntitySet entitySet, ExpandedNavigationSelectItem expandedItem = null,
+            IEdmEntityType entityType, IEdmNavigationSource navigationSource, ExpandedNavigationSelectItem expandedItem = null,
             int? modelBoundPageSize = null)
         {
             Type elementType;
             if (source.Type.IsCollection(out elementType))
             {
                 // new CollectionWrapper<ElementType> { Instance = source.Select(s => new Wrapper { ... }) };
-                return ProjectCollection(source, elementType, selectExpandClause, entityType, entitySet, expandedItem,
+                return ProjectCollection(source, elementType, selectExpandClause, entityType, navigationSource, expandedItem,
                     modelBoundPageSize);
             }
             else
             {
                 // new Wrapper { v1 = source.property ... }
-                return ProjectElement(source, selectExpandClause, entityType, entitySet);
+                return ProjectElement(source, selectExpandClause, entityType, navigationSource);
             }
         }
 
@@ -244,7 +244,7 @@ namespace System.Web.OData.Query.Expressions
 
         // Generates the expression
         //      source => new Wrapper { Instance = source, Container = new PropertyContainer { ..expanded properties.. } }
-        private Expression ProjectElement(Expression source, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet)
+        private Expression ProjectElement(Expression source, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmNavigationSource navigationSource)
         {
             Contract.Assert(source != null);
 
@@ -291,7 +291,7 @@ namespace System.Web.OData.Query.Expressions
                 Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand = GetPropertiesToExpandInQuery(selectExpandClause);
                 ISet<IEdmStructuralProperty> autoSelectedProperties;
 
-                ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, entitySet, _model, out autoSelectedProperties);
+                ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, navigationSource, _model, out autoSelectedProperties);
                 bool isSelectingOpenTypeSegments = GetSelectsOpenTypeSegments(selectExpandClause, entityType);
 
                 if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0)
@@ -396,7 +396,7 @@ namespace System.Web.OData.Query.Expressions
                 if (projection != null)
                 {
                     int? modelBoundPageSize = querySettings == null ? null : querySettings.PageSize;
-                    propertyValue = ProjectAsWrapper(propertyValue, projection, propertyToExpand.ToEntityType(), expandItem.NavigationSource as IEdmEntitySet, expandItem, modelBoundPageSize);
+                    propertyValue = ProjectAsWrapper(propertyValue, projection, propertyToExpand.ToEntityType(), expandItem.NavigationSource, expandItem, modelBoundPageSize);
                 }
 
                 NamedPropertyExpression propertyExpression = new NamedPropertyExpression(propertyName, propertyValue);
@@ -507,13 +507,13 @@ namespace System.Web.OData.Query.Expressions
         }
 
         // new CollectionWrapper<ElementType> { Instance = source.Select((ElementType element) => new Wrapper { }) }
-        private Expression ProjectCollection(Expression source, Type elementType, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet, ExpandedNavigationSelectItem expandedItem, int? modelBoundPageSize)
+        private Expression ProjectCollection(Expression source, Type elementType, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmNavigationSource navigationSource, ExpandedNavigationSelectItem expandedItem, int? modelBoundPageSize)
         {
             ParameterExpression element = Expression.Parameter(elementType);
 
             // expression
             //      new Wrapper { }
-            Expression projection = ProjectElement(element, selectExpandClause, entityType, entitySet);
+            Expression projection = ProjectElement(element, selectExpandClause, entityType, navigationSource);
 
             // expression
             //      (ElementType element) => new Wrapper { }
@@ -697,7 +697,7 @@ namespace System.Web.OData.Query.Expressions
         }
 
         private static ISet<IEdmStructuralProperty> GetPropertiesToIncludeInQuery(
-            SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet, IEdmModel model, out ISet<IEdmStructuralProperty> autoSelectedProperties)
+            SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmNavigationSource navigationSource, IEdmModel model, out ISet<IEdmStructuralProperty> autoSelectedProperties)
         {
             autoSelectedProperties = new HashSet<IEdmStructuralProperty>();
             HashSet<IEdmStructuralProperty> propertiesToInclude = new HashSet<IEdmStructuralProperty>();
@@ -726,9 +726,9 @@ namespace System.Web.OData.Query.Expressions
                 }
 
                 // add concurrency properties, if not added
-                if (entitySet != null && model != null)
+                if (navigationSource != null && model != null)
                 {
-                    IEnumerable<IEdmStructuralProperty> concurrencyProperties = model.GetConcurrencyProperties(entitySet);
+                    IEnumerable<IEdmStructuralProperty> concurrencyProperties = model.GetConcurrencyProperties(navigationSource);
                     foreach (IEdmStructuralProperty concurrencyProperty in concurrencyProperties)
                     {
                         if (!propertiesToInclude.Contains(concurrencyProperty))

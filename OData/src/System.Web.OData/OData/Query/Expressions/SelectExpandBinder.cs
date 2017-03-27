@@ -26,7 +26,7 @@ namespace System.Web.OData.Query.Expressions
         // EF fails with StackOverflow when tries to generate SELECT clause with more than ~90 columns
         // Need to convert long $select=... to $select=* as woraround until https://github.com/dotnet/corefx/pull/11091 will be ported to .NET and included in official version
         // Keeping number smaller than 80 to leave space for automatically added properties like keys
-        private const int MaxEFColumns = 80; 
+        private const int MaxEFColumns = 80;
         private SelectExpandQueryOption _selectExpandQuery;
         private ODataQueryContext _context;
         private IEdmModel _model;
@@ -468,6 +468,24 @@ namespace System.Web.OData.Query.Expressions
                 includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue));
             }
 
+            if (!propertiesToInclude.Any())
+            {
+                // List of proeprties to include is empty, but we still here => need to select properies with long paths
+                var containerProperties = elementType.Properties().OfType<IEdmStructuralProperty>()
+                    .Select(p => _model.GetAnnotationValue<ClrPropertyInfoAnnotation>(p))
+                    .Where(pa => pa != null && pa.PropertiesPath != null && pa.PropertiesPath.Any())
+                    .SelectMany(pa => pa.PropertiesPath)
+                    .Select(ps => ps.Name)
+                    .Distinct();
+
+                foreach (string containerProperty in containerProperties)
+                {
+                    Expression propertyName = Expression.Constant(containerProperty);
+                    Expression propertyValue = Expression.Property(source, containerProperty);
+                    includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue));
+                }
+            }
+
             // create a property container that holds all these property names and values.
             return PropertyContainer.CreatePropertyContainer(includedProperties);
         }
@@ -744,6 +762,15 @@ namespace System.Web.OData.Query.Expressions
                         }
                     }
                 }
+            }
+            else
+            {
+                //var propertiesToFlatten = entityType.Properties().OfType<IEdmStructuralProperty>()
+                //    .Where(p => model.GetAnnotationValue<ClrPropertyInfoAnnotation>(p)?.PropertiesPath != null);
+                //foreach (var p in propertiesToFlatten)
+                //{
+                //    propertiesToInclude.Add(p);
+                //}
             }
 
             return propertiesToInclude;

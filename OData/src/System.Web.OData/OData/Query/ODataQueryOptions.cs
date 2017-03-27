@@ -29,11 +29,6 @@ namespace System.Web.OData.Query
     [ODataQueryParameterBinding]
     public class ODataQueryOptions
     {
-        // EF fails with StackOverflow when tries to generate SELECT clause with more than ~90 columns
-        // Need to convert long $select=... to $select=* as woraround until https://github.com/dotnet/corefx/pull/11091 will be ported to .NET and included in official version
-        // Keeping number smaller than 80 to leave space for automatically added properties like keys
-        private const int MaxEFColumns = 80;
-
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
         private ETag _etagIfMatch;
@@ -893,32 +888,24 @@ namespace System.Web.OData.Query
         private T ApplySelectExpand<T>(T entity, ODataQuerySettings querySettings)
         {
             var result = default(T);
-            string safeSelect = SelectExpand.RawSelect != null && SelectExpand.RawSelect.Split(',').Count() > MaxEFColumns ? null : SelectExpand.RawSelect;
-            bool selectAvailable = IsAvailableODataQueryOption(safeSelect, AllowedQueryOptions.Select);
+            bool selectAvailable = IsAvailableODataQueryOption(SelectExpand.RawSelect, AllowedQueryOptions.Select);
             bool expandAvailable = IsAvailableODataQueryOption(SelectExpand.RawExpand, AllowedQueryOptions.Expand);
             if (selectAvailable || expandAvailable)
             {
 
-                if ((!selectAvailable && safeSelect != null) ||
+                if ((!selectAvailable && SelectExpand.RawSelect != null) ||
                     (!expandAvailable && SelectExpand.RawExpand != null))
                 {
                     SelectExpand = new SelectExpandQueryOption(
-                        selectAvailable ? safeSelect : null,
+                        selectAvailable ? RawValues.Select : null,
                         expandAvailable ? RawValues.Expand : null,
-                        SelectExpand.Context);
-                }
-                else if (safeSelect != SelectExpand.RawSelect)
-                {
-                    SelectExpand = new SelectExpandQueryOption(
-                        safeSelect,
-                        RawValues.Expand,
                         SelectExpand.Context);
                 }
 
 
                 SelectExpandClause processedClause = SelectExpand.ProcessLevels();
                 SelectExpandQueryOption newSelectExpand = new SelectExpandQueryOption(
-                    safeSelect,
+                    SelectExpand.RawSelect,
                     SelectExpand.RawExpand,
                     SelectExpand.Context,
                     processedClause);

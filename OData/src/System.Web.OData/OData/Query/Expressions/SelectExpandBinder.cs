@@ -296,17 +296,18 @@ namespace System.Web.OData.Query.Expressions
             {
                 Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand = GetPropertiesToExpandInQuery(selectExpandClause);
                 ISet<IEdmStructuralProperty> autoSelectedProperties;
+                ISet<String> containerProperties;
 
-                ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, entitySet, _model, out autoSelectedProperties);
+                ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, entitySet, _model, out autoSelectedProperties, out containerProperties);
                 bool isSelectingOpenTypeSegments = GetSelectsOpenTypeSegments(selectExpandClause, entityType);
 
-                if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0)
+                if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0 || containerProperties.Count > 0)
                 {
                     wrapperProperty = wrapperType.GetProperty("Container");
                     Contract.Assert(wrapperProperty != null);
 
                     Expression propertyContainerCreation =
-                        BuildPropertyContainer(entityType, source, propertiesToExpand, propertiesToInclude, autoSelectedProperties, isSelectingOpenTypeSegments);
+                        BuildPropertyContainer(entityType, source, propertiesToExpand, propertiesToInclude, autoSelectedProperties, containerProperties, isSelectingOpenTypeSegments);
 
                     wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, propertyContainerCreation));
                     isContainerPropertySet = true;
@@ -377,7 +378,7 @@ namespace System.Web.OData.Query.Expressions
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
         private Expression BuildPropertyContainer(IEdmEntityType elementType, Expression source,
             Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand,
-            ISet<IEdmStructuralProperty> propertiesToInclude, ISet<IEdmStructuralProperty> autoSelectedProperties, bool isSelectingOpenTypeSegments)
+            ISet<IEdmStructuralProperty> propertiesToInclude, ISet<IEdmStructuralProperty> autoSelectedProperties, ISet<String> containerProperties, bool isSelectingOpenTypeSegments)
         {
             IList<NamedPropertyExpression> includedProperties = new List<NamedPropertyExpression>();
 
@@ -470,13 +471,7 @@ namespace System.Web.OData.Query.Expressions
 
             if (!propertiesToInclude.Any())
             {
-                // List of proeprties to include is empty, but we still here => need to select properies with long paths
-                var containerProperties = elementType.Properties().OfType<IEdmStructuralProperty>()
-                    .Select(p => _model.GetAnnotationValue<ClrPropertyInfoAnnotation>(p))
-                    .Where(pa => pa != null && pa.PropertiesPath != null && pa.PropertiesPath.Any())
-                    .SelectMany(pa => pa.PropertiesPath)
-                    .Select(ps => ps.Name)
-                    .Distinct();
+
 
                 foreach (string containerProperty in containerProperties)
                 {
@@ -722,9 +717,10 @@ namespace System.Web.OData.Query.Expressions
         }
 
         private static ISet<IEdmStructuralProperty> GetPropertiesToIncludeInQuery(
-            SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet, IEdmModel model, out ISet<IEdmStructuralProperty> autoSelectedProperties)
+            SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmEntitySet entitySet, IEdmModel model, out ISet<IEdmStructuralProperty> autoSelectedProperties, out ISet<String> containerProperties)
         {
             autoSelectedProperties = new HashSet<IEdmStructuralProperty>();
+            containerProperties = new HashSet<String>();
             HashSet<IEdmStructuralProperty> propertiesToInclude = new HashSet<IEdmStructuralProperty>();
 
             IEnumerable<SelectItem> selectedItems = selectExpandClause.SelectedItems;
@@ -763,15 +759,18 @@ namespace System.Web.OData.Query.Expressions
                     }
                 }
             }
-            else
+
+            if (!propertiesToInclude.Any())
             {
-                //var propertiesToFlatten = entityType.Properties().OfType<IEdmStructuralProperty>()
-                //    .Where(p => model.GetAnnotationValue<ClrPropertyInfoAnnotation>(p)?.PropertiesPath != null);
-                //foreach (var p in propertiesToFlatten)
-                //{
-                //    propertiesToInclude.Add(p);
-                //}
+                // List of proeprties to include is empty, but we still here => need to select properies with long paths
+                containerProperties = new HashSet<String>(entityType.Properties().OfType<IEdmStructuralProperty>()
+                    .Select(p => model.GetAnnotationValue<ClrPropertyInfoAnnotation>(p))
+                    .Where(pa => pa != null && pa.PropertiesPath != null && pa.PropertiesPath.Any())
+                    .SelectMany(pa => pa.PropertiesPath)
+                    .Select(ps => ps.Name)
+                    .Distinct());
             }
+           
 
             return propertiesToInclude;
         }

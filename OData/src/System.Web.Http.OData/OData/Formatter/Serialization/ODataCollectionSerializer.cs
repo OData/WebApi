@@ -10,6 +10,8 @@ using Microsoft.Data.OData;
 
 namespace System.Web.Http.OData.Formatter.Serialization
 {
+    using Extensions;
+
     /// <summary>
     /// ODataSerializer for serializing collection of Entities or Complex types or primitives.
     /// </summary>
@@ -85,10 +87,20 @@ namespace System.Web.Http.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writer");
             }
 
+            ODataCollectionStart collectionStart = new ODataCollectionStart { Name = writeContext.RootElementName };
+            if (writeContext.Request.ODataProperties().NextLink != null)
+            {
+                collectionStart.NextPageLink = writeContext.Request.ODataProperties().NextLink;
+            }
+
+            if (writeContext.Request.ODataProperties().TotalCount.HasValue)
+            {
+                collectionStart.Count = writeContext.Request.ODataProperties().TotalCount;
+            }
+
+            writer.WriteStart(collectionStart);
+
             ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
-
-            writer.WriteStart(new ODataCollectionStart { Name = writeContext.RootElementName });
-
             if (collectionValue != null)
             {
                 foreach (object item in collectionValue.Items)

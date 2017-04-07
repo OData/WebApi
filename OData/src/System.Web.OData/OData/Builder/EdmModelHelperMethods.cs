@@ -576,6 +576,8 @@ namespace System.Web.OData.Builder
             }
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",
+            Justification = "Relies on many ODataLib classes.")]
         private static void AddOptimisticConcurrencyAnnotation(this EdmModel model, IEdmVocabularyAnnotatable target,
             NavigationSourceConfiguration navigationSourceConfiguration, EdmTypeMap edmTypeMap)
         {

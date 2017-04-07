@@ -383,7 +383,7 @@ namespace System.Web.OData.Formatter.Deserialization
                 return doubleValue;
             }
 
-            if (!value.StartsWith("\"") || !value.EndsWith("\""))
+            if (!value.StartsWith("\"", StringComparison.Ordinal) || !value.EndsWith("\"", StringComparison.Ordinal))
             {
                 throw new ODataException(Error.Format(SRResources.InvalidODataUntypedValue, value));
             }

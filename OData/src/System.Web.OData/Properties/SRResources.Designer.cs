@@ -1744,15 +1744,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The complex type &apos;{0}&apos; has a reference to itself through the property &apos;{1}&apos;. A recursive loop of complex types is not allowed..
-        /// </summary>
-        internal static string RecursiveComplexTypesNotAllowed {
-            get {
-                return ResourceManager.GetString("RecursiveComplexTypesNotAllowed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The &apos;{0}&apos; property &apos;{1}&apos; is already configured to have a relationship with &apos;{2}&apos; property &apos;{3}&apos; in the referential constraint..
         /// </summary>
         internal static string ReferentialConstraintAlreadyConfigured {

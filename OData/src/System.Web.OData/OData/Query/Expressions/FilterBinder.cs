@@ -570,7 +570,14 @@ namespace System.Web.OData.Query.Expressions
             return CreateConvertExpression(convertNode, source);
         }
 
-        private LambdaExpression BindExpression(SingleValueNode expression, RangeVariable rangeVariable, Type elementType)
+        /// <summary>
+        /// Bind Expression
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <param name="rangeVariable"></param>
+        /// <param name="elementType"></param>
+        /// <returns></returns>
+        public LambdaExpression BindExpression(SingleValueNode expression, RangeVariable rangeVariable, Type elementType)
         {
             ParameterExpression filterParameter = Expression.Parameter(elementType, rangeVariable.Name);
             _lambdaParameters = new Dictionary<string, ParameterExpression>();

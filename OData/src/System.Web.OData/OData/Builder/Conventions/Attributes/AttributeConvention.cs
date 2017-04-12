@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web.Http;
@@ -39,6 +40,8 @@ namespace System.Web.OData.Builder.Conventions.Attributes
         /// </summary>
         public bool AllowMultiple { get; private set; }
 
+        private static Dictionary<MemberInfo, ICollection<Attribute>> attributesCache = new Dictionary<MemberInfo, ICollection<Attribute>>();
+
         /// <summary>
         /// Returns the attributes on <paramref name="member"/> that this convention applies to.
         /// </summary>
@@ -51,14 +54,24 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 throw Error.ArgumentNull("member");
             }
 
-            Attribute[] attributes =
-                member
+
+            ICollection<Attribute> attributes;
+            if (!attributesCache.TryGetValue(member, out attributes))
+            {
+                attributes = member
                 .GetCustomAttributes(inherit: true)
                 .OfType<Attribute>()
+                .ToList();
+
+                // It's OK to replace it someone else already added 
+                attributesCache[member] = attributes; 
+            }
+
+             attributes = attributes
                 .Where(AttributeFilter)
                 .ToArray();
 
-            if (!AllowMultiple && attributes.Length > 1)
+            if (!AllowMultiple && attributes.Count > 1)
             {
                 throw Error.Argument(
                     "member",
@@ -68,7 +81,7 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                     attributes.First().GetType().Name);
             }
 
-            return attributes;
+            return attributes.ToArray();
         }
     }
 }

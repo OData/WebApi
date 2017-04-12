@@ -634,7 +634,7 @@ namespace System.Web.OData.Builder
             Contract.Assert(property != null);
             Contract.Assert(propertyKind == PropertyKind.Complex || propertyKind == PropertyKind.Primitive || propertyKind == PropertyKind.Enum);
 
-            bool addedExplicitly = type.Properties.Any(p => p.PropertyInfo.Name == property.Name);
+            bool addedExplicitly = type.HasProperty(property.Name); 
 
             PropertyConfiguration addedEdmProperty;
             if (!isCollection)

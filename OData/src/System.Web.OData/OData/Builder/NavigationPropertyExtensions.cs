@@ -65,6 +65,11 @@ namespace System.Web.OData.Builder
 
             foreach (var property in configuration.Properties)
             {
+                if (path.Any(p => p == property.PropertyInfo))
+                {
+                    continue;
+                }
+
                 path.Push(property.PropertyInfo);
 
                 NavigationPropertyConfiguration nav = property as NavigationPropertyConfiguration;

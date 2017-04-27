@@ -26,6 +26,49 @@ namespace System.Web.OData.Builder.Conventions
     {
         private const int _totalExpectedSchemaTypesForVehiclesModel = 10;
 
+        public sealed class Rule
+        {
+            [Key]
+            public int Id { get; set; }
+
+            public Expression Expression { get; set; }
+        }
+
+        public abstract class Expression
+        {
+        }
+
+        public sealed class ExpressionBinaryOperation : Expression
+        {
+            [Required]
+            public Expression FirstOperand { get; set; }
+
+            [Required]
+            public Expression SecondOperand { get; set; }
+        }
+
+        public sealed class ExpressionUnaryOperation : Expression
+        {
+            [Required]
+            public Expression Operand { get; set; }
+        }
+
+        public sealed class ExpressionVariable : Expression
+        {
+            [Required]
+            public int RuleVariableId { get; set; }
+        }
+
+        [Fact]
+        public void ComplexTypes_In_RecursiveInheritance_AreRecursed()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Rule>("rules");
+
+            IEdmModel model = builder.GetEdmModel();
+            Assert.Equal(6, model.SchemaElements.Count());
+        }
+
         [Fact]
         public void Ctor_ThrowsForNullConfiguration()
         {

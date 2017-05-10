@@ -20,6 +20,7 @@ namespace System.Web.OData.Formatter.Serialization.Models
         public string City { get; set; }
         public IList<Order> Orders { get; set; }
         public SimpleEnum SimpleEnum { get; set; }
+        public Address HomeAddress { get; set; }
     }
 
     public class SpecialCustomer : Customer

@@ -21,7 +21,7 @@ namespace WebStack.QA.Test.OData.Common
     {
         public static void ClearRepository(this IODataTestBase test, string entityName)
         {
-            test.Client.DeleteAsync(test.BaseAddress + "/api/" + entityName + "/Delete").Wait();
+            test.Client.DeleteAsync(test.BaseAddress + "/" + entityName).Wait();
         }
 
         public static void EnableODataSupport(this HttpConfiguration configuration, IEdmModel model, string routePrefix)

@@ -162,6 +162,11 @@ public sealed class System.Web.OData.EdmTypeExtensions {
 	ExtensionAttribute(),
 	]
 	public static bool IsDeltaFeed (Microsoft.OData.Edm.IEdmType type)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static bool IsDeltaResource (IEdmObject resource)
 }
 
 public sealed class System.Web.OData.ODataUriFunctions {
@@ -246,6 +251,15 @@ public class System.Web.OData.EdmComplexObjectCollection : System.Collections.Ob
 [
 NonValidatingParameterBindingAttribute(),
 ]
+public class System.Web.OData.EdmDeltaComplexObject : EdmComplexObject, IDynamicMetaObjectProvider, IDelta, IEdmComplexObject, IEdmObject, IEdmStructuredObject {
+	public EdmDeltaComplexObject (Microsoft.OData.Edm.IEdmComplexType edmType)
+	public EdmDeltaComplexObject (Microsoft.OData.Edm.IEdmComplexTypeReference edmType)
+	public EdmDeltaComplexObject (Microsoft.OData.Edm.IEdmComplexType edmType, bool isNullable)
+}
+
+[
+NonValidatingParameterBindingAttribute(),
+]
 public class System.Web.OData.EdmDeltaDeletedEntityObject : EdmEntityObject, IDynamicMetaObjectProvider, IDelta, IEdmChangedObject, IEdmDeltaDeletedEntityObject, IEdmEntityObject, IEdmObject, IEdmStructuredObject {
 	public EdmDeltaDeletedEntityObject (Microsoft.OData.Edm.IEdmEntityType entityType)
 	public EdmDeltaDeletedEntityObject (Microsoft.OData.Edm.IEdmEntityTypeReference entityTypeReference)
@@ -253,6 +267,7 @@ public class System.Web.OData.EdmDeltaDeletedEntityObject : EdmEntityObject, IDy
 
 	EdmDeltaEntityKind DeltaKind  { public virtual get; }
 	string Id  { public virtual get; public virtual set; }
+	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; public set; }
 	Microsoft.OData.DeltaDeletedEntryReason Reason  { public virtual get; public virtual set; }
 }
 
@@ -279,6 +294,7 @@ public class System.Web.OData.EdmDeltaEntityObject : EdmEntityObject, IDynamicMe
 	public EdmDeltaEntityObject (Microsoft.OData.Edm.IEdmEntityType entityType, bool isNullable)
 
 	EdmDeltaEntityKind DeltaKind  { public virtual get; }
+	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; public set; }
 }
 
 [
@@ -1919,6 +1935,7 @@ public sealed class System.Web.OData.Extensions.UrlHelperExtensions {
 
 public class System.Web.OData.Extensions.HttpRequestMessageProperties {
 	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public get; public set; }
+	System.Uri DeltaLink  { public get; public set; }
 	System.Uri NextLink  { public get; public set; }
 	ODataPath Path  { public get; public set; }
 	string RouteName  { public get; public set; }

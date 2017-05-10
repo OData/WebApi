@@ -6,6 +6,7 @@ using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using WebStack.QA.Test.OData.Common;
 using WebStack.QA.Test.OData.Common.Controllers;
+using System.Collections.Generic;
 
 namespace WebStack.QA.Test.OData.Formatter
 {
@@ -13,12 +14,30 @@ namespace WebStack.QA.Test.OData.Formatter
     [Key("ID")]
     public class UniverseEntity
     {
+        public UniverseEntity()
+        {
+            DynamicProperties = new Dictionary<string, object>();
+        }
         public string ID { get; set; }
         public int IntProperty { get; set; }
         public int? NullableIntProperty { get; set; }
         public bool BoolProperty { get; set; }
         public string StringProperty { get; set; }
         public ComplexType OptionalComplexProperty { get; set; }
+        public IDictionary<string, object> DynamicProperties { get; set; }
+    }
+
+    public class UniverseEntityClient : UniverseEntity
+    {
+        public string string1 { get; set;}
+        public string string2 { get; set; }
+        public string string3 { get; set; }
+        public string string4 { get; set; }
+        public decimal number10 { get; set; }
+        public decimal number10point5 { get; set; }
+        public decimal number10e25 { get; set; }
+        public bool boolean_true { get; set; }
+        public bool boolean_false { get; set; }
     }
 
     public class ComplexType

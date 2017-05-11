@@ -23,18 +23,7 @@ namespace System.Web.OData.Query.Expressions
         /// <returns></returns>
         public static string GetModelID(IEdmModel model)
         {
-            var modelIDAnnotation = model.GetAnnotationValue<ModelIDAnnotation>(model);
-            Guid modelID;
-            if (modelIDAnnotation != null)
-            {
-                modelID = modelIDAnnotation.ModelID;
-            }
-            else
-            {
-                modelID = Guid.NewGuid();
-            }
-
-            string index = _map.GetOrAdd(model, m => modelID.ToString());
+            string index = _map.GetOrAdd(model, m => Guid.NewGuid().ToString());
             _reverseMap.TryAdd(index, model);
             return index;
         }

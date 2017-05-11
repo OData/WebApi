@@ -33,15 +33,5 @@ namespace System.Web.OData.Query.Expressions
 
             Assert.Same(model, ModelContainer.GetModel(modelID));
         }
-
-        [Fact]
-        public void GetModelID_Returns_IDSetViaAnnotation()
-        {
-            EdmModel model = new EdmModel();
-            Guid id = Guid.NewGuid();
-            model.SetAnnotationValue<ModelIDAnnotation>(model, new ModelIDAnnotation(id));
-
-            Assert.Equal(id.ToString(), ModelContainer.GetModelID(model));
-        }
     }
 }

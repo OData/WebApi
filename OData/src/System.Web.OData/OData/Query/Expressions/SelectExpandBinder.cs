@@ -266,7 +266,16 @@ namespace System.Web.OData.Query.Expressions
             // Initialize property 'ModelID' on the wrapper class.
             // source = new Wrapper { ModelID = 'some-guid-id' }
             wrapperProperty = wrapperType.GetProperty("ModelID");
-            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(_modelID)));
+            Expression modelIDConstant;
+            if (_settings.EnableConstantParameterization)
+            {
+                modelIDConstant= LinqParameterContainer.Parameterize(typeof(string), _modelID);
+            }
+            else
+            {
+                modelIDConstant =  Expression.Constant(_modelID, typeof(string));
+            }
+            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, modelIDConstant));
 
             if (IsSelectAll(selectExpandClause))
             {

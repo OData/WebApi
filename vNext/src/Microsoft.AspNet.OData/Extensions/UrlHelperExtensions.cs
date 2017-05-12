@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.OData.Routing;
+using System.Diagnostics.Contracts;
+using Microsoft.AspNet.Http;
+using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
@@ -15,6 +18,27 @@ namespace Microsoft.AspNet.OData.Extensions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class UrlHelperExtensions
     {
+        public static string CreateODataLink(this IUrlHelper urlHelper, HttpRequest request, params ODataPathSegment[] segments)
+        {
+            if (urlHelper == null)
+            {
+                throw Error.ArgumentNull("urlHelper");
+            }
+
+            Contract.Assert(request != null);
+
+            string routeName = request.ODataProperties().Path.PathTemplate;
+            if (String.IsNullOrEmpty(routeName))
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustHaveODataRouteName);
+            }
+
+            var routePrefix = request.ODataProperties().RoutePrefix;
+            
+            //return CreateODataLink(urlHelper, routeName, pathHandler, segments);
+            return request.Scheme + "://" + request.Host + "/" + routePrefix + "/";  
+        }
+
         /// <summary>
         /// Generates an OData link using the request's OData route name and path handler and given segments.
         /// </summary>

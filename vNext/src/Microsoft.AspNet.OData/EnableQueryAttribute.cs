@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Linq;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.OData.Extensions;
+﻿using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.Mvc.Abstractions;
+using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.Http;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
-using Microsoft.AspNet.OData.Routing;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.AspNet.OData
 {
@@ -21,12 +22,12 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("context");
             }
 
-            var response = context.HttpContext.Response;
-            if (!response.IsSuccessStatusCode())
+            var response = context.Result as HttpStatusCodeResult;
+            if (response != null && !response.IsSuccessStatusCode())
             {
                 return;
             }
-            
+
             var request = context.HttpContext.Request;
             if (request.HasQueryOptions())
             {
@@ -35,30 +36,41 @@ namespace Microsoft.AspNet.OData
                 {
                     throw Error.Argument("context", SRResources.QueryingRequiresObjectContent, context.Result.GetType().FullName);
                 }
-
-                if (result.Value != null)
+                var value = result.Value;
+                if (value != null)
                 {
-                    result.Value = ApplyQueryOptions(result.Value, request, context.ActionDescriptor);
+                    var elementClrType = TypeHelper.GetImplementedIEnumerableType(value.GetType()) ?? value.GetType();
+                    var model = request.ODataProperties().Model;
+                    if (model == null)
+                    {
+                        throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
+                    }
+                    var queryContext = new ODataQueryContext(
+                        model,
+                        elementClrType,
+                        request.ODataProperties().Path);
+
+                    var queryOptions = new ODataQueryOptions(queryContext, request);
+
+                    long? count = null;
+                    var items = ApplyQueryOptions(result.Value, queryOptions, context.ActionDescriptor) as IEnumerable<object>;
+                    if (queryOptions.Count)
+                    {
+                        count = Count(result.Value, queryOptions, context.ActionDescriptor);
+                    }
+                    // We might be getting a single result, so no paging involved
+                    if (items != null)
+                    {
+                        var pageResult = new PageResult<object>(items, null, count);
+                        result.Value = pageResult;
+                    }
                 }
             }
         }
 
-        public virtual object ApplyQueryOptions(object value, HttpRequest request, ActionDescriptor descriptor)
+        public virtual object ApplyQueryOptions(object value, ODataQueryOptions options, ActionDescriptor descriptor)
         {
-            var elementClrType = TypeHelper.GetImplementedIEnumerableType(value.GetType());
 
-            var model = request.ODataProperties().Model;
-            if (model == null)
-            {
-                throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
-            }
-
-            var queryContext = new ODataQueryContext(
-                model,
-                elementClrType,
-                request.ODataProperties().Path);
-
-            var queryOptions = new ODataQueryOptions(queryContext, request);
 
             var enumerable = value as IEnumerable;
             if (enumerable == null)
@@ -69,11 +81,31 @@ namespace Microsoft.AspNet.OData
 
             // response is a collection.
             var query = (value as IQueryable) ?? enumerable.AsQueryable();
-            return queryOptions.ApplyTo(query,
+            return options.ApplyTo(query,
                 new ODataQuerySettings
                 {
                     HandleNullPropagation = HandleNullPropagationOption.True
                 });
+        }
+
+        public virtual long Count(object value, ODataQueryOptions options, ActionDescriptor descriptor)
+        {
+            var enumerable = value as IEnumerable;
+            if (enumerable == null)
+            {
+                // response is single entity.
+                return 1;
+            }
+
+            // response is a collection.
+            var query = (value as IQueryable) ?? enumerable.AsQueryable();
+            var settings = new ODataQuerySettings
+            {
+                HandleNullPropagation = HandleNullPropagationOption.True
+            };
+            var forCount = options.ApplyForCount(query, settings);
+            var count = forCount.Cast<object>().LongCount();
+            return count;
         }
     }
 }

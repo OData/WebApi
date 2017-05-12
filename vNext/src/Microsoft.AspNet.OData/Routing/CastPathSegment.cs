@@ -7,6 +7,8 @@ using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Routing
 {
+    using Microsoft.AspNet.OData.Formatter;
+
     /// <summary>
     /// An <see cref="ODataPathSegment"/> implementation representing a cast.
     /// </summary>

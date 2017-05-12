@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Mvc.Internal;
-using Microsoft.AspNet.Mvc.Routing;
+using Microsoft.AspNet.Mvc.Infrastructure;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.Routing;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.Internal;
-
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
@@ -24,6 +21,13 @@ namespace Microsoft.AspNet.OData.Extensions
             AssemblyProviderManager.Register(defaultAssemblyProvider);
 
             return app.UseRouter(new ODataRoute(prefix, DefaultODataModelProvider.BuildEdmModel(typeof(T))));
+        }
+
+        public static IApplicationBuilder InitializeODataBuilder([NotNull] this IApplicationBuilder app)        {
+            var defaultAssemblyProvider = app.ApplicationServices.GetRequiredService<IAssemblyProvider>();
+            AssemblyProviderManager.Register(defaultAssemblyProvider);
+
+            return app;
         }
     }
 }

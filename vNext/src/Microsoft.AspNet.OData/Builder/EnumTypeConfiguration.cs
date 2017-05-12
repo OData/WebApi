@@ -12,6 +12,8 @@ using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Builder
 {
+    using Microsoft.AspNet.OData.Formatter;
+
     /// <summary>
     /// Represents an <see cref="IEdmEnumType"/> that can be built using <see cref="ODataModelBuilder"/>.
     /// </summary>

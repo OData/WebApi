@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.OData
 
         public virtual object ApplyQueryOptions(object value, HttpRequest request, ActionDescriptor descriptor)
         {
-            var elementClrType = TypeHelper.GetImplementedIEnumerableType(value.GetType());
+            var elementClrType = TypeHelper.GetImplementedIEnumerableType(value.GetType()) ?? value.GetType();
 
             var model = request.ODataProperties().Model;
             if (model == null)

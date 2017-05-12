@@ -7,6 +7,8 @@ using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Routing
 {
+    using Microsoft.AspNet.OData.Formatter;
+
     /// <summary>
     /// An <see cref="ODataPathSegment"/> implementation representing an entity set.
     /// </summary>

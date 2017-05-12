@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
-using Microsoft.AspNet.OData.Builder;
+using System;
+using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData
 {
@@ -20,6 +19,83 @@ namespace Microsoft.AspNet.OData
                 var entityClrType = TypeHelper.GetImplementedIEnumerableType(property.PropertyType);
                 EntityTypeConfiguration entity = builder.AddEntityType(entityClrType);
                 builder.AddEntitySet(property.Name, entity);
+            }
+
+            // Get the actions and functions into the model
+            var publicMethods = ApiContextType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+            foreach (var method in publicMethods)
+            {
+                if (!method.IsSpecialName)
+                {
+                    var entityClrType = TypeHelper.GetImplementedIEnumerableType(method.ReturnType) ?? method.ReturnType;
+                    ProcedureConfiguration configuration = null;
+
+                    var entityType = builder.AddEntityType(entityClrType);
+
+                    var functionAttribute = method.GetCustomAttribute<ODataFunctionAttribute>();
+
+                    if (functionAttribute != null)
+                    {
+                        configuration = builder.Function(method.Name);
+                        if (functionAttribute.IsBound)
+                        {
+                            configuration.SetBindingParameterImplementation(functionAttribute.BindingName, entityType);
+                        }
+                    }
+
+                    var actionAttribute = method.GetCustomAttribute<ODataActionAttribute>();
+                    //method.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ODataActionAttribute));
+                    if (actionAttribute != null)
+                    {
+                        configuration = builder.Action(method.Name);
+                        if (actionAttribute.IsBound)
+                        {
+                            configuration.SetBindingParameterImplementation(actionAttribute.BindingName, entityType);
+                        }
+                    }
+
+                    if (configuration != null)
+                    {
+                        configuration.ReturnType = entityType;
+                        configuration.IsComposable = true;
+                        configuration.NavigationSource =
+                            builder.NavigationSources.FirstOrDefault(n => n.EntityType == entityType) as NavigationSourceConfiguration;
+
+                        foreach (var parameterInfo in method.GetParameters())
+                        {
+                            if (parameterInfo.ParameterType.GetTypeInfo().IsPrimitive || parameterInfo.ParameterType == typeof(decimal)
+                                 || parameterInfo.ParameterType == typeof(string))
+                            {
+                                var primitiveType = builder.AddPrimitiveType(parameterInfo.ParameterType);
+                                configuration.AddParameter(parameterInfo.Name, primitiveType);
+                            }
+                            else
+                            {
+
+                                if (parameterInfo.ParameterType.IsCollection())
+                                {
+                                    if (parameterInfo.ParameterType.GenericTypeArguments[0].GetTypeInfo().IsPrimitive)
+                                    {
+                                        var parameterType = builder.AddPrimitiveType(parameterInfo.ParameterType.GenericTypeArguments[0]);
+                                        var collectionTypeConfig = new CollectionTypeConfiguration(parameterType, parameterInfo.ParameterType.GenericTypeArguments[0]);
+                                        configuration.AddParameter(parameterInfo.Name, collectionTypeConfig);
+                                    }
+                                    else
+                                    {
+                                        var parameterType = builder.AddEntityType(parameterInfo.ParameterType.GenericTypeArguments[0]);
+                                        var collectionTypeConfig = new CollectionTypeConfiguration(parameterType, parameterInfo.ParameterType.GenericTypeArguments[0]);
+                                        configuration.AddParameter(parameterInfo.Name, collectionTypeConfig);
+                                    }
+                                }
+                                else
+                                {
+                                    var parameterType = builder.AddEntityType(parameterInfo.ParameterType);
+                                    configuration.AddParameter(parameterInfo.Name, parameterType);
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             return builder.GetEdmModel();

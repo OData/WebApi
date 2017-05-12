@@ -11,11 +11,14 @@ using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
 using Microsoft.OData.Edm;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 
 namespace Microsoft.AspNet.OData.Builder.Conventions
 {
+    using Microsoft.AspNet.OData.Formatter;
+
+    using TypeExtensions = Microsoft.AspNet.OData.Extensions.TypeExtensions;
+
     internal static class ConventionsHelpers
     {
         public static string GetEntityKeyValue(EntityInstanceContext entityContext)
@@ -136,7 +139,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions
             Type type = value.GetType();
             if (type.GetTypeInfo().IsEnum)
             {
-                value = new ODataEnumValue(value.ToString(), type.EdmFullName());
+                value = new ODataEnumValue(value.ToString(), TypeExtensions.EdmFullName(type));
             }
             else
             {

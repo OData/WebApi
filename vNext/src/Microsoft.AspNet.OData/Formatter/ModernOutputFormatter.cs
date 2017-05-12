@@ -38,7 +38,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
         public override Task WriteResponseBodyAsync(OutputFormatterContext context)
         {
-            var response = context.ActionContext.HttpContext.Response;
+            var response = context.HttpContext.Response;
             var selectedEncoding = context.SelectedEncoding;
 
             using (var delegatingStream = new NonDisposableStream(response.Body))
@@ -57,7 +57,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 context.SelectedContentType = SupportedMediaTypes[2];
             }
 
-            context.ActionContext.HttpContext.Response.Headers.Add("OData-Version", new[] { "4.0" });
+            context.HttpContext.Response.Headers.Add("OData-Version", new[] { "4.0" });
             base.WriteResponseHeaders(context);
         }
 

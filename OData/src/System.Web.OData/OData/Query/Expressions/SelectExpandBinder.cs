@@ -269,7 +269,7 @@ namespace System.Web.OData.Query.Expressions
             Expression modelIDConstant;
             if (_settings.EnableConstantParameterization)
             {
-                modelIDConstant= LinqParameterContainer.Parameterize(typeof(string), _modelID);
+                modelIDConstant = LinqParameterContainer.Parameterize(typeof(string), _modelID);
             }
             else
             {

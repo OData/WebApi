@@ -16,6 +16,9 @@ using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Builder
 {
+    using Mvc.Infrastructure;
+    using Microsoft.AspNet.OData.Formatter;
+
     /// <summary>
     /// <see cref="ODataConventionModelBuilder"/> is used to automatically map CLR classes to an EDM model based on a set of <see cref="IConvention"/>.
     /// </summary>

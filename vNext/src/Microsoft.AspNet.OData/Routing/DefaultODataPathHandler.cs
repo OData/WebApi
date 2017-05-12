@@ -14,6 +14,8 @@ using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Routing
 {
+    using Microsoft.AspNet.OData.Formatter;
+
     /// <summary>
     /// Parses an OData path as an <see cref="ODataPath"/> and converts an <see cref="ODataPath"/> into an OData link.
     /// </summary>

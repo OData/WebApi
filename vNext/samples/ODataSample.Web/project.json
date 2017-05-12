@@ -1,21 +1,27 @@
-﻿{
+{
   "webroot": "wwwroot",
 
   "dependencies": {
-    "Microsoft.AspNet.Mvc": "6.0.0-beta4",
-    "Microsoft.AspNet.Server.IIS": "1.0.0-beta4",
-    "Microsoft.AspNet.Server.WebListener": "1.0.0-beta4",
-    "Microsoft.AspNet.StaticFiles": "1.0.0-beta4",
-    "Microsoft.AspNet.OData": "6.0.0-*"
+    "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
+    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
+    "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
+    "Microsoft.AspNet.StaticFiles": "1.0.0-rc1-final",
+    "Microsoft.AspNet.OData": "6.0.0-alpha1-rc1-final"
   },
 
   "commands": {
-    "web": "Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.WebListener --server.urls http://localhost:5000"
+    "web": "Microsoft.AspNet.Server.Kestrel"
   },
 
   "frameworks": {
+    "net451": {},
     "dnx451": { },
-    "dnxcore50": { }
+    "dnxcore50": {
+      "dependencies": {
+        "System.Reflection.Primitives": "4.0.1-beta-*",
+        "System.Xml.XmlDocument": "4.0.1-beta-*"
+      }
+    }
   },
 
   "exclude": [

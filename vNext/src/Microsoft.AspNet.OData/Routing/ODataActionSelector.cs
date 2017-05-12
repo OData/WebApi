@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNet.Mvc;
-using System;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Routing;
-using Microsoft.AspNet.Mvc.Core;
-using Microsoft.Framework.Logging;
-using Microsoft.AspNet.Mvc.Routing;
+using Microsoft.AspNet.Mvc.Abstractions;
 using Microsoft.AspNet.Mvc.ActionConstraints;
-using System.Collections.Generic;
+using Microsoft.AspNet.Mvc.Infrastructure;
+using Microsoft.AspNet.Mvc.Routing;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.Routing;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNet.OData.Routing
 {

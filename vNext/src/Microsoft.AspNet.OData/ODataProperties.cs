@@ -6,7 +6,6 @@ using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNet.OData
 {
-
     public class ODataProperties
     {
         internal const string ODataServiceVersionHeader = "OData-Version";
@@ -27,5 +26,7 @@ namespace Microsoft.AspNet.OData
         public bool IsValidODataRequest { get; set; }
 
         public SelectExpandClause SelectExpandClause { get; set; }
+
+        public string RoutePrefix { get; set; }
     }
 }

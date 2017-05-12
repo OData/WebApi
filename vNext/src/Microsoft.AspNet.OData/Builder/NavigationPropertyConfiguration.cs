@@ -12,6 +12,8 @@ using Microsoft.AspNet.OData.Extensions;
 
 namespace Microsoft.AspNet.OData.Builder
 {
+    using Microsoft.AspNet.OData.Formatter;
+
     /// <summary>
     /// Represents the configuration for a navigation property of an entity type.
     /// </summary>

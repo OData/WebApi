@@ -1,21 +1,23 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System;
 
 namespace Microsoft.AspNet.OData.Query.Expressions
 {
     internal class ExpressionHelperMethods
     {
         private static MethodInfo _orderByMethod = GenericMethodOf(_ => Queryable.OrderBy<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
+        private static MethodInfo _enumerableOrderByMethod = GenericMethodOf(_ => Enumerable.OrderBy<int, int>(default(IEnumerable<int>), default(Func<int, int>)));
         private static MethodInfo _orderByDescendingMethod = GenericMethodOf(_ => Queryable.OrderByDescending<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _thenByMethod = GenericMethodOf(_ => Queryable.ThenBy<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
+        private static MethodInfo _enumerableThenByMethod = GenericMethodOf(_ => Enumerable.ThenBy<int, int>(default(IOrderedEnumerable<int>), default(Func<int, int>)));
         private static MethodInfo _thenByDescendingMethod = GenericMethodOf(_ => Queryable.ThenByDescending<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _countMethod = GenericMethodOf(_ => Queryable.LongCount<int>(default(IQueryable<int>)));
         private static MethodInfo _skipMethod = GenericMethodOf(_ => Queryable.Skip<int>(default(IQueryable<int>), default(int)));
@@ -45,6 +47,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             get { return _orderByMethod; }
         }
 
+        public static MethodInfo EnumerableOrderByGeneric
+        {
+            get { return _enumerableOrderByMethod; }
+        }
+
         public static MethodInfo QueryableOrderByDescendingGeneric
         {
             get { return _orderByDescendingMethod; }
@@ -53,6 +60,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         public static MethodInfo QueryableThenByGeneric
         {
             get { return _thenByMethod; }
+        }
+
+        public static MethodInfo EnumerableThenByGeneric
+        {
+            get { return _enumerableThenByMethod; }
         }
 
         public static MethodInfo QueryableThenByDescendingGeneric

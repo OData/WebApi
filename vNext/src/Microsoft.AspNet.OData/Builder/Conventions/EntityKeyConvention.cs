@@ -8,6 +8,8 @@ using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Builder.Conventions
 {
+    using Microsoft.AspNet.OData.Formatter;
+
     /// <summary>
     /// <see cref="EntityTypeConvention"/> for figuring out the entity keys.
     /// <remarks>This convention configures properties that are named 'ID' (case-insensitive) or {EntityName}+ID (case-insensitive) as the key.</remarks>

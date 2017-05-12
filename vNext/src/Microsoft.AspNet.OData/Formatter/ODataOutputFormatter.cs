@@ -13,8 +13,9 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.Framework.Internal;
+using Microsoft.Extensions.Internal;
 using Microsoft.OData.Core;
+using Microsoft.AspNet.Mvc.Formatters;
 
 namespace Microsoft.AspNet.OData.Formatter
 {
@@ -23,11 +24,11 @@ namespace Microsoft.AspNet.OData.Formatter
         private readonly ODataMessageWriterSettings _messageWriterSettings;
         private readonly ODataSerializerProvider _serializerProvider;
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
-        
+
         public ODataOutputFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
             : this(new DefaultODataSerializerProvider(), payloadKinds)
         {
-            
+
         }
 
         public ODataOutputFormatter(ODataSerializerProvider serializerProvider, IEnumerable<ODataPayloadKind> payloadKinds)
@@ -43,16 +44,16 @@ namespace Microsoft.AspNet.OData.Formatter
             _serializerProvider = serializerProvider;
             _payloadKinds = payloadKinds;
         }
-        
-        public override Task WriteResponseBodyAsync(OutputFormatterContext context)
+
+        public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
         {
             return Task.Run(() => WriteResponseBody(context));
         }
 
-        private void WriteResponseBody(OutputFormatterContext context)
+        private void WriteResponseBody(OutputFormatterWriteContext context)
         {
-            HttpRequest request = context.ActionContext.HttpContext.Request;
-            HttpResponse response = context.ActionContext.HttpContext.Response;
+            HttpRequest request = context.HttpContext.Request;
+            HttpResponse response = context.HttpContext.Response;
 
             IEdmModel model = request.ODataProperties().Model;
             if (model == null)
@@ -60,11 +61,24 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
             }
 
-            object value = context.Object;
-            Type type = value.GetType();
+            object value = null;
+            object graph = null;
+            var objectResult = context.Object as PageResult<object>;
+            if (objectResult != null)
+            {
+                value = objectResult.Items;
+                graph = objectResult;
+            }
+            else
+            {
+                value = context.Object;
+                graph = value;
+            }
+            var type = value.GetType();
+
             ODataSerializer serializer = GetSerializer(type, value, model, new DefaultODataSerializerProvider(), request);
 
-            IUrlHelper urlHelper = context.ActionContext.HttpContext.UrlHelper();
+            IUrlHelper urlHelper = context.HttpContext.UrlHelper();
 
             ODataPath path = request.ODataProperties().Path;
             IEdmNavigationSource targetNavigationSource = path == null ? null : path.NavigationSource;
@@ -91,7 +105,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 Version = ODataProperties.DefaultODataVersion,
             };
 
-            string metadataLink = urlHelper.CreateODataLink(new MetadataPathSegment());
+            string metadataLink = urlHelper.CreateODataLink(request, new MetadataPathSegment());
             if (metadataLink == null)
             {
                 throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
@@ -103,9 +117,10 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
                 SelectAndExpand = request.ODataProperties().SelectExpandClause,
-                Path = (path == null || IsOperationPath(path)) ? null : path.ODLPath,
+                Path = (path == null) ? null : path.ODLPath
+                //Path = (path == null || IsOperationPath(path)) ? null : path.ODLPath,
             };
-            
+
             using (ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, writerSettings, model))
             {
                 ODataSerializerContext writeContext = new ODataSerializerContext()
@@ -118,18 +133,18 @@ namespace Microsoft.AspNet.OData.Formatter
                     RootElementName = GetRootElementName(path) ?? "root",
                     SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.Feed,
                     Path = path,
-                    MetadataLevel = ODataMediaTypes.GetMetadataLevel(context.SelectedContentType),
-                    SelectExpandClause = request.ODataProperties().SelectExpandClause
+                    MetadataLevel = ODataMediaTypes.GetMetadataLevel(context.ContentType),
+                    SelectExpandClause = request.ODataProperties().SelectExpandClause,
                 };
 
-                serializer.WriteObject(value, type, messageWriter, writeContext);
+                serializer.WriteObject(graph, type, messageWriter, writeContext);
             }
         }
 
-        public override void WriteResponseHeaders(OutputFormatterContext context)
+        public override void WriteResponseHeaders(OutputFormatterWriteContext context)
         {
-            HttpRequest request = context.ActionContext.HttpContext.Request;
-            HttpResponse response = context.ActionContext.HttpContext.Response;
+            HttpRequest request = context.HttpContext.Request;
+            HttpResponse response = context.HttpContext.Response;
 
             //// When the user asks for application/json we really need to set the content type to
             //// application/json; odata.metadata=minimal. If the user provides the media type and is
@@ -173,10 +188,19 @@ namespace Microsoft.AspNet.OData.Formatter
             base.WriteResponseHeaders(context);
         }
 
-        public override bool CanWriteResult([NotNull]OutputFormatterContext context, MediaTypeHeaderValue contentType)
+        public override bool CanWriteResult(OutputFormatterCanWriteContext context)
         {
-            var type = context.Object.GetType();
-            var request = context.ActionContext.HttpContext.Request;
+            Type type = null;
+            var pageResult = context.Object as PageResult<object>;
+            if (pageResult != null)
+            {
+                type = pageResult.Items.GetType();
+            }
+            else
+            {
+                type = context.Object.GetType();
+            }
+            var request = ((OutputFormatterWriteContext)context).HttpContext.Request;
 
             if (request != null)
             {
@@ -243,7 +267,7 @@ namespace Microsoft.AspNet.OData.Formatter
         {
             IUrlHelper urlHelper = request.HttpContext.UrlHelper();
 
-            string baseAddress = urlHelper.CreateODataLink();
+            string baseAddress = urlHelper.CreateODataLink(request);
             if (baseAddress == null)
             {
                 throw new SerializationException(SRResources.UnableToDetermineBaseUrl);

@@ -1,32 +1,35 @@
 {
-  "version": "6.0.0-alpha1",
+  "version": "6.0.0-alpha1-rc1-final",
   "description": "Microsoft.AspNet.OData",
 
   "dependencies": {
-    "Microsoft.OData.Core": "6.12.0",
-    "Microsoft.OData.Edm": "6.12.0",
-    "Microsoft.Spatial": "6.12.0",
-    "Microsoft.AspNet.Mvc": "6.0.0-beta4",
-    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-beta4",
-    "Microsoft.Framework.OptionsModel": "1.0.0-beta4",
-    "Microsoft.Framework.NotNullAttribute.Internal": { "version": "1.0.0-beta5-10230", "type": "build" }
+    "Microsoft.OData.Core": "6.14.0-rc",
+    "Microsoft.OData.Edm": "6.14.0-rc",
+    "Microsoft.Spatial": "6.14.0-rc",
+    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
+    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc1-final",
+    "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final"
   },
 
   "frameworks": {
+    "net451": {},
     "dnx451": { },
     "dnxcore50": {
       "dependencies": {
-        "System.Collections": "4.0.10-beta-22816",
-        "System.Diagnostics.Debug": "4.0.10-beta-22913",
-        "System.Diagnostics.Tools": "4.0.0-beta-22913",
-        "System.Globalization": "4.0.10-beta-22913",
-        "System.Linq": "4.0.0-beta-22816",
-        "System.Linq.Queryable": "4.0.0-beta-22913",
-        "System.Reflection": "4.0.10-beta-22913",
-        "System.Resources.ResourceManager": "4.0.0-beta-22913",
-        "System.Runtime": "4.0.20-beta-22913",
-        "System.Threading": "4.0.10-beta-22816",
-        "Microsoft.CSharp": "4.0.0-beta-22816"
+        "System.Collections": "4.0.11-beta-*",
+        "System.Diagnostics.Debug": "4.0.11-beta-*",
+        "System.Diagnostics.Tools": "4.0.1-beta-*",
+        "System.Globalization": "4.0.11-beta-*",
+        "System.Linq": "4.0.1-beta-*",
+        "System.Linq.Queryable": "4.0.0-beta-*",
+        "System.Reflection": "4.1.0-beta-*",
+        "System.Resources.ResourceManager": "4.0.1-beta-*",
+        "System.Runtime": "4.0.21-beta-*",
+        "System.Threading": "4.0.11-beta-*",
+        "Microsoft.CSharp": "4.0.1-beta-*",
+        "System.Reflection.Primitives": "4.0.1-beta-*",
+        "System.Xml.XmlDocument": "4.0.1-beta-*"
       }
     }
   }

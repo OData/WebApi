@@ -7,6 +7,8 @@ using Microsoft.AspNet.OData.Extensions;
 
 namespace Microsoft.AspNet.OData.Builder
 {
+    using Microsoft.AspNet.OData.Formatter;
+
     /// <summary>
     /// Represents a parameter to a Procedure
     /// </summary>

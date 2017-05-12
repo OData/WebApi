@@ -3,30 +3,33 @@
   "description": "Microsoft.AspNet.OData",
 
   "dependencies": {
+    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
+    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc1-final",
+    "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final",
+    "Microsoft.Framework.NotNullAttribute.Sources": {
+      "version": "1.0.0-rc1-15685",
+      "type": "build"
+    },
     "Microsoft.OData.Core": "6.12.0",
     "Microsoft.OData.Edm": "6.12.0",
-    "Microsoft.Spatial": "6.12.0",
-    "Microsoft.AspNet.Mvc": "6.0.0-beta4",
-    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-beta4",
-    "Microsoft.Framework.OptionsModel": "1.0.0-beta4",
-    "Microsoft.Framework.NotNullAttribute.Internal": { "version": "1.0.0-beta5-10230", "type": "build" }
+    "Microsoft.Spatial": "6.12.0"
   },
 
   "frameworks": {
     "dnx451": { },
     "dnxcore50": {
       "dependencies": {
-        "System.Collections": "4.0.10-beta-22816",
-        "System.Diagnostics.Debug": "4.0.10-beta-22913",
-        "System.Diagnostics.Tools": "4.0.0-beta-22913",
-        "System.Globalization": "4.0.10-beta-22913",
-        "System.Linq": "4.0.0-beta-22816",
-        "System.Linq.Queryable": "4.0.0-beta-22913",
-        "System.Reflection": "4.0.10-beta-22913",
-        "System.Resources.ResourceManager": "4.0.0-beta-22913",
-        "System.Runtime": "4.0.20-beta-22913",
-        "System.Threading": "4.0.10-beta-22816",
-        "Microsoft.CSharp": "4.0.0-beta-22816"
+        "Microsoft.CSharp": "4.0.0-beta-*",
+        "System.Collections": "4.0.11-beta-*",
+        "System.Diagnostics.Debug": "4.0.10-beta-*",
+        "System.Diagnostics.Tools": "4.0.0-beta-*",
+        "System.Globalization": "4.0.10-beta-*",
+        "System.Linq": "4.0.0-beta-*",
+        "System.Linq.Queryable": "4.0.0-beta-*",
+        "System.Reflection": "4.1.0-beta-23225",
+        "System.Resources.ResourceManager": "4.0.0-beta-*",
+        "System.Runtime": "4.0.21-rc2-23621",
+        "System.Threading": "4.0.10-beta-*"
       }
     }
   }

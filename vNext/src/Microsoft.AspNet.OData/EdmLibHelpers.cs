@@ -13,6 +13,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.Spatial;
+using Microsoft.AspNet.Mvc.Infrastructure;
 
 namespace Microsoft.AspNet.OData
 {

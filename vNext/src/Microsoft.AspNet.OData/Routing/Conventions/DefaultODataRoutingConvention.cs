@@ -8,7 +8,11 @@ using Microsoft.OData.Core.UriParser.Semantic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.AspNet.Routing;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNet.Mvc.Infrastructure;
+using Microsoft.AspNet.Mvc.Abstractions;
+using Microsoft.AspNet.Mvc.Controllers;
+using Microsoft.AspNet.Mvc.ActionConstraints;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
 {

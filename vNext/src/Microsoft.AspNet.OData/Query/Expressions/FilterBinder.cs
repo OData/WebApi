@@ -20,6 +20,7 @@ using Microsoft.OData.Edm.Library;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.Mvc.Infrastructure;
 
 namespace Microsoft.AspNet.OData.Query.Expressions
 {

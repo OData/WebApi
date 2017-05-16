@@ -46,6 +46,11 @@ namespace System.Web.OData.Builder
             IEnumerable<StructuralTypeConfiguration> derivedTypes = builder.DerivedTypes(configuration);
             foreach (var config in derivedTypes)
             {
+                if (path.OfType<Type>().Any(p => p == config.ClrType))
+                {
+                    continue;
+                }
+
                 path.Push(config.ClrType);
 
                 builder.FindNavigationProperties(config, navigations, path);

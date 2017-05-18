@@ -268,13 +268,7 @@ namespace System.Web.OData.Formatter.Deserialization
                     throw new ODataException(Error.Format(SRResources.InvalidODataUntypedValue, untypedValue.RawValue));
                 }
 
-                ODataCollectionValue collectionValue = (ODataCollectionValue)ODataUriUtils.ConvertFromUriLiteral(
-                    String.Format(CultureInfo.InvariantCulture, "[{0}]", untypedValue.RawValue), ODataVersion.V4);
-                foreach (object item in collectionValue.Items)
-                {
-                    oDataValue = item;
-                    break;
-                }
+                oDataValue = ConvertPrimitiveValue(untypedValue.RawValue);
             }
 
             typeKind = EdmTypeKind.Primitive;
@@ -360,6 +354,41 @@ namespace System.Web.OData.Formatter.Deserialization
 
             ODataEdmTypeDeserializer deserializer = deserializerProvider.GetEdmTypeDeserializer(collectionType);
             return deserializer.ReadInline(collection, collectionType, readContext);
+        }
+
+        private static object ConvertPrimitiveValue(string value)
+        {
+            double doubleValue;
+            int intValue;
+            decimal decimalValue;
+
+            if (String.CompareOrdinal(value, "null") == 0)
+            {
+                return null;
+            }
+
+            if (Int32.TryParse(value, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out intValue))
+            {
+                return intValue;
+            }
+
+            // todo: if it is Ieee754Compatible, parse decimal after double
+            if (Decimal.TryParse(value, NumberStyles.Number, NumberFormatInfo.InvariantInfo, out decimalValue))
+            {
+                return decimalValue;
+            }
+
+            if (Double.TryParse(value, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out doubleValue))
+            {
+                return doubleValue;
+            }
+
+            if (!value.StartsWith("\"", StringComparison.Ordinal) || !value.EndsWith("\"", StringComparison.Ordinal))
+            {
+                throw new ODataException(Error.Format(SRResources.InvalidODataUntypedValue, value));
+            }
+
+            return value.Substring(1, value.Length - 2);
         }
 
         private static object ConvertEnumValue(ODataEnumValue enumValue, ref IEdmTypeReference propertyType,

@@ -101,7 +101,7 @@ namespace System.Web.OData.Query
                         throw new ODataException(Error.Format(
                             SRResources.SkipTopLimitExceeded,
                             Int32.MaxValue,
-                            AllowedQueryOptions.Skip,
+                            AllowedQueryOptions.Top,
                             RawValue));
                     }
 

@@ -18,9 +18,30 @@ using WebStack.QA.Test.OData.Common;
 using WebStack.QA.Test.OData.Common.Controllers;
 using WebStack.QA.Test.OData.Common.Models.Vehicle;
 using Xunit;
+using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
+using System.Web.Http.Controllers;
 
 namespace WebStack.QA.Test.OData.Formatter
 {
+    public class DeleteAllRoutingConvention : EntitySetRoutingConvention
+    {
+        public override string SelectAction(System.Web.OData.Routing.ODataPath odataPath, HttpControllerContext context,
+            ILookup<string, HttpActionDescriptor> actionMap)
+        {
+            if (context.Request.Method == HttpMethod.Delete &&
+                odataPath.PathTemplate == "~/entityset")
+            {
+                string actionName = "Delete";
+                if (actionMap.Contains(actionName))
+                {
+                     return actionName;
+                }
+            }
+            return null;
+        }
+    }
+
     #region Controllers
 
     public class InheritanceTests_MovingObjectsController : InMemoryODataController<MovingObject, int>
@@ -289,7 +310,7 @@ namespace WebStack.QA.Test.OData.Formatter
             where T : class
         {
             // clear respository
-            await ClearRepositoryAsync(entitySetName);
+            this.ClearRepository(entitySetName);
 
             // post new entity to repository
             T baseline = CreateNewEntity<T>(rand);
@@ -317,13 +338,6 @@ namespace WebStack.QA.Test.OData.Formatter
             // ensure that the entity has been deleted
             var entitiesFinal = await GetEntities<T>(entitySetName);
             Assert.Equal(0, entitiesFinal.ToList().Count());
-        }
-
-        private async Task<HttpResponseMessage> ClearRepositoryAsync(string entitySetName)
-        {
-            var uri = String.Format("{0}/api/{1}/Delete", BaseAddress, entitySetName);
-
-            return await Client.DeleteAsync(uri);
         }
 
         private async Task<DataServiceResponse> PostNewEntity<T>(T value, string entitySetName)

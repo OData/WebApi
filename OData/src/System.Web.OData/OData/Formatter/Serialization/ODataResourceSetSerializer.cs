@@ -216,6 +216,7 @@ namespace System.Web.OData.Formatter.Serialization
                 else if (writeContext.Request != null)
                 {
                     resourceSet.NextPageLink = writeContext.Request.ODataProperties().NextLink;
+                    resourceSet.DeltaLink = writeContext.Request.ODataProperties().DeltaLink;
 
                     long? countValue = writeContext.Request.ODataProperties().TotalCount;
                     if (countValue.HasValue)

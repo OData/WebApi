@@ -149,6 +149,7 @@
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayTest.cs" />
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayWithEfTest.cs" />
     <Compile Include="DateAndTimeOfDay\DateWithEfTest.cs" />
+    <Compile Include="DeltaQueryTests\DeltaQueryTests.cs" />
     <Compile Include="DependencyInjection\CustomizeCountQueryValidatorTest.cs" />
     <Compile Include="DependencyInjection\CustomizeSerializerTest.cs" />
     <Compile Include="DependencyInjection\DependencyInjectionController.cs" />
@@ -157,6 +158,7 @@
     <Compile Include="DollarLevels\DollarLevelsDataModel.cs" />
     <Compile Include="DollarLevels\DollarLevelsEdmModel.cs" />
     <Compile Include="DollarLevels\DollarLevelsTest.cs" />
+    <Compile Include="ETags\DerivedETagTests.cs" />
     <Compile Include="ModelBoundQuerySettings\CombinedTest\CombinedController.cs" />
     <Compile Include="ModelBoundQuerySettings\CombinedTest\CombinedEdmModel.cs" />
     <Compile Include="ModelBoundQuerySettings\CombinedTest\CombinedTest.cs" />

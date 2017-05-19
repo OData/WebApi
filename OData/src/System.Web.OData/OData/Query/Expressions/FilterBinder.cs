@@ -729,7 +729,7 @@ namespace System.Web.OData.Query.Expressions
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
             Justification = "The complexity come from the number of case statements, i.e. the number of values in ClrCanonicalFunctions. The function is simple in concept and reducing further would obfuscate the purpose of the code.")]
-        private Expression BindSingleValueFunctionCallNode(SingleValueFunctionCallNode node)
+        public virtual Expression BindSingleValueFunctionCallNode(SingleValueFunctionCallNode node)
         {
             switch (node.Name)
             {

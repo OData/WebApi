@@ -1,29 +1,28 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3E55571F-8E8F-448A-ACE8-63849EE0871F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E02A56F8-1F9A-4988-A929-D10582529C21}"
 	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
 		NuGet.Config = NuGet.Config
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.OData", "src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.xproj", "{391207F8-D7ED-4233-BAD9-ABBFF700B71C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{CB7EBE84-3A72-454A-BDFF-C2A604A98C11}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.OData.Test", "test\Microsoft.AspNetCore.OData.Test\Microsoft.AspNetCore.OData.Test.xproj", "{0B959ACA-F82B-43C4-946A-39066B4FA8C3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{CDB37674-D801-412C-9B1A-2103A114D41B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{31922483-4CE7-4B02-88E4-EAF27D5E941B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ResxGenerator", "tools\ResxGenerator\ResxGenerator.xproj", "{DACCD7F1-5E28-4AFF-BBA9-CB42F892A20C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.OData", "src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.csproj", "{391207F8-D7ED-4233-BAD9-ABBFF700B71C}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ODataSample.Web", "samples\ODataSample.Web\ODataSample.Web.xproj", "{46706CA6-2056-4355-B672-3E7C80D4CBF4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.OData.Test", "test\Microsoft.AspNetCore.OData.Test\Microsoft.AspNetCore.OData.Test.csproj", "{0B959ACA-F82B-43C4-946A-39066B4FA8C3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResxGenerator", "tools\ResxGenerator\ResxGenerator.csproj", "{DACCD7F1-5E28-4AFF-BBA9-CB42F892A20C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ODataSample.Web", "samples\ODataSample.Web\ODataSample.Web.csproj", "{46706CA6-2056-4355-B672-3E7C80D4CBF4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1051,6 +1051,38 @@ namespace System.Web.OData.Query
             Assert.Equal(customer, ((ObjectContent)actionExecutedContext.Response.Content).Value);
         }
 
+        [Fact]
+        public void OnActionExecuted_StringValue()
+        {
+            // Arrange
+            string stringResult = "foo";
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/Suppliers(1)/CompanyName?customqueryoption=bar", stringResult);
+
+            // Act
+            attribute.OnActionExecuted(actionExecutedContext);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, actionExecutedContext.Response.StatusCode);
+            Assert.Equal(stringResult, ((ObjectContent)actionExecutedContext.Response.Content).Value);
+        }
+
+        [Fact]
+        public void OnActionExecuted_ByteArrayValue()
+        {
+            // Arrange
+            byte[] bytesResult = BitConverter.GetBytes(42);
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
+            HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/Suppliers(1)/Version?customqueryoption=bar", bytesResult);
+
+            // Act
+            attribute.OnActionExecuted(actionExecutedContext);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, actionExecutedContext.Response.StatusCode);
+            Assert.Equal(bytesResult, ((ObjectContent)actionExecutedContext.Response.Content).Value);
+        }
+
         private void SomeAction()
         {
         }

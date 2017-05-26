@@ -590,7 +590,7 @@ namespace System.Web.OData
 
             // apply the query
             IEnumerable enumerable = response as IEnumerable;
-            if (enumerable == null)
+            if (enumerable == null || response is string || response is byte[])
             {
                 // response is not a collection; we only support $select and $expand on single entities.
                 ValidateSelectExpandOnly(queryOptions);

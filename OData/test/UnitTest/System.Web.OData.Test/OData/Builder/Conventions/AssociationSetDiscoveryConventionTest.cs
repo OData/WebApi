@@ -177,5 +177,23 @@ namespace System.Web.OData.Builder.Conventions
             // Assert
             Assert.Null(targetNavigationSource);
         }
+
+        [Fact]
+        public void GetTargetNavigationSource_Returns_Model_WithoutStackOverflow()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.ContainerName = "ThisContainer";
+            builder.Namespace = "ThisNamespace";
+
+            builder.EntityType<RecursivePropertyContainer>().HasKey(p => p.Id);
+            builder.EntitySet<RecursivePropertyContainer>("Containers");
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+        }
     }
 }

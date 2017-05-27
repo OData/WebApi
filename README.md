@@ -1,5 +1,9 @@
 ## OData Web API
 
+## This branch of the OData Web API will be maintained to keep the basic vNext sample working with the latest version of ASP.NET Core
+
+## Please do not use this branch if you wish to use a non ASP.NET Core version, see [the master branch](https://github.com/OData/WebApi/) for that.
+
 ### Introduction
 [OData Web API](http://odata.github.io/WebApi) (i.e., ASP.NET Web API OData) is a server library built upon [ODataLib](https://github.com/OData/odata.net/) and [Web API](http://www.asp.net/web-api).
 
@@ -21,32 +25,10 @@ The [gh-pages](https://github.com/OData/WebApi/tree/gh-pages) branch contains th
 ### Building
 ```
 cd OData
-build.cmd
+build
 ```
-
 ### Testing
-Each solution contains some test projects. Test projects use xUnit runner nuget package.
-
-Tests will not run correctly unless SkipStrongNames is Enabled. Please run
-```
-build.cmd EnableSkipStrongNames
-```
-
-#### Run tests in cmd
-* `build.cmd` build project, and run unit tests.
-
-To run end-to-end tests, you need to open an **elevated** - Run as administrator - command prompt
-* `build.cmd e2eV4` build projects, run unit tests, and OData **v4** end-to-end tests.
-* `build.cmd e2eV3` build projects, run unit tests, and OData **v3** end-to-end tests.
-* `build.cmd full` build projects, run unit tests, OData **v4 and v3** end-to-end tests.
-
-To disable the SkipStrongNames:
-```
-build.cmd DisableSkipStrongNames
-```
-
-#### Run tests in Visual Studio
-Open the project, build it, and then test cases should appear in test explorer. If not, this is because the assemblies are delay signed and you're missing the private key so xunit will not load them in Visual Studio. To fix, please run `build.cmd EnableSkipStrongNames`. Run all the tests in the test explorer. For running end-to-end tests you must open the solution as *Administrator*. More detail at [this](http://odata.github.io/WebApi/#09-01-unittest-e2etest).
+Each solution contains some test projects. Test projects use xUnit runner nuget package. Open the project, build it, and then test cases should appear in test explorer. Run all the tests in the test explorer. For running end-to-end tests you must open the solution as *Administrator*. More detail at [this](http://odata.github.io/WebApi/#09-01-unittest-e2etest).
 
 ### Nightly builds
 1.	In your NuGet Package Manager settings add the following package source:

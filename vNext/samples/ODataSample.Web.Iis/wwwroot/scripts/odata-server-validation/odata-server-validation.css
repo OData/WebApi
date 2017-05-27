@@ -1,0 +1,36 @@
+.alert.validation-group {
+	position: relative;
+}
+
+.alert.validation-group:after, .validation-group:before {
+	bottom: 100%;
+	left: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.alert.validation-group:after {
+	position: absolute;
+	left: 30px;
+	border-bottom-color: #F2DEDE;
+	border-width: 5px;
+	margin-left: -5px;
+}
+
+.alert.validation-group:before {
+	position: absolute;
+	left: 30px;
+	border-bottom-color: #EBCCD1;
+	border-width: 6px;
+	margin-left: -6px;
+}
+
+.alert.validation-group {
+	padding: 3px;
+	padding-left: 7px;
+	margin-top: 5px;
+}

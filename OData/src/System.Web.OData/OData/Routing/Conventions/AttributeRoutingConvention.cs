@@ -68,7 +68,10 @@ namespace System.Web.OData.Routing.Conventions
                     initialized = true;
                     oldInitializer(config);
                     IHttpControllerSelector controllerSelector = config.Services.GetHttpControllerSelector();
-                    _attributeMappings = BuildAttributeMappings(controllerSelector.GetControllerMapping().Values);
+                    _attributeMappings = BuildAttributeMappings(
+						new List<HttpControllerDescriptor>()
+						//controllerSelector.GetControllerMapping().Values
+						);
                 }
             };
         }

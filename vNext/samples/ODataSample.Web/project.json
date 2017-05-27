@@ -1,23 +1,51 @@
 ﻿{
   "webroot": "wwwroot",
-
+  "compilationOptions": {
+    "emitEntryPoint": true,
+    "preserveCompilationContext": true
+  },
   "dependencies": {
-    "Microsoft.AspNet.Mvc": "6.0.0-beta4",
-    "Microsoft.AspNet.Server.IIS": "1.0.0-beta4",
-    "Microsoft.AspNet.Server.WebListener": "1.0.0-beta4",
-    "Microsoft.AspNet.StaticFiles": "1.0.0-beta4",
-    "Microsoft.AspNet.OData": "6.0.0-*"
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Mvc.Core": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Mvc.Dnx": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Mvc.Razor": "1.0.0-rc2-20446",
+    "Microsoft.AspNetCore.Mvc.TagHelpers": "1.0.0-rc2-20446",
+    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Diagnostics": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.IISPlatformHandler": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.StaticFiles": "1.0.0-rc2-*",
+    "ODataSample": "1.0.0-*"
   },
 
   "commands": {
-    "web": "Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.WebListener --server.urls http://localhost:5000"
+    "web": "ODataSample.Web"
   },
-
+  "tools": {
+    "dotnet-publish-iis": "1.0.0-*"
+  },
   "frameworks": {
-    "dnx451": { },
-    "dnxcore50": { }
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Runtime": "4.0.10.0",
+        "System.ComponentModel": "4.0.0.0",
+        "System.Collections": "4.0.0.0",
+        "System.Xml.ReaderWriter": "4.0.0.0",
+        "System.IO": "4.0.0.0"
+      },
+      "dependencies": {
+      }
+    },
+    "netstandardapp1.5": {
+      "dependencies": {
+        "NETStandard.Library": "1.5.0-rc2-*"
+      },
+      "imports": [
+        "dnxcore50",
+        "portable-net451+win8"
+      ]
+    }
   },
-
   "exclude": [
     "wwwroot",
     "node_modules",

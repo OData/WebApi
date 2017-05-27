@@ -1,0 +1,34 @@
+{
+  "version": "1.0.0.26",
+  "description": "Microsoft.AspNetCore.OData",
+
+  "dependencies": {
+    "Microsoft.OData.Core": "6.15.0",
+    "Microsoft.AspNetCore.Mvc": "1.0.0-rc3-*",
+    "Microsoft.AspNetCore.Mvc.Core": "1.0.0-rc3-*",
+    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc3-*",
+    "Microsoft.EntityFrameworkCore": "1.0.0-rc3-*"
+  },
+
+  "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Runtime": "4.0.10.0",
+        "System.ComponentModel": "4.0.0.0",
+        "System.Collections": "4.0.0.0",
+        "System.Xml.ReaderWriter": "4.0.0.0",
+        "System.Xml.Linq": "4.0.0.0",
+        "System.IO": "4.0.0.0"
+      }
+    },
+    "netstandardapp1.5": {
+      "dependencies": {
+        "NETStandard.Library": "1.5.0-*"
+      },
+      "imports": [
+        "dnxcore50",
+        "portable-net451+win8"
+      ]
+    }
+  }
+}

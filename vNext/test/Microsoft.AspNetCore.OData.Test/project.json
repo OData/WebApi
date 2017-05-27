@@ -1,0 +1,24 @@
+﻿{
+  "dependencies": {
+    "Microsoft.AspNetCore.OData": "1.0.0.1-*",
+    "xunit.runner.dnx": "2.1.0-*",
+    "System.Linq": "4.1.0-*",
+    "System.Linq.Queryable": "4.0.1-*",
+    "Microsoft.Framework.NotNullAttribute.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
+    }
+  },
+
+  "commands": {
+    "test": "xunit.runner.aspnet"
+  },
+
+  "frameworks": {
+    "net451": {
+      "dependencies": {
+        "System.Xml.ReaderWriter": "4.0.11-rc2-23818"
+      }
+    }
+  }
+}

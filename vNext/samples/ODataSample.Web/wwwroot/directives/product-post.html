@@ -1,0 +1,39 @@
+<form name="productsForm" ng-submit="productsForm.$valid && addProduct()" odata-server-form-validation odata-server-field-validation-set="Products">
+	<!---->
+	<h2>Products POST</h2>
+	<div class="form-group">
+		<label for="Name">Name</label>
+		<input type="text" id="Name" class="form-control"
+		       name="Name" ng-model="Name"
+		       odata-server-field-validation
+		       ng-model-options="{ debounce: 300 }"/>
+		<!---->
+	</div>
+	<div class="form-group">
+		<label for="product-price">Price</label>
+		<input type="text" id="product-price"
+		       odata-server-field-validation
+		       class="form-control" name="Price" ng-model="Price"/>
+		<!---->
+	</div>
+	<div class="form-group">
+		<label for="product-owner-email-address">Owner email address</label>
+		<input type="text" id="product-owner-email-address"
+		       odata-server-field-validation
+		       class="form-control" name="OwnerEmailAddress" ng-model="OwnerEmailAddress"/>
+		<!---->
+	</div>
+	<div class="form-group">
+		<label for="product-date-invented">Date invented</label>
+		<input type="text" id="product-date-invented"
+		       odata-server-field-validation
+		       class="form-control" name="DateInvented" ng-model="DateInvented"/>
+		<!---->
+	</div>
+	<h2>Is invalid: {{productsForm.$invalid}}</h2>
+	<h2>Is unknown invalid: {{productsForm.unknownInvalid}}</h2>
+	<div class="form-group">
+		<!--ng-disabled="(productsForm.$submitted && productsForm.$invalid) || productsForm.$pending"-->
+		<button class="btn btn-default" odata-server-form-validation-submit>POST to Products</button>
+	</div>
+</form>

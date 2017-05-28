@@ -115,32 +115,30 @@ namespace System.Web.Http.OData.Query.Expressions
             IEdmEntityType declaringType = property.DeclaringType as IEdmEntityType;
             Contract.Assert(declaringType != null, "only entity types are projected.");
 
-            Expression propertyName;
-
             // derived navigation property using cast
             if (elementType != declaringType)
             {
+                Type originalType = EdmLibHelpers.GetClrType(elementType, _model);
                 Type castType = EdmLibHelpers.GetClrType(declaringType, _model);
                 if (castType == null)
                 {
                     throw new ODataException(Error.Format(SRResources.MappingDoesNotContainEntityType, declaringType.FullName()));
                 }
 
-                // Expression
-                //          source is navigationPropertyDeclaringType ? propertyName : null
-                propertyName = Expression.Condition(
-                    test: Expression.TypeIs(source, castType),
-                    ifTrue: Expression.Constant(property.Name),
-                    ifFalse: Expression.Constant(null, typeof(string)));
-            }
-            else
-            {
-                // Expression
-                //          "propertyName"
-                propertyName = Expression.Constant(property.Name);
+                if (!castType.IsAssignableFrom(originalType))
+                {
+                    // Expression
+                    //          source is navigationPropertyDeclaringType ? propertyName : null
+                    return Expression.Condition(
+                        test: Expression.TypeIs(source, castType),
+                        ifTrue: Expression.Constant(property.Name),
+                        ifFalse: Expression.Constant(null, typeof(string)));
+                }
             }
 
-            return propertyName;
+            // Expression
+            //          "propertyName"
+            return Expression.Constant(property.Name);
         }
 
         internal Expression CreatePropertyValueExpression(IEdmEntityType elementType, IEdmProperty property, Expression source)

@@ -91,7 +91,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                     break;
             }
 
-            if (actionDescriptors != null)
+            if (actionDescriptors != null && dynamicPropertSegment != null)
             {
                 if (odataPath.PathTemplate.StartsWith("~/entityset/key", StringComparison.Ordinal))
                 {

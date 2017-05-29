@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.OData.Abstracts;
-using Microsoft.AspNetCore.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -66,7 +65,7 @@ namespace Microsoft.AspNetCore.OData
         /// Gets the data store used by <see cref="IODataRoutingConvention"/>s to store any custom route data.
         /// </summary>
         /// <value>Initially an empty <c>IDictionary&lt;string, object&gt;</c>.</value>
-        public IDictionary<string, object> RoutingConventionsStore { get; set; }
+        public IDictionary<string, object> RoutingConventionsStore { get; set; } = new Dictionary<string, object>();
 
         // TODO: and more features below.
     }

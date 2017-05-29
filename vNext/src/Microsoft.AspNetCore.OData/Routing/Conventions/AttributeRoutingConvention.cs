@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.OData.Common;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Routing.Template;
@@ -144,7 +145,12 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
 
         private static bool IsHttpMethodMatch(ControllerActionDescriptor descriptor, string httpMethod)
         {
-            // TODO:
+            var constraint = descriptor.ActionConstraints?.OfType<HttpMethodActionConstraint>().FirstOrDefault();
+            if (constraint != null)
+            {
+                return constraint.HttpMethods.Contains(httpMethod);
+            }
+
             return true;
         }
 

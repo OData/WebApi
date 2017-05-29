@@ -5,7 +5,6 @@
     <AssemblyName>Microsoft.AspNetCore.OData.Test</AssemblyName>
     <PackageId>Microsoft.AspNetCore.OData.Test</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50;portable-net45+win8+wpa81</PackageTargetFallback>
     <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
   </PropertyGroup>
 
@@ -16,9 +15,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta5-build1225" />
-    <PackageReference Include="Microsoft.OData.Core" Version="7.0.0" />
-    <PackageReference Include="Microsoft.OData.Edm" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Spatial" Version="7.0.0" />
     <PackageReference Include="xunit" Version="2.2.0-beta5-build3474" />
     <PackageReference Include="Moq" Version="4.6.38-alpha" />
   </ItemGroup>

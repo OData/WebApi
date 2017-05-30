@@ -275,5 +275,10 @@ namespace System.Web.OData
 
             throw Error.InvalidOperation(SRResources.UnsupportedEdmType, edmType.ToTraceString(), edmType.TypeKind());
         }
+
+        /// <inheritdoc/>
+        public void SetModel(IEdmModel model)
+        {
+        }
     }
 }

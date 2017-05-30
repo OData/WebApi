@@ -164,6 +164,12 @@ namespace System.Web.OData.Formatter.Serialization
             IEdmObject edmObject = instance as IEdmObject;
             if (edmObject != null)
             {
+                IEdmStructuredObject edmStructuredObject = edmObject as IEdmStructuredObject;
+                if (edmStructuredObject != null)
+                {
+                    edmStructuredObject.SetModel(Model);
+                }
+
                 edmType = edmObject.GetEdmType();
                 if (edmType == null)
                 {

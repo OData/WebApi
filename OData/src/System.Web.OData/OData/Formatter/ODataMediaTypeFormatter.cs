@@ -594,6 +594,12 @@ namespace System.Web.OData.Formatter
             IEdmObject edmObject = value as IEdmObject;
             if (edmObject != null)
             {
+                IEdmStructuredObject edmStructuredObject = edmObject as IEdmStructuredObject;
+                if (edmStructuredObject != null)
+                {
+                    edmStructuredObject.SetModel(Request.GetModel());
+                }
+
                 IEdmTypeReference edmType = edmObject.GetEdmType();
                 if (edmType == null)
                 {

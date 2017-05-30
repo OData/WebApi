@@ -269,7 +269,6 @@
     <Compile Include="OData\Query\Expressions\PropertyContainer.cs" />
     <Compile Include="OData\Query\Expressions\SelectExpandBinder.cs" />
     <Compile Include="OData\Query\Expressions\SelectExpandWrapper.cs" />
-    <Compile Include="OData\Query\Expressions\ModelContainer.cs" />
     <Compile Include="OData\Query\Expressions\SelectExpandWrapperConverter.cs" />
     <Compile Include="OData\Query\ITruncatedCollection.cs" />
     <Compile Include="OData\Query\TruncatedCollectionOfT.cs" />

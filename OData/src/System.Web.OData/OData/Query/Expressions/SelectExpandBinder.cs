@@ -31,7 +31,6 @@ namespace System.Web.OData.Query.Expressions
         private ODataQueryContext _context;
         private IEdmModel _model;
         private ODataQuerySettings _settings;
-        private string _modelID;
 
         public SelectExpandBinder(ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
         {
@@ -44,7 +43,6 @@ namespace System.Web.OData.Query.Expressions
             _selectExpandQuery = selectExpandQuery;
             _context = selectExpandQuery.Context;
             _model = _context.Model;
-            _modelID = ModelContainer.GetModelID(_model);
             _settings = settings;
         }
 
@@ -265,17 +263,17 @@ namespace System.Web.OData.Query.Expressions
 
             // Initialize property 'ModelID' on the wrapper class.
             // source = new Wrapper { ModelID = 'some-guid-id' }
-            wrapperProperty = wrapperType.GetProperty("ModelID");
-            Expression modelIDConstant;
-            if (_settings.EnableConstantParameterization)
-            {
-                modelIDConstant = LinqParameterContainer.Parameterize(typeof(string), _modelID);
-            }
-            else
-            {
-                modelIDConstant =  Expression.Constant(_modelID, typeof(string));
-            }
-            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, modelIDConstant));
+            //wrapperProperty = wrapperType.GetProperty("ModelID");
+            //Expression modelIDConstant;
+            //if (_settings.EnableConstantParameterization)
+            //{
+            //    modelIDConstant = LinqParameterContainer.Parameterize(typeof(string), _modelID);
+            //}
+            //else
+            //{
+            //    modelIDConstant =  Expression.Constant(_modelID, typeof(string));
+            //}
+            //wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, modelIDConstant));
 
             if (IsSelectAll(selectExpandClause))
             {

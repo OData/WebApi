@@ -21,5 +21,11 @@ namespace System.Web.OData
         [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate",
             Justification = "Generics not appropriate here as this interface supports typeless")]
         bool TryGetPropertyValue(string propertyName, out object value);
+
+        /// <summary>
+        /// Sets model for EdmObject
+        /// </summary>
+        /// <param name="model"></param>
+        void SetModel(IEdmModel model);
     }
 }

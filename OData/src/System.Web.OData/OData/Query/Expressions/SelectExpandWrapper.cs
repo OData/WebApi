@@ -31,10 +31,10 @@ namespace System.Web.OData.Query.Expressions
         /// </summary>
         public TElement Instance { get; set; }
 
-        /// <summary>
-        /// An ID to uniquely identify the model in the <see cref="ModelContainer"/>.
-        /// </summary>
-        public string ModelID { get; set; }
+        ///// <summary>
+        ///// An ID to uniquely identify the model in the <see cref="ModelContainer"/>.
+        ///// </summary>
+        //public string ModelID { get; set; }
 
         /// <summary>
         /// Gets or sets the EDM type name of the element being selected and expanded. 
@@ -47,6 +47,8 @@ namespace System.Web.OData.Query.Expressions
         /// Gets or sets the property container that contains the properties being expanded. 
         /// </summary>
         public PropertyContainer Container { get; set; }
+
+        public IEdmModel Model {get; set;}
 
         /// <inheritdoc />
         public IEdmTypeReference GetEdmType()
@@ -153,9 +155,13 @@ namespace System.Web.OData.Query.Expressions
 
         private IEdmModel GetModel()
         {
-            Contract.Assert(ModelID != null);
+            return this.Model;
+        }
 
-            return ModelContainer.GetModel(ModelID);
+        /// <inheritdoc/>
+        public void SetModel(IEdmModel model)
+        {
+            this.Model = model;
         }
     }
 }

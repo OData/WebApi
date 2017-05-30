@@ -93,6 +93,7 @@ namespace System.Web.OData
             set
             {
                 SerializerContext.Model = value;
+                EnsureModel(this.edmObject);
             }
         }
 
@@ -116,10 +117,31 @@ namespace System.Web.OData
         /// </summary>
         public IEdmStructuredType StructuredType { get; set; }
 
+
+        private IEdmStructuredObject edmObject;
         /// <summary>
         /// Gets or sets the <see cref="IEdmStructuredObject"/> backing this instance.
         /// </summary>
-        public IEdmStructuredObject EdmObject { get; set; }
+        public IEdmStructuredObject EdmObject
+        {
+            get
+            {
+                return this.edmObject;
+            }
+            set
+            {
+                this.edmObject = EnsureModel(value);
+            }
+        }
+
+        private IEdmStructuredObject EnsureModel(IEdmStructuredObject obj)
+        {
+            if (obj != null)
+            {
+                obj.SetModel(this.EdmModel);
+            }
+            return obj;
+        }
 
         /// <summary>
         /// Gets or sets the value of this resource instance.

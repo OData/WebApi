@@ -39,5 +39,10 @@ namespace System.Web.OData
         {
             return _edmType;
         }
+
+        /// <inheritdoc/>
+        public void SetModel(IEdmModel model)
+        {
+        }
     }
 }

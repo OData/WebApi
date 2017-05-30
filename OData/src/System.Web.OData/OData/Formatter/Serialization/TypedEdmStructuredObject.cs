@@ -164,5 +164,10 @@ namespace System.Web.OData.Formatter.Serialization
 
             return result;
         }
+
+        /// <inheritdoc/>
+        public void SetModel(IEdmModel model)
+        {
+        }
     }
 }

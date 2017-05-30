@@ -246,7 +246,6 @@
     <Compile Include="OData\Routing\Conventions\AttributeRoutingConventionTest.cs" />
     <Compile Include="OData\Routing\Conventions\PropertyRoutingConventionTests.cs" />
     <Compile Include="OData\Query\ExpressionHelpersTest.cs" />
-    <Compile Include="OData\Query\Expressions\ModelContainerTest.cs" />
     <Compile Include="OData\Query\Expressions\PropertyContainerTest.cs" />
     <Compile Include="OData\Query\Expressions\SelectExpandBinderTest.cs" />
     <Compile Include="OData\Query\Expressions\SelectExpandWrapperTest.cs" />

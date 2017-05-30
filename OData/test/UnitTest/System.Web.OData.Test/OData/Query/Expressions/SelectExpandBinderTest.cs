@@ -282,22 +282,22 @@ namespace System.Web.OData.Query.Expressions
             Assert.IsType<ArgumentNullException>(e.InnerException);
         }
 
-        [Fact]
-        public void ProjectAsWrapper_Element_ProjectedValueContainsModelID()
-        {
-            // Arrange
-            Customer customer = new Customer();
-            SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
-            Expression source = Expression.Constant(customer);
+        //[Fact]
+        //public void ProjectAsWrapper_Element_ProjectedValueContainsModelID()
+        //{
+        //    // Arrange
+        //    Customer customer = new Customer();
+        //    SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
+        //    Expression source = Expression.Constant(customer);
 
-            // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer, _model.Customers);
+        //    // Act
+        //    Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer, _model.Customers);
 
-            // Assert
-            SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
-            Assert.NotNull(customerWrapper.ModelID);
-            Assert.Same(_model.Model, ModelContainer.GetModel(customerWrapper.ModelID));
-        }
+        //    // Assert
+        //    SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
+        //    Assert.NotNull(customerWrapper.ModelID);
+        //    Assert.Same(_model.Model, ModelContainer.GetModel(customerWrapper.ModelID));
+        //}
 
         [Theory]
         [InlineData("*")]
@@ -688,69 +688,69 @@ namespace System.Web.OData.Query.Expressions
                 @"IIF((42 Is AAA), ""NS.AAA"", IIF((42 Is AA), ""NS.AA"", IIF((42 Is B), ""NS.B"", IIF((42 Is A), ""NS.A"", ""NS.BaseType""))))");
         }
 
-        [Fact]
-        public void Bind_ParameterizesModelID_WhenEnabledConstantParameterization()
-        {
-            // Arrange
-            SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(select: "ID", expand: null, context: _context);
+        //[Fact]
+        //public void Bind_ParameterizesModelID_WhenEnabledConstantParameterization()
+        //{
+        //    // Arrange
+        //    SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(select: "ID", expand: null, context: _context);
 
-            // Act
-            IQueryable queryable = SelectExpandBinder.Bind(_queryable, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False, EnableConstantParameterization = true }, selectExpand);
+        //    // Act
+        //    IQueryable queryable = SelectExpandBinder.Bind(_queryable, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False, EnableConstantParameterization = true }, selectExpand);
 
-            // Assert
-            var visitor = new ModelIDCheckVisitor(ModelContainer.GetModelID(_context.Model));
-            visitor.Visit(queryable.Expression);
-            Assert.True(visitor.ModelIDFound);
-            Assert.True(visitor.ModelIDFoundAsParameter);
-        }
+        //    // Assert
+        //    var visitor = new ModelIDCheckVisitor(ModelContainer.GetModelID(_context.Model));
+        //    visitor.Visit(queryable.Expression);
+        //    Assert.True(visitor.ModelIDFound);
+        //    Assert.True(visitor.ModelIDFoundAsParameter);
+        //}
 
-        [Fact]
-        public void Bind_NotParameterizesModelID_WhenDisabledConstantParameterization()
-        {
-            // Arrange
-            SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(select: "ID", expand: null, context: _context);
+        //[Fact]
+        //public void Bind_NotParameterizesModelID_WhenDisabledConstantParameterization()
+        //{
+        //    // Arrange
+        //    SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(select: "ID", expand: null, context: _context);
 
-            // Act
-            IQueryable queryable = SelectExpandBinder.Bind(_queryable, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False, EnableConstantParameterization = false }, selectExpand);
+        //    // Act
+        //    IQueryable queryable = SelectExpandBinder.Bind(_queryable, new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False, EnableConstantParameterization = false }, selectExpand);
 
-            // Assert
-            var visitor = new ModelIDCheckVisitor(ModelContainer.GetModelID(_context.Model));
-            visitor.Visit(queryable.Expression);
-            Assert.True(visitor.ModelIDFound);
-            Assert.False(visitor.ModelIDFoundAsParameter);
-        }
+        //    // Assert
+        //    var visitor = new ModelIDCheckVisitor(ModelContainer.GetModelID(_context.Model));
+        //    visitor.Visit(queryable.Expression);
+        //    Assert.True(visitor.ModelIDFound);
+        //    Assert.False(visitor.ModelIDFoundAsParameter);
+        //}
 
-        private class ModelIDCheckVisitor : ExpressionVisitor
-        {
-            private string _modelIDToLookFor;
+        //private class ModelIDCheckVisitor : ExpressionVisitor
+        //{
+        //    private string _modelIDToLookFor;
 
-            public ModelIDCheckVisitor(string modelID)
-            {
-                this._modelIDToLookFor = modelID;
-            }
+        //    public ModelIDCheckVisitor(string modelID)
+        //    {
+        //        this._modelIDToLookFor = modelID;
+        //    }
 
-            public bool ModelIDFound { get; private set; }
-            public bool ModelIDFoundAsParameter { get; private set; }
+        //    public bool ModelIDFound { get; private set; }
+        //    public bool ModelIDFoundAsParameter { get; private set; }
 
-            protected override Expression VisitConstant(ConstantExpression node)
-            {
-                LinqParameterContainer container = node.Value as LinqParameterContainer;
-                if (container != null)
-                {
-                    if ((container.Property as string) == this._modelIDToLookFor)
-                    {
-                        this.ModelIDFound = true;
-                        this.ModelIDFoundAsParameter = true;
-                    }
-                }
-                else if ((node.Value as string) == this._modelIDToLookFor)
-                {
-                    this.ModelIDFound = true;
-                }
+        //    protected override Expression VisitConstant(ConstantExpression node)
+        //    {
+        //        LinqParameterContainer container = node.Value as LinqParameterContainer;
+        //        if (container != null)
+        //        {
+        //            if ((container.Property as string) == this._modelIDToLookFor)
+        //            {
+        //                this.ModelIDFound = true;
+        //                this.ModelIDFoundAsParameter = true;
+        //            }
+        //        }
+        //        else if ((node.Value as string) == this._modelIDToLookFor)
+        //        {
+        //            this.ModelIDFound = true;
+        //        }
 
-                return base.VisitConstant(node);
-            }
-        }
+        //        return base.VisitConstant(node);
+        //    }
+        //}
 
         private class SpecialCustomer : Customer
         {

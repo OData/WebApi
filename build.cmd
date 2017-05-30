@@ -14,7 +14,6 @@ set MSBuild="%ProgramFiles(x86)%\MSBuild\12.0\Bin\MSBuild.exe"
 if not exist %MSBuild% @set MSBuild="%ProgramFiles%\MSBuild\12.0\Bin\MSBuild.exe"
 
 if /I "%1" == "" goto BuildDefaults
-if /I "%1" == "E2EV4" goto BuildE2EV4
 if /I "%1" == "E2EV3" goto BuildE2EV3
 if /I "%1" == "FULL" goto BuildDefaults
 
@@ -25,22 +24,6 @@ goto BuildSuccess
 :BuildDefaults
 %MSBuild% WebApiOData.msbuild /m /nr:false /p:Platform="Any CPU" /p:Desktop=true /v:M /fl /flp:LogFile=bin\msbuild.log;Verbosity=Normal
 if %ERRORLEVEL% neq 0 goto BuildFail
-if /I "%1" == "FULL" goto BuildE2EV4
-goto BuildSuccess
-
-:BuildE2EV4
-echo *** E2EV4 Test against KatanaSelf ***
-PowerShell.exe -executionpolicy remotesigned -File tools\scripts\ReplaceAppConfigValue.ps1 test\E2ETest\WebStack.QA.Test.OData\App.config "Nuwa.DefaultHostTypes" "KatanaSelf"
-PowerShell.exe -executionpolicy remotesigned -File tools\scripts\ReplaceAppConfigValue.ps1 test\E2ETest\WebStack.QA.Test.OData\App.config "Nuwa.KatanaSelfStartingPort" "9001"
-%MSBuild% WebApiOData.E2E.msbuild /m /nr:false /p:ResultFileName="KatanaSelf.test.result.xml" /p:Platform="Any CPU" /p:Desktop=true /v:M /fl /flp:LogFile=bin\msbuild.log;Verbosity=Normal
-if %ERRORLEVEL% neq 0 goto BuildFail
-
-REM echo *** E2EV4 Test against IIS ***
-REM PowerShell.exe -executionpolicy remotesigned -File tools\scripts\ReplaceAppConfigValue.ps1 test\E2ETest\WebStack.QA.Test.OData\App.config "Nuwa.DefaultHostTypes" "IIS"
-REM PowerShell.exe -executionpolicy remotesigned -File tools\scripts\ReplaceAppConfigValue.ps1 test\E2ETest\WebStack.QA.Test.OData\App.config "Nuwa.KatanaSelfStartingPort" "9023"
-REM %MSBuild% WebApiOData.E2E.msbuild /m /nr:false /p:ResultFileName="IIS.test.result.xml" /p:Platform="Any CPU" /p:Desktop=true /v:M /fl /flp:LogFile=bin\msbuild.log;Verbosity=Normal
-REM if %ERRORLEVEL% neq 0 goto BuildFail
-
 if /I "%1" == "FULL" goto BuildE2EV3
 goto BuildSuccess
 

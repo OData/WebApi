@@ -25,7 +25,7 @@ namespace System.Web.OData
         /// <summary>
         /// Sets model for EdmObject
         /// </summary>
-        /// <param name="model"></param>
+        /// <param name="model">The EDM model to use for type resolutions.</param>
         void SetModel(IEdmModel model);
     }
 }

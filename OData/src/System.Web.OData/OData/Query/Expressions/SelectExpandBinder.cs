@@ -261,20 +261,6 @@ namespace System.Web.OData.Query.Expressions
             bool isTypeNamePropertySet = false;
             bool isContainerPropertySet = false;
 
-            // Initialize property 'ModelID' on the wrapper class.
-            // source = new Wrapper { ModelID = 'some-guid-id' }
-            //wrapperProperty = wrapperType.GetProperty("ModelID");
-            //Expression modelIDConstant;
-            //if (_settings.EnableConstantParameterization)
-            //{
-            //    modelIDConstant = LinqParameterContainer.Parameterize(typeof(string), _modelID);
-            //}
-            //else
-            //{
-            //    modelIDConstant =  Expression.Constant(_modelID, typeof(string));
-            //}
-            //wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, modelIDConstant));
-
             if (IsSelectAll(selectExpandClause))
             {
                 // Initialize property 'Instance' on the wrapper class

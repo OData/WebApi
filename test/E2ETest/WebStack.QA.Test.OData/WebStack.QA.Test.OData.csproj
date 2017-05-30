@@ -996,10 +996,6 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\System.Web.Http.OData\System.Web.Http.OData.csproj">
-      <Project>{cf73aaa7-ace9-4c91-afa5-5ec1df18feee}</Project>
-      <Name>System.Web.Http.OData</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\src\System.Web.OData\System.Web.OData.csproj">
       <Project>{d23e28f1-ccd0-43e0-8c0d-36731ec91318}</Project>
       <Name>System.Web.OData</Name>

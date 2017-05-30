@@ -177,7 +177,7 @@ namespace System.Web.OData
             Assert.NotNull(result["value"][1]["SpecialOrdersAlias"]);
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Raw JSON output not supported")]
         public void SelectExpand_WithInheritanceAndNonODataJson_Works()
         {
             // Arrange
@@ -200,7 +200,7 @@ namespace System.Web.OData
             Assert.NotNull(result[1]["SpecialOrders"]);
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Raw JSON output not supported")]
         public void SelectExpand_WithNonODataJson_Respects_JsonProperty()
         {
             // Arrange
@@ -215,7 +215,7 @@ namespace System.Web.OData
             Assert.Equal(1, result[0]["JsonOrders"][0]["JsonTotal"]);
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Raw JSON output not supported")]
         public void SelectExpand_WithNonODataJson_JsonProperty_Wins_OverDataMember()
         {
             // Arrange
@@ -246,7 +246,7 @@ namespace System.Web.OData
             ValidateCustomer(result);
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Raw JSON output not supported")]
         public void SelectExpand_QueryableOnSingleResult_Works()
         {
             // Arrange
@@ -265,7 +265,7 @@ namespace System.Web.OData
             Assert.NotNull(result["Orders"]);
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Raw JSON output not supported")]
         public void SelectExpand_Works_WithLevels()
         {
             // Arrange

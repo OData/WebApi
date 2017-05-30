@@ -1054,7 +1054,7 @@ namespace System.Web.OData.Query
             Assert.NotNull(queryOptions.Count);
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Raw JSON output not supported")]
         public void ODataQueryOptions_SetToApplied()
         {
             // Arrange

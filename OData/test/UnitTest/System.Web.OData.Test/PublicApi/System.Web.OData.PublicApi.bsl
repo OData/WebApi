@@ -1112,8 +1112,16 @@ public abstract class System.Web.OData.Builder.StructuralTypeConfiguration`1 {
 	public StructuralTypeConfiguration`1 OrderBy (QueryOptionSetting setting, string[] properties)
 	public StructuralTypeConfiguration`1 Page ()
 	public StructuralTypeConfiguration`1 Page (System.Nullable`1[[System.Int32]] maxTopValue, System.Nullable`1[[System.Int32]] pageSizeValue)
-	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
+	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
@@ -1294,6 +1302,12 @@ public class System.Web.OData.Builder.ComplexTypeConfiguration`1 : StructuralTyp
 	public ComplexTypeConfiguration`1 DerivesFromNothing ()
 }
 
+public class System.Web.OData.Builder.DecimalPropertyConfiguration : PrecisionPropertyConfiguration {
+	public DecimalPropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
+
+	System.Nullable`1[[System.Int32]] Scale  { public get; public set; }
+}
+
 public class System.Web.OData.Builder.DynamicPropertyDictionaryAnnotation {
 	public DynamicPropertyDictionaryAnnotation (System.Reflection.PropertyInfo propertyInfo)
 
@@ -1428,6 +1442,12 @@ public class System.Web.OData.Builder.FunctionConfiguration : OperationConfigura
 	public FunctionConfiguration SetBindingParameter (string name, IEdmTypeConfiguration bindingParameterType)
 }
 
+public class System.Web.OData.Builder.LengthPropertyConfiguration : PrimitivePropertyConfiguration {
+	public LengthPropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
+
+	System.Nullable`1[[System.Int32]] MaxLength  { public get; public set; }
+}
+
 public class System.Web.OData.Builder.LowerCamelCaser {
 	public LowerCamelCaser ()
 	public LowerCamelCaser (NameResolverOptions options)
@@ -1559,6 +1579,12 @@ public class System.Web.OData.Builder.OperationLinkBuilder {
 
 	public virtual System.Uri BuildLink (ResourceContext context)
 	public virtual System.Uri BuildLink (ResourceSetContext context)
+}
+
+public class System.Web.OData.Builder.PrecisionPropertyConfiguration : PrimitivePropertyConfiguration {
+	public PrecisionPropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
+
+	System.Nullable`1[[System.Int32]] Precision  { public get; public set; }
 }
 
 public class System.Web.OData.Builder.PrimitivePropertyConfiguration : StructuralPropertyConfiguration {

@@ -47,6 +47,7 @@ namespace System.Web.OData.Builder
             new MediaTypeAttributeConvention(),
             new AutoExpandAttributeEdmPropertyConvention(),
             new AutoExpandAttributeEdmTypeConvention(),
+            new MaxLengthAttributeEdmPropertyConvention(),
             new PageAttributeEdmPropertyConvention(),
             new PageAttributeEdmTypeConvention(),
             new ExpandAttributeEdmPropertyConvention(),

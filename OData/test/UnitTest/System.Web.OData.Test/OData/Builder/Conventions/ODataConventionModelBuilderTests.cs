@@ -3185,6 +3185,37 @@ namespace System.Web.OData.Builder.Conventions
             Assert.True(property.Type.IsNullable);
             Assert.Equal("Edm.TimeOfDay", property.Type.FullName());
         }
+
+        [Fact]
+        public void CanConfig_MaxLengthOfStringAndBinaryType()
+        {
+            // Arrange
+            ODataModelBuilder modelBuidler = new ODataConventionModelBuilder();
+            modelBuidler.EntitySet<MaxLengthEntity>("MaxLengthEntity");
+            var entityType = modelBuidler.EntityType<MaxLengthEntity>();
+
+            // Act
+            IEdmModel model = modelBuidler.GetEdmModel();
+            IEdmEntityType edmEntityType = model.SchemaElements.OfType<IEdmEntityType>().First(p => p.Name == "MaxLengthEntity");
+            IEdmStringTypeReference nameType =
+                (IEdmStringTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("Name")).Type;
+            IEdmStringTypeReference nonLengthType =
+                (IEdmStringTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("NonLength")).Type;
+
+            // Assert
+            Assert.NotNull(model);
+            var nameProp = entityType.Properties.Where(p => p.Name.Equals("Name")).First();
+            Assert.NotNull(nameProp);
+            var byteProp = entityType.Properties.Where(p => p.Name.Equals("Byte")).First();
+            Assert.NotNull(byteProp);
+            var nonLengthProp = entityType.Properties.Where(p => p.Name.Equals("NonLength")).First();
+            Assert.NotNull(nonLengthProp);
+            Assert.Equal(((LengthPropertyConfiguration)nameProp).MaxLength, 3);
+            Assert.Equal(((LengthPropertyConfiguration)byteProp).MaxLength, 5);
+            Assert.Equal(((LengthPropertyConfiguration)nonLengthProp).MaxLength, null);
+            Assert.Equal(nameType.MaxLength, 3);
+            Assert.Equal(nonLengthType.MaxLength, null);
+        }
     }
 
     public enum UserType
@@ -3568,5 +3599,18 @@ namespace System.Web.OData.Builder.Conventions
     public class SubSubEntityTypeWithOwnKey : SubEntityTypeWithOwnKey
     {
         public int SubSubEntityTypeWithOwnKeyId { get; set; }
+    }
+
+    public class MaxLengthEntity
+    {
+        public int Id { get; set; }
+
+        [MaxLength(3)]
+        public string Name { get; set; }
+
+        [MaxLength(5)]
+        public byte[] Byte { get; set; }
+
+        public string NonLength { get; set; }
     }
 }

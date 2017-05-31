@@ -296,6 +296,22 @@ namespace System.Web.OData.Builder
             if (propertyConfiguration == null)
             {
                 propertyConfiguration = new PrimitivePropertyConfiguration(propertyInfo, this);
+                var primitiveType = EdmLibHelpers.GetEdmPrimitiveTypeOrNull(propertyInfo.PropertyType);
+                if (primitiveType != null)
+                {
+                    if (primitiveType.PrimitiveKind == EdmPrimitiveTypeKind.Decimal)
+                    {
+                        propertyConfiguration = new DecimalPropertyConfiguration(propertyInfo, this);
+                    }
+                    else if (EdmLibHelpers.HasLength(primitiveType.PrimitiveKind))
+                    {
+                        propertyConfiguration = new LengthPropertyConfiguration(propertyInfo, this);
+                    }
+                    else if (EdmLibHelpers.HasPrecision(primitiveType.PrimitiveKind))
+                    {
+                        propertyConfiguration = new PrecisionPropertyConfiguration(propertyInfo, this);
+                    }
+                }
                 ExplicitProperties[propertyInfo] = propertyConfiguration;
             }
 

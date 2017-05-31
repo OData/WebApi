@@ -86,6 +86,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\CountAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\CountAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\FilterAttributeEdmPropertyConvention.cs" />
+    <Compile Include="OData\Builder\Conventions\Attributes\MaxLengthAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\SelectAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\OrderByAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\ExpandAttributeEdmPropertyConvention.cs" />
@@ -96,6 +97,8 @@
     <Compile Include="OData\Builder\Conventions\Attributes\PageAttributeEdmTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\PageAttributeEdmPropertyConvention.cs" />
     <Compile Include="OData\Builder\BindingPathConfigurationOfTStructuralType.cs" />
+    <Compile Include="OData\Builder\DecimalPropertyConfiguration.cs" />
+    <Compile Include="OData\Builder\LengthPropertyConfiguration.cs" />
     <Compile Include="OData\Builder\NavigationPropertyExtensions.cs" />
     <Compile Include="OData\Builder\NavigationPropertyBindingOption.cs" />
     <Compile Include="OData\Builder\OperationLinkBuilder.cs" />
@@ -106,6 +109,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\DataContractAttributeEnumTypeConvention.cs" />
     <Compile Include="OData\Builder\Conventions\Attributes\MediaTypeAttributeConvention.cs" />
     <Compile Include="OData\Builder\BindingPathHelper.cs" />
+    <Compile Include="OData\Builder\PrecisionPropertyConfiguration.cs" />
     <Compile Include="OData\EdmDeltaComplexObject.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerProviderProxy.cs" />
     <Compile Include="OData\Formatter\ODataModelBinderConverter.cs" />

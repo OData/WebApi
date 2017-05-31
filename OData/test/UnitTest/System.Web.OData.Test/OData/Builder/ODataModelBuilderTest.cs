@@ -853,6 +853,97 @@ namespace System.Web.OData.Builder
             Assert.Same(typeof(BasePrincipal).GetProperty("PrincipalId"), actualPropertyInfo);
         }
 
+        [Fact]
+        public void DefaultValue_PrecisionScaleAndMaxLength()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var entity = builder.EntityType<PrecisionEnitity>().HasKey(p => p.Id);
+            entity.Property(p => p.DecimalProperty);
+            entity.Property(p => p.StringProperty);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType edmEntityType = model.SchemaElements.OfType<IEdmEntityType>().First(p => p.Name == "PrecisionEnitity");
+            IEdmStringTypeReference stringType =
+                (IEdmStringTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("StringProperty")).Type;
+            IEdmDecimalTypeReference decimalType =
+                (IEdmDecimalTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("DecimalProperty")).Type;
+
+            // Assert
+            Assert.Equal(decimalType.Precision, null);
+            Assert.Equal(decimalType.Scale, 0);
+            Assert.Equal(stringType.MaxLength, null);
+        }
+
+        [Fact]
+        public void CanConfig_PrecisionOfTemporalType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var entity = builder.EntityType<PrecisionEnitity>().HasKey(p => p.Id);
+            entity.Property(p => p.DurationProperty).Precision = 5;
+            entity.Property(p => p.TimeOfDayProperty).Precision = 6;
+            entity.Property(p => p.DateTimeOffsetProperty).Precision = 7;
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType edmEntityType = model.SchemaElements.OfType<IEdmEntityType>().First(p => p.Name == "PrecisionEnitity");
+            IEdmTemporalTypeReference durationType =
+                (IEdmTemporalTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("DurationProperty")).Type;
+            IEdmTemporalTypeReference timeOfDayType =
+                (IEdmTemporalTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("TimeOfDayProperty")).Type;
+            IEdmTemporalTypeReference dateTimeOffsetType =
+                (IEdmTemporalTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("DateTimeOffsetProperty")).Type;
+
+            // Assert
+            Assert.Equal(durationType.Precision.Value, 5);
+            Assert.Equal(timeOfDayType.Precision.Value, 6);
+            Assert.Equal(dateTimeOffsetType.Precision.Value, 7);
+        }
+
+        [Fact]
+        public void CanConfig_PrecisionAndScaleOfDecimalType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var entity = builder.EntityType<PrecisionEnitity>().HasKey(p => p.Id);
+            entity.Property(p => p.DecimalProperty).Precision = 5;
+            entity.Property(p => p.DecimalProperty).Scale = 3;
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType edmEntityType = model.SchemaElements.OfType<IEdmEntityType>().First(p => p.Name == "PrecisionEnitity");
+            IEdmDecimalTypeReference decimalType =
+                (IEdmDecimalTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("DecimalProperty")).Type;
+
+            // Assert
+            Assert.Equal(decimalType.Precision.Value, 5);
+            Assert.Equal(decimalType.Scale.Value, 3);
+        }
+
+        [Fact]
+        public void CanConfig_MaxLengthOfStringAndBinaryType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            var entity = builder.EntityType<PrecisionEnitity>().HasKey(p => p.Id);
+            entity.Property(p => p.StringProperty).MaxLength = 5;
+            entity.Property(p => p.BinaryProperty).MaxLength = 3;
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEntityType edmEntityType = model.SchemaElements.OfType<IEdmEntityType>().First(p => p.Name == "PrecisionEnitity");
+            IEdmStringTypeReference stringType =
+                (IEdmStringTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("StringProperty")).Type;
+            IEdmBinaryTypeReference binaryType =
+                (IEdmBinaryTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("BinaryProperty")).Type;
+
+            // Assert
+            Assert.Equal(stringType.MaxLength.Value, 5);
+            Assert.Equal(binaryType.MaxLength.Value, 3);
+        }
+
         class BasePrincipal
         {
             public int PrincipalId { get; set; }
@@ -870,6 +961,23 @@ namespace System.Web.OData.Builder
             public int PrincipalKey { get; set; }
 
             public DerivedPrincipal Principal { get; set; }
+        }
+
+        class PrecisionEnitity
+        {
+            public int Id { get; set; }
+
+            public decimal DecimalProperty { get; set; }
+
+            public TimeSpan DurationProperty { get; set; }
+
+            public TimeOfDay TimeOfDayProperty { get; set; }
+
+            public DateTimeOffset DateTimeOffsetProperty { get; set; }
+
+            public string StringProperty { get; set; }
+
+            public byte[] BinaryProperty { get; set; }
         }
     }
 }

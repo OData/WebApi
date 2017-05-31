@@ -391,13 +391,7 @@ namespace System.Web.OData
 
                 // Apply the query if there are any query options, if there is a page size set, in the case of
                 // SingleResult or in the case of $count request.
-                bool shouldApplyQuery = responseContent.Value != null &&
-                    request.RequestUri != null &&
-                    (!String.IsNullOrWhiteSpace(request.RequestUri.Query) ||
-                    _querySettings.PageSize.HasValue ||
-                    responseContent.Value is SingleResult ||
-                    ODataCountMediaTypeMapping.IsCountRequest(request) ||
-                    ContainsAutoExpandProperty(responseContent.Value, request, actionDescriptor));
+                bool shouldApplyQuery = ShouldApplyQuery(responseContent, request, actionDescriptor);
 
                 if (shouldApplyQuery)
                 {
@@ -442,6 +436,26 @@ namespace System.Web.OData
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns true if the query should be applied
+        /// </summary>
+        /// <param name="responseContent">The response content</param>
+        /// <param name="request">The incoming request</param>
+        /// <param name="actionDescriptor">>The action descriptor for the action being queried on.</param>
+        /// <returns></returns>
+        protected virtual bool ShouldApplyQuery(ObjectContent responseContent, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
+        {
+            bool shouldApplyQuery = responseContent.Value != null &&
+                    request.RequestUri != null &&
+                    (!String.IsNullOrWhiteSpace(request.RequestUri.Query) ||
+                    _querySettings.PageSize.HasValue ||
+                    responseContent.Value is SingleResult ||
+                    ODataCountMediaTypeMapping.IsCountRequest(request) ||
+                    ContainsAutoExpandProperty(responseContent.Value, request, actionDescriptor));
+
+            return shouldApplyQuery;
         }
 
         /// <summary>
@@ -527,6 +541,32 @@ namespace System.Web.OData
             return queryOptions.ApplyTo(entity, _querySettings);
         }
 
+        /// <summary>
+        /// Create ODataQueryContext instance
+        /// </summary>
+        /// <param name="request">The incoming request.</param>
+        /// <param name="model">The EDM model for the given type and request.</param>
+        /// <param name="elementClrType">The CLR type required to create the related ODataQueryContext.</param>
+        /// <returns>The new ODataQuery context instance for given request, specified EDM model and type</returns>
+        protected virtual ODataQueryContext CreateODataQueryContext(HttpRequestMessage request, IEdmModel model, Type elementClrType)
+        {
+            return new ODataQueryContext(
+                model,
+                elementClrType,
+                request.ODataProperties().Path);
+        }
+
+        /// <summary>
+        /// Create ODataQueryOptions
+        /// </summary>
+        /// <param name="queryContext">The query context used to create the query options.</param>
+        /// <param name="request">The incoming request.</param>
+        /// <returns>The new ODataQueryOptions from the specified ODataQueryContext and request</returns>
+        protected virtual ODataQueryOptions CreateODataQueryOptions(ODataQueryContext queryContext, HttpRequestMessage request)
+        {
+            return new ODataQueryOptions(queryContext, request);
+        }
+
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
             Justification = "Response disposed after being sent.")]
         private object ExecuteQuery(object response, HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
@@ -539,11 +579,8 @@ namespace System.Web.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            ODataQueryContext queryContext = new ODataQueryContext(
-                model,
-                elementClrType,
-                request.ODataProperties().Path);
-            ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
+            ODataQueryContext queryContext = CreateODataQueryContext(request, model, elementClrType);
+            ODataQueryOptions queryOptions = CreateODataQueryOptions(queryContext, request);
 
             ValidateQuery(request, queryOptions);
 

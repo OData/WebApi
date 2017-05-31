@@ -379,8 +379,11 @@ public class System.Web.OData.EnableQueryAttribute : System.Web.Http.Filters.Act
 
 	public virtual System.Linq.IQueryable ApplyQuery (System.Linq.IQueryable queryable, ODataQueryOptions queryOptions)
 	public virtual object ApplyQuery (object entity, ODataQueryOptions queryOptions)
+	protected virtual ODataQueryContext CreateODataQueryContext (System.Net.Http.HttpRequestMessage request, Microsoft.OData.Edm.IEdmModel model, System.Type elementClrType)
+	protected virtual ODataQueryOptions CreateODataQueryOptions (ODataQueryContext queryContext, System.Net.Http.HttpRequestMessage request)
 	public virtual Microsoft.OData.Edm.IEdmModel GetModel (System.Type elementClrType, System.Net.Http.HttpRequestMessage request, System.Web.Http.Controllers.HttpActionDescriptor actionDescriptor)
 	public virtual void OnActionExecuted (System.Web.Http.Filters.HttpActionExecutedContext actionExecutedContext)
+	protected virtual bool ShouldApplyQuery (System.Net.Http.ObjectContent responseContent, System.Net.Http.HttpRequestMessage request, System.Web.Http.Controllers.HttpActionDescriptor actionDescriptor)
 	public virtual void ValidateQuery (System.Net.Http.HttpRequestMessage request, ODataQueryOptions queryOptions)
 }
 
@@ -2032,6 +2035,7 @@ public class System.Web.OData.Query.FilterQueryOption {
 
 	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings)
 	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, System.Web.Http.Dispatcher.IAssembliesResolver assembliesResolver)
+	protected virtual Microsoft.OData.Core.UriParser.Visitors.QueryNodeVisitor`1[[Microsoft.OData.Core.UriParser.Semantic.QueryNode]] GetVisitor (Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionsParser)
 	public void Validate (ODataValidationSettings validationSettings)
 }
 
@@ -2061,6 +2065,12 @@ public class System.Web.OData.Query.ODataQueryOptions {
 	public virtual object ApplyTo (object entity, ODataQuerySettings querySettings)
 	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)
 	public virtual object ApplyTo (object entity, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)
+	protected virtual CountQueryOption CreateCountQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
+	protected virtual FilterQueryOption CreateFilterQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
+	protected virtual OrderByQueryOption CreateOrderByQueryOption (OrderByQueryOption orderbyQueryOption)
+	protected virtual OrderByQueryOption CreateOrderByQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
+	protected virtual SkipQueryOption CreateSkipQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
+	protected virtual TopQueryOption CreateTopQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
 	internal virtual ETag GetETag (System.Net.Http.Headers.EntityTagHeaderValue etagHeaderValue)
 	public bool IsSupportedQueryOption (string queryOptionName)
 	public static bool IsSystemQueryOption (string queryOptionName)
@@ -2162,6 +2172,7 @@ public class System.Web.OData.Query.OrderByQueryOption {
 	public System.Linq.IOrderedQueryable ApplyTo (System.Linq.IQueryable query)
 	public IOrderedQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings)
 	public System.Linq.IOrderedQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings)
+	protected virtual Microsoft.OData.Core.UriParser.Visitors.QueryNodeVisitor`1[[Microsoft.OData.Core.UriParser.Semantic.QueryNode]] GetVisitor (Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionsParser)
 	public void Validate (ODataValidationSettings validationSettings)
 }
 

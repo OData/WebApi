@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace System.Web.OData.PublicApi
@@ -408,11 +409,11 @@ namespace System.Web.OData.PublicApi
                     {
                         continue;
                     }
-                    if (attribute is Runtime.CompilerServices.CompilerGeneratedAttribute)
+                    if (attribute is CompilerGeneratedAttribute)
                     {
                         continue;
                     }
-                    if (attribute is Runtime.CompilerServices.MethodImplAttribute)
+                    if (attribute is MethodImplAttribute)
                     {
                         continue;
                     }
@@ -421,6 +422,10 @@ namespace System.Web.OData.PublicApi
                         continue;
                     }
                     if (attribute is Diagnostics.CodeAnalysis.SuppressMessageAttribute)
+                    {
+                        continue;
+                    }
+                    if (attribute is IteratorStateMachineAttribute)
                     {
                         continue;
                     }

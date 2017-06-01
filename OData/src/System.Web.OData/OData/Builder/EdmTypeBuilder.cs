@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
@@ -11,7 +12,6 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Vocabularies;
 
 namespace System.Web.OData.Builder
 {
@@ -203,6 +203,7 @@ namespace System.Web.OData.Builder
             return primitiveTypeReference;
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
         private void CreateStructuralTypeBody(EdmStructuredType type, StructuralTypeConfiguration config)
         {
             foreach (PropertyConfiguration property in config.Properties)

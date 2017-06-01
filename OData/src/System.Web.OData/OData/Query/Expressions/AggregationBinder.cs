@@ -46,7 +46,7 @@ namespace System.Web.OData.Query.Expressions
             {
                 case TransformationNodeKind.Aggregate:
                     var aggregateClause = this._transformation as AggregateTransformationNode;
-                    _aggregateExpressions = aggregateClause.Expressions;
+                    _aggregateExpressions = FixCustomMethodReturnTypes(aggregateClause.Expressions);
                     ResultClrType = AggregationDynamicTypeProvider.GetResultType<DynamicTypeWrapper>(Model, null,
                         _aggregateExpressions);
                     break;
@@ -57,8 +57,8 @@ namespace System.Web.OData.Query.Expressions
                     {
                         if (groupByClause.ChildTransformations.Kind == TransformationNodeKind.Aggregate)
                         {
-                            _aggregateExpressions =
-                                ((AggregateTransformationNode)groupByClause.ChildTransformations).Expressions;
+                            var aggregationNode = groupByClause.ChildTransformations as AggregateTransformationNode;
+                            _aggregateExpressions = FixCustomMethodReturnTypes(aggregationNode.Expressions);
                         }
                         else
                         {
@@ -77,6 +77,45 @@ namespace System.Web.OData.Query.Expressions
             }
 
             _groupByClrType = _groupByClrType ?? typeof(DynamicTypeWrapper);
+        }
+
+        private IEnumerable<AggregateExpression> FixCustomMethodReturnTypes(IEnumerable<AggregateExpression> aggregateExpressions)
+        {
+            return aggregateExpressions.Select(x => FixCustomMethodReturnType(x));
+        }
+
+        private AggregateExpression FixCustomMethodReturnType(AggregateExpression expression)
+        {
+            if (expression.Method != AggregationMethod.Custom)
+            {
+                return expression;
+            }
+
+            var customMethod = GetCustomMethod(expression);
+            var typeReference = EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(customMethod.ReturnType);
+            return new AggregateExpression(expression.Expression, expression.MethodDefinition, expression.Alias, typeReference);
+        }
+
+        private MethodInfo GetCustomMethod(AggregateExpression expression)
+        {
+            var propertyLambda = Expression.Lambda(BindAccessor(expression.Expression), this._lambdaParameter);
+            Type inputType = propertyLambda.Body.Type;
+
+            string methodToken = expression.MethodDefinition.MethodLabel;
+            var customFunctionAnnotations = Model.GetAnnotationValue<CustomAggregateMethodAnnotation>(Model);
+
+            MethodInfo customMethod;
+            if (!customFunctionAnnotations.GetMethodInfo(methodToken, inputType, out customMethod))
+            {
+                throw new ODataException(
+                    Error.Format(
+                        SRResources.AggregationNotSupportedForType,
+                        expression.Method,
+                        expression.Expression,
+                        inputType));
+            }
+
+            return customMethod;
         }
 
         /// <summary>
@@ -130,15 +169,15 @@ namespace System.Web.OData.Query.Expressions
             {
                 foreach (var aggExpression in _aggregateExpressions)
                 {
-                    wrapperTypeMemberAssignments.Add(
-                        Expression.Bind(ResultClrType.GetMember(aggExpression.Alias).Single(),
-                            CreateAggregationExpression(accum, aggExpression)));
+                    var member = ResultClrType.GetMember(aggExpression.Alias).Single();
+                    var expression = CreateAggregationExpression(accum, aggExpression);
+                    wrapperTypeMemberAssignments.Add(Expression.Bind(member, expression));
                 }
             }
 
-            var selectLambda =
-                Expression.Lambda(Expression.MemberInit(Expression.New(ResultClrType), wrapperTypeMemberAssignments),
-                    accum);
+            var initilizedMember = 
+                Expression.MemberInit(Expression.New(ResultClrType), wrapperTypeMemberAssignments);
+            var selectLambda = Expression.Lambda(initilizedMember, accum);
 
             var result = ExpressionHelpers.Select(grouping, selectLambda, groupingType);
             return result;
@@ -196,14 +235,14 @@ namespace System.Web.OData.Query.Expressions
                         propertyLambda.Body.Type);
                     aggregationExpression = Expression.Call(null, minMethod, asQuerableExpression, propertyLambda);
                 }
-                    break;
+                break;
                 case AggregationMethod.Max:
                 {
                     var maxMethod = ExpressionHelperMethods.QueryableMax.MakeGenericMethod(this._elementType,
                         propertyLambda.Body.Type);
                     aggregationExpression = Expression.Call(null, maxMethod, asQuerableExpression, propertyLambda);
                 }
-                    break;
+                break;
                 case AggregationMethod.Sum:
                 {
                     MethodInfo sumGenericMethod;
@@ -217,7 +256,7 @@ namespace System.Web.OData.Query.Expressions
                     var sumMethod = sumGenericMethod.MakeGenericMethod(this._elementType);
                     aggregationExpression = Expression.Call(null, sumMethod, asQuerableExpression, propertyLambda);
                 }
-                    break;
+                break;
                 case AggregationMethod.Average:
                 {
                     MethodInfo averageGenericMethod;
@@ -231,7 +270,7 @@ namespace System.Web.OData.Query.Expressions
                     var averageMethod = averageGenericMethod.MakeGenericMethod(this._elementType);
                     aggregationExpression = Expression.Call(null, averageMethod, asQuerableExpression, propertyLambda);
                 }
-                    break;
+                break;
                 case AggregationMethod.CountDistinct:
                 {
                     // I select the specific field 
@@ -251,7 +290,16 @@ namespace System.Web.OData.Query.Expressions
                         ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(propertyLambda.Body.Type);
                     aggregationExpression = Expression.Call(null, countMethod, distinctExpression);
                 }
-                    break;
+                break;
+                case AggregationMethod.Custom:
+                {
+                    MethodInfo customMethod = GetCustomMethod(expression);
+                    var selectMethod = 
+                        ExpressionHelperMethods.QueryableSelectGeneric.MakeGenericMethod(this._elementType, propertyLambda.Body.Type);
+                    var selectExpression = Expression.Call(null, selectMethod, asQuerableExpression, propertyLambda);
+                    aggregationExpression = Expression.Call(null, customMethod, selectExpression);
+                }
+                break;
                 default:
                     throw new ODataException(Error.Format(SRResources.AggregationMethodNotSupported, expression.Method));
             }
@@ -328,7 +376,7 @@ namespace System.Web.OData.Query.Expressions
                 //                                          Prop1 = $it.Prop1,
                 //                                          Prop2 = $it.Prop2,
                 //                                          Prop3 = $it.NavProp.Prop3
-                //                                          ...
+                //                                          .../
                 //                                      }) 
 
                 List<MemberAssignment> wrapperTypeMemberAssignments = CreateGroupByMemberAssignments(_groupByClrType,

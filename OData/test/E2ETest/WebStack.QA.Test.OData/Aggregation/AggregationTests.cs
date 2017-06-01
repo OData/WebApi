@@ -254,6 +254,72 @@ namespace WebStack.QA.Test.OData.Aggregation
         }
 
         [Theory]
+        [InlineData("?$apply=groupby((Name), aggregate(Order/Price with Custom.StdDev as PriceStdDev))")]
+        [InlineData("?$apply=groupby((Address/Name), aggregate(Id with Custom.StdDev as IdStdDev))")]
+        [InlineData("?$apply=groupby((Order/Name), aggregate(Id with Custom.StdDev as IdStdDev))")]
+        public void CustomAggregateStdDevWorks(string query)
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + query,
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("?$apply=groupby((Name), aggregate(Order/Price with Custom.Sum as PriceStdDev))")]
+        [InlineData("?$apply=groupby((Address/Name), aggregate(Id with Custom.OtherMethod as IdStdDev))")]
+        [InlineData("?$apply=groupby((Order/Name), aggregate(Id with Custom.YetAnotherMethod as IdStdDev))")]
+        public void CustomAggregateNotDefinedHaveAppropriateAnswer(string query)
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + query,
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("?$apply=groupby((Name), aggregate(Order/Price with StdDev as PriceStdDev))")]
+        [InlineData("?$apply=groupby((Address/Name), aggregate(Id with OtherMethod as IdStdDev))")]
+        [InlineData("?$apply=groupby((Order/Name), aggregate(Id with YetAnotherMethod as IdStdDev))")]
+        public void MethodsNotDefinedHaveAppropriateAnswer(string query)
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + query,
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Theory]
         [InlineData("?$apply=aggregate(Order/Price with sum as Result)", "4500")]
         [InlineData("?$apply=aggregate(Order/Price with min as Result)", "100")]
         [InlineData("?$apply=aggregate(Order/Price with max as Result)", "900")]

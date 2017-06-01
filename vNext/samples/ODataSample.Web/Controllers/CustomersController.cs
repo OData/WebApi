@@ -26,9 +26,9 @@ namespace ODataSample.Web.Controllers
 
         // GET api/Customers/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public IActionResult Get(int customerId)
         {
-            var customer = _sampleContext.FindCustomer(id);
+            var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
                 return HttpNotFound();
@@ -38,9 +38,9 @@ namespace ODataSample.Web.Controllers
         }
 
         [HttpGet("{id}/FirstName")]
-        public IActionResult GetFirstName(int id)
+        public IActionResult GetFirstName(int customerId)
         {
-            var customer = _sampleContext.FindCustomer(id);
+            var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
                 return HttpNotFound();
@@ -50,9 +50,9 @@ namespace ODataSample.Web.Controllers
         }
 
         [HttpGet("{id}/LastName")]
-        public IActionResult GetLastName(int id)
+        public IActionResult GetLastName(int customerId)
         {
-            var customer = _sampleContext.FindCustomer(id);
+            var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
                 return HttpNotFound();
@@ -62,9 +62,9 @@ namespace ODataSample.Web.Controllers
         }
 
         [HttpGet("{id}/CustomerId")]
-        public IActionResult GetCustomerId(int id)
+        public IActionResult GetCustomerId(int customerId)
         {
-            var customer = _sampleContext.FindCustomer(id);
+            var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
                 return HttpNotFound();
@@ -74,9 +74,9 @@ namespace ODataSample.Web.Controllers
         }
 
         [HttpGet("{id}/Products")]
-        public IActionResult GetProducts(int id)
+        public IActionResult GetProducts(int customerId)
         {
-            var customer = _sampleContext.FindCustomer(id);
+            var customer = _sampleContext.FindCustomer(customerId);
             if (customer == null)
             {
                 return HttpNotFound();
@@ -95,9 +95,9 @@ namespace ODataSample.Web.Controllers
 
         // PUT api/Customers/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody]Customer value)
+        public IActionResult Put(int customerId, [FromBody]Customer value)
         {
-            if (!_sampleContext.UpdateCustomer(id, value))
+            if (!_sampleContext.UpdateCustomer(customerId, value))
             {
                 return HttpNotFound();
             }
@@ -107,9 +107,9 @@ namespace ODataSample.Web.Controllers
 
         // DELETE api/Customers/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(int customerId)
         {
-            if (!_sampleContext.DeleteCustomer(id))
+            if (!_sampleContext.DeleteCustomer(customerId))
             {
                 return HttpNotFound();
             }

@@ -29,9 +29,9 @@ namespace ODataSample.Web.Controllers
 
         // GET api/Products/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public IActionResult Get(int productId)
         {
-            var product = _sampleContext.FindProduct(id);
+            var product = _sampleContext.FindProduct(productId);
             if (product == null)
             {
                 return HttpNotFound();
@@ -41,9 +41,9 @@ namespace ODataSample.Web.Controllers
         }
 
         [HttpGet("{id}/Name")]
-        public IActionResult GetName(int id)
+        public IActionResult GetName(int productId)
         {
-            var product = _sampleContext.FindProduct(id);
+            var product = _sampleContext.FindProduct(productId);
             if (product == null)
             {
                 return HttpNotFound();
@@ -53,9 +53,9 @@ namespace ODataSample.Web.Controllers
         }
 
         [HttpGet("{id}/Price")]
-        public IActionResult GetPrice(int id)
+        public IActionResult GetPrice(int productId)
         {
-            var product = _sampleContext.FindProduct(id);
+            var product = _sampleContext.FindProduct(productId);
             if (product == null)
             {
                 return HttpNotFound();
@@ -65,9 +65,9 @@ namespace ODataSample.Web.Controllers
         }
 
         [HttpGet("{id}/ProductId")]
-        public IActionResult GetProductId(int id)
+        public IActionResult GetProductId(int productId)
         {
-            var product = _sampleContext.FindProduct(id);
+            var product = _sampleContext.FindProduct(productId);
             if (product == null)
             {
                 return HttpNotFound();
@@ -86,9 +86,9 @@ namespace ODataSample.Web.Controllers
 
         // PUT api/Products/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody]Product value)
+        public IActionResult Put(int productId, [FromBody]Product value)
         {
-            if (!_sampleContext.UpdateProduct(id, value))
+            if (!_sampleContext.UpdateProduct(productId, value))
             {
                 return HttpNotFound();
             }
@@ -98,9 +98,9 @@ namespace ODataSample.Web.Controllers
 
         // DELETE api/Products/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(int productId)
         {
-            if (!_sampleContext.DeleteProduct(id))
+            if (!_sampleContext.DeleteProduct(productId))
             {
                 return HttpNotFound();
             }

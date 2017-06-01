@@ -47,7 +47,10 @@ namespace Microsoft.AspNet.OData.Query
                 context.ElementType,
                 context.NavigationSource,
                 queryOptionDict);
-            
+
+            // Support for $expand
+            request.ODataProperties().SelectExpandClause = this._queryOptionParser.ParseSelectAndExpand();
+
             BuildQueryOptions(queryOptionDict);
         }
 

@@ -51,8 +51,8 @@ namespace Microsoft.AspNet.OData.Formatter
 
         private void WriteResponseBody(OutputFormatterContext context)
         {
-            HttpRequest request = context.ActionContext.HttpContext.Request;
-            HttpResponse response = context.ActionContext.HttpContext.Response;
+            HttpRequest request = context.HttpContext.Request;
+            HttpResponse response = context.HttpContext.Response;
 
             IEdmModel model = request.ODataProperties().Model;
             if (model == null)
@@ -64,7 +64,7 @@ namespace Microsoft.AspNet.OData.Formatter
             Type type = value.GetType();
             ODataSerializer serializer = GetSerializer(type, value, model, new DefaultODataSerializerProvider(), request);
 
-            IUrlHelper urlHelper = context.ActionContext.HttpContext.UrlHelper();
+            IUrlHelper urlHelper = context.HttpContext.UrlHelper();
 
             ODataPath path = request.ODataProperties().Path;
             IEdmNavigationSource targetNavigationSource = path == null ? null : path.NavigationSource;
@@ -128,8 +128,8 @@ namespace Microsoft.AspNet.OData.Formatter
 
         public override void WriteResponseHeaders(OutputFormatterContext context)
         {
-            HttpRequest request = context.ActionContext.HttpContext.Request;
-            HttpResponse response = context.ActionContext.HttpContext.Response;
+            HttpRequest request = context.HttpContext.Request;
+            HttpResponse response = context.HttpContext.Response;
 
             //// When the user asks for application/json we really need to set the content type to
             //// application/json; odata.metadata=minimal. If the user provides the media type and is
@@ -176,7 +176,7 @@ namespace Microsoft.AspNet.OData.Formatter
         public override bool CanWriteResult([NotNull]OutputFormatterContext context, MediaTypeHeaderValue contentType)
         {
             var type = context.Object.GetType();
-            var request = context.ActionContext.HttpContext.Request;
+            var request = context.HttpContext.Request;
 
             if (request != null)
             {

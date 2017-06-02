@@ -158,18 +158,18 @@ namespace System.Web.OData.Formatter
         }
 
         /// <summary>
-        /// Host name used by tests for verifying GetBaseAddress delegate
+        /// Host name used by tests for verifying ServiceRootResolver
         /// </summary>
         private const string CustomHost = "www.microsoft.com";
 
         /// <summary>
-        /// Delegate for GetBaseAddress that converts uris to https
+        /// Custom implementation of GetServiceRoot that converts uris to https
         /// </summary>
         /// <param name="httpRequestMessage">The HttpRequestMessage representing this request.</param>
-        /// <returns>A custom uri for the base address.</returns>
-        private Uri GetCustomBaseAddress(HttpRequestMessage httpRequestMessage)
+        /// <returns>A custom uri for the service root.</returns>
+        private Uri CustomServiceRootResolver(HttpRequestMessage httpRequestMessage)
         {
-            Uri baseAddress = ODataMediaTypeFormatter.GetDefaultBaseAddress(httpRequestMessage);
+            Uri baseAddress = ODataMediaTypeFormatter.GetDefaultServiceRoot(httpRequestMessage);
 
             UriBuilder uriBuilder = new UriBuilder(baseAddress);
             uriBuilder.Scheme = Uri.UriSchemeHttps;
@@ -180,7 +180,7 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void GetBaseAddress_AllowsBaseAddressOverride()
+        public void ServiceRootResolver_AllowsServiceRootOverride()
         {
             // Arrange
             string routeName = "Route";
@@ -200,7 +200,7 @@ namespace System.Web.OData.Formatter
 
             // Act
             ODataMediaTypeFormatter formatter = CreateFormatterWithJson(model, request, ODataPayloadKind.ServiceDocument);
-            formatter.BaseAddressFactory = GetCustomBaseAddress;
+            formatter.ServiceRootResolver = CustomServiceRootResolver;
             var content = new ObjectContent<ODataServiceDocument>(new ODataServiceDocument(), formatter);
             string actualContent = content.ReadAsStringAsync().Result;
 
@@ -209,13 +209,13 @@ namespace System.Web.OData.Formatter
         }
 
         [Fact]
-        public void GetDefaultBaseAddress_ThrowsWhenRequestIsNull()
+        public void ServiceRootResolver_ThrowsWhenRequestIsNull()
         {
-            Assert.ThrowsArgumentNull(() => ODataMediaTypeFormatter.GetDefaultBaseAddress(null), "request");
+            Assert.ThrowsArgumentNull(() => ODataMediaTypeFormatter.GetDefaultServiceRoot(null), "request");
         }
 
         [Fact]
-        public void GetDefaultBaseAddress_ReturnsCorrectBaseAddress()
+        public void GetDefaultServiceRoot_ReturnsCorrectServiceRoot()
         {
             // Arrange
             string baseUriText = "http://discovery.contoso.com/";
@@ -231,7 +231,7 @@ namespace System.Web.OData.Formatter
             request.ODataProperties().RouteName = routeName;
 
             // Act
-            Uri baseUri = ODataMediaTypeFormatter.GetDefaultBaseAddress(request);
+            Uri baseUri = ODataMediaTypeFormatter.GetDefaultServiceRoot(request);
 
             // Assert
             Assert.Equal(baseUriText + routePrefix + "/", baseUri.ToString());

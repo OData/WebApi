@@ -188,10 +188,10 @@ namespace System.Web.OData.Formatter
         public ODataMessageReaderSettings MessageReaderSettings { get; private set; }
 
         /// <summary>
-        /// Gets or sets a method that allows consumers to provide an alternate base
-        /// address for OData Uri.
+        /// Gets or sets a method that allows consumers to provide an alternate service
+        /// root for OData Uris.
         /// </summary>
-        public Func<HttpRequestMessage, Uri> BaseAddressFactory { get; set; }
+        public Func<HttpRequestMessage, Uri> ServiceRootResolver { get; set; }
 
         /// <summary>
         /// The request message associated with the per-request formatter instance.
@@ -400,7 +400,7 @@ namespace System.Web.OData.Formatter
                 try
                 {
                     ODataMessageReaderSettings oDataReaderSettings = new ODataMessageReaderSettings(MessageReaderSettings);
-                    oDataReaderSettings.BaseUri = GetBaseAddressInternal(Request);
+                    oDataReaderSettings.BaseUri = GetServiceRootInternal(Request);
 
                     IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(readStream, contentHeaders, Request.GetODataContentIdMapping());
                     ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
@@ -506,10 +506,10 @@ namespace System.Web.OData.Formatter
                 responseMessage.PreferenceAppliedHeader().AnnotationFilter = annotationFilter;
             }
 
-            Uri baseAddress = GetBaseAddressInternal(Request);
+            Uri serviceRootUri = GetServiceRootInternal(Request);
             ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings(MessageWriterSettings)
             {
-                PayloadBaseUri = baseAddress,
+                PayloadBaseUri = serviceRootUri,
                 Version = _version,
             };
 
@@ -522,7 +522,7 @@ namespace System.Web.OData.Formatter
 
             writerSettings.ODataUri = new ODataUri
             {
-                ServiceRoot = baseAddress,
+                ServiceRoot = serviceRootUri,
 
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
                 SelectAndExpand = Request.ODataProperties().SelectExpandClause,
@@ -741,30 +741,30 @@ namespace System.Web.OData.Formatter
         }
 
         /// <summary>
-        /// Internal method used for selecting the base address to be used with OData uris.
+        /// Internal method used for selecting the service root to be used with OData uris.
         /// If the consumer has provided a delegate for overriding our default implementation,
         /// we call that, otherwise we default to existing behavior below.
         /// </summary>
         /// <param name="request">The HttpRequestMessage object for the given request.</param>
-        /// <returns>The base address to be used as part of the service root; must terminate with a trailing '/'.</returns>
-        private Uri GetBaseAddressInternal(HttpRequestMessage request)
+        /// <returns>The service root to be used when generating OData uris; must terminate with a trailing '/'.</returns>
+        private Uri GetServiceRootInternal(HttpRequestMessage request)
         {
-            if (BaseAddressFactory != null)
+            if (ServiceRootResolver != null)
             {
-                return BaseAddressFactory(request);
+                return ServiceRootResolver(request);
             }
             else
             {
-                return ODataMediaTypeFormatter.GetDefaultBaseAddress(request);
+                return ODataMediaTypeFormatter.GetDefaultServiceRoot(request);
             }
         }
 
         /// <summary>
-        /// Returns a base address to be used in the service root when reading or writing OData uris.
+        /// Returns an OData service root to be used when reading or writing OData uris.
         /// </summary>
         /// <param name="request">The HttpRequestMessage object for the given request.</param>
-        /// <returns>The base address to be used as part of the service root in the OData uri; must terminate with a trailing '/'.</returns>
-        public static Uri GetDefaultBaseAddress(HttpRequestMessage request)
+        /// <returns>The service root to be used in OData uris; must terminate with a trailing '/'.</returns>
+        public static Uri GetDefaultServiceRoot(HttpRequestMessage request)
         {
             if (request == null)
             {
@@ -773,13 +773,13 @@ namespace System.Web.OData.Formatter
 
             UrlHelper urlHelper = request.GetUrlHelper() ?? new UrlHelper(request);
 
-            string baseAddress = urlHelper.CreateODataLink();
-            if (baseAddress == null)
+            string serviceRoot = urlHelper.CreateODataLink();
+            if (serviceRoot == null)
             {
                 throw new SerializationException(SRResources.UnableToDetermineBaseUrl);
             }
 
-            return baseAddress[baseAddress.Length - 1] != '/' ? new Uri(baseAddress + '/') : new Uri(baseAddress);
+            return serviceRoot[serviceRoot.Length - 1] != '/' ? new Uri(serviceRoot + '/') : new Uri(serviceRoot);
         }
 
         internal static ODataVersion GetODataResponseVersion(HttpRequestMessage request)

@@ -343,7 +343,7 @@ namespace WebStack.QA.Test.OData.DateTimeOffsetSupport
         [InlineData("explicit")]
         public async Task NowFilterDateTimePropertyWithDayFunction(string mode)
         {
-            DateTimeOffset time = DateTimeOffset.Now;
+            DateTimeOffset time = DateTimeOffset.UtcNow;
             var fileList = FilesController.CreateFiles(time);
             await ResetDatasource(time);
 

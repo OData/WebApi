@@ -7,16 +7,13 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Text;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
-using System.Web.OData.Query.Expressions;
 using System.Web.OData.Query.Validators;
 using Microsoft.OData.Core;
 using Microsoft.OData.Core.UriParser;
@@ -54,6 +51,7 @@ namespace System.Web.OData.Query
         /// </summary>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information.</param>
         /// <param name="request">The incoming request message.</param>
+        [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "The property being set, ClrType, is on a different object.")]
         public ODataQueryOptions(ODataQueryContext context, HttpRequestMessage request)
         {
             if (context == null)
@@ -755,11 +753,11 @@ namespace System.Web.OData.Query
         /// <summary>
         /// Creates a new instance of <see cref="OrderByQueryOption"/> based on the pased copy
         /// </summary>
-        /// <param name="orderbyQueryOption">An instance of <see cref="OrderByQueryOption"/> to use as a source  for the new instnace's values</param>
+        /// <param name="orderByQueryOption">An instance of <see cref="OrderByQueryOption"/> to use as a source  for the new instnace's values</param>
         /// <returns>A new <see cref="OrderByQueryOption"/> instance</returns>
-        protected virtual OrderByQueryOption CreateOrderByQueryOption(OrderByQueryOption orderbyQueryOption)
+        protected virtual OrderByQueryOption CreateOrderByQueryOption(OrderByQueryOption orderByQueryOption)
         {
-            return new OrderByQueryOption(orderbyQueryOption);
+            return new OrderByQueryOption(orderByQueryOption);
         }
 
         /// <summary>

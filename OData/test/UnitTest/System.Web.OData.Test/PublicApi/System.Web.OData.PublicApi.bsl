@@ -2067,7 +2067,7 @@ public class System.Web.OData.Query.ODataQueryOptions {
 	public virtual object ApplyTo (object entity, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)
 	protected virtual CountQueryOption CreateCountQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
 	protected virtual FilterQueryOption CreateFilterQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
-	protected virtual OrderByQueryOption CreateOrderByQueryOption (OrderByQueryOption orderbyQueryOption)
+	protected virtual OrderByQueryOption CreateOrderByQueryOption (OrderByQueryOption orderByQueryOption)
 	protected virtual OrderByQueryOption CreateOrderByQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
 	protected virtual SkipQueryOption CreateSkipQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)
 	protected virtual TopQueryOption CreateTopQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.Core.UriParser.ODataQueryOptionParser queryOptionParser)

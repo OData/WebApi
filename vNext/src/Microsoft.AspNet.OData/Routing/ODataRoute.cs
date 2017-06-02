@@ -39,7 +39,7 @@ namespace Microsoft.AspNet.OData.Routing
             }
 
             uri = new Uri(remaining.ToString(), UriKind.Relative);
-            
+
             context.HttpContext.ODataProperties().Model = _model;
             var parser = new ODataUriParser(_model, uri);
             var path = parser.ParsePath();

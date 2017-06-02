@@ -1,20 +1,20 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
-using System.Collections;
-using System.Diagnostics.Contracts;
-using System.Runtime.Serialization;
-using System.Web.OData.Formatter.Serialization;
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.OData.Core;
-using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Query;
-
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
+    using System;
+    using System.Collections;
+    using System.Diagnostics.Contracts;
+    using System.Runtime.Serialization;
+
+    using Microsoft.AspNet.OData.Builder;
+    using Microsoft.AspNet.OData.Common;
+    using Microsoft.AspNet.OData.Extensions;
+    using Microsoft.AspNet.OData.Query;
+    using Microsoft.OData.Core;
+    using Microsoft.OData.Edm;
+
     /// <summary>
     /// OData serializer for serializing a collection of <see cref="IEdmEntityType" />
     /// The Collection is of <see cref="IEdmChangedObject"/> which is the base interface implemented by all objects which are a part of the DeltaFeed payload.

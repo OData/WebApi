@@ -10,6 +10,8 @@ using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Builder
 {
+    using Microsoft.AspNet.OData.Formatter;
+
     /// <summary>
     /// Represents a Procedure that is exposed in the model
     /// </summary>

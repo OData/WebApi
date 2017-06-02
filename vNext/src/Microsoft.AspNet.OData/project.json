@@ -6,10 +6,10 @@
     "Microsoft.OData.Core": "6.12.0",
     "Microsoft.OData.Edm": "6.12.0",
     "Microsoft.Spatial": "6.12.0",
-    "Microsoft.AspNet.Mvc": "6.0.0-beta4",
-    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-beta4",
-    "Microsoft.Framework.OptionsModel": "1.0.0-beta4",
-    "Microsoft.Framework.NotNullAttribute.Internal": { "version": "1.0.0-beta5-10230", "type": "build" }
+    "Microsoft.AspNet.Mvc": "6.0.0-beta6",
+    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-beta6",
+    "Microsoft.Framework.OptionsModel": "1.0.0-beta6",
+    "Microsoft.Framework.NotNullAttribute.Internal": { "version": "1.0.0-beta5-10302", "type": "build" }
   },
 
   "frameworks": {

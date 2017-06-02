@@ -12,6 +12,8 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 
 namespace Microsoft.AspNet.OData
 {
+    using Microsoft.AspNet.OData.Formatter;
+
     /// <summary>
     /// An instance of <see cref="EntityInstanceContext"/> gets passed to the self link (
     /// <see cref="M:NavigationSourceConfiguration.HasIdLink"/>,

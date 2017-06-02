@@ -1,13 +1,19 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query.Expressions;
+using Microsoft.OData.Core.UriParser;
+using Microsoft.OData.Edm;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.OData.Core.UriParser;
-using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Query.Expressions
 {
+    using Microsoft.AspNet.OData.Formatter;
+
     internal static class ExpressionHelpers
     {
         public static long Count(IQueryable query, Type type)
@@ -46,6 +52,45 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Expression takeValueExpression = parameterize ? LinqParameterContainer.Parameterize(typeof(int), count) : Expression.Constant(count);
             Expression takeQuery = Expression.Call(null, takeMethod, new[] { source, takeValueExpression });
             return takeQuery;
+        }
+
+        public static Expression OrderByPropertyExpression(
+            Expression source,
+            string propertyName,
+            Type elementType,
+            bool alreadyOrdered = false)
+        {
+            LambdaExpression orderByLambda = GetPropertyAccessLambda(elementType, propertyName);
+            Type returnType = orderByLambda.Body.Type;
+            MethodInfo orderByMethod;
+
+            if (!alreadyOrdered)
+            {
+                if (typeof(IQueryable).IsAssignableFrom(source.Type))
+                {
+                    orderByMethod = ExpressionHelperMethods.QueryableOrderByGeneric.MakeGenericMethod(elementType,
+                        returnType);
+                }
+                else
+                {
+                    orderByMethod = ExpressionHelperMethods.EnumerableOrderByGeneric.MakeGenericMethod(elementType,
+                        returnType);
+                }
+            }
+            else
+            {
+                if (typeof(IQueryable).IsAssignableFrom(source.Type))
+                {
+                    orderByMethod = ExpressionHelperMethods.QueryableThenByGeneric.MakeGenericMethod(elementType,
+                        returnType);
+                }
+                else
+                {
+                    orderByMethod = ExpressionHelperMethods.EnumerableThenByGeneric.MakeGenericMethod(elementType,
+                        returnType);
+                }
+            }
+            return Expression.Call(null, orderByMethod, new[] { source, orderByLambda });
         }
 
         public static IQueryable OrderByIt(IQueryable query, OrderByDirection direction, Type type, bool alreadyOrdered = false)

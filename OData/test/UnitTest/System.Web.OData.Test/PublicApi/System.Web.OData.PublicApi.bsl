@@ -186,6 +186,13 @@ public class System.Web.OData.ClrTypeAnnotation {
 	System.Type ClrType  { public get; }
 }
 
+public class System.Web.OData.CustomAggregateMethodAnnotation {
+	public CustomAggregateMethodAnnotation ()
+
+	public CustomAggregateMethodAnnotation AddMethod (string methodToken, System.Collections.Generic.IDictionary`2[[System.Type],[System.Reflection.MethodInfo]] methods)
+	public bool GetMethodInfo (string methodToken, System.Type returnType, out System.Reflection.MethodInfo& methodInfo)
+}
+
 public class System.Web.OData.DefaultContainerBuilder : IContainerBuilder {
 	public DefaultContainerBuilder ()
 

@@ -1,17 +1,20 @@
-﻿using System.Net;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Extensions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Nuwa;
-using WebStack.QA.Test.OData.Common;
 using Xunit;
 using Xunit.Extensions;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Linq;
+using WebStack.QA.Test.OData.Common;
 
 namespace WebStack.QA.Test.OData.Aggregation
 {
@@ -251,6 +254,72 @@ namespace WebStack.QA.Test.OData.Aggregation
             var result = response.Content.ReadAsAsync<JObject>().Result;
             var results = result["value"] as JArray;
             Assert.Equal(1, results.Count);
+        }
+
+        [Theory]
+        [InlineData("?$apply=groupby((Name), aggregate(Order/Price with Custom.StdDev as PriceStdDev))")]
+        [InlineData("?$apply=groupby((Address/Name), aggregate(Id with Custom.StdDev as IdStdDev))")]
+        [InlineData("?$apply=groupby((Order/Name), aggregate(Id with Custom.StdDev as IdStdDev))")]
+        public void CustomAggregateStdDevWorks(string query)
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + query,
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("?$apply=groupby((Name), aggregate(Order/Price with Custom.Sum as PriceStdDev))")]
+        [InlineData("?$apply=groupby((Address/Name), aggregate(Id with Custom.OtherMethod as IdStdDev))")]
+        [InlineData("?$apply=groupby((Order/Name), aggregate(Id with Custom.YetAnotherMethod as IdStdDev))")]
+        public void CustomAggregateNotDefinedHaveAppropriateAnswer(string query)
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + query,
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("?$apply=groupby((Name), aggregate(Order/Price with StdDev as PriceStdDev))")]
+        [InlineData("?$apply=groupby((Address/Name), aggregate(Id with OtherMethod as IdStdDev))")]
+        [InlineData("?$apply=groupby((Order/Name), aggregate(Id with YetAnotherMethod as IdStdDev))")]
+        public void MethodsNotDefinedHaveAppropriateAnswer(string query)
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + query,
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Theory]

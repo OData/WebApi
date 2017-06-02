@@ -134,6 +134,7 @@
     <Compile Include="OData\DefaultContainerBuilder.cs" />
     <Compile Include="OData\Builder\QueryConfiguration.cs" />
     <Compile Include="OData\Query\ExpandAttribute.cs" />
+    <Compile Include="OData\CustomAggregateMethodAnnotation.cs" />
     <Compile Include="OData\ODataSwaggerUtilities.cs" />
     <Compile Include="OData\ODataSwaggerConverter.cs" />
     <Compile Include="OData\EdmEnumObjectCollection.cs" />

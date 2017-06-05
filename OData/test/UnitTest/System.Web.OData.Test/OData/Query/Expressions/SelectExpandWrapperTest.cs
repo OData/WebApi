@@ -93,6 +93,7 @@ namespace System.Web.OData.Query.Expressions
                     Container = container
                 };
             wrapper.Instance = new TestEntity { SampleProperty = expectedPropertyValue };
+            wrapper.UseInstanceForProperties = true;
 
             object value;
             bool result = wrapper.TryGetPropertyValue("SampleProperty", out value);
@@ -107,6 +108,7 @@ namespace System.Web.OData.Query.Expressions
             object expectedPropertyValue = new object();
             SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity> { ModelID = _modelID };
             wrapper.Instance = new TestEntity { SampleProperty = expectedPropertyValue };
+            wrapper.UseInstanceForProperties = true;
 
             object value;
             bool result = wrapper.TryGetPropertyValue("SampleProperty", out value);
@@ -126,6 +128,7 @@ namespace System.Web.OData.Query.Expressions
             object expectedPropertyValue = new object();
             SelectExpandWrapper<TestEntityWithAlias> wrapper = new SelectExpandWrapper<TestEntityWithAlias> { ModelID = _modelID };
             wrapper.Instance = new TestEntityWithAlias { SampleProperty = expectedPropertyValue };
+            wrapper.UseInstanceForProperties = true;
 
             // Act
             object value;
@@ -171,7 +174,8 @@ namespace System.Web.OData.Query.Expressions
             SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>
             {
                 Instance = new TestEntity { SampleProperty = 42 },
-                ModelID = ModelContainer.GetModelID(model)
+                ModelID = ModelContainer.GetModelID(model),
+                UseInstanceForProperties = true,
             };
 
             // Act
@@ -259,7 +263,8 @@ namespace System.Web.OData.Query.Expressions
             SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>
             {
                 Instance = new TestEntity { SampleProperty = 42 },
-                ModelID = ModelContainer.GetModelID(model)
+                ModelID = ModelContainer.GetModelID(model),
+                UseInstanceForProperties = true,
             };
 
             Mock<IPropertyMapper> mapperMock = new Mock<IPropertyMapper>();
@@ -288,7 +293,8 @@ namespace System.Web.OData.Query.Expressions
             SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>
             {
                 Instance = new TestEntity { SampleProperty = 42 },
-                ModelID = ModelContainer.GetModelID(model)
+                ModelID = ModelContainer.GetModelID(model),
+                UseInstanceForProperties = true,
             };
             
             Mock<IPropertyMapper> mapperMock = new Mock<IPropertyMapper>();

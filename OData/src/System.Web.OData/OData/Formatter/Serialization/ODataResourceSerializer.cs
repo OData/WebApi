@@ -231,37 +231,38 @@ namespace System.Web.OData.Formatter.Serialization
         }
 
         private static IEnumerable<ODataProperty> CreateODataPropertiesFromDynamicType(EdmEntityType entityType, object graph,
-            Dictionary<IEdmProperty, object> dynamicTypeProperties = null)
+            Dictionary<IEdmProperty, object> dynamicTypeProperties)
         {
+            Contract.Assert(dynamicTypeProperties != null);
+
             var properties = new List<ODataProperty>();
             var dynamicObject = graph as DynamicTypeWrapper;
-            foreach (var prop in graph.GetType().GetProperties())
+            if (dynamicObject != null)
             {
-                object value;
-                ODataProperty property = null;
-                if (dynamicObject.TryGetPropertyValue(prop.Name, out value))
+                foreach (var prop in dynamicObject.Values)
                 {
-                    if (value != null && EdmLibHelpers.IsDynamicTypeWrapper(value.GetType()))
+                    if (prop.Value != null && EdmLibHelpers.IsDynamicTypeWrapper(prop.Value.GetType()))
                     {
                         IEdmProperty edmProperty = entityType.Properties()
-                            .FirstOrDefault(p => p.Name.Equals(prop.Name));
+                            .FirstOrDefault(p => p.Name.Equals(prop.Key));
                         if (edmProperty != null)
                         {
-                            dynamicTypeProperties.Add(edmProperty, value);
+                            dynamicTypeProperties.Add(edmProperty, prop.Value);
                         }
                     }
                     else
                     {
-                        property = new ODataProperty
+                        var property = new ODataProperty
                         {
-                            Name = prop.Name,
-                            Value = value
+                            Name = prop.Key,
+                            Value = prop.Value
                         };
 
                         properties.Add(property);
                     }
                 }
             }
+
             return properties;
         }
 
@@ -301,8 +302,8 @@ namespace System.Web.OData.Formatter.Serialization
                     };
 
                     writer.WriteStart(nestedResourceInfo);
-                    WriteComplexAndExpandedNavigationProperty(property, null, resourceContext, writer);
-                    writer.WriteEnd();   
+                    WriteDynamicComplexProperty(dynamicTypeProperties[property], property.Type, resourceContext, writer);
+                    writer.WriteEnd();
                 }
             }
 
@@ -671,7 +672,7 @@ namespace System.Web.OData.Formatter.Serialization
 
             foreach (IEdmStructuralProperty complexProperty in complexProperties)
             {
-                ODataNestedResourceInfo nestedResourceInfo  = new ODataNestedResourceInfo
+                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
                 {
                     IsCollection = complexProperty.Type.IsCollection(),
                     Name = complexProperty.Name

@@ -43,7 +43,7 @@ namespace System.Web.OData.Query.Expressions
         {
         }
 
-        internal static Expression Bind(FilterClause filterClause, Type filterType, IServiceProvider requestContainer)
+        internal static Expression Bind(IQueryable baseQuery, FilterClause filterClause, Type filterType, IServiceProvider requestContainer)
         {
             if (filterClause == null)
             {
@@ -60,11 +60,12 @@ namespace System.Web.OData.Query.Expressions
 
             FilterBinder binder = requestContainer.GetRequiredService<FilterBinder>();
             binder._filterType = filterType;
+            binder.BaseQuery = baseQuery;
 
             return BindFilterClause(binder, filterClause, filterType);
         }
 
-        internal static LambdaExpression Bind(OrderByClause orderBy, Type elementType, IServiceProvider requestContainer)
+        internal static LambdaExpression Bind(IQueryable baseQuery, OrderByClause orderBy, Type elementType, IServiceProvider requestContainer)
         {
             Contract.Assert(orderBy != null);
             Contract.Assert(elementType != null);
@@ -72,6 +73,7 @@ namespace System.Web.OData.Query.Expressions
 
             FilterBinder binder = requestContainer.GetRequiredService<FilterBinder>();
             binder._filterType = elementType;
+            binder.BaseQuery = baseQuery;
 
             return BindOrderByClause(binder, orderBy, elementType);
         }
@@ -254,8 +256,7 @@ namespace System.Web.OData.Query.Expressions
         {
             if (EdmLibHelpers.IsDynamicTypeWrapper(_filterType))
             {
-                var property = Expression.Property(Bind(openNode.Source), openNode.Name);
-                return property;
+                return GetFlattenedPropertyExpression(openNode.Name) ?? Expression.Property(Bind(openNode.Source), openNode.Name);
             }
             PropertyInfo prop = GetDynamicPropertyContainer(openNode);
 
@@ -574,6 +575,8 @@ namespace System.Web.OData.Query.Expressions
             _lambdaParameters = new Dictionary<string, ParameterExpression>();
             _lambdaParameters.Add(rangeVariable.Name, filterParameter);
 
+            EnsureFlattenedPropertyContainer(filterParameter);
+
             Expression body = Bind(expression);
             return Expression.Lambda(body, filterParameter);
         }
@@ -642,7 +645,7 @@ namespace System.Web.OData.Query.Expressions
         public virtual Expression BindPropertyAccessQueryNode(SingleValuePropertyAccessNode propertyAccessNode)
         {
             Expression source = Bind(propertyAccessNode.Source);
-            return CreatePropertyAccessExpression(source, propertyAccessNode.Property);
+            return CreatePropertyAccessExpression(source, propertyAccessNode.Property, GetFullPropertyPath(propertyAccessNode));
         }
 
         /// <summary>
@@ -654,15 +657,20 @@ namespace System.Web.OData.Query.Expressions
         public virtual Expression BindSingleComplexNode(SingleComplexNode singleComplexNode)
         {
             Expression source = Bind(singleComplexNode.Source);
-            return CreatePropertyAccessExpression(source, singleComplexNode.Property);
+            return CreatePropertyAccessExpression(source, singleComplexNode.Property, GetFullPropertyPath(singleComplexNode));
         }
 
-        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property)
+        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property, string propertyPath = null)
         {
             string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);
+            propertyPath = propertyPath ?? propertyName;
+
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) && source != _lambdaParameters[ODataItParameterName])
             {
-                Expression propertyAccessExpression = Expression.Property(RemoveInnerNullPropagation(source), propertyName);
+                var cleanSource = RemoveInnerNullPropagation(source);
+                Expression propertyAccessExpression = null;
+
+                propertyAccessExpression = GetFlattenedPropertyExpression(propertyPath) ?? Expression.Property(cleanSource, propertyName);
 
                 // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
                 // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
@@ -676,7 +684,7 @@ namespace System.Web.OData.Query.Expressions
             }
             else
             {
-                return ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+                return GetFlattenedPropertyExpression(propertyPath) ?? ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
             }
         }
 
@@ -789,7 +797,7 @@ namespace System.Web.OData.Query.Expressions
 
                     throw new NotImplementedException(Error.Format(SRResources.ODataFunctionNotSupported, node.Name));
             }
-            }
+        }
 
         private Expression BindCastSingleValue(SingleValueFunctionCallNode node)
         {

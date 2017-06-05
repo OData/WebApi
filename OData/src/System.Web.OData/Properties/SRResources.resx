@@ -865,4 +865,7 @@
   <data name="NavigationPropertyBindingPathNotInHierarchy" xml:space="preserve">
     <value>The type '{0}' of the binding type cast segment '{1}' is not a part of the type '{2}' hierarchy.</value>
   </data>
+  <data name="PropertyOrPathWasRemovedFromContext" xml:space="preserve">
+    <value>Property or path {0} isn't available in the current context. It was removed in earlier transformation.</value>
+  </data>
 </root>

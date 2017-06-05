@@ -203,8 +203,8 @@ namespace System.Web.OData.Query.Expressions
                             ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(clrElementType),
                             nullablePropertyValue)
                         : nullablePropertyValue;
-
-                Expression filterPredicate = FilterBinder.Bind(filterClause, clrElementType, _context.RequestContainer);
+                // TODO: Implement proper support for $select/$expand after $apply
+                Expression filterPredicate = FilterBinder.Bind(null, filterClause, clrElementType, _context.RequestContainer);
                 MethodCallExpression filterResult = Expression.Call(
                     ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(clrElementType),
                     filterSource,
@@ -470,8 +470,9 @@ namespace System.Web.OData.Query.Expressions
         {
             if (orderbyClause != null)
             {
+                // TODO: Implement proper support for $select/$expand after $apply
                 LambdaExpression orderByExpression =
-                    FilterBinder.Bind(orderbyClause, elementType, _context.RequestContainer);
+                    FilterBinder.Bind(null, orderbyClause, elementType, _context.RequestContainer);
                 source = ExpressionHelpers.OrderBy(source, orderByExpression, elementType, orderbyClause.Direction);
             }
 

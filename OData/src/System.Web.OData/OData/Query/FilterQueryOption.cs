@@ -140,7 +140,7 @@ namespace System.Web.OData.Query
 
             Context.UpdateQuerySettings(querySettings, query);
 
-            Expression filter = FilterBinder.Bind(filterClause, Context.ElementClrType, Context.RequestContainer);
+            Expression filter = FilterBinder.Bind(query, filterClause, Context.ElementClrType, Context.RequestContainer);
             query = ExpressionHelpers.Where(query, filter, Context.ElementClrType);
             return query;
         }

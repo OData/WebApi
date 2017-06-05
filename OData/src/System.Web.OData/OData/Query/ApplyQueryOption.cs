@@ -131,7 +131,7 @@ namespace System.Web.OData.Query
                 else if (transformation.Kind == TransformationNodeKind.Filter)
                 {
                     var filterTransformation = transformation as FilterTransformationNode;
-                    Expression filter = FilterBinder.Bind(filterTransformation.FilterClause, ResultClrType, Context.RequestContainer);
+                    Expression filter = FilterBinder.Bind(query, filterTransformation.FilterClause, ResultClrType, Context.RequestContainer);
                     query = ExpressionHelpers.Where(query, filter, ResultClrType);
                 }
             }

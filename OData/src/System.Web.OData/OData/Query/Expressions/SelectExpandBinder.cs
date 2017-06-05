@@ -262,13 +262,15 @@ namespace System.Web.OData.Query.Expressions
             wrapperProperty = wrapperType.GetProperty("ModelID");
             wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(_modelID)));
 
+            // Initialize property 'Instance' on the wrapper class
+            // source => new Wrapper { Instance = element }
+            wrapperProperty = wrapperType.GetProperty("Instance");
+            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
+
             if (IsSelectAll(selectExpandClause))
             {
-                // Initialize property 'Instance' on the wrapper class
-                // source => new Wrapper { Instance = element }
-                wrapperProperty = wrapperType.GetProperty("Instance");
-                Contract.Assert(wrapperProperty != null);
-                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
+                wrapperProperty = wrapperType.GetProperty("UseInstanceForProperties");
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(true)));
                 isInstancePropertySet = true;
             }
             else
@@ -277,9 +279,6 @@ namespace System.Web.OData.Query.Expressions
                 Expression typeName = CreateTypeNameExpression(source, entityType, _model);
                 if (typeName != null)
                 {
-                    wrapperProperty = wrapperType.GetProperty("TypeName");
-                    Contract.Assert(wrapperProperty != null);
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, typeName));
                     isTypeNamePropertySet = true;
                 }
             }

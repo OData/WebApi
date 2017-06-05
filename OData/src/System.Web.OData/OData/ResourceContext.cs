@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -12,6 +11,7 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
+using System.Web.OData.Query.Expressions;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData
@@ -229,6 +229,12 @@ namespace System.Web.OData
             if (edmStructruredObject != null)
             {
                 return edmStructruredObject.Instance;
+            }
+
+            SelectExpandWrapper selectExpandWrapper = EdmObject as SelectExpandWrapper;
+            if (selectExpandWrapper != null && selectExpandWrapper.Instance != null)
+            {
+                return selectExpandWrapper.Instance;
             }
 
             Type clrType = EdmLibHelpers.GetClrType(StructuredType, EdmModel);

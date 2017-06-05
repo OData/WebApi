@@ -200,7 +200,7 @@ namespace System.Web.OData.Query.Expressions
             IEnumerable<SelectExpandWrapper<Order>> projectedOrders = Expression.Lambda(projection).Compile().DynamicInvoke() as IEnumerable<SelectExpandWrapper<Order>>;
             Assert.NotNull(projectedOrders);
             Assert.Equal(pageSize + 1, projectedOrders.Count());
-            Assert.Equal(1, projectedOrders.First().Instance.ID);
+            Assert.Equal(1, ((Order)projectedOrders.First().Instance).ID);
         }
 
         [Fact]

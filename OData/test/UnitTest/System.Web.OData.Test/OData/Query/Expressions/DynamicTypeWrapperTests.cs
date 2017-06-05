@@ -13,10 +13,14 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         {
             var expectedValue = "TestValue";
             var propName = "TestProp";
-            var wrapper = new DynamicTypeWrapper();
-            wrapper.SetPropertyValue(propName, expectedValue);
+            var wrapper = new GroupByWrapper();
+            wrapper.GroupByContainer = new AggregationPropertyContainer()
+            {
+                Name = propName,
+                Value = expectedValue
+            };
 
-            var actual = wrapper.GetPropertyValue(propName);
+            var actual = wrapper.Values[propName];
 
             Assert.Equal(expectedValue, actual);
         }
@@ -26,8 +30,12 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         {
             var expectedValue = "TestValue";
             var propName = "TestProp";
-            var wrapper = new DynamicTypeWrapper();
-            wrapper.SetPropertyValue(propName, expectedValue);
+            var wrapper = new GroupByWrapper();
+            wrapper.GroupByContainer = new AggregationPropertyContainer()
+            {
+                Name = propName,
+                Value = expectedValue
+            };
 
             object actual;
             Assert.True(wrapper.TryGetPropertyValue(propName, out actual));
@@ -40,11 +48,19 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         {
             var expectedValue = "TestValue";
             var propName = "TestProp";
-            var wrapper = new DynamicTypeWrapper();
-            wrapper.SetPropertyValue(propName, expectedValue);
+            var wrapper = new GroupByWrapper();
+            wrapper.GroupByContainer = new AggregationPropertyContainer()
+            {
+                Name = propName,
+                Value = expectedValue
+            };
 
-            var wrapper2 = new DynamicTypeWrapper();
-            wrapper2.SetPropertyValue(propName, expectedValue);
+            var wrapper2 = new GroupByWrapper();
+            wrapper2.GroupByContainer = new AggregationPropertyContainer()
+            {
+                Name = propName,
+                Value = expectedValue
+            };
 
             Assert.Equal(wrapper, wrapper2);
         }
@@ -54,11 +70,19 @@ namespace System.Web.OData.Test.OData.Query.Expressions
         {
             var expectedValue = "TestValue";
             var propName = "TestProp";
-            var wrapper = new DynamicTypeWrapper();
-            wrapper.SetPropertyValue(propName, expectedValue);
+            var wrapper = new GroupByWrapper();
+            wrapper.GroupByContainer = new AggregationPropertyContainer()
+            {
+                Name = propName,
+                Value = expectedValue
+            };
 
-            var wrapper2 = new DynamicTypeWrapper();
-            wrapper2.SetPropertyValue(propName, expectedValue);
+            var wrapper2 = new GroupByWrapper();
+            wrapper2.GroupByContainer = new AggregationPropertyContainer()
+            {
+                Name = propName,
+                Value = expectedValue
+            };
 
             Assert.Equal(wrapper.GetHashCode(), wrapper2.GetHashCode());
         }

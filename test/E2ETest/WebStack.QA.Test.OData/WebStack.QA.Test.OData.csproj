@@ -98,6 +98,10 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
+   	<Reference Include="System.Web.Http.OData, Version=5.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+       <HintPath>..\..\..\packages\Microsoft.AspNet.WebApi.OData.5.7.0\lib\net45\System.Web.Http.OData.dll</HintPath>
+       <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="System.Net.Http.Formatting, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.2\lib\net45\System.Net.Http.Formatting.dll</HintPath>
@@ -1016,10 +1020,6 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\System.Web.Http.OData\System.Web.Http.OData.csproj">
-      <Project>{cf73aaa7-ace9-4c91-afa5-5ec1df18feee}</Project>
-      <Name>System.Web.Http.OData</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\src\System.Web.OData\System.Web.OData.csproj">
       <Project>{d23e28f1-ccd0-43e0-8c0d-36731ec91318}</Project>
       <Name>System.Web.OData</Name>

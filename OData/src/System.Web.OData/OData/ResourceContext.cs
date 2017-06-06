@@ -11,7 +11,7 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
-using System.Web.OData.Query.Expressions;
+using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData
@@ -231,7 +231,7 @@ namespace System.Web.OData
                 return edmStructruredObject.Instance;
             }
 
-            SelectExpandWrapper selectExpandWrapper = EdmObject as SelectExpandWrapper;
+            ISelectExpandWrapper selectExpandWrapper = EdmObject as ISelectExpandWrapper;
             if (selectExpandWrapper != null && selectExpandWrapper.Instance != null)
             {
                 return selectExpandWrapper.Instance;

@@ -12,47 +12,12 @@ using Newtonsoft.Json;
 
 namespace System.Web.OData.Query.Expressions
 {
-    internal abstract class SelectExpandWrapper : IEdmEntityObject, ISelectExpandWrapper
-    {
-        /// <summary>
-        /// Gets or sets the property container that contains the properties being expanded. 
-        /// </summary>
-        public PropertyContainer Container { get; set; }
-
-        /// <summary>
-        /// Gets or sets the instance of the element being selected and expanded.
-        /// </summary>
-        public object Instance { get; set; }
-
-        /// <summary>
-        /// An ID to uniquely identify the model in the <see cref="ModelContainer"/>.
-        /// </summary>
-        public string ModelID { get; set; }
-
-        /// <summary>
-        /// Indicates whether the underlying instance can be used to obtain property values.
-        /// </summary>
-        public bool UseInstanceForProperties { get; set; }
-
-        /// <inheritdoc />
-        public abstract IEdmTypeReference GetEdmType();
-
-        /// <inheritdoc />
-        public abstract IDictionary<string, object> ToDictionary();
-
-        /// <inheritdoc />
-        public abstract IDictionary<string, object> ToDictionary(Func<IEdmModel, IEdmStructuredType, IPropertyMapper> mapperProvider);
-
-        /// <inheritdoc />
-        public abstract bool TryGetPropertyValue(string propertyName, out object value);
-    }
-
     /// <summary>
     /// Represents a container class that contains properties that are either selected or expanded using $select and $expand.
     /// </summary>
     /// <typeparam name="TElement">The element being selected and expanded.</typeparam>
     [JsonConverter(typeof(SelectExpandWrapperConverter))]
-    internal class SelectExpandWrapper<TElement> : SelectExpandWrapper
+    internal class SelectExpandWrapper<TElement> : IEdmEntityObject, ISelectExpandWrapper
     {
         private static readonly IPropertyMapper DefaultPropertyMapper = new IdentityPropertyMapper();
         private static readonly Func<IEdmModel, IEdmStructuredType, IPropertyMapper> _mapperProvider =
@@ -61,8 +26,31 @@ namespace System.Web.OData.Query.Expressions
         private Dictionary<string, object> _containerDict;
         private TypedEdmEntityObject _typedEdmEntityObject;
 
+        /// <summary>
+        /// Gets or sets the instance of the element being selected and expanded.
+        /// </summary>
+        public TElement Instance { get; set; }
+
+        /// <summary>
+        /// An ID to uniquely identify the model in the <see cref="ModelContainer"/>.
+        /// </summary>
+        public string ModelID { get; set; }
+
+        /// <summary>
+        /// Gets or sets the property container that contains the properties being expanded. 
+        /// </summary>
+        public PropertyContainer Container { get; set; }
+
+        /// <summary>
+        /// Indicates whether the underlying instance can be used to obtain property values.
+        /// </summary>
+        public bool UseInstanceForProperties { get; set; }
+
         /// <inheritdoc />
-        public override IEdmTypeReference GetEdmType()
+        object ISelectExpandWrapper.Instance { get { return this.Instance; } }
+
+        /// <inheritdoc />
+        public IEdmTypeReference GetEdmType()
         {
             IEdmModel model = GetModel();
             Type elementType = GetElementType();
@@ -70,7 +58,7 @@ namespace System.Web.OData.Query.Expressions
         }
 
         /// <inheritdoc />
-        public override bool TryGetPropertyValue(string propertyName, out object value)
+        public bool TryGetPropertyValue(string propertyName, out object value)
         {
             // look into the container first to see if it has that property. container would have it 
             // if the property was expanded.
@@ -96,12 +84,12 @@ namespace System.Web.OData.Query.Expressions
             return false;
         }
 
-        public override IDictionary<string, object> ToDictionary()
+        public IDictionary<string, object> ToDictionary()
         {
             return ToDictionary(_mapperProvider);
         }
 
-        public override IDictionary<string, object> ToDictionary(Func<IEdmModel, IEdmStructuredType, IPropertyMapper> mapperProvider)
+        public IDictionary<string, object> ToDictionary(Func<IEdmModel, IEdmStructuredType, IPropertyMapper> mapperProvider)
         {
             if (mapperProvider == null)
             {

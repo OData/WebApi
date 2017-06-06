@@ -2198,6 +2198,8 @@ public interface System.Web.OData.Query.IPropertyMapper {
 }
 
 public interface System.Web.OData.Query.ISelectExpandWrapper {
+	object Instance  { public abstract get; }
+
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ToDictionary ()
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ToDictionary (System.Func`3[[Microsoft.OData.Edm.IEdmModel],[Microsoft.OData.Edm.IEdmStructuredType],[System.Web.OData.Query.IPropertyMapper]] propertyMapperProvider)
 }

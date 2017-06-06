@@ -26,8 +26,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F4C937D2-3BD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.OData", "..\src\System.Web.OData\System.Web.OData.csproj", "{D23E28F1-CCD0-43E0-8C0D-36731EC91318}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.OData", "..\src\System.Web.Http.OData\System.Web.Http.OData.csproj", "{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2EB8D1F9-C505-4FA8-8D1C-F167B5B1AB8E}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
@@ -189,26 +187,6 @@ Global
 		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Release|x86.ActiveCfg = Release|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.CodeAnalysis|Mixed Platforms.ActiveCfg = CodeAnalysis|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.CodeAnalysis|Mixed Platforms.Build.0 = CodeAnalysis|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.CodeAnalysis|x86.ActiveCfg = CodeAnalysis|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.CodeCoverage|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.CodeCoverage|Any CPU.Build.0 = CodeAnalysis|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.CodeCoverage|Mixed Platforms.ActiveCfg = CodeAnalysis|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.CodeCoverage|Mixed Platforms.Build.0 = CodeAnalysis|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.CodeCoverage|x86.ActiveCfg = CodeAnalysis|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -221,6 +199,5 @@ Global
 		{FAC5C560-6EE4-441A-B7F4-8B21951C35E0} = {C015197B-27D3-499F-9A31-63E9E7D58F58}
 		{1D7E43C6-399C-4D06-9F5B-00241324B4D1} = {C015197B-27D3-499F-9A31-63E9E7D58F58}
 		{D23E28F1-CCD0-43E0-8C0D-36731EC91318} = {F4C937D2-3BD0-4F6B-B75F-A526A7FD978B}
-		{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE} = {F4C937D2-3BD0-4F6B-B75F-A526A7FD978B}
 	EndGlobalSection
 EndGlobal

@@ -7,15 +7,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A9836F9E-6DB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C40883CD-366D-4534-8B58-3EA0D13136DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.OData", "src\System.Web.Http.OData\System.Web.Http.OData.csproj", "{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.OData", "..\src\System.Web.Http.OData\System.Web.Http.OData.csproj", "{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.OData", "src\System.Web.OData\System.Web.OData.csproj", "{D23E28F1-CCD0-43E0-8C0D-36731EC91318}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.OData", "..\src\System.Web.OData\System.Web.OData.csproj", "{D23E28F1-CCD0-43E0-8C0D-36731EC91318}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.TestCommon", "test\UnitTest\Microsoft.TestCommon\Microsoft.TestCommon.csproj", "{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.TestCommon", "..\test\UnitTest\Microsoft.TestCommon\Microsoft.TestCommon.csproj", "{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.OData.Test", "test\UnitTest\System.Web.Http.OData.Test\System.Web.Http.OData.Test.csproj", "{D344485F-F8CA-4B02-AF3D-D9C6FD556CA9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.OData.Test", "..\test\UnitTest\System.Web.Http.OData.Test\System.Web.Http.OData.Test.csproj", "{D344485F-F8CA-4B02-AF3D-D9C6FD556CA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.OData.Test", "test\UnitTest\System.Web.OData.Test\System.Web.OData.Test.csproj", "{66EFD03D-95B7-4C7E-83AC-1A8BD6C12612}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.OData.Test", "..\test\UnitTest\System.Web.OData.Test\System.Web.OData.Test.csproj", "{66EFD03D-95B7-4C7E-83AC-1A8BD6C12612}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

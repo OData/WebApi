@@ -7,26 +7,26 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "base", "base", "{C015197B-2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{DD61AE62-B084-4A8C-AE1E-615A62BA645D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebStack.QA.Test.OData", "test\E2ETest\WebStack.QA.Test.OData\WebStack.QA.Test.OData.csproj", "{5516EA5D-350A-447A-9399-61A22A9C4F4B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebStack.QA.Test.OData", "..\test\E2ETest\WebStack.QA.Test.OData\WebStack.QA.Test.OData.csproj", "{5516EA5D-350A-447A-9399-61A22A9C4F4B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D23E28F1-CCD0-43E0-8C0D-36731EC91318} = {D23E28F1-CCD0-43E0-8C0D-36731EC91318}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nuwa", "test\E2ETest\Nuwa\Nuwa.csproj", "{A0A7A1E8-AF58-4BC8-A547-91D1DB9680CC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nuwa", "..\test\E2ETest\Nuwa\Nuwa.csproj", "{A0A7A1E8-AF58-4BC8-A547-91D1DB9680CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nuwa.WebStack", "test\E2ETest\Nuwa.WebStack\Nuwa.WebStack.csproj", "{45AA91B6-8657-4676-B441-5F325170B8B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nuwa.WebStack", "..\test\E2ETest\Nuwa.WebStack\Nuwa.WebStack.csproj", "{45AA91B6-8657-4676-B441-5F325170B8B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebStack.QA.Common", "test\E2ETest\Common\WebStack.QA.Common.csproj", "{A71A9BE1-93A6-487E-98EB-9550C7401C12}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebStack.QA.Common", "..\test\E2ETest\Common\WebStack.QA.Common.csproj", "{A71A9BE1-93A6-487E-98EB-9550C7401C12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebStack.QA.Instancing", "test\E2ETest\WebStack.QA.Instancing\WebStack.QA.Instancing.csproj", "{FAC5C560-6EE4-441A-B7F4-8B21951C35E0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebStack.QA.Instancing", "..\test\E2ETest\WebStack.QA.Instancing\WebStack.QA.Instancing.csproj", "{FAC5C560-6EE4-441A-B7F4-8B21951C35E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebStack.QA.Share", "test\E2ETest\WebStack.QA.Share\WebStack.QA.Share.csproj", "{1D7E43C6-399C-4D06-9F5B-00241324B4D1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebStack.QA.Share", "..\test\E2ETest\WebStack.QA.Share\WebStack.QA.Share.csproj", "{1D7E43C6-399C-4D06-9F5B-00241324B4D1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F4C937D2-3BD0-4F6B-B75F-A526A7FD978B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.OData", "src\System.Web.OData\System.Web.OData.csproj", "{D23E28F1-CCD0-43E0-8C0D-36731EC91318}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.OData", "..\src\System.Web.OData\System.Web.OData.csproj", "{D23E28F1-CCD0-43E0-8C0D-36731EC91318}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.OData", "src\System.Web.Http.OData\System.Web.Http.OData.csproj", "{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.Http.OData", "..\src\System.Web.Http.OData\System.Web.Http.OData.csproj", "{CF73AAA7-ACE9-4C91-AFA5-5EC1DF18FEEE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2EB8D1F9-C505-4FA8-8D1C-F167B5B1AB8E}"
 	ProjectSection(SolutionItems) = preProject

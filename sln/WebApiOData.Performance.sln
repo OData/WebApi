@@ -3,16 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiPerformance.Service", "test\PerfTest\WebApiPerformance.Service\WebApiPerformance.Service.csproj", "{F7B5A5D5-0B2F-493B-94B2-039B881FD4D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiPerformance.Service", "..\test\PerfTest\WebApiPerformance.Service\WebApiPerformance.Service.csproj", "{F7B5A5D5-0B2F-493B-94B2-039B881FD4D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.OData", "src\System.Web.OData\System.Web.OData.csproj", "{D23E28F1-CCD0-43E0-8C0D-36731EC91318}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.OData", "..\src\System.Web.OData\System.Web.OData.csproj", "{D23E28F1-CCD0-43E0-8C0D-36731EC91318}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{0C3B5E95-47F3-42FE-AFBD-9FA823808470}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiPerformance.Test", "test\PerfTest\WebApiPerformance.Test\WebApiPerformance.Test.csproj", "{5C4C506B-9BFE-429D-A48C-77CEC613877A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiPerformance.Test", "..\test\PerfTest\WebApiPerformance.Test\WebApiPerformance.Test.csproj", "{5C4C506B-9BFE-429D-A48C-77CEC613877A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),WebApiOData.sln))\tools\WebStack.settings.targets" />
+  <Import Project="..\..\..\tools\WebStack.settings.targets" />
   <PropertyGroup>
     <ProjectGuid>{66EFD03D-95B7-4C7E-83AC-1A8BD6C12612}</ProjectGuid>
     <OutputType>Library</OutputType>

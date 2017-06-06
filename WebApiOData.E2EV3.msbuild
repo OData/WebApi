@@ -17,7 +17,7 @@
   <UsingTask AssemblyFile=".\packages\xunit.1.9.2\lib\net20\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit"/>
   
   <ItemGroup>
-    <SolutionsToBuild Include="WebApiOData.E2EV3.sln">
+    <SolutionsToBuild Include=".\sln\WebApiOData.E2EV3.sln">
       <BuildInParallel>$(BuildInParallel)</BuildInParallel>
     </SolutionsToBuild>
   </ItemGroup>

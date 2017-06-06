@@ -19,7 +19,7 @@
   </PropertyGroup>
 	
   <ItemGroup>
-    <SolutionsToBuild Include="WebApiOData.sln">
+    <SolutionsToBuild Include=".\sln\WebApiOData.sln">
       <BuildInParallel>$(BuildInParallel)</BuildInParallel>
     </SolutionsToBuild>
   </ItemGroup>

@@ -224,6 +224,34 @@ namespace System.Web.OData
         }
 
         [Fact]
+        public void Property_ResourceInstance_HandlesModelClrNameDifferences()
+        {
+            // Arrange
+            const string clrPropertyName = "Property";
+            const string modelPropertyName = "DifferentProperty";
+
+            EdmComplexType edmType = new EdmComplexType("NS", "Name");
+            EdmStructuralProperty edmProperty = edmType.AddStructuralProperty(modelPropertyName, EdmPrimitiveTypeKind.Int32);
+            EdmModel model = new EdmModel();
+            model.AddElement(edmType);
+            model.SetAnnotationValue(edmType, new ClrTypeAnnotation(typeof(TestEntity)));
+            model.SetAnnotationValue(edmProperty, new ClrPropertyInfoAnnotation(typeof(TestEntity).GetProperty(clrPropertyName)));
+            Mock<IEdmComplexObject> edmObject = new Mock<IEdmComplexObject>();
+            object propertyValue = 42;
+            edmObject.Setup(e => e.TryGetPropertyValue(modelPropertyName, out propertyValue)).Returns(true);
+            edmObject.Setup(e => e.GetEdmType()).Returns(new EdmComplexTypeReference(edmType, isNullable: false));
+
+            ResourceContext entityContext = new ResourceContext { EdmModel = model, EdmObject = edmObject.Object, StructuredType = edmType };
+
+            // Act
+            object resource = entityContext.ResourceInstance;
+
+            // Assert
+            TestEntity testEntity = Assert.IsType<TestEntity>(resource);
+            Assert.Equal(42, testEntity.Property);
+        }
+
+        [Fact]
         public void Property_ResourceInstance_ThrowsInvalidOp_ResourceTypeDoesNotHaveAMapping()
         {
             // Arrange

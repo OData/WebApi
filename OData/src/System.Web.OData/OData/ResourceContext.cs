@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -243,13 +242,15 @@ namespace System.Web.OData
                 object value;
                 if (EdmObject.TryGetPropertyValue(property.Name, out value) && value != null)
                 {
+                    string propertyName = EdmLibHelpers.GetClrPropertyName(property, EdmModel);
+
                     if (value.GetType().IsCollection())
                     {
-                        DeserializationHelpers.SetCollectionProperty(resource, property, value, property.Name);
+                        DeserializationHelpers.SetCollectionProperty(resource, property, value, propertyName);
                     }
                     else
                     {
-                        DeserializationHelpers.SetProperty(resource, property.Name, value);
+                        DeserializationHelpers.SetProperty(resource, propertyName, value);
                     }
                 }
             }

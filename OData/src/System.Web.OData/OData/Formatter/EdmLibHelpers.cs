@@ -32,8 +32,6 @@ namespace System.Web.OData.Formatter
 
         private static readonly IAssembliesResolver _defaultAssemblyResolver = new DefaultAssembliesResolver();
 
-        private static ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>> _concurrencyProperties;
-
         private static readonly Dictionary<Type, IEdmPrimitiveType> _builtInTypesMapping =
             new[]
             {
@@ -778,8 +776,16 @@ namespace System.Web.OData.Formatter
             Contract.Assert(model != null);
             Contract.Assert(navigationSource != null);
 
+            // Ensure that concurrency properties cache is attached to model as an annotation to avoid expensive calculations each time
+            ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>> concurrencyProperties = model.GetAnnotationValue<ConcurrencyPropertiesAnnotation>(model);
+            if (concurrencyProperties == null)
+            {
+                concurrencyProperties = new ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>>();
+                model.SetAnnotationValue(model, concurrencyProperties);
+            }
+
             IEnumerable<IEdmStructuralProperty> cachedProperties;
-            if (_concurrencyProperties != null && _concurrencyProperties.TryGetValue(navigationSource, out cachedProperties))
+            if (concurrencyProperties != null && concurrencyProperties.TryGetValue(navigationSource, out cachedProperties))
             {
                 return cachedProperties;
             }
@@ -816,12 +822,15 @@ namespace System.Web.OData.Formatter
                 }
             }
 
-            if (_concurrencyProperties == null)
+            if (concurrencyProperties == null)
             {
-                _concurrencyProperties = new ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>>();
+                concurrencyProperties = new ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>>();
             }
 
-            _concurrencyProperties[navigationSource] = results;
+            if (results.Any())
+            {
+                concurrencyProperties[navigationSource] = results;
+            }
             return results;
         }
 
@@ -976,6 +985,13 @@ namespace System.Web.OData.Formatter
                     type.Name.Replace('`', '_'),
                     String.Join("_", type.GetGenericArguments().Select(t => MangleClrTypeName(t))));
             }
+        }
+
+        /// <summary>
+        /// Annotation to store cache for concurrency properties
+        /// </summary>
+        private class ConcurrencyPropertiesAnnotation : ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>>
+        {
         }
     }
 }

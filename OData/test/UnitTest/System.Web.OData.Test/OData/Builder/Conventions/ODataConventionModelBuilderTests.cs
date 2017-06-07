@@ -463,6 +463,98 @@ namespace System.Web.OData.Builder.Conventions
             Assert.Equal("Name", path);
         }
 
+        public sealed class Rule
+        {
+            [Key]
+            public int Id { get; set; }
+
+            [Required]
+            public BooleanExpression Expression { get; set; }
+        }
+
+        public abstract class BooleanExpression
+        {
+        }
+
+        public sealed class BooleanExpressionBinaryOperation : BooleanExpression
+        {
+            public enum OperatorType
+            {
+                Or,
+                And
+            }
+
+            [Required]
+            public OperatorType Operator { get; set; }
+
+            [Required]
+            public BooleanExpression FirstOperand { get; set; }
+
+            [Required]
+            public BooleanExpression SecondOperand { get; set; }
+        }
+
+        public sealed class BooleanExpressionUnaryOperation : BooleanExpression
+        {
+            public enum OperatorType
+            {
+                Not
+            }
+
+            [Required]
+            public OperatorType Operator { get; set; }
+
+            [Required]
+            public BooleanExpression Operand { get; set; }
+        }
+
+        public sealed class BooleanExpressionConstant : BooleanExpression
+        {
+            [Required]
+            public bool Value { get; set; }
+        }
+
+        [Fact]
+        public void ModelBuilder_ExpressionsWithRecursiveComplexTypeInheritance()
+        {
+            // Arrange
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Rule>("rules");
+
+            // Act & Assert
+            IEdmModel model = builder.GetEdmModel();
+            Assert.NotNull(model);
+
+            var container = Assert.Single(model.SchemaElements.OfType<IEdmEntityContainer>());
+
+            var rules = container.FindEntitySet("rules");
+            Assert.NotNull(rules);
+            var edmRuleType = rules.EntityType();
+            Assert.Equal("Rule", edmRuleType.Name);
+
+            edmRuleType.AssertHasKey(model, "Id", EdmPrimitiveTypeKind.Int32);
+            var edmExpressionProperty = edmRuleType.AssertHasComplexProperty(model, "Expression", typeof(BooleanExpression), false);
+
+            var edmBooleanExpression = model.AssertHasComplexType(typeof(BooleanExpression));
+            Assert.Equal(0, edmBooleanExpression.Properties().Count());
+            Assert.True(edmBooleanExpression.IsAbstract);
+
+            var edmBooleanExpressionConstant = model.AssertHasComplexType(typeof(BooleanExpressionConstant), typeof(BooleanExpression));
+            Assert.Equal(1, edmBooleanExpressionConstant.Properties().Count());
+            edmBooleanExpressionConstant.AssertHasPrimitiveProperty(model, "Value", EdmPrimitiveTypeKind.Boolean, false);
+
+            var edmBooleanExpressionBinaryOperation = model.AssertHasComplexType(typeof(BooleanExpressionBinaryOperation), typeof(BooleanExpression));
+            Assert.Equal(3, edmBooleanExpressionBinaryOperation.Properties().Count());
+            edmBooleanExpressionBinaryOperation.AssertHasProperty<IEdmStructuralProperty>(model, "Operator", typeof(BooleanExpressionBinaryOperation.OperatorType), false);
+            edmBooleanExpressionBinaryOperation.AssertHasComplexProperty(model, "FirstOperand", typeof(BooleanExpression), false);
+            edmBooleanExpressionBinaryOperation.AssertHasComplexProperty(model, "SecondOperand", typeof(BooleanExpression), false);
+
+            var edmBooleanExpressionUnaryOperation = model.AssertHasComplexType(typeof(BooleanExpressionUnaryOperation), typeof(BooleanExpression));
+            Assert.Equal(2, edmBooleanExpressionUnaryOperation.Properties().Count());
+            edmBooleanExpressionUnaryOperation.AssertHasProperty<IEdmStructuralProperty>(model, "Operator", typeof(BooleanExpressionUnaryOperation.OperatorType), false);
+            edmBooleanExpressionUnaryOperation.AssertHasComplexProperty(model, "Operand", typeof(BooleanExpression), false);
+        }
+
         [Theory]
         [InlineData(typeof(Version[]))]
         [InlineData(typeof(IEnumerable<Version>))]

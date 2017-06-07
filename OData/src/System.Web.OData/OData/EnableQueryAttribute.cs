@@ -582,11 +582,6 @@ namespace System.Web.OData
             ODataQueryContext queryContext = CreateODataQueryContext(request, model, elementClrType);
             ODataQueryOptions queryOptions = CreateODataQueryOptions(queryContext, request);
 
-            if (queryOptions.SelectExpand != null)
-            {
-                queryOptions.SelectExpand.LevelsMaxLiteralExpansionDepth = _validationSettings.MaxExpansionDepth;
-            }
-
             ValidateQuery(request, queryOptions);
 
             // apply the query

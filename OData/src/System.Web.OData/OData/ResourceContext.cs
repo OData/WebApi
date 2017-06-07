@@ -243,13 +243,15 @@ namespace System.Web.OData
                 object value;
                 if (EdmObject.TryGetPropertyValue(property.Name, out value) && value != null)
                 {
+                    string propertyName = EdmLibHelpers.GetClrPropertyName(property, EdmModel);
+
                     if (value.GetType().IsCollection())
                     {
-                        DeserializationHelpers.SetCollectionProperty(resource, property, value, property.Name);
+                        DeserializationHelpers.SetCollectionProperty(resource, property, value, propertyName);
                     }
                     else
                     {
-                        DeserializationHelpers.SetProperty(resource, property.Name, value);
+                        DeserializationHelpers.SetProperty(resource, propertyName, value);
                     }
                 }
             }

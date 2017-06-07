@@ -37,37 +37,24 @@ namespace System.Web.OData.Query.Expressions
         public string ModelID { get; set; }
 
         /// <summary>
-        /// Gets or sets the EDM type name of the element being selected and expanded. 
-        /// </summary>
-        /// <remarks>This is required by the <see cref="ODataMediaTypeFormatter"/> during serialization. If the instance property is not
-        /// null, the type name will not be set as the type name can be figured from the instance runtime type.</remarks>
-        public string TypeName { get; set; }
-
-        /// <summary>
         /// Gets or sets the property container that contains the properties being expanded. 
         /// </summary>
         public PropertyContainer Container { get; set; }
+
+        /// <summary>
+        /// Indicates whether the underlying instance can be used to obtain property values.
+        /// </summary>
+        public bool UseInstanceForProperties { get; set; }
+
+        /// <inheritdoc />
+        object ISelectExpandWrapper.Instance { get { return this.Instance; } }
 
         /// <inheritdoc />
         public IEdmTypeReference GetEdmType()
         {
             IEdmModel model = GetModel();
-
-            if (TypeName != null)
-            {
-                IEdmEntityType entityType = model.FindDeclaredType(TypeName) as IEdmEntityType;
-                if (entityType == null)
-                {
-                    throw Error.InvalidOperation(SRResources.ResourceTypeNotInModel, TypeName);
-                }
-
-                return new EdmEntityTypeReference(entityType, isNullable: false);
-            }
-            else
-            {
-                Type elementType = GetElementType();
-                return model.GetEdmTypeReference(elementType);
-            }
+            Type elementType = GetElementType();
+            return model.GetEdmTypeReference(elementType);
         }
 
         /// <inheritdoc />
@@ -85,7 +72,7 @@ namespace System.Web.OData.Query.Expressions
             }
 
             // fall back to the instance.
-            if (Instance != null)
+            if (UseInstanceForProperties && Instance != null)
             {
                 _typedEdmEntityObject = _typedEdmEntityObject ??
                     new TypedEdmEntityObject(Instance, GetEdmType() as IEdmEntityTypeReference, GetModel());
@@ -125,7 +112,7 @@ namespace System.Web.OData.Query.Expressions
             }
 
             // The user asked for all the structural properties on this instance.
-            if (Instance != null)
+            if (UseInstanceForProperties && Instance != null)
             {
                 foreach (IEdmStructuralProperty property in type.StructuralProperties())
                 {

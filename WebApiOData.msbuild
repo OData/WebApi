@@ -13,7 +13,7 @@
     <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
     <OutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\UnitTest\</OutputPath>
     <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\UnitTest\TestResults\</TestResultsDirectory>
-    <SkipStrongNamesExe>$(MSBuildThisFileDirectory)packages\Microsoft.Web.SkipStrongNames.1.0.0\tools\SkipStrongNames.exe</SkipStrongNamesExe>
+    <SkipStrongNamesExe>$(MSBuildThisFileDirectory)sln\packages\Microsoft.Web.SkipStrongNames.1.0.0\tools\SkipStrongNames.exe</SkipStrongNamesExe>
     <SkipStrongNamesXml>$(MSBuildThisFileDirectory)tools\SkipStrongNames.xml</SkipStrongNamesXml>
     <NuGetExeFile>$(MSBuildThisFileDirectory).nuget\NuGet.exe</NuGetExeFile>
   </PropertyGroup>
@@ -56,19 +56,19 @@
   </Target>
 
   <Target Name="RestoreSkipStrongNames" DependsOnTargets="DownloadNuGet">
-    <Exec Command='"$(NuGetExeFile)" restore .nuget\packages.config -PackagesDirectory packages -NonInteractive -Verbosity quiet -ConfigFile .nuget\NuGet.Config' />
+    <Exec Command='"$(NuGetExeFile)" restore .nuget\packages.config -PackagesDirectory sln\packages -NonInteractive -Verbosity quiet -ConfigFile .nuget\NuGet.Config' />
   </Target>
 
   <Target Name="RestorePackages" DependsOnTargets="DownloadNuGet">
     <Message Text="Restoring NuGet packages..." Importance="High" />
-    <Exec Command='"$(NuGetExeFile)" restore "%(SolutionsToBuild.Identity)" -PackagesDirectory packages -NonInteractive -Verbosity quiet -ConfigFile "$(MsBuildThisFileDirectory)\.nuget\NuGet.Config"' />
+    <Exec Command='"$(NuGetExeFile)" restore "%(SolutionsToBuild.Identity)" -PackagesDirectory sln\packages -NonInteractive -Verbosity quiet -ConfigFile "$(MsBuildThisFileDirectory)\.nuget\NuGet.Config"' />
     <!-- Pick the right Microsoft.Web.FxCop package to use and copy it to a standard location. -->
   </Target>
   
   <Target Name="BuildTools">
     <PropertyGroup>
         <FxCopProjectLocation>$(MsBuildThisFileDirectory)tools\src\Microsoft.Web.FxCop\</FxCopProjectLocation>
-        <CustomFxCopRulesPath>$(MsBuildThisFileDirectory)packages\CustomFxCopRules</CustomFxCopRulesPath>
+        <CustomFxCopRulesPath>$(MsBuildThisFileDirectory)sln\packages\CustomFxCopRules</CustomFxCopRulesPath>
     </PropertyGroup>
     <MsBuild 
           Condition=" '$(CodeAnalysis)' == 'true' "

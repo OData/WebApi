@@ -1,7 +1,7 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <StyleCopMsBuildRunner Include="$(WebStackRootPath)packages\**\StyleCop.dll"/>
-    <StyleCopAdditionalAddins Include="$(WebStackRootPath)packages\**\Microsoft.Web.StyleCop.dll" />
+    <StyleCopMsBuildRunner Include="$(WebStackRootPath)sln\packages\**\StyleCop.dll"/>
+    <StyleCopAdditionalAddins Include="$(WebStackRootPath)sln\packages\**\Microsoft.Web.StyleCop.dll" />
     <StyleCopAdditionalAddinPaths Include="@(StyleCopAdditionalAddins -> '%(RootDir)%(Directory)')" />
   </ItemGroup>
 

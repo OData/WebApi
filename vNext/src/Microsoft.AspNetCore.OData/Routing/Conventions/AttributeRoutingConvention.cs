@@ -226,7 +226,7 @@ namespace Microsoft.AspNetCore.OData.Routing.Conventions
                 //IEdmModel model = new EdmModel(); // TODO:
                 odataPathTemplate = ODataPathTemplateHandler.ParseTemplate(model, pathTemplate);
             }
-            catch (ODataException e)
+            catch (ODataException)
             {
                 /*
                 throw Error.InvalidOperation(SRResources.InvalidODataRouteOnAction, pathTemplate, action.ActionName,

@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 object value = ReadRequestBody(context);
                 return InputFormatterResult.SuccessAsync(value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return InputFormatterResult.FailureAsync();
             }

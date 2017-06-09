@@ -125,7 +125,7 @@ namespace Microsoft.AspNetCore.OData.Routing
                     IODataPathHandler pathHandler = httpContext.RequestServices.GetRequiredService<IODataPathHandler>();
                     odataPath = pathHandler.Parse(_model, serviceRoot, oDataPathAndQuery);
                 }
-                catch (ODataException odataException)
+                catch (ODataException)
                 {
                     odataPath = null;
                 }

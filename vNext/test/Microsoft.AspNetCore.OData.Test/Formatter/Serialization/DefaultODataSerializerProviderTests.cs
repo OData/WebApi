@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Models;
 using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +16,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.Spatial;
 using Xunit;
 using ODataPath = Microsoft.AspNetCore.OData.Routing.ODataPath;
+using Microsoft.AspNetCore.OData.Extensions;
 
 namespace Microsoft.AspNetCore.OData.Formatter.Serialization
 {
@@ -90,7 +90,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             }
         }
 
-        [Theory, MemberData("EdmPrimitiveMappingData")]
+        [Theory, MemberData(nameof(EdmPrimitiveMappingData))]
         public static void GetODataSerializer_Primitive(Type type, EdmPrimitiveTypeKind edmPrimitiveTypeKind)
         {
             // Arrange
@@ -103,10 +103,10 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             // Assert
             Assert.NotNull(serializer);
             var primitiveSerializer = Assert.IsType<ODataPrimitiveSerializer>(serializer);
-            Assert.Equal(primitiveSerializer.ODataPayloadKind, ODataPayloadKind.Property);
+            Assert.Equal(ODataPayloadKind.Property, primitiveSerializer.ODataPayloadKind);
         }
 
-        [Theory, MemberData("EdmPrimitiveMappingData")]
+        [Theory, MemberData(nameof(EdmPrimitiveMappingData))]
         public void GetODataPayloadSerializer_ReturnsRawValueSerializer_ForValueRequests(Type type, EdmPrimitiveTypeKind edmPrimitiveTypeKind)
         {
             // Arrange
@@ -216,7 +216,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             Assert.NotNull(serializer);
             var entitySerializer = Assert.IsType<ODataResourceSerializer>(serializer);
             Assert.Equal(entitySerializer.SerializerProvider, serialierProvider);
-            Assert.Equal(entitySerializer.ODataPayloadKind, ODataPayloadKind.Resource);
+            Assert.Equal(ODataPayloadKind.Resource, entitySerializer.ODataPayloadKind);
         }
 
         [Theory]
@@ -245,7 +245,7 @@ namespace Microsoft.AspNetCore.OData.Formatter.Serialization
             // Assert
             Assert.NotNull(serializer);
             var resourceSetSerializer = Assert.IsType<ODataResourceSetSerializer>(serializer);
-            Assert.Equal(resourceSetSerializer.ODataPayloadKind, ODataPayloadKind.ResourceSet);
+            Assert.Equal(ODataPayloadKind.ResourceSet, resourceSetSerializer.ODataPayloadKind);
             Assert.Same(resourceSetSerializer.SerializerProvider, serialierProvider);
         }
 

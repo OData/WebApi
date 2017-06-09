@@ -10,7 +10,7 @@ if %ERRORLEVEL% neq 0 goto EnvFail
 dotnet restore
 if %ERRORLEVEL% neq 0 goto BuildFail
 
-dotnet test test/Microsoft.AspNetCore.OData.Test/project.json
+dotnet test test/Microsoft.AspNetCore.OData.Test/Microsoft.AspNetCore.OData.Test.csproj
 if %ERRORLEVEL% neq 0 goto TestFail
 goto BuildSuccess
 

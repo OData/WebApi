@@ -40,7 +40,6 @@ These are maintenance branches for previous RTMs. Project archives only, contrib
 
 ### Building
 ```
-cd OData
 build.cmd
 ```
 
@@ -53,12 +52,11 @@ build.cmd EnableSkipStrongNames
 ```
 
 #### Run tests in cmd
-* `build.cmd` build project, and run unit tests.
-
 To run end-to-end tests, you need to open an **elevated** - Run as administrator - command prompt
-* `build.cmd e2eV4` build projects, run unit tests, and OData **v4** end-to-end tests.
-* `build.cmd e2eV3` build projects, run unit tests, and OData **v3** end-to-end tests.
-* `build.cmd full` build projects, run unit tests, OData **v4 and v3** end-to-end tests.
+
+* `build.cmd` build projects, run unit tests, and OData end-to-end tests.
+
+* `build.cmd quick` build project, and run unit tests
 
 To disable the SkipStrongNames:
 ```

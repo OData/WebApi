@@ -23,30 +23,6 @@ namespace System.Web.OData
         {
             // Arrange
             const string Uri = "http://localhost/odata/$metadata";
-            const string Expected = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
-                                  "<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">" +
-                                  "<edmx:DataServices>" +
-                                  "<Schema Namespace=\"System.Web.OData\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
-                                    "<EntityType Name=\"DateAndTimeOfDayModel\">" +
-                                          "<Key>" +
-                                              "<PropertyRef Name=\"Id\" />" +
-                                          "</Key>" +
-                                          "<Property Name=\"Id\" Type=\"Edm.Int32\" Nullable=\"false\" />" +
-                                          "<Property Name=\"Birthday\" Type=\"Edm.Date\" Nullable=\"false\" />" +
-                                          "<Property Name=\"PublishDay\" Type=\"Edm.Date\" />" +
-                                          "<Property Name=\"CreatedTime\" Type=\"Edm.TimeOfDay\" Nullable=\"false\" />" +
-                                          "<Property Name=\"EdmTime\" Type=\"Edm.TimeOfDay\" />" +
-                                          "<Property Name=\"ResumeTime\" Type=\"Edm.Duration\" Nullable=\"false\" />" +
-                                      "</EntityType>" +
-                                  "</Schema>" +
-                                  "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
-                                  "<EntityContainer Name=\"Container\">" +
-                                      "<EntitySet Name=\"DateAndTimeOfDayModels\" EntityType=\"System.Web.OData.DateAndTimeOfDayModel\" />" +
-                                  "</EntityContainer>" +
-                                  "</Schema>" +
-                                  "</edmx:DataServices>" +
-                                  "</edmx:Edmx>";
-
             HttpClient client = GetClient();
 
             // Act
@@ -55,7 +31,15 @@ namespace System.Web.OData
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(Expected, response.Content.ReadAsStringAsync().Result);
+
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+
+            string payload = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains("<Property Name=\"Birthday\" Type=\"Edm.Date\" Nullable=\"false\" />", payload);
+            Assert.Contains("<Property Name=\"PublishDay\" Type=\"Edm.Date\" />", payload);
+            Assert.Contains("<Property Name=\"CreatedTime\" Type=\"Edm.TimeOfDay\" Nullable=\"false\" />", payload);
+            Assert.Contains("<Property Name=\"EdmTime\" Type=\"Edm.TimeOfDay\" />", payload);
+            Assert.Contains("<Property Name=\"ResumeTime\" Type=\"Edm.Duration\" Nullable=\"false\" />", payload);
         }
 
         [Fact]

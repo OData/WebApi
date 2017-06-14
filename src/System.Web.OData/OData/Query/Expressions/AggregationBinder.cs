@@ -226,7 +226,7 @@ namespace System.Web.OData.Query.Expressions
 
         private Expression CreateAggregationExpression(ParameterExpression accum, AggregateExpression expression)
         {
-            // I substitute the element type for all generic arguments.                                                
+            // I substitute the element type for all generic arguments.
             var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(this._elementType);
             Expression asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
 
@@ -237,7 +237,9 @@ namespace System.Web.OData.Query.Expressions
                 return WrapConvert(Expression.Call(null, countMethod, asQuerableExpression));
             }
 
-            LambdaExpression propertyLambda = Expression.Lambda(BindAccessor(expression.Expression), this._lambdaParameter);
+            Expression propertyAccessor = BindAccessor(expression.Expression);
+            LambdaExpression propertyLambda = Expression.Lambda(propertyAccessor,
+                this._lambdaParameter);
 
             Expression aggregationExpression;
 
@@ -260,34 +262,56 @@ namespace System.Web.OData.Query.Expressions
                 case AggregationMethod.Sum:
                     {
                         MethodInfo sumGenericMethod;
+                        // For Dynamic properties cast to decimal
+                        Expression propertyExpression = WrapDynamicCastIfNeeded(propertyAccessor);
+                        propertyLambda = Expression.Lambda(propertyExpression, this._lambdaParameter);
+
                         if (
-                            !ExpressionHelperMethods.QueryableSumGenerics.TryGetValue(propertyLambda.Body.Type,
+                            !ExpressionHelperMethods.QueryableSumGenerics.TryGetValue(propertyExpression.Type,
                                 out sumGenericMethod))
                         {
                             throw new ODataException(Error.Format(SRResources.AggregationNotSupportedForType,
-                                expression.Method, expression.Expression, propertyLambda.Body.Type));
+                                expression.Method, expression.Expression, propertyExpression.Type));
                         }
+
                         var sumMethod = sumGenericMethod.MakeGenericMethod(this._elementType);
                         aggregationExpression = Expression.Call(null, sumMethod, asQuerableExpression, propertyLambda);
+
+                        // For Dynamic properties cast back to object
+                        if (propertyAccessor.Type == typeof(object))
+                        {
+                            aggregationExpression = Expression.Convert(aggregationExpression, typeof(object));
+                        }
                     }
                     break;
                 case AggregationMethod.Average:
                     {
                         MethodInfo averageGenericMethod;
+                        // For Dynamic properties cast to decimal
+                        Expression propertyExpression = WrapDynamicCastIfNeeded(propertyAccessor);
+                        propertyLambda = Expression.Lambda(propertyExpression, this._lambdaParameter);
+
                         if (
-                            !ExpressionHelperMethods.QueryableAverageGenerics.TryGetValue(propertyLambda.Body.Type,
+                            !ExpressionHelperMethods.QueryableAverageGenerics.TryGetValue(propertyExpression.Type,
                                 out averageGenericMethod))
                         {
                             throw new ODataException(Error.Format(SRResources.AggregationNotSupportedForType,
-                                expression.Method, expression.Expression, propertyLambda.Body.Type));
+                                expression.Method, expression.Expression, propertyExpression.Type));
                         }
+
                         var averageMethod = averageGenericMethod.MakeGenericMethod(this._elementType);
                         aggregationExpression = Expression.Call(null, averageMethod, asQuerableExpression, propertyLambda);
+
+                        // For Dynamic properties cast back to object 
+                        if (propertyAccessor.Type == typeof(object))
+                        {
+                            aggregationExpression = Expression.Convert(aggregationExpression, typeof(object));
+                        }
                     }
                     break;
                 case AggregationMethod.CountDistinct:
                     {
-                        // I select the specific field 
+                        // I select the specific field
                         var selectMethod =
                             ExpressionHelperMethods.QueryableSelectGeneric.MakeGenericMethod(this._elementType,
                                 propertyLambda.Body.Type);
@@ -342,19 +366,19 @@ namespace System.Web.OData.Query.Expressions
                     return CreatePropertyAccessExpression(BindAccessor(singleComplexNode.Source), singleComplexNode.Property, GetFullPropertyPath(singleComplexNode));
                 case QueryNodeKind.SingleValueOpenPropertyAccess:
                     var openNode = node as SingleValueOpenPropertyAccessNode;
-                    return GetFlattenedPropertyExpression(openNode.Name) ?? Expression.Property(BindAccessor(openNode.Source), openNode.Name);
+                    return GetFlattenedPropertyExpression(openNode.Name) ?? CreateOpenPropertyAccessExpression(openNode);
                 case QueryNodeKind.None:
                 case QueryNodeKind.SingleNavigationNode:
-                    var navNode = node as SingleNavigationNode;
+                    var navNode = (SingleNavigationNode)node;
                     return CreatePropertyAccessExpression(BindAccessor(navNode.Source), navNode.NavigationProperty);
                 case QueryNodeKind.BinaryOperator:
-                    var binaryNode = node as BinaryOperatorNode;
+                    var binaryNode = (BinaryOperatorNode)node;
                     var leftExpression = BindAccessor(binaryNode.Left);
                     var rightExpression = BindAccessor(binaryNode.Right);
                     return CreateBinaryExpression(binaryNode.OperatorKind, leftExpression, rightExpression,
                         liftToNull: true);
                 case QueryNodeKind.Convert:
-                    var convertNode = node as ConvertNode;
+                    var convertNode = (ConvertNode)node;
                     return CreateConvertExpression(convertNode, BindAccessor(convertNode.Source));
                 default:
                     throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind,
@@ -386,6 +410,44 @@ namespace System.Web.OData.Query.Expressions
             else
             {
                 return GetFlattenedPropertyExpression(propertyPath) ?? ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+            }
+        }
+
+        private Expression CreateOpenPropertyAccessExpression(SingleValueOpenPropertyAccessNode openNode)
+        {
+            var sourceAccessor = BindAccessor(openNode.Source);
+
+            // First check that property exists in source
+            // It's the case when we are apply transformation based on earlier transformation
+            if (sourceAccessor.Type.GetProperty(openNode.Name) != null)
+            {
+                return Expression.Property(sourceAccessor, openNode.Name);
+            }
+
+            // Property doesn't exists go for dynamic properties dictionary
+            PropertyInfo prop = GetDynamicPropertyContainer(openNode);
+            var propertyAccessExpression = Expression.Property(sourceAccessor, prop.Name);
+            var readDictionaryIndexerExpression = Expression.Property(propertyAccessExpression,
+                            DictionaryStringObjectIndexerName, Expression.Constant(openNode.Name));
+            var containsKeyExpression = Expression.Call(propertyAccessExpression,
+                propertyAccessExpression.Type.GetMethod("ContainsKey"), Expression.Constant(openNode.Name));
+            var nullExpression = Expression.Constant(null);
+
+            if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True)
+            {
+                var dynamicDictIsNotNull = Expression.NotEqual(propertyAccessExpression, Expression.Constant(null));
+                var dynamicDictIsNotNullAndContainsKey = Expression.AndAlso(dynamicDictIsNotNull, containsKeyExpression);
+                return Expression.Condition(
+                    dynamicDictIsNotNullAndContainsKey,
+                    readDictionaryIndexerExpression,
+                    nullExpression);
+            }
+            else
+            {
+                return Expression.Condition(
+                    containsKeyExpression,
+                    readDictionaryIndexerExpression,
+                    nullExpression);
             }
         }
 
@@ -447,6 +509,16 @@ namespace System.Web.OData.Query.Expressions
             }
 
             return properties;
+        }
+
+        private static Expression WrapDynamicCastIfNeeded(Expression propertyAccessor)
+        {
+            if (propertyAccessor.Type == typeof(object))
+            {
+                return Expression.Call(null, ExpressionHelperMethods.ConvertToDecimal, propertyAccessor);
+            }
+
+            return propertyAccessor;
         }
     }
 }

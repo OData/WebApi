@@ -49,9 +49,9 @@ namespace System.Web.OData.Query.Expressions
             {
                 foreach (var field in expressions)
                 {
-                    if (field.TypeReference.Definition.TypeKind == EdmTypeKind.Primitive)
+                    if (field.TypeReference == null || field.TypeReference.Definition.TypeKind == EdmTypeKind.Primitive)
                     {
-                        var primitiveType = EdmLibHelpers.GetClrType(field.TypeReference, model);
+                        var primitiveType = field.TypeReference == null ? typeof(object) : EdmLibHelpers.GetClrType(field.TypeReference, model);
                         CreateProperty(tb, field.Alias, primitiveType);
                     }
                 }
@@ -61,9 +61,9 @@ namespace System.Web.OData.Query.Expressions
             {
                 foreach (var field in propertyNodes)
                 {
-                    if (field.Expression != null && field.TypeReference.Definition.TypeKind == EdmTypeKind.Primitive)
+                    if (field.Expression != null && (field.TypeReference == null || field.TypeReference.Definition.TypeKind == EdmTypeKind.Primitive))
                     {
-                        var primitiveType = EdmLibHelpers.GetClrType(field.TypeReference, model);
+                        var primitiveType = field.TypeReference == null ? typeof(object) : EdmLibHelpers.GetClrType(field.TypeReference, model);
                         CreateProperty(tb, field.Name, primitiveType);
                     }
                     else

@@ -25,6 +25,7 @@ namespace System.Web.OData.Query.Expressions
     internal abstract class ExpressionBinderBase
     {
         protected static readonly MethodInfo StringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
+        protected static readonly string DictionaryStringObjectIndexerName = typeof(Dictionary<string, object>).GetDefaultMembers()[0].Name;
 
         protected static readonly Expression NullConstant = Expression.Constant(null);
         protected static readonly Expression FalseConstant = Expression.Constant(false);
@@ -438,6 +439,26 @@ namespace System.Web.OData.Query.Expressions
             }
 
             return expression;
+        }
+
+        protected PropertyInfo GetDynamicPropertyContainer(SingleValueOpenPropertyAccessNode openNode)
+        {
+            IEdmStructuredType edmStructuredType;
+            var edmTypeReference = openNode.Source.TypeReference;
+            if (edmTypeReference.IsEntity())
+            {
+                edmStructuredType = edmTypeReference.AsEntity().EntityDefinition();
+            }
+            else if (edmTypeReference.IsComplex())
+            {
+                edmStructuredType = edmTypeReference.AsComplex().ComplexDefinition();
+            }
+            else
+            {
+                throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, openNode.Kind, typeof(FilterBinder).Name);
+            }
+            var prop = EdmLibHelpers.GetDynamicPropertyDictionary(edmStructuredType, _model);
+            return prop;
         }
 
         private static Expression CheckIfArgumentsAreNull(Expression[] arguments)

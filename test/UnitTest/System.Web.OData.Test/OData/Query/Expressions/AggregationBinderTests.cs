@@ -56,6 +56,15 @@ namespace System.Web.OData.Query.Expressions
                 + ".Select($it => new DynamicTypeWrapper() {Category = new DynamicTypeWrapperCategory() {CategoryName = $it.Key.Category.CategoryName, }, SupplierAddress = new DynamicTypeWrapperSupplierAddress() {State = $it.Key.SupplierAddress.State, }, })");
         }
 
+        [Fact]
+        public void SingleDynamicGroupBy()
+        {
+            var filters = VerifyQueryDeserialization<DynamicProduct>(
+                "groupby((ProductProperty))",
+                ".GroupBy($it => new DynamicTypeWrapper() {ProductProperty = IIF($it.ProductProperties.ContainsKey(ProductProperty), $it.ProductPropertiesProductProperty, null), })"
+                + ".Select($it => new DynamicTypeWrapper() {ProductProperty = $it.Key.ProductProperty, })");
+        }
+
 
         [Fact]
         public void SingleSum()
@@ -67,12 +76,30 @@ namespace System.Web.OData.Query.Expressions
         }
 
         [Fact]
+        public void SingleDynamicSum()
+        {
+            var filters = VerifyQueryDeserialization<DynamicProduct>(
+                "aggregate(ProductProperty with sum as ProductProperty)",
+                ".GroupBy($it => new DynamicTypeWrapper())"
+                + ".Select($it => new DynamicTypeWrapper() {ProductProperty = Convert($it.AsQueryable().Sum($it => IIF($it.ProductProperties.ContainsKey(ProductProperty), $it.ProductPropertiesProductProperty, null).SafeConvertToDecimal())), })");
+        }
+
+        [Fact]
         public void SingleMin()
         {
             var filters = VerifyQueryDeserialization(
                 "aggregate(SupplierID with min as SupplierID)",
                 ".GroupBy($it => new DynamicTypeWrapper())"
                 + ".Select($it => new DynamicTypeWrapper() {SupplierID = $it.AsQueryable().Min($it => $it.SupplierID), })");
+        }
+
+        [Fact]
+        public void SingleDynamicMin()
+        {
+            var filters = VerifyQueryDeserialization<DynamicProduct>(
+                "aggregate(ProductProperty with min as MinProductProperty)",
+                ".GroupBy($it => new DynamicTypeWrapper())"
+                + ".Select($it => new DynamicTypeWrapper() {MinProductProperty = $it.AsQueryable().Min($it => IIF($it.ProductProperties.ContainsKey(ProductProperty), $it.ProductPropertiesProductProperty, null)), })");
         }
 
         [Fact]

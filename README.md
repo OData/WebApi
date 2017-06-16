@@ -40,11 +40,17 @@ These are maintenance branches for previous RTMs. Project archives only, contrib
 
 ### Building
 ```
-cd OData
-build
+build.cmd
 ```
 ### Testing
 Each solution contains some test projects. Install this [runner](https://xunit.codeplex.com/downloads/get/755091) first, then open the project, build it and run all the tests in the test explorer. For running tests you must open the solution as *Administrator*. More detail at [this](http://odata.github.io/WebApi/#09-01-unittest-e2etest).
+
+#### Run tests in cmd
+To run end-to-end tests, you need to open an **elevated** - Run as administrator - command prompt
+
+* `build.cmd` build projects, run unit tests, and OData end-to-end tests.
+
+* `build.cmd quick` or `build.cmd -q` build project, and run unit tests
 
 ### Nightly builds
 1.	In your NuGet Package Manager settings add the following package source:

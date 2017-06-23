@@ -673,6 +673,24 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The generated lambda expression of $filter in $expand of reference navigation property &apos;{0}&apos; has no parameter..
+        /// </summary>
+        internal static string ExpandFilterExpressionLambdaExpressionNoParameter {
+            get {
+                return ResourceManager.GetString("ExpandFilterExpressionLambdaExpressionNoParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to $filter in $expand of reference navigation property &apos;{0}&apos; is not expected type &apos;{1}&apos;.
+        /// </summary>
+        internal static string ExpandFilterExpressionNotLambdaExpression {
+            get {
+                return ResourceManager.GetString("ExpandFilterExpressionNotLambdaExpression", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot create an EDM model as the action &apos;{0}&apos; on controller &apos;{1}&apos; has a void return type..
         /// </summary>
         internal static string FailedToBuildEdmModelBecauseReturnTypeIsNull {
@@ -1848,6 +1866,15 @@ namespace System.Web.OData.Properties {
         internal static string RecursiveComplexTypesNotAllowed {
             get {
                 return ResourceManager.GetString("RecursiveComplexTypesNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Found unexpected parameter &apos;{0}&apos;..
+        /// </summary>
+        internal static string ReferenceNavigationPropertyExpandFilterVisitorUnexpectedParameter {
+            get {
+                return ResourceManager.GetString("ReferenceNavigationPropertyExpandFilterVisitorUnexpectedParameter", resourceCulture);
             }
         }
         

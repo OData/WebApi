@@ -11,7 +11,7 @@
     <StyleCopEnabled Condition=" '$(StyleCopEnabled)' == '' ">true</StyleCopEnabled>
 	<BuildInParallel Condition=" '$(BuildInParallel)' == '' And $(MSBuildNodeCount) &gt; 1 ">true</BuildInParallel>
     <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
-    <NuGetExeFile>$(MSBuildThisFileDirectory).nuget\NuGet.exe</NuGetExeFile>
+    <NuGetExeFile>$(MSBuildThisFileDirectory)sln\.nuget\NuGet.exe</NuGetExeFile>
   </PropertyGroup>
 
   <UsingTask AssemblyFile=".\sln\packages\xunit.1.9.2\lib\net20\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit"/>
@@ -34,7 +34,7 @@
 
   <Target Name="RestorePackages" DependsOnTargets="DownloadNuGet">
     <Message Text="Restoring NuGet packages..." Importance="High" />
-    <Exec Command='"$(NuGetExeFile)" restore "%(SolutionsToBuild.Identity)" -PackagesDirectory sln\packages -NonInteractive -Verbosity quiet -ConfigFile "$(MsBuildThisFileDirectory)\.nuget\NuGet.Config"' />
+    <Exec Command='"$(NuGetExeFile)" restore "%(SolutionsToBuild.Identity)" -PackagesDirectory sln\packages -NonInteractive -Verbosity quiet -ConfigFile "$(MsBuildThisFileDirectory)sln\.nuget\NuGet.Config"' />
     
   </Target>
   

@@ -60,5 +60,14 @@ namespace System.Web.OData.Query
                 o => o.EnableConstantParameterization,
                 expectedDefaultValue: true);
         }
+
+        [Fact]
+        public void HandleReferenceNavigationPropertyExpandFilter_Property_RoundTrips()
+        {
+            Assert.Reflection.BooleanProperty<ODataQuerySettings>(
+                new ODataQuerySettings(),
+                o => o.HandleReferenceNavigationPropertyExpandFilter,
+                expectedDefaultValue: false);
+        }
     }
 }

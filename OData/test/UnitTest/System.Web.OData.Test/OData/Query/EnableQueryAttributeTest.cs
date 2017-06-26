@@ -1076,6 +1076,15 @@ namespace System.Web.OData.Query
             Assert.Equal(customer, ((ObjectContent)actionExecutedContext.Response.Content).Value);
         }
 
+        [Fact]
+        public void HandleReferenceNavigationPropertyExpandFilter_Property_RoundTrips()
+        {
+            Assert.Reflection.BooleanProperty<EnableQueryAttribute>(
+                new EnableQueryAttribute(),
+                o => o.HandleReferenceNavigationPropertyExpandFilter,
+                false);
+        }
+
         private void SomeAction()
         {
         }

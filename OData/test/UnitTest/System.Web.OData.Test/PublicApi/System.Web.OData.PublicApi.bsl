@@ -186,6 +186,8 @@ public class System.Web.OData.ClrTypeAnnotation {
 	System.Type ClrType  { public get; }
 }
 
+
+
 public class System.Web.OData.DefaultContainerBuilder : IContainerBuilder {
 	public DefaultContainerBuilder ()
 
@@ -368,6 +370,7 @@ public class System.Web.OData.EnableQueryAttribute : System.Web.Http.Filters.Act
 	bool EnableConstantParameterization  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
+	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
 	int MaxAnyAllExpressionDepth  { public get; public set; }
 	int MaxExpansionDepth  { public get; public set; }
 	int MaxNodeCount  { public get; public set; }
@@ -1294,6 +1297,8 @@ public class System.Web.OData.Builder.ComplexTypeConfiguration`1 : StructuralTyp
 	public ComplexTypeConfiguration`1 DerivesFromNothing ()
 }
 
+
+
 public class System.Web.OData.Builder.DynamicPropertyDictionaryAnnotation {
 	public DynamicPropertyDictionaryAnnotation (System.Reflection.PropertyInfo propertyInfo)
 
@@ -1428,6 +1433,8 @@ public class System.Web.OData.Builder.FunctionConfiguration : OperationConfigura
 	public FunctionConfiguration SetBindingParameter (string name, IEdmTypeConfiguration bindingParameterType)
 }
 
+
+
 public class System.Web.OData.Builder.LowerCamelCaser {
 	public LowerCamelCaser ()
 	public LowerCamelCaser (NameResolverOptions options)
@@ -1560,6 +1567,8 @@ public class System.Web.OData.Builder.OperationLinkBuilder {
 	public virtual System.Uri BuildLink (ResourceContext context)
 	public virtual System.Uri BuildLink (ResourceSetContext context)
 }
+
+
 
 public class System.Web.OData.Builder.PrimitivePropertyConfiguration : StructuralPropertyConfiguration {
 	public PrimitivePropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
@@ -3179,6 +3188,9 @@ public class System.Web.OData.Formatter.Serialization.SelectExpandNode {
 
 	public static void GetStructuralProperties (Microsoft.OData.Edm.IEdmStructuredType structuredType, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] structuralProperties, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] nestedStructuralProperties)
 }
+
+
+
 
 public abstract class System.Web.OData.Query.Expressions.ExpressionBinderBase {
 	protected ExpressionBinderBase (System.IServiceProvider requestContainer)

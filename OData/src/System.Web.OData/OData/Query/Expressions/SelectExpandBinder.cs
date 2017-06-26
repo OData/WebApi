@@ -193,9 +193,9 @@ namespace System.Web.OData.Query.Expressions
 
             if (filterClause != null)
             {
-                var collection = property.Type.IsCollection();
+                var isCollection = property.Type.IsCollection();
 
-                IEdmTypeReference edmElementType = (collection ? property.Type.AsCollection().ElementType() : property.Type);
+                IEdmTypeReference edmElementType = (isCollection ? property.Type.AsCollection().ElementType() : property.Type);
                 Type clrElementType = EdmLibHelpers.GetClrType(edmElementType, _model);
                 if (clrElementType == null)
                 {
@@ -205,7 +205,7 @@ namespace System.Web.OData.Query.Expressions
 
                 Expression filterResult = nullablePropertyValue;
 
-                if (collection)
+                if (isCollection)
                 {
                     Expression filterSource =
                         typeof(IEnumerable).IsAssignableFrom(source.Type.GetProperty(propertyName).PropertyType)
@@ -232,14 +232,7 @@ namespace System.Web.OData.Query.Expressions
                             property.Name, nameof(LambdaExpression)));
                     }
 
-                    var filterParameter = filterLambdaExpression.Parameters.FirstOrDefault();
-                    if(filterParameter == null)
-                    {   
-                        //Never seen this, but just to be safe...
-                        throw new ODataException(Error.Format(SRResources.ExpandFilterExpressionLambdaExpressionNoParameter,
-                            property.Name));                            
-                    }
-
+                    var filterParameter = filterLambdaExpression.Parameters.First();
                     var predicateExpression = new ReferenceNavigationPropertyExpandFilterVisitor(filterParameter, nullablePropertyValue).Visit(filterLambdaExpression.Body);
 
                     // predicateExpression == true ? nullablePropertyValue : null

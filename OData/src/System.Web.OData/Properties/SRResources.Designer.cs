@@ -673,15 +673,6 @@ namespace System.Web.OData.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The generated lambda expression of $filter in $expand of reference navigation property &apos;{0}&apos; has no parameter..
-        /// </summary>
-        internal static string ExpandFilterExpressionLambdaExpressionNoParameter {
-            get {
-                return ResourceManager.GetString("ExpandFilterExpressionLambdaExpressionNoParameter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to $filter in $expand of reference navigation property &apos;{0}&apos; is not expected type &apos;{1}&apos;.
         /// </summary>
         internal static string ExpandFilterExpressionNotLambdaExpression {

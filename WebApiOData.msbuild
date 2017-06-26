@@ -15,7 +15,7 @@
     <TestResultsDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\UnitTest\TestResults\</TestResultsDirectory>
     <SkipStrongNamesExe>$(MSBuildThisFileDirectory)\sln\packages\Microsoft.Web.SkipStrongNames.1.0.0\tools\SkipStrongNames.exe</SkipStrongNamesExe>
     <SkipStrongNamesXml>$(MSBuildThisFileDirectory)tools\SkipStrongNames.xml</SkipStrongNamesXml>
-    <NuGetExeFile>$(MSBuildThisFileDirectory).nuget\NuGet.exe</NuGetExeFile>
+    <NuGetExeFile>$(MSBuildThisFileDirectory)\sln\.nuget\NuGet.exe</NuGetExeFile>
   </PropertyGroup>
 	
   <ItemGroup>
@@ -56,12 +56,12 @@
   </Target>
 
   <Target Name="RestoreSkipStrongNames" DependsOnTargets="DownloadNuGet">
-    <Exec Command='"$(NuGetExeFile)" restore .nuget\packages.config -PackagesDirectory sln\packages -NonInteractive -Verbosity quiet -ConfigFile .nuget\NuGet.Config' />
+    <Exec Command='"$(NuGetExeFile)" restore sln\.nuget\packages.config -PackagesDirectory sln\packages -NonInteractive -Verbosity quiet -ConfigFile sln\.nuget\NuGet.Config' />
   </Target>
 
   <Target Name="RestorePackages" DependsOnTargets="DownloadNuGet">
     <Message Text="Restoring NuGet packages..." Importance="High" />
-    <Exec Command='"$(NuGetExeFile)" restore "%(SolutionsToBuild.Identity)" -PackagesDirectory sln\packages -NonInteractive -Verbosity quiet -ConfigFile "$(MsBuildThisFileDirectory)\.nuget\NuGet.Config"' />
+    <Exec Command='"$(NuGetExeFile)" restore "%(SolutionsToBuild.Identity)" -PackagesDirectory sln\packages -NonInteractive -Verbosity quiet -ConfigFile "$(MsBuildThisFileDirectory)\sln\.nuget\NuGet.Config"' />
     <!-- Pick the right Microsoft.Web.FxCop package to use and copy it to a standard location. -->
   </Target>
   

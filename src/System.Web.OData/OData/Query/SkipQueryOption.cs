@@ -97,7 +97,6 @@ namespace System.Web.OData.Query
                     
                     if (skipValue.HasValue && skipValue > Int32.MaxValue)
                     {
-                        Contract.Assert(skipValue.Value <= Int32.MaxValue);
                         throw new ODataException(Error.Format(
                             SRResources.SkipTopLimitExceeded,
                             Int32.MaxValue,

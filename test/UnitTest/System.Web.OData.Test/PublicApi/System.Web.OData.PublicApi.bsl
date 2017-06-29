@@ -186,12 +186,7 @@ public class System.Web.OData.ClrTypeAnnotation {
 	System.Type ClrType  { public get; }
 }
 
-public class System.Web.OData.CustomAggregateMethodAnnotation {
-	public CustomAggregateMethodAnnotation ()
 
-	public CustomAggregateMethodAnnotation AddMethod (string methodToken, System.Collections.Generic.IDictionary`2[[System.Type],[System.Reflection.MethodInfo]] methods)
-	public bool GetMethodInfo (string methodToken, System.Type returnType, out System.Reflection.MethodInfo& methodInfo)
-}
 
 public class System.Web.OData.DefaultContainerBuilder : IContainerBuilder {
 	public DefaultContainerBuilder ()
@@ -375,6 +370,7 @@ public class System.Web.OData.EnableQueryAttribute : System.Web.Http.Filters.Act
 	bool EnableConstantParameterization  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
+	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
 	int MaxAnyAllExpressionDepth  { public get; public set; }
 	int MaxExpansionDepth  { public get; public set; }
 	int MaxNodeCount  { public get; public set; }
@@ -1119,16 +1115,8 @@ public abstract class System.Web.OData.Builder.StructuralTypeConfiguration`1 {
 	public StructuralTypeConfiguration`1 OrderBy (QueryOptionSetting setting, string[] properties)
 	public StructuralTypeConfiguration`1 Page ()
 	public StructuralTypeConfiguration`1 Page (System.Nullable`1[[System.Int32]] maxTopValue, System.Nullable`1[[System.Int32]] pageSizeValue)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
-	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
@@ -1309,11 +1297,7 @@ public class System.Web.OData.Builder.ComplexTypeConfiguration`1 : StructuralTyp
 	public ComplexTypeConfiguration`1 DerivesFromNothing ()
 }
 
-public class System.Web.OData.Builder.DecimalPropertyConfiguration : PrecisionPropertyConfiguration {
-	public DecimalPropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
 
-	System.Nullable`1[[System.Int32]] Scale  { public get; public set; }
-}
 
 public class System.Web.OData.Builder.DynamicPropertyDictionaryAnnotation {
 	public DynamicPropertyDictionaryAnnotation (System.Reflection.PropertyInfo propertyInfo)
@@ -1449,11 +1433,7 @@ public class System.Web.OData.Builder.FunctionConfiguration : OperationConfigura
 	public FunctionConfiguration SetBindingParameter (string name, IEdmTypeConfiguration bindingParameterType)
 }
 
-public class System.Web.OData.Builder.LengthPropertyConfiguration : PrimitivePropertyConfiguration {
-	public LengthPropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
 
-	System.Nullable`1[[System.Int32]] MaxLength  { public get; public set; }
-}
 
 public class System.Web.OData.Builder.LowerCamelCaser {
 	public LowerCamelCaser ()
@@ -1588,11 +1568,7 @@ public class System.Web.OData.Builder.OperationLinkBuilder {
 	public virtual System.Uri BuildLink (ResourceSetContext context)
 }
 
-public class System.Web.OData.Builder.PrecisionPropertyConfiguration : PrimitivePropertyConfiguration {
-	public PrecisionPropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
 
-	System.Nullable`1[[System.Int32]] Precision  { public get; public set; }
-}
 
 public class System.Web.OData.Builder.PrimitivePropertyConfiguration : StructuralPropertyConfiguration {
 	public PrimitivePropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
@@ -2340,6 +2316,7 @@ public class System.Web.OData.Query.ODataQuerySettings {
 	bool EnableConstantParameterization  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
+	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
 	System.Nullable`1[[System.Int32]] PageSize  { public get; public set; }
 }
 
@@ -3198,7 +3175,6 @@ public class System.Web.OData.Formatter.Serialization.ODataServiceDocumentSerial
 
 public class System.Web.OData.Formatter.Serialization.SelectExpandNode {
 	public SelectExpandNode ()
-	public SelectExpandNode (SelectExpandNode selectExpandNodeToCopy)
 	public SelectExpandNode (Microsoft.OData.Edm.IEdmStructuredType structuredType, ODataSerializerContext writeContext)
 	public SelectExpandNode (Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmStructuredType structuredType, Microsoft.OData.Edm.IEdmModel model)
 
@@ -3214,19 +3190,21 @@ public class System.Web.OData.Formatter.Serialization.SelectExpandNode {
 	public static void GetStructuralProperties (Microsoft.OData.Edm.IEdmStructuredType structuredType, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] structuralProperties, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] nestedStructuralProperties)
 }
 
-public abstract class System.Web.OData.Query.Expressions.DynamicTypeWrapper {
-	protected DynamicTypeWrapper ()
 
-	System.Collections.Generic.Dictionary`2[[System.String],[System.Object]] Values  { public abstract get; }
 
-	public bool TryGetPropertyValue (string propertyName, out System.Object& value)
-}
 
 public abstract class System.Web.OData.Query.Expressions.ExpressionBinderBase {
 	protected ExpressionBinderBase (System.IServiceProvider requestContainer)
+}
 
-	protected void EnsureFlattenedPropertyContainer (System.Linq.Expressions.ParameterExpression source)
-	protected System.Linq.Expressions.Expression GetFlattenedPropertyExpression (string propertyPath)
+public class System.Web.OData.Query.Expressions.DynamicTypeWrapper {
+	public DynamicTypeWrapper ()
+
+	public virtual bool Equals (object obj)
+	public virtual int GetHashCode ()
+	public object GetPropertyValue (string propertyName)
+	public void SetPropertyValue (string propertyName, object value)
+	public bool TryGetPropertyValue (string propertyName, out System.Object& value)
 }
 
 public class System.Web.OData.Query.Expressions.FilterBinder : ExpressionBinderBase {

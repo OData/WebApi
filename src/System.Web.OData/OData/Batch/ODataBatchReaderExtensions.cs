@@ -143,7 +143,6 @@ namespace System.Web.OData.Batch
             return ReadOperationInternalAsync(reader, batchId, changeSetId, cancellationToken, bufferContentStream);
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing the object.")]
         private static async Task<HttpRequestMessage> ReadOperationInternalAsync(
             ODataBatchReader reader, Guid batchId, Guid? changeSetId, CancellationToken cancellationToken, bool bufferContentStream = true)
         {

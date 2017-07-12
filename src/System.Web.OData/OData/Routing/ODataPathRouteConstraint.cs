@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
@@ -56,7 +55,6 @@ namespace System.Web.OData.Routing
         /// <returns>
         /// True if this instance equals a specified route; otherwise, false.
         /// </returns>
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Response disposed after being sent.")]
         public virtual bool Match(HttpRequestMessage request, IHttpRoute route, string parameterName, IDictionary<string, object> values, HttpRouteDirection routeDirection)
         {
             if (request == null)

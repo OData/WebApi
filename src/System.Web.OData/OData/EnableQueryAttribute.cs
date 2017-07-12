@@ -15,7 +15,6 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
@@ -575,8 +574,6 @@ namespace System.Web.OData
             }
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
-            Justification = "Response disposed after being sent.")]
         private object ExecuteQuery(object response, HttpRequestMessage request, HttpActionDescriptor actionDescriptor, ODataQueryContext queryContext)
         {
             if (queryContext == null)

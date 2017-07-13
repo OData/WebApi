@@ -168,7 +168,6 @@ namespace System.Web.OData.Query.Expressions
             List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
 
             // Setting GroupByContainer property when previous step was grouping
-            var propertyAccessor = Expression.Property(accum, "Key");
             if (this._groupingProperties != null && this._groupingProperties.Any())
             {
                 var wrapperProperty = this.ResultClrType.GetProperty("GroupByContainer");

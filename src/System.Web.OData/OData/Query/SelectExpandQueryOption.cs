@@ -174,7 +174,6 @@ namespace System.Web.OData.Query
         /// <param name="queryable">The original <see cref="IQueryable"/>.</param>
         /// <param name="settings">The <see cref="ODataQuerySettings"/> that contains all the query application related settings.</param>
         /// <returns>The new <see cref="IQueryable"/> after the filter query has been applied to.</returns>
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "stopgap. will be used later.")]
         public IQueryable ApplyTo(IQueryable queryable, ODataQuerySettings settings)
         {
             if (queryable == null)

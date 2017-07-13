@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.OData.Query
     {
         private readonly IAssemblyProvider _assemblyProvider;
         private readonly ODataQueryOptionParser _queryOptionParser;
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
         /// the <see cref="ODataQueryContext"/>.
@@ -41,6 +41,7 @@ namespace Microsoft.AspNetCore.OData.Query
 
             _assemblyProvider = request.AssemblyProvider();
 
+            
             Context = context;
             Request = request;
             RawValues = new ODataRawQueryOptions();
@@ -52,7 +53,9 @@ namespace Microsoft.AspNetCore.OData.Query
                 context.NavigationSource,
                 queryOptionDict);
 
-            BuildQueryOptions(queryOptionDict);
+            var serviceProvider = request.HttpContext.RequestServices;
+
+            BuildQueryOptions(queryOptionDict, serviceProvider);
         }
 
         /// <summary>
@@ -189,7 +192,7 @@ namespace Microsoft.AspNetCore.OData.Query
             return query;
         }
 
-        private void BuildQueryOptions(IDictionary<string, string> queryParameters)
+        private void BuildQueryOptions(IDictionary<string, string> queryParameters, IServiceProvider serviceProvider)
         {
             foreach (var kvp in queryParameters)
             {
@@ -203,7 +206,7 @@ namespace Microsoft.AspNetCore.OData.Query
                     case "$orderby":
                         ThrowIfEmpty(kvp.Value, "$orderby");
                         RawValues.OrderBy = kvp.Value;
-                        OrderBy = new OrderByQueryOption(kvp.Value, Context, _queryOptionParser);
+                        OrderBy = new OrderByQueryOption(kvp.Value, Context, _queryOptionParser, serviceProvider);
                         break;
                     case "$top":
                         ThrowIfEmpty(kvp.Value, "$top");

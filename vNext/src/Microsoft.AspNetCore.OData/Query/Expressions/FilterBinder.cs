@@ -69,8 +69,8 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
             Contract.Assert(orderBy != null);
             Contract.Assert(elementType != null);
             Contract.Assert(requestContainer != null);
-
-            FilterBinder binder = requestContainer.GetRequiredService<FilterBinder>();
+            
+            FilterBinder binder = new FilterBinder(requestContainer);
             binder._filterType = elementType;
 
             return BindOrderByClause(binder, orderBy, elementType);

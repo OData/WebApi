@@ -44,30 +44,30 @@ namespace System.Web.OData.Query.Expressions
         internal const string TimeFunctionName = "time";
 
         // string functions
-        public static readonly MethodInfo StartsWith;
-        public static readonly MethodInfo EndsWith;
-        public static readonly MethodInfo Contains;
-        public static readonly MethodInfo SubstringStart;
-        public static readonly MethodInfo SubstringStartAndLength;
-        public static readonly MethodInfo SubstringStartNoThrow;
-        public static readonly MethodInfo SubstringStartAndLengthNoThrow;
-        public static readonly MethodInfo IndexOf;
-        public static readonly MethodInfo ToLower;
-        public static readonly MethodInfo ToUpper;
-        public static readonly MethodInfo Trim;
-        public static readonly MethodInfo Concat;
+        public static readonly MethodInfo StartsWith = MethodOf(_ => _defaultString.StartsWith(default(string)));
+        public static readonly MethodInfo EndsWith = MethodOf(_ => _defaultString.EndsWith(default(string)));
+        public static readonly MethodInfo Contains = MethodOf(_ => _defaultString.Contains(default(string)));
+        public static readonly MethodInfo SubstringStart = MethodOf(_ => _defaultString.Substring(default(int)));
+        public static readonly MethodInfo SubstringStartAndLength = MethodOf(_ => _defaultString.Substring(default(int), default(int)));
+        public static readonly MethodInfo SubstringStartNoThrow = MethodOf(_ => ClrSafeFunctions.SubstringStart(default(string), default(int)));
+        public static readonly MethodInfo SubstringStartAndLengthNoThrow = MethodOf(_ => ClrSafeFunctions.SubstringStartAndLength(default(string), default(int), default(int)));
+        public static readonly MethodInfo IndexOf = MethodOf(_ => _defaultString.IndexOf(default(string)));
+        public static readonly MethodInfo ToLower = MethodOf(_ => _defaultString.ToLower());
+        public static readonly MethodInfo ToUpper = MethodOf(_ => _defaultString.ToUpper());
+        public static readonly MethodInfo Trim = MethodOf(_ => _defaultString.Trim());
+        public static readonly MethodInfo Concat = MethodOf(_ => String.Concat(default(string), default(string)));
 
         // math functions
-        public static readonly MethodInfo CeilingOfDouble;
-        public static readonly MethodInfo RoundOfDouble;
-        public static readonly MethodInfo FloorOfDouble;
+        public static readonly MethodInfo CeilingOfDouble = MethodOf(_ => Math.Ceiling(default(double)));
+        public static readonly MethodInfo RoundOfDouble = MethodOf(_ => Math.Round(default(double)));
+        public static readonly MethodInfo FloorOfDouble = MethodOf(_ => Math.Floor(default(double)));
 
-        public static readonly MethodInfo CeilingOfDecimal;
-        public static readonly MethodInfo RoundOfDecimal;
-        public static readonly MethodInfo FloorOfDecimal;
+        public static readonly MethodInfo CeilingOfDecimal = MethodOf(_ => Math.Ceiling(default(decimal)));
+        public static readonly MethodInfo RoundOfDecimal = MethodOf(_ => Math.Round(default(decimal)));
+        public static readonly MethodInfo FloorOfDecimal = MethodOf(_ => Math.Floor(default(decimal)));
 
         // enum functions
-        public static readonly MethodInfo HasFlag;
+        public static readonly MethodInfo HasFlag = MethodOf(_ => _defaultEnum.HasFlag(default(Enum)));
 
         // Date properties
         public static readonly Dictionary<string, PropertyInfo> DateProperties = new[]
@@ -129,33 +129,6 @@ namespace System.Web.OData.Query.Expressions
         public static readonly MethodInfo ToUniversalTimeDateTimeOffset = typeof(DateTimeOffset).GetMethod("ToUniversalTime", BindingFlags.Instance | BindingFlags.Public);
         public static readonly MethodInfo ToOffsetFunction = typeof(DateTimeOffset).GetMethod("ToOffset", BindingFlags.Instance | BindingFlags.Public);
         public static readonly MethodInfo GetUtcOffset = typeof(TimeZoneInfo).GetMethod("GetUtcOffset", new[] { typeof(DateTime) });
-
-        [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline", Justification = "Initialization is order dependent")]
-        static ClrCanonicalFunctions()
-        {
-            StartsWith = MethodOf(_ => _defaultString.StartsWith(default(string)));
-            EndsWith = MethodOf(_ => _defaultString.EndsWith(default(string)));
-            IndexOf = MethodOf(_ => _defaultString.IndexOf(default(string)));
-            SubstringStart = MethodOf(_ => _defaultString.Substring(default(int)));
-            SubstringStartAndLength = MethodOf(_ => _defaultString.Substring(default(int), default(int)));
-            SubstringStartNoThrow = MethodOf(_ => ClrSafeFunctions.SubstringStart(default(string), default(int)));
-            SubstringStartAndLengthNoThrow = MethodOf(_ => ClrSafeFunctions.SubstringStartAndLength(default(string), default(int), default(int)));
-            Contains = MethodOf(_ => _defaultString.Contains(default(string)));
-            ToLower = MethodOf(_ => _defaultString.ToLower());
-            ToUpper = MethodOf(_ => _defaultString.ToUpper());
-            Trim = MethodOf(_ => _defaultString.Trim());
-            Concat = MethodOf(_ => String.Concat(default(string), default(string)));
-
-            CeilingOfDecimal = MethodOf(_ => Math.Ceiling(default(decimal)));
-            RoundOfDecimal = MethodOf(_ => Math.Round(default(decimal)));
-            FloorOfDecimal = MethodOf(_ => Math.Floor(default(decimal)));
-
-            CeilingOfDouble = MethodOf(_ => Math.Ceiling(default(double)));
-            RoundOfDouble = MethodOf(_ => Math.Round(default(double)));
-            FloorOfDouble = MethodOf(_ => Math.Floor(default(double)));
-
-            HasFlag = MethodOf(_ => _defaultEnum.HasFlag(default(Enum)));
-        }
 
         private static MethodInfo MethodOf<TReturn>(Expression<Func<object, TReturn>> expression)
         {

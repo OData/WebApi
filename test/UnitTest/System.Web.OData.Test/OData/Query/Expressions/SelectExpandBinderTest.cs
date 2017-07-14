@@ -22,6 +22,7 @@ namespace System.Web.OData.Query.Expressions
         private readonly SelectExpandBinder _binder;
         private readonly CustomersModelWithInheritance _model;
         private readonly IQueryable<Customer> _queryable;
+        private readonly Customer _customer;
         private readonly ODataQueryContext _context;
         private readonly ODataQuerySettings _settings;
 
@@ -34,11 +35,11 @@ namespace System.Web.OData.Query.Expressions
             _context = new ODataQueryContext(_model.Model, typeof(Customer)) { RequestContainer = new MockContainer() };
             _binder = new SelectExpandBinder(_settings, new SelectExpandQueryOption("*", "", _context));
 
-            Customer customer = new Customer();
-            Order order = new Order { Customer = customer };
-            customer.Orders.Add(order);
+            _customer = new Customer();
+            Order order = new Order { Customer = _customer };
+            _customer.Orders.Add(order);
 
-            _queryable = new[] { customer }.AsQueryable();
+            _queryable = new[] { _customer }.AsQueryable();
         }
 
         [Fact]
@@ -83,6 +84,51 @@ namespace System.Web.OData.Query.Expressions
             object customer = partialOrder.Container.ToDictionary(mapper)["Customer"];
             SelectExpandWrapper<Customer> innerInnerCustomer = Assert.IsAssignableFrom<SelectExpandWrapper<Customer>>(customer);
             Assert.Same(_queryable.First(), innerInnerCustomer.Instance);
+        }
+
+        [Fact]
+        public void Bind_GeneratedExpression_DelegateCachingEnabled()
+        {
+            // Arrange
+            SelectExpandQueryOption selectExpand = new SelectExpandQueryOption("Orders", "Orders,Orders($expand=Customer)", _context);
+            IPropertyMapper mapper = new IdentityPropertyMapper();
+            _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
+            var oldCacheExpirationTime = _settings.SelectExpandCacheExpirationTimeSeconds;
+            SelectExpandBinder.ResetCache();
+            _settings.SelectExpandCacheExpirationTimeSeconds = 10;
+
+            // Act
+            object result = SelectExpandBinder.Bind(_customer, _settings, selectExpand);
+
+            // Assert
+            Assert.Equal(SelectExpandBinder.DelegateCache.GetCount(), 1);
+            KeyValuePair<string, object> cachedKeyValuePair = SelectExpandBinder.DelegateCache.First();
+            Assert.IsAssignableFrom(typeof(Delegate), cachedKeyValuePair.Value);
+
+            // Cleanup
+            _settings.SelectExpandCacheExpirationTimeSeconds = oldCacheExpirationTime;
+            SelectExpandBinder.ResetCache();
+        }
+        
+        [Fact]
+        public void Bind_GeneratedExpression_DelegateCachingDisabled()
+        {
+            // Arrange
+            SelectExpandQueryOption selectExpand = new SelectExpandQueryOption("Orders", "Orders,Orders($expand=Customer)", _context);
+            IPropertyMapper mapper = new IdentityPropertyMapper();
+            _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
+            var oldCacheExpirationTime = _settings.SelectExpandCacheExpirationTimeSeconds;
+            SelectExpandBinder.ResetCache();
+            _settings.SelectExpandCacheExpirationTimeSeconds = 0;
+
+            // Act
+            object result = SelectExpandBinder.Bind(_customer, _settings, selectExpand);
+
+            // Assert
+            Assert.Equal(SelectExpandBinder.DelegateCache.GetCount(), 0);
+
+            // Cleanup
+            _settings.SelectExpandCacheExpirationTimeSeconds = oldCacheExpirationTime;
         }
 
         [Fact]

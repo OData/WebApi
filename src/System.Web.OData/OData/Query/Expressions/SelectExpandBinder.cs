@@ -8,6 +8,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.Caching;
 using System.Web.Http;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
@@ -23,6 +24,11 @@ namespace System.Web.OData.Query.Expressions
     /// </summary>
     internal class SelectExpandBinder
     {
+        static SelectExpandBinder()
+        {
+            ResetCache();
+        }
+
         private SelectExpandQueryOption _selectExpandQuery;
         private ODataQueryContext _context;
         private IEdmModel _model;
@@ -42,6 +48,17 @@ namespace System.Web.OData.Query.Expressions
             _model = _context.Model;
             _modelID = ModelContainer.GetModelID(_model);
             _settings = settings;
+        }
+        
+        internal static MemoryCache DelegateCache
+        {
+            get;
+            private set;
+        }
+
+        internal static void ResetCache()
+        {
+            DelegateCache = new MemoryCache(typeof(SelectExpandBinder).FullName + ".Cache");
         }
 
         public static IQueryable Bind(IQueryable queryable, ODataQuerySettings settings,
@@ -65,11 +82,7 @@ namespace System.Web.OData.Query.Expressions
         private object Bind(object entity)
         {
             Contract.Assert(entity != null);
-
-            LambdaExpression projectionLambda = GetProjectionLambda();
-
-            // TODO: cache this ?
-            return projectionLambda.Compile().DynamicInvoke(entity);
+            return GetCompiledProjectionLambda().DynamicInvoke(entity);
         }
 
         private IQueryable Bind(IQueryable queryable)
@@ -80,6 +93,32 @@ namespace System.Web.OData.Query.Expressions
 
             MethodInfo selectMethod = ExpressionHelperMethods.QueryableSelectGeneric.MakeGenericMethod(elementType, projectionLambda.Body.Type);
             return selectMethod.Invoke(null, new object[] { queryable, projectionLambda }) as IQueryable;
+        }
+
+        private Delegate GetCompiledProjectionLambda()
+        {
+            string cacheKey = String.Format("{0}?select={1}&$expand={2}", _selectExpandQuery.Context.ElementClrType.FullName, _selectExpandQuery.RawSelect, _selectExpandQuery.RawExpand);
+            object cachedValue = DelegateCache.Get(cacheKey);
+            if (cachedValue != null)
+            {
+                return (Delegate)cachedValue;
+            }
+
+            LambdaExpression expression = GetProjectionLambda();
+            Delegate compiledExpression = expression.Compile();
+
+            if (_settings.SelectExpandCacheExpirationTimeSeconds > 0)
+            {
+                // Use sliding window expiration to prevent unused things from hanging around indefinitely.
+                CacheItemPolicy evictionPolicy = new CacheItemPolicy
+                {
+                    SlidingExpiration = TimeSpan.FromSeconds(_settings.SelectExpandCacheExpirationTimeSeconds)
+                };
+
+                DelegateCache.Add(cacheKey, compiledExpression, evictionPolicy);
+            }
+
+            return compiledExpression;
         }
 
         private LambdaExpression GetProjectionLambda()

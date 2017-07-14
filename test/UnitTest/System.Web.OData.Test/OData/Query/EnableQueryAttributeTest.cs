@@ -224,6 +224,20 @@ namespace System.Web.OData.Query
         }
 
         [Fact]
+        public void SelectExpandEvaluationCacheLifetimeMinutes_Property_RoundTrips()
+        {
+            Assert.Reflection.IntegerProperty(
+                new EnableQueryAttribute(),
+                o => o.SelectExpandEvaluationCacheLifetimeSeconds,
+                expectedDefaultValue: 0,
+                minLegalValue: 0,
+                illegalLowerValue: -1,
+                illegalUpperValue: null,
+                maxLegalValue: int.MaxValue,
+                roundTripTestValue: 100);
+        }
+
+        [Fact]
         public void OnActionExecuted_Throws_Null_Context()
         {
             Assert.ThrowsArgumentNull(() => new EnableQueryAttribute().OnActionExecuted(null), "actionExecutedContext");

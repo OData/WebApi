@@ -166,7 +166,7 @@ namespace WebStack.QA.Test.OData.Singleton
             await ClientContext.SaveChangesAsync(SaveChangesOptions.BatchWithSingleChangeset);
         }
 
-        [Fact(Skip = "Used to generate csdl file")]
+        //[Fact(Skip = "Used to generate csdl file")]
         public void GetMetadata()
         {
             var directory = Directory.GetCurrentDirectory();

@@ -411,9 +411,9 @@ namespace WebStack.QA.Test.OData.BoundOperation
             Assert.Equal(expectedCount, int.Parse(responseString));
         }
 
-        [Theory(Skip = "On IIS host, if a invalid OData path is requested, stack overflow is triggered.")]
-        [InlineData("ConventionRouting/Employees(1)/Default.GetEmails()/$count", 1)]
-        [InlineData("AttributeRouting/Employees(1)/Default.GetEmails()/$count", 2)]
+        // [Theory(Skip = "On IIS host, if a invalid OData path is requested, stack overflow is triggered.")]
+        // [InlineData("ConventionRouting/Employees(1)/Default.GetEmails()/$count", 1)]
+        // [InlineData("AttributeRouting/Employees(1)/Default.GetEmails()/$count", 2)]
         public async Task DollarCountFollowsNotComposibleFunction(string url, int expectedCount)
         {
             // Arrange

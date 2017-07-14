@@ -140,8 +140,8 @@ namespace WebStack.QA.Test.OData.ComplexTypeInheritance
             Assert.True(4 == vertexes.Count, "The returned OptionalShapes is not as expected");
         }
 
-        [Theory(Skip = "[Client] Client cant deserialize a property which is declared as abstract, but the payload is concrete.")]
-        [PropertyData("MediaTypes")]
+        // [Theory(Skip = "[Client] Client cant deserialize a property which is declared as abstract, but the payload is concrete.")]
+        // [PropertyData("MediaTypes")]
         // GET ~/Windows(1)
         public async Task QuerySingleContainingEntity(string mode, string mime)
         {

@@ -983,9 +983,9 @@ namespace WebStack.QA.Test.OData.Containment
             Assert.Equal(originCount - deletedCount, currentCount);
         }
 
-        [Theory(Skip = "Should support Action/Function returns contained entities.")]
-        [InlineData("convention")]
-        [InlineData("explicit")]
+        // [Theory(Skip = "Should support Action/Function returns contained entities.")]
+        // [InlineData("convention")]
+        // [InlineData("explicit")]
         // Action bound to a collection of contained entity.
         public async Task DuplicatePayinPI(string mode)
         {

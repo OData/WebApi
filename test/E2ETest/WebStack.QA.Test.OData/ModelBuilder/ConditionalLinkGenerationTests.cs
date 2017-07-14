@@ -102,7 +102,7 @@ namespace WebStack.QA.Test.OData.ModelBuilder
             return model;
         }
 
-        [Fact(Skip="when we compute navigationlink and association link, if readlink is set but editlink is not set, it will throw null exception")]
+       // [Fact(Skip="when we compute navigationlink and association link, if readlink is set but editlink is not set, it will throw null exception")]
         public void EditLinkWithNullValueShouldResultInNoEditLinkinPayload()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, this.BaseAddress + "/ConditionalLinkGeneration_Products(1)/");

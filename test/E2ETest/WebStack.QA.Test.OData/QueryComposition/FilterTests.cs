@@ -367,10 +367,10 @@ namespace WebStack.QA.Test.OData.QueryComposition
             }
         }
 
-        [Theory(Skip="It is not stable, now disable it to prevent it from hiding other test failures.")]
-        [PropertyData("SpecialCharacterData")]
-        [PropertyData("OperatorData")]
-        [PropertyData("StringFunctionData")]
+        //[Theory(Skip="It is not stable, now disable it to prevent it from hiding other test failures.")]
+        //[PropertyData("SpecialCharacterData")]
+        //[PropertyData("OperatorData")]
+        //[PropertyData("StringFunctionData")]
         //[PropertyData("MixQueries")] 1559
         //[PropertyData("AdHocTests")]
         public void TestFiltersWithMultipleThreads(string filter, IEnumerable<Product> expected)

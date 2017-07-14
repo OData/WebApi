@@ -38,21 +38,21 @@ namespace WebStack.QA.Test.OData.DollarId
         public async Task DeleteNavigationLink()
         {
             var serviceRoot = this.BaseAddress + "/clientTest/";
-            var ClientContext = new Client.Default.Container(new Uri(serviceRoot));
-            ClientContext.MergeOption = MergeOption.OverwriteChanges;
+            var clientContext = new Client.Default.Container(new Uri(serviceRoot));
+            clientContext.MergeOption = MergeOption.OverwriteChanges;
 
-            await ClientContext.ExecuteAsync(new Uri(serviceRoot + "Singers/WebStack.QA.Test.OData.DollarId.ResetDataSource"), "POST");
-            await ClientContext.ExecuteAsync(new Uri(serviceRoot + "Albums/WebStack.QA.Test.OData.DollarId.ResetDataSource"), "POST");
+            await clientContext.ExecuteAsync(new Uri(serviceRoot + "Singers/WebStack.QA.Test.OData.DollarId.ResetDataSource"), "POST");
+            await clientContext.ExecuteAsync(new Uri(serviceRoot + "Albums/WebStack.QA.Test.OData.DollarId.ResetDataSource"), "POST");
 
-            var singer = ClientContext.Singers.Where(s => s.ID == 0).Single();
-            ClientContext.LoadProperty(singer, "Albums");
+            var singer = clientContext.Singers.Where(s => s.ID == 0).Single();
+            clientContext.LoadProperty(singer, "Albums");
             Assert.Equal(3, singer.Albums.Count);
 
-            var album = ClientContext.Albums.Where(s => s.ID == 0).Single();
-            ClientContext.DeleteLink(singer, "Albums", album);
-            await ClientContext.SaveChangesAsync();
+            var album = clientContext.Albums.Where(s => s.ID == 0).Single();
+            clientContext.DeleteLink(singer, "Albums", album);
+            await clientContext.SaveChangesAsync();
 
-            ClientContext.LoadProperty(singer, "Albums");
+            clientContext.LoadProperty(singer, "Albums");
             Assert.Equal(2, singer.Albums.Count);
         }
 
@@ -60,26 +60,26 @@ namespace WebStack.QA.Test.OData.DollarId
         public async Task DeleteContainedNavigationLink()
         {
             var serviceRoot = this.BaseAddress + "/clientTest/";
-            var ClientContext = new Client.Default.Container(new Uri(serviceRoot));
-            ClientContext.MergeOption = MergeOption.OverwriteChanges;
+            var clientContext = new Client.Default.Container(new Uri(serviceRoot));
+            clientContext.MergeOption = MergeOption.OverwriteChanges;
 
-            await ClientContext.ExecuteAsync(new Uri(serviceRoot + "Singers/WebStack.QA.Test.OData.DollarId.ResetDataSource"), "POST");
-            await ClientContext.ExecuteAsync(new Uri(serviceRoot + "Albums/WebStack.QA.Test.OData.DollarId.ResetDataSource"), "POST");
+            await clientContext.ExecuteAsync(new Uri(serviceRoot + "Singers/WebStack.QA.Test.OData.DollarId.ResetDataSource"), "POST");
+            await clientContext.ExecuteAsync(new Uri(serviceRoot + "Albums/WebStack.QA.Test.OData.DollarId.ResetDataSource"), "POST");
 
             const int albumKey = 5;
-            var album = ClientContext.Albums.Where(a => a.ID == albumKey).Single();
-            ClientContext.LoadProperty(album, "Sales");
+            var album = clientContext.Albums.Where(a => a.ID == albumKey).Single();
+            clientContext.LoadProperty(album, "Sales");
             Assert.Equal(2, album.Sales.Count);
 
             var sales = album.Sales.Where(s => s.ID == albumKey + 1).Single();
-            ClientContext.DeleteLink(album, "Sales", sales);
-            await ClientContext.SaveChangesAsync();
+            clientContext.DeleteLink(album, "Sales", sales);
+            await clientContext.SaveChangesAsync();
 
-            ClientContext.LoadProperty(album, "Sales");
+            clientContext.LoadProperty(album, "Sales");
             Assert.Equal(1, album.Sales.Count);
         }
 
-        [Fact(Skip = "Used to generate csdl file")]
+        // [Fact(Skip = "Used to generate csdl file")]
         public void GetMetadata()
         {
             var directory = Directory.GetCurrentDirectory();

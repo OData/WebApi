@@ -1231,7 +1231,7 @@
 
         #region Function & Action
 
-        [Fact(Skip = "Potencially a client bug, and the owner is investigating it.")]
+        // [Fact(Skip = "Potencially a client bug, and the owner is investigating it.")]
         public async Task GetAddressFunctionClientTest()
         {
             foreach (string routing in Routings)
@@ -1536,7 +1536,7 @@
                 string.Format("Manager PhoneNumbers count is in-correct, expected: {0}, actual: {1}", expectedValueOfInt, actualValueOfInt));
         }
 
-        [Fact(Skip = "Used to generate csdl file")]
+        // [Fact(Skip = "Used to generate csdl file")]
         public void GetMetadata()
         {
             var directory = Directory.GetCurrentDirectory();

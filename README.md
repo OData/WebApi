@@ -1,4 +1,5 @@
 ## OData Web API
+<img src="https://identitydivision.visualstudio.com/_apis/public/build/definitions/2cfe7ec3-b94f-4ab9-85ab-2ebff928f3fd/104/badge"/>
 
 ### Introduction
 [OData Web API](http://odata.github.io/WebApi) (i.e., ASP.NET Web API OData) is a server library built upon [ODataLib](https://github.com/OData/odata.net/) and [Web API](http://www.asp.net/web-api).

@@ -12,6 +12,7 @@ using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
+using System.Web.OData.Query.Expressions;
 using Microsoft.OData.Edm;
 
 namespace System.Web.OData
@@ -231,10 +232,10 @@ namespace System.Web.OData
                 return edmStructruredObject.Instance;
             }
 
-            ISelectExpandWrapper selectExpandWrapper = EdmObject as ISelectExpandWrapper;
-            if (selectExpandWrapper != null && selectExpandWrapper.Instance != null)
+            SelectExpandWrapper selectExpandWrapper = EdmObject as SelectExpandWrapper;
+            if (selectExpandWrapper != null && selectExpandWrapper.UntypedInstance != null)
             {
-                return selectExpandWrapper.Instance;
+                return selectExpandWrapper.UntypedInstance;
             }
 
             Type clrType = EdmLibHelpers.GetClrType(StructuredType, EdmModel);

@@ -13,11 +13,6 @@ namespace System.Web.OData.Query
     public interface ISelectExpandWrapper
     {
         /// <summary>
-        /// The instance on which the selection and/or expansion will is taking place.
-        /// </summary>
-        object Instance { get; }
-
-        /// <summary>
         /// Projects the result of a $select and $expand query to a <see cref="IDictionary{TKey,TValue}" />.
         /// </summary>
         /// <returns>An <see cref="IDictionary{TKey,TValue}"/> representing the $select and $expand result.</returns>

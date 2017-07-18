@@ -12,12 +12,7 @@ using Newtonsoft.Json;
 
 namespace System.Web.OData.Query.Expressions
 {
-    /// <summary>
-    /// Represents a container class that contains properties that are either selected or expanded using $select and $expand.
-    /// </summary>
-    /// <typeparam name="TElement">The element being selected and expanded.</typeparam>
-    [JsonConverter(typeof(SelectExpandWrapperConverter))]
-    internal class SelectExpandWrapper<TElement> : IEdmEntityObject, ISelectExpandWrapper
+    internal abstract class SelectExpandWrapper : IEdmEntityObject, ISelectExpandWrapper
     {
         private static readonly IPropertyMapper DefaultPropertyMapper = new IdentityPropertyMapper();
         private static readonly Func<IEdmModel, IEdmStructuredType, IPropertyMapper> _mapperProvider =
@@ -27,27 +22,22 @@ namespace System.Web.OData.Query.Expressions
         private TypedEdmEntityObject _typedEdmEntityObject;
 
         /// <summary>
-        /// Gets or sets the instance of the element being selected and expanded.
+        /// Gets or sets the property container that contains the properties being expanded. 
         /// </summary>
-        public TElement Instance { get; set; }
+        public PropertyContainer Container { get; set; }
 
         /// <summary>
         /// An ID to uniquely identify the model in the <see cref="ModelContainer"/>.
         /// </summary>
         public string ModelID { get; set; }
 
-        /// <summary>
-        /// Gets or sets the property container that contains the properties being expanded. 
-        /// </summary>
-        public PropertyContainer Container { get; set; }
+        /// <inheritdoc />
+        public object UntypedInstance { get; set; }
 
         /// <summary>
         /// Indicates whether the underlying instance can be used to obtain property values.
         /// </summary>
         public bool UseInstanceForProperties { get; set; }
-
-        /// <inheritdoc />
-        object ISelectExpandWrapper.Instance { get { return this.Instance; } }
 
         /// <inheritdoc />
         public IEdmTypeReference GetEdmType()
@@ -72,10 +62,10 @@ namespace System.Web.OData.Query.Expressions
             }
 
             // fall back to the instance.
-            if (UseInstanceForProperties && Instance != null)
+            if (UseInstanceForProperties && UntypedInstance != null)
             {
                 _typedEdmEntityObject = _typedEdmEntityObject ??
-                    new TypedEdmEntityObject(Instance, GetEdmType() as IEdmEntityTypeReference, GetModel());
+                    new TypedEdmEntityObject(UntypedInstance, GetEdmType() as IEdmEntityTypeReference, GetModel());
 
                 return _typedEdmEntityObject.TryGetPropertyValue(propertyName, out value);
             }
@@ -112,7 +102,7 @@ namespace System.Web.OData.Query.Expressions
             }
 
             // The user asked for all the structural properties on this instance.
-            if (UseInstanceForProperties && Instance != null)
+            if (UseInstanceForProperties && UntypedInstance != null)
             {
                 foreach (IEdmStructuralProperty property in type.StructuralProperties())
                 {
@@ -133,16 +123,35 @@ namespace System.Web.OData.Query.Expressions
             return dictionary;
         }
 
-        private Type GetElementType()
-        {
-            return Instance == null ? typeof(TElement) : Instance.GetType();
-        }
+        protected abstract Type GetElementType();
 
         private IEdmModel GetModel()
         {
             Contract.Assert(ModelID != null);
 
             return ModelContainer.GetModel(ModelID);
+        }
+    }
+
+    /// <summary>
+    /// Represents a container class that contains properties that are either selected or expanded using $select and $expand.
+    /// </summary>
+    /// <typeparam name="TElement">The element being selected and expanded.</typeparam>
+    [JsonConverter(typeof(SelectExpandWrapperConverter))]
+    internal class SelectExpandWrapper<TElement> : SelectExpandWrapper
+    {
+        /// <summary>
+        /// Gets or sets the instance of the element being selected and expanded.
+        /// </summary>
+        public TElement Instance
+        {
+            get { return (TElement)UntypedInstance; }
+            set { UntypedInstance = value; }
+        }
+
+        protected override Type GetElementType()
+        {
+            return UntypedInstance == null ? typeof(TElement) : UntypedInstance.GetType();
         }
     }
 }

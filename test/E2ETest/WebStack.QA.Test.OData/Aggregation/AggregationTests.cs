@@ -268,7 +268,7 @@ namespace WebStack.QA.Test.OData.Aggregation
             Assert.Equal("0", results[0]["TotalAmount"].ToString());
             Assert.Equal("2000", results[1]["TotalAmount"].ToString());
             Assert.Equal("2500", results[2]["TotalAmount"].ToString());
-            Assert.Equal(JValue.CreateNull(), results[0]["Name"]);
+            Assert.Equal(null, results[0]["Name"]);
             Assert.Equal("Customer0", results[1]["Name"].ToString());
             Assert.Equal("Customer1", results[2]["Name"].ToString());
         }

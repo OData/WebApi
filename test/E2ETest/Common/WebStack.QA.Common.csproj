@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A71A9BE1-93A6-487E-98EB-9550C7401C12}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>WebStack.QA.Common</RootNamespace>
+    <AssemblyName>WebStack.QA.Common</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <OutputPath>..\..\..\bin\$(Configuration)\E2ETest\</OutputPath>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\src\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LTAF.Infrastructure, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\sln\packages\LTAF.Infrastructure.1.0.5\lib\Net40\LTAF.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\..\sln\packages\Microsoft.Web.Administration.7.0.0.0\lib\net20\Microsoft.Web.Administration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\sln\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Web.XmlTransform">
+      <HintPath>..\..\..\sln\packages\Microsoft.Web.Xdt.1.0.0\lib\net40\Microsoft.Web.XmlTransform.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\..\sln\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Core, Version=2.7.41101.299, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\sln\packages\NuGet.Core.2.7.2\lib\net40-Client\NuGet.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\sln\packages\Microsoft.AspNet.WebApi.Client.5.2.2\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Http, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\sln\packages\Microsoft.AspNet.WebApi.Core.5.2.2\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.SelfHost, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\sln\packages\Microsoft.AspNet.WebApi.SelfHost.5.2.2\lib\net45\System.Web.Http.SelfHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\sln\packages\Microsoft.AspNet.WebApi.WebHost.5.2.2\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="xunit, Version=1.9.2.1705, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\sln\packages\xunit.1.9.2\lib\net20\xunit.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.extensions, Version=1.9.2.1705, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\sln\packages\xunit.extensions.1.9.2\lib\net20\xunit.extensions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Client\RawHttpClient.cs" />
+    <Compile Include="Database\ConnectionStringBuilder.cs" />
+    <Compile Include="Database\ITestDatabase.cs" />
+    <Compile Include="Database\SqlTestDatabase.cs" />
+    <Compile Include="Extensions\DirectoryInfoExtension.cs" />
+    <Compile Include="Extensions\HttpClientExtension.cs" />
+    <Compile Include="FileSystem\DiskFileStreamProvider.cs" />
+    <Compile Include="FileSystem\FileSystemExtensions.cs" />
+    <Compile Include="FileSystem\IDirectory.cs" />
+    <Compile Include="FileSystem\IFile.cs" />
+    <Compile Include="FileSystem\IFileStreamProvider.cs" />
+    <Compile Include="FileSystem\MemoryDirectory.cs" />
+    <Compile Include="FileSystem\MemoryFile.cs" />
+    <Compile Include="FileSystem\MemoryStreamProvider.cs" />
+    <Compile Include="FileSystem\StreamWrapper.cs" />
+    <Compile Include="Globalization\ResourceHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Proxy\ProxyUtility.cs" />
+    <Compile Include="Trace\DummyTraceWriter.cs" />
+    <Compile Include="Utils\Ftp.cs" />
+    <Compile Include="WebHost\AzureWebsiteHostOptions.cs" />
+    <Compile Include="WebHost\IISExpressHostOptions.cs" />
+    <Compile Include="WebHost\DirectoryNameStrategies.cs" />
+    <Compile Include="WebHost\FtpDeploymentOptions.cs" />
+    <Compile Include="WebHost\IISHostOptions.cs" />
+    <Compile Include="WebHost\ITemporaryDirectoryProvider.cs" />
+    <Compile Include="WebHost\LocalDeploymentOptions.cs" />
+    <Compile Include="WebHost\DeploymentOptions.cs" />
+    <Compile Include="WebHost\GlobalAsaxTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GlobalAsaxTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="WebHost\GlobalAsaxTemplatePartial.cs" />
+    <Compile Include="WebHost\HostOptions.cs" />
+    <Compile Include="WebHost\IISHelper.cs" />
+    <Compile Include="WebHost\SecurityHelper.cs" />
+    <Compile Include="WebHost\TemporaryDirectoryProvider.cs" />
+    <Compile Include="WebHost\WebAppSetupOptions.cs" />
+    <Compile Include="WebHost\RouteSetupOptions.cs" />
+    <Compile Include="WebHost\WebConfigHelper.cs" />
+    <Compile Include="WebHost\WebConfigTransformer.cs" />
+    <Compile Include="XElementExtensions.cs" />
+    <Compile Include="WebHost\WebAPISetupOptionsProviders.cs" />
+    <Compile Include="WebHost\xUnit\WebHostSetupFixture.cs" />
+    <Compile Include="WebHost\ISetupOptionProvider.cs" />
+    <Compile Include="XUnit\AssertExtensions.cs" />
+    <Compile Include="XUnit\ExtendedTheoryAttribute.cs" />
+    <Compile Include="XUnit\ISkippable.cs" />
+    <Compile Include="XUnit\PartialTrustRunner.cs" />
+    <Compile Include="XUnit\SkippableInlineDataAttribute.cs" />
+    <Compile Include="XUnit\TestTraits.cs" />
+    <Compile Include="XUnit\TheoryDataSet.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="WebHost\GlobalAsaxTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>GlobalAsaxTemplate.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\..\..\sln\packages\xunit.runner.visualstudio.2.0.1\build\net20\xunit.runner.visualstudio.props"
+          Condition="Exists('..\..\..\sln\packages\xunit.runner.visualstudio.2.0.1\build\net20\xunit.runner.visualstudio.props')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\..\sln\packages\xunit.runner.visualstudio.2.0.1\build\net20\xunit.runner.visualstudio.props')"
+           Text="$([System.String]::Format('$(ErrorText)', '..\..\..\sln\packages\xunit.runner.visualstudio.2.0.1\build\net20\xunit.runner.visualstudio.props'))" />
+  </Target>
+</Project>

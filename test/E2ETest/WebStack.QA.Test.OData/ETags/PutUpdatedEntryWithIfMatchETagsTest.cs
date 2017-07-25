@@ -42,7 +42,7 @@ namespace WebStack.QA.Test.OData.ETags
             return builder.GetEdmModel();
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Model Container removed")]
         public void PutUpdatedEntryWithIfMatchShouldReturnPreconditionFailed()
         {
             string requestUri = this.BaseAddress + "/odata/ETagsCustomers(0)?$format=json";

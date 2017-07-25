@@ -224,7 +224,7 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.SelectAttributeTest
             Assert.Contains("Id", result);
         }
 
-        [Theory]
+        [Theory(Skip = "VSTS AX: Null elimination")]
         [InlineData(AutoSelectCustomerBaseUrl)]
         [InlineData(ModelBoundAutoSelectCustomerBaseUrl)]
         public void DollarSelectGetPrecedenceWithAutoSelect(string url)
@@ -247,7 +247,7 @@ namespace WebStack.QA.Test.OData.ModelBoundQuerySettings.SelectAttributeTest
             Assert.Contains("CarNumber", result);
         }
 
-        [Theory]
+        [Theory(Skip = "VSTS AX: Null elimination")]
         [InlineData(AutoSelectCustomerBaseUrl)]
         [InlineData(ModelBoundAutoSelectCustomerBaseUrl)]
         public void NestedDollarSelectGetPrecedenceWithAutoSelect(string url)

@@ -33,7 +33,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight
             configuration.EnableODataSupport(GetEdmModel(configuration));
         }
 
-        [Theory]
+        [Theory(Skip = "VSTS AX: Null elimination")]
         [InlineData("application/json;odata.metadata=minimal;odata.streaming=true")]
         [InlineData("application/json;odata.metadata=minimal;odata.streaming=false")]
         [InlineData("application/json;odata.metadata=minimal")]

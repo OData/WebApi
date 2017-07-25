@@ -93,7 +93,7 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight
             PostAndGetShouldReturnSameEntity(entity);
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Null elimination")]
         public void SerializationTests()
         {
             string requestUri = this.BaseAddress + "/UniverseEntity";

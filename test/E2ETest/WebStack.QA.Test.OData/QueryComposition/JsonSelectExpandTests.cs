@@ -26,7 +26,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             configuration.EnableDependencyInjection();
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Model Container removed")]
         public void QueryJustThePropertiesOfTheEntriesOnAFeed()
         {
             string queryUrl = string.Format("{0}/api/JsonSelectCustomer/?$select=*", BaseAddress);
@@ -50,7 +50,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             Assert.True(result.OfType<JObject>().All(x => x.Properties().Count() == 2));
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Model Container removed")]
         public void QueryASubsetOfThePropertiesOfAnEntry()
         {
             string queryUrl = string.Format("{0}/api/JsonSelectCustomer/?$select=Name", BaseAddress);
@@ -74,7 +74,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             Assert.True(result.OfType<JObject>().All(x => x.Properties().Count() == 1 && x.Properties().All(p => p.Name == "Name")));
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Model Container removed")]
         public void QueryASubsetOfThePropertiesOfAnEntryAndASubsetOfThePropertiesOfARelatedEntry()
         {
             string queryUrl = string.Format("{0}/api/JsonSelectCustomer/?$select=Id,Name&$expand=JsonSelectOrders($select=Id)", BaseAddress);
@@ -100,7 +100,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             Assert.True(result.OfType<JObject>().All(x => (int)x["Id"] == ((JArray)x["JsonSelectOrders"]).Count));
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Model Container removed")]
         public void QueryASubSetOfThePropertiesPresentOnlyInADerivedEntry()
         {
             string queryUrl = string.Format("{0}/api/JsonSelectCustomer/PremiumCustomers?" +
@@ -126,7 +126,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             Assert.True(result.OfType<JObject>().All(x => x.Properties().Count() == 2));
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Model Container removed")]
         public void QueryAnEntryAndIncludeTheRelatedEntriesForAGivenNavigationPropertyInline()
         {
             string queryUrl = string.Format("{0}/api/JsonSelectCustomer?$select=Id&$expand=JsonSelectOrders($select=*)", BaseAddress);
@@ -160,7 +160,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             }
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Model Container removed")]
         public void QueryForAnEntryAnIncludeTheRelatedEntriesForASetOfNavigationProperties()
         {
             string queryUrl = string.Format("{0}/api/JsonSelectCustomer/PremiumCustomers?" +
@@ -203,7 +203,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             }
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Model Container removed")]
         public void QueryForAnEntryAndIncludeTheRelatedEntriesForAGivenNavigationPropertyPath()
         {
             string queryUrl = string.Format("{0}/api/JsonSelectCustomer?$select=Id,JsonSelectOrders&$expand=JsonSelectOrders($expand=OrderDetails)", BaseAddress);
@@ -243,7 +243,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             }
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Model Container removed")]
         public void QueryForAnEntryAnIncludeTheRelatedEntriesForANavigationPropertyPresentOnlyInDerivedEntries()
         {
             string queryUrl = string.Format("{0}/api/JsonSelectCustomer/PremiumCustomers?" +

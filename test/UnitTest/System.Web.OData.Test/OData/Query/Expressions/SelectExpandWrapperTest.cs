@@ -49,7 +49,7 @@ namespace System.Web.OData.Query.Expressions
         public void GetEdmType_ThrowsODataException_IfTypeFromTypeNameIsNotFoundInModel()
         {
             // Arrange
-            SelectExpandWrapper<int> wrapper = new SelectExpandWrapper<int> { TypeName = _model.Customer.FullName(), Model = _model.Model };
+            SelectExpandWrapper<int> wrapper = new SelectExpandWrapper<int> { TypeName = _model.Customer.FullName(), Model = EdmCoreModel.Instance };
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(

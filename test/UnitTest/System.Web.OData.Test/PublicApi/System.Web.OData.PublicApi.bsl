@@ -50,6 +50,7 @@ public interface System.Web.OData.IEdmObject {
 }
 
 public interface System.Web.OData.IEdmStructuredObject : IEdmObject {
+	void SetModel (Microsoft.OData.Edm.IEdmModel model)
 	bool TryGetPropertyValue (string propertyName, out System.Object& value)
 }
 
@@ -85,6 +86,7 @@ public abstract class System.Web.OData.EdmStructuredObject : Delta, IDynamicMeta
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetChangedPropertyNames ()
 	public virtual Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
+	public virtual void SetModel (Microsoft.OData.Edm.IEdmModel model)
 	public System.Collections.Generic.Dictionary`2[[System.String],[System.Object]] TryGetDynamicProperties ()
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)
 	public virtual bool TryGetPropertyValue (string name, out System.Object& value)
@@ -178,6 +180,7 @@ public class System.Web.OData.ClrPropertyInfoAnnotation {
 	public ClrPropertyInfoAnnotation (System.Reflection.PropertyInfo clrPropertyInfo)
 
 	System.Reflection.PropertyInfo ClrPropertyInfo  { public get; }
+	System.Collections.Generic.IList`1[[System.Reflection.PropertyInfo]] PropertiesPath  { public get; public set; }
 }
 
 public class System.Web.OData.ClrTypeAnnotation {
@@ -412,6 +415,7 @@ public class System.Web.OData.NullEdmComplexObject : IEdmComplexObject, IEdmObje
 	public NullEdmComplexObject (Microsoft.OData.Edm.IEdmComplexTypeReference edmType)
 
 	public virtual Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
+	public virtual void SetModel (Microsoft.OData.Edm.IEdmModel model)
 	public virtual bool TryGetPropertyValue (string propertyName, out System.Object& value)
 }
 
@@ -1074,6 +1078,7 @@ public abstract class System.Web.OData.Builder.StructuralTypeConfiguration : IEd
 	public virtual PrimitivePropertyConfiguration AddProperty (System.Reflection.PropertyInfo propertyInfo)
 	internal virtual void DerivesFromImpl (StructuralTypeConfiguration baseType)
 	internal virtual void DerivesFromNothingImpl ()
+	protected bool HasProperty (string propertyName)
 	public virtual void RemoveProperty (System.Reflection.PropertyInfo propertyInfo)
 }
 
@@ -2343,6 +2348,7 @@ public class System.Web.OData.Query.ODataQuerySettings {
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
 	System.Nullable`1[[System.Int32]] PageSize  { public get; public set; }
+	bool PostponePaging  { public get; public set; }
 }
 
 public class System.Web.OData.Query.ODataRawQueryOptions {
@@ -3244,6 +3250,7 @@ public class System.Web.OData.Query.Expressions.FilterBinder : ExpressionBinderB
 	public virtual System.Linq.Expressions.Expression BindConstantNode (Microsoft.OData.UriParser.ConstantNode constantNode)
 	public virtual System.Linq.Expressions.Expression BindConvertNode (Microsoft.OData.UriParser.ConvertNode convertNode)
 	public virtual System.Linq.Expressions.Expression BindDynamicPropertyAccessQueryNode (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
+	public System.Linq.Expressions.LambdaExpression BindExpression (Microsoft.OData.UriParser.SingleValueNode expression, Microsoft.OData.UriParser.RangeVariable rangeVariable, System.Type elementType)
 	public virtual System.Linq.Expressions.Expression BindNavigationPropertyNode (Microsoft.OData.UriParser.QueryNode sourceNode, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty)
 	public virtual System.Linq.Expressions.Expression BindPropertyAccessQueryNode (Microsoft.OData.UriParser.SingleValuePropertyAccessNode propertyAccessNode)
 	public virtual System.Linq.Expressions.Expression BindRangeVariable (Microsoft.OData.UriParser.RangeVariable rangeVariable)

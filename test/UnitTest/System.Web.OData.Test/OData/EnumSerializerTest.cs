@@ -101,7 +101,7 @@ namespace System.Web.OData
                 "ODataEnumSerializer cannot write an object of type 'Edm.Int32'.");
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Null elimination")]
         public void EnumTypeSerializerTestForOData()
         {
             // Arrange

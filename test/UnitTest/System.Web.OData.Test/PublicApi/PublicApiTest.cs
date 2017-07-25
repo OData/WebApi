@@ -9,7 +9,8 @@ namespace System.Web.OData.PublicApi
 {
     public class PublicApiTest
     {
-        private const string AssemblyName = "System.Web.OData.dll";
+        // VSTS AX: We renamed assemblies in our fork
+        private const string AssemblyName = "Microsoft.TeamFoundation.Web.OData.dll";
         private const string OutputFileName = "System.Web.OData.PublicApi.out";
         private const string BaseLineFileName = "System.Web.OData.PublicApi.bsl";
 
@@ -43,7 +44,7 @@ namespace System.Web.OData.PublicApi
                 String.Format("Base line file {1} and output file {2} do not match, please check.{0}" +
                 "To update the baseline, please run:{0}{0}" +
                 "copy /y \"{2}\" \"{1}\"", Environment.NewLine,
-                @"OData\test\UnitTest\System.Web.OData.Test\PublicApi\System.Web.OData.PublicApi.bsl",
+                @"test\UnitTest\System.Web.OData.Test\PublicApi\System.Web.OData.PublicApi.bsl",
                 outputFile));
         }
 

@@ -107,7 +107,7 @@ namespace System.Web.OData.Formatter.Serialization
             serializer.Verify();
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Null elimination")]
         public void WriteObject_CanWriteTopLevelResourceSetContainsNullComplexElement()
         {
             // Arrange

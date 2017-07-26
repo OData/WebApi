@@ -71,12 +71,11 @@ build.cmd DisableSkipStrongNames
 Open the project, build it, and then test cases should appear in test explorer. If not, this is because the assemblies are delay signed and you're missing the private key so xunit will not load them in Visual Studio. To fix, please run `build.cmd EnableSkipStrongNames`. Run all the tests in the test explorer. For running end-to-end tests you must open the solution as *Administrator*. More detail at [this](http://odata.github.io/WebApi/#09-01-unittest-e2etest).
 
 ### Nightly builds
-1.	In your NuGet Package Manager settings add the following package source:
-  * https://www.myget.org/F/aspnetwebstacknightly/
-2.	Package IDs
-  * Choose: Include Prerelease
-  * OData v4: [Microsoft.AspNet.OData](https://www.myget.org/F/aspnetwebstacknightly/Packages?$filter=Id%20eq%20%27Microsoft.AspNet.OData%27&$select=Id,Version&$orderby=Version%20desc&$top=4&$format=application/json)
-  * OData v3: [Microsoft.AspNet.WebApi.OData](https://www.myget.org/F/aspnetwebstacknightly/Packages?$filter=Id%20eq%20%27Microsoft.AspNet.WebApi.OData%27&$select=Id,Version&$orderby=Version%20desc&$top=4&$format=application/json)
+The nightly build process will upload a NuGet packages for WebApi to the [MyGet.org webapinightly feed](https://www.myget.org/gallery/webapinightly).
+
+To connect to webapinightly feed, use this feed URL: [webapinightly MyGet feed URL](https://www.myget.org/F/webapinightly).
+
+You can query the latest nightly NuGet packages using this query: [MAGIC WebApi query](https://www.myget.org/F/webapinightly/Packages?$select=Id,Version&$orderby=Version%20desc&$top=4&$format=application/json)
 
 ### Contribution
 Please refer to the [CONTRIBUTION.md](https://github.com/OData/WebApi/blob/master/CONTRIBUTION.md).

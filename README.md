@@ -1,4 +1,8 @@
 ## OData Web API
+ Build  | Status
+--------|---------
+Rolling | <img src="https://identitydivision.visualstudio.com/_apis/public/build/definitions/2cfe7ec3-b94f-4ab9-85ab-2ebff928f3fd/108/badge"/>
+Nightly | <img src="https://identitydivision.visualstudio.com/_apis/public/build/definitions/2cfe7ec3-b94f-4ab9-85ab-2ebff928f3fd/109/badge"/>
 
 ### Introduction
 [OData Web API](http://odata.github.io/WebApi) (i.e., ASP.NET Web API OData) is a server library built upon [ODataLib](https://github.com/OData/odata.net/) and [Web API](http://www.asp.net/web-api).
@@ -40,7 +44,6 @@ These are maintenance branches for previous RTMs. Project archives only, contrib
 
 ### Building
 ```
-cd OData
 build.cmd
 ```
 
@@ -53,12 +56,11 @@ build.cmd EnableSkipStrongNames
 ```
 
 #### Run tests in cmd
-* `build.cmd` build project, and run unit tests.
-
 To run end-to-end tests, you need to open an **elevated** - Run as administrator - command prompt
-* `build.cmd e2eV4` build projects, run unit tests, and OData **v4** end-to-end tests.
-* `build.cmd e2eV3` build projects, run unit tests, and OData **v3** end-to-end tests.
-* `build.cmd full` build projects, run unit tests, OData **v4 and v3** end-to-end tests.
+
+* `build.cmd` build projects, run unit tests, and OData end-to-end tests.
+
+* `build.cmd quick` build project, and run unit tests
 
 To disable the SkipStrongNames:
 ```

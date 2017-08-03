@@ -26,7 +26,7 @@ namespace System.Web.OData.TestCommon
             address.AddStructuralProperty("City", EdmPrimitiveTypeKind.String);
             address.AddStructuralProperty("State", EdmPrimitiveTypeKind.String);
             address.AddStructuralProperty("ZipCode", EdmPrimitiveTypeKind.String);
-            address.AddStructuralProperty("Country", EdmPrimitiveTypeKind.String);
+            address.AddStructuralProperty("CountryOrRegion", EdmPrimitiveTypeKind.String);
             model.AddElement(address);
 
             // open complex type "Account"
@@ -132,7 +132,7 @@ namespace System.Web.OData.TestCommon
 
             // containment
             IEdmContainedEntitySet orderLines = (IEdmContainedEntitySet)myOrders.FindNavigationTarget(orderLinesNavProp);
-            
+
             // no-containment
             IEdmNavigationSource nonContainedOrderLines = myOrders.FindNavigationTarget(nonContainedOrderLinesNavProp);
 
@@ -349,7 +349,7 @@ namespace System.Web.OData.TestCommon
             Mary = mary;
             RootOrder = rootOrder;
             OrderLine = orderLine;
-            OrderLines = orderLines; 
+            OrderLines = orderLines;
             NonContainedOrderLines = nonContainedOrderLines;
             UpgradeCustomer = upgrade;
             UpgradeSpecialCustomer = specialUpgrade;
@@ -386,7 +386,7 @@ namespace System.Web.OData.TestCommon
         public EdmSingleton RootOrder { get; private set; }
 
         public IEdmContainedEntitySet OrderLines { get; private set; }
-        
+
         public IEdmNavigationSource NonContainedOrderLines { get; private set; }
 
         public EdmEntityContainer Container { get; private set; }

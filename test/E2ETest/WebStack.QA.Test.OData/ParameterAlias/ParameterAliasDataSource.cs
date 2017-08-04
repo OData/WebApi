@@ -18,14 +18,14 @@ namespace WebStack.QA.Test.OData.ParameterAlias
         public string ProductName { get; set; }
         public string Description { get; set; }
         public long? TradingVolume { get; set; }
-        public Country PortingCountry { get; set; }
+        public CountryOrRegion PortingCountryOrRegion { get; set; }
         public TradeLocation TradeLocation { get; set; }
     }
 
     /// <summary>
     /// enum type
     /// </summary>
-    public enum Country
+    public enum CountryOrRegion
     {
         Australia,
         USA,
@@ -66,7 +66,7 @@ namespace WebStack.QA.Test.OData.ParameterAlias
                             TradeID = 1,
                             ProductName = "Rice",
                             Description = "Export Rice to USA",
-                            PortingCountry = Country.USA,
+                            PortingCountryOrRegion = CountryOrRegion.USA,
                             TradingVolume = 1000,
                             TradeLocation = new TradeLocation()
                                 {
@@ -80,7 +80,7 @@ namespace WebStack.QA.Test.OData.ParameterAlias
                             TradeID = 2,
                             ProductName = "Wheat",
                             Description = "Export Wheat to USA",
-                            PortingCountry = Country.USA,
+                            PortingCountryOrRegion = CountryOrRegion.USA,
                             TradingVolume = null,
                             TradeLocation = new TradeLocation()
                                 {
@@ -93,7 +93,7 @@ namespace WebStack.QA.Test.OData.ParameterAlias
                             TradeID = 3,
                             ProductName = "Wheat",
                             Description = "Export Wheat to Italy",
-                            PortingCountry = Country.Italy,
+                            PortingCountryOrRegion = CountryOrRegion.Italy,
                             TradingVolume = 2000,
                             TradeLocation = new TradeLocation()
                                 {
@@ -106,7 +106,7 @@ namespace WebStack.QA.Test.OData.ParameterAlias
                             TradeID = 4,
                             ProductName = "Corn",
                             Description = "Import Corn from USA",
-                            PortingCountry = Country.USA,
+                            PortingCountryOrRegion = CountryOrRegion.USA,
                             TradingVolume = 8000,
                             TradeLocation = new TradeLocation()
                                 {
@@ -119,7 +119,7 @@ namespace WebStack.QA.Test.OData.ParameterAlias
                             TradeID = 5,
                             ProductName = "Corn",
                             Description = "Import Corn from Australia",
-                            PortingCountry = Country.Australia,
+                            PortingCountryOrRegion = CountryOrRegion.Australia,
                             TradingVolume = 8000,
                             TradeLocation = new TradeLocation()
                                 {
@@ -132,7 +132,7 @@ namespace WebStack.QA.Test.OData.ParameterAlias
                             TradeID = 6,
                             ProductName = "Corn",
                             Description = "Import Corn from Canada",
-                            PortingCountry = Country.Canada,
+                            PortingCountryOrRegion = CountryOrRegion.Canada,
                             TradingVolume = 6000,
                             TradeLocation = new TradeLocation()
                                 {
@@ -164,10 +164,10 @@ namespace WebStack.QA.Test.OData.ParameterAlias
             }
         }
 
-        [ODataRoute("Trades/WebStack.QA.Test.OData.ParameterAlias.GetTradingVolume(productName={productName}, portingCountry={portingCountry})")]
-        public IHttpActionResult GetTradingVolume([FromODataUri]string productName, Country portingCountry)
+        [ODataRoute("Trades/WebStack.QA.Test.OData.ParameterAlias.GetTradingVolume(productName={productName}, PortingCountryOrRegion={PortingCountryOrRegion})")]
+        public IHttpActionResult GetTradingVolume([FromODataUri]string productName, CountryOrRegion portingCountryOrRegion)
         {
-            var trades = Trades.Where(t => t.ProductName == productName && t.PortingCountry == portingCountry).ToArray();
+            var trades = Trades.Where(t => t.ProductName == productName && t.PortingCountryOrRegion == portingCountryOrRegion).ToArray();
             long? tradingVolume = 0;
 
             foreach (var trade in trades)
@@ -178,10 +178,10 @@ namespace WebStack.QA.Test.OData.ParameterAlias
         }
 
         [EnableQuery]
-        [ODataRoute("GetTradeByCountry(portingCountry={country})")]
-        public IHttpActionResult GetTradeByCountry([FromODataUri] Country country)
+        [ODataRoute("GetTradeByCountry(PortingCountryOrRegion={CountryOrRegion})")]
+        public IHttpActionResult GetTradeByCountry([FromODataUri] CountryOrRegion countryOrRegion)
         {
-            var trades = Trades.Where(t => t.PortingCountry == country).ToList();
+            var trades = Trades.Where(t => t.PortingCountryOrRegion == countryOrRegion).ToList();
             return Ok(trades);
         }
         #endregion

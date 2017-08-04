@@ -144,7 +144,7 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.NotNull(address);
             Assert.Equal(address.Street, "12");
             Assert.Equal(address.City, "Redmond");
-            Assert.Null(address.Country);
+            Assert.Null(address.CountryOrRegion);
             Assert.Null(address.State);
             Assert.Null(address.ZipCode);
         }
@@ -223,7 +223,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             Assert.Equal(usAddress.Street, "12");
             Assert.Equal(usAddress.City, "Redmond");
-            Assert.Null(usAddress.Country);
+            Assert.Null(usAddress.CountryOrRegion);
             Assert.Null(usAddress.State);
             Assert.Null(usAddress.ZipCode);
             Assert.Equal("UsPropertyValue", usAddress.UsProp);
@@ -589,7 +589,7 @@ namespace System.Web.OData.Formatter.Deserialization
               "\"City\":\"MyCity\"," +
               "\"State\":\"MyState\"," +
               "\"ZipCode\":\"160202\"," +
-              "\"Country\":\"MyCountry\"" +
+              "\"CountryOrRegion\":\"MyCountry\"" +
             "}}";
 
             ODataComplexTypeDeserializer deserializer = new ODataComplexTypeDeserializer(new DefaultODataDeserializerProvider());
@@ -612,7 +612,7 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Equal("MyCity", address.City);
             Assert.Equal("MyState", address.State);
             Assert.Equal("160202", address.ZipCode);
-            Assert.Equal("MyCountry", address.Country);
+            Assert.Equal("MyCountry", address.CountryOrRegion);
         }
 
         [Fact]
@@ -777,7 +777,7 @@ namespace System.Web.OData.Formatter.Deserialization
               "\"City\":\"CityValue\"," +
               "\"State\":\"MyState\"," +
               "\"ZipCode\":\"160202\"," +
-              "\"Country\":\"MyCountry\"," +
+              "\"CountryOrRegion\":\"MyCountry\"," +
               "\"CnProp\":\"8E8375AA-D348-49DD-94A0-46E4FB42973C\"" +
             "}";
 
@@ -802,7 +802,7 @@ namespace System.Web.OData.Formatter.Deserialization
             Assert.Equal("CityValue", address.City);
             Assert.Equal("MyState", address.State);
             Assert.Equal("160202", address.ZipCode);
-            Assert.Equal("MyCountry", address.Country);
+            Assert.Equal("MyCountry", address.CountryOrRegion);
             Assert.Equal(new Guid("8E8375AA-D348-49DD-94A0-46E4FB42973C"), address.CnProp);
         }
 

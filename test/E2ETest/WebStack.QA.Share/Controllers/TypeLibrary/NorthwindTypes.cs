@@ -406,21 +406,7 @@ namespace WebStack.QA.Share.Controllers.TypeLibrary
         [EdmScalarPropertyAttribute(EntityKeyProperty = false, IsNullable = true)]
         [DataMemberAttribute]
         public global::System.String Country { get; set; }
-        //{
-        //    get
-        //    {
-        //        return _Country;
-        //    }
-        //    set
-        //    {
-        //        OnCountryChanging(value);
-        //        ReportPropertyChanging("Country");
-        //        _Country = StructuralObject.SetValidValue(value, true);
-        //        ReportPropertyChanged("Country");
-        //        OnCountryChanged();
-        //    }
-        //}
-        //private global::System.String _Country;
+
         partial void OnCountryChanging(global::System.String value);
         partial void OnCountryChanged();
 
@@ -931,21 +917,7 @@ namespace WebStack.QA.Share.Controllers.TypeLibrary
         [EdmScalarPropertyAttribute(EntityKeyProperty = false, IsNullable = true)]
         [DataMemberAttribute]
         public global::System.String Country { get; set; }
-        //{
-        //    get
-        //    {
-        //        return _Country;
-        //    }
-        //    set
-        //    {
-        //        OnCountryChanging(value);
-        //        ReportPropertyChanging("Country");
-        //        _Country = StructuralObject.SetValidValue(value, true);
-        //        ReportPropertyChanged("Country");
-        //        OnCountryChanged();
-        //    }
-        //}
-        //private global::System.String _Country;
+
         partial void OnCountryChanging(global::System.String value);
         partial void OnCountryChanged();
 
@@ -2804,22 +2776,8 @@ namespace WebStack.QA.Share.Controllers.TypeLibrary
         /// </summary>
         [EdmScalarPropertyAttribute(EntityKeyProperty = false, IsNullable = true)]
         [DataMemberAttribute]
-        public global::System.String Country
-        {
-            get
-            {
-                return _Country;
-            }
-            set
-            {
-                OnCountryChanging(value);
-                ReportPropertyChanging("Country");
-                _Country = StructuralObject.SetValidValue(value, true);
-                ReportPropertyChanged("Country");
-                OnCountryChanged();
-            }
-        }
-        private global::System.String _Country;
+        public global::System.String Country { get; set; }
+
         partial void OnCountryChanging(global::System.String value);
         partial void OnCountryChanged();
 

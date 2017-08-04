@@ -9,7 +9,7 @@ namespace Nop.Core.Domain.Directory
     public partial class StateProvince : BaseEntity, ILocalizedEntity
     {
         /// <summary>
-        /// Gets or sets the country identifier
+        /// Gets or sets the country/region identifier
         /// </summary>
         public virtual int CountryId { get; set; }
 
@@ -34,9 +34,9 @@ namespace Nop.Core.Domain.Directory
         public virtual int DisplayOrder { get; set; }
 
         /// <summary>
-        /// Gets or sets the country
+        /// Gets or sets the country/region
         /// </summary>
-        public virtual Country Country { get; set; }
+        public virtual CountryOrRegion CountryOrRegion { get; set; }
     }
 
 }

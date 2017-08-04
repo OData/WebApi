@@ -280,24 +280,24 @@ namespace Location
     public partial class PoliticalRegion
     {
         /// <summary>
-        /// There are no comments for Property Country in the schema.
+        /// There are no comments for Property CountryOrRegion in the schema.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.OData.Service.Design.T4", "1.0.0")]
-        public string Country
+        public string CountryOrRegion
         {
             get
             {
-                return this._Country;
+                return this._countryOrRegion;
             }
             set
             {
                 this.OnCountryChanging(value);
-                this._Country = value;
+                this._countryOrRegion = value;
                 this.OnCountryChanged();
             }
         }
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.OData.Service.Design.T4", "1.0.0")]
-        private string _Country;
+        private string _countryOrRegion;
         partial void OnCountryChanging(string value);
         partial void OnCountryChanged();
         /// <summary>
@@ -873,7 +873,7 @@ namespace Default
         <Property Name=""City"" Type=""Edm.String"" />
       </ComplexType>
       <ComplexType Name=""PoliticalRegion"">
-        <Property Name=""Country"" Type=""Edm.String"" />
+        <Property Name=""CountryOrRegion"" Type=""Edm.String"" />
         <Property Name=""State"" Type=""Edm.String"" />
       </ComplexType>
     </Schema>

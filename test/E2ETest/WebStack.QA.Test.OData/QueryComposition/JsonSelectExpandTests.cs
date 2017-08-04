@@ -299,7 +299,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                         ZipCode = j * 100,
                         City = string.Format("City {0}", j),
                         State = string.Format("State {0}", j),
-                        Country = string.Format("Country {0}", j),
+                        Country = string.Format("CountryOrRegion {0}", j),
                     },
                     OrderDetails = Enumerable.Range(0, j).Select(k => new JsonSelectOrderDetail
                     {
@@ -342,7 +342,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                         ZipCode = j * 100,
                         City = string.Format("City {0}", j),
                         State = string.Format("State {0}", j),
-                        Country = string.Format("Country {0}", j),
+                        Country = string.Format("CountryOrRegion {0}", j),
                     },
                     OrderDetails = Enumerable.Range(0, j).Select(k => new JsonSelectOrderDetail
                     {

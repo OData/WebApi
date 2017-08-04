@@ -39,12 +39,12 @@ namespace WebStack.QA.Test.OData.ModelBuilder
         {
             var modelBuilder = new ODataModelBuilder();
 
-            var enumContry = modelBuilder.EnumType<Country>();
-            enumContry.Member(Country.Canada);
-            enumContry.Member(Country.China);
-            enumContry.Member(Country.India);
-            enumContry.Member(Country.Japen);
-            enumContry.Member(Country.USA);
+            var enumContry = modelBuilder.EnumType<CountryOrRegion>();
+            enumContry.Member(CountryOrRegion.Canada);
+            enumContry.Member(CountryOrRegion.China);
+            enumContry.Member(CountryOrRegion.India);
+            enumContry.Member(CountryOrRegion.Japen);
+            enumContry.Member(CountryOrRegion.USA);
 
             var products = modelBuilder.EntitySet<Product>("Products");
             products.HasEditLink(entityContext =>
@@ -97,7 +97,7 @@ namespace WebStack.QA.Test.OData.ModelBuilder
 
             var address = modelBuilder.ComplexType<Address>();
             address.Property(a => a.City);
-            address.Property(a => a.Country);
+            address.Property(a => a.CountryOrRegion);
             address.Property(a => a.State);
             address.Property(a => a.Street);
             address.Property(a => a.ZipCode);
@@ -107,7 +107,7 @@ namespace WebStack.QA.Test.OData.ModelBuilder
             supplier.Property(s => s.Name);
             supplier.CollectionProperty(s => s.Addresses);
             supplier.CollectionProperty(s => s.Tags);
-            supplier.EnumProperty(s => s.Country);
+            supplier.EnumProperty(s => s.CountryOrRegion);
 
             var productFamily = families.EntityType;
             productFamily.HasKey(pf => pf.ID);

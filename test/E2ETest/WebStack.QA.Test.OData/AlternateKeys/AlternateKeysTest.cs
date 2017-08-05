@@ -50,7 +50,7 @@ namespace WebStack.QA.Test.OData.AlternateKeys
 
             // Task QueryEntityWithComposedAlternateKeys_Returns_SameEntityWithPrimitiveKey's convention route
             // test case requires creating default convention with attribute routing.
-            configuration.MapODataServiceRoute("odata1", "convention", model, null);
+            configuration.MapODataServiceRoute("odata1", "convention", model);
 
             configuration.EnsureInitialized();
         }

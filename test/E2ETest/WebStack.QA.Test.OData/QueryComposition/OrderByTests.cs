@@ -60,7 +60,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
         [Fact]
         public void CanOrderByMultipleNestedPropertiesOnComplexObjects()
         {
-            string query = "/odata/OrderByCustomers?$orderby=Address/Country/Name asc, Address/ZipCode asc";
+            string query = "/odata/OrderByCustomers?$orderby=Address/CountryOrRegion/Name asc, Address/ZipCode asc";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + query);
             HttpResponseMessage response = Client.SendAsync(request).Result;
 
@@ -71,8 +71,8 @@ namespace WebStack.QA.Test.OData.QueryComposition
             {
                 dynamic previousElement = parsedContent.value[i - 1];
                 dynamic currentElement = parsedContent.value[i];
-                Assert.True(previousElement.Address.Country.Name.Equals(currentElement.Address.Country.Name) && 1 > previousElement.Address.ZipCode.CompareTo(currentElement.Address.ZipCode)
-                            || previousElement.Address.Country.Name.CompareTo(currentElement.Address.Country.Name) < 1);
+                Assert.True(previousElement.Address.CountryOrRegion.Name.Equals(currentElement.Address.CountryOrRegion.Name) && 1 > previousElement.Address.ZipCode.CompareTo(currentElement.Address.ZipCode)
+                            || previousElement.Address.CountryOrRegion.Name.CompareTo(currentElement.Address.CountryOrRegion.Name) < 1);
             }
         }
     }
@@ -95,9 +95,9 @@ namespace WebStack.QA.Test.OData.QueryComposition
                               FirstLine = "FirstLine " + j,
                               SecondLine = "SecondLine " + i,
                               ZipCode = (13 * 7 * j).ToString(),
-                              Country = new OrderByCountry
+                              CountryOrRegion = new OrderByCountryOrRegion
                               {
-                                  Name = "Country " + j % 2,
+                                  Name = "CountryOrRegion " + j % 2,
                                   State = "State " + j
                               }
                           },
@@ -111,9 +111,9 @@ namespace WebStack.QA.Test.OData.QueryComposition
                                             FirstLine = "FirstLine " + k,
                                             SecondLine = "SecondLine " + k,
                                             ZipCode = (13 * 7 * 5 * k).ToString(),
-                                            Country = new OrderByCountry
+                                            CountryOrRegion = new OrderByCountryOrRegion
                                             {
-                                                Name = "Country " + k,
+                                                Name = "CountryOrRegion " + k,
                                                 State = "State " + k
                                             }
                                         },
@@ -136,10 +136,10 @@ namespace WebStack.QA.Test.OData.QueryComposition
         public string FirstLine { get; set; }
         public string SecondLine { get; set; }
         public string ZipCode { get; set; }
-        public OrderByCountry Country { get; set; }
+        public OrderByCountryOrRegion CountryOrRegion { get; set; }
     }
 
-    public class OrderByCountry
+    public class OrderByCountryOrRegion
     {
         public string Name { get; set; }
         public string State { get; set; }

@@ -61,7 +61,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
             ComplexTypeConfiguration<ModelAliasingMetadataAddress> address = builder.ComplexType<ModelAliasingMetadataAddress>();
             address.Name = "Direction";
             address.Namespace = "Location";
-            address.ComplexProperty<ModelAliasingMetadataRegion>(c => c.Country).Name = "Reign";
+            address.ComplexProperty<ModelAliasingMetadataRegion>(c => c.CountryOrRegion).Name = "Reign";
             return builder.GetEdmModel();
         }
 
@@ -80,7 +80,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                     City = "Billing City " + i,
                     Reign = new Location.PoliticalRegion
                     {
-                        Country = "Billing Region Country" + i,
+                        CountryOrRegion = "Billing Region CountryOrRegion" + i,
                         State = "Billing Region State" + i
                     }
                 },
@@ -92,7 +92,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                     City = "DefaultShipping City " + i,
                     Reign = new Location.PoliticalRegion
                     {
-                        Country = "DefaultShipping Region Country" + i,
+                        CountryOrRegion = "DefaultShipping Region CountryOrRegion" + i,
                         State = "DefaultShipping Region State" + i
                     }
                 },
@@ -113,7 +113,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                         City = "Order Shipping City " + i,
                                         Reign = new Location.PoliticalRegion
                                         {
-                                            Country = "Order Shipping Region Country" + i,
+                                            CountryOrRegion = "Order Shipping Region CountryOrRegion" + i,
                                             State = "Order Shipping Region State" + i
                                         }
                                     },
@@ -128,7 +128,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                             ProductName = "Product " + i * 100 + j * 10 + k,
                                             AvailableRegions = new System.Collections.ObjectModel.Collection<Location.PoliticalRegion>(Enumerable.Range(0, k).Select(l => new Location.PoliticalRegion
                                             {
-                                                Country = "Product Country " + 1000 * i + 100 * j + 10 * k + l,
+                                                CountryOrRegion = "Product CountryOrRegion " + 1000 * i + 100 * j + 10 * k + l,
                                                 State = "Product State " + 1000 * i + 100 * j + 10 * k + l
                                             }).ToList())
                                         }
@@ -147,7 +147,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                         City = "Order Shipping City " + i,
                                         Reign = new Location.PoliticalRegion
                                         {
-                                            Country = "Order Shipping Region Country" + i,
+                                            CountryOrRegion = "Order Shipping Region CountryOrRegion" + i,
                                             State = "Order Shipping Region State" + i
                                         }
                                     },
@@ -163,7 +163,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                             ProductName = "Product " + i * 100 + j * 10 + k,
                                             AvailableRegions = new System.Collections.ObjectModel.Collection<Location.PoliticalRegion>(Enumerable.Range(0, k).Select(l => new Location.PoliticalRegion
                                             {
-                                                Country = "Product Country " + 1000 * i + 100 * j + 10 * k + l,
+                                                CountryOrRegion = "Product CountryOrRegion " + 1000 * i + 100 * j + 10 * k + l,
                                                 State = "Product State " + 1000 * i + 100 * j + 10 * k + l
                                             }).ToList())
                                         }
@@ -183,7 +183,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                         City = "Order Shipping City " + i,
                                         Reign = new Location.PoliticalRegion
                                         {
-                                            Country = "Order Shipping Region Country" + i,
+                                            CountryOrRegion = "Order Shipping Region CountryOrRegion" + i,
                                             State = "Order Shipping Region State" + i
                                         }
                                     },
@@ -199,7 +199,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                             ProductName = "Product " + i * 100 + j * 10 + k,
                                             AvailableRegions = new System.Collections.ObjectModel.Collection<Location.PoliticalRegion>(Enumerable.Range(0, k).Select(l => new Location.PoliticalRegion
                                             {
-                                                Country = "Product Country " + 1000 * i + 100 * j + 10 * k + l,
+                                                CountryOrRegion = "Product CountryOrRegion " + 1000 * i + 100 * j + 10 * k + l,
                                                 State = "Product State " + 1000 * i + 100 * j + 10 * k + l
                                             }).ToList())
                                         }
@@ -211,12 +211,12 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                     }).ToList())
             });
             string expand = "$expand=Purchases($select=Details;$expand=Details($select=Product;$expand=Product($select=AvailableRegions)))";
-            string filter = "$filter=FinancialAddress/ZipCode le 30 and startswith(FinancialAddress/Reign/Country,'Billing Region Country')";
+            string filter = "$filter=FinancialAddress/ZipCode le 30 and startswith(FinancialAddress/Reign/CountryOrRegion,'Billing Region CountryOrRegion')";
             string orderBy = "$orderby=DefaultShippingAddress/Reign/State desc, FinancialAddress/ZipCode asc";
             string select = "$select=Id";
             string query = string.Format("?{0}&{1}&{2}&{3}", expand, filter, orderBy, select);
 
-            customers = customers.Where(c => c.FinancialAddress.ZipCode <= 30 && c.FinancialAddress.Reign.Country.StartsWith("Billing Region Country"))
+            customers = customers.Where(c => c.FinancialAddress.ZipCode <= 30 && c.FinancialAddress.Reign.CountryOrRegion.StartsWith("Billing Region CountryOrRegion"))
                                  .OrderByDescending(c => c.DefaultShippingAddress.Reign.State).ThenBy(c => c.FinancialAddress.ZipCode);
             var projectedCustomers = customers.Select(c =>
                 new
@@ -254,9 +254,9 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                     SecondLine = "Billing Second line " + i,
                     ZipCode = i * 5,
                     City = "Billing City " + i,
-                    Country = new ModelAliasingMetadataRegion
+                    CountryOrRegion = new ModelAliasingMetadataRegion
                     {
-                        Country = "Billing Region Country" + i,
+                        CountryOrRegion = "Billing Region CountryOrRegion" + i,
                         State = "Billing Region State" + i
                     }
                 },
@@ -266,9 +266,9 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                     SecondLine = "DefaultShipping Second line " + i,
                     ZipCode = i * 5,
                     City = "DefaultShipping City " + i,
-                    Country = new ModelAliasingMetadataRegion
+                    CountryOrRegion = new ModelAliasingMetadataRegion
                     {
-                        Country = "DefaultShipping Region Country" + i,
+                        CountryOrRegion = "DefaultShipping Region CountryOrRegion" + i,
                         State = "DefaultShipping Region State" + i
                     }
                 },
@@ -287,9 +287,9 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                         SecondLine = "Order Shipping Second line " + i,
                                         ZipCode = i * 5,
                                         City = "Order Shipping City " + i,
-                                        Country = new ModelAliasingMetadataRegion
+                                        CountryOrRegion = new ModelAliasingMetadataRegion
                                         {
-                                            Country = "Order Shipping Region Country" + i,
+                                            CountryOrRegion = "Order Shipping Region CountryOrRegion" + i,
                                             State = "Order Shipping Region State" + i
                                         }
                                     },
@@ -304,7 +304,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                             Name = "Product " + i * 100 + j * 10 + k,
                                             Regions = Enumerable.Range(0, k).Select(l => new ModelAliasingMetadataRegion
                                             {
-                                                Country = "Product Country " + 1000 * i + 100 * j + 10 * k + l,
+                                                CountryOrRegion = "Product CountryOrRegion " + 1000 * i + 100 * j + 10 * k + l,
                                                 State = "Product State " + 1000 * i + 100 * j + 10 * k + l
                                             }).ToList()
                                         }
@@ -321,9 +321,9 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                         SecondLine = "Order Shipping Second line " + i,
                                         ZipCode = i * 5,
                                         City = "Order Shipping City " + i,
-                                        Country = new ModelAliasingMetadataRegion
+                                        CountryOrRegion = new ModelAliasingMetadataRegion
                                         {
-                                            Country = "Order Shipping Region Country" + i,
+                                            CountryOrRegion = "Order Shipping Region CountryOrRegion" + i,
                                             State = "Order Shipping Region State" + i
                                         }
                                     },
@@ -340,7 +340,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                             Name = "Product " + i * 100 + j * 10 + k,
                                             Regions = Enumerable.Range(0, k).Select(l => new ModelAliasingMetadataRegion
                                             {
-                                                Country = "Product Country " + 1000 * i + 100 * j + 10 * k + l,
+                                                CountryOrRegion = "Product CountryOrRegion " + 1000 * i + 100 * j + 10 * k + l,
                                                 State = "Product State " + 1000 * i + 100 * j + 10 * k + l
                                             }).ToList()
                                         }
@@ -358,9 +358,9 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                         SecondLine = "Order Shipping Second line " + i,
                                         ZipCode = i * 5,
                                         City = "Order Shipping City " + i,
-                                        Country = new ModelAliasingMetadataRegion
+                                        CountryOrRegion = new ModelAliasingMetadataRegion
                                         {
-                                            Country = "Order Shipping Region Country" + i,
+                                            CountryOrRegion = "Order Shipping Region CountryOrRegion" + i,
                                             State = "Order Shipping Region State" + i
                                         }
                                     },
@@ -376,7 +376,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                             Name = "Product " + i * 100 + j * 10 + k,
                                             Regions = Enumerable.Range(0, k).Select(l => new ModelAliasingMetadataRegion
                                             {
-                                                Country = "Product Country " + 1000 * i + 100 * j + 10 * k + l,
+                                                CountryOrRegion = "Product CountryOrRegion " + 1000 * i + 100 * j + 10 * k + l,
                                                 State = "Product State " + 1000 * i + 100 * j + 10 * k + l
                                             }).ToList()
                                         }

@@ -34,7 +34,7 @@ namespace System.Web.OData.Formatter.Serialization
                 Street = "One Microsoft Way",
                 City = "Redmond",
                 State = "Washington",
-                Country = "United States",
+                CountryOrRegion = "United States",
                 ZipCode = "98052"
             };
 
@@ -176,7 +176,7 @@ namespace System.Web.OData.Formatter.Serialization
                     Tuple.Create("Street","One Microsoft Way"),
                     Tuple.Create("City","Redmond"),
                     Tuple.Create("State","Washington"),
-                    Tuple.Create("Country", "United States"),
+                    Tuple.Create("CountryOrRegion", "United States"),
                     Tuple.Create("ZipCode","98052") });
         }
 
@@ -212,7 +212,7 @@ namespace System.Web.OData.Formatter.Serialization
                     Tuple.Create("Street","One Microsoft Way"),
                     Tuple.Create("City","Redmond"),
                     Tuple.Create("State","Washington"),
-                    Tuple.Create("Country", "United States"),
+                    Tuple.Create("CountryOrRegion", "United States"),
                     Tuple.Create("ZipCode","98052") });
         }
 
@@ -227,7 +227,7 @@ namespace System.Web.OData.Formatter.Serialization
                 {
                     City = "Shanghai",
                     CnProp = new Guid("87f049bd-9976-4843-9434-a5735b0daf10"),
-                    Country = "CN",
+                    CountryOrRegion = "CN",
                     State = "Shanghai",
                     Street = "ZiXing Rd",
                     ZipCode = "200241"
@@ -256,7 +256,7 @@ namespace System.Web.OData.Formatter.Serialization
                     Tuple.Create("Street","ZiXing Rd"), 
                     Tuple.Create("City","Shanghai"),
                     Tuple.Create("State","Shanghai"),
-                    Tuple.Create("Country", "CN"),
+                    Tuple.Create("CountryOrRegion", "CN"),
                     Tuple.Create("ZipCode","200241"),
                     Tuple.Create("CnProp","87f049bd-9976-4843-9434-a5735b0daf10")});
         }
@@ -528,7 +528,7 @@ namespace System.Web.OData.Formatter.Serialization
                 City = "Redmond",
                 Properties = new Dictionary<string, object>()
             };
-            address.Properties.Add("StringProperty", "My Country");
+            address.Properties.Add("StringProperty", "My CountryOrRegion");
             address.Properties.Add("Street", new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"));
 
             // Act & Assert
@@ -636,7 +636,7 @@ namespace System.Web.OData.Formatter.Serialization
                 Street = "One Microsoft Way",
                 City = "Redmond",
                 State = "Washington",
-                Country = "United States",
+                CountryOrRegion = "United States",
                 ZipCode = "98052",
                 CnProp = new Guid("F83FB4CC-84BD-403B-B411-79926800F9A5")
             };

@@ -44,7 +44,7 @@ namespace WebStack.QA.Test.OData.ParameterAlias
             //Add bound function
             var boundFunction = tradesConfiguration.EntityType.Collection.Function("GetTradingVolume");
             boundFunction.Parameter<string>("productName");
-            boundFunction.Parameter<Country>("portingCountry");
+            boundFunction.Parameter<CountryOrRegion>("PortingCountryOrRegion");
             boundFunction.Returns<long?>();
 
             //Add bound function
@@ -55,10 +55,10 @@ namespace WebStack.QA.Test.OData.ParameterAlias
 
             //Add unbound function
             var unboundFunction = builder.Function("GetTradeByCountry");
-            unboundFunction.Parameter<Country>("portingCountry");
+            unboundFunction.Parameter<CountryOrRegion>("PortingCountryOrRegion");
             unboundFunction.ReturnsCollectionFromEntitySet<Trade>("Trades");
 
-            builder.Namespace = typeof(Country).Namespace;
+            builder.Namespace = typeof(CountryOrRegion).Namespace;
 
            return builder.GetEdmModel();
         }
@@ -68,7 +68,7 @@ namespace WebStack.QA.Test.OData.ParameterAlias
         public async Task ParameterAliasInFunctionCall()
         {
             //Unbound function
-            string query = "/GetTradeByCountry(portingCountry=@p1)?@p1=WebStack.QA.Test.OData.ParameterAlias.Country'USA'";
+            string query = "/GetTradeByCountry(PortingCountryOrRegion=@p1)?@p1=WebStack.QA.Test.OData.ParameterAlias.CountryOrRegion'USA'";
 
             HttpResponseMessage response = this.Client.GetAsync(this.BaseAddress + query).Result;
             var json = await response.Content.ReadAsAsync<JObject>();
@@ -76,7 +76,7 @@ namespace WebStack.QA.Test.OData.ParameterAlias
             Assert.Equal(3, result.Count);
 
             //Bound function
-            string requestUri = this.BaseAddress + "/Trades/WebStack.QA.Test.OData.ParameterAlias.GetTradingVolume(productName=@p1, portingCountry=@p2)?@p1='Rice'&@p2=WebStack.QA.Test.OData.ParameterAlias.Country'USA'";
+            string requestUri = this.BaseAddress + "/Trades/WebStack.QA.Test.OData.ParameterAlias.GetTradingVolume(productName=@p1, PortingCountryOrRegion=@p2)?@p1='Rice'&@p2=WebStack.QA.Test.OData.ParameterAlias.CountryOrRegion'USA'";
             response = this.Client.GetAsync(requestUri).Result;
             json = await response.Content.ReadAsAsync<JObject>();
             Assert.Equal(1000, (long)json["value"]);
@@ -98,8 +98,8 @@ namespace WebStack.QA.Test.OData.ParameterAlias
         }
 
         [Theory]
-        [InlineData("?$orderby=@p1&@p1=PortingCountry", "Australia")]
-        [InlineData("?$orderby=ProductName,@p2 desc,PortingCountry desc&@p2=TradingVolume", "USA")]
+        [InlineData("?$orderby=@p1&@p1=PortingCountryOrRegion", "Australia")]
+        [InlineData("?$orderby=ProductName,@p2 desc,PortingCountryOrRegion desc&@p2=TradingVolume", "USA")]
         public async Task ParameterAliasInOrderby(string queryOption, string expectedPortingCountry)
         {
             string requestBaseUri = this.BaseAddress + "/Trades";
@@ -108,14 +108,14 @@ namespace WebStack.QA.Test.OData.ParameterAlias
 
             var json = await response.Content.ReadAsAsync<JObject>();
             var result = json["value"] as JArray;
-            Assert.Equal(expectedPortingCountry, result.First["PortingCountry"]);
+            Assert.Equal(expectedPortingCountry, result.First["PortingCountryOrRegion"]);
             Assert.Equal("Corn", result.First["ProductName"]);
             Assert.Equal(8000, result.First["TradingVolume"]);
         }
 
         [Theory]
         //Use multi times in different place
-        [InlineData("/GetTradeByCountry(portingCountry=@p1)?@p1=WebStack.QA.Test.OData.ParameterAlias.Country'USA'&$filter=PortingCountry eq @p1 and @p2 gt 1000&$orderby=@p2&@p2=TradingVolume", 1, 0)]
+        [InlineData("/GetTradeByCountry(PortingCountryOrRegion=@p1)?@p1=WebStack.QA.Test.OData.ParameterAlias.CountryOrRegion'USA'&$filter=PortingCountryOrRegion eq @p1 and @p2 gt 1000&$orderby=@p2&@p2=TradingVolume", 1, 0)]
         //Reference property under complex type
         [InlineData("/Trades?$filter=@p1 gt 0&$orderby=@p1&@p1=TradeLocation/ZipCode", 3, 1)]
         public async Task MiscParameterAlias(string queryUri, int expectedEntryCount, int expectedZipCode)

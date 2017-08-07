@@ -208,11 +208,11 @@ namespace System.Web.OData
               "\"@odata.context\":\"http://localhost/odata/$metadata#OpenCustomers/$entity\"," +
               "\"CustomerId\":6,\"Name\":\"FirstName 6\"," +
               "\"Address\":{" +
-                "\"Street\":\"Street 6\",\"City\":\"City 6\",\"Country\":\"Earth\",\"Token@odata.type\":\"#Guid\"," +
+                "\"Street\":\"Street 6\",\"City\":\"City 6\",\"Place\":\"Earth\",\"Token@odata.type\":\"#Guid\"," +
                 "\"Token\":\"4DB52263-4382-4BCB-A63E-3129C1B5FA0D\"," +
                 "\"Number\":990" +
               "}," +
-              "\"Website\": \"WebSite #6\",\"Country\":\"My Dynamic Country\",\"Token@odata.type\":\"#Guid\",\"Token\":\"2c1f450a-a2a7-4fe1-a25d-4d9332fc0694\"," +
+              "\"Website\": \"WebSite #6\",\"Place\":\"My Dynamic Place\",\"Token@odata.type\":\"#Guid\",\"Token\":\"2c1f450a-a2a7-4fe1-a25d-4d9332fc0694\"," +
               "\"DoubleList@odata.type\":\"#Collection(Double)\"," +
               "\"DoubleList\":[5.5, 4.4, 3.3]" +
             "}";
@@ -431,10 +431,10 @@ namespace System.Web.OData
         {
             // Verify there is a string dynamic property
             object countryValue;
-            customer.CustomerProperties.TryGetValue("Country", out countryValue);
+            customer.CustomerProperties.TryGetValue("Place", out countryValue);
             Assert.NotNull(countryValue);
             Assert.Equal(typeof(String), countryValue.GetType());
-            Assert.Equal("My Dynamic Country", countryValue);
+            Assert.Equal("My Dynamic Place", countryValue);
 
             // Verify there is a Guid dynamic property
             object tokenValue;

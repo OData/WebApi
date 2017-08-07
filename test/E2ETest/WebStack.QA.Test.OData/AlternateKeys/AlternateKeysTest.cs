@@ -48,8 +48,9 @@ namespace WebStack.QA.Test.OData.AlternateKeys
             IEdmModel model = AlternateKeysEdmModel.GetEdmModel();
             configuration.MapODataServiceRoute("odata", "odata", model: AlternateKeysEdmModel.GetEdmModel());
 
-            var conventions = ODataRoutingConventions.CreateDefault();
-            configuration.MapODataServiceRoute("odata1", "convention", model, new DefaultODataPathHandler(), conventions);
+            // Task QueryEntityWithComposedAlternateKeys_Returns_SameEntityWithPrimitiveKey's convention route
+            // test case requires creating default convention with attribute routing.
+            configuration.MapODataServiceRoute("odata1", "convention", model);
 
             configuration.EnsureInitialized();
         }
@@ -121,7 +122,7 @@ namespace WebStack.QA.Test.OData.AlternateKeys
 "          <PropertyRef Name=\"ID\" />\r\n" +
 "        </Key>\r\n" +
 "        <Property Name=\"ID\" Type=\"Edm.Int32\" />\r\n" +
-"        <Property Name=\"Country\" Type=\"Edm.String\" />\r\n" +
+"        <Property Name=\"Country_Region\" Type=\"Edm.String\" />\r\n" +
 "        <Property Name=\"Passport\" Type=\"Edm.String\" />\r\n" +
 "        <Annotation Term=\"OData.Community.Keys.V1.AlternateKeys\">\r\n" +
 "          <Collection>\r\n" +
@@ -129,8 +130,8 @@ namespace WebStack.QA.Test.OData.AlternateKeys
 "              <PropertyValue Property=\"Key\">\r\n" +
 "                <Collection>\r\n" +
 "                  <Record Type=\"OData.Community.Keys.V1.PropertyRef\">\r\n" +
-"                    <PropertyValue Property=\"Alias\" String=\"Country\" />\r\n" +
-"                    <PropertyValue Property=\"Name\" PropertyPath=\"Country\" />\r\n" +
+"                    <PropertyValue Property=\"Alias\" String=\"Country_Region\" />\r\n" +
+"                    <PropertyValue Property=\"Name\" PropertyPath=\"Country_Region\" />\r\n" +
 "                  </Record>\r\n" +
 "                  <Record Type=\"OData.Community.Keys.V1.PropertyRef\">\r\n" +
 "                    <PropertyValue Property=\"Alias\" String=\"Passport\" />\r\n" +
@@ -283,7 +284,7 @@ namespace WebStack.QA.Test.OData.AlternateKeys
             string primitiveResponse = await response.Content.ReadAsStringAsync();
 
             // query with composed alternate keys
-            requestUri = string.Format("{0}/{1}/People(Country='United States',Passport='9999')", this.BaseAddress, route);
+            requestUri = string.Format("{0}/{1}/People(Country_Region='United States',Passport='9999')", this.BaseAddress, route);
             response = await Client.GetAsync(requestUri);
             response.EnsureSuccessStatusCode();
             string composedResponse = await response.Content.ReadAsStringAsync();
@@ -294,7 +295,7 @@ namespace WebStack.QA.Test.OData.AlternateKeys
         [Fact]
         public async Task QueryFailedIfMissingAnyOfComposedAlternateKeys()
         {
-            var requestUri = string.Format("{0}/odata/People(Country='United States')", this.BaseAddress);
+            var requestUri = string.Format("{0}/odata/People(Country_Region='United States')", this.BaseAddress);
             var response = await Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
@@ -312,7 +313,7 @@ namespace WebStack.QA.Test.OData.AlternateKeys
             Console.WriteLine(requestUri);
             Console.WriteLine(responseContent);
 
-            requestUri = string.Format("{0}/odata/People(Country='United States',Passport='9999')", this.BaseAddress);
+            requestUri = string.Format("{0}/odata/People(Country_Region='United States',Passport='9999')", this.BaseAddress);
             response = await Client.GetAsync(requestUri);
             responseContent = await response.Content.ReadAsStringAsync();
             Console.WriteLine(requestUri);

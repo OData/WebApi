@@ -1040,7 +1040,7 @@ namespace System.Web.OData.Formatter.Deserialization
 
             public string ZipCode { get; set; }
 
-            public string Country { get; set; }
+            public string CountryOrRegion { get; set; }
         }
 
         public enum SupplierRating

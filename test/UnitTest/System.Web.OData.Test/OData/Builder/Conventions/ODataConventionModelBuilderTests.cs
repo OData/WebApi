@@ -89,7 +89,7 @@ namespace System.Web.OData.Builder.Conventions
         {
             var mockType1 = new MockType("Foo");
             var mockType2 = new MockType("Bar").BaseType(mockType1);
-            var mockType3 = new MockType("FooBar").BaseType(mockType2);
+            var mockType3 = new MockType("ThirdLevel").BaseType(mockType2);
 
             var mockAssembly = new MockAssembly(mockType1, mockType2, mockType3);
 
@@ -110,7 +110,7 @@ namespace System.Web.OData.Builder.Conventions
         {
             var mockType1 = new MockType("Foo").Property<int>("P1");
             var mockType2 = new MockType("Bar").BaseType(mockType1).Property<int>("P1").Property<int>("P2");
-            var mockType3 = new MockType("FooBar").BaseType(mockType2).Property<int>("P1").Property<int>("P2");
+            var mockType3 = new MockType("ThirdLevel").BaseType(mockType2).Property<int>("P1").Property<int>("P2");
 
             var mockAssembly = new MockAssembly(mockType1, mockType2, mockType3);
 
@@ -136,7 +136,7 @@ namespace System.Web.OData.Builder.Conventions
         [Fact]
         public void MapDerivedTypes_BringsAllDerivedTypes_InTheAssembly()
         {
-            var mockType1 = new MockType("FooBar");
+            var mockType1 = new MockType("BaseLevel");
             var mockType2 = new MockType("Foo").BaseType(mockType1);
             var mockType3 = new MockType("Fo").BaseType(mockType2);
             var mockType4 = new MockType("Bar").BaseType(mockType1);
@@ -151,7 +151,7 @@ namespace System.Web.OData.Builder.Conventions
             builder.MapDerivedTypes(entity1);
 
             Assert.Equal(
-                new[] { "FooBar", "Foo", "Fo", "Bar" }.OrderBy(name => name),
+                new[] { "BaseLevel", "Foo", "Fo", "Bar" }.OrderBy(name => name),
                 builder.StructuralTypes.Select(t => t.Name).OrderBy(name => name));
         }
 

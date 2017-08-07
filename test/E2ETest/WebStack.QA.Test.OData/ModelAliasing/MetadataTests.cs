@@ -56,7 +56,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
             ComplexTypeConfiguration<ModelAliasingMetadataAddress> address = builder.ComplexType<ModelAliasingMetadataAddress>();
             address.Name = "Direction";
             address.Namespace = "Location";
-            address.ComplexProperty<ModelAliasingMetadataRegion>(c => c.Country).Name = "Reign";
+            address.ComplexProperty<ModelAliasingMetadataRegion>(c => c.CountryOrRegion).Name = "Reign";
             return builder.GetEdmModel();
         }
 
@@ -92,9 +92,9 @@ namespace WebStack.QA.Test.OData.ModelAliasing
             address.Property(a => a.SecondLine);
             address.Property(a => a.ZipCode);
             address.Property(a => a.City);
-            address.ComplexProperty(a => a.Country);
+            address.ComplexProperty(a => a.CountryOrRegion);
             ComplexTypeConfiguration<ModelAliasingMetadataRegion> region = builder.ComplexType<ModelAliasingMetadataRegion>();
-            region.Property(r => r.Country);
+            region.Property(r => r.CountryOrRegion);
             region.Property(r => r.State);
 
             EntitySetConfiguration<ModelAliasingMetadataProduct> products = builder.EntitySet<ModelAliasingMetadataProduct>("Products");
@@ -124,7 +124,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
 
             address.Name = "Direction";
             address.Namespace = "Location";
-            address.ComplexProperty<ModelAliasingMetadataRegion>(c => c.Country).Name = "Reign";
+            address.ComplexProperty<ModelAliasingMetadataRegion>(c => c.CountryOrRegion).Name = "Reign";
             return builder.GetEdmModel();
         }
 

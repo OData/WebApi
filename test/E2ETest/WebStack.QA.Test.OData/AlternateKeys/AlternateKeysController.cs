@@ -191,19 +191,19 @@ namespace WebStack.QA.Test.OData.AlternateKeys
         }
 
         [HttpGet]
-        [ODataRoute("People(Country={country},Passport={passport})")]
-        public IHttpActionResult FindPeopleByCountryAndPassport([FromODataUri]string country, [FromODataUri]string passport)
+        [ODataRoute("People(Country_Region={countryOrRegion},Passport={passport})")]
+        public IHttpActionResult FindPeopleByCountryAndPassport([FromODataUri]string countryOrRegion, [FromODataUri]string passport)
         {
             foreach (var person in AlternateKeysDataSource.People)
             {
                 object value;
-                if (person.TryGetPropertyValue("Country", out value))
+                if (person.TryGetPropertyValue("Country_Region", out value))
                 {
                     string countryValue = (string)value;
                     if (person.TryGetPropertyValue("Passport", out value))
                     {
                         string passportValue = (string)value;
-                        if (countryValue == country && passportValue == passport)
+                        if (countryValue == countryOrRegion && passportValue == passport)
                         {
                             return Ok(person);
                         }

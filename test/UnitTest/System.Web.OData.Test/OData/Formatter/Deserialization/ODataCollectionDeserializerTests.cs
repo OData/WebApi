@@ -231,7 +231,7 @@ namespace System.Web.OData.Formatter.Deserialization
         {
             public bool Equals(Address x, Address y)
             {
-                return x.City == y.City && x.Country == y.Country && x.State == y.State && x.Street == y.Street && x.ZipCode == y.ZipCode;
+                return x.City == y.City && x.CountryOrRegion == y.CountryOrRegion && x.State == y.State && x.Street == y.Street && x.ZipCode == y.ZipCode;
             }
 
             public int GetHashCode(Address obj)

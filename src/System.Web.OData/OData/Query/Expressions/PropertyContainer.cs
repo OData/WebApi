@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Http;
 using System.Web.OData.Properties;
@@ -16,6 +17,7 @@ namespace System.Web.OData.Query.Expressions
     /// EntityFramework understands only member initializations in Select expressions. Also, it doesn't understand type casts for non-primitive types. So, 
     /// SelectExpandBinder has to generate strongly types expressions that involve only property access. This class represents the base class for a bunch of 
     /// generic derived types that are used in the expressions that SelectExpandBinder generates.
+    /// Also, Expression.Compile() could fail with stack overflow if expression is to deep and causes to mane levels of recursion. To avoid that we are tree-like property container.
     /// </remarks>
     internal abstract class PropertyContainer
     {
@@ -54,29 +56,44 @@ namespace System.Web.OData.Query.Expressions
         //          Name = properties[0].Key, 
         //          Value = properties[0].Value,
         //
-        //          Next = new NamedProperty<> { ..... } 
+        //          LeftNext = new NamedProperty<> { ..... } 
+        //          RightNext = new NamedProperty<> { ..... } 
         //      }
         public static Expression CreatePropertyContainer(IList<NamedPropertyExpression> properties)
         {
             Expression container = null;
 
             // build the linked list of properties.
-            foreach (NamedPropertyExpression property in properties)
+            if (properties.Count >= 1)
             {
-                container = CreateNamedPropertyCreationExpression(property, container);
+                NamedPropertyExpression property = properties.First();
+                int count = properties.Count - 1;
+                int leftSize = GetLeftSize(count);
+                Expression leftNext = CreatePropertyContainer(properties.Skip(1).Take(leftSize).ToList());
+                Expression rightNext = CreatePropertyContainer(properties.Skip(1 + leftSize).ToList());
+                container = CreateNamedPropertyCreationExpression(property, leftNext, rightNext);
             }
 
             return container;
         }
 
+        private static int GetLeftSize(int count)
+        {
+            if (count % 2 == 1)
+            {
+                return (count + 1) / 2;
+            }
+            return count / 2;
+        }
+
         // Expression:
-        // new NamedProperty<T> { Name = property.Name, Value = property.Value, Next = next }.
-        private static Expression CreateNamedPropertyCreationExpression(NamedPropertyExpression property, Expression next)
+        // new NamedProperty<T> { Name = property.Name, Value = property.Value, LeftNext = leftNext, RightNext = rightNext }.
+        private static Expression CreateNamedPropertyCreationExpression(NamedPropertyExpression property, Expression leftNext, Expression rightNext)
         {
             Contract.Assert(property != null);
             Contract.Assert(property.Value != null);
 
-            Type namedPropertyType = GetNamedPropertyType(property, next);
+            Type namedPropertyType = GetNamedPropertyType(property, leftNext, rightNext);
             List<MemberBinding> memberBindings = new List<MemberBinding>();
 
             memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Name"), property.Name));
@@ -101,9 +118,13 @@ namespace System.Web.OData.Query.Expressions
                 memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Value"), property.Value));
             }
 
-            if (next != null)
+            if (leftNext != null)
             {
-                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Next"), next));
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("LeftNext"), leftNext));
+            }
+            if (rightNext != null)
+            {
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("RightNext"), rightNext));
             }
             if (property.NullCheck != null)
             {
@@ -113,11 +134,11 @@ namespace System.Web.OData.Query.Expressions
             return Expression.MemberInit(Expression.New(namedPropertyType), memberBindings);
         }
 
-        private static Type GetNamedPropertyType(NamedPropertyExpression property, Expression next)
+        private static Type GetNamedPropertyType(NamedPropertyExpression property, Expression leftNext, Expression rightNext)
         {
             Type namedPropertyGenericType;
 
-            if (next == null)
+            if (leftNext == null)
             {
                 if (property.NullCheck != null)
                 {
@@ -134,6 +155,25 @@ namespace System.Web.OData.Query.Expressions
                 else
                 {
                     namedPropertyGenericType = typeof(NamedProperty<>);
+                }
+            }
+            else if (rightNext == null)
+            {
+                if (property.NullCheck != null)
+                {
+                    namedPropertyGenericType = typeof(SingleExpandedPropertyWithNextLeftOnly<>);
+                }
+                else if (property.PageSize != null || property.CountOption != null)
+                {
+                    namedPropertyGenericType = typeof(CollectionExpandedPropertyWithNextLeftOnly<>);
+                }
+                else if (property.AutoSelected)
+                {
+                    namedPropertyGenericType = typeof(AutoSelectedNamedPropertyWithNextLeftOnly<>);
+                }
+                else
+                {
+                    namedPropertyGenericType = typeof(NamedPropertyWithNextLeftOnly<>);
                 }
             }
             else
@@ -233,57 +273,108 @@ namespace System.Web.OData.Query.Expressions
         }
 
         // Entityframework requires that the two different type initializers for a given type in the same query have the same set of properties in the same order.
-        // A $select=Prop1,Prop2 where Prop1 and Prop2 are of the same type without this extra NamedPropertyWithNext type results in an select expression that looks like,
-        //      c => new NamedProperty<int> { Name = "Prop1", Value = c.Prop1, Next = new NamedProperty<int> { Name = "Prop2", Value = c.Prop2 } };
+        // A $select=Prop1,Prop2,Prop3 where Prop1 and Prop2 are of the same type without this extra NamedPropertyWithNext type results in an select expression that looks like,
+        //      c => new NamedProperty<int> { Name = "Prop1", Value = c.Prop1, LeftNext = new NamedProperty<int> { Name = "Prop2", Value = c.Prop2 }, RightNext = new NamedProperty<int> { Name = "Prop3", Value = c.Prop3 } };
         // Entityframework cannot translate this expression as the first NamedProperty<int> initialization has Next and the second one doesn't. Also, Entityframework cannot 
         // create null's of NamedProperty<T>. So, you cannot generate an expression like new NamedProperty<int> { Next = null }. The exception that EF throws looks like this,
         // "The type 'NamedProperty`1[SystemInt32...]' appears in two structurally incompatible initializations within a single LINQ to Entities query. 
         // A type can be initialized in two places in the same query, but only if the same properties are set in both places and those properties are set in the same order."
-        internal class NamedPropertyWithNext<T> : NamedProperty<T>
+        internal class NamedPropertyWithNextLeftOnly<T> : NamedProperty<T>
         {
-            public PropertyContainer Next { get; set; }
+            public PropertyContainer LeftNext { get; set; }
 
             public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
                 bool includeAutoSelected)
             {
                 base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                LeftNext.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
             }
         }
 
-        private class AutoSelectedNamedPropertyWithNext<T> : AutoSelectedNamedProperty<T>
+        internal class NamedPropertyWithNext<T> : NamedPropertyWithNextLeftOnly<T>
         {
-            public PropertyContainer Next { get; set; }
+            public PropertyContainer RightNext { get; set; }
 
             public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
                 bool includeAutoSelected)
             {
                 base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                if (RightNext != null)
+                {
+                    RightNext.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                }
             }
         }
 
-        private class SingleExpandedPropertyWithNext<T> : SingleExpandedProperty<T>
+        private class AutoSelectedNamedPropertyWithNextLeftOnly<T> : AutoSelectedNamedProperty<T>
         {
-            public PropertyContainer Next { get; set; }
+            public PropertyContainer LeftNext { get; set; }
 
             public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
                 bool includeAutoSelected)
             {
                 base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                LeftNext.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
             }
         }
 
-        private class CollectionExpandedPropertyWithNext<T> : CollectionExpandedProperty<T>
+        private class AutoSelectedNamedPropertyWithNext<T> : AutoSelectedNamedPropertyWithNextLeftOnly<T>
         {
-            public PropertyContainer Next { get; set; }
+            public PropertyContainer RightNext { get; set; }
 
             public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
                 bool includeAutoSelected)
             {
                 base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                RightNext.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+            }
+        }
+
+        private class SingleExpandedPropertyWithNextLeftOnly<T> : SingleExpandedProperty<T>
+        {
+            public PropertyContainer LeftNext { get; set; }
+
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
+                bool includeAutoSelected)
+            {
+                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                LeftNext.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+            }
+        }
+
+        private class SingleExpandedPropertyWithNext<T> : SingleExpandedPropertyWithNextLeftOnly<T>
+        {
+            public PropertyContainer RightNext { get; set; }
+
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
+                bool includeAutoSelected)
+            {
+                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                RightNext.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+            }
+        }
+
+        private class CollectionExpandedPropertyWithNextLeftOnly<T> : CollectionExpandedProperty<T>
+        {
+            public PropertyContainer LeftNext { get; set; }
+
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
+                bool includeAutoSelected)
+            {
+                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                LeftNext.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+            }
+        }
+
+        private class CollectionExpandedPropertyWithNext<T> : CollectionExpandedPropertyWithNextLeftOnly<T>
+        {
+            public PropertyContainer RightNext { get; set; }
+
+            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
+                bool includeAutoSelected)
+            {
+                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
+                RightNext.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
             }
         }
     }

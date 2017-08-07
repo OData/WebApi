@@ -23,10 +23,6 @@ namespace System.Web.OData.Query.Expressions
     /// </summary>
     internal class SelectExpandBinder
     {
-        // EF fails with StackOverflow when tries to generate SELECT clause with more than ~90 columns
-        // Need to convert long $select=... to $select=* as woraround until https://github.com/dotnet/corefx/pull/11091 will be ported to .NET and included in official version
-        // Keeping number smaller than 80 to leave space for automatically added properties like keys
-        private const int MaxEFColumns = 80;
         private SelectExpandQueryOption _selectExpandQuery;
         private ODataQueryContext _context;
         private IEdmModel _model;
@@ -338,18 +334,17 @@ namespace System.Web.OData.Query.Expressions
             {
                 Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand = GetPropertiesToExpandInQuery(selectExpandClause);
                 ISet<IEdmStructuralProperty> autoSelectedProperties;
-                ISet<String> containerProperties;
 
-                ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, navigationSource, _model, out autoSelectedProperties, out containerProperties);
+                ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, navigationSource, _model, out autoSelectedProperties);
                 bool isSelectingOpenTypeSegments = GetSelectsOpenTypeSegments(selectExpandClause, entityType);
 
-                if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0 || containerProperties.Count > 0)
+                if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0)
                 {
                     wrapperProperty = wrapperType.GetProperty("Container");
                     Contract.Assert(wrapperProperty != null);
 
                     Expression propertyContainerCreation =
-                        BuildPropertyContainer(entityType, source, propertiesToExpand, propertiesToInclude, autoSelectedProperties, containerProperties, isSelectingOpenTypeSegments);
+                        BuildPropertyContainer(entityType, source, propertiesToExpand, propertiesToInclude, autoSelectedProperties, isSelectingOpenTypeSegments);
 
                     wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, propertyContainerCreation));
                     isContainerPropertySet = true;
@@ -420,7 +415,7 @@ namespace System.Web.OData.Query.Expressions
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
         private Expression BuildPropertyContainer(IEdmEntityType elementType, Expression source,
             Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand,
-            ISet<IEdmStructuralProperty> propertiesToInclude, ISet<IEdmStructuralProperty> autoSelectedProperties, ISet<String> containerProperties, bool isSelectingOpenTypeSegments)
+            ISet<IEdmStructuralProperty> propertiesToInclude, ISet<IEdmStructuralProperty> autoSelectedProperties, bool isSelectingOpenTypeSegments)
         {
             IList<NamedPropertyExpression> includedProperties = new List<NamedPropertyExpression>();
 
@@ -509,18 +504,6 @@ namespace System.Web.OData.Query.Expressions
                 }
 
                 includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue));
-            }
-
-            if (!propertiesToInclude.Any())
-            {
-
-
-                foreach (string containerProperty in containerProperties)
-                {
-                    Expression propertyName = Expression.Constant(containerProperty);
-                    Expression propertyValue = Expression.Property(source, containerProperty);
-                    includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue));
-                }
             }
 
             // create a property container that holds all these property names and values.
@@ -759,10 +742,9 @@ namespace System.Web.OData.Query.Expressions
         }
 
         private static ISet<IEdmStructuralProperty> GetPropertiesToIncludeInQuery(
-            SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmNavigationSource navigationSource, IEdmModel model, out ISet<IEdmStructuralProperty> autoSelectedProperties, out ISet<String> containerProperties)
+            SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmNavigationSource navigationSource, IEdmModel model, out ISet<IEdmStructuralProperty> autoSelectedProperties)
         {
             autoSelectedProperties = new HashSet<IEdmStructuralProperty>();
-            containerProperties = new HashSet<String>();
             HashSet<IEdmStructuralProperty> propertiesToInclude = new HashSet<IEdmStructuralProperty>();
 
             IEnumerable<SelectItem> selectedItems = selectExpandClause.SelectedItems;
@@ -802,18 +784,6 @@ namespace System.Web.OData.Query.Expressions
                 }
             }
 
-            if (!propertiesToInclude.Any())
-            {
-                // List of proeprties to include is empty, but we still here => need to select properies with long paths
-                containerProperties = new HashSet<String>(entityType.Properties().OfType<IEdmStructuralProperty>()
-                    .Select(p => model.GetAnnotationValue<ClrPropertyInfoAnnotation>(p))
-                    .Where(pa => pa != null && pa.PropertiesPath != null && pa.PropertiesPath.Any())
-                    .SelectMany(pa => pa.PropertiesPath)
-                    .Select(ps => ps.Name)
-                    .Distinct());
-            }
-           
-
             return propertiesToInclude;
         }
 
@@ -824,11 +794,7 @@ namespace System.Web.OData.Query.Expressions
                 return true;
             }
 
-            if (selectExpandClause.AllSelected || selectExpandClause.SelectedItems.OfType<WildcardSelectItem>().Any()
-                // EF fails with StackOverflow when tries to generate SELECT clause with more than MaxEFColumns columns
-                // Convert long $select=... to $select=* as woraround until https://github.com/dotnet/corefx/pull/11091 will be ported to .NET and included in official version
-                || selectExpandClause.SelectedItems.OfType<PathSelectItem>().Count() > MaxEFColumns
-                )
+            if (selectExpandClause.AllSelected || selectExpandClause.SelectedItems.OfType<WildcardSelectItem>().Any())
             {
                 return true;
             }

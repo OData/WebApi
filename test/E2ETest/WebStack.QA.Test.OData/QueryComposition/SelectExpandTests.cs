@@ -29,6 +29,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                   new TestAssemblyResolver(
                       typeof(SelectCustomerController),
                       typeof(EFSelectCustomersController),
+                      typeof(EFWideCustomersController),
                       typeof(EFSelectOrdersController)));
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
@@ -50,6 +51,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             builder.EntityType<SelectPremiumCustomer>();
             builder.EntitySet<SelectOrder>("SelectOrder");
             builder.EntitySet<SelectBonus>("SelectBonus");
+            builder.EntitySet<EFWideCustomer>("EFWideCustomers");
             builder.Action("ResetDataSource");
             builder.Action("ResetDataSource-Order");
 
@@ -619,6 +621,36 @@ namespace WebStack.QA.Test.OData.QueryComposition
             Assert.Equal(expandProp[0]["Id"], 2);
         }
 
+        [Fact]
+        public void QueryForLongSelectList()
+        {
+            // Arrange
+            RestoreData();
+            string queryUrl = string.Format("{0}/selectexpand/EFWideCustomers?" +
+                "$select=Id,"+ string.Join(",", Enumerable.Range(1,298).Select(i => string.Format("Prop{0:000}", i))), BaseAddress);
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Act
+            response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
+            var responseObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var result = responseObject["value"] as JArray;
+            Assert.Equal(result.Count, 1);
+            Assert.Equal(result[0]["Prop001"], "Prop001");
+            Assert.Equal(result[0]["Prop099"], "Prop099");
+            Assert.Equal(result[0]["Prop199"], "Prop199");
+            Assert.Equal(result[0]["Prop298"], "Prop298");
+            Assert.Null(result[0]["Prop299"]);
+        }
+
         private void RestoreData(string suffix = null)
         {
             string requestUri = BaseAddress + $"/selectexpand/ResetDataSource{suffix}";
@@ -752,7 +784,29 @@ namespace WebStack.QA.Test.OData.QueryComposition
                 }
             };
             _db.Customers.Add(customer);
+
+            var wideCustomer = new EFWideCustomer
+            {
+                Id = 1,
+                Prop001 = "Prop001",
+                Prop099 = "Prop099",
+                Prop199 = "Prop199",
+                Prop298 = "Prop298",
+                Prop299 = "Prop299",
+            };
+            _db.WideCustomers.Add(wideCustomer);
             _db.SaveChanges();
+        }
+    }
+
+    public class EFWideCustomersController : ODataController
+    {
+        private readonly SampleContext _db = new SampleContext();
+
+        [EnableQuery]
+        public IHttpActionResult Get()
+        {
+            return Ok(_db.WideCustomers);
         }
     }
 
@@ -797,7 +851,6 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
     public class SampleContext : DbContext
     {
-        //todo: do not checkin
         public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=SelectExpandTest";
 
         public SampleContext()
@@ -808,6 +861,8 @@ namespace WebStack.QA.Test.OData.QueryComposition
         public DbSet<EFSelectCustomer> Customers { get; set; }
 
         public DbSet<SelectCustomer> SelectCustomers { get; set; }
+
+        public DbSet<EFWideCustomer> WideCustomers { get; set; }
 
         public DbSet<EFSelectOrder> Orders { get; set; }
     }
@@ -867,5 +922,334 @@ namespace WebStack.QA.Test.OData.QueryComposition
         public string Name { get; set; }
         public int Ammount { get; set; }
         public double Price { get; set; }
+    }
+
+    public class EFWideCustomer
+    {
+        public int Id { get; set; }
+        public string Prop001 { get; set; }
+        public string Prop002 { get; set; }
+        public string Prop003 { get; set; }
+        public string Prop004 { get; set; }
+        public string Prop005 { get; set; }
+        public string Prop006 { get; set; }
+        public string Prop007 { get; set; }
+        public string Prop008 { get; set; }
+        public string Prop009 { get; set; }
+        public string Prop010 { get; set; }
+        public string Prop011 { get; set; }
+        public string Prop012 { get; set; }
+        public string Prop013 { get; set; }
+        public string Prop014 { get; set; }
+        public string Prop015 { get; set; }
+        public string Prop016 { get; set; }
+        public string Prop017 { get; set; }
+        public string Prop018 { get; set; }
+        public string Prop019 { get; set; }
+        public string Prop020 { get; set; }
+        public string Prop021 { get; set; }
+        public string Prop022 { get; set; }
+        public string Prop023 { get; set; }
+        public string Prop024 { get; set; }
+        public string Prop025 { get; set; }
+        public string Prop026 { get; set; }
+        public string Prop027 { get; set; }
+        public string Prop028 { get; set; }
+        public string Prop029 { get; set; }
+
+        public string Prop030 { get; set; }
+        public string Prop031 { get; set; }
+        public string Prop032 { get; set; }
+        public string Prop033 { get; set; }
+        public string Prop034 { get; set; }
+        public string Prop035 { get; set; }
+        public string Prop036 { get; set; }
+        public string Prop037 { get; set; }
+        public string Prop038 { get; set; }
+        public string Prop039 { get; set; }
+
+        public string Prop040 { get; set; }
+        public string Prop041 { get; set; }
+        public string Prop042 { get; set; }
+        public string Prop043 { get; set; }
+        public string Prop044 { get; set; }
+        public string Prop045 { get; set; }
+        public string Prop046 { get; set; }
+        public string Prop047 { get; set; }
+        public string Prop048 { get; set; }
+        public string Prop049 { get; set; }
+
+        public string Prop050 { get; set; }
+        public string Prop051 { get; set; }
+        public string Prop052 { get; set; }
+        public string Prop053 { get; set; }
+        public string Prop054 { get; set; }
+        public string Prop055 { get; set; }
+        public string Prop056 { get; set; }
+        public string Prop057 { get; set; }
+        public string Prop058 { get; set; }
+        public string Prop059 { get; set; }
+
+        public string Prop060 { get; set; }
+        public string Prop061 { get; set; }
+        public string Prop062 { get; set; }
+        public string Prop063 { get; set; }
+        public string Prop064 { get; set; }
+        public string Prop065 { get; set; }
+        public string Prop066 { get; set; }
+        public string Prop067 { get; set; }
+        public string Prop068 { get; set; }
+        public string Prop069 { get; set; }
+
+        public string Prop070 { get; set; }
+        public string Prop071 { get; set; }
+        public string Prop072 { get; set; }
+        public string Prop073 { get; set; }
+        public string Prop074 { get; set; }
+        public string Prop075 { get; set; }
+        public string Prop076 { get; set; }
+        public string Prop077 { get; set; }
+        public string Prop078 { get; set; }
+        public string Prop079 { get; set; }
+
+        public string Prop080 { get; set; }
+        public string Prop081 { get; set; }
+        public string Prop082 { get; set; }
+        public string Prop083 { get; set; }
+        public string Prop084 { get; set; }
+        public string Prop085 { get; set; }
+        public string Prop086 { get; set; }
+        public string Prop087 { get; set; }
+        public string Prop088 { get; set; }
+        public string Prop089 { get; set; }
+
+        public string Prop090 { get; set; }
+        public string Prop091 { get; set; }
+        public string Prop092 { get; set; }
+        public string Prop093 { get; set; }
+        public string Prop094 { get; set; }
+        public string Prop095 { get; set; }
+        public string Prop096 { get; set; }
+        public string Prop097 { get; set; }
+        public string Prop098 { get; set; }
+        public string Prop099 { get; set; }
+
+        public string Prop100 { get; set; }
+        public string Prop101 { get; set; }
+        public string Prop102 { get; set; }
+        public string Prop103 { get; set; }
+        public string Prop104 { get; set; }
+        public string Prop105 { get; set; }
+        public string Prop106 { get; set; }
+        public string Prop107 { get; set; }
+        public string Prop108 { get; set; }
+        public string Prop109 { get; set; }
+        public string Prop110 { get; set; }
+        public string Prop111 { get; set; }
+        public string Prop112 { get; set; }
+        public string Prop113 { get; set; }
+        public string Prop114 { get; set; }
+        public string Prop115 { get; set; }
+        public string Prop116 { get; set; }
+        public string Prop117 { get; set; }
+        public string Prop118 { get; set; }
+        public string Prop119 { get; set; }
+        public string Prop120 { get; set; }
+        public string Prop121 { get; set; }
+        public string Prop122 { get; set; }
+        public string Prop123 { get; set; }
+        public string Prop124 { get; set; }
+        public string Prop125 { get; set; }
+        public string Prop126 { get; set; }
+        public string Prop127 { get; set; }
+        public string Prop128 { get; set; }
+        public string Prop129 { get; set; }
+
+        public string Prop130 { get; set; }
+        public string Prop131 { get; set; }
+        public string Prop132 { get; set; }
+        public string Prop133 { get; set; }
+        public string Prop134 { get; set; }
+        public string Prop135 { get; set; }
+        public string Prop136 { get; set; }
+        public string Prop137 { get; set; }
+        public string Prop138 { get; set; }
+        public string Prop139 { get; set; }
+
+        public string Prop140 { get; set; }
+        public string Prop141 { get; set; }
+        public string Prop142 { get; set; }
+        public string Prop143 { get; set; }
+        public string Prop144 { get; set; }
+        public string Prop145 { get; set; }
+        public string Prop146 { get; set; }
+        public string Prop147 { get; set; }
+        public string Prop148 { get; set; }
+        public string Prop149 { get; set; }
+
+        public string Prop150 { get; set; }
+        public string Prop151 { get; set; }
+        public string Prop152 { get; set; }
+        public string Prop153 { get; set; }
+        public string Prop154 { get; set; }
+        public string Prop155 { get; set; }
+        public string Prop156 { get; set; }
+        public string Prop157 { get; set; }
+        public string Prop158 { get; set; }
+        public string Prop159 { get; set; }
+
+        public string Prop160 { get; set; }
+        public string Prop161 { get; set; }
+        public string Prop162 { get; set; }
+        public string Prop163 { get; set; }
+        public string Prop164 { get; set; }
+        public string Prop165 { get; set; }
+        public string Prop166 { get; set; }
+        public string Prop167 { get; set; }
+        public string Prop168 { get; set; }
+        public string Prop169 { get; set; }
+
+        public string Prop170 { get; set; }
+        public string Prop171 { get; set; }
+        public string Prop172 { get; set; }
+        public string Prop173 { get; set; }
+        public string Prop174 { get; set; }
+        public string Prop175 { get; set; }
+        public string Prop176 { get; set; }
+        public string Prop177 { get; set; }
+        public string Prop178 { get; set; }
+        public string Prop179 { get; set; }
+
+        public string Prop180 { get; set; }
+        public string Prop181 { get; set; }
+        public string Prop182 { get; set; }
+        public string Prop183 { get; set; }
+        public string Prop184 { get; set; }
+        public string Prop185 { get; set; }
+        public string Prop186 { get; set; }
+        public string Prop187 { get; set; }
+        public string Prop188 { get; set; }
+        public string Prop189 { get; set; }
+
+        public string Prop190 { get; set; }
+        public string Prop191 { get; set; }
+        public string Prop192 { get; set; }
+        public string Prop193 { get; set; }
+        public string Prop194 { get; set; }
+        public string Prop195 { get; set; }
+        public string Prop196 { get; set; }
+        public string Prop197 { get; set; }
+        public string Prop198 { get; set; }
+        public string Prop199 { get; set; }
+
+
+        public string Prop200 { get; set; }
+        public string Prop201 { get; set; }
+        public string Prop202 { get; set; }
+        public string Prop203 { get; set; }
+        public string Prop204 { get; set; }
+        public string Prop205 { get; set; }
+        public string Prop206 { get; set; }
+        public string Prop207 { get; set; }
+        public string Prop208 { get; set; }
+        public string Prop209 { get; set; }
+        public string Prop210 { get; set; }
+        public string Prop211 { get; set; }
+        public string Prop212 { get; set; }
+        public string Prop213 { get; set; }
+        public string Prop214 { get; set; }
+        public string Prop215 { get; set; }
+        public string Prop216 { get; set; }
+        public string Prop217 { get; set; }
+        public string Prop218 { get; set; }
+        public string Prop219 { get; set; }
+        public string Prop220 { get; set; }
+        public string Prop221 { get; set; }
+        public string Prop222 { get; set; }
+        public string Prop223 { get; set; }
+        public string Prop224 { get; set; }
+        public string Prop225 { get; set; }
+        public string Prop226 { get; set; }
+        public string Prop227 { get; set; }
+        public string Prop228 { get; set; }
+        public string Prop229 { get; set; }
+
+        public string Prop230 { get; set; }
+        public string Prop231 { get; set; }
+        public string Prop232 { get; set; }
+        public string Prop233 { get; set; }
+        public string Prop234 { get; set; }
+        public string Prop235 { get; set; }
+        public string Prop236 { get; set; }
+        public string Prop237 { get; set; }
+        public string Prop238 { get; set; }
+        public string Prop239 { get; set; }
+
+        public string Prop240 { get; set; }
+        public string Prop241 { get; set; }
+        public string Prop242 { get; set; }
+        public string Prop243 { get; set; }
+        public string Prop244 { get; set; }
+        public string Prop245 { get; set; }
+        public string Prop246 { get; set; }
+        public string Prop247 { get; set; }
+        public string Prop248 { get; set; }
+        public string Prop249 { get; set; }
+
+        public string Prop250 { get; set; }
+        public string Prop251 { get; set; }
+        public string Prop252 { get; set; }
+        public string Prop253 { get; set; }
+        public string Prop254 { get; set; }
+        public string Prop255 { get; set; }
+        public string Prop256 { get; set; }
+        public string Prop257 { get; set; }
+        public string Prop258 { get; set; }
+        public string Prop259 { get; set; }
+
+        public string Prop260 { get; set; }
+        public string Prop261 { get; set; }
+        public string Prop262 { get; set; }
+        public string Prop263 { get; set; }
+        public string Prop264 { get; set; }
+        public string Prop265 { get; set; }
+        public string Prop266 { get; set; }
+        public string Prop267 { get; set; }
+        public string Prop268 { get; set; }
+        public string Prop269 { get; set; }
+
+        public string Prop270 { get; set; }
+        public string Prop271 { get; set; }
+        public string Prop272 { get; set; }
+        public string Prop273 { get; set; }
+        public string Prop274 { get; set; }
+        public string Prop275 { get; set; }
+        public string Prop276 { get; set; }
+        public string Prop277 { get; set; }
+        public string Prop278 { get; set; }
+        public string Prop279 { get; set; }
+
+        public string Prop280 { get; set; }
+        public string Prop281 { get; set; }
+        public string Prop282 { get; set; }
+        public string Prop283 { get; set; }
+        public string Prop284 { get; set; }
+        public string Prop285 { get; set; }
+        public string Prop286 { get; set; }
+        public string Prop287 { get; set; }
+        public string Prop288 { get; set; }
+        public string Prop289 { get; set; }
+
+        public string Prop290 { get; set; }
+        public string Prop291 { get; set; }
+        public string Prop292 { get; set; }
+        public string Prop293 { get; set; }
+        public string Prop294 { get; set; }
+        public string Prop295 { get; set; }
+        public string Prop296 { get; set; }
+        public string Prop297 { get; set; }
+        public string Prop298 { get; set; }
+        public string Prop299 { get; set; }
+
     }
 }

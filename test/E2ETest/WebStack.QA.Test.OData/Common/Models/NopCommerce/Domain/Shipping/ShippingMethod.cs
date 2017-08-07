@@ -9,7 +9,7 @@ namespace Nop.Core.Domain.Shipping
     /// </summary>
     public partial class ShippingMethod : BaseEntity, ILocalizedEntity
     {
-        private ICollection<Country> _restrictedCountries;
+        private ICollection<CountryOrRegion> _restrictedCountries;
 
         /// <summary>
         /// Gets or sets the name
@@ -27,11 +27,11 @@ namespace Nop.Core.Domain.Shipping
         public virtual int DisplayOrder { get; set; }
 
         /// <summary>
-        /// Gets or sets the restricted countries
+        /// Gets or sets the restricted countries/regions
         /// </summary>
-        public virtual ICollection<Country> RestrictedCountries
+        public virtual ICollection<CountryOrRegion> RestrictedCountries
         {
-            get { return _restrictedCountries ?? (_restrictedCountries = new List<Country>()); }
+            get { return _restrictedCountries ?? (_restrictedCountries = new List<CountryOrRegion>()); }
             protected set { _restrictedCountries = value; }
         }
     }

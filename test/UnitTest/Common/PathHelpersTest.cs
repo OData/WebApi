@@ -21,7 +21,7 @@ namespace System.Web.Test
         [InlineData("foo.Baz", "bar")]
         [InlineData("", "bar")]
         [InlineData("Bar", "bar")]
-        [InlineData("fooBar", "bar")]
+        [InlineData("sthBar", "bar")]
         public void EndsWithExtensionReturnsFalse(string path, string extension)
         {
             Assert.False(PathHelpers.EndsWithExtension(path, extension));

@@ -70,12 +70,12 @@ namespace WebStack.QA.Test.OData.ModelAliasing
         public string SecondLine { get; set; }
         public int ZipCode { get; set; }
         public string City { get; set; }
-        public ModelAliasingMetadataRegion Country { get; set; }
+        public ModelAliasingMetadataRegion CountryOrRegion { get; set; }
     }
 
     public class ModelAliasingMetadataRegion
     {
-        public string Country { get; set; }
+        public string CountryOrRegion { get; set; }
         public string State { get; set; }
     }
 }

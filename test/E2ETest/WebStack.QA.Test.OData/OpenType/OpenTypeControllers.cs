@@ -209,7 +209,7 @@
 
             Accounts[0].AccountInfo.DynamicProperties["Subs"] = new string[] { "Xbox", "Windows", "Office" };
 
-            Accounts[0].Address.DynamicProperties["Country"] = "US";
+            Accounts[0].Address.DynamicProperties["CountryOrRegion"] = "US";
             Accounts[0].Tags.DynamicProperties["Tag1"] = "Value 1";
             Accounts[0].Tags.DynamicProperties["Tag2"] = "Value 2";
 
@@ -219,7 +219,7 @@
 
             Accounts[1].AccountInfo.DynamicProperties["Subs"] = new string[] { "Xbox", "Windows" };
 
-            Accounts[1].Address.DynamicProperties["Country"] = "China";
+            Accounts[1].Address.DynamicProperties["CountryOrRegion"] = "China";
             Accounts[1].Tags.DynamicProperties["Tag1"] = "abc";
 
             Accounts[2].AccountInfo.DynamicProperties["Age"] = 30;
@@ -228,7 +228,7 @@
 
             Accounts[2].AccountInfo.DynamicProperties["Subs"] = new string[] { "Windows", "Office" };
 
-            Accounts[2].Address.DynamicProperties["Country"] = "China";
+            Accounts[2].Address.DynamicProperties["CountryOrRegion"] = "China";
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]

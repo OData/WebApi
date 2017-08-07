@@ -5,9 +5,9 @@ using Nop.Core.Domain.Shipping;
 namespace Nop.Core.Domain.Directory
 {
     /// <summary>
-    /// Represents a country
+    /// Represents a country/region
     /// </summary>
-    public partial class Country : BaseEntity, ILocalizedEntity
+    public partial class CountryOrRegion : BaseEntity, ILocalizedEntity
     {
         private ICollection<StateProvince> _stateProvinces;
         private ICollection<ShippingMethod> _restrictedShippingMethods;
@@ -19,12 +19,12 @@ namespace Nop.Core.Domain.Directory
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether billing is allowed to this country
+        /// Gets or sets a value indicating whether billing is allowed to this country/region
         /// </summary>
         public virtual bool AllowsBilling { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether shipping is allowed to this country
+        /// Gets or sets a value indicating whether shipping is allowed to this country/region
         /// </summary>
         public virtual bool AllowsShipping { get; set; }
 
@@ -44,7 +44,7 @@ namespace Nop.Core.Domain.Directory
         public virtual int NumericIsoCode { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether customers in this country must be charged EU VAT
+        /// Gets or sets a value indicating whether customers in this country/region must be charged EU VAT
         /// </summary>
         public virtual bool SubjectToVat { get; set; }
 

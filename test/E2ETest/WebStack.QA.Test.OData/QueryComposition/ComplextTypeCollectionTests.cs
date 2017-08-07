@@ -112,19 +112,19 @@ namespace WebStack.QA.Test.OData.QueryComposition
             var address1 = new ComplextTypeCollectionTests_Address();
             address1.City = "Bellevue";
             address1.State = "WA";
-            address1.Country = "USA";
+            address1.CountryOrRegion = "USA";
             address1.Zipcode = 98007;
 
             var address2 = new ComplextTypeCollectionTests_Address();
             address2.City = "Redmond";
             address2.State = "WA";
-            address2.Country = "USA";
+            address2.CountryOrRegion = "USA";
             address2.Zipcode = 98052;
 
             var address3 = new ComplextTypeCollectionTests_Address();
             address3.City = "Issaquah";
             address3.State = "WA";
-            address3.Country = "USA";
+            address3.CountryOrRegion = "USA";
             address3.Zipcode = 98029;
 
             ComplextTypeCollectionTests_Person person = new ComplextTypeCollectionTests_Person();
@@ -191,7 +191,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
         public string Line2 { get; set; }
         public string City { get; set; }
         public string State { get; set; }
-        public string Country { get; set; }
+        public string CountryOrRegion { get; set; }
         public int Zipcode { get; set; }
     }
 

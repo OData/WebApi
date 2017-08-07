@@ -47,11 +47,11 @@ namespace WebStack.QA.Test.OData.AlternateKeys
             // entity type 'Person' with composed alternate keys
             EdmEntityType person = new EdmEntityType("NS", "Person");
             person.AddKeys(person.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
-            var country = person.AddStructuralProperty("Country", EdmPrimitiveTypeKind.String);
+            var countryRegion = person.AddStructuralProperty("Country_Region", EdmPrimitiveTypeKind.String);
             var passport = person.AddStructuralProperty("Passport", EdmPrimitiveTypeKind.String);
             model.AddAlternateKeyAnnotation(person, new Dictionary<string, IEdmProperty>
             {
-                {"Country", country},
+                {"Country_Region", countryRegion},
                 {"Passport", passport}
             });
             model.AddElement(person);

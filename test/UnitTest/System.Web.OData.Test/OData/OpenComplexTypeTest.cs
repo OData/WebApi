@@ -43,7 +43,7 @@ namespace System.Web.OData
             Assert.Equal("Street 2", result["Street"]);
             Assert.Equal("City 2", result["City"]);
             Assert.Equal("300", result["IntProp"]);
-            Assert.Equal("My Dynamic Country", result["Country"]);
+            Assert.Equal("My Dynamic Place", result["Place"]);
             Assert.Equal("2c1f450a-a2a7-4fe1-a25d-4d9332fc0694", result["Token"]);
             Assert.Equal("2015-03-02", result["Birthday"]);
             if (enableNullDynamicProperty)
@@ -65,7 +65,7 @@ namespace System.Web.OData
               "\"@odata.context\":\"http://localhost/odata/$metadata#OpenCustomers/$entity\"," +
               "\"CustomerId\":6,\"Name\":\"FirstName 6\"," +
               "\"Address\":{" +
-                "\"Street\":\"Street 6\",\"City\":\"City 6\",\"Country@odata.type\":\"#String\",\"Country\":\"Earth\",\"Token@odata.type\":\"#Guid\"," +
+                "\"Street\":\"Street 6\",\"City\":\"City 6\",\"Place@odata.type\":\"#String\",\"Place\":\"Earth\",\"Token@odata.type\":\"#Guid\"," +
                 "\"Token\":\"4DB52263-4382-4BCB-A63E-3129C1B5FA0D\"," +
                 "\"Number@odata.type\":\"#Int32\"," +
                 "\"Number\":990," +
@@ -90,7 +90,7 @@ namespace System.Web.OData
             Assert.True(response.IsSuccessStatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
             Assert.Equal("http://localhost/odata/$metadata#OpenCustomers/$entity", result["@odata.context"]);
-            Assert.Equal("Earth", result["Address"]["Country"]);
+            Assert.Equal("Earth", result["Address"]["Place"]);
             Assert.Equal(990, result["Address"]["Number"]);
             Assert.Equal("4DB52263-4382-4BCB-A63E-3129C1B5FA0D".ToLower(), result["Address"]["Token"]);
             Assert.Equal("11:12:13.0140000", result["Address"]["BirthTime"]);
@@ -214,7 +214,7 @@ namespace System.Web.OData
             OpenAddress address = customer.Address;
 
             // Add more dynamic properties
-            address.DynamicProperties.Add("Country", "My Dynamic Country");
+            address.DynamicProperties.Add("Place", "My Dynamic Place");
             address.DynamicProperties.Add("Token", new Guid("2C1F450A-A2A7-4FE1-A25D-4D9332FC0694"));
             address.DynamicProperties.Add("Birthday", new Date(2015, 3, 2));
             address.DynamicProperties.Add("Region", null);
@@ -225,7 +225,7 @@ namespace System.Web.OData
         {
             // Verify there is a string dynamic property
             object countryValue;
-            customer.Address.DynamicProperties.TryGetValue("Country", out countryValue);
+            customer.Address.DynamicProperties.TryGetValue("Place", out countryValue);
             Assert.NotNull(countryValue);
             Assert.IsType<string>(countryValue);
             Assert.Equal("Earth", countryValue);

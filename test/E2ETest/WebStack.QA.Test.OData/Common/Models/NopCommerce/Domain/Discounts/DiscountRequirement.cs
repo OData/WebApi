@@ -21,12 +21,12 @@
         public virtual decimal SpentAmount { get; set; }
 
         /// <summary>
-        /// Gets or sets the discount requirement - customer's billing country is... (used when requirement is set to "Billing country is")
+        /// Gets or sets the discount requirement - customer's billing country/region is... (used when requirement is set to "Billing country/region is")
         /// </summary>
         public virtual int BillingCountryId { get; set; }
 
         /// <summary>
-        /// Gets or sets the discount requirement - customer's shipping country is... (used when requirement is set to "Shipping country is")
+        /// Gets or sets the discount requirement - customer's shipping country/region is... (used when requirement is set to "Shipping country/region is")
         /// </summary>
         public virtual int ShippingCountryId { get; set; }
 

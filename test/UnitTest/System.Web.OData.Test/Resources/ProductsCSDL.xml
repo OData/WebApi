@@ -44,7 +44,7 @@
         <Property Name="City" Type="Edm.String" />
         <Property Name="State" Type="Edm.String" />
         <Property Name="ZipCode" Type="Edm.String" />
-        <Property Name="Country" Type="Edm.String" />
+        <Property Name="CountryOrRegion" Type="Edm.String" />
       </ComplexType>
       <Function Name="GetProductsByRating" m:HttpMethod="GET">
         <ReturnType Type="Collection(ODataDemo.Product)" />

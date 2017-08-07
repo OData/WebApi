@@ -42,7 +42,7 @@ namespace System.Web.OData.Formatter.Serialization
             addressType.AddStructuralProperty("Street", EdmPrimitiveTypeKind.String);
             addressType.AddStructuralProperty("City", EdmPrimitiveTypeKind.String);
             addressType.AddStructuralProperty("State", EdmPrimitiveTypeKind.String);
-            addressType.AddStructuralProperty("Country", EdmPrimitiveTypeKind.String);
+            addressType.AddStructuralProperty("CountryOrRegion", EdmPrimitiveTypeKind.String);
             addressType.AddStructuralProperty("ZipCode", EdmPrimitiveTypeKind.String);
             model.AddElement(addressType);
 

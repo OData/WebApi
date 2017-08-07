@@ -91,7 +91,7 @@ namespace Nop.Core.Domain.Tax
         public bool EuVatEnabled { get; set; }
 
         /// <summary>
-        /// Gets or sets a shop country identifier
+        /// Gets or sets a shop country/region identifier
         /// </summary>
         public int EuVatShopCountryId { get; set; }
 

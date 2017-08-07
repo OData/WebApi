@@ -26,7 +26,7 @@ namespace Nop.Core.Domain.Common
         public virtual string Company { get; set; }
 
         /// <summary>
-        /// Gets or sets the country identifier
+        /// Gets or sets the country/region identifier
         /// </summary>
         public virtual int? CountryId { get; set; }
 
@@ -71,9 +71,9 @@ namespace Nop.Core.Domain.Common
         public virtual DateTimeOffset CreatedOnUtc { get; set; }
 
         /// <summary>
-        /// Gets or sets the country
+        /// Gets or sets the country/region
         /// </summary>
-        public virtual Country Country { get; set; }
+        public virtual CountryOrRegion CountryOrRegion { get; set; }
 
         /// <summary>
         /// Gets or sets the state/province
@@ -89,7 +89,7 @@ namespace Nop.Core.Domain.Common
                 LastName = this.LastName,
                 Email = this.Email,
                 Company = this.Company,
-                Country = this.Country,
+                CountryOrRegion = this.CountryOrRegion,
                 CountryId = this.CountryId,
                 StateProvince = this.StateProvince,
                 StateProvinceId = this.StateProvinceId,

@@ -7,6 +7,6 @@
         "City":"Supplier City",
         "State":"WA",
         "ZipCode":"123456",
-        "Country":"USA"
+        "CountryOrRegion":"USA"
     }
 }

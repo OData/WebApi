@@ -58,7 +58,7 @@
 
     }
 
-    // This is an open complex type，which may contain dynamic properties: country(string)
+    // This is an open complex type，which may contain dynamic properties: countryOrRegion(string)
     public class Address
     {
         public Address()

@@ -82,22 +82,22 @@
     public partial class Address
     {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.OData.Client.Design.T4", "1.0.0")]
-        public string Country
+        public string CountryOrRegion
         {
             get
             {
-                return this._Country;
+                return this._countryOrRegion;
             }
             set
             {
                 this.OnCountryChanging(value);
-                this._Country = value;
+                this._countryOrRegion = value;
                 this.OnCountryChanged();
-                this.OnPropertyChanged("Country");
+                this.OnPropertyChanged("CountryOrRegion");
             }
         }
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.OData.Client.Design.T4", "1.0.0")]
-        private string _Country;
+        private string _countryOrRegion;
         partial void OnCountryChanging(string value);
         partial void OnCountryChanged();
     }

@@ -101,7 +101,6 @@ namespace WebStack.QA.Test.OData.QueryComposition
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(response.Content);
             content = response.Content.ReadAsStringAsync().Result;
-            Console.WriteLine(content);
 
             result = JObject.Parse(content);
             Assert.NotNull(result);
@@ -127,7 +126,6 @@ namespace WebStack.QA.Test.OData.QueryComposition
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(response.Content);
             content = response.Content.ReadAsStringAsync().Result;
-            Console.WriteLine(content);
 
             result = JObject.Parse(content);
             Assert.NotNull(result);
@@ -148,11 +146,11 @@ namespace WebStack.QA.Test.OData.QueryComposition
             string content;
 
             response = client.SendAsync(request).Result;
+
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(response.Content);
             content = response.Content.ReadAsStringAsync().Result;
-            Console.WriteLine(content);
 
             result = JObject.Parse(content);
             Assert.NotNull(result);

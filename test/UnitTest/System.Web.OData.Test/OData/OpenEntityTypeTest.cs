@@ -60,7 +60,7 @@ namespace System.Web.OData
             }
         }
 
-        [Theory] 
+        [Theory]
         [InlineData("http://localhost/odata/SimpleOpenCustomers?$orderby=Token&$filter=Token ne null", new[] { 2, 4 })]
         [InlineData("http://localhost/odata/SimpleOpenCustomers?$orderby=Token desc&$filter=Token ne null", new[] { 4, 2 })]
         [InlineData("http://localhost/odata/SimpleOpenCustomers?$filter=Token ne null", new[] { 2, 4 })]
@@ -113,8 +113,8 @@ namespace System.Web.OData
         [Theory]
         [InlineData("/$count", "1")]
         [InlineData("(1)/DeclaredNumbers/$count", "2")]
-        [InlineData("(1)/DeclaredColors/$count", "3")] 
-        [InlineData("(1)/DeclaredAddresses/$count", "2")] 
+        [InlineData("(1)/DeclaredColors/$count", "3")]
+        [InlineData("(1)/DeclaredAddresses/$count", "2")]
         public void Get_UnTyped_DollarCount(string requestUri, string expectedResult)
         {
             // Arrange
@@ -206,12 +206,12 @@ namespace System.Web.OData
               "\"@odata.context\":\"http://localhost/odata/$metadata#OpenCustomers/$entity\"," +
               "\"CustomerId\":6,\"Name\":\"FirstName 6\"," +
               "\"Address\":{" +
-                "\"Street\":\"Street 6\",\"City\":\"City 6\",\"Country\":\"Earth\",\"Token@odata.type\":\"#Guid\"," +
+                "\"Street\":\"Street 6\",\"City\":\"City 6\",\"Place\":\"Earth\",\"Token@odata.type\":\"#Guid\"," +
                 "\"Token\":\"4DB52263-4382-4BCB-A63E-3129C1B5FA0D\"," +
                 "\"Number\":990" +
               "}," +
               "\"Website\": \"WebSite #6\"," +
-              "\"Country@odata.type\":\"#String\",\"Country\":\"My Dynamic Country\"," + // odata.type is necessary, otherwise it will get an ODataUntypedValue
+              "\"Place@odata.type\":\"#String\",\"Place\":\"My Dynamic Place\"," + // odata.type is necessary, otherwise it will get an ODataUntypedValue
               "\"Token@odata.type\":\"#Guid\",\"Token\":\"2c1f450a-a2a7-4fe1-a25d-4d9332fc0694\"," +
               "\"DoubleList@odata.type\":\"#Collection(Double)\"," +
               "\"DoubleList\":[5.5, 4.4, 3.3]" +
@@ -236,14 +236,14 @@ namespace System.Web.OData
 
         [Fact]
         public void Post_UnTyped_OpenEntityType()
-        { 
+        {
             // Arrange
-            const string Payload = "{" + 
+            const string Payload = "{" +
               "\"@odata.context\":\"http://localhost/odata/$metadata#UntypedSimpleOpenCustomers/$entity\"," +
               "\"CustomerId\":6,\"Name@odata.type\":\"#String\",\"Name\":\"FirstName 6\"," +
               "\"Address\":{" +
                 "\"@odata.type\":\"#NS.Address\",\"Street\":\"Street 6\",\"City\":\"City 6\"" +
-              "}," + 
+              "}," +
               "\"Addresses@odata.type\":\"#Collection(NS.Address)\"," +
               "\"Addresses\":[{" +
                 "\"@odata.type\":\"#NS.Address\",\"Street\":\"Street 7\",\"City\":\"City 7\"" +
@@ -363,7 +363,7 @@ namespace System.Web.OData
             EdmComplexType address = new EdmComplexType("NS", "Address", null, false, true);
             address.AddStructuralProperty("Street", EdmPrimitiveTypeKind.String);
             model.AddElement(address);
-            IEdmCollectionTypeReference complexCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(address.ToEdmTypeReference(false)));   
+            IEdmCollectionTypeReference complexCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(address.ToEdmTypeReference(false)));
 
             // enum type color
             EdmEnumType color = new EdmEnumType("NS", "Color");
@@ -386,10 +386,10 @@ namespace System.Web.OData
             model.AddElement(customer);
 
             EdmAction action = new EdmAction(
-                "NS", 
-                "AddColor", 
-                null, 
-                isBound: true, 
+                "NS",
+                "AddColor",
+                null,
+                isBound: true,
                 entitySetPathExpression: null);
             action.AddParameter("bindingParameter", new EdmEntityTypeReference(customer, false));
             action.AddParameter("Color", new EdmEnumTypeReference(color, true));
@@ -449,10 +449,10 @@ namespace System.Web.OData
         {
             // Verify there is a string dynamic property
             object countryValue;
-            customer.CustomerProperties.TryGetValue("Country", out countryValue);
+            customer.CustomerProperties.TryGetValue("Place", out countryValue);
             Assert.NotNull(countryValue);
             Assert.Equal(typeof(String), countryValue.GetType());
-            Assert.Equal("My Dynamic Country", countryValue);
+            Assert.Equal("My Dynamic Place", countryValue);
 
             // Verify there is a Guid dynamic property
             object tokenValue;
@@ -554,7 +554,7 @@ namespace System.Web.OData
             return customers;
         }
     }
-    
+
     // Controller
     public class UntypedSimpleOpenCustomersController : ODataController
     {

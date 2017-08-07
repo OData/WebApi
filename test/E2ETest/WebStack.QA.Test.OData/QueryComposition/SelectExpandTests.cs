@@ -97,9 +97,9 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
             response = client.SendAsync(request).Result;
 
-            //Assert.NotNull(response);
-            //Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            //Assert.NotNull(response.Content);
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
             content = response.Content.ReadAsStringAsync().Result;
             Console.WriteLine(content);
 
@@ -123,9 +123,9 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
             response = client.SendAsync(request).Result;
 
-            //Assert.NotNull(response);
-            //Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            //Assert.NotNull(response.Content);
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
             content = response.Content.ReadAsStringAsync().Result;
             Console.WriteLine(content);
 
@@ -148,9 +148,9 @@ namespace WebStack.QA.Test.OData.QueryComposition
             string content;
 
             response = client.SendAsync(request).Result;
-            //Assert.NotNull(response);
-            //Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            //Assert.NotNull(response.Content);
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.NotNull(response.Content);
             content = response.Content.ReadAsStringAsync().Result;
             Console.WriteLine(content);
 
@@ -810,40 +810,6 @@ namespace WebStack.QA.Test.OData.QueryComposition
         {
             return Ok(_db.WideCustomers);
         }
-
-        //[HttpGet]
-        //[ODataRoute("ResetDataSource")]
-        //public IHttpActionResult ResetDataSource()
-        //{
-        //    if (_db.Database.Exists())
-        //    {
-        //        _db.Database.Delete();
-        //        _db.Database.Create();
-        //    }
-
-        //    Generate();
-        //    return Ok();
-        //}
-
-        //public void Generate()
-        //{
-        //    var wideCustomer = new EFWideCustomer
-        //    {
-        //        Id = 1,
-        //        Prop001 = "Prop001",
-        //        Prop099 = "Prop099",
-        //    };
-        //    _db.WideCustomers.Add(wideCustomer);
-        //    var wideCustomer2 = new EFWideCustomer
-        //    {
-        //        Id = 2,
-        //        Prop001 = "Prop001",
-        //        Prop099 = "Prop099",
-        //    };
-        //    _db.WideCustomers.Add(wideCustomer2);
-
-        //    _db.SaveChanges();
-        //}
     }
 
     public class EFSelectOrdersController : ODataController

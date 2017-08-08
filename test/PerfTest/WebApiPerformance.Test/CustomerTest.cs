@@ -15,6 +15,7 @@ namespace WebApiPerformance.Test
         }
 
         [Benchmark]
+        [MeasureGCAllocations]
         public void ODataClrTest()
         {
             Uri queryUri = new Uri(serviceFixture.ServiceBaseUri + "/ODataClr?n=1000");
@@ -22,6 +23,7 @@ namespace WebApiPerformance.Test
         }
 
         [Benchmark]
+        [MeasureGCAllocations]
         public void ODataEdmTest()
         {
             Uri queryUri = new Uri(serviceFixture.ServiceBaseUri + "/ODataEdm?n=1000");
@@ -29,6 +31,7 @@ namespace WebApiPerformance.Test
         }
 
         [Benchmark]
+        [MeasureGCAllocations]
         public void WebApiJsonTest()
         {
             Uri queryUri = new Uri(serviceFixture.ServiceBaseUri + "/api/WebApiJson?n=1000");

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+    <metadata>
+        <id>Microsoft.AspNet.WebApi.OData</id>
+        <title>Microsoft ASP.NET Web API 2.2 for OData v1-3</title>
+        <version>$VersionNuGetSemantic$</version>
+        <authors>Microsoft</authors>
+        <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
+        <description>This package contains everything you need to create OData v1-3 endpoints using ASP.NET Web API and to support OData query syntax for your web APIs.</description>
+        <summary>This package contains everything you need to create OData v1-3 endpoints using ASP.NET Web API.</summary>
+        <language>en-US</language>
+        <projectUrl>http://odata.github.io</projectUrl>
+        <licenseUrl>http://www.microsoft.com/web/webpi/eula/net_library_eula_ENU.htm</licenseUrl>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <tags>Microsoft AspNet WebApi AspNetWebApi OData</tags>
+        <dependencies>
+          <dependency id="Microsoft.AspNet.WebApi.Client" version="$WebApiClientPackageDependency$" />
+          <dependency id="Microsoft.AspNet.WebApi.Core" version="$WebApiCorePackageDependency$" />
+          <dependency id="Microsoft.OData.Core" version="$ODataLibPackageDependency$" />
+        </dependencies>
+        <frameworkAssemblies>
+            <frameworkAssembly assemblyName="System.Net.Http" targetFramework="net45"/>
+        </frameworkAssemblies>
+    </metadata>
+  <files>
+    <file src="$ProductRoot$\System.Web.Http.OData.dll" target="lib\net45" />
+    <file src="$ProductRoot$\System.Web.Http.OData.pdb" target="lib\net45" />
+    <file src="$ProductRoot$\System.Web.Http.OData.xml" target="lib\net45" />
+    <file src="$SourcesRoot$\src\System.Web.Http.OData\*.cs" target="src\System.Web.Http.OData" />
+    <file src="$SourcesRoot$\src\System.Web.Http.OData\Extensions\**\*.cs" target="src\System.Web.Http.OData\Extensions" />
+    <file src="$SourcesRoot$\src\System.Web.Http.OData\OData\**\*.cs" target="src\System.Web.Http.OData\OData" />
+    <file src="$SourcesRoot$\src\System.Web.Http.OData\Properties\*.cs" target="src\System.Web.Http.OData\Properties" />
+  </files>
+</package>

@@ -27,7 +27,7 @@ namespace WebStack.QA.Test.OData.Formatter.Atom
             config.AddODataLibAssemblyRedirection();
         }
 
-        [Fact]
+        //[Fact]
         public void SupportPostCollectionPropertyByEntityPayloadAtom()
         {
             SupportPostCollectionPropertyByEntityPayload();

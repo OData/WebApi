@@ -39,31 +39,35 @@ namespace WebStack.QA.Test.OData.Formatter.Atom
             config.AddODataLibAssemblyRedirection();
         }
 
-        [Theory]
-        [InlineData(typeof(Car), "InheritanceTests_MovingObjects")]
-        [InlineData(typeof(Vehicle), "InheritanceTests_MovingObjects")]
-        [InlineData(typeof(Vehicle), "InheritanceTests_Vehicles")]
-        [InlineData(typeof(Car), "InheritanceTests_Cars")]
-        [InlineData(typeof(Car), "InheritanceTests_Vehicles")]
-        [InlineData(typeof(SportBike), "InheritanceTests_Vehicles")]
+        //[Theory]
+        //[InlineData(typeof(Car), "InheritanceTests_MovingObjects")]
+        //[InlineData(typeof(Vehicle), "InheritanceTests_MovingObjects")]
+        //[InlineData(typeof(Vehicle), "InheritanceTests_Vehicles")]
+        //[InlineData(typeof(Car), "InheritanceTests_Cars")]
+        //[InlineData(typeof(Car), "InheritanceTests_Vehicles")]
+        //[InlineData(typeof(SportBike), "InheritanceTests_Vehicles")]
+        //[Trait("Category", "LocalOnly")]
         public void PostGetUpdateAndDeleteAtom(Type entityType, string entitySetName)
         {
             PostGetUpdateAndDelete(entityType, entitySetName);
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public void AddAndRemoveBaseNavigationPropertyInDerivedTypeAtom()
         {
             AddAndRemoveBaseNavigationPropertyInDerivedType();
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public void AddAndRemoveDerivedNavigationPropertyInDerivedTypeAtom()
         {
             AddAndRemoveDerivedNavigationPropertyInDerivedType();
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public override void CreateAndDeleteLinkToDerivedNavigationPropertyOnBaseEntitySet()
         {
             base.CreateAndDeleteLinkToDerivedNavigationPropertyOnBaseEntitySet();

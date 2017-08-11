@@ -59,7 +59,8 @@ namespace WebStack.QA.Test.OData.ODataPathHandler
             return mb.GetEdmModel();
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public void CRUDEntitySetShouldWork()
         {
             Random r = new Random(RandomSeedGenerator.GetRandomSeed());

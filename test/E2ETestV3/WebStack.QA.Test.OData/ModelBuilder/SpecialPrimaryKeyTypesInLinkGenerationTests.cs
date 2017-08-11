@@ -229,7 +229,8 @@ namespace WebStack.QA.Test.OData.ModelBuilder
             return builder.GetEdmModel();
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public void TestGuidTypeAsPrimaryKey()
         {
             DataServiceContext ctx = new DataServiceContext(new Uri(this.BaseAddress));
@@ -249,7 +250,8 @@ namespace WebStack.QA.Test.OData.ModelBuilder
             }
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public void TestStringTypeAsPrimaryKey()
         {
             DataServiceContext ctx = new DataServiceContext(new Uri(this.BaseAddress));
@@ -269,7 +271,8 @@ namespace WebStack.QA.Test.OData.ModelBuilder
             }
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public void TestUIntTypeAsPrimaryKey()
         {
             DataServiceContext ctx = new DataServiceContext(new Uri(this.BaseAddress));
@@ -289,7 +292,8 @@ namespace WebStack.QA.Test.OData.ModelBuilder
             }
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public void TestLongTypeAsPrimaryKey()
         {
             DataServiceContext ctx = new DataServiceContext(new Uri(this.BaseAddress));

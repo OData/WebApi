@@ -7,6 +7,7 @@ using System.Text;
 using System.Web.Http;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
+using Xunit;
 using Xunit.Extensions;
 
 namespace WebStack.QA.Test.OData.Formatter.JsonLight
@@ -42,16 +43,17 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight
             config.AddODataLibAssemblyRedirection();
         }
 
-        [Theory]
-        [InlineData("application/json;odata=minimalmetadata;streaming=true")]
-        [InlineData("application/json;odata=minimalmetadata;streaming=false")]
-        [InlineData("application/json;odata=minimalmetadata")]
-        [InlineData("application/json;odata=fullmetadata;streaming=true")]
-        [InlineData("application/json;odata=fullmetadata;streaming=false")]
-        [InlineData("application/json;odata=fullmetadata")]
-        [InlineData("application/json;streaming=true")]
-        [InlineData("application/json;streaming=false")]
-        [InlineData("application/json")]
+        //[Theory]
+        //[InlineData("application/json;odata=minimalmetadata;streaming=true")]
+        //[InlineData("application/json;odata=minimalmetadata;streaming=false")]
+        //[InlineData("application/json;odata=minimalmetadata")]
+        //[InlineData("application/json;odata=fullmetadata;streaming=true")]
+        //[InlineData("application/json;odata=fullmetadata;streaming=false")]
+        //[InlineData("application/json;odata=fullmetadata")]
+        //[InlineData("application/json;streaming=true")]
+        //[InlineData("application/json;streaming=false")]
+        //[InlineData("application/json")]
+        //[Trait("Category", "LocalOnly")]
         public void ODataCRUDShouldWorkJsonLight(string acceptHeader)
         {
             AcceptHeader = acceptHeader;

@@ -51,8 +51,9 @@ namespace WebStack.QA.Test.OData.Validation
             }
         }
 
-        [Theory]
-        [PropertyData("CanValidatePatchesData")]
+        //[Theory]
+        //[PropertyData("CanValidatePatchesData")]
+        //[Trait("Category", "LocalOnly")]
         public void CanValidatePatches(object payload, HttpStatusCode expectedResponseCode, string message)
         {
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), BaseAddress + "/odata/PatchCustomers(5)");

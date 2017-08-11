@@ -27,7 +27,8 @@ namespace WebStack.QA.Test.OData.Formatter.Atom
             config.AddODataLibAssemblyRedirection();
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public void ShouldSupportDerivedComplexTypePayloadAtom()
         {
             ShouldSupportDerivedComplexType();

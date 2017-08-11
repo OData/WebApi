@@ -42,7 +42,8 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata
             return builder.GetEdmModel();
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public void QueryWithCastDoesntContainODataType()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/Pets(5)/WebStack.QA.Test.OData.Formatter.JsonLight.Metadata.BigPet");

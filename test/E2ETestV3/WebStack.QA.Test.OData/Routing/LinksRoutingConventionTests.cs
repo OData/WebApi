@@ -41,17 +41,18 @@ namespace WebStack.QA.Test.OData.Routing
             return builder.GetEdmModel();
         }
 
-        [Theory]
-        [InlineData("POST", "/Customers(5)/$links/Orders")]
-        [InlineData("PUT", "/Customers(5)/$links/Orders")]
-        [InlineData("POST", "/Customers(5)/WebStack.QA.Test.OData.Routing.VipCustomer/$links/Orders")]
-        [InlineData("PUT", "/Customers(5)/WebStack.QA.Test.OData.Routing.VipCustomer/$links/Orders")]
-        [InlineData("POST", "/Addresses(5)/$links/VipCustomer")]
-        [InlineData("PUT", "/Addresses(5)/$links/VipCustomer")]
-        [InlineData("POST", "/Customers(5)/$links/Information")]
-        [InlineData("PUT", "/Customers(5)/$links/Information")]
-        [InlineData("POST", "/Customers(5)/WebStack.QA.Test.OData.Routing.VipCustomer/$links/Addresses")]
-        [InlineData("PUT", "/Customers(5)/WebStack.QA.Test.OData.Routing.VipCustomer/$links/Addresses")]
+        //[Theory]
+        //[InlineData("POST", "/Customers(5)/$links/Orders")]
+        //[InlineData("PUT", "/Customers(5)/$links/Orders")]
+        //[InlineData("POST", "/Customers(5)/WebStack.QA.Test.OData.Routing.VipCustomer/$links/Orders")]
+        //[InlineData("PUT", "/Customers(5)/WebStack.QA.Test.OData.Routing.VipCustomer/$links/Orders")]
+        //[InlineData("POST", "/Addresses(5)/$links/VipCustomer")]
+        //[InlineData("PUT", "/Addresses(5)/$links/VipCustomer")]
+        //[InlineData("POST", "/Customers(5)/$links/Information")]
+        //[InlineData("PUT", "/Customers(5)/$links/Information")]
+        //[InlineData("POST", "/Customers(5)/WebStack.QA.Test.OData.Routing.VipCustomer/$links/Addresses")]
+        //[InlineData("PUT", "/Customers(5)/WebStack.QA.Test.OData.Routing.VipCustomer/$links/Addresses")]
+        //[Trait("Category", "LocalOnly")]
         public void CreateLinksRoutingConventionWorks(string method, string url)
         {
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(method), BaseAddress + url);
@@ -61,12 +62,13 @@ namespace WebStack.QA.Test.OData.Routing
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
-        [Theory]
-        [InlineData("/Customers(5)/$links/Orders(25)")]
-        [InlineData("/Orders(25)/$links/Customer")]
-        [InlineData("/Customers(5)/WebStack.QA.Test.OData.Routing.VipCustomer/$links/Addresses(25)")]
-        [InlineData("/Addresses(25)/$links/VipCustomer")]
-        [InlineData("/Customers(5)/$links/Information")]
+        //[Theory]
+        //[InlineData("/Customers(5)/$links/Orders(25)")]
+        //[InlineData("/Orders(25)/$links/Customer")]
+        //[InlineData("/Customers(5)/WebStack.QA.Test.OData.Routing.VipCustomer/$links/Addresses(25)")]
+        //[InlineData("/Addresses(25)/$links/VipCustomer")]
+        //[InlineData("/Customers(5)/$links/Information")]
+        //[Trait("Category", "LocalOnly")]
         public void DeleteLinksRoutingConventionWorks(string url)
         {
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("DELETE"), BaseAddress + url);

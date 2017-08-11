@@ -114,7 +114,8 @@ namespace WebStack.QA.Test.OData.ETags
             }
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public async Task DeleteUpdatedEntryWithIfMatchShouldReturnPreconditionFailed()
         {
             string eTag;
@@ -146,7 +147,8 @@ namespace WebStack.QA.Test.OData.ETags
             }
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public async Task PutUpdatedEntryWithIfMatchShouldReturnPreconditionFailed()
         {
             ETagsCustomersController.ResetCustomers();
@@ -181,7 +183,8 @@ namespace WebStack.QA.Test.OData.ETags
             }
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public async Task PatchUpdatedEntryWithIfMatchShouldReturnPreconditionFailed()
         {
             ETagsCustomersController.ResetCustomers();

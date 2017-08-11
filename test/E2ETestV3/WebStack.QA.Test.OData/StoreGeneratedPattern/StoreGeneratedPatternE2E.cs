@@ -103,7 +103,8 @@ namespace WebStack.QA.Test.OData.StoreGeneratedPattern
             }
         }
 
-        [Fact]
+        //[Fact]
+        //[Trait("Category", "LocalOnly")]
         public async Task PutEntityWithStoreGeneratedProperty()
         {
             const string expectedComputedProperty = "ComputedProperty";

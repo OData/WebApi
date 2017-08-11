@@ -11,6 +11,7 @@ using WebStack.QA.Common.WebHost;
 using WebStack.QA.Common.XUnit;
 using WebStack.QA.Test.OData.Common;
 using WebStack.QA.Test.OData.Common.Models.Vehicle;
+using Xunit;
 using Xunit.Extensions;
 
 namespace WebStack.QA.Test.OData.Formatter.JsonLight
@@ -95,56 +96,60 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight
             config.AddODataLibAssemblyRedirection();
         }
 
-        [Theory]
-        [PropertyData("PostGetUpdateAndDeleteData")]
+        //[Theory]
+        //[PropertyData("PostGetUpdateAndDeleteData")]
+        //[Trait("Category", "LocalOnly")]
         public void PostGetUpdateAndDeleteJsonLight(Type entityType, string entitySetName, string acceptHeader)
         {
             AcceptHeader = acceptHeader;
             PostGetUpdateAndDelete(entityType, entitySetName);
         }
 
-        [Theory]
-        [InlineData("application/json;odata=minimalmetadata;streaming=true")]
-        [InlineData("application/json;odata=minimalmetadata;streaming=false")]
-        [InlineData("application/json;odata=minimalmetadata")]
-        [InlineData("application/json;odata=fullmetadata;streaming=true")]
-        [InlineData("application/json;odata=fullmetadata;streaming=false")]
-        [InlineData("application/json;odata=fullmetadata")]
-        [InlineData("application/json;streaming=true")]
-        [InlineData("application/json;streaming=false")]
-        [InlineData("application/json")]
+        //[Theory]
+        //[InlineData("application/json;odata=minimalmetadata;streaming=true")]
+        //[InlineData("application/json;odata=minimalmetadata;streaming=false")]
+        //[InlineData("application/json;odata=minimalmetadata")]
+        //[InlineData("application/json;odata=fullmetadata;streaming=true")]
+        //[InlineData("application/json;odata=fullmetadata;streaming=false")]
+        //[InlineData("application/json;odata=fullmetadata")]
+        //[InlineData("application/json;streaming=true")]
+        //[InlineData("application/json;streaming=false")]
+        //[InlineData("application/json")]
+        //[Trait("Category", "LocalOnly")]
         public void AddAndRemoveBaseNavigationPropertyInDerivedTypeJsonLight(string acceptHeader)
         {
             AcceptHeader = acceptHeader;
             AddAndRemoveBaseNavigationPropertyInDerivedType();
         }
 
-        [Theory]
-        [InlineData("application/json;odata=minimalmetadata;streaming=true")]
-        [InlineData("application/json;odata=minimalmetadata;streaming=false")]
-        [InlineData("application/json;odata=minimalmetadata")]
-        [InlineData("application/json;odata=fullmetadata;streaming=true")]
-        [InlineData("application/json;odata=fullmetadata;streaming=false")]
-        [InlineData("application/json;odata=fullmetadata")]
-        [InlineData("application/json;streaming=true")]
-        [InlineData("application/json;streaming=false")]
-        [InlineData("application/json")]
+        //[Theory]
+        //[InlineData("application/json;odata=minimalmetadata;streaming=true")]
+        //[InlineData("application/json;odata=minimalmetadata;streaming=false")]
+        //[InlineData("application/json;odata=minimalmetadata")]
+        //[InlineData("application/json;odata=fullmetadata;streaming=true")]
+        //[InlineData("application/json;odata=fullmetadata;streaming=false")]
+        //[InlineData("application/json;odata=fullmetadata")]
+        //[InlineData("application/json;streaming=true")]
+        //[InlineData("application/json;streaming=false")]
+        //[InlineData("application/json")]
+        //[Trait("Category", "LocalOnly")]
         public void AddAndRemoveDerivedNavigationPropertyInDerivedTypeJsonLight(string acceptHeader)
         {
             AcceptHeader = acceptHeader;
             AddAndRemoveDerivedNavigationPropertyInDerivedType();
         }
 
-        [Theory]
-        [InlineData("application/json;odata=minimalmetadata;streaming=true")]
-        [InlineData("application/json;odata=minimalmetadata;streaming=false")]
-        [InlineData("application/json;odata=minimalmetadata")]
-        [InlineData("application/json;odata=fullmetadata;streaming=true")]
-        [InlineData("application/json;odata=fullmetadata;streaming=false")]
-        [InlineData("application/json;odata=fullmetadata")]
-        [InlineData("application/json;streaming=true")]
-        [InlineData("application/json;streaming=false")]
-        [InlineData("application/json")]
+        //[Theory]
+        //[InlineData("application/json;odata=minimalmetadata;streaming=true")]
+        //[InlineData("application/json;odata=minimalmetadata;streaming=false")]
+        //[InlineData("application/json;odata=minimalmetadata")]
+        //[InlineData("application/json;odata=fullmetadata;streaming=true")]
+        //[InlineData("application/json;odata=fullmetadata;streaming=false")]
+        //[InlineData("application/json;odata=fullmetadata")]
+        //[InlineData("application/json;streaming=true")]
+        //[InlineData("application/json;streaming=false")]
+        //[InlineData("application/json")]
+        //[Trait("Category", "LocalOnly")]
         public void CreateAndDeleteLinkToDerivedNavigationPropertyOnBaseEntitySetJsonLight(string acceptHeader)
         {
             AcceptHeader = acceptHeader;

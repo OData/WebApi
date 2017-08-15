@@ -10,6 +10,8 @@ namespace WebStack.QA.Common.WebHost
 {
     public static class SecurityHelper
     {
+        private static readonly string PassGuid = Guid.NewGuid().ToString().Substring(0, 8);
+
         public static void CleanupEnvironment(string certificateFilePath, string port, string addressSuffix)
         {
             // CLEANUP
@@ -54,7 +56,7 @@ namespace WebStack.QA.Common.WebHost
             }
 
             var certificate = new X509Certificate2(
-                certificateFilePath, "1234", X509KeyStorageFlags.MachineKeySet);
+                certificateFilePath, PassGuid, X509KeyStorageFlags.MachineKeySet);
 
             var store = new X509Store(StoreLocation.LocalMachine);
 
@@ -78,7 +80,7 @@ namespace WebStack.QA.Common.WebHost
         public static void RemoveCertificate(string certificateFilePath)
         {
             var certificate = new X509Certificate2(
-                certificateFilePath, "1234", X509KeyStorageFlags.MachineKeySet);
+                certificateFilePath, PassGuid, X509KeyStorageFlags.MachineKeySet);
 
             var store = new X509Store(StoreLocation.LocalMachine);
 

@@ -28,9 +28,20 @@ namespace Microsoft.AspNetCore.OData.Routing
         /// Initializes a new instance of the <see cref="ODataActionSelector" /> class.
         /// </summary>
         /// <param name="serviceProvider"></param>
-        /// <param name="decisionTreeProvider"></param>
         /// <param name="actionConstraintProviders"></param>
         /// <param name="loggerFactory"></param>
+#if NETSTANDARD2_0
+        ///<param name="actionDescriptorCollectionProvider"></param>
+        public ODataActionSelector(IServiceProvider serviceProvider,
+        IActionDescriptorCollectionProvider actionDescriptorCollectionProvider,
+        ActionConstraintCache actionConstraintProviders,
+        ILoggerFactory loggerFactory)
+        {
+            _serviceProvider = serviceProvider;
+            _selector = new ActionSelector(actionDescriptorCollectionProvider, actionConstraintProviders, loggerFactory);
+        }
+#else
+        /// <param name="decisionTreeProvider"></param>
         public ODataActionSelector(IServiceProvider serviceProvider,
             IActionSelectorDecisionTreeProvider decisionTreeProvider,
             ActionConstraintCache actionConstraintProviders,
@@ -39,6 +50,7 @@ namespace Microsoft.AspNetCore.OData.Routing
             _serviceProvider = serviceProvider;
             _selector = new ActionSelector(decisionTreeProvider, actionConstraintProviders, loggerFactory);
         }
+#endif
 
         public bool HasValidAction(VirtualPathContext context)
         {

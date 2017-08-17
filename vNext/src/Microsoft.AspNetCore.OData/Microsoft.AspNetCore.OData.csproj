@@ -3,21 +3,28 @@
   <PropertyGroup>
     <Description>Microsoft.AspNetCore.OData</Description>
     <AssemblyTitle>Microsoft.AspNetCore.OData</AssemblyTitle>
-    <VersionPrefix>6.0.0-alpha1-170529</VersionPrefix>
-    <TargetFrameworks>netstandard1.6;net451;</TargetFrameworks>
+    <VersionPrefix>6.0.0-alpha1-1708161</VersionPrefix>
+    <TargetFrameworks>netstandard1.6;net451;netstandard2.0</TargetFrameworks>
     <AssemblyName>Microsoft.AspNetCore.OData</AssemblyName>
     <PackageId>Microsoft.AspNetCore.OData</PackageId>
     <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
+    <Version>6.0.0-alpha1-1708161</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.OData.Core" Version="7.2.0" />
     <PackageReference Include="Microsoft.OData.Edm" Version="7.2.0" />
     <PackageReference Include="Microsoft.Spatial" Version="7.2.0" />
+    <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="1.0.3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.0.2" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.3.0" />
-    <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
   </ItemGroup>
 
 </Project>

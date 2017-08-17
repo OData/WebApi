@@ -154,7 +154,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             // Assert
             Assert.True(sendEmail.IsBindable);
             Assert.NotNull(sendEmail.Parameters);
-            Assert.Equal(1, sendEmail.Parameters.Count());
+            Assert.Single(sendEmail.Parameters);
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, sendEmail.Parameters.Single().Name);
             Assert.Equal(typeof(Customer).FullName, sendEmail.Parameters.Single().TypeConfiguration.FullName);
         }
@@ -171,7 +171,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             // Assert
             Assert.True(sendEmail.IsBindable);
             Assert.NotNull(sendEmail.Parameters);
-            Assert.Equal(1, sendEmail.Parameters.Count());
+            Assert.Single(sendEmail.Parameters);
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, sendEmail.Parameters.Single().Name);
             Assert.Equal(string.Format("Collection({0})", typeof(Customer).FullName), sendEmail.Parameters.Single().TypeConfiguration.FullName);
         }
@@ -353,7 +353,7 @@ namespace Microsoft.AspNetCore.OData.Builder
             Assert.True(action.IsBound);
             Assert.Equal("ActionName", action.Name);
             Assert.Null(action.ReturnType);
-            Assert.Equal(1, action.Parameters.Count());
+            Assert.Single(action.Parameters);
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, action.Parameters.Single().Name);
             Assert.Equal(typeof(Customer).FullName, action.Parameters.Single().Type.FullName());
         }
@@ -373,8 +373,8 @@ namespace Microsoft.AspNetCore.OData.Builder
             // Assert
             IEdmEntityContainer container = model.EntityContainer;
             Assert.NotNull(container);
-            Assert.Equal(1, container.Elements.OfType<IEdmActionImport>().Count());
-            Assert.Equal(1, container.Elements.OfType<IEdmEntitySet>().Count());
+            Assert.Single(container.Elements.OfType<IEdmActionImport>());
+            Assert.Single(container.Elements.OfType<IEdmEntitySet>());
             IEdmActionImport action = container.Elements.OfType<IEdmActionImport>().Single();
             Assert.False(action.Action.IsBound);
             Assert.Equal("ActionName", action.Name);

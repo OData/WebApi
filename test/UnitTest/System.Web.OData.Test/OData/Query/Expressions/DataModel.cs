@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Data.Linq;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.OData.Edm;
@@ -118,7 +117,6 @@ namespace System.Web.OData.Query.Expressions
         public char? NullableCharProp { get; set; }
 
         public char[] CharArrayProp { get; set; }
-        public Binary BinaryProp { get; set; }
         public XElement XElementProp { get; set; }
 
         public SimpleEnum SimpleEnumProp { get; set; }

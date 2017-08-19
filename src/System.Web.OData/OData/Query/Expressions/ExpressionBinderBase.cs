@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Data.Linq;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -313,10 +312,6 @@ namespace System.Web.OData.Query.Expressions
                             else if (sourceType == typeof(XElement))
                             {
                                 convertedExpression = Expression.Call(source, "ToString", typeArguments: null, arguments: null);
-                            }
-                            else if (sourceType == typeof(Binary))
-                            {
-                                convertedExpression = Expression.Call(source, "ToArray", typeArguments: null, arguments: null);
                             }
                             break;
 

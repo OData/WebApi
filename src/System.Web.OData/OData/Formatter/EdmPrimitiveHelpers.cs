@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations;
-using System.Data.Linq;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Web.Http;
@@ -53,10 +52,6 @@ namespace System.Web.OData.Formatter
                 }
 
                 return str.ToCharArray();
-            }
-            else if (type == typeof(Binary))
-            {
-                return new Binary((byte[])value);
             }
             else if (type == typeof(XElement))
             {

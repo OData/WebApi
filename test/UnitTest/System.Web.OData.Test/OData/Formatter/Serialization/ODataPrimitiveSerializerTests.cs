@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Data.Linq;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -56,8 +55,7 @@ namespace System.Web.OData.Formatter.Serialization
                     { (UInt32)1, "Edm.Int64", "1" },
                     { (UInt64)1, "Edm.Int64", "1" },
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
-                    { new XElement(XName.Get("element","namespace")), "Edm.String", "\"<element xmlns=\\\"namespace\\\" />\"" },
-                    { new Binary(new byte[] {1}), "Edm.Binary", "\"AQ==\"" },
+                    { new XElement(XName.Get("element","namespace")), "Edm.String", "\"<element xmlns=\\\"namespace\\\" />\"" }
                 };
             }
         }

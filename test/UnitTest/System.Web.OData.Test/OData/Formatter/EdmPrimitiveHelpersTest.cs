@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations;
-using System.Data.Linq;
 using System.Xml.Linq;
 using Microsoft.TestCommon;
 
@@ -26,8 +25,7 @@ namespace System.Web.OData.Formatter
                      { (long)1 , (ulong)1, typeof(ulong)},
                      { (long?)1 ,(ulong?)1, typeof(ulong?)},
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
-                     { "<element xmlns=\"namespace\" />" ,(XElement) new XElement(XName.Get("element","namespace")), typeof(XElement)},
-                     { new byte[] {1}, new Binary(new byte[] {1}), typeof(Binary)}
+                     { "<element xmlns=\"namespace\" />" ,(XElement) new XElement(XName.Get("element","namespace")), typeof(XElement)}
                 };
             }
         }

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Data.Linq;
 using System.Diagnostics.Contracts;
 using System.Web.Http;
 using System.Web.OData.Properties;
@@ -219,10 +218,6 @@ namespace System.Web.OData.Formatter.Serialization
                         else if (type == typeof(XElement))
                         {
                             return ((XElement)value).ToString();
-                        }
-                        else if (type == typeof(Binary))
-                        {
-                            return ((Binary)value).ToArray();
                         }
                         break;
                 }

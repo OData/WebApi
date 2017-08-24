@@ -173,7 +173,7 @@ namespace Nop.Core.Domain.Customers
         public bool CityRequired { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether 'Country' is enabled
+        /// Gets or sets a value indicating whether 'CountryOrRegion' is enabled
         /// </summary>
         public bool CountryEnabled { get; set; }
 

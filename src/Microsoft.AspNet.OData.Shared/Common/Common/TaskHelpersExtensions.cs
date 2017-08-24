@@ -2,8 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
-namespace System.Threading.Tasks
+namespace Microsoft.AspNet.OData.Common
 {
     internal static class TaskHelpersExtensions
     {

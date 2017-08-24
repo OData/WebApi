@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Net;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Results;
 
-namespace System.Web.OData.Results
+namespace Microsoft.AspNet.OData.Results
 {
     /// <summary>
     /// Represents an action result that is a response to a PUT, PATCH, or a MERGE operation on an OData entity.

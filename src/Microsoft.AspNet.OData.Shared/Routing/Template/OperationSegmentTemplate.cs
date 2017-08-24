@@ -3,12 +3,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
-using System.Web.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
-namespace System.Web.OData.Routing.Template
+namespace Microsoft.AspNet.OData.Routing.Template
 {
     /// <summary>
     /// Represents a template that can match a <see cref="OperationSegment"/>.

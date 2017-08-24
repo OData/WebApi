@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 using Newtonsoft.Json;
 
-namespace System.Web.OData
+namespace Microsoft.AspNet.OData
 {
     /// <summary>Represents a feed of entities that includes additional information that OData formats support.</summary>
     /// <remarks>

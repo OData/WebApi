@@ -3,7 +3,7 @@
 
 using Microsoft.OData;
 
-namespace System.Web.OData.Formatter
+namespace Microsoft.AspNet.OData.Formatter
 {
     internal static class ODataValueExtensions
     {

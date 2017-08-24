@@ -1,20 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.OData.Formatter.Deserialization;
-using System.Web.OData.Formatter.Serialization;
-using System.Web.OData.Query;
-using System.Web.OData.Query.Expressions;
-using System.Web.OData.Query.Validators;
-using System.Web.OData.Routing;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Query.Expressions;
+using Microsoft.AspNet.OData.Query.Validators;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
-using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
-namespace System.Web.OData.Extensions
+namespace Microsoft.AspNet.OData.Extensions
 {
     internal static class ContainerBuilderExtensions
     {

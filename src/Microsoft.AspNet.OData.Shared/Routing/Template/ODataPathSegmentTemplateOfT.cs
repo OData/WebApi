@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.OData.UriParser;
 
-namespace System.Web.OData.Routing.Template
+namespace Microsoft.AspNet.OData.Routing.Template
 {
     /// <summary>
     /// Represents a template that can match a general path segment.

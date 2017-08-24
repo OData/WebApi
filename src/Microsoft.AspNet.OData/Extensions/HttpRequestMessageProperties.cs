@@ -1,19 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http;
-using System.Web.OData.Formatter;
-using System.Web.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace System.Web.OData.Extensions
+namespace Microsoft.AspNet.OData.Extensions
 {
     /// <summary>
     /// Provides properties for use with the <see cref="HttpRequestMessageExtensions.ODataProperties"/> extension
@@ -83,11 +85,11 @@ namespace System.Web.OData.Extensions
         /// <summary>
         /// Gets or sets the OData path of the request.
         /// </summary>
-        public Routing.ODataPath Path
+        public ODataPath Path
         {
             get
             {
-                return GetValueOrNull<Routing.ODataPath>(PathKey);
+                return GetValueOrNull<ODataPath>(PathKey);
             }
             set
             {

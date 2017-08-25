@@ -77,6 +77,11 @@ namespace System.Web.OData.Formatter.Deserialization
         /// <inheritdoc />
         public sealed override object ReadInline(object item, IEdmTypeReference edmType, ODataDeserializerContext readContext)
         {
+            if (edmType == null)
+            {
+                throw Error.ArgumentNull("edmType");
+            }
+
             if (edmType.IsComplex() && item == null)
             {
                 return null;
@@ -85,11 +90,6 @@ namespace System.Web.OData.Formatter.Deserialization
             if (item == null)
             {
                 throw Error.ArgumentNull("item");
-            }
-
-            if (edmType == null)
-            {
-                throw Error.ArgumentNull("edmType");
             }
 
             if (!edmType.IsStructured())

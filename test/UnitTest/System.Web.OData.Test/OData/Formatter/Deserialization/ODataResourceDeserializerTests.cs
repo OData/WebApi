@@ -117,6 +117,18 @@ namespace System.Web.OData.Formatter.Deserialization
         }
 
         [Fact]
+        public void ReadInline_ThrowsArgumentNull_EdmType()
+        {
+            // Arrange
+            var deserializer = new ODataResourceDeserializer(_deserializerProvider);
+
+            // Act & Assert
+            Assert.ThrowsArgumentNull(
+                () => deserializer.ReadInline(item: new object(), edmType: null, readContext: new ODataDeserializerContext()),
+                "edmType");
+        }
+
+        [Fact]
         public void ReadInline_Throws_ArgumentMustBeOfType()
         {
             // Arrange

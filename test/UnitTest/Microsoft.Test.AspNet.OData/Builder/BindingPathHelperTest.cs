@@ -3,9 +3,10 @@
 
 using System.Collections.Generic;
 using System.Reflection;
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.Test.AspNet.OData.Builder
 {
     public class BindingPathHelperTest
     {

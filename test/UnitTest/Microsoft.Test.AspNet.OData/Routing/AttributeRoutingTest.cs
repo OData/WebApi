@@ -7,12 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.OData.Extensions;
-using System.Web.OData.Formatter;
-using System.Web.OData.TestCommon;
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.AspNet.OData.Formatter;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Routing
+namespace Microsoft.Test.AspNet.OData.Routing
 {
     public class AttributeRoutingTest
     {

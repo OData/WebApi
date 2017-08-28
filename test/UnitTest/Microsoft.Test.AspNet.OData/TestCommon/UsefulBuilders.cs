@@ -1,13 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Linq.Expressions;
-using System.Web.OData.Builder;
-using System.Web.OData.Builder.TestModels;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.TestCommon.Types;
 
-namespace System.Web.OData
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     public static class UsefulBuilders
     {

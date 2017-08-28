@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.OData.Batch;
-using System.Web.OData.Extensions;
-using Microsoft.OData;
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData.Batch;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Test
+namespace Microsoft.Test.AspNet.OData.Batch
 {
     public class ODataBatchContentTest
     {

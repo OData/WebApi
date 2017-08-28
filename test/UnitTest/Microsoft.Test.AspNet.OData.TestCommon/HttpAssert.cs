@@ -9,7 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     /// <summary>
     /// Unit test utility for testing <see cref="HttpResponseMessage"/> instances.

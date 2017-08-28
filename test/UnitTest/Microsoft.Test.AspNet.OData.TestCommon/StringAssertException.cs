@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Text;
 using Xunit.Sdk;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     // An early copy of the new string assert exception from xUnit.net 2.0 (temporarily, until it RTMs)
 

@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     public class DictionaryEqualityComparer : IEqualityComparer<IDictionary<string, object>>
     {

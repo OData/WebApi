@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Xml.Serialization;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     /// <summary>
     /// MSTest utility for testing code operating against a stream.

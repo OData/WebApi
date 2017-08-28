@@ -7,12 +7,12 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Tracing;
-using System.Web.OData.Formatter.Serialization.Models;
-using System.Web.OData.TestCommon;
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData;
+using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon.Models;
 using Moq;
 
-namespace System.Web.OData
+namespace Microsoft.Test.AspNet.OData
 {
     public class PerRequestActionValueBinderTest
     {

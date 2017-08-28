@@ -2,11 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Web.OData.Builder.TestModels;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.Test.AspNet.OData.Builder
 {
     public class ProgrammableBuilderApiTest
     {

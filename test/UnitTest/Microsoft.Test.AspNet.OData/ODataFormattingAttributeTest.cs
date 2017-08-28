@@ -6,12 +6,13 @@ using System.Linq;
 using System.Net.Http.Formatting;
 using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.OData.Formatter;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 
-namespace System.Web.OData
+namespace Microsoft.Test.AspNet.OData
 {
     public class ODataFormattingAttributeTest
     {

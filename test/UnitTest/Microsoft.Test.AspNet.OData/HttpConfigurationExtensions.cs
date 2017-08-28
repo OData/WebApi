@@ -2,9 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Web.Http;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Extensions
+namespace Microsoft.Test.AspNet.OData
 {
     internal static class HttpConfigurationExtensions
     {

@@ -4,8 +4,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNet.OData.Builder;
 
-namespace System.Web.OData.Builder.TestModels
+namespace Microsoft.Test.AspNet.OData.Builder.TestModels
 {
     [MediaType]
     public abstract class Vehicle

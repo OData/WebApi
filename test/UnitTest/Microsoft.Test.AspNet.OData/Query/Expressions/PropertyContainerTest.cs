@@ -1,13 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Query.Expressions;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 
-namespace System.Web.OData.Query.Expressions
+namespace Microsoft.Test.AspNet.OData.Query.Expressions
 {
     public class PropertyContainerTest
     {

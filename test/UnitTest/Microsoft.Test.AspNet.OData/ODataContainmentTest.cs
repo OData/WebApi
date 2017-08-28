@@ -7,16 +7,17 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.OData.Builder;
-using System.Web.OData.Builder.TestModels;
-using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
-using System.Web.OData.TestCommon;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Builder.TestModelss;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
 
-namespace System.Web.OData
+namespace Microsoft.Test.AspNet.OData
 {
     public class ODataContainmentTest
     {

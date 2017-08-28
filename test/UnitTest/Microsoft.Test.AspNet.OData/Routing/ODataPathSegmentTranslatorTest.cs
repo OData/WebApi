@@ -2,11 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Routing
+namespace Microsoft.Test.AspNet.OData.Routing
 {
     public class ODataPathSegmentTranslatorTest
     {

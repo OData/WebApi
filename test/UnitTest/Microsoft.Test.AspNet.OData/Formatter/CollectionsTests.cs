@@ -8,14 +8,16 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
-using System.Web.OData.Builder;
-using System.Web.OData.Builder.TestModels;
-using System.Web.OData.Extensions;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
 
-namespace System.Web.OData.Formatter
+namespace Microsoft.Test.AspNet.OData.Formatter
 {
     public class CollectionsTests
     {

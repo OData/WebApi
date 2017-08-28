@@ -2,12 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Web.OData.TestCommon;
+using Microsoft.AspNet.OData;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
 
-namespace System.Web.OData
+namespace Microsoft.Test.AspNet.OData
 {
     public class ODataSwaggerUtilitiesTest
     {

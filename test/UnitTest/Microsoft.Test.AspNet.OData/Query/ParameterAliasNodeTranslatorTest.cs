@@ -3,12 +3,13 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.OData.Builder;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Query
+namespace Microsoft.Test.AspNet.OData.Query
 {
     public class ParameterAliasNodeTranslatorTest
     {

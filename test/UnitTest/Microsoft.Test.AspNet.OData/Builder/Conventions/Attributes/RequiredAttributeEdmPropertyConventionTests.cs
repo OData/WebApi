@@ -3,11 +3,13 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 
-namespace System.Web.OData.Builder.Conventions.Attributes
+namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
 {
     public class RequiredAttributeEdmPropertyConventionTests
     {

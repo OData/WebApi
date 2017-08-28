@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon.DataTypes
 {
     public class ValueTypeTestData<T> : TestData<T> where T : struct
     {

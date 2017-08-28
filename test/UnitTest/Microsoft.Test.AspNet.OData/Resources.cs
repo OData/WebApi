@@ -2,9 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.IO;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData
+namespace Microsoft.Test.AspNet.OData
 {
     internal static class Resources
     {

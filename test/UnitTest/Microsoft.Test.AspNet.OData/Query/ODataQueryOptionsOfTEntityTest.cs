@@ -5,17 +5,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http;
-using System.Web.OData.Builder;
-using System.Web.OData.Extensions;
-using System.Web.OData.Formatter;
-using System.Web.OData.TestCommon.Models;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.TestCommon;
-using ODataPath = System.Web.OData.Routing.ODataPath;
+using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace System.Web.OData.Query
+namespace Microsoft.Test.AspNet.OData.Query
 {
     public class ODataQueryOptionsOfTEntityTest
     {

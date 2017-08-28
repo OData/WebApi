@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
     public class TraitAttribute : Xunit.TraitAttribute

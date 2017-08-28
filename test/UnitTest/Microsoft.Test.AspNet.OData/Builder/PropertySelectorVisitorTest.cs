@@ -1,12 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Web.OData.TestCommon.Models;
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon.Models;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.Test.AspNet.OData.Builder
 {
     public class PropertySelectorVisitorTest
     {

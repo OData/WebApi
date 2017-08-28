@@ -1,14 +1,18 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
-using System.Web.OData.Builder;
-using System.Web.OData.Routing;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Query.Validators;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
-using Microsoft.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon.Types;
 
-namespace System.Web.OData.Query.Validators
+namespace Microsoft.Test.AspNet.OData.Query.Validators
 {
     public class CountQueryValidatorTest
     {

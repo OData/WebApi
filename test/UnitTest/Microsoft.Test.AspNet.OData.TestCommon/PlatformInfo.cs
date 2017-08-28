@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     /// <summary>
     /// Used to retrieve the currently running platform.

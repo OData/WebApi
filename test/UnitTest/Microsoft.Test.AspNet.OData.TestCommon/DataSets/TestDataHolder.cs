@@ -4,7 +4,7 @@
 using System;
 using System.Globalization;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon.DataTypes
 {
     /// <summary>
     /// Equatable class wrapping a single instance of type <paramref name="T"/>. Equatable to ease test assertions.

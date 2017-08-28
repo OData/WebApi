@@ -2,12 +2,13 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.Routing;
 using Moq;
 
-namespace System.Web.Http
+namespace Microsoft.Test.AspNet.OData
 {
     internal static class ContextUtil
     {

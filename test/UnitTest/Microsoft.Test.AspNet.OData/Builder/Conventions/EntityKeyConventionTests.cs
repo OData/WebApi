@@ -2,13 +2,14 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Web.OData.Builder.TestModels;
-using System.Web.OData.TestCommon;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 
-namespace System.Web.OData.Builder.Conventions
+namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 {
     public class EntityKeyConventionTests
     {

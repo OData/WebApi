@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Security.Principal;
 using System.Threading;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     public class RestoreThreadPrincipalAttribute : Xunit.BeforeAfterTestAttribute
     {

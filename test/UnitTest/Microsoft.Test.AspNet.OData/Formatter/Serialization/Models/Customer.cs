@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
-using Microsoft.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.TestCommon.Types;
 
-namespace System.Web.OData.Formatter.Serialization.Models
+namespace Microsoft.Test.AspNet.OData.Formatter.Serialization.Models
 {
     public class Customer
     {

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     /// <summary>
     /// An enumeration of known platforms that the unit test might be running under.

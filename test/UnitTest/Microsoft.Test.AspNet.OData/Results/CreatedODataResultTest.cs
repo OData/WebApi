@@ -1,25 +1,27 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http;
 using System.Web.Http.Results;
-using System.Web.OData.Builder;
-using System.Web.OData.Builder.TestModels;
-using System.Web.OData.Extensions;
-using System.Web.OData.Formatter;
-using System.Web.OData.Routing;
-using System.Web.OData.TestCommon;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Results;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
-using ODataPath = System.Web.OData.Routing.ODataPath;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace System.Web.OData.Results
+namespace Microsoft.Test.AspNet.OData.Query.Results
 {
     public class CreatedODataResultTest
     {

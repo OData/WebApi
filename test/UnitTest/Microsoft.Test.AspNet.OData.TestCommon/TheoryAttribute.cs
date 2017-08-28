@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Xunit.Sdk;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public class TheoryAttribute : Xunit.Extensions.TheoryAttribute

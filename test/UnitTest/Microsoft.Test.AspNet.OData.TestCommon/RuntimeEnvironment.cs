@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Win32;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     public static class RuntimeEnvironment
     {

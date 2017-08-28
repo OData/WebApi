@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public class PropertyDataAttribute : Xunit.Extensions.PropertyDataAttribute

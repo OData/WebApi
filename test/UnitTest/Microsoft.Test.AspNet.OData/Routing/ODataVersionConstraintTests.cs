@@ -3,11 +3,12 @@
 
 using System.Net.Http;
 using System.Web.Http.Routing;
-using System.Web.OData.Extensions;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Routing.Test
+namespace Microsoft.Test.AspNet.OData.Routing.Test
 {
     public class ODataVersionConstraintTests
     {

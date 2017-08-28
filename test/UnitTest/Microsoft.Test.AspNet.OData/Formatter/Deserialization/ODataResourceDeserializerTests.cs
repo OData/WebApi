@@ -1,23 +1,26 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
-using System.Web.OData.Builder;
-using System.Web.OData.TestCommon;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.TestCommon;
-using Microsoft.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon.Types;
 using Moq;
-using ODataPath = System.Web.OData.Routing.ODataPath;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace System.Web.OData.Formatter.Deserialization
+namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
     public class ODataResourceDeserializerTests
     {

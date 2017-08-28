@@ -5,12 +5,12 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
-using System.Web.OData.Batch;
-using System.Web.OData.Formatter;
+using Microsoft.AspNet.OData.Batch;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Test
+namespace Microsoft.Test.AspNet.OData.Batch
 {
     public class OperationResponseItemTest
     {

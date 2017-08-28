@@ -1,18 +1,22 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Web.Http;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
-using Microsoft.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon.Types;
 using Moq;
 
-namespace System.Web.OData.Formatter.Deserialization
+namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
     public class DeserializationHelpersTest
     {

@@ -3,11 +3,11 @@
   <Import Project="..\..\..\sln\packages\xunit.runner.visualstudio.2.0.1\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\..\..\sln\packages\xunit.runner.visualstudio.2.0.1\build\net20\xunit.runner.visualstudio.props')" />
   <Import Project="..\..\..\tools\WebStack.settings.targets" />
   <PropertyGroup>
-    <ProjectGuid>{FCCC4CB7-BAF7-4A57-9F89-E5766FE536C0}</ProjectGuid>
+    <ProjectGuid>{74A22C68-168D-4492-9A43-FD7FB9C04CC5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.TestCommon</RootNamespace>
-    <AssemblyName>Microsoft.TestCommon</AssemblyName>
+    <RootNamespace>Microsoft.Test.OData.WebApi.TestCommon</RootNamespace>
+    <AssemblyName>Microsoft.Test.OData.WebApi.TestCommon</AssemblyName>
     <OutputPath>..\..\..\bin\$(Configuration)\UnitTest\</OutputPath>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -54,12 +54,12 @@
     <Compile Include="EnumHelperTestBase.cs" />
     <Compile Include="InlineDataAttribute.cs" />
     <Compile Include="MatrixTheoryDataSet.cs" />
-    <Compile Include="Microsoft\TestCommon\DataSets\TestDataHolder.cs" />
-    <Compile Include="Microsoft\TestCommon\Types\ByteEnum.cs" />
-    <Compile Include="Microsoft\TestCommon\Types\SByteEnum.cs" />
-    <Compile Include="Microsoft\TestCommon\Types\ShortEnum.cs" />
-    <Compile Include="Microsoft\TestCommon\Types\UIntEnum.cs" />
-    <Compile Include="Microsoft\TestCommon\Types\UShortEnum.cs" />
+    <Compile Include="DataSets\TestDataHolder.cs" />
+    <Compile Include="Types\ByteEnum.cs" />
+    <Compile Include="Types\SByteEnum.cs" />
+    <Compile Include="Types\ShortEnum.cs" />
+    <Compile Include="Types\UIntEnum.cs" />
+    <Compile Include="Types\UShortEnum.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="PlatformInfo.cs" />
     <Compile Include="PortReserver.cs" />
@@ -67,44 +67,40 @@
     <Compile Include="ReplaceCultureAttribute.cs" />
     <Compile Include="RestoreThreadPrincipalAttribute.cs" />
     <Compile Include="AppDomainUtils.cs" />
-    <Compile Include="Assert.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Assert.cs" />
     <Compile Include="CultureReplacer.cs" />
     <Compile Include="FactAttribute.cs" />
     <Compile Include="StringAssertions.cs" />
     <Compile Include="StringAssertException.cs" />
     <Compile Include="TheoryAttribute.cs" />
     <Compile Include="DictionaryEqualityComparer.cs" />
-    <Compile Include="ExceptionAssertions.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="ExceptionAssertions.cs" />
     <Compile Include="ForceGCAttribute.cs" />
     <Compile Include="MemberHelper.cs" />
-    <Compile Include="Microsoft\TestCommon\DataSets\RefTypeTestData.cs" />
-    <Compile Include="Microsoft\TestCommon\DataSets\TestDataVariations.cs" />
-    <Compile Include="Microsoft\TestCommon\DataSets\ValueTypeTestData.cs" />
-    <Compile Include="Microsoft\TestCommon\GenericTypeAssert.cs" />
-    <Compile Include="Microsoft\TestCommon\HttpAssert.cs" />
-    <Compile Include="Microsoft\TestCommon\MediaTypeAssert.cs" />
-    <Compile Include="Microsoft\TestCommon\MediaTypeHeaderValueComparer.cs" />
-    <Compile Include="Microsoft\TestCommon\ParsedMediaTypeHeaderValue.cs" />
-    <Compile Include="Microsoft\TestCommon\RegexReplacement.cs" />
-    <Compile Include="Microsoft\TestCommon\RuntimeEnvironment.cs" />
-    <Compile Include="Microsoft\TestCommon\SerializerAssert.cs" />
-    <Compile Include="Microsoft\TestCommon\StreamAssert.cs" />
-    <Compile Include="Microsoft\TestCommon\TaskAssert.cs" />
-    <Compile Include="Microsoft\TestCommon\DataSets\TestData.cs" />
-    <Compile Include="Microsoft\TestCommon\TestDataSetAttribute.cs" />
-    <Compile Include="Microsoft\TestCommon\TimeoutConstant.cs" />
-    <Compile Include="Microsoft\TestCommon\TypeAssert.cs" />
-    <Compile Include="Microsoft\TestCommon\Types\FlagsEnum.cs" />
-    <Compile Include="Microsoft\TestCommon\Types\INameAndIdContainer.cs" />
-    <Compile Include="Microsoft\TestCommon\Types\ISerializableType.cs" />
-    <Compile Include="Microsoft\TestCommon\Types\LongEnum.cs" />
-    <Compile Include="Microsoft\TestCommon\Types\SimpleEnum.cs" />
-    <Compile Include="Microsoft\TestCommon\DataSets\CommonUnitTestDataSets.cs" />
-    <Compile Include="Microsoft\TestCommon\XmlAssert.cs" />
+    <Compile Include="DataSets\RefTypeTestData.cs" />
+    <Compile Include="DataSets\TestDataVariations.cs" />
+    <Compile Include="DataSets\ValueTypeTestData.cs" />
+    <Compile Include="GenericTypeAssert.cs" />
+    <Compile Include="HttpAssert.cs" />
+    <Compile Include="MediaTypeAssert.cs" />
+    <Compile Include="MediaTypeHeaderValueComparer.cs" />
+    <Compile Include="ParsedMediaTypeHeaderValue.cs" />
+    <Compile Include="RegexReplacement.cs" />
+    <Compile Include="RuntimeEnvironment.cs" />
+    <Compile Include="SerializerAssert.cs" />
+    <Compile Include="StreamAssert.cs" />
+    <Compile Include="TaskAssert.cs" />
+    <Compile Include="DataSets\TestData.cs" />
+    <Compile Include="TestDataSetAttribute.cs" />
+    <Compile Include="TimeoutConstant.cs" />
+    <Compile Include="TypeAssert.cs" />
+    <Compile Include="Types\FlagsEnum.cs" />
+    <Compile Include="Types\INameAndIdContainer.cs" />
+    <Compile Include="Types\ISerializableType.cs" />
+    <Compile Include="Types\LongEnum.cs" />
+    <Compile Include="Types\SimpleEnum.cs" />
+    <Compile Include="DataSets\CommonUnitTestDataSets.cs" />
+    <Compile Include="XmlAssert.cs" />
     <Compile Include="PreAppStartTestHelper.cs" />
     <Compile Include="PreserveSyncContextAttribute.cs" />
     <Compile Include="ReflectionAssert.cs" />

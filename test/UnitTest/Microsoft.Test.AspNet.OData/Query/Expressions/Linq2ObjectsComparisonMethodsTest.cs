@@ -1,9 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData.Query.Expressions;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Query.Expressions
+namespace Microsoft.Test.AspNet.OData.Query.Expressions
 {
     public class Linq2ObjectsComparisonMethodsTest
     {

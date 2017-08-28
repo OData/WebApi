@@ -2,10 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 
-namespace System.Web.OData.Builder.Conventions.Attributes
+namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
 {
     public class ComplexTypeAttributeConventionTests
     {

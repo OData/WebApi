@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.ComponentModel;
 using System.Reflection;
-using Microsoft.TestCommon;
 
-namespace System.Web.WebPages.TestUtils
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     public static class PreAppStartTestHelper
     {

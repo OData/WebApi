@@ -2,11 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Reflection;
-using System.Web.OData.Query;
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.Test.AspNet.OData.Builder
 {
     public class PropertyConfigurationTest
     {

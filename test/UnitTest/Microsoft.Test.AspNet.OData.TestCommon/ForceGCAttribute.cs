@@ -4,7 +4,7 @@
 using System;
 using System.Reflection;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     public class ForceGCAttribute : Xunit.BeforeAfterTestAttribute
     {

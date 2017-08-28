@@ -2,14 +2,15 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Web.OData.Builder;
-using System.Web.OData.Extensions;
-using System.Web.OData.TestCommon.Models;
+using System.Net.Http.Headers;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon.Models;
 
-namespace System.Web.OData.Formatter.Serialization
+namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
     public class ComplexTypeTest
     {

@@ -2,9 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Web.OData.Extensions;
+using Microsoft.AspNet.OData.Extensions;
 
-namespace System.Web.OData.Formatter
+namespace Microsoft.Test.AspNet.OData.Formatter
 {
     internal static class HttpRequestMessageExtensions
     {

@@ -5,11 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Microsoft.AspNet.OData;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Formatter.Serialization
+namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
     public class ODataMessageReaderLearningTests
     {

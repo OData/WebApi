@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -8,11 +9,11 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.OData.Batch;
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData.Batch;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 
-namespace System.Web.OData.Test
+namespace Microsoft.Test.AspNet.OData.Batch
 {
     public class ChangeSetRequestItemTest
     {

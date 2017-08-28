@@ -9,15 +9,17 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Tracing;
-using System.Web.OData.Builder.TestModels;
-using System.Web.OData.Extensions;
-using System.Web.OData.Formatter;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
-using Microsoft.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Formatter;
+using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon.Types;
 using Moq;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.Test.AspNet.OData
 {
     public class MetadataControllerTest
     {

@@ -3,8 +3,10 @@
 
 using System.Linq;
 using System.Web.Http.Controllers;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
 
-namespace System.Web.OData.Routing.Conventions
+namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 {
     class MockNavigationSourceRoutingConvention : NavigationSourceRoutingConvention
     {

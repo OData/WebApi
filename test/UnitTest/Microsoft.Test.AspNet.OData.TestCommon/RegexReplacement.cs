@@ -3,7 +3,7 @@
 
 using System.Text.RegularExpressions;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     public class RegexReplacement
     {

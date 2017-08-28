@@ -2,14 +2,16 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.IO;
-using System.Web.OData.Builder;
-using System.Web.OData.Formatter.Serialization.Models;
 using System.Xml.Linq;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Formatter.Serialization
+namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
     public class ODataMetadataSerializerTest
     {

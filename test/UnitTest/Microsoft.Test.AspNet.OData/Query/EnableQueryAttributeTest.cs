@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,21 +16,22 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
 using System.Web.Http.Routing;
-using System.Web.OData.Builder;
-using System.Web.OData.Extensions;
-using System.Web.OData.Query.Controllers;
-using System.Web.OData.Query.Validators;
-using System.Web.OData.Routing;
-using System.Web.OData.TestCommon;
-using System.Web.OData.TestCommon.Models;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.Query.Controllers;
+using Microsoft.Test.AspNet.OData.Query.Validators;
+using Microsoft.Test.AspNet.OData.Routing;
+using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon.Models;
 using Moq;
-using ODataPath = System.Web.OData.Routing.ODataPath;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace System.Web.OData.Query
+namespace Microsoft.Test.AspNet.OData.Query
 {
     public class EnableQueryAttributeTest
     {

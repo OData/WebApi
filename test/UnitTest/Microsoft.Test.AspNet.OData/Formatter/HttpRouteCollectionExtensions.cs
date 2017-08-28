@@ -7,7 +7,7 @@ using System.Web.Http;
 using System.Web.Http.Routing;
 using Moq;
 
-namespace System.Web.OData.Formatter
+namespace Microsoft.Test.AspNet.OData.Formatter
 {
     internal static class HttpRouteCollectionExtensions
     {

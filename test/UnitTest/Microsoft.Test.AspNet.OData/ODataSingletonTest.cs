@@ -9,13 +9,14 @@ using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.OData.Builder;
-using System.Web.OData.Extensions;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
 
-namespace System.Web.OData
+namespace Microsoft.Test.AspNet.OData
 {
     public class ODataSingletonTest
     {
@@ -100,19 +101,19 @@ namespace System.Web.OData
             string requestUri = BaseAddress + "/odata/OscorpSubs(102)/HeadQuarter";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             HttpResponseMessage response = _client.SendAsync(request).Result;
-            Assert.True(response.StatusCode == Net.HttpStatusCode.OK);
+            Assert.True(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             // 2. Use the $ref to delete the reference link.
             requestUri = BaseAddress + "/odata/OscorpSubs(102)/HeadQuarter/$ref";
             request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
             response = _client.SendAsync(request).Result;
-            Assert.True(response.StatusCode == Net.HttpStatusCode.OK);
+            Assert.True(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             // 3. Now, Can't navigation to the navigation property
             requestUri = BaseAddress + "/odata/OscorpSubs(102)/HeadQuarter";
             request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             response = _client.SendAsync(request).Result;
-            Assert.True(response.StatusCode == Net.HttpStatusCode.NotFound);
+            Assert.True(response.StatusCode == System.Net.HttpStatusCode.NotFound);
         }
 
         private void VerifySingleton(JObject result)

@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace System.Web.OData
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     public class SimpleOpenCustomer
     {

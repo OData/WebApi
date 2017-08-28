@@ -6,8 +6,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Test.AspNet.OData.TestCommon.DataTypes;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     public class TestDataSetAttribute : DataAttribute
     {
@@ -19,7 +20,7 @@ namespace Microsoft.TestCommon
 
         private IEnumerable<Tuple<Type, string>> ExtraDataSets { get; set; }
 
-        public TestDataSetAttribute(Type declaringType, string propertyName, TestDataVariations testDataVariations = TestCommon.TestDataVariations.All)
+        public TestDataSetAttribute(Type declaringType, string propertyName, TestDataVariations testDataVariations = TestDataVariations.All)
         {
             DeclaringType = declaringType;
             PropertyName = propertyName;
@@ -29,7 +30,7 @@ namespace Microsoft.TestCommon
 
         public TestDataSetAttribute(Type declaringType, string propertyName,
                                     Type declaringType1, string propertyName1,
-                                    TestDataVariations testDataVariations = TestCommon.TestDataVariations.All)
+                                    TestDataVariations testDataVariations = TestDataVariations.All)
             : this(declaringType, propertyName, testDataVariations)
         {
             ExtraDataSets = new List<Tuple<Type, string>> { Tuple.Create(declaringType1, propertyName1) };
@@ -38,7 +39,7 @@ namespace Microsoft.TestCommon
         public TestDataSetAttribute(Type declaringType, string propertyName,
             Type declaringType1, string propertyName1,
             Type declaringType2, string propertyName2,
-            TestDataVariations testDataVariations = TestCommon.TestDataVariations.All)
+            TestDataVariations testDataVariations = TestDataVariations.All)
             : this(declaringType, propertyName, testDataVariations)
         {
             ExtraDataSets = new List<Tuple<Type, string>> { Tuple.Create(declaringType1, propertyName1), Tuple.Create(declaringType2, propertyName2) };
@@ -48,7 +49,7 @@ namespace Microsoft.TestCommon
             Type declaringType1, string propertyName1,
             Type declaringType2, string propertyName2,
             Type declaringType3, string propertyName3,
-            TestDataVariations testDataVariations = TestCommon.TestDataVariations.All)
+            TestDataVariations testDataVariations = TestDataVariations.All)
             : this(declaringType, propertyName, testDataVariations)
         {
             ExtraDataSets = new List<Tuple<Type, string>> { Tuple.Create(declaringType1, propertyName1), Tuple.Create(declaringType2, propertyName2), Tuple.Create(declaringType3, propertyName3) };
@@ -59,7 +60,7 @@ namespace Microsoft.TestCommon
             Type declaringType2, string propertyName2,
             Type declaringType3, string propertyName3,
             Type declaringType4, string propertyName4,
-            TestDataVariations testDataVariations = TestCommon.TestDataVariations.All)
+            TestDataVariations testDataVariations = TestDataVariations.All)
             : this(declaringType, propertyName, testDataVariations)
         {
             ExtraDataSets = new List<Tuple<Type, string>> 

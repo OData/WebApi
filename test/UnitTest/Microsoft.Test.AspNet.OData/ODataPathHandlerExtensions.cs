@@ -1,15 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Diagnostics.Contracts;
-using System.Web.OData.Routing;
-using System.Web.OData.Routing.Template;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using ODataPath = System.Web.OData.Routing.ODataPath;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace System.Web.OData
+namespace Microsoft.Test.AspNet.OData
 {
     public static class ODataPathHandlerExtensions
     {

@@ -3,7 +3,7 @@
 
 using System.Threading;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     /// <summary>
     /// Preserves the current <see cref="SynchronizationContext"/>. Use this attribute on

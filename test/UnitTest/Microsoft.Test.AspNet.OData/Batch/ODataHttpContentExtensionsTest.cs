@@ -4,11 +4,10 @@
 using System.Net.Http;
 using System.Text;
 using System.Threading;
-using System.Web.OData.Batch;
 using Microsoft.OData;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Test
+namespace Microsoft.Test.AspNet.OData.Batch
 {
     public class ODataHttpContentExtensionsTest
     {

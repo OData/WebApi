@@ -3,9 +3,10 @@
 
 using System.Linq;
 using System.Web.Http;
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Routing.Conventions
+namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 {
     public class ODataRoutingConventionsTest
     {

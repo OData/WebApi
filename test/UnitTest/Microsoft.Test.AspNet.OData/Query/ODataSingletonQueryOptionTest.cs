@@ -1,17 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Web.Http;
-using System.Web.OData.Builder;
-using System.Web.OData.Extensions;
-using System.Web.OData.Formatter.Serialization.Models;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Query
+namespace Microsoft.Test.AspNet.OData.Query
 {
     public class ODataSingletonQueryOptionTest
     {
@@ -91,7 +93,7 @@ namespace System.Web.OData.Query
             string responseString = response.Content.ReadAsStringAsync().Result;
 
             // Assert
-            Assert.Equal(Net.HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Contains("The query specified in the URI is not valid. The requested resource is not a collection." +
                 " Query options $filter, $orderby, $count, $skip, and $top can be applied only on collections.",
             responseString);
@@ -111,7 +113,7 @@ namespace System.Web.OData.Query
             Birthday = new DateTimeOffset(1991, 1, 12, 9, 3, 40, new TimeSpan(0, -5, 0)),
             Level = 60,
             Bonus = 999.19m,
-            SimpleEnum = Microsoft.TestCommon.Types.SimpleEnum.Third,
+            SimpleEnum = Microsoft.Test.OData.WebApi.TestCommon.Types.SimpleEnum.Third,
             Orders = Enumerable.Range(0, 10).Select(j =>
                 new Order
                 {

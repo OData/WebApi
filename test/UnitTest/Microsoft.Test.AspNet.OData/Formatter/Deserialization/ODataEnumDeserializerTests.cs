@@ -3,12 +3,14 @@
 
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.OData.Builder;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Formatter.Deserialization
+namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
     public class ODataEnumDeserializerTests
     {

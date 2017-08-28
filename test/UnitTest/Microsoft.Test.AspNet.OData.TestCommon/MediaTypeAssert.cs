@@ -4,7 +4,7 @@
 using System;
 using System.Net.Http.Headers;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     public class MediaTypeAssert
     {

@@ -1,13 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Web.OData.TestCommon.Models;
+using Microsoft.AspNet.OData;
+using Microsoft.Test.AspNet.OData.TestCommon.Models;
 
-namespace System.Web.OData.Query.Controllers
+namespace Microsoft.Test.AspNet.OData.Query.Controllers
 {
     public class CustomerHighLevelController : ODataController
     {
@@ -90,7 +92,7 @@ namespace System.Web.OData.Query.Controllers
             return _list.GetEnumerator();
         }
 
-        Collections.IEnumerator Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return _list.GetEnumerator();
         }

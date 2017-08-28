@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Microsoft.TestCommon.Types
+namespace Microsoft.Test.AspNet.OData.TestCommon.Types
 {
     [Serializable]
     public class ISerializableType : ISerializable, INameAndIdContainer

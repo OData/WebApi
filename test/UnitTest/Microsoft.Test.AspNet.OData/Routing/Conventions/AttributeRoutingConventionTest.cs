@@ -1,22 +1,25 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.OData.Extensions;
-using System.Web.OData.Routing.Template;
-using System.Web.OData.TestCommon;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.OData.Edm;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 
-namespace System.Web.OData.Routing.Conventions
+namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 {
     public class AttributeRoutingConventionTest
     {
-        private static readonly string RouteName = System.Web.OData.Formatter.HttpRouteCollectionExtensions.RouteName;
+        private static readonly string RouteName = Microsoft.Test.OData.WebApi.AspNet.Formatter.HttpRouteCollectionExtensions.RouteName;
 
         [Fact]
         public void CtorTakingModelAndConfiguration_ThrowsArgumentNull_Configuration()

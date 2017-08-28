@@ -3,7 +3,7 @@
 
 using System.Runtime.Serialization;
 
-namespace System.Web.OData.Builder.TestModels
+namespace Microsoft.Test.AspNet.OData.Builder.TestModels
 {
     [DataContract(Namespace = "com.contoso", Name = "PropertyAlias2")]
     public class PropertyAlias

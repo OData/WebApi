@@ -3,7 +3,7 @@
 
 using System.Threading;
 
-namespace Microsoft.TestCommon
+namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     /// <summary>
     /// This is an implementation of SynchronizationContext that not only queues things on the thread pool for

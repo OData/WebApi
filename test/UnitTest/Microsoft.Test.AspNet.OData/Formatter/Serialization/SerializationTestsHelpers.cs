@@ -2,11 +2,13 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Web.OData.Builder;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Vocabularies;
+using Microsoft.Test.AspNet.OData.Builder;
 
-namespace System.Web.OData.Formatter.Serialization
+namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
     internal class SerializationTestsHelpers
     {

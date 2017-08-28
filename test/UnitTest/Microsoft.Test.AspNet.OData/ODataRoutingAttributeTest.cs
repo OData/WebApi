@@ -3,10 +3,11 @@
 
 using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.OData.Routing;
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData
+namespace Microsoft.Test.AspNet.OData
 {
     public class ODataRoutingAttributeTest
     {

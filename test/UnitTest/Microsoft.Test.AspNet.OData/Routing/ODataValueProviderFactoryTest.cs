@@ -5,12 +5,13 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
-using System.Web.OData.Builder;
-using System.Web.OData.Extensions;
-using System.Web.OData.TestCommon;
-using Microsoft.TestCommon;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.AspNet.OData.TestCommon;
 
-namespace System.Web.OData.Routing
+namespace Microsoft.Test.AspNet.OData.Routing
 {
     public class ODataValueProviderFactoryTest
     {

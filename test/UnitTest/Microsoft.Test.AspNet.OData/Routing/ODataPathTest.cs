@@ -4,9 +4,10 @@
 using System.Collections.Generic;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.TestCommon;
+using Microsoft.Test.AspNet.OData.TestCommon;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace System.Web.OData.Routing
+namespace Microsoft.Test.AspNet.OData.Routing
 {
     public class ODataPathTest
     {

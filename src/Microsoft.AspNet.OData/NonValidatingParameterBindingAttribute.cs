@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.OData
     /// An attribute to disable WebApi model validation for a particular type.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    internal sealed class NonValidatingParameterBindingAttribute : ParameterBindingAttribute
+    internal sealed partial class NonValidatingParameterBindingAttribute : ParameterBindingAttribute
     {
         public override HttpParameterBinding GetBinding(HttpParameterDescriptor parameter)
         {

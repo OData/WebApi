@@ -38,6 +38,6 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// Determine if the Http method is a match.
         /// </summary>
         /// <param name="method">Method to test.</param>
-        bool IsHttpMethodMatch(ODataRequestMethod method);
+        bool IsHttpMethodSupported(ODataRequestMethod method);
     }
 }

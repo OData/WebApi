@@ -49,10 +49,8 @@ namespace Microsoft.AspNet.OData.Batch
             cancellationToken.ThrowIfCancellationRequested();
             Stream contentStream = await content.ReadAsStreamAsync();
 
-            IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(contentStream, content.Headers)
-            {
-                Container = requestContainer
-            };
+            IODataRequestMessage oDataRequestMessage = ODataMessageWrapperHelper.Create(contentStream, content.Headers,
+                requestContainer);
             ODataMessageReaderSettings settings = requestContainer.GetRequiredService<ODataMessageReaderSettings>();
             ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, settings);
             return oDataMessageReader;

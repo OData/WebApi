@@ -23,18 +23,18 @@ namespace Microsoft.AspNet.OData.Extensions
     /// </summary>
     public class HttpRequestMessageProperties
     {
-        // Maintain the System.Web.OData. prefix in any new properties to avoid conflicts with user properties
+        // Maintain the Microsoft.AspNet.OData. prefix in any new properties to avoid conflicts with user properties
         // and those of the v3 assembly.
-        private const string DeltaLinkKey = "System.Web.OData.DeltaLink";
-        private const string NextLinkKey = "System.Web.OData.NextLink";
-        private const string PathKey = "System.Web.OData.Path";
-        private const string RouteNameKey = "System.Web.OData.RouteName";
-        private const string RoutingConventionsStoreKey = "System.Web.OData.RoutingConventionsStore";
-        private const string RoutingConventionsKey = "System.Web.OData.RoutingConventions";
-        private const string SelectExpandClauseKey = "System.Web.OData.SelectExpandClause";
-        private const string ApplyClauseKey = "System.Web.OData.ApplyClause";
-        private const string TotalCountKey = "System.Web.OData.TotalCount";
-        private const string TotalCountFuncKey = "System.Web.OData.TotalCountFunc";
+        private const string DeltaLinkKey = "Microsoft.AspNet.OData.DeltaLink";
+        private const string NextLinkKey = "Microsoft.AspNet.OData.NextLink";
+        private const string PathKey = "Microsoft.AspNet.OData.Path";
+        private const string RouteNameKey = "Microsoft.AspNet.OData.RouteName";
+        private const string RoutingConventionsStoreKey = "Microsoft.AspNet.OData.RoutingConventionsStore";
+        private const string RoutingConventionsKey = "Microsoft.AspNet.OData.RoutingConventions";
+        private const string SelectExpandClauseKey = "Microsoft.AspNet.OData.SelectExpandClause";
+        private const string ApplyClauseKey = "Microsoft.AspNet.OData.ApplyClause";
+        private const string TotalCountKey = "Microsoft.AspNet.OData.TotalCount";
+        private const string TotalCountFuncKey = "Microsoft.AspNet.OData.TotalCountFunc";
 
         internal const string ODataServiceVersionHeader = "OData-Version";
         internal const string ODataMaxServiceVersionHeader = "OData-MaxVersion";

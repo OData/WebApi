@@ -19,7 +19,7 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.UriParser;
+using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
@@ -29,25 +29,25 @@ namespace Microsoft.AspNet.OData.Extensions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpConfigurationExtensions
     {
-        // Maintain the System.Web.OData. prefix in any new properties to avoid conflicts with user properties
+        // Maintain the Microsoft.AspNet.OData. prefix in any new properties to avoid conflicts with user properties
         // and those of the v3 assembly.
-        private const string ETagHandlerKey = "System.Web.OData.ETagHandler";
+        private const string ETagHandlerKey = "Microsoft.AspNet.OData.ETagHandler";
 
-        private const string TimeZoneInfoKey = "System.Web.OData.TimeZoneInfo";
+        private const string TimeZoneInfoKey = "Microsoft.AspNet.OData.TimeZoneInfo";
 
-        private const string UrlKeyDelimiterKey = "System.Web.OData.UrlKeyDelimiterKey";
+        private const string UrlKeyDelimiterKey = "Microsoft.AspNet.OData.UrlKeyDelimiterKey";
 
-        private const string ContinueOnErrorKey = "System.Web.OData.ContinueOnErrorKey";
+        private const string ContinueOnErrorKey = "Microsoft.AspNet.OData.ContinueOnErrorKey";
 
-        private const string NullDynamicPropertyKey = "System.Web.OData.NullDynamicPropertyKey";
+        private const string NullDynamicPropertyKey = "Microsoft.AspNet.OData.NullDynamicPropertyKey";
 
-        private const string ContainerBuilderFactoryKey = "System.Web.OData.ContainerBuilderFactoryKey";
+        private const string ContainerBuilderFactoryKey = "Microsoft.AspNet.OData.ContainerBuilderFactoryKey";
 
-        private const string RootContainerMappingsKey = "System.Web.OData.RootContainerMappingsKey";
+        private const string RootContainerMappingsKey = "Microsoft.AspNet.OData.RootContainerMappingsKey";
 
-        private const string DefaultQuerySettingsKey = "System.Web.OData.DefaultQuerySettings";
+        private const string DefaultQuerySettingsKey = "Microsoft.AspNet.OData.DefaultQuerySettings";
 
-        private const string NonODataRootContainerKey = "System.Web.OData.NonODataRootContainerKey";
+        private const string NonODataRootContainerKey = "Microsoft.AspNet.OData.NonODataRootContainerKey";
 
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return

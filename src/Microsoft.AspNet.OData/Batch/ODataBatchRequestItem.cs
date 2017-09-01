@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,10 +49,26 @@ namespace Microsoft.AspNet.OData.Batch
 
             if (contentIdToLocationMapping != null && contentId != null)
             {
-                ContentIdHelpers.AddLocationHeaderToMapping(response, contentIdToLocationMapping, contentId);
+                AddLocationHeaderToMapping(response, contentIdToLocationMapping, contentId);
             }
 
             return response;
+        }
+
+        private static void AddLocationHeaderToMapping(
+            HttpResponseMessage response,
+            IDictionary<string, string> contentIdToLocationMapping,
+            string contentId)
+        {
+            Contract.Assert(response != null);
+            Contract.Assert(response.Headers != null);
+            Contract.Assert(contentIdToLocationMapping != null);
+            Contract.Assert(contentId != null);
+
+            if (response.Headers.Location != null)
+            {
+                contentIdToLocationMapping.Add(contentId, response.Headers.Location.AbsoluteUri);
+            }
         }
 
         /// <inheritdoc/>

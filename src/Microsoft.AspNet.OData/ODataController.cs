@@ -15,7 +15,7 @@ namespace Microsoft.AspNet.OData
     [ODataFormatting]
     [ODataRouting]
     [ApiExplorerSettings(IgnoreApi = true)]
-    public abstract class ODataController : ApiController
+    public abstract partial class ODataController : ApiController
     {
         /// <summary>
         /// Releases the unmanaged resources that are used by the object and, optionally,

@@ -76,9 +76,14 @@ namespace Microsoft.AspNet.OData.Routing
             }
 
             ILookup<string, HttpActionDescriptor> actionMap = _innerSelector.GetActionMapping(controllerContext.ControllerDescriptor);
+
             foreach (IODataRoutingConvention routingConvention in routingConventions)
             {
-                string actionName = routingConvention.SelectAction(odataPath, controllerContext, actionMap);
+                string actionName = routingConvention.SelectAction(
+                    odataPath,
+                    controllerContext,
+                    actionMap);
+
                 if (actionName != null)
                 {
                     routeData.Values[ODataRouteConstants.Action] = actionName;

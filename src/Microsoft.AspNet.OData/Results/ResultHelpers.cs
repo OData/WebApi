@@ -85,7 +85,7 @@ namespace Microsoft.AspNet.OData.Results
                 resourceContext.NavigationSource.NavigationSourceKind() == EdmNavigationSourceKind.ContainedEntitySet);
             Contract.Assert(resourceContext.Request != null);
 
-            ODataPath path = resourceContext.Request.ODataProperties().Path;
+            ODataPath path = resourceContext.InternalRequest.Context.Path;
             if (path == null)
             {
                 throw Error.InvalidOperation(SRResources.ODataPathMissing);
@@ -147,7 +147,6 @@ namespace Microsoft.AspNet.OData.Results
                 Url = request.GetUrlHelper() ?? new UrlHelper(request),
                 MetadataLevel = ODataMetadataLevel.FullMetadata, // Used internally to always calculate the links.
                 Request = request,
-                RequestContext = request.GetRequestContext(),
                 Path = path
             };
 

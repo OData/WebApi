@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.OData.Query
         private OrderByClause _orderByClause;
         private IList<OrderByNode> _orderByNodes;
         private ODataQueryOptionParser _queryOptionParser;
-
+        private IServiceProvider _serviceProvider;
         /// <summary>
         /// Initialize a new instance of <see cref="OrderByQueryOption"/> based on the raw $orderby value and
         /// an EdmModel from <see cref="ODataQueryContext"/>.
@@ -31,7 +31,7 @@ namespace Microsoft.AspNetCore.OData.Query
         /// <param name="rawValue">The raw value for $orderby query. It can be null or empty.</param>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
         /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
-        public OrderByQueryOption(string rawValue, ODataQueryContext context, ODataQueryOptionParser queryOptionParser)
+        public OrderByQueryOption(string rawValue, ODataQueryContext context, ODataQueryOptionParser queryOptionParser, IServiceProvider serviceProvider)
         {
             if (context == null)
             {
@@ -47,12 +47,13 @@ namespace Microsoft.AspNetCore.OData.Query
             {
                 throw Error.ArgumentNull("queryOptionParser");
             }
-
+            
             Context = context;
             RawValue = rawValue;
             Validator = new OrderByQueryValidator();
             // Validator = OrderByQueryValidator.GetOrderByQueryValidator(context); // TODO
             _queryOptionParser = queryOptionParser;
+            _serviceProvider = serviceProvider;
         }
 
         // This constructor is intended for unit testing only.
@@ -233,7 +234,7 @@ namespace Microsoft.AspNetCore.OData.Query
 
                     if (propertyNode.OrderByClause != null)
                     {
-                        querySoFar = AddOrderByQueryForProperty(query, querySettings, propertyNode.OrderByClause, querySoFar, direction, alreadyOrdered);
+                        querySoFar = AddOrderByQueryForProperty(query, querySettings, propertyNode.OrderByClause, querySoFar, direction, alreadyOrdered, _serviceProvider);
                     }
                     else
                     {
@@ -252,7 +253,7 @@ namespace Microsoft.AspNetCore.OData.Query
 
                     openPropertiesSoFar.Add(openPropertyNode.PropertyName);
                     Contract.Assert(openPropertyNode.OrderByClause != null);
-                    querySoFar = AddOrderByQueryForProperty(query, querySettings, openPropertyNode.OrderByClause, querySoFar, openPropertyNode.Direction, alreadyOrdered);
+                    querySoFar = AddOrderByQueryForProperty(query, querySettings, openPropertyNode.OrderByClause, querySoFar, openPropertyNode.Direction, alreadyOrdered, _serviceProvider);
                     alreadyOrdered = true;
                 }
                 else
@@ -273,13 +274,13 @@ namespace Microsoft.AspNetCore.OData.Query
         }
 
         private IQueryable AddOrderByQueryForProperty(IQueryable query, ODataQuerySettings querySettings,
-            OrderByClause orderbyClause, IQueryable querySoFar, OrderByDirection direction, bool alreadyOrdered)
+            OrderByClause orderbyClause, IQueryable querySoFar, OrderByDirection direction, bool alreadyOrdered , IServiceProvider serviceProvider)
         {
             // TODO: 
             //Context.UpdateQuerySettings(querySettings, query);
 
             LambdaExpression orderByExpression =
-                FilterBinder.Bind(orderbyClause, Context.ElementClrType, /*Context.RequestContainer*/ null);
+                FilterBinder.Bind(orderbyClause, Context.ElementClrType, serviceProvider);
             querySoFar = ExpressionHelpers.OrderBy(querySoFar, orderByExpression, direction, Context.ElementClrType,
                 alreadyOrdered);
             return querySoFar;

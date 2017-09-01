@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.OData.Query.Expressions
     /// i.e MethodInfo of each EdmFunction which is mentioned in the EdmModel.
     /// If you add a custom uri function in OData.Core via 'CustomUriFunctions' class, you must bind it to it's MethodInfo.
     /// </summary>
-    internal static class UriFunctionsBinder
+    public static class UriFunctionsBinder
     {
         private static Dictionary<string, MethodInfo> methodLiteralSignaturesToMethodInfo = new Dictionary<string, MethodInfo>();
 

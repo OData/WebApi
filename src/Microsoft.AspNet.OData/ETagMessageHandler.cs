@@ -131,8 +131,7 @@ namespace Microsoft.AspNet.OData
             {
                 properties.Add(etagProperty.Name, resourceContext.GetPropertyValue(etagProperty.Name));
             }
-            EntityTagHeaderValue etagHeaderValue = handler.CreateETag(properties);
-            return etagHeaderValue;
+            return handler.CreateETag(properties);
         }
 
         private static object GetSingleEntityObject(HttpResponseMessage response)

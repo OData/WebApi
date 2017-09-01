@@ -25,7 +25,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 ODataPathTemplate template = attributeMapping.Key;
                 IWebApiActionDescriptor action = attributeMapping.Value;
 
-                if (action.IsHttpMethodMatch(request.Method) && template.TryMatch(odataPath, values))
+                if (action.IsHttpMethodSupported(request.Method) && template.TryMatch(odataPath, values))
                 {
                     values["action"] = action.ActionName;
                     SelectControllerResult result = new SelectControllerResult(action.ControllerName, values);

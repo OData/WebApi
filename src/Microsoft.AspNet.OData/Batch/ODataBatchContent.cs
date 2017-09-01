@@ -69,10 +69,7 @@ namespace Microsoft.AspNet.OData.Batch
         /// <inheritdoc/>
         protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
         {
-            IODataResponseMessage responseMessage = new ODataMessageWrapper(stream, Headers)
-            {
-                Container = _requestContainer
-            };
+            IODataResponseMessage responseMessage = ODataMessageWrapperHelper.Create(stream, this.Headers, _requestContainer);
             ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, _writerSettings);
             ODataBatchWriter writer = messageWriter.CreateODataBatchWriter();
 

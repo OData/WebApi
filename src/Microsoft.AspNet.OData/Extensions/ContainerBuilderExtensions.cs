@@ -14,6 +14,7 @@ using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
+using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace Microsoft.AspNet.OData.Extensions
 {

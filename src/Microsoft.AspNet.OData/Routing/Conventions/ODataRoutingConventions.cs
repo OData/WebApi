@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Web.Http;
-using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions

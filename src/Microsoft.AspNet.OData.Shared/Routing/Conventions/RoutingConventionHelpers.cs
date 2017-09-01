@@ -1,10 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -13,7 +16,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     internal static class RoutingConventionHelpers
     {
-        public static string SelectAction(this IEdmOperation operation, ILookup<string, HttpActionDescriptor> actionMap, bool isCollection)
+        public static string SelectAction(this IEdmOperation operation, IWebApiActionMap actionMap, bool isCollection)
         {
             Contract.Assert(actionMap != null);
 
@@ -145,12 +148,12 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             return true;
         }
 
-        public static void AddKeyValueToRouteData(this HttpControllerContext controllerContext, KeySegment segment, string keyName = "key")
+        public static void AddKeyValueToRouteData(this IWebApiControllerContext controllerContext, KeySegment segment, string keyName = "key")
         {
             Contract.Assert(controllerContext != null);
             Contract.Assert(segment != null);
 
-            IDictionary<string, object> routingConventionsStore = controllerContext.Request.ODataProperties().RoutingConventionsStore;
+            IDictionary<string, object> routingConventionsStore = controllerContext.Request.Context.RoutingConventionsStore;
 
             IEdmEntityType entityType = segment.EdmType as IEdmEntityType;
             Contract.Assert(entityType != null);
@@ -183,7 +186,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     newKeyName = keyName;
                 }
 
-                AddKeyValues(newKeyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData.Values, routingConventionsStore);
+                AddKeyValues(newKeyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData, routingConventionsStore);
             }
         }
 
@@ -219,12 +222,12 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             odataValues[prefixName] = odataValue;
         }
 
-        public static void AddFunctionParameterToRouteData(this HttpControllerContext controllerContext, OperationSegment functionSegment)
+        public static void AddFunctionParameterToRouteData(this IWebApiControllerContext controllerContext, OperationSegment functionSegment)
         {
             Contract.Assert(controllerContext != null);
             Contract.Assert(functionSegment != null);
 
-            IDictionary<string, object> routingConventionsStore = controllerContext.Request.ODataProperties().RoutingConventionsStore;
+            IDictionary<string, object> routingConventionsStore = controllerContext.Request.Context.RoutingConventionsStore;
 
             IEdmFunction function = functionSegment.Operations.First() as IEdmFunction;
             if (function == null)
@@ -237,7 +240,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 string name = parameter.Name;
                 object value = functionSegment.GetParameterValue(name);
 
-                AddFunctionParameters(function, name, value, controllerContext.RouteData.Values,
+                AddFunctionParameters(function, name, value, controllerContext.RouteData,
                     routingConventionsStore, null);
             }
         }
@@ -327,46 +330,6 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
             return parameterMappings;
         }
-        /*
-        public static object TranslateNode(object node)
-        {
-            Contract.Assert(node != null);
-
-            ConstantNode constantNode = node as ConstantNode;
-            if (constantNode != null)
-            {
-                UriTemplateExpression uriTemplateExpression = constantNode.Value as UriTemplateExpression;
-                if (uriTemplateExpression != null)
-                {
-                    return uriTemplateExpression.LiteralText;
-                }
-
-                // Make the enum prefix free to work.
-                ODataEnumValue enumValue = constantNode.Value as ODataEnumValue;
-                if (enumValue != null)
-                {
-                    return ODataUriUtils.ConvertToUriLiteral(enumValue, ODataVersion.V4);
-                }
-
-                return constantNode.LiteralText;
-            }
-
-            ConvertNode convertNode = node as ConvertNode;
-            if (convertNode != null)
-            {
-                return TranslateNode(convertNode.Source);
-            }
-
-            ParameterAliasNode parameterAliasNode = node as ParameterAliasNode;
-            if (parameterAliasNode != null)
-            {
-                return parameterAliasNode.Alias;
-            }
-
-            //return node.ToString();
-            throw Error.NotSupported(SRResources.CannotRecognizeNodeType, typeof(ODataPathSegmentHandler),
-                node.GetType().FullName);
-        }*/
 
         public static bool IsRouteParameter(string parameterName)
         {

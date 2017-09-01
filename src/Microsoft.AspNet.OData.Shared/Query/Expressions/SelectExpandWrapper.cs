@@ -39,7 +39,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// <summary>
         /// Gets or sets the EDM type name of the element being selected and expanded. 
         /// </summary>
-        /// <remarks>This is required by the <see cref="ODataMediaTypeFormatter"/> during serialization. If the instance property is not
+        /// <remarks>This is required by the ODataMediaTypeFormatter during serialization. If the instance property is not
         /// null, the type name will not be set as the type name can be figured from the instance runtime type.</remarks>
         public string TypeName { get; set; }
 

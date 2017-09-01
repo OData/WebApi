@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -31,7 +32,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private bool _linqToObjectMode = false;
 
-        internal AggregationBinder(ODataQuerySettings settings, IAssembliesResolver assembliesResolver, Type elementType,
+        internal AggregationBinder(ODataQuerySettings settings, IWebApiAssembliesResolver assembliesResolver, Type elementType,
             IEdmModel model, TransformationNode transformation)
             : base(model, assembliesResolver, settings)
         {

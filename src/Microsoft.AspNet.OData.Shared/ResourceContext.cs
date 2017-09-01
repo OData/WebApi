@@ -9,6 +9,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
@@ -23,7 +24,7 @@ namespace Microsoft.AspNet.OData
     /// <see cref="M:NavigationSourceConfiguration.HasNavigationPropertiesLink"/>
     /// ) builders and can be used by the link builders to generate links.
     /// </summary>
-    public class ResourceContext
+    public partial class ResourceContext
     {
         private object _resourceInstance;
 
@@ -66,15 +67,11 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets or sets the HTTP request that caused this instance to be generated.
         /// </summary>
-        public HttpRequestMessage Request
+        internal IWebApiRequestMessage InternalRequest
         {
             get
             {
-                return SerializerContext.Request;
-            }
-            set
-            {
-                SerializerContext.Request = value;
+                return SerializerContext.InternalRequest;
             }
         }
 
@@ -139,18 +136,14 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Gets or sets a <see cref="UrlHelper"/> that may be used to generate links while serializing this resource
+        /// Gets or sets a <see cref="IWebApiUrlHelper"/> that may be used to generate links while serializing this resource
         /// instance.
         /// </summary>
-        public UrlHelper Url
+        internal IWebApiUrlHelper InternalUrlHelper
         {
             get
             {
-                return SerializerContext.Url;
-            }
-            set
-            {
-                SerializerContext.Url = value;
+                return SerializerContext.InternalUrl;
             }
         }
 

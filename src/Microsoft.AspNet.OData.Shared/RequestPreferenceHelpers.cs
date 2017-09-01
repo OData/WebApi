@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNet.OData.Interfaces;
 
 namespace Microsoft.AspNet.OData
 {
@@ -12,30 +13,30 @@ namespace Microsoft.AspNet.OData
         public const string ReturnContentHeaderValue = "return=representation";
         public const string ReturnNoContentHeaderValue = "return=minimal";
 
-        internal static bool RequestPrefersReturnContent(HttpRequestMessage request)
+        internal static bool RequestPrefersReturnContent(IWebApiHeaders headers)
         {
             IEnumerable<string> preferences = null;
-            if (request.Headers.TryGetValues(PreferHeaderName, out preferences))
+            if (headers.TryGetValues(PreferHeaderName, out preferences))
             {
                 return preferences.Contains(ReturnContentHeaderValue);
             }
             return false;
         }
 
-        internal static bool RequestPrefersReturnNoContent(HttpRequestMessage request)
+        internal static bool RequestPrefersReturnNoContent(IWebApiHeaders headers)
         {
             IEnumerable<string> preferences = null;
-            if (request.Headers.TryGetValues(PreferHeaderName, out preferences))
+            if (headers.TryGetValues(PreferHeaderName, out preferences))
             {
                 return preferences.Contains(ReturnNoContentHeaderValue);
             }
             return false;
         }
 
-        internal static string GetRequestPreferHeader(HttpRequestMessage request)
+        internal static string GetRequestPreferHeader(IWebApiHeaders headers)
         {
             IEnumerable<string> values;
-            if (request.Headers.TryGetValues(PreferHeaderName, out values))
+            if (headers.TryGetValues(PreferHeaderName, out values))
             {
                 // If there are many "Prefer" headers, pick up the first one.
                 return values.FirstOrDefault();

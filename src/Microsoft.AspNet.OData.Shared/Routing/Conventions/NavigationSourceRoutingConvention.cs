@@ -2,6 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
@@ -10,7 +12,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles navigation sources
     /// (entity sets or singletons)
     /// </summary>
-    public abstract class NavigationSourceRoutingConvention : IODataRoutingConvention
+    public abstract partial class NavigationSourceRoutingConvention
     {
         /// <summary>
         /// Selects the controller for OData requests.
@@ -20,7 +22,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// <returns>
         ///   <c>null</c> if the request isn't handled by this convention; otherwise, the name of the selected controller
         /// </returns>
-        public virtual string SelectController(ODataPath odataPath, HttpRequestMessage request)
+        internal static SelectControllerResult SelectControllerImpl(ODataPath odataPath, IWebApiRequestMessage request)
         {
             if (odataPath == null)
             {
@@ -36,29 +38,17 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             EntitySetSegment entitySetSegment = odataPath.Segments.FirstOrDefault() as EntitySetSegment;
             if (entitySetSegment != null)
             {
-                return entitySetSegment.EntitySet.Name;
+                return new SelectControllerResult(entitySetSegment.EntitySet.Name, null);
             }
 
             // singleton
             SingletonSegment singletonSegment = odataPath.Segments.FirstOrDefault() as SingletonSegment;
             if (singletonSegment != null)
             {
-                return singletonSegment.Singleton.Name;
+                return new SelectControllerResult(singletonSegment.Singleton.Name, null);
             }
 
             return null;
         }
-
-        /// <summary>
-        /// Selects the action for OData requests.
-        /// </summary>
-        /// <param name="odataPath">The OData path.</param>
-        /// <param name="controllerContext">The controller context.</param>
-        /// <param name="actionMap">The action map.</param>
-        /// <returns>
-        ///   <c>null</c> if the request isn't handled by this convention; otherwise, the name of the selected action
-        /// </returns>
-        public abstract string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext,
-            ILookup<string, HttpActionDescriptor> actionMap);
     }
 }

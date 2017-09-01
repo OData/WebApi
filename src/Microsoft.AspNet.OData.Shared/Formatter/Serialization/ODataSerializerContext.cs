@@ -4,8 +4,9 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 using SelectExpandClause = Microsoft.OData.UriParser.SelectExpandClause;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
@@ -13,7 +14,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     /// <summary>
     /// Context information used by the <see cref="ODataSerializer"/> when serializing objects in OData message format.
     /// </summary>
-    public class ODataSerializerContext
+    public partial class ODataSerializerContext
     {
         private ClrTypeCache _typeMappingCache;
         private IDictionary<object, object> _items;
@@ -44,7 +45,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             ODataSerializerContext context = resource.SerializerContext;
 
             Request = context.Request;
-            RequestContext = context.RequestContext;
             Url = context.Url;
             Model = context.Model;
             Path = context.Path;
@@ -67,20 +67,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        /// <summary>
-        /// Gets or sets the HTTP Request whose response is being serialized.
-        /// </summary>
-        public HttpRequestMessage Request { get; set; }
+        internal IWebApiRequestMessage InternalRequest { get; private set; }
 
         /// <summary>
-        /// Gets or sets the request context.
+        /// Gets or sets the <see cref="IWebApiUrlHelper"/> to use for generating OData links.
         /// </summary>
-        public HttpRequestContext RequestContext { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="UrlHelper"/> to use for generating OData links.
-        /// </summary>
-        public UrlHelper Url { get; set; }
+        internal IWebApiUrlHelper InternalUrl { get; private set; }
 
         /// <summary>
         /// Gets or sets the navigation source.

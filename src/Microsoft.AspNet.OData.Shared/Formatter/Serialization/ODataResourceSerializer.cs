@@ -495,11 +495,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
             else if (resourceContext.Request != null)
             {
-                HttpConfiguration configuration = resourceContext.Request.GetConfiguration();
-                if (configuration != null)
-                {
-                    nullDynamicPropertyEnabled = configuration.HasEnabledNullDynamicProperty();
-                }
+                nullDynamicPropertyEnabled = resourceContext.InternalRequest.Options.NullDynamicPropertyIsEnabled;
             }
 
             IEdmStructuredType structuredType = resourceContext.StructuredType;
@@ -606,12 +602,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         {
             if (resourceContext.Request != null)
             {
-                HttpConfiguration configuration = resourceContext.Request.GetConfiguration();
-                if (configuration == null)
-                {
-                    throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
-                }
-
                 IEdmModel model = resourceContext.EdmModel;
                 IEdmNavigationSource navigationSource = resourceContext.NavigationSource;
 
@@ -630,11 +620,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     properties.Add(etagProperty.Name, resourceContext.GetPropertyValue(etagProperty.Name));
                 }
-                EntityTagHeaderValue etagHeaderValue = configuration.GetETagHandler().CreateETag(properties);
-                if (etagHeaderValue != null)
-                {
-                    return etagHeaderValue.ToString();
-                }
+
+                return resourceContext.InternalRequest.CreateETag(properties);
             }
 
             return null;
@@ -1057,7 +1044,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 return null;
             }
 
-            Uri baseUri = new Uri(resourceContext.Url.CreateODataLink(MetadataSegment.Instance));
+            Uri baseUri = new Uri(resourceContext.InternalUrlHelper.CreateODataLink(MetadataSegment.Instance));
             Uri metadata = new Uri(baseUri, "#" + CreateMetadataFragment(operation));
 
             ODataOperation odataOperation;

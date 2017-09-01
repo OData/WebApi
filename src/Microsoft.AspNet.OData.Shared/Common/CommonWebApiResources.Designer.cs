@@ -11,6 +11,7 @@
 namespace Microsoft.AspNet.OData.Common {
     using System;
     using System.Linq;
+    using System.Reflection;
 
 
     /// <summary>
@@ -41,9 +42,9 @@ namespace Microsoft.AspNet.OData.Common {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
 #if NETFX_CORE
-                    var assembly = typeof(CommonWebApiResources).GetTypeInfo().Assembly;
+                    Assembly assembly = typeof(CommonWebApiResources).GetTypeInfo().Assembly;
 #else
-                    var assembly = typeof(CommonWebApiResources).Assembly;
+                    Assembly assembly = typeof(CommonWebApiResources).Assembly;
 #endif
 
                     // Find the CommonResources.resources file's full resource name in this assembly

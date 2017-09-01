@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Linq;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles OData metadata requests.
     /// </summary>
-    public class MetadataRoutingConvention : IODataRoutingConvention
+    public partial class MetadataRoutingConvention
     {
         /// <summary>
         /// Selects the controller for OData requests.
@@ -18,7 +19,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// <returns>
         ///   <c>null</c> if the request isn't handled by this convention; otherwise, the name of the selected controller
         /// </returns>
-        public string SelectController(ODataPath odataPath, HttpRequestMessage request)
+        internal static SelectControllerResult SelectControllerImpl(ODataPath odataPath, IWebApiRequestMessage request)
         {
             if (odataPath == null)
             {
@@ -33,7 +34,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             if (odataPath.PathTemplate == "~" ||
                 odataPath.PathTemplate == "~/$metadata")
             {
-                return "Metadata";
+                return new SelectControllerResult("Metadata", null);
             }
 
             return null;
@@ -48,7 +49,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// <returns>
         ///   <c>null</c> if the request isn't handled by this convention; otherwise, the name of the selected action
         /// </returns>
-        public string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
+        internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
             if (odataPath == null)
             {

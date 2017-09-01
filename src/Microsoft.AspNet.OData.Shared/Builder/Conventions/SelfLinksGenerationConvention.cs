@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions
             {
                 entitySet.HasFeedSelfLink(feedContext =>
                 {
-                    string selfLink = feedContext.Url.CreateODataLink(new EntitySetSegment(feedContext.EntitySetBase as IEdmEntitySet));
+                    string selfLink = feedContext.InternalUrlHelper.CreateODataLink(new EntitySetSegment(feedContext.EntitySetBase as IEdmEntitySet));
 
                     if (selfLink == null)
                     {

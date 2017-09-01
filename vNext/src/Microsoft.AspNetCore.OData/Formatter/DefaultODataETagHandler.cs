@@ -68,7 +68,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 throw Error.ArgumentNull("etagHeaderValue");
             }
 
-            string tag = etagHeaderValue.Tag.Trim('\"');
+            string tag = etagHeaderValue.Tag.ToString().Trim('\"');
 
             // split etag
             string[] rawValues = tag.Split(Separator);

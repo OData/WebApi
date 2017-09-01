@@ -116,7 +116,7 @@ namespace Microsoft.AspNetCore.OData.Formatter
                 return ODataMetadataLevel.MinimalMetadata;
             }
 
-            if (!String.Equals(ODataMediaTypes.ApplicationJson.MediaType, contentType.MediaType,
+            if (!ODataMediaTypes.ApplicationJson.MediaType.Equals( contentType.MediaType,
                 StringComparison.Ordinal))
             {
                 return ODataMetadataLevel.MinimalMetadata;
@@ -125,15 +125,15 @@ namespace Microsoft.AspNetCore.OData.Formatter
             Contract.Assert(contentType.Parameters != null);
             NameValueHeaderValue odataParameter =
                 contentType.Parameters.FirstOrDefault(
-                    (p) => String.Equals("odata.metadata", p.Name, StringComparison.OrdinalIgnoreCase));
+                    (p) => p.Name.Equals("odata.metadata", StringComparison.OrdinalIgnoreCase));
 
             if (odataParameter != null)
             {
-                if (String.Equals("full", odataParameter.Value, StringComparison.OrdinalIgnoreCase))
+                if (odataParameter.Value.Equals("full", StringComparison.OrdinalIgnoreCase))
                 {
                     return ODataMetadataLevel.FullMetadata;
                 }
-                if (String.Equals("none", odataParameter.Value, StringComparison.OrdinalIgnoreCase))
+                if (odataParameter.Value.Equals("none", StringComparison.OrdinalIgnoreCase))
                 {
                     return ODataMetadataLevel.NoMetadata;
                 }

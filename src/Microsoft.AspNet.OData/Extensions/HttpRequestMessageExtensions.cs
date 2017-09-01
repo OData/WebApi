@@ -32,9 +32,9 @@ namespace Microsoft.AspNet.OData.Extensions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class HttpRequestMessageExtensions
     {
-        private const string PropertiesKey = "System.Web.OData.Properties";
-        private const string RequestContainerKey = "System.Web.OData.RequestContainer";
-        private const string RequestScopeKey = "System.Web.OData.RequestScope";
+        private const string PropertiesKey = "Microsoft.AspNet.OData.Properties";
+        private const string RequestContainerKey = "Microsoft.AspNet.OData.RequestContainer";
+        private const string RequestScopeKey = "Microsoft.AspNet.OData.RequestScope";
 
         /// <summary>
         /// Gets the <see cref="HttpRequestMessageProperties"/> instance containing OData methods and properties

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <assemblies defaultPublicKeyToken="31bf3856ad364e35">
   <!-- Production assemblies -->
+  <assembly name="Microsoft.AspNet.OData"/>
   <assembly name="Microsoft.AspNet.Facebook"/>
   <assembly name="System.Web.Cors"/>
   <assembly name="Microsoft.Web.Helpers"/>
@@ -21,7 +22,6 @@
   <assembly name="System.Web.Http.Tracing"/>
   <assembly name="System.Web.Http.WebHost"/>
   <assembly name="System.Web.Mvc"/>
-  <assembly name="System.Web.OData"/>
   <assembly name="System.Web.Razor"/>
   <assembly name="System.Web.WebPages"/>
   <assembly name="System.Web.WebPages.Administration"/>

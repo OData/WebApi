@@ -141,7 +141,6 @@ namespace Microsoft.AspNet.OData.Formatter
                     Request = request,
                     ResourceType = bindingContext.ModelType,
                     ResourceEdmType = edmTypeReference,
-                    RequestContext = request.GetRequestContext()
                 };
             }
         }

@@ -195,6 +195,11 @@
     <Compile Include="ODataCountTest\CountEdmModel.cs" />
     <Compile Include="ODataCountTest\CountTest.cs" />
     <Compile Include="ODataPathHandlerExtensions.cs" />
+    <Compile Include="QueryComposition\EFWideCustomer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EFWideCustomer.tt</DependentUpon>
+    </Compile>
     <Compile Include="QueryComposition\IsOf\IsOfController.cs" />
     <Compile Include="QueryComposition\IsOf\IsofDataSource.cs" />
     <Compile Include="QueryComposition\IsOf\IsofEdmModel.cs" />
@@ -1059,6 +1064,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ComplexTypeInheritance\ComplexTypeInheritanceEdmModels.csdl.xml" />
+    <Content Include="QueryComposition\EFWideCustomer.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>EFWideCustomer.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="OpenType\TypedMetadata.csdl.xml" />

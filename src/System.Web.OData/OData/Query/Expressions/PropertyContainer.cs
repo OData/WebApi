@@ -17,7 +17,7 @@ namespace System.Web.OData.Query.Expressions
     /// EntityFramework understands only member initializations in Select expressions. Also, it doesn't understand type casts for non-primitive types. So, 
     /// SelectExpandBinder has to generate strongly types expressions that involve only property access. This class represents the base class for a bunch of 
     /// generic derived types that are used in the expressions that SelectExpandBinder generates.
-    /// Also, Expression.Compile() could fail with stack overflow if expression is to deep and causes to mane levels of recursion. To avoid that we are tree-like property container.
+    /// Also, Expression.Compile() could fail with stack overflow if expression is to deep and causes too many levels of recursion. To avoid that we are tree-like property container.
     /// </remarks>
     internal abstract partial class PropertyContainer
     {

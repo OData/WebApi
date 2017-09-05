@@ -139,9 +139,9 @@ namespace System.Web.OData.Formatter.Serialization
             // Assert
             Assert.Equal("{\"@odata.context\":\"http://any/$metadata#Collection(Default.Address)\"," +
                 "\"value\":[" +
-                  "{\"Street\":null,\"City\":\"Redmond\",\"State\":null,\"Country\":null,\"ZipCode\":null}," +
+                  "{\"Street\":null,\"City\":\"Redmond\",\"State\":null,\"CountryOrRegion\":null,\"ZipCode\":null}," +
                   "null," +
-                  "{\"Street\":null,\"City\":\"Shanghai\",\"State\":null,\"Country\":null,\"ZipCode\":null}" +
+                  "{\"Street\":null,\"City\":\"Shanghai\",\"State\":null,\"CountryOrRegion\":null,\"ZipCode\":null}" +
                   "]}", result);
         }
 

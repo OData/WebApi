@@ -19,7 +19,7 @@ namespace System.Web.OData.Query.Expressions
     /// generic derived types that are used in the expressions that SelectExpandBinder generates.
     /// Also, Expression.Compile() could fail with stack overflow if expression is to deep and causes to mane levels of recursion. To avoid that we are tree-like property container.
     /// </remarks>
-    internal abstract class PropertyContainer
+    internal abstract partial class PropertyContainer
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyContainer"/> class.
@@ -69,7 +69,7 @@ namespace System.Web.OData.Query.Expressions
                 NamedPropertyExpression property = properties.First();
                 int count = properties.Count - 1;
                 List<Expression> nextExpressions = new List<Expression>();
-                int parts = 3;
+                int parts = 4;
                 int offset = 0;
                 for (int step = parts; step > 0; step--)
                 {
@@ -138,10 +138,10 @@ namespace System.Web.OData.Query.Expressions
             return Expression.MemberInit(Expression.New(namedPropertyType), memberBindings);
         }
 
-        private static List<Type> _singleExpandedPropertyTypes = new List<Type> { typeof(SingleExpandedProperty<>), typeof(SingleExpandedPropertyWithNext0<>), typeof(SingleExpandedPropertyWithNext1<>), typeof(SingleExpandedPropertyWithNext2<>) };
-        private static List<Type> _collectionExpandedPropertyTypes = new List<Type> { typeof(CollectionExpandedProperty<>), typeof(CollectionExpandedPropertyWithNext0<>), typeof(CollectionExpandedPropertyWithNext1<>), typeof(CollectionExpandedPropertyWithNext2<>) };
-        private static List<Type> _autoSelectedNamedPropertyTypes = new List<Type> { typeof(AutoSelectedNamedProperty<>), typeof(AutoSelectedNamedPropertyWithNext0<>), typeof(AutoSelectedNamedPropertyWithNext1<>), typeof(AutoSelectedNamedPropertyWithNext2<>) };
-        private static List<Type> _namedPropertyTypes = new List<Type> { typeof(NamedProperty<>), typeof(NamedPropertyWithNext0<>), typeof(NamedPropertyWithNext1<>), typeof(NamedPropertyWithNext2<>) };
+        private static List<Type> _singleExpandedPropertyTypes = new List<Type> { typeof(SingleExpandedProperty<>), typeof(SingleExpandedPropertyWithNext0<>), typeof(SingleExpandedPropertyWithNext1<>), typeof(SingleExpandedPropertyWithNext2<>), typeof(SingleExpandedPropertyWithNext3<>) };
+        private static List<Type> _collectionExpandedPropertyTypes = new List<Type> { typeof(CollectionExpandedProperty<>), typeof(CollectionExpandedPropertyWithNext0<>), typeof(CollectionExpandedPropertyWithNext1<>), typeof(CollectionExpandedPropertyWithNext2<>), typeof(CollectionExpandedPropertyWithNext3<>) };
+        private static List<Type> _autoSelectedNamedPropertyTypes = new List<Type> { typeof(AutoSelectedNamedProperty<>), typeof(AutoSelectedNamedPropertyWithNext0<>), typeof(AutoSelectedNamedPropertyWithNext1<>), typeof(AutoSelectedNamedPropertyWithNext2<>), typeof(AutoSelectedNamedPropertyWithNext3<>) };
+        private static List<Type> _namedPropertyTypes = new List<Type> { typeof(NamedProperty<>), typeof(NamedPropertyWithNext0<>), typeof(NamedPropertyWithNext1<>), typeof(NamedPropertyWithNext2<>), typeof(NamedPropertyWithNext3<>) };
 
         private static Type GetNamedPropertyType(NamedPropertyExpression property, IList<Expression> expressions)
         {
@@ -237,164 +237,6 @@ namespace System.Web.OData.Query.Expressions
                 {
                     return new TruncatedCollection<T>(Collection, PageSize, TotalCount);
                 }
-            }
-        }
-
-        // Entityframework requires that the two different type initializers for a given type in the same query have the same set of properties in the same order.
-        // A $select=Prop1,Prop2,Prop3 where Prop1 and Prop2 are of the same type without this extra NamedPropertyWithNext type results in an select expression that looks like,
-        //      c => new NamedProperty<int> { Name = "Prop1", Value = c.Prop1, Next0 = new NamedProperty<int> { Name = "Prop2", Value = c.Prop2 }, Next2 = new NamedProperty<int> { Name = "Prop3", Value = c.Prop3 } };
-        // Entityframework cannot translate this expression as the first NamedProperty<int> initialization has Next and the second one doesn't. Also, Entityframework cannot 
-        // create null's of NamedProperty<T>. So, you cannot generate an expression like new NamedProperty<int> { Next = null }. The exception that EF throws looks like this,
-        // "The type 'NamedProperty`1[SystemInt32...]' appears in two structurally incompatible initializations within a single LINQ to Entities query. 
-        // A type can be initialized in two places in the same query, but only if the same properties are set in both places and those properties are set in the same order."
-        internal class NamedPropertyWithNext0<T> : NamedProperty<T>
-        {
-            public PropertyContainer Next0 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next0.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-            }
-        }
-
-        internal class NamedPropertyWithNext1<T> : NamedPropertyWithNext0<T>
-        {
-            public PropertyContainer Next1 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                if (Next1 != null)
-                {
-                    Next1.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                }
-            }
-        }
-
-        internal class NamedPropertyWithNext2<T> : NamedPropertyWithNext1<T>
-        {
-            public PropertyContainer Next2 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                if (Next2 != null)
-                {
-                    Next2.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                }
-            }
-        }
-
-        private class AutoSelectedNamedPropertyWithNext0<T> : AutoSelectedNamedProperty<T>
-        {
-            public PropertyContainer Next0 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next0.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-            }
-        }
-
-        private class AutoSelectedNamedPropertyWithNext1<T> : AutoSelectedNamedPropertyWithNext0<T>
-        {
-            public PropertyContainer Next1 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next1.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-            }
-        }
-
-        private class AutoSelectedNamedPropertyWithNext2<T> : AutoSelectedNamedPropertyWithNext1<T>
-        {
-            public PropertyContainer Next2 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next2.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-            }
-        }
-
-        private class SingleExpandedPropertyWithNext0<T> : SingleExpandedProperty<T>
-        {
-            public PropertyContainer Next0 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next0.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-            }
-        }
-
-        private class SingleExpandedPropertyWithNext1<T> : SingleExpandedPropertyWithNext0<T>
-        {
-            public PropertyContainer Next1 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next1.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-            }
-        }
-
-
-        private class SingleExpandedPropertyWithNext2<T> : SingleExpandedPropertyWithNext1<T>
-        {
-            public PropertyContainer Next2 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next2.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-            }
-        }
-
-        private class CollectionExpandedPropertyWithNext0<T> : CollectionExpandedProperty<T>
-        {
-            public PropertyContainer Next0 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next0.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-            }
-        }
-
-        private class CollectionExpandedPropertyWithNext1<T> : CollectionExpandedPropertyWithNext0<T>
-        {
-            public PropertyContainer Next1 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next1.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-            }
-        }
-
-        private class CollectionExpandedPropertyWithNext2<T> : CollectionExpandedPropertyWithNext1<T>
-        {
-            public PropertyContainer Next2 { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next2.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
             }
         }
     }

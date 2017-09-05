@@ -1,0 +1,51 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<# 
+int levels = 5;
+int propertiesPerLevel = 400;
+#>
+namespace WebStack.QA.Test.OData.QueryComposition
+{
+	public interface IContinuation
+    {
+        int SkipToken { get; set; }
+    }
+
+    public class EFWideCustomer : IContinuation
+    {
+        public int Id { get; set; }
+
+        public int PartitionId { get; set; }
+
+		<# for(int level=1; level<=levels; level++)
+{
+#>
+        public CustomProperties<#= level #> Custom<#= level #> {get;set;}
+<#
+}
+#>
+        public int SkipToken { get; set; }
+    }
+
+<# for(int level=1; level<=levels; level++)
+{#>
+	public class CustomProperties<#= level #>
+	{
+				public int Id { get; set; }
+		<# for(int idx = (level - 1) * propertiesPerLevel + 1; idx <= level * propertiesPerLevel; idx++)
+		{
+		#>
+		public string Prop<#= string.Format("{0:0000}",idx) #> {get; set;}
+		<#
+		}
+		#>
+	}
+<#
+}
+#>
+}
+

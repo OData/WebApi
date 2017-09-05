@@ -69,7 +69,7 @@ namespace System.Web.OData.Query.Expressions
                 NamedPropertyExpression property = properties.First();
                 int count = properties.Count - 1;
                 List<Expression> nextExpressions = new List<Expression>();
-                int parts = 4;
+                int parts = SingleExpandedPropertyTypes.Count - 1;
                 int offset = 0;
                 for (int step = parts; step > 0; step--)
                 {
@@ -138,30 +138,25 @@ namespace System.Web.OData.Query.Expressions
             return Expression.MemberInit(Expression.New(namedPropertyType), memberBindings);
         }
 
-        private static List<Type> _singleExpandedPropertyTypes = new List<Type> { typeof(SingleExpandedProperty<>), typeof(SingleExpandedPropertyWithNext0<>), typeof(SingleExpandedPropertyWithNext1<>), typeof(SingleExpandedPropertyWithNext2<>), typeof(SingleExpandedPropertyWithNext3<>) };
-        private static List<Type> _collectionExpandedPropertyTypes = new List<Type> { typeof(CollectionExpandedProperty<>), typeof(CollectionExpandedPropertyWithNext0<>), typeof(CollectionExpandedPropertyWithNext1<>), typeof(CollectionExpandedPropertyWithNext2<>), typeof(CollectionExpandedPropertyWithNext3<>) };
-        private static List<Type> _autoSelectedNamedPropertyTypes = new List<Type> { typeof(AutoSelectedNamedProperty<>), typeof(AutoSelectedNamedPropertyWithNext0<>), typeof(AutoSelectedNamedPropertyWithNext1<>), typeof(AutoSelectedNamedPropertyWithNext2<>), typeof(AutoSelectedNamedPropertyWithNext3<>) };
-        private static List<Type> _namedPropertyTypes = new List<Type> { typeof(NamedProperty<>), typeof(NamedPropertyWithNext0<>), typeof(NamedPropertyWithNext1<>), typeof(NamedPropertyWithNext2<>), typeof(NamedPropertyWithNext3<>) };
-
         private static Type GetNamedPropertyType(NamedPropertyExpression property, IList<Expression> expressions)
         {
             Type namedPropertyGenericType;
 
             if (property.NullCheck != null)
             {
-                namedPropertyGenericType = _singleExpandedPropertyTypes[expressions.Count];
+                namedPropertyGenericType = SingleExpandedPropertyTypes[expressions.Count];
             }
             else if (property.PageSize != null || property.CountOption != null)
             {
-                namedPropertyGenericType = _collectionExpandedPropertyTypes[expressions.Count];
+                namedPropertyGenericType = CollectionExpandedPropertyTypes[expressions.Count];
             }
             else if (property.AutoSelected)
             {
-                namedPropertyGenericType = _autoSelectedNamedPropertyTypes[expressions.Count];
+                namedPropertyGenericType = AutoSelectedNamedPropertyTypes[expressions.Count];
             }
             else
             {
-                namedPropertyGenericType = _namedPropertyTypes[expressions.Count];
+                namedPropertyGenericType = NamedPropertyTypes[expressions.Count];
             }
 
             Type elementType = (property.PageSize == null && property.CountOption == null)

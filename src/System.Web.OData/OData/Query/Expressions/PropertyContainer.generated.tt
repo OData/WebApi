@@ -18,7 +18,7 @@ namespace System.Web.OData.Query.Expressions
         // "The type 'NamedProperty`1[SystemInt32...]' appears in two structurally incompatible initializations within a single LINQ to Entities query. 
         // A type can be initialized in two places in the same query, but only if the same properties are set in both places and those properties are set in the same order."
 
-	<# int levels = 4;
+	<# int levels = 8;
 	string[] types = new string[] { "SingleExpandedProperty", "CollectionExpandedProperty", "AutoSelectedNamedProperty", "NamedProperty"};
 	foreach(var type in types) {
 	var baseClass = type;
@@ -38,6 +38,25 @@ namespace System.Web.OData.Query.Expressions
         }
 	<#
 	baseClass =  newClass;
+	}
+	
+	baseClass = type;
+	#>
+	private static List<Type> <#= type #>Types = new List<Type> {
+		typeof(<#= type #><>),
+		<#
+for(int level = 0; level < levels; level++) {
+		var newClass = type + "WithNext" + level.ToString();
+		#>
+		typeof(<#= newClass #><>),
+		<#
+	#>
+	<#}#>};
+	<#
+	for(int level = 0; level < levels; level++) {
+	#>
+		
+	<#
 	}
 	}#>
 

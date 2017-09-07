@@ -74,7 +74,7 @@ namespace System.Web.OData.Query.Expressions
             Assert.True(enumerator.MoveNext());
             var partialCustomer = Assert.IsAssignableFrom<SelectExpandWrapper<Customer>>(enumerator.Current);
             Assert.False(enumerator.MoveNext());
-            Assert.NotNull(partialCustomer.Instance);
+            Assert.Same(_queryable.Single(), partialCustomer.Instance);
             IEnumerable<SelectExpandWrapper<Order>> innerOrders = partialCustomer.Container
                 .ToDictionary(mapper)["Orders"] as IEnumerable<SelectExpandWrapper<Order>>;
             Assert.NotNull(innerOrders);
@@ -342,7 +342,7 @@ namespace System.Web.OData.Query.Expressions
             Assert.Equal(ExpressionType.MemberInit, projection.NodeType);
             Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "Instance"));
             SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
-            Assert.NotNull(customerWrapper.Instance);
+            Assert.Same(customer, customerWrapper.Instance);
         }
 
         [Fact]

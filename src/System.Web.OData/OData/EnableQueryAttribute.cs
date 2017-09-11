@@ -341,6 +341,19 @@ namespace System.Web.OData
         }
 
         /// <summary>
+        /// Gets or sets the minimum amount of time $select and $expand evaluations will be cached. The value may be
+        /// set to <c>0</c> to disable caching completely.
+        /// </summary>
+        public int SelectExpandEvaluationCacheLifetimeSeconds
+        {
+            get { return _querySettings.SelectExpandCacheExpirationTimeSeconds; }
+            set
+            {
+                _querySettings.SelectExpandCacheExpirationTimeSeconds = value;
+            }
+        }
+
+        /// <summary>
         /// Performs the query composition after action is executed. It first tries to retrieve the IQueryable from the
         /// returning response message. It then validates the query from uri based on the validation settings on
         /// <see cref="EnableQueryAttribute"/>. It finally applies the query appropriately, and reset it back on

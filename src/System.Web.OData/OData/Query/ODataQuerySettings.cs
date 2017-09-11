@@ -13,6 +13,7 @@ namespace System.Web.OData.Query
         private HandleNullPropagationOption _handleNullPropagationOption = HandleNullPropagationOption.Default;
         private int? _pageSize;
         private int? _modelBoundPageSize;
+        private int? _selectExpandCacheLifetime;
 
         /// <summary>
         /// Instantiates a new instance of the <see cref="ODataQuerySettings"/> class
@@ -49,6 +50,30 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
+        /// Gets or sets the amount of time unused generated delegates will be retained.
+        /// </summary>
+        /// <value>
+        /// The amount of time a compiled delegate should be retained while not being used, or <c>0</c> to 
+        /// disable caching.
+        /// </value>
+        internal int SelectExpandCacheExpirationTimeSeconds
+        {
+            get
+            {
+                return _selectExpandCacheLifetime ?? 0;
+            }
+            set
+            {
+                if (value < 0)
+                {
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 0);
+                }
+
+                _selectExpandCacheLifetime = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether query composition should
         /// alter the original query when necessary to ensure a stable sort order.
         /// </summary>
@@ -59,7 +84,7 @@ namespace System.Web.OData.Query
         /// a stable sort order should set this value to <c>false</c>.
         /// The default value is <c>true</c>.</value>
         public bool EnsureStableOrdering { get; set; }
-
+        
         /// <summary>
         /// Gets or sets a value indicating how null propagation should
         /// be handled during query composition.
@@ -117,6 +142,7 @@ namespace System.Web.OData.Query
             HandleNullPropagation = settings.HandleNullPropagation;
             PageSize = settings.PageSize;
             ModelBoundPageSize = settings.ModelBoundPageSize;
+            SelectExpandCacheExpirationTimeSeconds = settings.SelectExpandCacheExpirationTimeSeconds;
         }
     }
 }

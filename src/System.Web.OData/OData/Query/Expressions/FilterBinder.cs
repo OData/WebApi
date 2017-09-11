@@ -299,26 +299,6 @@ namespace System.Web.OData.Query.Expressions
             return propertyAccessExpression;
         }
 
-        //private PropertyInfo GetDynamicPropertyContainer(SingleValueOpenPropertyAccessNode openNode)
-        //{
-        //    IEdmStructuredType edmStructuredType;
-        //    var edmTypeReference = openNode.Source.TypeReference;
-        //    if (edmTypeReference.IsEntity())
-        //    {
-        //        edmStructuredType = edmTypeReference.AsEntity().EntityDefinition();
-        //    }
-        //    else if (edmTypeReference.IsComplex())
-        //    {
-        //        edmStructuredType = edmTypeReference.AsComplex().ComplexDefinition();
-        //    }
-        //    else
-        //    {
-        //        throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, openNode.Kind, typeof(FilterBinder).Name);
-        //    }
-        //    var prop = EdmLibHelpers.GetDynamicPropertyDictionary(edmStructuredType, Model);
-        //    return prop;
-        //}
-
         /// <summary>
         /// Binds a <see cref="SingleResourceFunctionCallNode"/> to create a LINQ <see cref="Expression"/> that
         /// represents the semantics of the <see cref="SingleResourceFunctionCallNode"/>.

@@ -5,17 +5,11 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net.Http;
-using System.Web.Http;
-using System.Web.Http.Controllers;
-using System.Web.Http.Dispatcher;
-using System.Web.OData.Extensions;
-using System.Web.OData.Properties;
-using System.Web.OData.Routing.Template;
+using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Routing.Conventions
+namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     /// <summary>
     /// Represents a routing convention that looks for <see cref="ODataRouteAttribute"/>s to match an <see cref="ODataPath"/>

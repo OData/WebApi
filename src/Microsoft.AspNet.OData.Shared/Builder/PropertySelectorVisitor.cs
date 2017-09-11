@@ -6,10 +6,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Web.Http;
-using System.Web.OData.Properties;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     internal class PropertySelectorVisitor : ExpressionVisitor
     {

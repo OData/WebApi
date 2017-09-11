@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Web.Http.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
 
-namespace System.Web.Http.OData
+namespace Microsoft.AspNet.OData
 {
     /// <summary>
     /// CompiledPropertyAccessor is a <see cref="PropertyAccessor{TEntityType}"/> that pre-compiles (using expression)

@@ -3,12 +3,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
-using System.Web.OData.Routing;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
-namespace System.Web.OData.Query
+namespace Microsoft.AspNet.OData.Query
 {
     /// <summary>
     /// This defines a translator to translate parameter alias nodes.

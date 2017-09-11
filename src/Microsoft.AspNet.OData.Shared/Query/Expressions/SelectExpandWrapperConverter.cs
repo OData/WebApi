@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 
-namespace System.Web.OData.Query.Expressions
+namespace Microsoft.AspNet.OData.Query.Expressions
 {
     /// <summary>
     /// Represents a custom <see cref="JsonConverter"/> to serialize <see cref="SelectExpandWrapper{TElement}"/> instances to JSON.

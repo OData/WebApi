@@ -6,13 +6,13 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.OData.Extensions;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using ODataPath = System.Web.OData.Routing.ODataPath;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace System.Web.OData
+namespace Microsoft.AspNet.OData
 {
     /// <summary>
     /// Represents an <see href="HttpMessageHandler" /> that converts null values in OData responses to

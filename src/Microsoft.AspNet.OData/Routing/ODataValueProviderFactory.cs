@@ -3,13 +3,13 @@
 
 using System.Collections.Generic;
 using System.Globalization;
-using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.ValueProviders;
 using System.Web.Http.ValueProviders.Providers;
-using System.Web.OData.Extensions;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 
-namespace System.Web.OData.Routing
+namespace Microsoft.AspNet.OData.Routing
 {
     internal class ODataValueProviderFactory : ValueProviderFactory, IUriValueProviderFactory
     {

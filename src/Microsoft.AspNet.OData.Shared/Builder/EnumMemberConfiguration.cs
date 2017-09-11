@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Diagnostics.Contracts;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// Represents the configuration for an enum member of an enum type.

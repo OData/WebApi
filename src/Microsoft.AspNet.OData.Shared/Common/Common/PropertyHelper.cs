@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -8,11 +9,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 
-#if ASPNETWEBAPI
-namespace System.Web.Http.Internal
-#else
-namespace System.Web.WebPages
-#endif
+namespace Microsoft.AspNet.OData.Common
 {
     internal class PropertyHelper
     {

@@ -4,12 +4,12 @@
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Web.Http;
-using System.Web.OData.Extensions;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.UriParser;
-using ODataPath = System.Web.OData.Routing.ODataPath;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace System.Web.OData.Formatter
+namespace Microsoft.AspNet.OData.Formatter
 {
     /// <summary>
     /// Media type mapping that associates requests for the raw value of properties.

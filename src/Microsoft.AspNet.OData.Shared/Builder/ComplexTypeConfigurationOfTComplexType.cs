@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// Represents an <see cref="IEdmComplexType"/> that can be built using <see cref="ODataModelBuilder"/>.

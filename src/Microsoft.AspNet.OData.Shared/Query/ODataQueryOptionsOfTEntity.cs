@@ -2,15 +2,11 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Web.Http;
-using System.Web.OData.Extensions;
-using System.Web.OData.Formatter;
-using System.Web.OData.Properties;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Query
+namespace Microsoft.AspNet.OData.Query
 {
     /// <summary>
     /// This defines a composite OData query options that can be used to perform query composition.

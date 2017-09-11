@@ -4,12 +4,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
 using ODataPathSegment = Microsoft.OData.UriParser.ODataPathSegment;
 using Semantic = Microsoft.OData.UriParser;
 
-namespace System.Web.OData.Routing
+namespace Microsoft.AspNet.OData.Routing
 {
     /// <summary>
     /// Provides an object representation for an OData path with additional information about the EDM type and entity set for the path.

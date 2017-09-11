@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Builder.Conventions
+namespace Microsoft.AspNet.OData.Builder.Conventions
 {
     internal class NavigationLinksGenerationConvention : INavigationSourceConvention
     {

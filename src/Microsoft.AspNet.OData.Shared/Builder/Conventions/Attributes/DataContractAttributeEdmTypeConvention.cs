@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Builder.Conventions.Attributes
+namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Configures classes that have the <see cref="DataContractAttribute"/> to follow DataContract serialization/deserialization rules.

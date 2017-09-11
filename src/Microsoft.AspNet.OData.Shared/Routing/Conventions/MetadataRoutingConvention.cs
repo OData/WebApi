@@ -2,11 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Net.Http;
-using System.Web.Http;
-using System.Web.Http.Controllers;
 
-namespace System.Web.OData.Routing.Conventions
+namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles OData metadata requests.

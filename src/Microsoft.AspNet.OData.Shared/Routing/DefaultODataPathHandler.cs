@@ -1,22 +1,20 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net.Http;
-using System.Web.Http;
-using System.Web.OData.Properties;
-using System.Web.OData.Routing.Template;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using ODL = Microsoft.OData.UriParser;
 
-namespace System.Web.OData.Routing
+namespace Microsoft.AspNet.OData.Routing
 {
     /// <summary>
     /// Parses an OData path as an <see cref="ODataPath"/> into an OData link.

@@ -2,8 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
-namespace System.Collections.ObjectModel
+namespace Microsoft.AspNet.OData.Common
 {
     /// <summary>
     /// A class that inherits from Collection of T but also exposes its underlying data as List of T for performance.

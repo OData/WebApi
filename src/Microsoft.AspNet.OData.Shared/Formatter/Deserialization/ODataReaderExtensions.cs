@@ -3,10 +3,10 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 
-namespace System.Web.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
     /// <summary>
     /// Extension methods for <see cref="ODataReader"/>.

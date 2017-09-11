@@ -1,13 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Web.Http;
-using System.Web.OData.Properties;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
 
-namespace System.Web.OData.Query.Validators
+namespace Microsoft.AspNet.OData.Query.Validators
 {
     /// <summary>
     /// Represents a validator used to validate an <see cref="OrderByQueryOption"/> based on the <see cref="ODataValidationSettings"/>.

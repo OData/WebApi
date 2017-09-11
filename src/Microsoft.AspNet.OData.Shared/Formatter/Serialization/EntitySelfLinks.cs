@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-namespace System.Web.OData.Formatter.Serialization
+using System;
+
+namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
     /// <summary>
     /// EntitySelfLinks contains the Id, Edit and Read links for an entity.

@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Web.Http;
-using System.Web.OData.Properties;
-using System.Web.OData.Query.Validators;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData.UriParser;
 
-namespace System.Web.OData.Query
+namespace Microsoft.AspNet.OData.Query
 {
     /// <summary>
     /// Represents the value of the $count query option and exposes a way to retrieve the number of entities that satisfy a query.

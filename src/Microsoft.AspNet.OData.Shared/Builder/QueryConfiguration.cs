@@ -2,10 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Web.Http;
-using System.Web.OData.Query;
+using Microsoft.AspNet.OData.Query;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// Query configuration which contains <see cref="ModelBoundQuerySettings"/>.

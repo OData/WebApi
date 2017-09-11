@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 
-namespace System.Web.OData.Formatter
+namespace Microsoft.AspNet.OData.Formatter
 {
     /// <summary>
     /// Exposes the ability to convert a collection of concurrency property names and values into an <see cref="EntityTagHeaderValue"/>

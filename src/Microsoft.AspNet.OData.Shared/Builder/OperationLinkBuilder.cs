@@ -1,9 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Web.Http;
+using System;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// <see cref="OperationLinkBuilder"/> can be used to annotate an action or a function.

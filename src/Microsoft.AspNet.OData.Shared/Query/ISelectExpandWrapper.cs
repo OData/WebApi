@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Query
+namespace Microsoft.AspNet.OData.Query
 {
     /// <summary>
     /// Represents the result of a $select and $expand query operation.

@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Specialized;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Web.Http;
-using System.Web.OData.Properties;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Formatter
+namespace Microsoft.AspNet.OData.Formatter
 {
     /// <summary>
     /// Class that provides <see cref="MediaTypeHeaderValue"/>s from query strings.

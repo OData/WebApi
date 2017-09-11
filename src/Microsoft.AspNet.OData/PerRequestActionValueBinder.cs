@@ -2,11 +2,11 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
-using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData
+namespace Microsoft.AspNet.OData
 {
     internal class PerRequestActionValueBinder : IActionValueBinder
     {

@@ -1,16 +1,18 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Metadata;
-using System.Web.OData.Extensions;
-using System.Web.OData.Properties;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 
-namespace System.Web.OData.Routing
+namespace Microsoft.AspNet.OData.Routing
 {
     /// <summary>
     /// Implementation of <see cref="ParameterBindingAttribute"/> used to bind an instance of <see cref="ODataPath"/> as an action parameter.

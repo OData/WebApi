@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData
+namespace Microsoft.AspNet.OData
 {
     /// <summary>
     /// An equality comparer for <see cref="IEdmTypeReference"/>.

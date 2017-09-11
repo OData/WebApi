@@ -3,7 +3,7 @@
 
 using Microsoft.OData;
 
-namespace System.Web.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
     /// <summary>
     /// Base class for all classes that wrap an <see cref="ODataItem"/>.

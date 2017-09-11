@@ -5,7 +5,7 @@ using System.Collections;
 using System.Diagnostics.Contracts;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Formatter
+namespace Microsoft.AspNet.OData.Formatter
 {
     internal static class EdmObjectHelper
     {

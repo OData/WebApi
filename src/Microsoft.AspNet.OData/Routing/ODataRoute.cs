@@ -1,13 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Routing;
 
-namespace System.Web.OData.Routing
+namespace Microsoft.AspNet.OData.Routing
 {
     /// <summary>
     /// A route implementation for OData routes. It supports passing in a route prefix for the route as well

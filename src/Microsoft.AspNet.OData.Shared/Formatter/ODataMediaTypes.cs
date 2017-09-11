@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net.Http.Headers;
 
-namespace System.Web.OData.Formatter
+namespace Microsoft.AspNet.OData.Formatter
 {
     /// <summary>
     /// Contains media types used by the OData formatter.

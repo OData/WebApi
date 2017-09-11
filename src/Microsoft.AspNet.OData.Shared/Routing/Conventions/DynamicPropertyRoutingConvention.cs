@@ -3,15 +3,11 @@
 
 using System.Globalization;
 using System.Linq;
-using System.Net.Http;
-using System.Web.Http;
-using System.Web.Http.Controllers;
-using System.Web.OData.Extensions;
-using System.Web.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
-namespace System.Web.OData.Routing.Conventions
+namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles dynamic properties for open type.

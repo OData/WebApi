@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.OData;
 
-namespace System.Web.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
     /// <summary>
     /// Encapsulates an <see cref="ODataResource"/> and the inner nested resource infos.

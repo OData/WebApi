@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.UriParser;
 
-namespace System.Web.OData.Query
+namespace Microsoft.AspNet.OData.Query
 {
     /// <summary>
     /// Represents a single order by expression in the $orderby clause.

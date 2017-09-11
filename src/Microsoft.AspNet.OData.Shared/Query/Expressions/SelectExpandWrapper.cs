@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Web.Http;
-using System.Web.OData.Formatter;
-using System.Web.OData.Formatter.Serialization;
-using System.Web.OData.Properties;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 
-namespace System.Web.OData.Query.Expressions
+namespace Microsoft.AspNet.OData.Query.Expressions
 {
     /// <summary>
     /// Represents a container class that contains properties that are either selected or expanded using $select and $expand.

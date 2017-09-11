@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Web.Http;
-using System.Web.OData.Properties;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Formatter
+namespace Microsoft.AspNet.OData.Formatter
 {
     /// <summary>
     /// OData ETag of an entity type <typeparamref name="TEntity"/>.

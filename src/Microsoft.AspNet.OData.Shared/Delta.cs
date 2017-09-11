@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData
+namespace Microsoft.AspNet.OData
 {
     /// <summary>
     /// A class the tracks changes (i.e. the Delta) for an entity.

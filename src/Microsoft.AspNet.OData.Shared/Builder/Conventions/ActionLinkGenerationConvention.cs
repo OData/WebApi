@@ -3,7 +3,7 @@
 
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Builder.Conventions
+namespace Microsoft.AspNet.OData.Builder.Conventions
 {
     /// <summary>
     /// The ActionLinkGenerationConvention calls action.HasActionLink(..) if the action binds to a single entity and has not previously been configured.

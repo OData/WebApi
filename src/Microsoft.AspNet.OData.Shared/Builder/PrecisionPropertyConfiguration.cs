@@ -3,7 +3,7 @@
 
 using System.Reflection;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// Used to configure a  datetime-with-offset, decimal, duration, or time-of-day property precision of an entity type or complex type.

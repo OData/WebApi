@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Collections.Generic;
-using System.Web.Http;
-using System.Web.OData.Properties;
+using System;
 
-namespace System.Web.OData.Builder
+namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
     /// Allows configuration to be performed for a singleton in a model.

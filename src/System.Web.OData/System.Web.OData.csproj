@@ -23,7 +23,7 @@
     <Reference Include="Microsoft.Spatial, Version=7.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\sln\packages\Microsoft.Spatial.7.2.0\lib\portable-net45+win8+wpa81\Microsoft.Spatial.dll</HintPath>
       <Private>True</Private>
-    </Reference>    
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\sln\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -117,6 +117,7 @@
     <Compile Include="OData\ODataQueryContextExtensions.cs" />
     <Compile Include="OData\Query\CountAttribute.cs" />
     <Compile Include="OData\Query\Expressions\AggregationPropertyContainer.cs" />
+    <Compile Include="OData\Query\Expressions\SelectExpandWrapperOfT.cs" />
     <Compile Include="OData\Query\SelectAttribute.cs" />
     <Compile Include="OData\Query\ExpandConfiguration.cs" />
     <Compile Include="OData\Query\QueryOptionSetting.cs" />

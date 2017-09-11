@@ -5,9 +5,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 
-namespace System.Web.OData.Extensions
+namespace Microsoft.AspNet.OData.Extensions
 {
     /// <summary>
     /// Provides extension methods for the <see cref="HttpError"/> class.

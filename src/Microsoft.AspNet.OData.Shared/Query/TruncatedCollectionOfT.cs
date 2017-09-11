@@ -3,9 +3,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Query
+namespace Microsoft.AspNet.OData.Query
 {
     /// <summary>
     /// Represents a class that truncates a collection to a given page size.

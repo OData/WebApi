@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -9,9 +10,10 @@ using System.Net.Http.Formatting;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Services;
-using System.Web.OData.Formatter;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter;
 
-namespace System.Web.OData
+namespace Microsoft.AspNet.OData
 {
     /// <summary>
     /// An attribute to be placed on controllers that enables the OData formatters.

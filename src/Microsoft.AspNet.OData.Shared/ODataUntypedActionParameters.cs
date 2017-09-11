@@ -3,10 +3,10 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData
+namespace Microsoft.AspNet.OData
 {
     /// <summary>
     /// ActionPayload holds the Parameter names and values provided by a client in a POST request

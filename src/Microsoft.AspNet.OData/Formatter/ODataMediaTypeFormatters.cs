@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Web.OData.Formatter.Deserialization;
-using System.Web.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 
-namespace System.Web.OData.Formatter
+namespace Microsoft.AspNet.OData.Formatter
 {
     /// <summary>
     /// <see cref="MediaTypeFormatter"/> classes to handle OData.

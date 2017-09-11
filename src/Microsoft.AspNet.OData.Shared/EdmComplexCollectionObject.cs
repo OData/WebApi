@@ -3,11 +3,10 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Web.Http;
-using System.Web.OData.Properties;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData
+namespace Microsoft.AspNet.OData
 {
     /// <summary>
     /// Represents an <see cref="IEdmObject"/> that is a collection of <see cref="IEdmComplexObject"/>s.

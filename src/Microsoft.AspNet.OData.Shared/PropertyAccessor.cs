@@ -2,10 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Reflection;
-using System.Web.Http;
-using WebApiResources = System.Web.OData.Properties.SRResources;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData
+namespace Microsoft.AspNet.OData
 {
     /// <summary>
     /// Represents a strategy for Getting and Setting a PropertyInfo on <typeparamref name="TStructuralType"/>
@@ -23,7 +22,7 @@ namespace System.Web.OData
             if (Property.GetGetMethod() == null ||
                 (!Property.PropertyType.IsCollection() && Property.GetSetMethod() == null))
             {
-                throw Error.Argument("property", WebApiResources.PropertyMustHavePublicGetterAndSetter);
+                throw Error.Argument("property", SRResources.PropertyMustHavePublicGetterAndSetter);
             }
         }
 

@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Diagnostics.Contracts;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
     /// <summary>
     /// Represents an <see cref="ODataDeserializer"/> that can read OData enum types.

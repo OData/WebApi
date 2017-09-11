@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 
-namespace System.Web.OData
+namespace Microsoft.AspNet.OData
 {
     /// <summary>
     /// <para>QualityBand : Preview</para>

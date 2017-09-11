@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Web.Http;
+using System;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 
-namespace System.Web.OData.Formatter.Serialization
+namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="ODataSerializer"/> for serializing $metadata. 

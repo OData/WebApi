@@ -2,10 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.UriParser;
 
-namespace System.Web.OData.Routing.Template
+namespace Microsoft.AspNet.OData.Routing.Template
 {
     /// <summary>
     /// Represents a template that can match a <see cref="NavigationPropertyLinkSegment"/>.

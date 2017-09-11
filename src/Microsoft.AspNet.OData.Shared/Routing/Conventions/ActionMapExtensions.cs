@@ -2,9 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Web.Http.Controllers;
 
-namespace System.Web.OData.Routing.Conventions
+namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     /// <summary>
     /// Provides helper methods for querying an action map.

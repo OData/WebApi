@@ -1,9 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Web.Http;
+using System;
+using Microsoft.AspNet.OData.Common;
 
-namespace System.Web.OData.Builder.Conventions.Attributes
+namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
 {
     /// <summary>
     /// Configures classes that have the <see cref="AutoExpandAttribute"/> to specify all navigation properties are auto expanded.

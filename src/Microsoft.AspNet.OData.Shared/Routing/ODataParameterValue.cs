@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Web.Http;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Routing
+namespace Microsoft.AspNet.OData.Routing
 {
     internal class ODataParameterValue
     {

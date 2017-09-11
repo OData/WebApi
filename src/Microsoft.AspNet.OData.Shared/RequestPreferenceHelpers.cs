@@ -3,9 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 
-namespace System.Web.OData
+namespace Microsoft.AspNet.OData
 {
     internal static class RequestPreferenceHelpers
     {

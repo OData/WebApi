@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Data.Linq;
 using System.Diagnostics.Contracts;
-using System.Web.Http;
-using System.Web.OData.Properties;
 using System.Xml.Linq;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
-namespace System.Web.OData.Formatter.Serialization
+namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
     /// <summary>
     /// Represents an <see cref="ODataSerializer"/> for serializing <see cref="IEdmPrimitiveType" />'s.

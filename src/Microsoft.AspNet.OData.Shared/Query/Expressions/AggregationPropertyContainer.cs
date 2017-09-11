@@ -4,14 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.OData.Query;
-using System.Web.OData.Query.Expressions;
 
-namespace System.Web.OData.Query.Expressions
+namespace Microsoft.AspNet.OData.Query.Expressions
 {
     /// <summary>
     /// Reperesent properties used in groupby and aggregate clauses to make them accessiable in further clauses/transformations

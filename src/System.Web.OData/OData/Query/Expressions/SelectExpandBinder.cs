@@ -189,9 +189,9 @@ namespace System.Web.OData.Query.Expressions
 
             if (filterClause != null)
             {
-                var collection = property.Type.IsCollection();
+                var isCollection = property.Type.IsCollection();
 
-                IEdmTypeReference edmElementType = (collection ? property.Type.AsCollection().ElementType() : property.Type);
+                IEdmTypeReference edmElementType = (isCollection ? property.Type.AsCollection().ElementType() : property.Type);
                 Type clrElementType = EdmLibHelpers.GetClrType(edmElementType, _model);
                 if (clrElementType == null)
                 {
@@ -201,7 +201,7 @@ namespace System.Web.OData.Query.Expressions
 
                 Expression filterResult = nullablePropertyValue;
 
-                if (collection)
+                if (isCollection)
                 {
                     Expression filterSource =
                         typeof(IEnumerable).IsAssignableFrom(source.Type.GetProperty(propertyName).PropertyType)
@@ -209,7 +209,7 @@ namespace System.Web.OData.Query.Expressions
                                 ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(clrElementType),
                                 nullablePropertyValue)
                             : nullablePropertyValue;
-                    
+
                     // TODO: Implement proper support for $select/$expand after $apply
                     Expression filterPredicate = FilterBinder.Bind(null, filterClause, clrElementType, _context.RequestContainer);
                     filterResult = Expression.Call(
@@ -220,15 +220,15 @@ namespace System.Web.OData.Query.Expressions
                     nullablePropertyType = filterResult.Type;
                 }
                 else if(_settings.HandleReferenceNavigationPropertyExpandFilter)
-                {                    
-                    var filterLambdaExpression = FilterBinder.Bind(null, filterClause, clrElementType, _context.RequestContainer) as LambdaExpression;
+                {
+                    LambdaExpression filterLambdaExpression = FilterBinder.Bind(null, filterClause, clrElementType, _context.RequestContainer) as LambdaExpression;
                     if(filterLambdaExpression == null)
                     {
                         throw new ODataException(Error.Format(SRResources.ExpandFilterExpressionNotLambdaExpression,
                             property.Name, nameof(LambdaExpression)));
                     }
 
-                    var filterParameter = filterLambdaExpression.Parameters.FirstOrDefault();
+                    var filterParameter = filterLambdaExpression.Parameters.First();
                     if(filterParameter == null)
                     {   
                         //Never seen this, but just to be safe...
@@ -236,9 +236,9 @@ namespace System.Web.OData.Query.Expressions
                             property.Name));                            
                     }
 
-                    var predicateExpression = new ReferenceNavigationPropertyExpandFilterVisitor(filterParameter, nullablePropertyValue).Visit(filterLambdaExpression.Body);
+                    Expression predicateExpression = new ReferenceNavigationPropertyExpandFilterVisitor(filterParameter, nullablePropertyValue).Visit(filterLambdaExpression.Body);
 
-                    // predicateExpression == true ? nullablePropertyValue : null
+                    // create expression similar to: 'predicateExpression == true ? nullablePropertyValue : null'
                     filterResult = Expression.Condition(
                         test: predicateExpression,
                         ifTrue: nullablePropertyValue,
@@ -247,7 +247,7 @@ namespace System.Web.OData.Query.Expressions
 
                 if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
                 {
-                    // nullablePropertyValue == null ? null : filterResult
+                    // create expression similar to: 'nullablePropertyValue == null ? null : filterResult'
                     nullablePropertyValue = Expression.Condition(
                         test: Expression.Equal(nullablePropertyValue, Expression.Constant(value: null)),
                         ifTrue: Expression.Constant(value: null, type: nullablePropertyType),
@@ -261,7 +261,7 @@ namespace System.Web.OData.Query.Expressions
 
             if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
-                // source == null ? null : propertyValue
+                // create expression similar to: 'source == null ? null : propertyValue'
                 propertyValue = Expression.Condition(
                     test: Expression.Equal(source, Expression.Constant(value: null)),
                     ifTrue: Expression.Constant(value: null, type: nullablePropertyType),

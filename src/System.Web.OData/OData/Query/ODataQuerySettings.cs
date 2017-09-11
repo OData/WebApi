@@ -115,10 +115,7 @@ namespace System.Web.OData.Query
         /// The expanded property is only populated when the filter evaluates to true.
         /// This setting is false by default.
         /// </summary>
-        public bool HandleReferenceNavigationPropertyExpandFilter
-        {
-            get; set;
-        }
+        public bool HandleReferenceNavigationPropertyExpandFilter { get; set; }
 
         internal void CopyFrom(ODataQuerySettings settings)
         {

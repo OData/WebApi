@@ -28,7 +28,8 @@ namespace WebStack.QA.Test.OData.QueryComposition
                   typeof(IAssembliesResolver),
                   new TestAssemblyResolver(
                       typeof(SelectCustomerController),
-                      typeof(EFSelectCustomersController)));
+                      typeof(EFSelectCustomersController),
+                      typeof(EFSelectOrdersController)));
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
@@ -50,6 +51,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             builder.EntitySet<SelectOrder>("SelectOrder");
             builder.EntitySet<SelectBonus>("SelectBonus");
             builder.Action("ResetDataSource");
+            builder.Action("ResetDataSource-Order");
 
             IEdmModel model = builder.GetEdmModel();
             return model;
@@ -301,7 +303,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
             HttpClient client = new HttpClient();
             HttpResponseMessage response;
-           
+
             response = client.SendAsync(request).Result;
 
             Assert.NotNull(response);
@@ -341,13 +343,46 @@ namespace WebStack.QA.Test.OData.QueryComposition
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(response.Content);
-            
+
             var responseObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
             var result = responseObject["value"] as JArray;
             var expandProp = result[0]["SelectOrders"] as JArray;
             Assert.Equal(expandProp.Count, 2);
             Assert.Equal(expandProp[0]["Id"], 1);
             Assert.Equal(expandProp[1]["Id"], 2);
+        }
+
+        [Fact]
+        public void QueryForAnEntryWithExpandSingleNavigationPropertyFilterWorks()
+        {
+            RestoreData("-Order");
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            // Arrange
+            Func<string, JArray> TestBody = (url) =>
+            {
+                string queryUrl = url;
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+
+                // Act
+                response = client.SendAsync(request).Result;
+
+                // Assert
+                Assert.NotNull(response);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.NotNull(response.Content);
+
+                var responseObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                return responseObject["value"] as JArray;
+            };
+
+            var result = TestBody(string.Format("{0}/selectexpand/EFSelectOrders?$expand=SelectCustomer($filter=Id ne 1)", BaseAddress));
+            Assert.False(result[0]["SelectCustomer"].HasValues);
+
+            result = TestBody(string.Format("{0}/selectexpand/EFSelectOrders?$expand=SelectCustomer($filter=Id eq 1)", BaseAddress));
+            Assert.Equal(1, (int)result[0]["SelectCustomer"]["Id"]);
         }
 
         [Fact]
@@ -541,7 +576,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
             // Act
             HttpResponseMessage response = client.SendAsync(request).Result;
-                                                                                                                                                                                                                                                                                                                                                    
+
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -584,9 +619,9 @@ namespace WebStack.QA.Test.OData.QueryComposition
             Assert.Equal(expandProp[0]["Id"], 2);
         }
 
-        private void RestoreData()
+        private void RestoreData(string suffix = null)
         {
-            string requestUri = BaseAddress + "/selectexpand/ResetDataSource";
+            string requestUri = BaseAddress + string.Format("/selectexpand/ResetDataSource{0}", suffix);
             HttpClient client = new HttpClient();
             HttpResponseMessage response = client.GetAsync(requestUri).Result;
             response.EnsureSuccessStatusCode();
@@ -721,6 +756,45 @@ namespace WebStack.QA.Test.OData.QueryComposition
         }
     }
 
+    public class EFSelectOrdersController : ODataController
+    {
+        private readonly SampleContext _db = new SampleContext();
+
+        [EnableQuery(HandleReferenceNavigationPropertyExpandFilter = true)]
+        public IHttpActionResult Get()
+        {
+            return Ok(_db.Orders);
+        }
+
+        [HttpGet]
+        [ODataRoute("ResetDataSource-Order")]
+        public IHttpActionResult ResetDataSource()
+        {
+            if (_db.Database.Exists())
+            {
+                _db.Database.Delete();
+                _db.Database.Create();
+            }
+
+            Generate();
+            return Ok();
+        }
+
+        public void Generate()
+        {
+            var order = new EFSelectOrder
+            {
+                Id = 1,
+                SelectCustomer = new EFSelectCustomer
+                {
+                    Id = 1
+                }
+            };
+            _db.Orders.Add(order);
+            _db.SaveChanges();
+        }
+    }
+
     public class SampleContext : DbContext
     {
         public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=SelectExpandTest";
@@ -733,6 +807,8 @@ namespace WebStack.QA.Test.OData.QueryComposition
         public DbSet<EFSelectCustomer> Customers { get; set; }
 
         public DbSet<SelectCustomer> SelectCustomers { get; set; }
+
+        public DbSet<EFSelectOrder> Orders { get; set; }
     }
 
     public class EFSelectCustomer
@@ -744,6 +820,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
     public class EFSelectOrder
     {
         public int Id { get; set; }
+        public virtual EFSelectCustomer SelectCustomer { get; set; }
     }
 
     public class SelectCustomer

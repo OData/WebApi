@@ -225,15 +225,15 @@ namespace System.Web.OData.Query.Expressions
                     if(filterLambdaExpression == null)
                     {
                         throw new ODataException(Error.Format(SRResources.ExpandFilterExpressionNotLambdaExpression,
-                            property.Name, nameof(LambdaExpression)));
+                            property.Name, "LambdaExpression"));
                     }
 
                     var filterParameter = filterLambdaExpression.Parameters.First();
                     if(filterParameter == null)
-                    {   
+                    {
                         //Never seen this, but just to be safe...
                         throw new ODataException(Error.Format(SRResources.ExpandFilterExpressionLambdaExpressionNoParameter,
-                            property.Name));                            
+                            property.Name));
                     }
 
                     Expression predicateExpression = new ReferenceNavigationPropertyExpandFilterVisitor(filterParameter, nullablePropertyValue).Visit(filterLambdaExpression.Body);

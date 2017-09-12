@@ -365,7 +365,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                 string queryUrl = url;
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
                 request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
-                
+
                 // Act
                 response = client.SendAsync(request).Result;
 
@@ -797,7 +797,6 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
     public class SampleContext : DbContext
     {
-        //todo: do not checkin
         public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=SelectExpandTest";
 
         public SampleContext()

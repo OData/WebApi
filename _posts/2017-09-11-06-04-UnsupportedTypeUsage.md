@@ -10,14 +10,5 @@ Web API OData adds supporting for some unsupported types in ODataLib, for exampl
  
 The mapping list for the unsupported types are:
 
-C# Type       | Edm Type      |  Nullable|
-------------------------------|-------------|---------|
-System.Xml.Linq.XElement      | Edm.String  ||
-System.Binary                 | Edm.Binary  ||
-System.UInt16                 | Edm.Int32   | true/false|
-System.UInt32                 | Edm.Int64   | true/false|
-System.UInt64                 | Edm.Int64   | true/false|
-char[]                        | Edm.String  | |
-char                          | Edm.String  |true/false|
-System.DataTime               | Edm.DateTimeOffset  |true/false|
+![]({{site.baseurl}}/img/06-05-typemapping.png)
 

@@ -102,7 +102,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             Assert.Same(enumProperty, enumKey);
 
             Assert.Equal(EdmTypeKind.Enum, enumKey.Type.TypeKind());
-            Assert.Equal("System.Web.OData.Builder.TestModels.Color", enumKey.Type.Definition.FullTypeName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Color", enumKey.Type.Definition.FullTypeName());
         }
 
         [Fact]

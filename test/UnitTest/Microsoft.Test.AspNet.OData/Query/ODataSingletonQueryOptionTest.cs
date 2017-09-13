@@ -45,11 +45,11 @@ namespace Microsoft.Test.AspNet.OData.Query
         {
             // Arrange
             const string expectedPayload = "{" +
-                "\"@odata.context\":\"http://localhost/odata/$metadata#Me/System.Web.OData.Formatter.Serialization.Models.SpecialCustomer(Birthday)\"," +
+                "\"@odata.context\":\"http://localhost/odata/$metadata#Me/Microsoft.Test.AspNet.OData.Formatter.Serialization.Models.SpecialCustomer(Birthday)\"," +
                 "\"Birthday\":\"1991-01-12T09:03:40-00:05\"" +
                 "}";
 
-            string requestUri = "http://localhost/odata/Me/System.Web.OData.Formatter.Serialization.Models.SpecialCustomer?$select=Birthday";
+            string requestUri = "http://localhost/odata/Me/Microsoft.Test.AspNet.OData.Formatter.Serialization.Models.SpecialCustomer?$select=Birthday";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
             // Act
@@ -113,7 +113,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             Birthday = new DateTimeOffset(1991, 1, 12, 9, 3, 40, new TimeSpan(0, -5, 0)),
             Level = 60,
             Bonus = 999.19m,
-            SimpleEnum = Microsoft.Test.OData.WebApi.TestCommon.Types.SimpleEnum.Third,
+            SimpleEnum = Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum.Third,
             Orders = Enumerable.Range(0, 10).Select(j =>
                 new Order
                 {

@@ -230,7 +230,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(),
-                "Cannot find the resource type 'System.Web.OData.Results.CreatedODataResultTest+TestEntity' in the model.");
+                "Cannot find the resource type 'Microsoft.Test.AspNet.OData.Query.Results.CreatedODataResultTest+TestEntity' in the model.");
         }
 
         [Fact]

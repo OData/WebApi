@@ -33,7 +33,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             Assert.ThrowsArgument(
                 () => new ODataQueryOptions<int>(context, message),
-                "context", "The entity type 'System.Web.OData.TestCommon.Models.Customer' does not match the expected entity type 'System.Int32' as set on the query context.");
+                "context", "The entity type 'Microsoft.Test.AspNet.OData.TestCommon.Models.Customer' does not match the expected entity type 'System.Int32' as set on the query context.");
         }
 
         [Fact]
@@ -150,7 +150,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             Assert.ThrowsArgument(
                 () => query.ApplyTo(Enumerable.Empty<int>().AsQueryable()),
                 "query",
-                "Cannot apply ODataQueryOptions of 'System.Web.OData.TestCommon.Models.Customer' to IQueryable of 'System.Int32'.");
+                "Cannot apply ODataQueryOptions of 'Microsoft.Test.AspNet.OData.TestCommon.Models.Customer' to IQueryable of 'System.Int32'.");
         }
 
         [Fact]
@@ -203,7 +203,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             Assert.ThrowsArgument(
                 () => query.ApplyTo(Enumerable.Empty<int>().AsQueryable(), new ODataQuerySettings()),
                 "query",
-                "Cannot apply ODataQueryOptions of 'System.Web.OData.TestCommon.Models.Customer' to IQueryable of 'System.Int32'.");
+                "Cannot apply ODataQueryOptions of 'Microsoft.Test.AspNet.OData.TestCommon.Models.Customer' to IQueryable of 'System.Int32'.");
         }
 
         [Fact]

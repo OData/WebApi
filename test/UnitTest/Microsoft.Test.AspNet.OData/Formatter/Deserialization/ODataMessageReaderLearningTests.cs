@@ -261,7 +261,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 
             headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
 
-            return new ODataMessageWrapper(Stream.Null, headers);
+            return ODataMessageWrapperHelper.Create(Stream.Null, headers);
         }
 
         private static IODataRequestMessage CreateRequest(string body)
@@ -270,7 +270,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             HttpContentHeaders headers = content.Headers;
             headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
 
-            return new ODataMessageWrapper(content.ReadAsStreamAsync().Result, headers);
+            return ODataMessageWrapperHelper.Create(content.ReadAsStreamAsync().Result, headers);
         }
 
         private static IEdmModel CreateModel()

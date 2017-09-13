@@ -33,8 +33,9 @@
   <assembly name="WebMatrix.WebData"/>
 
   <!-- Unit test assemblies and helpers -->
+  <assembly name="Microsoft.Test.AspNet.OData.TestCommon"/>
+  <assembly name="Microsoft.Test.AspNet.OData"/>
   <assembly name="Microsoft.AspNet.Facebook.Test"/>
-  <assembly name="Microsoft.TestCommon"/>
   <assembly name="Microsoft.Web.Helpers.Test"/>
   <assembly name="Microsoft.Web.Http.Data.Test"/>
   <assembly name="Microsoft.Web.WebPages.OAuth.Test"/>
@@ -48,7 +49,6 @@
   <assembly name="System.Web.Http.Common.Test"/>
   <assembly name="System.Web.Http.Cors.Test"/>
   <assembly name="System.Web.Http.Integration.Test"/>
-  <assembly name="System.Web.Http.OData.Test"/>
   <assembly name="System.Web.Http.Owin.Test"/>
   <assembly name="System.Web.Http.SelfHost.Test"/>
   <assembly name="System.Web.Http.SignalR.Test"/>
@@ -56,7 +56,6 @@
   <assembly name="System.Web.Http.Tracing.Test"/>
   <assembly name="System.Web.Http.WebHost.Test"/>
   <assembly name="System.Web.Mvc.Test"/>
-  <assembly name="System.Web.OData.Test"/>
   <assembly name="System.Web.Razor.Test"/>
   <assembly name="System.Web.WebPages.Administration.Test"/>
   <assembly name="System.Web.WebPages.Deployment.Test"/>

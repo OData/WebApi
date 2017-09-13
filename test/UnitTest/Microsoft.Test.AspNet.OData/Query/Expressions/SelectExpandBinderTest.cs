@@ -585,7 +585,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                     "IIF((value({0}) == null), null, IIF((value({0}).Orders == null), null, " +
                     "value({0}).Orders.AsQueryable().Where($it => ($it.ID == value({1}).TypedProperty))))",
                     customer.Type,
-                    "System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]"),
+                    "Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]"),
                 filterInExpand.ToString());
             var orders = Expression.Lambda(filterInExpand).Compile().DynamicInvoke() as IEnumerable<Order>;
             Assert.Single(orders);
@@ -619,7 +619,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             Assert.Equal(
                 string.Format(
                     "value({0}).Orders.AsQueryable().Where($it => ($it.ID == value(" +
-                    "System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]).TypedProperty))",
+                    "Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]).TypedProperty))",
                     customer.Type),
                 filterInExpand.ToString());
             var orders = Expression.Lambda(filterInExpand).Compile().DynamicInvoke() as IEnumerable<Order>;

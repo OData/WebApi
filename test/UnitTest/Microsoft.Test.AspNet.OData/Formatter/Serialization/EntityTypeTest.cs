@@ -27,7 +27,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             ODataMediaTypeFormatter formatter = CreateFormatter();
             Employee employee = (Employee)TypeInitializer.GetInstance(SupportedTypes.Employee);
             ObjectContent<Employee> content = new ObjectContent<Employee>(employee, formatter,
-                ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+                MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
             JsonAssert.Equal(Resources.EmployeeEntry, content.ReadAsStringAsync().Result);
@@ -37,7 +37,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         {
             ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Resource });
             formatter.Request = GetSampleRequest();
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+            formatter.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
             return formatter;
         }
 

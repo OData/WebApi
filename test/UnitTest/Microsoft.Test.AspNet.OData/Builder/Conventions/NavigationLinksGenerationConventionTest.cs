@@ -95,7 +95,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 
             Uri uri = linkBuilder.BuildNavigationLink(entityContext, carManufacturerProperty, ODataMetadataLevel.MinimalMetadata);
 
-            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/System.Web.OData.Builder.TestModels.Car/Manufacturer", uri.AbsoluteUri);
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Manufacturer", uri.AbsoluteUri);
         }
 
         [Fact]

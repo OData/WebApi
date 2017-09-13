@@ -189,13 +189,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 
             // Assert
             Assert.Equal(@"{
-  ""@odata.context"": ""http://any/$metadata#Collection(System.Web.OData.SimpleOpenAddress)"",
+  ""@odata.context"": ""http://any/$metadata#Collection(Microsoft.Test.AspNet.OData.TestCommon.SimpleOpenAddress)"",
   ""value"": [
     {
       ""Street"": ""Microsoft Rd"",
       ""City"": ""Redmond"",
       ""StringProp"": ""abc"",
-      ""Locations@odata.type"": ""#Collection(System.Web.OData.SimpleOpenAddress)"",
+      ""Locations@odata.type"": ""#Collection(Microsoft.Test.AspNet.OData.TestCommon.SimpleOpenAddress)"",
       ""Locations"": []
     }
   ]

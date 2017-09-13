@@ -164,22 +164,22 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                     { AllowedFunctions.Cast, "cast('Edm.Int64') eq 0", "cast" },
                     { AllowedFunctions.Cast, "cast(Edm.String) eq 'Name'", "cast" },
                     { AllowedFunctions.Cast, "cast('Edm.String') eq 'Name'", "cast" },
-                    { AllowedFunctions.Cast, "cast('System.Web.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
-                    { AllowedFunctions.Cast, "cast('System.Web.OData.Query.Expressions.DerivedProduct')/DerivedProductName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast('Microsoft.Test.AspNet.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
+                    { AllowedFunctions.Cast, "cast('Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct')/DerivedProductName eq 'Name'", "cast" },
                     { AllowedFunctions.Cast, "cast(null,'Edm.Int64') eq 0", "cast" },
                     { AllowedFunctions.Cast, "cast(null, 'Edm.Int64') eq 0", "cast" },
                     { AllowedFunctions.Cast, "cast(null,Edm.String) eq 'Name'", "cast" },
                     { AllowedFunctions.Cast, "cast(null, Edm.String) eq 'Name'", "cast" },
                     { AllowedFunctions.Cast, "cast(null,'Edm.String') eq 'Name'", "cast" },
                     { AllowedFunctions.Cast, "cast(null, 'Edm.String') eq 'Name'", "cast" },
-                    { AllowedFunctions.Cast, "cast(null,'Microsoft.TestCommon.Types.SimpleEnum') eq Microsoft.TestCommon.Types.SimpleEnum'First'", "cast" },
-                    { AllowedFunctions.Cast, "cast(null, 'Microsoft.TestCommon.Types.SimpleEnum') eq Microsoft.TestCommon.Types.SimpleEnum'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') eq Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null, 'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') eq Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", "cast" },
 
                     // TODO: uncomment the follow two cases after ODL fix the issues.
-                 //   { AllowedFunctions.Cast, "cast(null,'System.Web.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
-                //    { AllowedFunctions.Cast, "cast(null, 'System.Web.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
-                    { AllowedFunctions.Cast, "cast(Microsoft.TestCommon.Types.SimpleEnum'First','Edm.String') eq 'First'", "cast" },
-                    { AllowedFunctions.Cast, "cast(Microsoft.TestCommon.Types.SimpleEnum'First', 'Edm.String') eq 'First'", "cast" },
+                 //   { AllowedFunctions.Cast, "cast(null,'Microsoft.Test.AspNet.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
+                //    { AllowedFunctions.Cast, "cast(null, 'Microsoft.Test.AspNet.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First','Edm.String') eq 'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First', 'Edm.String') eq 'First'", "cast" },
                     { AllowedFunctions.Cast, "cast(CategoryID,'Edm.Int64') eq 0", "cast" },
                     { AllowedFunctions.Cast, "cast(CategoryID, 'Edm.Int64') eq 0", "cast" },
                     { AllowedFunctions.Cast, "cast(ReorderLevel,Edm.String) eq 'Name'", "cast" },
@@ -188,44 +188,44 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                     { AllowedFunctions.Cast, "cast(ReorderLevel, 'Edm.String') eq 'Name'", "cast" },
                     { AllowedFunctions.Cast, "cast(Ranking,'Edm.String') eq 'First'", "cast" },
                     { AllowedFunctions.Cast, "cast(Ranking, 'Edm.String') eq 'First'", "cast" },
-                    { AllowedFunctions.Cast, "cast(ProductName,'Microsoft.TestCommon.Types.SimpleEnum') eq Microsoft.TestCommon.Types.SimpleEnum'First'", "cast" },
-                    { AllowedFunctions.Cast, "cast(ProductName, 'Microsoft.TestCommon.Types.SimpleEnum') eq Microsoft.TestCommon.Types.SimpleEnum'First'", "cast" },
-                    { AllowedFunctions.Cast, "cast(SupplierAddress,'System.Web.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
-                    { AllowedFunctions.Cast, "cast(SupplierAddress, 'System.Web.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
-                    { AllowedFunctions.Cast, "cast(Category,'System.Web.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
-                    { AllowedFunctions.Cast, "cast(Category, 'System.Web.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(ProductName,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') eq Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(ProductName, 'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') eq Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", "cast" },
+                    { AllowedFunctions.Cast, "cast(SupplierAddress,'Microsoft.Test.AspNet.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
+                    { AllowedFunctions.Cast, "cast(SupplierAddress, 'Microsoft.Test.AspNet.OData.Query.Expressions.Address')/City eq 'Redmond'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Category,'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Category, 'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
 
                     { AllowedFunctions.IsOf, "isof('Edm.Int64')", "isof" },
                     { AllowedFunctions.IsOf, "isof(Edm.String)", "isof" },
                     { AllowedFunctions.IsOf, "isof('Edm.String')", "isof" },
-                    { AllowedFunctions.IsOf, "isof('Microsoft.TestCommon.Types.SimpleEnum')", "isof" },
-                    { AllowedFunctions.IsOf, "isof('System.Web.OData.Query.Expressions.Address')", "isof" },
-                    { AllowedFunctions.IsOf, "isof('System.Web.OData.Query.Expressions.DerivedCategory')", "isof" },
-                    { AllowedFunctions.IsOf, "isof('System.Web.OData.Query.Expressions.DerivedProduct')", "isof" },
+                    { AllowedFunctions.IsOf, "isof('Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum')", "isof" },
+                    { AllowedFunctions.IsOf, "isof('Microsoft.Test.AspNet.OData.Query.Expressions.Address')", "isof" },
+                    { AllowedFunctions.IsOf, "isof('Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')", "isof" },
+                    { AllowedFunctions.IsOf, "isof('Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct')", "isof" },
                     { AllowedFunctions.IsOf, "isof(null,'Edm.Int64')", "isof" },
                     { AllowedFunctions.IsOf, "isof(null, 'Edm.Int64')", "isof" },
                     { AllowedFunctions.IsOf, "isof(null,Edm.String)", "isof" },
                     { AllowedFunctions.IsOf, "isof(null, Edm.String)", "isof" },
                     { AllowedFunctions.IsOf, "isof(null,'Edm.String')", "isof" },
                     { AllowedFunctions.IsOf, "isof(null, 'Edm.String')", "isof" },
-                    { AllowedFunctions.IsOf, "isof(null,'Microsoft.TestCommon.Types.SimpleEnum')", "isof" },
-                    { AllowedFunctions.IsOf, "isof(null, 'Microsoft.TestCommon.Types.SimpleEnum')", "isof" },
-                    { AllowedFunctions.IsOf, "isof(null,'System.Web.OData.Query.Expressions.Address')", "isof" },
-                    { AllowedFunctions.IsOf, "isof(null, 'System.Web.OData.Query.Expressions.Address')", "isof" },
-                    { AllowedFunctions.IsOf, "isof(null,'System.Web.OData.Query.Expressions.DerivedCategory')", "isof" },
-                    { AllowedFunctions.IsOf, "isof(null, 'System.Web.OData.Query.Expressions.DerivedCategory')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, 'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null,'Microsoft.Test.AspNet.OData.Query.Expressions.Address')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, 'Microsoft.Test.AspNet.OData.Query.Expressions.Address')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null,'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, 'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')", "isof" },
                     { AllowedFunctions.IsOf, "isof(CategoryID,'Edm.Int64')", "isof" },
                     { AllowedFunctions.IsOf, "isof(CategoryID, 'Edm.Int64')", "isof" },
                     { AllowedFunctions.IsOf, "isof(ReorderLevel,Edm.String)", "isof" },
                     { AllowedFunctions.IsOf, "isof(ReorderLevel, Edm.String)", "isof" },
                     { AllowedFunctions.IsOf, "isof(ReorderLevel,'Edm.String')", "isof" },
                     { AllowedFunctions.IsOf, "isof(ReorderLevel, 'Edm.String')", "isof" },
-                    { AllowedFunctions.IsOf, "isof(Ranking,'Microsoft.TestCommon.Types.SimpleEnum')", "isof" },
-                    { AllowedFunctions.IsOf, "isof(Ranking, 'Microsoft.TestCommon.Types.SimpleEnum')", "isof" },
-                    { AllowedFunctions.IsOf, "isof(SupplierAddress,'System.Web.OData.Query.Expressions.Address')", "isof" },
-                    { AllowedFunctions.IsOf, "isof(SupplierAddress, 'System.Web.OData.Query.Expressions.Address')", "isof" },
-                    { AllowedFunctions.IsOf, "isof(Category,'System.Web.OData.Query.Expressions.DerivedCategory')", "isof" },
-                    { AllowedFunctions.IsOf, "isof(Category, 'System.Web.OData.Query.Expressions.DerivedCategory')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Ranking,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Ranking, 'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(SupplierAddress,'Microsoft.Test.AspNet.OData.Query.Expressions.Address')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(SupplierAddress, 'Microsoft.Test.AspNet.OData.Query.Expressions.Address')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Category,'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Category, 'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')", "isof" },
                 };
             }
         }
@@ -237,8 +237,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                 return new TheoryDataSet<AllowedFunctions, string, string>
                 {
                     // Single-parameter casts without quotes around the type name.
-                    { AllowedFunctions.Cast, "cast(System.Web.OData.Query.Expressions.DerivedProduct)/DerivedProductName eq 'Name'", "cast" },
-                    { AllowedFunctions.IsOf, "isof(System.Web.OData.Query.Expressions.DerivedProduct)", "isof" },
+                    { AllowedFunctions.Cast, "cast(Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct)/DerivedProductName eq 'Name'", "cast" },
+                    { AllowedFunctions.IsOf, "isof(Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct)", "isof" },
                 };
             }
         }
@@ -250,15 +250,15 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                 return new TheoryDataSet<AllowedFunctions, string, string>
                 {
                     // Two-parameter casts without quotes around the type name.
-                    { AllowedFunctions.Cast, "cast(null,System.Web.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
-                    { AllowedFunctions.Cast, "cast(null, System.Web.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
-                    { AllowedFunctions.Cast, "cast(Category,System.Web.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
-                    { AllowedFunctions.Cast, "cast(Category, System.Web.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null,Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null, Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Category,Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(Category, Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq 'Name'", "cast" },
 
-                    { AllowedFunctions.IsOf, "isof(null,System.Web.OData.Query.Expressions.DerivedCategory)", "isof" },
-                    { AllowedFunctions.IsOf, "isof(null, System.Web.OData.Query.Expressions.DerivedCategory)", "isof" },
-                    { AllowedFunctions.IsOf, "isof(Category,System.Web.OData.Query.Expressions.DerivedCategory)", "isof" },
-                    { AllowedFunctions.IsOf, "isof(Category, System.Web.OData.Query.Expressions.DerivedCategory)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null,Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(null, Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Category,Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)", "isof" },
+                    { AllowedFunctions.IsOf, "isof(Category, Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)", "isof" },
                 };
             }
         }
@@ -270,8 +270,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                 return new TheoryDataSet<AllowedFunctions, string, string>
                 {
                     // Cast null to an entity type. Note 'isof' with same arguments is fine.
-                    { AllowedFunctions.Cast, "cast(null,'System.Web.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
-                    { AllowedFunctions.Cast, "cast(null, 'System.Web.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null,'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
+                    { AllowedFunctions.Cast, "cast(null, 'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq 'Name'", "cast" },
                 };
             }
         }
@@ -394,7 +394,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                     { AllowedLogicalOperators.Equal, "UnitPrice add 0 eq UnitPrice", "Equal" },
                     { AllowedLogicalOperators.GreaterThan, "UnitPrice add 1 gt UnitPrice", "GreaterThan" },
                     { AllowedLogicalOperators.GreaterThanOrEqual, "UnitPrice add 0 ge UnitPrice", "GreaterThanOrEqual" },
-                    { AllowedLogicalOperators.Has, "Ranking has Microsoft.TestCommon.Types.SimpleEnum'First'", "Has" },
+                    { AllowedLogicalOperators.Has, "Ranking has Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", "Has" },
                     { AllowedLogicalOperators.LessThan, "UnitPrice add -1 lt UnitPrice", "LessThan" },
                     { AllowedLogicalOperators.LessThanOrEqual, "UnitPrice add 0 le UnitPrice", "LessThanOrEqual" },
                     { AllowedLogicalOperators.Not, "not Discontinued", "Not" },
@@ -948,8 +948,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FilterBinder.BindFilter(QueryToken filter) Line 51
             // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilterImplementation(string filter, ..., IEdmNavigationSource navigationSource) Line 250
             // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilter() Line 112
-            // System.Web.OData.dll!System.Web.OData.Query.FilterQueryOption.FilterClause.get() Line 99
-            // System.Web.OData.dll!System.Web.OData.Query.Validators.FilterQueryValidator.Validate(FilterQueryOption filterQueryOption, ODataValidationSettings settings) Line 54
+            // Microsoft.Test.AspNet.OData.dll!Microsoft.Test.AspNet.OData.Query.FilterQueryOption.FilterClause.get() Line 99
+            // Microsoft.Test.AspNet.OData.dll!Microsoft.Test.AspNet.OData.Query.Validators.FilterQueryValidator.Validate(FilterQueryOption filterQueryOption, ODataValidationSettings settings) Line 54
 
             // Arrange
             var settings = new ODataValidationSettings
@@ -991,8 +991,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.Parsers.FilterBinder.BindFilter(QueryToken filter) Line 51
             // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilterImplementation(string filter, ..., IEdmNavigationSource navigationSource) Line 250
             // Microsoft.OData.Core.dll!Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilter() Line 112
-            // System.Web.OData.dll!System.Web.OData.Query.FilterQueryOption.FilterClause.get() Line 99
-            // System.Web.OData.dll!System.Web.OData.Query.Validators.FilterQueryValidator.Validate(FilterQueryOption filterQueryOption, ODataValidationSettings settings) Line 54
+            // Microsoft.Test.AspNet.OData.dll!Microsoft.Test.AspNet.OData.Query.FilterQueryOption.FilterClause.get() Line 99
+            // Microsoft.Test.AspNet.OData.dll!Microsoft.Test.AspNet.OData.Query.Validators.FilterQueryValidator.Validate(FilterQueryOption filterQueryOption, ODataValidationSettings settings) Line 54
 
             // Arrange
             var settings = new ODataValidationSettings
@@ -1248,7 +1248,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         public void ValidateVisitLogicalOperatorHas()
         {
             // Arrange
-            FilterQueryOption option = new FilterQueryOption("FavoriteColor has System.Web.OData.Builder.TestModels.Color'Red'", _context);
+            FilterQueryOption option = new FilterQueryOption("FavoriteColor has Microsoft.Test.AspNet.OData.Builder.TestModels.Color'Red'", _context);
 
             // Act
             _validator.Validate(option, _settings);
@@ -1295,9 +1295,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         [InlineData("ceiling(AmountSpent) eq 0")]
         [InlineData("Tags/any()")]
         [InlineData("Tags/all(t : t eq '1')")]
-        [InlineData("System.Web.OData.Query.QueryCompositionCustomerBase/Id eq 1")]
-        [InlineData("Contacts/System.Web.OData.Query.QueryCompositionCustomerBase/any()")]
-        [InlineData("FavoriteColor has System.Web.OData.Builder.TestModels.Color'Red'")]
+        [InlineData("Microsoft.Test.AspNet.OData.Query.QueryCompositionCustomerBase/Id eq 1")]
+        [InlineData("Contacts/Microsoft.Test.AspNet.OData.Query.QueryCompositionCustomerBase/any()")]
+        [InlineData("FavoriteColor has Microsoft.Test.AspNet.OData.Builder.TestModels.Color'Red'")]
         public void Validator_Doesnot_Throw_For_ValidQueries(string filter)
         {
             // Arrange

@@ -1,4 +1,7 @@
-﻿using System.Web.Http;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System.Web.Http;
 using System.Web.Http.OData.Extensions;
 using WebStack.QA.Test.OData.SxS.ODataV3.Extensions;
 

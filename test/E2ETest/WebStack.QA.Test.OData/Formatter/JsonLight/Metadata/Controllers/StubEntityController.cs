@@ -1,9 +1,12 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.OData;
+using Microsoft.AspNet.OData;
 using WebStack.QA.Test.OData.Common.Controllers;
 using WebStack.QA.Test.OData.Formatter.JsonLight.Metadata.Model;
 

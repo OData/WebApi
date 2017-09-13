@@ -1,4 +1,7 @@
-﻿namespace Nop.Core.Domain.Catalog
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+namespace Nop.Core.Domain.Catalog
 {
     /// <summary>
     /// Represents the product sorting

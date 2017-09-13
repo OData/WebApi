@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Web.OData.Builder;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Xunit;
 

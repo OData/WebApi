@@ -8,8 +8,8 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Results;
-using System.Web.OData;
-using System.Web.OData.Query;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 
 namespace WebStack.QA.Test.OData.DollarLevels

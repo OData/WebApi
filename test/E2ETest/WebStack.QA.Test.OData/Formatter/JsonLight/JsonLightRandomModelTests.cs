@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,7 +14,6 @@ using Nuwa;
 using WebStack.QA.Common.XUnit;
 using WebStack.QA.Test.OData.Common;
 using WebStack.QA.Test.OData.Common.TypeCreator;
-using Xunit.Extensions;
 
 namespace WebStack.QA.Test.OData.Formatter.JsonLight
 {

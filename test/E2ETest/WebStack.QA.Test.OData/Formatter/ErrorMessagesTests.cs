@@ -1,15 +1,17 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
-using System.Web.OData;
-using System.Web.OData.Builder;
-using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
-using System.Web.OData.Routing.Conventions;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Nuwa;
-using Xunit;
 
 namespace WebStack.QA.Test.OData.Formatter
 {

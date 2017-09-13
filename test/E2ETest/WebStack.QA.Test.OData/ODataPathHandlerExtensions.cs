@@ -3,8 +3,8 @@
 
 using System;
 using System.Diagnostics.Contracts;
-using System.Web.OData.Routing;
-using System.Web.OData.Routing.Template;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.OData.Edm;
 
 namespace WebStack.QA.Test.OData

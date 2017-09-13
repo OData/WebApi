@@ -1,8 +1,10 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Web.OData.Builder;
-using System.Web.OData.Query;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Query;
 
 namespace WebStack.QA.Test.OData.Singleton
 {

@@ -26,21 +26,21 @@
   <Choose>
     <When Condition=" '$(TestType)'=='Private' ">
       <ItemGroup>
-        <Reference Include="Microsoft.OData.Core, Version=7.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-          <HintPath>..\..\..\sln\packages\Microsoft.OData.Core.7.2.0\lib\portable-net45+win8+wpa81\Microsoft.OData.Core.dll</HintPath>
+        <Reference Include="Microsoft.OData.Core, Version=7.3.1.10814, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+          <HintPath>..\..\..\sln\packages\Microsoft.OData.Core.7.3.1\lib\portable-net45+win8+wpa81\Microsoft.OData.Core.dll</HintPath>
           <Private>True</Private>
         </Reference>
-        <Reference Include="Microsoft.OData.Edm, Version=7.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-          <HintPath>..\..\..\sln\packages\Microsoft.OData.Edm.7.2.0\lib\portable-net45+win8+wpa81\Microsoft.OData.Edm.dll</HintPath>
+        <Reference Include="Microsoft.OData.Edm, Version=7.3.1.10814, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+          <HintPath>..\..\..\sln\packages\Microsoft.OData.Edm.7.3.1\lib\portable-net45+win8+wpa81\Microsoft.OData.Edm.dll</HintPath>
           <Private>True</Private>
         </Reference>
-        <Reference Include="Microsoft.Spatial, Version=7.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-          <HintPath>..\..\..\sln\packages\Microsoft.Spatial.7.2.0\lib\portable-net45+win8+wpa81\Microsoft.Spatial.dll</HintPath>
+        <Reference Include="Microsoft.Spatial, Version=7.3.1.10814, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+          <HintPath>..\..\..\sln\packages\Microsoft.Spatial.7.3.1\lib\portable-net45+win8+wpa81\Microsoft.Spatial.dll</HintPath>
           <Private>True</Private>
         </Reference>
-        <ProjectReference Include="..\..\..\src\System.Web.OData\System.Web.OData.csproj">
-          <Project>{d23e28f1-ccd0-43e0-8c0d-36731ec91318}</Project>
-          <Name>System.Web.OData</Name>
+        <ProjectReference Include="..\..\..\src\Microsoft.AspNet.OData\Microsoft.AspNet.OData.csproj">
+          <Project>{a6f9775d-f7e2-424e-8363-79644a73038f}</Project>
+          <Name>Microsoft.AspNet.OData</Name>
         </ProjectReference>
       </ItemGroup>
     </When>

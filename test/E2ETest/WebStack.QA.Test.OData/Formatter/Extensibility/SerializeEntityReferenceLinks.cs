@@ -10,14 +10,14 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.OData;
-using System.Web.OData.Builder;
-using System.Web.OData.Extensions;
-using System.Web.OData.Formatter;
-using System.Web.OData.Formatter.Deserialization;
-using System.Web.OData.Formatter.Serialization;
-using System.Web.OData.Routing;
-using System.Web.OData.Routing.Conventions;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -25,7 +25,7 @@ using Newtonsoft.Json.Linq;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
-using ODataPath = System.Web.OData.Routing.ODataPath;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace WebStack.QA.Test.OData.Formatter.Extensibility
 {

@@ -1,6 +1,8 @@
-﻿using System.Linq;
-using System.Web.OData.Routing;
-using System.Web.OData.Routing.Conventions;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System.Linq;
+using Microsoft.AspNet.OData.Routing.Conventions;
 
 namespace WebStack.QA.Test.OData.SxS.ODataV4.Extensions
 {
@@ -15,7 +17,7 @@ namespace WebStack.QA.Test.OData.SxS.ODataV4.Extensions
             _versionSuffix = versionSuffix;
         }
 
-        public string SelectAction(System.Web.OData.Routing.ODataPath odataPath, System.Web.Http.Controllers.HttpControllerContext controllerContext, ILookup<string, System.Web.Http.Controllers.HttpActionDescriptor> actionMap)
+        public string SelectAction(Microsoft.AspNet.OData.Routing.ODataPath odataPath, System.Web.Http.Controllers.HttpControllerContext controllerContext, ILookup<string, System.Web.Http.Controllers.HttpActionDescriptor> actionMap)
         {
             return (string)null;
         }
@@ -24,7 +26,7 @@ namespace WebStack.QA.Test.OData.SxS.ODataV4.Extensions
         /// Returns the controller names with the version suffix. 
         /// For example: request from route V1 can be dispatched to ProductsV1Controller.
         /// </summary>
-        public string SelectController(System.Web.OData.Routing.ODataPath odataPath, System.Net.Http.HttpRequestMessage request)
+        public string SelectController(Microsoft.AspNet.OData.Routing.ODataPath odataPath, System.Net.Http.HttpRequestMessage request)
         {
             var baseControllerName = _entitySetRoutingConvention.SelectController(odataPath, request);
             if (baseControllerName != null)

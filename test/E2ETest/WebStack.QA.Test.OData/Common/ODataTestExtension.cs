@@ -8,12 +8,12 @@ using System.Text;
 using System.Web.Http;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Routing;
-using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
-using System.Web.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using ODataPath = System.Web.OData.Routing.ODataPath;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace WebStack.QA.Test.OData.Common
 {

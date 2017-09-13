@@ -8,8 +8,10 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.OData.Builder;
-using System.Web.OData.Extensions;
+using System.Web.Http.Controllers;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -18,15 +20,12 @@ using WebStack.QA.Test.OData.Common;
 using WebStack.QA.Test.OData.Common.Controllers;
 using WebStack.QA.Test.OData.Common.Models.Vehicle;
 using Xunit;
-using System.Web.OData.Routing;
-using System.Web.OData.Routing.Conventions;
-using System.Web.Http.Controllers;
 
 namespace WebStack.QA.Test.OData.Formatter
 {
     public class DeleteAllRoutingConvention : EntitySetRoutingConvention
     {
-        public override string SelectAction(System.Web.OData.Routing.ODataPath odataPath, HttpControllerContext context,
+        public override string SelectAction(Microsoft.AspNet.OData.Routing.ODataPath odataPath, HttpControllerContext context,
             ILookup<string, HttpActionDescriptor> actionMap)
         {
             if (context.Request.Method == HttpMethod.Delete &&

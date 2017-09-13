@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -12,7 +15,7 @@ using WebStack.QA.Test.OData.SxS2.ODataV4.Controllers;
 using Xunit;
 using Xunit.Extensions;
 using ODataV3Stack = System.Web.Http.OData;
-using ODataV4Stack = System.Web.OData;
+using ODataV4Stack = Microsoft.AspNet.OData;
 
 namespace WebStack.QA.Test.OData.SxS2
 {

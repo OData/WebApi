@@ -173,7 +173,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void CanTranslate_CollectionResourceCastNode_FroComplex()
         {
             // Arrange & Act
-            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Addresses/System.Web.OData.Query.ParameterAliasAddress/all(a : a ne null)");
+            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Addresses/Microsoft.Test.AspNet.OData.Query.ParameterAliasAddress/all(a : a ne null)");
 
             // Assert
             var allNode = Assert.IsType<AllNode>(translatedNode);
@@ -188,7 +188,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void CanTranslate_CollectionResourceCastNode_ForEntity()
         {
             // Arrange & Act
-            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Orders/System.Web.OData.Query.ParameterAliasOrder/all(o : o ne null)");
+            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Orders/Microsoft.Test.AspNet.OData.Query.ParameterAliasOrder/all(o : o ne null)");
 
             // Assert
             var allNode = Assert.IsType<AllNode>(translatedNode);
@@ -219,7 +219,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void CanTranslate_SingleResourceCastNode_ForEntity()
         {
             // Arrange & Act
-            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/System.Web.OData.Query.ParameterAliasCustomer eq null");
+            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Microsoft.Test.AspNet.OData.Query.ParameterAliasCustomer eq null");
 
             // Assert
             var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);
@@ -278,7 +278,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void CanTranslate_SingleResourceCastNode_ForComplex()
         {
             // Arrange & Act
-            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/SpecialAddress/System.Web.OData.Query.ParameterAliasAddress eq null");
+            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/SpecialAddress/Microsoft.Test.AspNet.OData.Query.ParameterAliasAddress eq null");
 
             // Assert
             var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);

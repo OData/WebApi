@@ -68,7 +68,7 @@ namespace Microsoft.Test.AspNet.OData
             string expect = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <edmx:Edmx Version=""4.0"" xmlns:edmx=""http://docs.oasis-open.org/odata/ns/edmx"">
   <edmx:DataServices>
-    <Schema Namespace=""System.Web.OData"" xmlns=""http://docs.oasis-open.org/odata/ns/edm"">
+    <Schema Namespace=""Microsoft.Test.AspNet.OData"" xmlns=""http://docs.oasis-open.org/odata/ns/edm"">
       <EntityType Name=""QueryLimitCustomer"">
         <Key>
           <PropertyRef Name=""Id"" />
@@ -82,8 +82,8 @@ namespace Microsoft.Test.AspNet.OData
         <Property Name=""NonFilterableUnsortableLastName"" Type=""Edm.String"" />
         <Property Name=""Address"" Type=""Edm.String"" />
         <Property Name=""Notes"" Type=""Collection(Edm.String)"" />
-        <NavigationProperty Name=""Orders"" Type=""Collection(System.Web.OData.QueryLimitOrder)"" />
-        <NavigationProperty Name=""ImportantOrders"" Type=""Collection(System.Web.OData.QueryLimitOrder)"" />
+        <NavigationProperty Name=""Orders"" Type=""Collection(Microsoft.Test.AspNet.OData.QueryLimitOrder)"" />
+        <NavigationProperty Name=""ImportantOrders"" Type=""Collection(Microsoft.Test.AspNet.OData.QueryLimitOrder)"" />
       </EntityType>
       <EntityType Name=""QueryLimitOrder"">
         <Key>
@@ -93,13 +93,13 @@ namespace Microsoft.Test.AspNet.OData
         <Property Name=""OrderName"" Type=""Edm.String"" />
         <Property Name=""OrderValue"" Type=""Edm.Decimal"" Nullable=""false"" />
       </EntityType>
-      <EntityType Name=""DerivedQueryLimitCustomer"" BaseType=""System.Web.OData.QueryLimitCustomer"">
+      <EntityType Name=""DerivedQueryLimitCustomer"" BaseType=""Microsoft.Test.AspNet.OData.QueryLimitCustomer"">
         <Property Name=""DerivedName"" Type=""Edm.String"" />
       </EntityType>
     </Schema>
     <Schema Namespace=""Default"" xmlns=""http://docs.oasis-open.org/odata/ns/edm"">
       <EntityContainer Name=""Container"">
-        <EntitySet Name=""QueryLimitCustomers"" EntityType=""System.Web.OData.QueryLimitCustomer"">
+        <EntitySet Name=""QueryLimitCustomers"" EntityType=""Microsoft.Test.AspNet.OData.QueryLimitCustomer"">
           <NavigationPropertyBinding Path=""Orders"" Target=""QueryLimitOrders"" />
           <NavigationPropertyBinding Path=""ImportantOrders"" Target=""QueryLimitOrders"" />
           <Annotation Term=""Org.OData.Capabilities.V1.CountRestrictions"">
@@ -182,7 +182,7 @@ namespace Microsoft.Test.AspNet.OData
             </Record>
           </Annotation>
         </EntitySet>
-        <EntitySet Name=""QueryLimitOrders"" EntityType=""System.Web.OData.QueryLimitOrder"" />
+        <EntitySet Name=""QueryLimitOrders"" EntityType=""Microsoft.Test.AspNet.OData.QueryLimitOrder"" />
       </EntityContainer>
     </Schema>
   </edmx:DataServices>
@@ -342,8 +342,8 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData("QueryLimitCustomers(1)/Addresses?$count=true")]
         [InlineData("QueryLimitCustomers(1)/Addresses/$count")]
-        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/Addresses?$count=true")]
-        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/Addresses/$count")]
+        [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/Addresses?$count=true")]
+        [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/Addresses/$count")]
         public void QueryableLimitation_NotCountableFromModelTest(string uri)
         {
             // Arrange
@@ -364,8 +364,8 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData("QueryLimitCustomers(1)/ImportantOrders?$count=true")]
         [InlineData("QueryLimitCustomers(1)/ImportantOrders/$count")]
-        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/ImportantOrders?$count=true")]
-        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/ImportantOrders/$count")]
+        [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/ImportantOrders?$count=true")]
+        [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/ImportantOrders/$count")]
         public void QueryableLimitation_NotCountableFromAttributeTest(string uri)
         {
             // Arrange
@@ -386,8 +386,8 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData("QueryLimitCustomers(1)/Numbers?$count=true")]
         [InlineData("QueryLimitCustomers(1)/Numbers/$count")]
-        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/Numbers?$count=true")]
-        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/Numbers/$count")]
+        [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/Numbers?$count=true")]
+        [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/Numbers/$count")]
         public void QueryableLimitation_NotCountableAttributeOverrideByModelTest(string uri)
         {
             // Arrange
@@ -406,8 +406,8 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData("QueryLimitCustomers(1)/Notes?$count=true")]
         [InlineData("QueryLimitCustomers(1)/Notes/$count")]
-        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/Notes?$count=true")]
-        [InlineData("QueryLimitCustomers(1)/System.Web.OData.DerivedQueryLimitCustomer/Notes/$count")]
+        [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/Notes?$count=true")]
+        [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/Notes/$count")]
         public void QueryableLimitation_CountNotAllowedInQueryOptionsTest(string uri)
         {
             // Arrange

@@ -331,7 +331,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             Type type = typeof(Delta<Customer>);
 
-            bool success = ODataMediaTypeFormatter.TryGetInnerTypeForDelta(ref type);
+            bool success = EdmLibHelpers.TryGetInnerTypeForDelta(ref type);
 
             Assert.Same(typeof(Customer), type);
             Assert.True(success);
@@ -344,7 +344,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             Type type = originalType;
 
-            bool success = ODataMediaTypeFormatter.TryGetInnerTypeForDelta(ref type);
+            bool success = EdmLibHelpers.TryGetInnerTypeForDelta(ref type);
 
             Assert.Same(originalType, type);
             Assert.False(success);
@@ -761,7 +761,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             IEdmModel model = CreateModel();
-            IEdmSchemaType entityType = model.FindDeclaredType("System.Net.Http.Formatting.SampleType");
+            IEdmSchemaType entityType = model.FindDeclaredType("Microsoft.Test.AspNet.OData.Formatter.SampleType");
             IEdmStructuralProperty property =
                 ((IEdmStructuredType)entityType).FindProperty("Number") as IEdmStructuralProperty;
             HttpRequestMessage request = CreateFakeODataRequest(model);
@@ -877,7 +877,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             params ODataPayloadKind[] payloadKinds)
         {
             ODataMediaTypeFormatter formatter = CreateFormatter(model, request, payloadKinds);
-            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+            formatter.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
             return formatter;
         }
 
@@ -930,7 +930,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 return Encoding.UTF8.GetBytes(
                     "{" +
                         "\"@odata.context\":\"http://localhost/$metadata#sampleTypes/$entity\"," +
-                        "\"@odata.type\":\"#System.Net.Http.Formatting.SampleType\"," +
+                        "\"@odata.type\":\"#Microsoft.Test.AspNet.OData.Formatter.SampleType\"," +
                         "\"@odata.id\":\"http://localhost/sampleTypes(42)\"," +
                         "\"@odata.editLink\":\"http://localhost/sampleTypes(42)\"," +
                         "\"Number\":42" +

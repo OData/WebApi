@@ -104,7 +104,7 @@ namespace Microsoft.Test.AspNet.OData
           ""200"": {
             ""description"": ""EntitySet Customers"",
             ""schema"": {
-              ""$ref"": ""#/definitions/System.Web.OData.Customer""
+              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Customer""
             }
           },
           ""default"": {
@@ -128,7 +128,7 @@ namespace Microsoft.Test.AspNet.OData
             ""in"": ""body"",
             ""description"": ""The entity to post"",
             ""schema"": {
-              ""$ref"": ""#/definitions/System.Web.OData.Customer""
+              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Customer""
             }
           }
         ],
@@ -136,7 +136,7 @@ namespace Microsoft.Test.AspNet.OData
           ""200"": {
             ""description"": ""EntitySet Customers"",
             ""schema"": {
-              ""$ref"": ""#/definitions/System.Web.OData.Customer""
+              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Customer""
             }
           },
           ""default"": {
@@ -175,7 +175,7 @@ namespace Microsoft.Test.AspNet.OData
           ""200"": {
             ""description"": ""EntitySet Customers"",
             ""schema"": {
-              ""$ref"": ""#/definitions/System.Web.OData.Customer""
+              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Customer""
             }
           },
           ""default"": {
@@ -206,7 +206,7 @@ namespace Microsoft.Test.AspNet.OData
             ""in"": ""body"",
             ""description"": ""The entity to patch"",
             ""schema"": {
-              ""$ref"": ""#/definitions/System.Web.OData.Customer""
+              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Customer""
             }
           }
         ],
@@ -307,7 +307,7 @@ namespace Microsoft.Test.AspNet.OData
           ""200"": {
             ""description"": ""EntitySet Orders"",
             ""schema"": {
-              ""$ref"": ""#/definitions/System.Web.OData.Order""
+              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Order""
             }
           },
           ""default"": {
@@ -331,7 +331,7 @@ namespace Microsoft.Test.AspNet.OData
             ""in"": ""body"",
             ""description"": ""The entity to post"",
             ""schema"": {
-              ""$ref"": ""#/definitions/System.Web.OData.Order""
+              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Order""
             }
           }
         ],
@@ -339,7 +339,7 @@ namespace Microsoft.Test.AspNet.OData
           ""200"": {
             ""description"": ""EntitySet Orders"",
             ""schema"": {
-              ""$ref"": ""#/definitions/System.Web.OData.Order""
+              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Order""
             }
           },
           ""default"": {
@@ -378,7 +378,7 @@ namespace Microsoft.Test.AspNet.OData
           ""200"": {
             ""description"": ""EntitySet Orders"",
             ""schema"": {
-              ""$ref"": ""#/definitions/System.Web.OData.Order""
+              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Order""
             }
           },
           ""default"": {
@@ -409,7 +409,7 @@ namespace Microsoft.Test.AspNet.OData
             ""in"": ""body"",
             ""description"": ""The entity to patch"",
             ""schema"": {
-              ""$ref"": ""#/definitions/System.Web.OData.Order""
+              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Order""
             }
           }
         ],
@@ -568,7 +568,7 @@ namespace Microsoft.Test.AspNet.OData
     }
   },
   ""definitions"": {
-    ""System.Web.OData.Customer"": {
+    ""Microsoft.Test.AspNet.OData.Customer"": {
       ""properties"": {
         ""CustomerId"": {
           ""description"": ""CustomerId"",
@@ -577,7 +577,7 @@ namespace Microsoft.Test.AspNet.OData
         }
       }
     },
-    ""System.Web.OData.Order"": {
+    ""Microsoft.Test.AspNet.OData.Order"": {
       ""properties"": {
         ""OrderId"": {
           ""description"": ""OrderId"",

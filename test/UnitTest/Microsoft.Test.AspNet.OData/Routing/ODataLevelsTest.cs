@@ -270,7 +270,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void Levels_Works_WithTypeCast()
         {
             // Arrange
-            string uri = "LevelsEntities(6)?$expand=System.Web.OData.Routing.LevelsDerivedEntity/AncestorsInDerivedEntity($levels=2)";
+            string uri = "LevelsEntities(6)?$expand=Microsoft.Test.AspNet.OData.Routing.LevelsDerivedEntity/AncestorsInDerivedEntity($levels=2)";
 
             // Act
             HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;

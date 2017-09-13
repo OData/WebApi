@@ -226,13 +226,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataResourceWrapper resourceWrapper =
                 new ODataResourceWrapper(new ODataResource
                 {
-                    TypeName = "System.Web.OData.Formatter.Deserialization.BaseType"
+                    TypeName = "Microsoft.Test.AspNet.OData.Formatter.Deserialization.BaseType"
                 });
 
             // Act & Assert
             Assert.Throws<ODataException>(
                 () => deserializer.ReadResource(resourceWrapper, _productEdmType, new ODataDeserializerContext { Model = model }),
-                "An instance of the abstract resource type 'System.Web.OData.Formatter.Deserialization.BaseType' was found. " +
+                "An instance of the abstract resource type 'Microsoft.Test.AspNet.OData.Formatter.Deserialization.BaseType' was found. " +
                 "Abstract resource types cannot be instantiated.");
         }
 

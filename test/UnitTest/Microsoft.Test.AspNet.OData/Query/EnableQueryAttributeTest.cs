@@ -479,7 +479,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             HttpRequestMessage request = new HttpRequestMessage();
             request.EnableHttpDependencyInjectionSupport();
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer)), request);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Microsoft.Test.AspNet.OData.Builder.TestModels.Customer)), request);
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() => attribute.ValidateQuery(null, options), "request");
@@ -512,7 +512,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             defaultQuerySettings.MaxTop = null;
 
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer), null);
+            var context = new ODataQueryContext(model, typeof(Microsoft.Test.AspNet.OData.Builder.TestModels.Customer), null);
             var options = new ODataQueryOptions(context, request);
 
             // Act & Assert
@@ -527,7 +527,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$xxx");
             request.EnableHttpDependencyInjectionSupport();
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer)), request);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Microsoft.Test.AspNet.OData.Builder.TestModels.Customer)), request);
 
             // Act & Assert
             HttpResponseException responseException = Assert.Throws<HttpResponseException>(
@@ -556,7 +556,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             message.EnableHttpDependencyInjectionSupport();
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer)), message);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Microsoft.Test.AspNet.OData.Builder.TestModels.Customer)), message);
 
             // Act & Assert
             Assert.ThrowsArgumentNull(() => attribute.ApplyQuery(null, options), "queryable");
@@ -584,10 +584,10 @@ namespace Microsoft.Test.AspNet.OData.Query
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query);
             request.EnableHttpDependencyInjectionSupport();
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer)), request);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Microsoft.Test.AspNet.OData.Builder.TestModels.Customer)), request);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => attribute.ApplyQuery(new List<System.Web.OData.Builder.TestModels.Customer>().AsQueryable(), options));
+            Assert.DoesNotThrow(() => attribute.ApplyQuery(new List<Microsoft.Test.AspNet.OData.Builder.TestModels.Customer>().AsQueryable(), options));
         }
 
         [Fact]
@@ -603,7 +603,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$top=2");
             request.EnableHttpDependencyInjectionSupport();
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(System.Web.OData.Builder.TestModels.Customer)), request);
+            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Microsoft.Test.AspNet.OData.Builder.TestModels.Customer)), request);
 
             // Act & Assert
             Assert.Same(result, mockAttribute.Object.ApplyQuery(result, options));
@@ -662,7 +662,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var queryModel = new EnableQueryAttribute().GetModel(entityClrType, request, descriptor);
 
             Assert.NotNull(queryModel);
-            Assert.Same(descriptor.Properties["System.Web.OData.Model+System.Web.OData.Query.QueryCompositionCustomer"],
+            Assert.Same(descriptor.Properties["Microsoft.AspNet.OData.Model+Microsoft.Test.AspNet.OData.Query.QueryCompositionCustomer"],
                 queryModel);
         }
 
@@ -680,7 +680,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var queryModel = new EnableQueryAttribute().GetModel(entityClrType, request, descriptor);
 
             Assert.NotNull(queryModel);
-            Assert.Same(descriptor.Properties["System.Web.OData.Model+System.Web.OData.Query.QueryCompositionCustomer"],
+            Assert.Same(descriptor.Properties["Microsoft.AspNet.OData.Model+Microsoft.Test.AspNet.OData.Query.QueryCompositionCustomer"],
                 queryModel);
         }
 
@@ -701,7 +701,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             Assert.NotNull(queryModel);
             Assert.Same(model, queryModel);
-            Assert.DoesNotContain("System.Web.OData.Model+System.Web.OData.Query.QueryCompositionCustomer",
+            Assert.DoesNotContain("Microsoft.AspNet.OData.Model+Microsoft.Test.AspNet.OData.Query.QueryCompositionCustomer",
                 descriptor.Properties.Keys.OfType<string>());
         }
 
@@ -746,7 +746,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.EntitySet<QueryCompositionCustomer>(typeof(QueryCompositionCustomer).Name);
             IEdmModel model = modelBuilder.GetEdmModel();
-            model.SetAnnotationValue<ClrTypeAnnotation>(model.FindType("System.Web.OData.Query.QueryCompositionCustomer"), null);
+            model.SetAnnotationValue<ClrTypeAnnotation>(model.FindType("Microsoft.Test.AspNet.OData.Query.QueryCompositionCustomer"), null);
 
             bool called = false;
             Mock<IAssembliesResolver> assembliesResolver = new Mock<IAssembliesResolver>();

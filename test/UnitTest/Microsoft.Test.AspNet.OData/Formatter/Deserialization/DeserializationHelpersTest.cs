@@ -63,7 +63,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
             Assert.Throws<SerializationException>(
                 () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name),
-                String.Format("The property '{0}' on type 'System.Web.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithSettableCollectionProperties' returned a null value. " +
+                String.Format("The property '{0}' on type 'Microsoft.Test.AspNet.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithSettableCollectionProperties' returned a null value. " +
                 "The input stream contains collection items which cannot be added if the instance is null.", propertyName));
         }
 
@@ -97,7 +97,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
             Assert.Throws<SerializationException>(
                 () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name),
-                String.Format("The value of the property '{0}' on type 'System.Web.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithNonSettableCollectionProperties' is an array. " +
+                String.Format("The value of the property '{0}' on type 'Microsoft.Test.AspNet.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithNonSettableCollectionProperties' is an array. " +
                 "Consider adding a setter for the property.", propertyName));
         }
 
@@ -111,7 +111,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
             Assert.Throws<SerializationException>(
                 () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name),
-                String.Format("The type '{0}' of the property '{1}' on type 'System.Web.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithNonSettableCollectionProperties' does not have an Add method. " +
+                String.Format("The type '{0}' of the property '{1}' on type 'Microsoft.Test.AspNet.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithNonSettableCollectionProperties' does not have an Add method. " +
                 "Consider using a collection type that does have an Add method - for example IList<T> or ICollection<T>.", propertyType.FullName, propertyName));
         }
 
@@ -132,7 +132,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
             Assert.Throws<SerializationException>(
                 () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name),
-                 String.Format("The property '{0}' on type 'System.Web.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithNonSettableCollectionProperties' returned a null value. " +
+                 String.Format("The property '{0}' on type 'Microsoft.Test.AspNet.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithNonSettableCollectionProperties' returned a null value. " +
                  "The input stream contains collection items which cannot be added if the instance is null.", propertyName));
         }
 
@@ -226,7 +226,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             Assert.Throws<SerializationException>(
                 () => DeserializationHelpers.SetCollectionProperty(value, edmProperty, value: new List<int> { 1, 2, 3 }, propertyName: edmProperty.Name),
             Error.Format(
-            "The type '{0}' of the property '{1}' on type 'System.Web.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithDifferentCollectionProperties' must be a collection.",
+            "The type '{0}' of the property '{1}' on type 'Microsoft.Test.AspNet.OData.Formatter.Deserialization.DeserializationHelpersTest+SampleClassWithDifferentCollectionProperties' must be a collection.",
             propertyType.FullName,
             propertyName));
         }
@@ -392,7 +392,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
                 throw new NotImplementedException();
             }
 
-            Collections.IEnumerator Collections.IEnumerable.GetEnumerator()
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
             {
                 throw new NotImplementedException();
             }

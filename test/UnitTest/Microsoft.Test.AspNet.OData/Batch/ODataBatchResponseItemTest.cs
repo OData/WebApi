@@ -30,7 +30,7 @@ namespace Microsoft.Test.AspNet.OData.Batch
         {
             HttpContent content = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
             content.Headers.ContentType.Parameters.Add(new NameValueHeaderValue("boundary", Guid.NewGuid().ToString()));
-            IODataResponseMessage odataResponse = new ODataMessageWrapper(new MemoryStream(), content.Headers);
+            IODataResponseMessage odataResponse = ODataMessageWrapperHelper.Create(new MemoryStream(), content.Headers);
             ODataMessageWriter messageWriter = new ODataMessageWriter(odataResponse);
 
             Assert.ThrowsArgumentNull(
@@ -45,7 +45,7 @@ namespace Microsoft.Test.AspNet.OData.Batch
             MemoryStream ms = new MemoryStream();
             HttpContent content = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
             content.Headers.ContentType.Parameters.Add(new NameValueHeaderValue("boundary", Guid.NewGuid().ToString()));
-            IODataResponseMessage odataResponse = new ODataMessageWrapper(ms, content.Headers);
+            IODataResponseMessage odataResponse = ODataMessageWrapperHelper.Create(ms, content.Headers);
             var batchWriter = new ODataMessageWriter(odataResponse).CreateODataBatchWriter();
             HttpResponseMessage response = new HttpResponseMessage()
             {
@@ -72,7 +72,7 @@ namespace Microsoft.Test.AspNet.OData.Batch
             MemoryStream ms = new MemoryStream();
             HttpContent content = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
             content.Headers.ContentType.Parameters.Add(new NameValueHeaderValue("boundary", Guid.NewGuid().ToString()));
-            IODataResponseMessage odataResponse = new ODataMessageWrapper(ms, content.Headers);
+            IODataResponseMessage odataResponse = ODataMessageWrapperHelper.Create(ms, content.Headers);
             var batchWriter = new ODataMessageWriter(odataResponse).CreateODataBatchWriter();
             HttpResponseMessage response = new HttpResponseMessage
             {

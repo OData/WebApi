@@ -27,8 +27,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             get
             {
-                MediaTypeHeaderValue fullMetadata = ODataMediaTypes.ApplicationJsonODataFullMetadata;
-                MediaTypeHeaderValue noMetadata = ODataMediaTypes.ApplicationJsonODataNoMetadata;
+                MediaTypeHeaderValue fullMetadata = MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataFullMetadata);
+                MediaTypeHeaderValue noMetadata = MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataNoMetadata);
 
                 return new TheoryDataSet<Type, object, MediaTypeHeaderValue, string>
                 {
@@ -137,8 +137,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             get
             {
-                MediaTypeHeaderValue fullMetadata = ODataMediaTypes.ApplicationJsonODataFullMetadata;
-                MediaTypeHeaderValue noMetadata = ODataMediaTypes.ApplicationJsonODataNoMetadata;
+                MediaTypeHeaderValue fullMetadata = MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataFullMetadata);
+                MediaTypeHeaderValue noMetadata = MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataNoMetadata);
 
                 return new TheoryDataSet<Type, object, MediaTypeHeaderValue, string>
                 {

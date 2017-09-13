@@ -490,7 +490,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         private const string EntityPayload =
             "{" +
                 "\"Id\": 1, " +
-                "\"Customer\": {\"@odata.type\":\"#System.Web.OData.TestCommon.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" } " +
+                "\"Customer\": {\"@odata.type\":\"#Microsoft.Test.AspNet.OData.TestCommon.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" } " +
                 // null can't work here, see: https://github.com/OData/odata.net/issues/99
                 // ",\"NullableCustomer\" : null " +  //
             "}";
@@ -558,10 +558,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             "{" +
                 "\"Id\": 1, " +
                 "\"Customers\": [" +
-                    "{\"@odata.type\":\"#System.Web.OData.TestCommon.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" }, " +
+                    "{\"@odata.type\":\"#Microsoft.Test.AspNet.OData.TestCommon.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" }, " +
                     // null can't work. see: https://github.com/OData/odata.net/issues/100
                     // "null," +
-                    "{\"@odata.type\":\"#System.Web.OData.TestCommon.Models.Customer\", \"Id\":901,\"Name\":\"Robot\" } " +
+                    "{\"@odata.type\":\"#Microsoft.Test.AspNet.OData.TestCommon.Models.Customer\", \"Id\":901,\"Name\":\"Robot\" } " +
                  "]" +
             "}";
 

@@ -171,12 +171,12 @@ namespace Microsoft.Test.AspNet.OData
 
             // non-nullable
             Assert.Contains("<Property Name=\"SupplierId\" Type=\"Edm.Int32\" />", payload);
-            Assert.Contains("<NavigationProperty Name=\"Supplier\" Type=\"System.Web.OData.Formatter.FkSupplier\">", payload);
+            Assert.Contains("<NavigationProperty Name=\"Supplier\" Type=\"Microsoft.Test.AspNet.OData.Formatter.FkSupplier\">", payload);
             Assert.Contains("<ReferentialConstraint Property=\"SupplierId\" ReferencedProperty=\"Id\" />", payload);
 
             // nullable
             Assert.Contains("<Property Name=\"SupplierKey\" Type=\"Edm.Int32\" Nullable=\"false\" />", payload);
-            Assert.Contains("<NavigationProperty Name=\"SupplierNav\" Type=\"System.Web.OData.Formatter.FkSupplier\" Nullable=\"false\">", payload);
+            Assert.Contains("<NavigationProperty Name=\"SupplierNav\" Type=\"Microsoft.Test.AspNet.OData.Formatter.FkSupplier\" Nullable=\"false\">", payload);
             Assert.Contains("<ReferentialConstraint Property=\"SupplierKey\" ReferencedProperty=\"Id\" />", payload);
         }
 
@@ -206,12 +206,12 @@ namespace Microsoft.Test.AspNet.OData
 
             // non-nullable
             Assert.Contains("<Property Name=\"SupplierId\" Type=\"Edm.String\" Nullable=\"false\" />", payload);
-            Assert.Contains("<NavigationProperty Name=\"Supplier\" Type=\"System.Web.OData.Formatter.FkSupplier2\" Nullable=\"false\">", payload);
+            Assert.Contains("<NavigationProperty Name=\"Supplier\" Type=\"Microsoft.Test.AspNet.OData.Formatter.FkSupplier2\" Nullable=\"false\">", payload);
             Assert.Contains("<ReferentialConstraint Property=\"SupplierId\" ReferencedProperty=\"Id\" />", payload);
 
             // nullable
             Assert.Contains("<Property Name=\"SupplierKey\" Type=\"Edm.String\" />", payload);
-            Assert.Contains("<NavigationProperty Name=\"SupplierNav\" Type=\"System.Web.OData.Formatter.FkSupplier2\">", payload);
+            Assert.Contains("<NavigationProperty Name=\"SupplierNav\" Type=\"Microsoft.Test.AspNet.OData.Formatter.FkSupplier2\">", payload);
             Assert.Contains("<ReferentialConstraint Property=\"SupplierKey\" ReferencedProperty=\"Id\" />", payload);
         }
 
@@ -223,13 +223,13 @@ namespace Microsoft.Test.AspNet.OData
                 "<Property Name=\"FkSupplierId\" Type=\"Edm.Int32\" Nullable=\"false\" />" +
                 "<Property Name=\"FkSupplier2Id\" Type=\"Edm.String\" Nullable=\"false\" />" +
                 "<Property Name=\"FkSupplier3Id\" Type=\"Edm.Int32\" />" +
-                "<NavigationProperty Name=\"Supplier\" Type=\"System.Web.OData.Formatter.FkSupplier\" Nullable=\"false\">" +
+                "<NavigationProperty Name=\"Supplier\" Type=\"Microsoft.Test.AspNet.OData.Formatter.FkSupplier\" Nullable=\"false\">" +
                     "<ReferentialConstraint Property=\"FkSupplierId\" ReferencedProperty=\"Id\" />" +
                 "</NavigationProperty>" +
-                "<NavigationProperty Name=\"Supplier2\" Type=\"System.Web.OData.Formatter.FkSupplier2\" Nullable=\"false\">" +
+                "<NavigationProperty Name=\"Supplier2\" Type=\"Microsoft.Test.AspNet.OData.Formatter.FkSupplier2\" Nullable=\"false\">" +
                     "<ReferentialConstraint Property=\"FkSupplier2Id\" ReferencedProperty=\"Id\" />" +
                 "</NavigationProperty>" +
-                "<NavigationProperty Name=\"Supplier3\" Type=\"System.Web.OData.Formatter.FkSupplier3\">" +
+                "<NavigationProperty Name=\"Supplier3\" Type=\"Microsoft.Test.AspNet.OData.Formatter.FkSupplier3\">" +
                     "<ReferentialConstraint Property=\"FkSupplier3Id\" ReferencedProperty=\"Id\" />" +
                 "</NavigationProperty>";
 
@@ -316,7 +316,7 @@ namespace Microsoft.Test.AspNet.OData
             // Arrange
             const string expect =
                 "<Property Name=\"CustomerId\" Type=\"Edm.Int32\" Nullable=\"false\" />" +
-                "<NavigationProperty Name=\"Customer\" Type=\"System.Web.OData.Formatter.ForeignCustomer\" Nullable=\"false\">" +
+                "<NavigationProperty Name=\"Customer\" Type=\"Microsoft.Test.AspNet.OData.Formatter.ForeignCustomer\" Nullable=\"false\">" +
                     "<OnDelete Action=\"Cascade\" />" +
                     "<ReferentialConstraint Property=\"CustomerId\" ReferencedProperty=\"ForeignCustomerId\" />" +
                 "</NavigationProperty>";
@@ -350,7 +350,7 @@ namespace Microsoft.Test.AspNet.OData
         {
             // Arrange
             const string expect =
-                "<NavigationProperty Name=\"Customer\" Type=\"System.Web.OData.Formatter.MultiForeignCustomer\" Nullable=\"false\">" +
+                "<NavigationProperty Name=\"Customer\" Type=\"Microsoft.Test.AspNet.OData.Formatter.MultiForeignCustomer\" Nullable=\"false\">" +
                     "<ReferentialConstraint Property=\"CustomerForeignKey1\" ReferencedProperty=\"CustomerId1\" />" +
                     "<ReferentialConstraint Property=\"CustomerForeignKey2\" ReferencedProperty=\"CustomerId2\" />" +
                 "</NavigationProperty>";
@@ -384,7 +384,7 @@ namespace Microsoft.Test.AspNet.OData
         {
             // Arrange
             const string expect =
-                "<NavigationProperty Name=\"DerivedProp\" Type=\"System.Web.OData.Formatter.DerivedPrincipalEntity\">" +
+                "<NavigationProperty Name=\"DerivedProp\" Type=\"Microsoft.Test.AspNet.OData.Formatter.DerivedPrincipalEntity\">" +
                     "<ReferentialConstraint Property=\"DerivedPrincipalEntityId\" ReferencedProperty=\"Id\" />" +
                 "</NavigationProperty>";
 
@@ -501,7 +501,7 @@ namespace Microsoft.Test.AspNet.OData
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains("<ComplexType Name=\"FormatterUsAddress\" BaseType=\"System.Web.OData.Formatter.FormatterAddress\" OpenType=\"true\">",
+            Assert.Contains("<ComplexType Name=\"FormatterUsAddress\" BaseType=\"Microsoft.Test.AspNet.OData.Formatter.FormatterAddress\" OpenType=\"true\">",
                 response.Content.ReadAsStringAsync().Result);
         }
 
@@ -513,11 +513,11 @@ namespace Microsoft.Test.AspNet.OData
             "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
             "<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">" +
             "<edmx:DataServices>" +
-                "<Schema Namespace=\"System.Web.OData.Formatter\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                "<Schema Namespace=\"Microsoft.Test.AspNet.OData.Formatter\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                     "<ComplexType Name=\"ComplexBaseType\">" +
                         "<Property Name=\"BaseProperty\" Type=\"Edm.String\" />" +
                     "</ComplexType>" +
-                    "<ComplexType Name=\"ComplexDerivedOpenType\" BaseType=\"System.Web.OData.Formatter.ComplexBaseType\" OpenType=\"true\">" +
+                    "<ComplexType Name=\"ComplexDerivedOpenType\" BaseType=\"Microsoft.Test.AspNet.OData.Formatter.ComplexBaseType\" OpenType=\"true\">" +
                         "<Property Name=\"DerivedProperty\" Type=\"Edm.String\" />" +
                     "</ComplexType>" +
                 "</Schema>" +
@@ -551,14 +551,14 @@ namespace Microsoft.Test.AspNet.OData
             const string expectMetadata =
             "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                 "<Action Name=\"NullableAction\" IsBound=\"true\">" +
-                    "<Parameter Name=\"bindingParameter\" Type=\"System.Web.OData.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.Test.AspNet.OData.Formatter.FormatterPerson\" />" +
                     "<Parameter Name=\"param\" Type=\"Edm.String\" Unicode=\"false\" />" +
-                    "<ReturnType Type=\"System.Web.OData.Formatter.FormatterAddress\" />" +
+                    "<ReturnType Type=\"Microsoft.Test.AspNet.OData.Formatter.FormatterAddress\" />" +
                 "</Action>" +
                 "<Action Name=\"NonNullableAction\" IsBound=\"true\">" +
-                    "<Parameter Name=\"bindingParameter\" Type=\"System.Web.OData.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.Test.AspNet.OData.Formatter.FormatterPerson\" />" +
                     "<Parameter Name=\"param\" Type=\"Edm.String\" Nullable=\"false\" Unicode=\"false\" />" +
-                    "<ReturnType Type=\"System.Web.OData.Formatter.FormatterAddress\" Nullable=\"false\" />" +
+                    "<ReturnType Type=\"Microsoft.Test.AspNet.OData.Formatter.FormatterAddress\" Nullable=\"false\" />" +
                 "</Action>" +
                 "<EntityContainer Name=\"Container\" /></Schema>" +
             "</edmx:DataServices>" +
@@ -597,14 +597,14 @@ namespace Microsoft.Test.AspNet.OData
             const string expectMetadata =
             "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                 "<Function Name=\"NullableFunction\" IsBound=\"true\">" +
-                    "<Parameter Name=\"bindingParameter\" Type=\"System.Web.OData.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.Test.AspNet.OData.Formatter.FormatterPerson\" />" +
                     "<Parameter Name=\"param\" Type=\"Edm.String\" Unicode=\"false\" />" +
-                    "<ReturnType Type=\"System.Web.OData.Formatter.FormatterAddress\" />" +
+                    "<ReturnType Type=\"Microsoft.Test.AspNet.OData.Formatter.FormatterAddress\" />" +
                 "</Function>" +
                 "<Function Name=\"NonNullableFunction\" IsBound=\"true\">" +
-                    "<Parameter Name=\"bindingParameter\" Type=\"System.Web.OData.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.Test.AspNet.OData.Formatter.FormatterPerson\" />" +
                     "<Parameter Name=\"param\" Type=\"Edm.String\" Nullable=\"false\" Unicode=\"false\" />" +
-                    "<ReturnType Type=\"System.Web.OData.Formatter.FormatterAddress\" Nullable=\"false\" />" +
+                    "<ReturnType Type=\"Microsoft.Test.AspNet.OData.Formatter.FormatterAddress\" Nullable=\"false\" />" +
                 "</Function>" +
                 "<EntityContainer Name=\"Container\" />" +
             "</Schema>" +
@@ -671,17 +671,17 @@ namespace Microsoft.Test.AspNet.OData
         {
             // Arrange
             const string expectMetadata =
-            "<Schema Namespace=\"System.Web.OData.Formatter\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+            "<Schema Namespace=\"Microsoft.Test.AspNet.OData.Formatter\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                 "<EntityType Name=\"AbstractEntityType\" Abstract=\"true\">" +
                     "<Property Name=\"IntProperty\" Type=\"Edm.Int32\" Nullable=\"false\" />" +
                 "</EntityType>" +
-                "<EntityType Name=\"SubEntityType\" BaseType=\"System.Web.OData.Formatter.AbstractEntityType\">" +
+                "<EntityType Name=\"SubEntityType\" BaseType=\"Microsoft.Test.AspNet.OData.Formatter.AbstractEntityType\">" +
                     "<Key>" +
                         "<PropertyRef Name=\"SubKey\" />" +
                     "</Key>" +
                     "<Property Name=\"SubKey\" Type=\"Edm.Int32\" Nullable=\"false\" />" +
                 "</EntityType>" +
-                "<EntityType Name=\"AnotherSubEntityType\" BaseType=\"System.Web.OData.Formatter.AbstractEntityType\">" +
+                "<EntityType Name=\"AnotherSubEntityType\" BaseType=\"Microsoft.Test.AspNet.OData.Formatter.AbstractEntityType\">" +
                     "<Key>" +
                         "<PropertyRef Name=\"AnotherKey\" />" +
                     "</Key>" +
@@ -750,7 +750,7 @@ namespace Microsoft.Test.AspNet.OData
         {
             // Arrange
             const string expectMetadata =
-                "<EntitySet Name=\"Customers\" EntityType=\"System.Web.OData.Formatter.CustomerWithConcurrencyAttribute\">" +
+                "<EntitySet Name=\"Customers\" EntityType=\"Microsoft.Test.AspNet.OData.Formatter.CustomerWithConcurrencyAttribute\">" +
                     "<Annotation Term=\"Org.OData.Core.V1.OptimisticConcurrency\">" +
                         "<Collection>" +
                             "<PropertyPath>Name</PropertyPath>" +
@@ -986,11 +986,11 @@ namespace Microsoft.Test.AspNet.OData
 
             // Assert
             Assert.Contains(
-                "<Property Name=\"Address\" Type=\"System.Web.OData.Formatter.FormatterAddress\" Nullable=\"false\" />",
+                "<Property Name=\"Address\" Type=\"Microsoft.Test.AspNet.OData.Formatter.FormatterAddress\" Nullable=\"false\" />",
                 responseString);
 
             Assert.Contains(
-                "<Property Name=\"Addresses\" Type=\"Collection(System.Web.OData.Formatter.FormatterAddress)\" Nullable=\"false\" />",
+                "<Property Name=\"Addresses\" Type=\"Collection(Microsoft.Test.AspNet.OData.Formatter.FormatterAddress)\" Nullable=\"false\" />",
                 responseString);
         }
 
@@ -1000,10 +1000,10 @@ namespace Microsoft.Test.AspNet.OData
             // Arrange
           const string expectMetadata =
             "<EntityContainer Name=\"Container\">" +
-                "<EntitySet Name=\"Customers\" EntityType=\"System.Web.OData.Formatter.BindingCustomer\">" +
+                "<EntitySet Name=\"Customers\" EntityType=\"Microsoft.Test.AspNet.OData.Formatter.BindingCustomer\">" +
                     "<NavigationPropertyBinding Path=\"Location/City\" Target=\"Cities\" />" +
                 "</EntitySet>" +
-                "<EntitySet Name=\"Cities\" EntityType=\"System.Web.OData.Formatter.BindingCity\" />" +
+                "<EntitySet Name=\"Cities\" EntityType=\"Microsoft.Test.AspNet.OData.Formatter.BindingCity\" />" +
             "</EntityContainer>";
 
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -1035,12 +1035,12 @@ namespace Microsoft.Test.AspNet.OData
             // Arrange
             const string expectMetadata =
               "<EntityContainer Name=\"Container\">" +
-                  "<EntitySet Name=\"Customers\" EntityType=\"System.Web.OData.Formatter.BindingCustomer\">" +
-                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipLocation/System.Web.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities_A\" />" +
-                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipLocation/System.Web.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities_B\" />" +
+                  "<EntitySet Name=\"Customers\" EntityType=\"Microsoft.Test.AspNet.OData.Formatter.BindingCustomer\">" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipLocation/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities_A\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipLocation/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities_B\" />" +
                   "</EntitySet>" +
-                  "<EntitySet Name=\"Cities_A\" EntityType=\"System.Web.OData.Formatter.BindingCity\" />" +
-                  "<EntitySet Name=\"Cities_B\" EntityType=\"System.Web.OData.Formatter.BindingCity\" />" +
+                  "<EntitySet Name=\"Cities_A\" EntityType=\"Microsoft.Test.AspNet.OData.Formatter.BindingCity\" />" +
+                  "<EntitySet Name=\"Cities_B\" EntityType=\"Microsoft.Test.AspNet.OData.Formatter.BindingCity\" />" +
               "</EntityContainer>";
 
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -1074,29 +1074,29 @@ namespace Microsoft.Test.AspNet.OData
             // Arrange
             const string expectMetadata =
               "<EntityContainer Name=\"Container\">" +
-                  "<EntitySet Name=\"Customers\" EntityType=\"System.Web.OData.Formatter.BindingCustomer\">" +
+                  "<EntitySet Name=\"Customers\" EntityType=\"Microsoft.Test.AspNet.OData.Formatter.BindingCustomer\">" +
                       "<NavigationPropertyBinding Path=\"Location/City\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Address/City\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Addresses/City\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipLocation/City\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipAddresses/City\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipLocation/City\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipAddresses/City\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Location/Cities\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Address/Cities\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Addresses/Cities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipLocation/Cities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipAddresses/Cities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Location/System.Web.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Address/System.Web.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Addresses/System.Web.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipLocation/System.Web.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipAddresses/System.Web.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Location/System.Web.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Address/System.Web.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Addresses/System.Web.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipLocation/System.Web.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"System.Web.OData.Formatter.BindingVipCustomer/VipAddresses/System.Web.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipLocation/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipAddresses/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Address/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Addresses/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipLocation/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipAddresses/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Address/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Addresses/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipLocation/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipAddresses/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
                   "</EntitySet>" +
-                  "<EntitySet Name=\"Cities\" EntityType=\"System.Web.OData.Formatter.BindingCity\" />" +
+                  "<EntitySet Name=\"Cities\" EntityType=\"Microsoft.Test.AspNet.OData.Formatter.BindingCity\" />" +
               "</EntityContainer>";
 
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();

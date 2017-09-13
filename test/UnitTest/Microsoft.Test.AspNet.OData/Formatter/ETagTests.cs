@@ -115,7 +115,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             MethodCallExpression methodCall = queryable.Expression as MethodCallExpression;
             Assert.NotNull(methodCall);
             Assert.Equal(2, methodCall.Arguments.Count);
-            Assert.Equal(@"Param_0 => (Param_0.FirstName == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty)",
+            Assert.Equal(@"Param_0 => (Param_0.FirstName == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty)",
                 methodCall.Arguments[1].ToString());
         }
 
@@ -140,7 +140,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Assert.NotNull(methodCall);
             Assert.Equal(2, methodCall.Arguments.Count);
             Assert.Equal(
-                @"Param_0 => Not((Param_0.LastName == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty))",
+                @"Param_0 => Not((Param_0.LastName == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty))",
                 methodCall.Arguments[1].ToString());
         }
 
@@ -166,8 +166,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Assert.NotNull(methodCall);
             Assert.Equal(2, methodCall.Arguments.Count);
             Assert.Equal(
-                @"Param_0 => Not(((Param_0.FirstName == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty) "
-                + "AndAlso (Param_0.LastName == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty)))",
+                @"Param_0 => Not(((Param_0.FirstName == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty) "
+                + "AndAlso (Param_0.LastName == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty)))",
                 methodCall.Arguments[1].ToString());
         }
 
@@ -249,13 +249,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             if (ifMatch)
             {
                 Assert.Equal(
-                    "Param_0 => (Param_0.DoubleETag == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Double]).TypedProperty)",
+                    "Param_0 => (Param_0.DoubleETag == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Double]).TypedProperty)",
                     methodCall.Arguments[1].ToString());
             }
             else
             {
                 Assert.Equal(
-                    "Param_0 => Not((Param_0.DoubleETag == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Double]).TypedProperty))",
+                    "Param_0 => Not((Param_0.DoubleETag == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Double]).TypedProperty))",
                     methodCall.Arguments[1].ToString());
             }
         }
@@ -335,15 +335,15 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             if (ifMatch)
             {
                 Assert.Equal(
-                    "Param_0 => ((Param_0.ByteVal == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.SByte]).TypedProperty) " +
-                    "AndAlso (Param_0.ShortVal == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int16]).TypedProperty))",
+                    "Param_0 => ((Param_0.ByteVal == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.SByte]).TypedProperty) " +
+                    "AndAlso (Param_0.ShortVal == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int16]).TypedProperty))",
                     methodCall.Arguments[1].ToString());
             }
             else
             {
                 Assert.Equal(
-                    "Param_0 => Not(((Param_0.ByteVal == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.SByte]).TypedProperty) " +
-                    "AndAlso (Param_0.ShortVal == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int16]).TypedProperty)))",
+                    "Param_0 => Not(((Param_0.ByteVal == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.SByte]).TypedProperty) " +
+                    "AndAlso (Param_0.ShortVal == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int16]).TypedProperty)))",
                     methodCall.Arguments[1].ToString());
             }
         }

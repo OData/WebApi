@@ -826,7 +826,7 @@ namespace Microsoft.Test.AspNet.OData.Query
                 IQueryable<int> e = Enumerable.Range(1, 9).AsQueryable();
                 return new TheoryDataSet<IQueryable, string, object>
                 {
-                    { e.Select(i => (SimpleEnum)(i%3)), "$filter=$it eq Microsoft.TestCommon.Types.SimpleEnum'First'&$orderby=$it desc&$skip=1&$top=1", SimpleEnum.First },
+                    { e.Select(i => (SimpleEnum)(i%3)), "$filter=$it eq Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'&$orderby=$it desc&$skip=1&$top=1", SimpleEnum.First },
                     { e.Select(i => (SimpleEnum?)null), "$filter=$it eq null&$orderby=$it desc&$skip=1&$top=1", null },
                 };
             }

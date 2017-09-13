@@ -112,7 +112,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             IEdmType edmType = model.GetEdmType(typeof(IEnumerable<BaseType>));
 
             Assert.Equal(EdmTypeKind.Collection, edmType.TypeKind);
-            Assert.Equal("System.Web.OData.Formatter.BaseType", (edmType as IEdmCollectionType).ElementType.FullName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Formatter.BaseType", (edmType as IEdmCollectionType).ElementType.FullName());
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             IEdmType edmType = model.GetEdmType(typeof(IEnumerable<SelectExpandWrapper<BaseType>>));
 
             Assert.Equal(EdmTypeKind.Collection, edmType.TypeKind);
-            Assert.Equal("System.Web.OData.Formatter.BaseType", (edmType as IEdmCollectionType).ElementType.FullName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Formatter.BaseType", (edmType as IEdmCollectionType).ElementType.FullName());
         }
 
         [Fact]

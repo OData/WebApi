@@ -86,7 +86,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
                 ODataUri = new ODataUri { ServiceRoot = new Uri("http://localhost/odata") }
             };
 
-            IODataResponseMessage responseMessage = new ODataMessageWrapper(bufferedStream, content.Headers);
+            IODataResponseMessage responseMessage = ODataMessageWrapperHelper.Create(bufferedStream, content.Headers);
             return new ODataMessageWriter(responseMessage, writerSettings, model);
         }
 

@@ -269,11 +269,11 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             IEdmStructuralProperty enumKey = Assert.Single(product.DeclaredKey);
             Assert.Equal("ProductColor", enumKey.Name);
             Assert.Equal(EdmTypeKind.Enum, enumKey.Type.Definition.TypeKind);
-            Assert.Equal("System.Web.OData.Builder.TestModels.Color", enumKey.Type.Definition.FullTypeName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Color", enumKey.Type.Definition.FullTypeName());
             Assert.False(enumKey.Type.IsNullable);
 
             IEdmEnumType colorType = Assert.Single(model.SchemaElements.OfType<IEdmEnumType>());
-            Assert.Equal("System.Web.OData.Builder.TestModels.Color", enumKey.Type.Definition.FullTypeName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Color", enumKey.Type.Definition.FullTypeName());
             Assert.Equal(3, colorType.Members.Count());
             Assert.Single(colorType.Members.Where(m => m.Name == "Red"));
             Assert.Single(colorType.Members.Where(m => m.Name == "Green"));
@@ -1222,9 +1222,9 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
-                "Cannot determine the Edm type for the CLR type 'System.Web.OData.Builder.TestModels.Animal' " +
-                "because the derived type 'System.Web.OData.Builder.TestModels.Horse' is configured as entity type and another " +
-                "derived type 'System.Web.OData.Builder.TestModels.Human' is configured as complex type.");
+                "Cannot determine the Edm type for the CLR type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Animal' " +
+                "because the derived type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Horse' is configured as entity type and another " +
+                "derived type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Human' is configured as complex type.");
         }
 
         [Fact]
@@ -1288,9 +1288,9 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
-                "Cannot determine the Edm type for the CLR type 'System.Web.OData.Builder.TestModels.Plant' " +
-                "because the derived type 'System.Web.OData.Builder.TestModels.Jasmine' is configured as entity type and another " +
-                "derived type 'System.Web.OData.Builder.TestModels.Phycophyta' is configured as complex type.");
+                "Cannot determine the Edm type for the CLR type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Plant' " +
+                "because the derived type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Jasmine' is configured as entity type and another " +
+                "derived type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Phycophyta' is configured as complex type.");
         }
 
         [Fact]
@@ -1504,25 +1504,25 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             Assert.Equal(2, vehicles.NavigationPropertyBindings.Count());
             vehicles.AssertHasNavigationTarget(
                 car.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
-                "manufacturers", "System.Web.OData.Builder.TestModels.Car/Manufacturer");
+                "manufacturers", "Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Manufacturer");
             vehicles.AssertHasNavigationTarget(
                 motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
-                "manufacturers", "System.Web.OData.Builder.TestModels.Motorcycle/Manufacturer");
+                "manufacturers", "Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer");
             vehicles.AssertHasNavigationTarget(
                 sportbike.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
-                "manufacturers", "System.Web.OData.Builder.TestModels.Motorcycle/Manufacturer");
+                "manufacturers", "Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer");
 
             // for singleton
             Assert.Equal(2, singleton.NavigationPropertyBindings.Count());
             singleton.AssertHasNavigationTarget(
                 car.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
-                "manufacturers", "System.Web.OData.Builder.TestModels.Car/Manufacturer");
+                "manufacturers", "Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Manufacturer");
             singleton.AssertHasNavigationTarget(
                 motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
-                "manufacturers", "System.Web.OData.Builder.TestModels.Motorcycle/Manufacturer");
+                "manufacturers", "Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer");
             singleton.AssertHasNavigationTarget(
                 sportbike.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
-                "manufacturers", "System.Web.OData.Builder.TestModels.Motorcycle/Manufacturer");
+                "manufacturers", "Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer");
         }
 
         [Fact]
@@ -1553,25 +1553,25 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             Assert.Equal(2, vehicles.NavigationPropertyBindings.Count());
             vehicles.AssertHasNavigationTarget(
                 car.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
-                "car_manufacturers", "System.Web.OData.Builder.TestModels.Car/Manufacturer");
+                "car_manufacturers", "Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Manufacturer");
             vehicles.AssertHasNavigationTarget(
                 motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
-                "motorcycle_manufacturers", "System.Web.OData.Builder.TestModels.Motorcycle/Manufacturer");
+                "motorcycle_manufacturers", "Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer");
             vehicles.AssertHasNavigationTarget(
                 sportbike.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
-                "motorcycle_manufacturers", "System.Web.OData.Builder.TestModels.Motorcycle/Manufacturer");
+                "motorcycle_manufacturers", "Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer");
 
             // for singleton
             Assert.Equal(2, singleton.NavigationPropertyBindings.Count());
             singleton.AssertHasNavigationTarget(
                 car.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
-                "car_manufacturers", "System.Web.OData.Builder.TestModels.Car/Manufacturer");
+                "car_manufacturers", "Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Manufacturer");
             singleton.AssertHasNavigationTarget(
                 motorcycle.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
-                "motorcycle_manufacturers", "System.Web.OData.Builder.TestModels.Motorcycle/Manufacturer");
+                "motorcycle_manufacturers", "Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer");
             singleton.AssertHasNavigationTarget(
                 sportbike.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne),
-                "motorcycle_manufacturers", "System.Web.OData.Builder.TestModels.Motorcycle/Manufacturer");
+                "motorcycle_manufacturers", "Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer");
         }
 
         [Fact]
@@ -1594,8 +1594,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             // one for motorcycle manufacturer and one for car manufacturer
             IEdmEntitySet vehicles = model.EntityContainer.FindEntitySet("vehicles");
             Assert.Equal(2, vehicles.NavigationPropertyBindings.Count());
-            Assert.Equal("System.Web.OData.Builder.TestModels.Car/Manufacturer", vehicles.NavigationPropertyBindings.First().Path.Path);
-            Assert.Equal("System.Web.OData.Builder.TestModels.Motorcycle/Manufacturer", vehicles.NavigationPropertyBindings.Last().Path.Path);
+            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Manufacturer", vehicles.NavigationPropertyBindings.First().Path.Path);
+            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer", vehicles.NavigationPropertyBindings.Last().Path.Path);
 
             // one for car manufacturer
             IEdmEntitySet cars = model.EntityContainer.FindEntitySet("cars");
@@ -1642,8 +1642,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             // one for motorcycle manufacturer and one for car manufacturer
             IEdmSingleton vehicle = model.EntityContainer.FindSingleton("MyVehicle");
             Assert.Equal(2, vehicle.NavigationPropertyBindings.Count());
-            Assert.Equal("System.Web.OData.Builder.TestModels.Car/Manufacturer", vehicle.NavigationPropertyBindings.First().Path.Path);
-            Assert.Equal("System.Web.OData.Builder.TestModels.Motorcycle/Manufacturer", vehicle.NavigationPropertyBindings.Last().Path.Path);
+            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Manufacturer", vehicle.NavigationPropertyBindings.First().Path.Path);
+            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer", vehicle.NavigationPropertyBindings.Last().Path.Path);
 
             // one for car manufacturer
             IEdmSingleton car = model.EntityContainer.FindSingleton("Contoso");
@@ -1703,13 +1703,13 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 
             // for entity set
             Assert.Equal(2, vehicles.NavigationPropertyBindings.Count());
-            vehicles.AssertHasNavigationTarget(addressNav, "Addresses", "System.Web.OData.Builder.TestModels.Car/Manufacturer/Address");
-            vehicles.AssertHasNavigationTarget(addressNav, "Addresses", "System.Web.OData.Builder.TestModels.Motorcycle/Manufacturer/Address");
+            vehicles.AssertHasNavigationTarget(addressNav, "Addresses", "Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Manufacturer/Address");
+            vehicles.AssertHasNavigationTarget(addressNav, "Addresses", "Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer/Address");
 
             // for singleton
             Assert.Equal(2, singleton.NavigationPropertyBindings.Count());
-            singleton.AssertHasNavigationTarget(addressNav, "Addresses", "System.Web.OData.Builder.TestModels.Car/Manufacturer/Address");
-            singleton.AssertHasNavigationTarget(addressNav, "Addresses", "System.Web.OData.Builder.TestModels.Motorcycle/Manufacturer/Address");
+            singleton.AssertHasNavigationTarget(addressNav, "Addresses", "Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Manufacturer/Address");
+            singleton.AssertHasNavigationTarget(addressNav, "Addresses", "Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer/Address");
         }
 
         [Fact]
@@ -1757,18 +1757,18 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 customers.AssertHasNavigationTarget(nav, "Cities", "Location/" + navigation);
                 customers.AssertHasNavigationTarget(nav, "Cities", "Address/" + navigation);
                 customers.AssertHasNavigationTarget(nav, "Cities", "Addresses/" + navigation);
-                customers.AssertHasNavigationTarget(nav, "Cities", "System.Web.OData.Formatter.BindingVipCustomer/VipLocation/" + navigation);
-                customers.AssertHasNavigationTarget(nav, "Cities", "System.Web.OData.Formatter.BindingVipCustomer/VipAddresses/" + navigation);
+                customers.AssertHasNavigationTarget(nav, "Cities", "Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipLocation/" + navigation);
+                customers.AssertHasNavigationTarget(nav, "Cities", "Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipAddresses/" + navigation);
             }
 
             foreach (var navigation in new[] { "UsCity", "UsCities" })
             {
                 IEdmNavigationProperty nav = navigation == "UsCity" ? usCityNav : usCitiesNav;
-                customers.AssertHasNavigationTarget(nav, "Cities", "Location/System.Web.OData.Formatter.BindingUsAddress/" + navigation);
-                customers.AssertHasNavigationTarget(nav, "Cities", "Address/System.Web.OData.Formatter.BindingUsAddress/" + navigation);
-                customers.AssertHasNavigationTarget(nav, "Cities", "Addresses/System.Web.OData.Formatter.BindingUsAddress/" + navigation);
-                customers.AssertHasNavigationTarget(nav, "Cities", "System.Web.OData.Formatter.BindingVipCustomer/VipLocation/System.Web.OData.Formatter.BindingUsAddress/" + navigation);
-                customers.AssertHasNavigationTarget(nav, "Cities", "System.Web.OData.Formatter.BindingVipCustomer/VipAddresses/System.Web.OData.Formatter.BindingUsAddress/" + navigation);
+                customers.AssertHasNavigationTarget(nav, "Cities", "Location/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/" + navigation);
+                customers.AssertHasNavigationTarget(nav, "Cities", "Address/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/" + navigation);
+                customers.AssertHasNavigationTarget(nav, "Cities", "Addresses/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/" + navigation);
+                customers.AssertHasNavigationTarget(nav, "Cities", "Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipLocation/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/" + navigation);
+                customers.AssertHasNavigationTarget(nav, "Cities", "Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipAddresses/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/" + navigation);
             }
         }
 
@@ -1904,7 +1904,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => builder.GetEdmModel(),
-            "Cannot define keys on type 'System.Web.OData.Builder.Conventions.SubSubEntityTypeWithOwnKey' deriving from 'System.Web.OData.Builder.Conventions.SubEntityTypeWithOwnKey'. " +
+            "Cannot define keys on type 'Microsoft.Test.AspNet.OData.Builder.Conventions.SubSubEntityTypeWithOwnKey' deriving from 'Microsoft.Test.AspNet.OData.Builder.Conventions.SubEntityTypeWithOwnKey'. " +
             "The base type in the entity inheritance hierarchy already contains keys.");
         }
 
@@ -1918,7 +1918,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => builder.GetEdmModel(),
-            "The entity set or singleton 'entitySet' is based on type 'System.Web.OData.Builder.Conventions.AbstractEntityType' that has no keys defined.");
+            "The entity set or singleton 'entitySet' is based on type 'Microsoft.Test.AspNet.OData.Builder.Conventions.AbstractEntityType' that has no keys defined.");
         }
 
         [Fact]
@@ -1980,13 +1980,13 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             IEdmEntityType baseEntityType = model.AssertHasEntityType(baseType);
             IEdmStructuralProperty key = Assert.Single(baseEntityType.DeclaredKey);
             Assert.Equal(EdmTypeKind.Enum, key.Type.TypeKind());
-            Assert.Equal("System.Web.OData.Builder.TestModels.Color", key.Type.Definition.FullTypeName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Color", key.Type.Definition.FullTypeName());
 
             IEdmEntityType derivedEntityType = model.AssertHasEntityType(derivedType, baseType);
             Assert.Null(derivedEntityType.DeclaredKey);
             IEdmProperty derivedId = Assert.Single(derivedEntityType.DeclaredProperties);
             Assert.Equal(EdmTypeKind.Enum, derivedId.Type.TypeKind());
-            Assert.Equal("System.Web.OData.Builder.TestModels.Color", derivedId.Type.Definition.FullTypeName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Color", derivedId.Type.Definition.FullTypeName());
         }
 
         [Fact]
@@ -3000,7 +3000,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             // Act & Assert
             Assert.ThrowsArgument(() => builder.GetEdmModel(),
                 "propertyInfo",
-                "The complex type 'System.Web.OData.Builder.Conventions.RecursiveEmployee' has a reference to itself " +
+                "The complex type 'Microsoft.Test.AspNet.OData.Builder.Conventions.RecursiveEmployee' has a reference to itself " +
                 "through the property 'Manager'. A recursive loop of complex types is not allowed.");
         }
 

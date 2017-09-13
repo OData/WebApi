@@ -19,8 +19,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public ComplexTypeTest()
         {
             _formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Resource }) { Request = GetSampleRequest() };
-            _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
-            _formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationXml);
+            _formatter.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
+            _formatter.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationXml));
         }
 
         [Fact]
@@ -28,7 +28,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         {
             // Arrange
             ObjectContent<Person> content = new ObjectContent<Person>(new Person(0, new ReferenceDepthContext(7)),
-                _formatter, ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+                _formatter, MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
             JsonAssert.Equal(Resources.PersonComplexType, content.ReadAsStringAsync().Result);

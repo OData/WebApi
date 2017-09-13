@@ -510,7 +510,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
 
             protected override bool ExcludeStackFrame(string stackFrame)
             {
-                if (stackFrame.StartsWith("at Microsoft.TestCommon.Assert.", StringComparison.OrdinalIgnoreCase))
+                if (stackFrame.StartsWith("at Microsoft.Test.AspNet.OData.TestCommon.Assert.", StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }

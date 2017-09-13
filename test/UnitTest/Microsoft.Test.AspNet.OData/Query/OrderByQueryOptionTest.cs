@@ -525,7 +525,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             var parser = new ODataQueryOptionParser(
                 model,
-                model.FindType("System.Web.OData.Builder.TestModels.Customer"),
+                model.FindType("Microsoft.Test.AspNet.OData.Builder.TestModels.Customer"),
                 model.FindDeclaredNavigationSource("Default.Container.Customers"),
                 new Dictionary<string, string> { { "$orderby", "@q desc,@p asc" }, { "@q", "Address/HouseNumber" }, { "@p", "CustomerId" } });
 
@@ -559,7 +559,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             var parser = new ODataQueryOptionParser(
                 model,
-                model.FindType("System.Web.OData.Builder.TestModels.Customer"),
+                model.FindType("Microsoft.Test.AspNet.OData.Builder.TestModels.Customer"),
                 model.FindDeclaredNavigationSource("Default.Container.Customers"),
                 new Dictionary<string, string> { { "$orderby", "@p1" }, { "@p2", "Name" }, { "@p1", "@p2" } });
 

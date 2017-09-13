@@ -110,70 +110,70 @@ namespace Microsoft.Test.AspNet.OData.Query
                 return new TheoryDataSet<string, int[]>
                 {
                     // Simple Enums
-                    { "Simple eq Microsoft.TestCommon.Types.SimpleEnum'First'", new int[] { 1, 3 } },
-                    { "Simple eq Microsoft.TestCommon.Types.SimpleEnum'0'", new int[] { 1, 3 } },
-                    { "Simple eq Microsoft.TestCommon.Types.SimpleEnum'Fourth'", new int[] { } },
-                    { "Simple eq Microsoft.TestCommon.Types.SimpleEnum'3'", new int[] { } },
-                    { "Microsoft.TestCommon.Types.SimpleEnum'First' eq Simple", new int[] { 1, 3 } },
-                    { "Simple eq cast('0',Microsoft.TestCommon.Types.SimpleEnum)", new int[] { 1, 3} },
-                    { "Simple eq cast('First','Microsoft.TestCommon.Types.SimpleEnum')", new int[] { 1, 3} },
+                    { "Simple eq Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", new int[] { 1, 3 } },
+                    { "Simple eq Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'0'", new int[] { 1, 3 } },
+                    { "Simple eq Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'Fourth'", new int[] { } },
+                    { "Simple eq Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'3'", new int[] { } },
+                    { "Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First' eq Simple", new int[] { 1, 3 } },
+                    { "Simple eq cast('0',Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum)", new int[] { 1, 3} },
+                    { "Simple eq cast('First','Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum')", new int[] { 1, 3} },
                     { "Simple eq null", new int[] { } },
                     { "null eq Simple", new int[] { } },
                     { "Simple eq SimpleNullable", new int[] { 1 } },
-                    { "Simple has Microsoft.TestCommon.Types.SimpleEnum'First'", new int[] { 1, 2, 3, 5, 6 } },
-                    { "Simple has Microsoft.TestCommon.Types.SimpleEnum'0'", new int[] { 1, 2, 3, 5, 6 } },
-                    { "Simple has Microsoft.TestCommon.Types.SimpleEnum'Second'", new int[] { 5 } },
-                    { "SimpleNullable eq Microsoft.TestCommon.Types.SimpleEnum'First'", new int[] { 1 } },
-                    { "Microsoft.TestCommon.Types.SimpleEnum'First' eq SimpleNullable", new int[] { 1 } },
+                    { "Simple has Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", new int[] { 1, 2, 3, 5, 6 } },
+                    { "Simple has Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'0'", new int[] { 1, 2, 3, 5, 6 } },
+                    { "Simple has Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'Second'", new int[] { 5 } },
+                    { "SimpleNullable eq Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", new int[] { 1 } },
+                    { "Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First' eq SimpleNullable", new int[] { 1 } },
                     { "SimpleNullable eq null", new int[] { 3, 5 } },
                     { "null eq SimpleNullable", new int[] { 3, 5 } },
 
                     // Long enums
-                    { "Long eq Microsoft.TestCommon.Types.LongEnum'SecondLong'", new int[] { 2 } },
-                    { "Long eq Microsoft.TestCommon.Types.LongEnum'FourthLong'", new int[] { } },
-                    { "Long eq Microsoft.TestCommon.Types.LongEnum'3'", new int[] { } },
+                    { "Long eq Microsoft.Test.AspNet.OData.TestCommon.Types.LongEnum'SecondLong'", new int[] { 2 } },
+                    { "Long eq Microsoft.Test.AspNet.OData.TestCommon.Types.LongEnum'FourthLong'", new int[] { } },
+                    { "Long eq Microsoft.Test.AspNet.OData.TestCommon.Types.LongEnum'3'", new int[] { } },
 
                     // Byte enums
-                    { "Byte eq Microsoft.TestCommon.Types.ByteEnum'SecondByte'", new int[] { 2 } },
+                    { "Byte eq Microsoft.Test.AspNet.OData.TestCommon.Types.ByteEnum'SecondByte'", new int[] { 2 } },
 
                     // SByte enums
-                    { "SByte eq Microsoft.TestCommon.Types.SByteEnum'SecondSByte'", new int[] { 2 } },
+                    { "SByte eq Microsoft.Test.AspNet.OData.TestCommon.Types.SByteEnum'SecondSByte'", new int[] { 2 } },
 
                     // Short enums
-                    { "Short eq Microsoft.TestCommon.Types.ShortEnum'SecondShort'", new int[] { 2 } },
+                    { "Short eq Microsoft.Test.AspNet.OData.TestCommon.Types.ShortEnum'SecondShort'", new int[] { 2 } },
 
                     // UShort enums
-                    { "UShort eq Microsoft.TestCommon.Types.UShortEnum'SecondUShort'", new int[] { 2 } },
+                    { "UShort eq Microsoft.Test.AspNet.OData.TestCommon.Types.UShortEnum'SecondUShort'", new int[] { 2 } },
 
                     // UInt enums
-                    { "UInt eq Microsoft.TestCommon.Types.UIntEnum'SecondUInt'", new int[] { 2 } },
+                    { "UInt eq Microsoft.Test.AspNet.OData.TestCommon.Types.UIntEnum'SecondUInt'", new int[] { 2 } },
 
                     // Flag enums
-                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'One, Four'", new int[] { 1 } },
-                    { "Microsoft.TestCommon.Types.FlagsEnum'One, Four' eq Flag", new int[] { 1 } },
-                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'0'", new int[] { } },
-                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'1'", new int[] { 5 } },
-                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'5'", new int[] { 1 } },
-                    { "Flag has Microsoft.TestCommon.Types.FlagsEnum'One, Four'", new int[] { 1 } },
-                    { "Flag has Microsoft.TestCommon.Types.FlagsEnum'One'", new int[] { 1, 2, 5 } },
+                    { "Flag eq Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'One, Four'", new int[] { 1 } },
+                    { "Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'One, Four' eq Flag", new int[] { 1 } },
+                    { "Flag eq Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'0'", new int[] { } },
+                    { "Flag eq Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'1'", new int[] { 5 } },
+                    { "Flag eq Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'5'", new int[] { 1 } },
+                    { "Flag has Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'One, Four'", new int[] { 1 } },
+                    { "Flag has Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'One'", new int[] { 1, 2, 5 } },
                     { "Flag eq null", new int[] { } },
                     { "null eq Flag", new int[] { } },
                     { "Flag eq FlagNullable", new int[] { 1 } },
-                    { "FlagNullable eq Microsoft.TestCommon.Types.FlagsEnum'One, Four'", new int[] { 1 } },
-                    { "Microsoft.TestCommon.Types.FlagsEnum'One, Four' eq FlagNullable", new int[] { 1 } },
+                    { "FlagNullable eq Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'One, Four'", new int[] { 1 } },
+                    { "Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'One, Four' eq FlagNullable", new int[] { 1 } },
                     { "FlagNullable eq null", new int[] { 3, 5 } },
                     { "null eq FlagNullable", new int[] { 3, 5 } },
 
                     // Flag enums with different formats
-                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'One,Four'", new int[] { 1 } },
-                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'One,    Four'", new int[] { 1 } },
-                    { "Flag eq Microsoft.TestCommon.Types.FlagsEnum'Four, One'", new int[] { 1 } },
+                    { "Flag eq Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'One,Four'", new int[] { 1 } },
+                    { "Flag eq Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'One,    Four'", new int[] { 1 } },
+                    { "Flag eq Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'Four, One'", new int[] { 1 } },
 
                     // Other expressions
-                    { "Flag ne Microsoft.TestCommon.Types.FlagsEnum'One, Four'", new int[] { 2, 3, 5, 6 } },
+                    { "Flag ne Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'One, Four'", new int[] { 2, 3, 5, 6 } },
                     { "Flag eq FlagNullable and Simple eq SimpleNullable", new int[] { 1 } },
-                    { "Simple gt Microsoft.TestCommon.Types.SimpleEnum'First'", new int[] { 2, 5, 6 } },
-                    { "Flag ge Microsoft.TestCommon.Types.FlagsEnum'Four,One'", new int[] { 1, 3, 6 } }
+                    { "Simple gt Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", new int[] { 2, 5, 6 } },
+                    { "Flag ge Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'Four,One'", new int[] { 1, 3, 6 } }
                 };
             }
         }
@@ -272,7 +272,7 @@ namespace Microsoft.Test.AspNet.OData.Query
                     { "cast(IntProp,Edm.String) eq '3'", new int[] { 3 } },
                     { "cast(NullableIntProp,Edm.Int64) eq 1", new int[] { 1 }},
                     { "cast(NullableIntProp,Edm.String) eq null", new int[] { 3 }},
-                    { "cast('Two, Four',Microsoft.TestCommon.Types.FlagsEnum) has FlagsEnumProp", new int[] { 2, 3 } },
+                    { "cast('Two, Four',Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum) has FlagsEnumProp", new int[] { 2, 3 } },
                     { "contains(cast(StringProp,Edm.String),'String')", new int[] { 1, 3 } },
                     { "cast(NullableSimpleEnumProp,Edm.String) ne '0'", new int[] { 2, 3 } },
                     { "cast(DateTimeOffsetProp,Edm.DateTimeOffset) eq 2001-01-01T01:01:01.000+00:00", new int[] { 1 } },
@@ -284,7 +284,7 @@ namespace Microsoft.Test.AspNet.OData.Query
                     { "cast(IntProp,Edm.DateTimeOffset) eq null", new int[] { 1, 2, 3 } },
                     { "cast(NullableIntProp,Edm.Guid) eq null", new int[] { 1, 2, 3 } },
                     { "cast(StringProp,Edm.Double) eq null", new int[] { 1, 2, 3 } },
-                    { "cast(StringProp,Microsoft.TestCommon.Types.SimpleEnum) eq null", new int[] { 1, 2, 3 } },
+                    { "cast(StringProp,Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum) eq null", new int[] { 1, 2, 3 } },
                     { "cast(DateTimeOffsetProp,Edm.Int32) eq null", new int[] { 1, 2, 3 } },
                     { "cast(Edm.Int32) eq null", new int[] { 1, 2, 3 } },
                     { "cast($it,Edm.String) ne null", new int[] { } },
@@ -348,8 +348,8 @@ namespace Microsoft.Test.AspNet.OData.Query
                     { "IntProp gt @p", "1.5", new int[] { 2, 3 }},
                     { "NullableIntProp lt @p", "1.5", new int[] { 1}},
                     { "contains(StringProp,@p)", "'3'", new int[] { 3 } },
-                    { "FlagsEnumProp has @p", "Microsoft.TestCommon.Types.FlagsEnum'Two'", new int[] { 2, 3 } },
-                    { "NullableSimpleEnumProp ne @p", "Microsoft.TestCommon.Types.SimpleEnum'1'", new int[] { 1, 3 } },
+                    { "FlagsEnumProp has @p", "Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'Two'", new int[] { 2, 3 } },
+                    { "NullableSimpleEnumProp ne @p", "Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'1'", new int[] { 1, 3 } },
                     { "DateTimeOffsetProp ne @p", "2001-01-01T01:01:01.000+00:00", new int[] { 2, 3 } },
                     { "GuidProp eq @p", "00000000-0000-0000-0000-000000000000", new int[] { 1, 3 } },
                     { "EntityProp/AlternateAddresses/all(a: a/City ne @p)", "'bc'", new int[] { 1 } },
@@ -677,8 +677,8 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
         [Theory]
         [InlineData("Simple has null", typeof(ODataException))]
-        [InlineData("null has Microsoft.TestCommon.Types.SimpleEnum'First'", typeof(ODataException))]
-        [InlineData("Id has Microsoft.TestCommon.Types.SimpleEnum'First'", typeof(ODataException))]
+        [InlineData("null has Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", typeof(ODataException))]
+        [InlineData("Id has Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", typeof(ODataException))]
         [InlineData("null has null", typeof(NotSupportedException))]
         [InlineData("Simple has 23", typeof(ODataException))]
         [InlineData("'Some string' has 0", typeof(ODataException))]
@@ -699,8 +699,8 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [InlineData("Simple eq Microsoft.TestCommon.Types.SimpleEnum'4'")]
-        [InlineData("Flag eq Microsoft.TestCommon.Types.FlagsEnum'8'")]
+        [InlineData("Simple eq Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'4'")]
+        [InlineData("Flag eq Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'8'")]
         public void ApplyToEnums_DoesnotThrow_ForUndefinedValue(string filter)
         {
             // Arrange
@@ -744,7 +744,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [InlineData("cast(NoSuchProperty,Edm.String) eq null", typeof(ODataException))]
         [InlineData("cast(ProductId,Edm.NoSuchType) eq null", typeof(ODataException))]
         [InlineData("cast(ProductId,Edm.String) eq 123", typeof(ODataException))]
-        [InlineData("cast('123',Microsoft.TestCommon.Types.SimpleEnum) ne 'First'", typeof(ODataException))]
+        [InlineData("cast('123',Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum) ne 'First'", typeof(ODataException))]
         [InlineData("cast(Edm.Int32) eq '123'", typeof(ODataException))]
         public void ApplyWithCast_Throws_WithInvalidFilter(string filter, Type exceptionType)
         {
@@ -827,8 +827,8 @@ namespace Microsoft.Test.AspNet.OData.Query
             // Arrange
             var model = GetParameterAliasModel();
             var context = new ODataQueryContext(model, typeof(DataTypes)) { RequestContainer = new MockContainer(model) };
-            IEdmType targetEdmType = model.FindType("System.Web.OData.Query.Expressions.DataTypes");
-            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("System.Web.OData.Query.Expressions.Products");
+            IEdmType targetEdmType = model.FindType("Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes");
+            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("Microsoft.Test.AspNet.OData.Query.Expressions.Products");
 
             ODataQueryOptionParser parser = new ODataQueryOptionParser(
                 model,

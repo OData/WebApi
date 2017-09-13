@@ -809,7 +809,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.Throws<InvalidOperationException>(
                 () => builder.EntityType<ForeignEntity>().HasRequired(c => c.Principal,
                     (c, r) => c.InvalidForeignKey == r.InvalidPrincipalKey),
-                String.Format(SRResources.ReferentialConstraintPropertyTypeNotValid, "System.Web.OData.MockType"));
+                String.Format(SRResources.ReferentialConstraintPropertyTypeNotValid, "Microsoft.Test.AspNet.OData.TestCommon.MockType"));
         }
 
         class ForeignPrincipal

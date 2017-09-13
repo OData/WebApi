@@ -6,11 +6,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Microsoft.Test.AspNet.OData.PublicApi
@@ -219,7 +222,7 @@ namespace Microsoft.Test.AspNet.OData.PublicApi
             {
                 filter = new string[2 + Assemblies.Count];
                 filter[0] = ", " + typeof(object).Assembly.ToString();
-                filter[1] = ", " + typeof(System.Uri).Assembly.ToString();
+                filter[1] = ", " + typeof(Uri).Assembly.ToString();
                 for (int i = 2; i < filter.Length; i++)
                 {
                     filter[i] = ", " + Assemblies[i - 2].ToString();
@@ -402,11 +405,11 @@ namespace Microsoft.Test.AspNet.OData.PublicApi
                 }
                 foreach (object attribute in attributes)
                 {
-                    if (attribute is Runtime.InteropServices.MarshalAsAttribute)
+                    if (attribute is MarshalAsAttribute)
                     {
                         continue;
                     }
-                    if (attribute is Runtime.InteropServices.StructLayoutAttribute)
+                    if (attribute is StructLayoutAttribute)
                     {
                         continue;
                     }
@@ -418,11 +421,11 @@ namespace Microsoft.Test.AspNet.OData.PublicApi
                     {
                         continue;
                     }
-                    if (attribute is Runtime.TargetedPatchingOptOutAttribute)
+                    if (attribute is TargetedPatchingOptOutAttribute)
                     {
                         continue;
                     }
-                    if (attribute is Diagnostics.CodeAnalysis.SuppressMessageAttribute)
+                    if (attribute is SuppressMessageAttribute)
                     {
                         continue;
                     }
@@ -868,7 +871,7 @@ namespace Microsoft.Test.AspNet.OData.PublicApi
                 // only going into this method if there is a "Version=" present in the name.
                 AppendGenericTypeName(builder, parameterType);
             }
-            else if (name.StartsWith("System.Web.OData."))
+            else if (name.StartsWith("Microsoft.AspNet.OData."))
             {
                 builder.Append(parameterType.Name);
             }

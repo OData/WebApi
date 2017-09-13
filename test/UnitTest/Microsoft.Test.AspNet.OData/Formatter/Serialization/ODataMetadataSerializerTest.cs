@@ -63,7 +63,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             // Assert
             stream.Seek(0, SeekOrigin.Begin);
             string result = new StreamReader(stream).ReadToEnd();
-            Assert.Contains("<Singleton Name=\"Me\" Type=\"System.Web.OData.Formatter.Serialization.Models.Customer\">", result);
+            Assert.Contains("<Singleton Name=\"Me\" Type=\"Microsoft.Test.AspNet.OData.Formatter.Serialization.Models.Customer\">", result);
         }
     }
 }

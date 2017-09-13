@@ -43,8 +43,8 @@ namespace Microsoft.Test.AspNet.OData
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Assert.Equal("http://localhost/odata/$metadata#SimpleOpenCustomers/System.Web.OData.SimpleVipCustomer/$entity", result["@odata.context"]);
-            Assert.Equal("#System.Web.OData.SimpleVipCustomer", result["@odata.type"]);
+            Assert.Equal("http://localhost/odata/$metadata#SimpleOpenCustomers/Microsoft.Test.AspNet.OData.TestCommon.SimpleVipCustomer/$entity", result["@odata.context"]);
+            Assert.Equal("#Microsoft.Test.AspNet.OData.TestCommon.SimpleVipCustomer", result["@odata.type"]);
             Assert.Equal(9, result["CustomerId"]);
             Assert.Equal("VipCustomer", result["Name"]);
             Assert.Equal("#Collection(Int32)", result["ListProp@odata.type"]);

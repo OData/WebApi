@@ -147,7 +147,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
 
             var binder = new AggregationBinder(
                 customizeSettings(new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False }),
-                assembliesResolver,
+                new WebApiAssembliesResolver(assembliesResolver),
                 typeof(T),
                 model,
                 clause.Transformations.First());

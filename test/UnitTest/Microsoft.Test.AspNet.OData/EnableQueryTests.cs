@@ -80,11 +80,11 @@ namespace Microsoft.Test.AspNet.OData
                     {"?$filter=Category/Id le 5", "'LessThanOrEqual'"},
 
                     // Logical operators with property in a derived type in a single valued navigation property
-                    {"?$filter=Category/System.Web.OData.Test.PremiumEnableQueryCategory/PremiumLevel ne 5", "NotEqual'"},
-                    {"?$filter=Category/System.Web.OData.Test.PremiumEnableQueryCategory/PremiumLevel gt 5", "GreaterThan'"},
-                    {"?$filter=Category/System.Web.OData.Test.PremiumEnableQueryCategory/PremiumLevel ge 5", "GreaterThanOrEqual'"},
-                    {"?$filter=Category/System.Web.OData.Test.PremiumEnableQueryCategory/PremiumLevel lt 5", "LessThan'"},
-                    {"?$filter=Category/System.Web.OData.Test.PremiumEnableQueryCategory/PremiumLevel le 5", "LessThanOrEqual'"},
+                    {"?$filter=Category/Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory/PremiumLevel ne 5", "NotEqual'"},
+                    {"?$filter=Category/Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory/PremiumLevel gt 5", "GreaterThan'"},
+                    {"?$filter=Category/Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory/PremiumLevel ge 5", "GreaterThanOrEqual'"},
+                    {"?$filter=Category/Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory/PremiumLevel lt 5", "LessThan'"},
+                    {"?$filter=Category/Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory/PremiumLevel le 5", "LessThanOrEqual'"},
 
                     // not operator
                     {"?$filter=not Adult", "'Not'"},
@@ -101,7 +101,7 @@ namespace Microsoft.Test.AspNet.OData
                     {"?$filter=Id eq 5", "Equal"},
                     {"?$filter=Address/ZipCode eq 5", "Equal"},
                     {"?$filter=Category/Id eq 5", "Equal"},
-                    {"?$filter=Category/System.Web.OData.Test.PremiumEnableQueryCategory/PremiumLevel eq 5", "Equal"},
+                    {"?$filter=Category/Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory/PremiumLevel eq 5", "Equal"},
                 };
             }
         }
@@ -148,11 +148,11 @@ namespace Microsoft.Test.AspNet.OData
                     {"?$filter=1 eq (Category/Id mod 1)", "Modulo"},
 
                     // Arithmetic operators with property in a derived type in a single valued navigation property
-                    {"?$filter=1 eq (3 add Category/System.Web.OData.Test.PremiumEnableQueryCategory/PremiumLevel)", "Add"},
-                    {"?$filter=1 eq (3 sub Category/System.Web.OData.Test.PremiumEnableQueryCategory/PremiumLevel)", "Subtract"},
-                    {"?$filter=1 eq (1 mul Category/System.Web.OData.Test.PremiumEnableQueryCategory/PremiumLevel)", "Multiply"},
-                    {"?$filter=1 eq (Category/System.Web.OData.Test.PremiumEnableQueryCategory/PremiumLevel div 1)", "Divide"},
-                    {"?$filter=1 eq (Category/System.Web.OData.Test.PremiumEnableQueryCategory/PremiumLevel mod 1)", "Modulo"},
+                    {"?$filter=1 eq (3 add Category/Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory/PremiumLevel)", "Add"},
+                    {"?$filter=1 eq (3 sub Category/Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory/PremiumLevel)", "Subtract"},
+                    {"?$filter=1 eq (1 mul Category/Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory/PremiumLevel)", "Multiply"},
+                    {"?$filter=1 eq (Category/Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory/PremiumLevel div 1)", "Divide"},
+                    {"?$filter=1 eq (Category/Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory/PremiumLevel mod 1)", "Modulo"},
                 };
             }
         }
@@ -179,11 +179,11 @@ namespace Microsoft.Test.AspNet.OData
                     {"?$filter=Orders/all(o: o/Id eq 1)", "all"},
 
                     // Collection navigation property with casts
-                    {"?$filter=Orders/any(o: o/System.Web.OData.Test.DiscountedEnableQueryOrder/Discount eq 1)", "any"},
-                    {"?$filter=Orders/all(o: o/System.Web.OData.Test.DiscountedEnableQueryOrder/Discount eq 1)", "all"},
-                    {"?$filter=Orders/System.Web.OData.Test.DiscountedEnableQueryOrder/any()", "any"},
-                    {"?$filter=Orders/System.Web.OData.Test.DiscountedEnableQueryOrder/any(o: o/Discount eq 1)", "any"},
-                    {"?$filter=Orders/System.Web.OData.Test.DiscountedEnableQueryOrder/all(o: o/Discount eq 1)", "all"},
+                    {"?$filter=Orders/any(o: o/Microsoft.Test.AspNet.OData.DiscountedEnableQueryOrder/Discount eq 1)", "any"},
+                    {"?$filter=Orders/all(o: o/Microsoft.Test.AspNet.OData.DiscountedEnableQueryOrder/Discount eq 1)", "all"},
+                    {"?$filter=Orders/Microsoft.Test.AspNet.OData.DiscountedEnableQueryOrder/any()", "any"},
+                    {"?$filter=Orders/Microsoft.Test.AspNet.OData.DiscountedEnableQueryOrder/any(o: o/Discount eq 1)", "any"},
+                    {"?$filter=Orders/Microsoft.Test.AspNet.OData.DiscountedEnableQueryOrder/all(o: o/Discount eq 1)", "all"},
                 };
 
             }
@@ -196,10 +196,10 @@ namespace Microsoft.Test.AspNet.OData
                 return new TheoryDataSet<string, string>
                 {
                     // Entity type casts
-                    {"?$filter=cast(Category,'System.Web.OData.Test.PremiumEnableQueryCategory') eq null", "cast"},
+                    {"?$filter=cast(Category,'Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory') eq null", "cast"},
                     {"?$filter=cast(Id, Edm.Double) eq 2", "cast"},
                     {"?$filter=cast(Id, 'Edm.Double') eq 2", "cast"},
-                    {"?$filter=cast('System.Web.OData.Test.PremiumEnableQueryCustomer') eq null", "cast"},
+                    {"?$filter=cast('Microsoft.Test.AspNet.OData.PremiumEnableQueryCustomer') eq null", "cast"},
                 };
             }
         }
@@ -211,8 +211,8 @@ namespace Microsoft.Test.AspNet.OData
                 return new TheoryDataSet<string, string>
                 {
                     // Entity type casts
-                    {"?$filter=isof(Category,'System.Web.OData.Test.PremiumEnableQueryCategory')", "isof"},
-                    {"?$filter=isof('System.Web.OData.Test.PremiumEnableQueryCustomer')", "isof"},
+                    {"?$filter=isof(Category,'Microsoft.Test.AspNet.OData.PremiumEnableQueryCategory')", "isof"},
+                    {"?$filter=isof('Microsoft.Test.AspNet.OData.PremiumEnableQueryCustomer')", "isof"},
                 };
             }
         }

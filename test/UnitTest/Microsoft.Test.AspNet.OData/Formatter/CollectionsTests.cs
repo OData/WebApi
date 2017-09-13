@@ -102,9 +102,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public void EntityCollectionProperty_Deserialize()
         {
             string message = "{ 'ID' : 44,  'Vehicles' : [ " +
-                "{ '@odata.type' : '#System.Web.OData.Builder.TestModels.Car', 'Model': 2009, 'Name': 'Car'}, " +
-                "{ '@odata.type' : '#System.Web.OData.Builder.TestModels.Motorcycle', 'Model': 2010, 'Name': 'Motorcycle'}, " +
-                "{ '@odata.type' : '#System.Web.OData.Builder.TestModels.SportBike', 'Model': 2012, 'Name': 'SportBike'} " +
+                "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.Car', 'Model': 2009, 'Name': 'Car'}, " +
+                "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle', 'Model': 2010, 'Name': 'Motorcycle'}, " +
+                "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.SportBike', 'Model': 2012, 'Name': 'SportBike'} " +
                 " ] }";
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
@@ -119,9 +119,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public void Posting_A_Feed_To_NonCollectionProperty_ODataLibThrows()
         {
             string message = "{ 'ID' : 44,  'Vehicle' : [ " +
-                "{ '@odata.type' : '#System.Web.OData.Builder.TestModels.Car', 'Model': 2009, 'Name': 'Car'}, " +
-                "{ '@odata.type' : '#System.Web.OData.Builder.TestModels.Motorcycle', 'Model': 2010, 'Name': 'Motorcycle'}, " +
-                "{ '@odata.type' : '#System.Web.OData.Builder.TestModels.SportBike', 'Model': 2012, 'Name': 'SportBike'} " +
+                "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.Car', 'Model': 2009, 'Name': 'Car'}, " +
+                "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle', 'Model': 2010, 'Name': 'Motorcycle'}, " +
+                "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.SportBike', 'Model': 2012, 'Name': 'SportBike'} " +
                 " ] }";
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");

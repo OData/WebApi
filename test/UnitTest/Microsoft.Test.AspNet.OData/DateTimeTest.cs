@@ -34,7 +34,7 @@ namespace Microsoft.Test.AspNet.OData
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
                 "<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">" +
                 "<edmx:DataServices>" +
-                "<Schema Namespace=\"System.Web.OData.Builder.TestModels\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                "<Schema Namespace=\"Microsoft.Test.AspNet.OData.Builder.TestModels\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                     "<EntityType Name=\"DateTimeModel\">" +
                         "<Key>" +
                             "<PropertyRef Name=\"Id\" />" +
@@ -48,12 +48,12 @@ namespace Microsoft.Test.AspNet.OData
                 "</Schema>" +
                 "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                     "<Function Name=\"CalcBirthday\" IsBound=\"true\">" +
-                        "<Parameter Name=\"bindingParameter\" Type=\"System.Web.OData.Builder.TestModels.DateTimeModel\" />" +
+                        "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.Test.AspNet.OData.Builder.TestModels.DateTimeModel\" />" +
                         "<Parameter Name=\"dto\" Type=\"Edm.DateTimeOffset\" Nullable=\"false\" />" +
                         "<ReturnType Type=\"Edm.DateTimeOffset\" Nullable=\"false\" />" +
                     "</Function>" +
                     "<EntityContainer Name=\"Container\">" +
-                        "<EntitySet Name=\"DateTimeModels\" EntityType=\"System.Web.OData.Builder.TestModels.DateTimeModel\" />" +
+                        "<EntitySet Name=\"DateTimeModels\" EntityType=\"Microsoft.Test.AspNet.OData.Builder.TestModels.DateTimeModel\" />" +
                     "</EntityContainer>" +
                 "</Schema>" +
                 "</edmx:DataServices>" +

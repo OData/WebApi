@@ -203,7 +203,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.Same(requiredColorProperty, requiredColorKey);
 
             Assert.Equal(EdmTypeKind.Enum, requiredColorKey.Type.TypeKind());
-            Assert.Equal("System.Web.OData.Builder.TestModels.Color", requiredColorKey.Type.Definition.FullTypeName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Color", requiredColorKey.Type.Definition.FullTypeName());
         }
 
         [Fact]
@@ -290,7 +290,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.ThrowsArgument(
                 () => builder.EnumType<ComplexTypeWithEnumTypePropertyTestModel>(),
                 "type",
-                "The type 'System.Web.OData.Builder.ComplexTypeWithEnumTypePropertyTestModel' cannot be configured as an enum type.");
+                "The type 'Microsoft.Test.AspNet.OData.Builder.ComplexTypeWithEnumTypePropertyTestModel' cannot be configured as an enum type.");
         }
 
         [Fact]
@@ -308,7 +308,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.ThrowsArgument(
                 () => entityTypeConfiguration.EnumProperty(e => e.ID),
                 "propertyInfo",
-                "The property 'ID' on type 'System.Web.OData.Builder.EntityTypeWithEnumTypePropertyTestModel' must be an Enum property.");
+                "The property 'ID' on type 'Microsoft.Test.AspNet.OData.Builder.EntityTypeWithEnumTypePropertyTestModel' must be an Enum property.");
         }
 
         [Fact]
@@ -340,7 +340,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
                     .DerivesFrom<BaseTypeWithEnumTypePropertyTestModel>()
                     .Property(d => d.Color),
                 "propertyInfo",
-                "Cannot redefine property 'Color' already defined on the base type 'System.Web.OData.Builder.BaseTypeWithEnumTypePropertyTestModel'.");
+                "Cannot redefine property 'Color' already defined on the base type 'Microsoft.Test.AspNet.OData.Builder.BaseTypeWithEnumTypePropertyTestModel'.");
         }
 
         [Fact]
@@ -357,7 +357,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
                 () => builder.EntityType<BaseTypeWithEnumTypePropertyTestModel>()
                     .Property(b => b.Color),
                 "propertyInfo",
-                "Cannot define property 'Color' in the base type 'System.Web.OData.Builder.BaseTypeWithEnumTypePropertyTestModel' as the derived type 'System.Web.OData.Builder.DerivedTypeWithEnumTypePropertyTestModel' already defines it.");
+                "Cannot define property 'Color' in the base type 'Microsoft.Test.AspNet.OData.Builder.BaseTypeWithEnumTypePropertyTestModel' as the derived type 'Microsoft.Test.AspNet.OData.Builder.DerivedTypeWithEnumTypePropertyTestModel' already defines it.");
         }
 
         [Fact]
@@ -481,7 +481,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.ThrowsArgument(
                 () => enumTypeConfiguration.AddMember(SimpleEnum.First),
                 "member",
-                "The property 'First' does not belong to the type 'System.Web.OData.Builder.TestModels.Color'.");
+                "The property 'First' does not belong to the type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Color'.");
         }
 
         [Fact]
@@ -510,7 +510,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.ThrowsArgument(
                 () => enumTypeConfiguration.RemoveMember(SimpleEnum.First),
                 "member",
-                "The property 'First' does not belong to the type 'System.Web.OData.Builder.TestModels.Color'.");
+                "The property 'First' does not belong to the type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Color'.");
         }
 
         [Fact]
@@ -579,7 +579,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.ThrowsArgument(
                 () => structuralTypeConfiguration.AddEnumProperty(propertyInfo),
                 "propertyInfo",
-                "The property 'RequiredColor' does not belong to the type 'System.Web.OData.Builder.ComplexTypeWithEnumTypePropertyTestModel'.");
+                "The property 'RequiredColor' does not belong to the type 'Microsoft.Test.AspNet.OData.Builder.ComplexTypeWithEnumTypePropertyTestModel'.");
         }
 
         [Fact]
@@ -596,7 +596,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.ThrowsArgument(
                 () => structuralTypeConfiguration.AddEnumProperty(propertyInfo),
                 "propertyInfo",
-                "The property 'ID' on type 'System.Web.OData.Builder.EntityTypeWithEnumTypePropertyTestModel' must be an Enum property.");
+                "The property 'ID' on type 'Microsoft.Test.AspNet.OData.Builder.EntityTypeWithEnumTypePropertyTestModel' must be an Enum property.");
         }
 
         [Fact]

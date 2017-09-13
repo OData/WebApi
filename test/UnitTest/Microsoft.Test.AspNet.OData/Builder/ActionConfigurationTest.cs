@@ -418,7 +418,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
                 "Found more than one action with name 'ActionOnCustomer' " +
-                "bound to the same type 'System.Web.OData.Builder.TestModels.Customer'. " +
+                "bound to the same type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Customer'. " +
                 "Each bound action must have a different binding type or name.");
         }
 
@@ -866,7 +866,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => action.Returns<Movie>(),
-                "The EDM type 'System.Web.OData.Builder.Movie' is already declared as an entity type. Use the " +
+                "The EDM type 'Microsoft.Test.AspNet.OData.Builder.Movie' is already declared as an entity type. Use the " +
                 "method 'ReturnsFromEntitySet' if the return type is an entity.");
         }
 
@@ -880,7 +880,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => action.ReturnsCollection<Movie>(),
-                "The EDM type 'System.Web.OData.Builder.Movie' is already declared as an entity type. Use the " +
+                "The EDM type 'Microsoft.Test.AspNet.OData.Builder.Movie' is already declared as an entity type. Use the " +
                 "method 'ReturnsCollectionFromEntitySet' if the return type is an entity collection.");
         }
 

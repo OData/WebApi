@@ -117,7 +117,7 @@ namespace Microsoft.Test.AspNet.OData
             var contentId = Guid.NewGuid().ToString();
 
             // Act
-            ContentIdHelpers.AddLocationHeaderToMapping(response, contentIdToLocationMapping, contentId);
+            ContentIdHelpers.AddLocationHeaderToMapping(response.Headers.Location, contentIdToLocationMapping, contentId);
 
             // Assert
             Assert.True(contentIdToLocationMapping.ContainsKey(contentId));
@@ -133,7 +133,7 @@ namespace Microsoft.Test.AspNet.OData
             var contentId = Guid.NewGuid().ToString();
 
             // Act
-            ContentIdHelpers.AddLocationHeaderToMapping(response, contentIdToLocationMapping, contentId);
+            ContentIdHelpers.AddLocationHeaderToMapping(response.Headers.Location, contentIdToLocationMapping, contentId);
 
             // Assert
             Assert.False(contentIdToLocationMapping.ContainsKey(contentId));

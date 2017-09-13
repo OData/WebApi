@@ -60,7 +60,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             MethodCallExpression methodCall = queryable.Expression as MethodCallExpression;
             Assert.NotNull(methodCall);
             Assert.Equal(2, methodCall.Arguments.Count);
-            Assert.Equal(@"Param_0 => (Param_0.FirstName == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty)",
+            Assert.Equal(@"Param_0 => (Param_0.FirstName == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty)",
                 methodCall.Arguments[1].ToString());
         }
 
@@ -85,7 +85,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Assert.NotNull(methodCall);
             Assert.Equal(2, methodCall.Arguments.Count);
             Assert.Equal(
-                @"Param_0 => Not((Param_0.LastName == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty))",
+                @"Param_0 => Not((Param_0.LastName == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty))",
                 methodCall.Arguments[1].ToString());
         }
 
@@ -111,8 +111,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Assert.NotNull(methodCall);
             Assert.Equal(2, methodCall.Arguments.Count);
             Assert.Equal(
-                @"Param_0 => Not(((Param_0.FirstName == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty) "
-                + "AndAlso (Param_0.LastName == value(System.Web.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty)))",
+                @"Param_0 => Not(((Param_0.FirstName == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty) "
+                + "AndAlso (Param_0.LastName == value(Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.String]).TypedProperty)))",
                 methodCall.Arguments[1].ToString());
         }
 
@@ -126,7 +126,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Act & Assert
             Assert.Throws<ArgumentException>(
                 () => etagCustomer.ApplyTo(query),
-                "Cannot apply ETag of 'System.Web.OData.Formatter.Serialization.Models.Customer' to IQueryable of " +
+                "Cannot apply ETag of 'Microsoft.Test.AspNet.OData.Formatter.Serialization.Models.Customer' to IQueryable of " +
                 "'System.Int32'.\r\nParameter name: query");
         }
     }

@@ -255,7 +255,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = ODataLevelsTest.GetEdmModel();
             var context = new ODataQueryContext(
                 model,
-                model.FindDeclaredType("System.Web.OData.Routing.LevelsEntity"));
+                model.FindDeclaredType("Microsoft.Test.AspNet.OData.Routing.LevelsEntity"));
             context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: null,
@@ -311,7 +311,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = ODataLevelsTest.GetEdmModel();
             var context = new ODataQueryContext(
                 model,
-                model.FindDeclaredType("System.Web.OData.Routing.LevelsEntity"));
+                model.FindDeclaredType("Microsoft.Test.AspNet.OData.Routing.LevelsEntity"));
             context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: "Name",
@@ -378,7 +378,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = ODataLevelsTest.GetEdmModel();
             var context = new ODataQueryContext(
                 model,
-                model.FindDeclaredType("System.Web.OData.Routing.LevelsEntity"));
+                model.FindDeclaredType("Microsoft.Test.AspNet.OData.Routing.LevelsEntity"));
             context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: null,
@@ -487,7 +487,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = ODataLevelsTest.GetEdmModel();
             var context = new ODataQueryContext(
                 model,
-                model.FindDeclaredType("System.Web.OData.Routing.LevelsEntity"));
+                model.FindDeclaredType("Microsoft.Test.AspNet.OData.Routing.LevelsEntity"));
             context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: null,
@@ -573,7 +573,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = ODataLevelsTest.GetEdmModel();
             var context = new ODataQueryContext(
                 model,
-                model.FindDeclaredType("System.Web.OData.Routing.LevelsEntity"));
+                model.FindDeclaredType("Microsoft.Test.AspNet.OData.Routing.LevelsEntity"));
             context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: null,
@@ -632,7 +632,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = GetAutoExpandEdmModel();
             var context = new ODataQueryContext(
                 model,
-                model.FindDeclaredType("System.Web.OData.TestCommon.Models.AutoExpandCustomer"));
+                model.FindDeclaredType("Microsoft.Test.AspNet.OData.TestCommon.Models.AutoExpandCustomer"));
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.EnableHttpDependencyInjectionSupport();
             var queryOption = new ODataQueryOptions(context, request);

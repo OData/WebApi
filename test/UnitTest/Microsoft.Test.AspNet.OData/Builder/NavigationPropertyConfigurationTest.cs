@@ -379,7 +379,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             // Act & Assert
             Assert.Throws<InvalidOperationException>(
                 () => navigationProperty.HasConstraint(dependentPropertyInfo, principalPropertyInfo),
-                String.Format(SRResources.ReferentialConstraintPropertyTypeNotValid, "System.Web.OData.MockType"));
+                String.Format(SRResources.ReferentialConstraintPropertyTypeNotValid, "Microsoft.Test.AspNet.OData.TestCommon.MockType"));
         }
 
         class Principal

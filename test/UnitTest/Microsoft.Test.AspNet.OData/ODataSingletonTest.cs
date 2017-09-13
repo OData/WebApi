@@ -55,7 +55,7 @@ namespace Microsoft.Test.AspNet.OData
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("http://localhost/odata/$metadata#Oscorp", (string)result["@odata.context"]);
-            Assert.Equal("#System.Web.OData.Corporation", (string)result["@odata.type"]);
+            Assert.Equal("#Microsoft.Test.AspNet.OData.Corporation", (string)result["@odata.type"]);
             Assert.Equal("http://localhost/odata/Oscorp", (string)result["@odata.id"]);
             Assert.Equal("http://localhost/odata/Oscorp/SubSidiaries", (string)result["SubSidiaries@odata.navigationLink"]);
             VerifySingleton(result);

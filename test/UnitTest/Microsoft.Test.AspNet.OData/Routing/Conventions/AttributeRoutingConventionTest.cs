@@ -19,7 +19,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 {
     public class AttributeRoutingConventionTest
     {
-        private static readonly string RouteName = Microsoft.Test.OData.WebApi.AspNet.Formatter.HttpRouteCollectionExtensions.RouteName;
+        private static readonly string RouteName = Microsoft.Test.AspNet.OData.Formatter.HttpRouteCollectionExtensions.RouteName;
 
         [Fact]
         public void CtorTakingModelAndConfiguration_ThrowsArgumentNull_Configuration()

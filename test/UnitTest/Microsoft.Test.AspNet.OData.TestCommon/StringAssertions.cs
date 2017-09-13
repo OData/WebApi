@@ -19,7 +19,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
         /// <param name="ignoreCase">If set to <c>true</c>, ignores cases differences. The invariant culture is used.</param>
         /// <param name="ignoreLineEndingDifferences">If set to <c>true</c>, treats \r\n, \r, and \n as equivalent.</param>
         /// <param name="ignoreWhiteSpaceDifferences">If set to <c>true</c>, treats spaces and tabs (in any non-zero quantity) as equivalent.</param>
-        /// <exception cref="Microsoft.TestCommon.Assert.StringEqualException">Thrown when the strings are not equivalent.</exception>
+        /// <exception cref="Microsoft.Test.AspNet.OData.TestCommon.Assert.StringEqualException">Thrown when the strings are not equivalent.</exception>
         public static void Equal(string expected, string actual, bool ignoreCase = false, bool ignoreLineEndingDifferences = false, bool ignoreWhiteSpaceDifferences = false)
         {
             // Start out assuming the one of the values is null

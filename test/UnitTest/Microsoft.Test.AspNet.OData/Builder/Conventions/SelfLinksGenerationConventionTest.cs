@@ -77,7 +77,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.FullMetadata);
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Contoso')", selfLinks.IdLink.ToString());
-            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Contoso')/System.Web.OData.Builder.TestModels.Car", selfLinks.EditLink.ToString());
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Contoso')/Microsoft.Test.AspNet.OData.Builder.TestModels.Car", selfLinks.EditLink.ToString());
         }
 
         [Fact]
@@ -101,7 +101,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 
             // Assert
             Assert.Equal("http://localhost/MyVehicle", selfLinks.IdLink.ToString());
-            Assert.Equal("http://localhost/MyVehicle/System.Web.OData.Builder.TestModels.Car", selfLinks.EditLink.ToString());
+            Assert.Equal("http://localhost/MyVehicle/Microsoft.Test.AspNet.OData.Builder.TestModels.Car", selfLinks.EditLink.ToString());
         }
 
         [Fact]

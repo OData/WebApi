@@ -19,9 +19,9 @@ namespace Microsoft.Test.AspNet.OData
 
         [Theory]
         [InlineData("Drive", "Vehicles(Model=6,Name='6')/org.odata.Drive")]
-        [InlineData("Drive", "Vehicles(Model=6,Name='6')/System.Web.OData.Builder.TestModels.Car/org.odata.Drive")]
+        [InlineData("Drive", "Vehicles(Model=6,Name='6')/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/org.odata.Drive")]
         [InlineData("Drive", "MyVehicle/org.odata.Drive")]
-        [InlineData("Drive", "MyVehicle/System.Web.OData.Builder.TestModels.Car/org.odata.Drive")]
+        [InlineData("Drive", "MyVehicle/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/org.odata.Drive")]
         public void Can_Find_Action_QualifiedActionName(string actionName, string url)
         {
             // Arrange
@@ -40,9 +40,9 @@ namespace Microsoft.Test.AspNet.OData
 
         [Theory]
         [InlineData("Vehicles(Model=6,Name='6')/Drive")]
-        [InlineData("Vehicles(Model=6,Name='6')/System.Web.OData.Builder.TestModels.Car/Drive")]
+        [InlineData("Vehicles(Model=6,Name='6')/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Drive")]
         [InlineData("MyVehicle/Drive")]
-        [InlineData("MyVehicle/System.Web.OData.Builder.TestModels.Car/Drive")]
+        [InlineData("MyVehicle/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Drive")]
         public void ParseAsUnresolvedPathSegment_UnqualifiedBoundAction(string url)
         {
             // Arrange
@@ -55,8 +55,8 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [InlineData("Vehicles(Model=8,Name='8')/System.Web.OData.Builder.TestModels.Car/org.odata.Wash")]
-        [InlineData("MyVehicle/System.Web.OData.Builder.TestModels.Car/org.odata.Wash")]
+        [InlineData("Vehicles(Model=8,Name='8')/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/org.odata.Wash")]
+        [InlineData("MyVehicle/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/org.odata.Wash")]
         public void Can_find_action_overload_using_bindingparameter_type(string url)
         {
             // Arrange
@@ -74,8 +74,8 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [InlineData("Vehicles(Model=8,Name='8')/System.Web.OData.Builder.TestModels.Car/customize.NSAction")]
-        [InlineData("MyVehicle/System.Web.OData.Builder.TestModels.Car/customize.NSAction")]
+        [InlineData("Vehicles(Model=8,Name='8')/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/customize.NSAction")]
+        [InlineData("MyVehicle/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/customize.NSAction")]
         public void Can_Find_Customized_Namespace_Action(string url)
         {
             // Arrange
@@ -113,7 +113,7 @@ namespace Microsoft.Test.AspNet.OData
 
             // Act & Assert
             Assert.Throws<ODataException>(() =>
-                new DefaultODataPathHandler().Parse(model, _serviceRoot, "Vehicles/System.Web.OData.Builder.TestModels.Car(Model=8,Name='8')/org.odata.Park"),
+                new DefaultODataPathHandler().Parse(model, _serviceRoot, "Vehicles/Microsoft.Test.AspNet.OData.Builder.TestModels.Car(Model=8,Name='8')/org.odata.Park"),
                 "Multiple action overloads were found with the same binding parameter for 'org.odata.Park'.");
         }
 

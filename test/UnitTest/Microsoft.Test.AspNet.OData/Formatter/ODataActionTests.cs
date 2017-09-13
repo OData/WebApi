@@ -66,10 +66,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         private const string EntityPayload = @"{ 
-                ""Customer"": {""@odata.type"":""#System.Web.OData.Formatter.Customer"", ""ID"":101,""Name"":""Avatar"" } , 
+                ""Customer"": {""@odata.type"":""#Microsoft.Test.AspNet.OData.Formatter.Customer"", ""ID"":101,""Name"":""Avatar"" } , 
                 ""Customers"": [
-                    {""@odata.type"":""#System.Web.OData.Formatter.Customer"", ""ID"":901,""Name"":""John"" } , 
-                    {""@odata.type"":""#System.Web.OData.Formatter.SubCustomer"", ""ID"":902,""Name"":""Mike"", ""Price"": 9.9 } 
+                    {""@odata.type"":""#Microsoft.Test.AspNet.OData.Formatter.Customer"", ""ID"":901,""Name"":""John"" } , 
+                    {""@odata.type"":""#Microsoft.Test.AspNet.OData.Formatter.SubCustomer"", ""ID"":902,""Name"":""Mike"", ""Price"": 9.9 } 
                 ]
             }";
 
@@ -217,12 +217,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             var model = new EdmModel();
 
             // entity type customer
-            EdmEntityType customer = new EdmEntityType("System.Web.OData.Formatter", "Customer");
+            EdmEntityType customer = new EdmEntityType("Microsoft.Test.AspNet.OData.Formatter", "Customer");
             customer.AddKeys(customer.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
             customer.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
             model.AddElement(customer);
 
-            EdmEntityType subCustomer = new EdmEntityType("System.Web.OData.Formatter", "SubCustomer", customer);
+            EdmEntityType subCustomer = new EdmEntityType("Microsoft.Test.AspNet.OData.Formatter", "SubCustomer", customer);
             customer.AddKeys(subCustomer.AddStructuralProperty("Price", EdmPrimitiveTypeKind.Double));
             model.AddElement(subCustomer);
 
@@ -390,7 +390,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Assert.Equal(2, customers.Count());
             EdmEntityObject entity = customers.First() as EdmEntityObject;
             IEdmTypeReference typeReference = entity.GetEdmType();
-            Assert.Equal("System.Web.OData.Formatter.Customer", typeReference.FullName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Formatter.Customer", typeReference.FullName());
 
             customer = customers.First();
             Assert.NotNull(customer);
@@ -399,7 +399,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             entity = customers.Last() as EdmEntityObject;
             typeReference = entity.GetEdmType();
-            Assert.Equal("System.Web.OData.Formatter.SubCustomer", typeReference.FullName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Formatter.SubCustomer", typeReference.FullName());
             customer = customers.Last();
             Assert.NotNull(customer);
             Assert.Equal(902, customer.ID);

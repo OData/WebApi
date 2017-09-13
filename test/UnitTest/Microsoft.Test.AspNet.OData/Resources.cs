@@ -203,7 +203,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private static string GetPath(string fileName)
         {
-            const string projectDefaultNamespace = "System.Web.OData.Test";
+            const string projectDefaultNamespace = "Microsoft.Test.AspNet.OData";
             const string resourcesFolderName = "Resources";
             const string pathSeparator = ".";
             return projectDefaultNamespace + pathSeparator + resourcesFolderName + pathSeparator + fileName;

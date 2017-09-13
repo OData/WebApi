@@ -152,7 +152,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             var osCorp = container.FindSingleton("OsCorp");
             Assert.NotNull(osCorp);
-            Assert.Equal("System.Web.OData.Builder.TestModels.Company", osCorp.EntityType().FullName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Company", osCorp.EntityType().FullName());
 
             var companies = container.FindEntitySet("Companies");
             Assert.NotNull(companies);
@@ -385,8 +385,8 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.ThrowsArgument(
                 () => myVehicle.HasNavigationPropertyLink(navProperty, new NavigationLinkBuilder((ctxt, property) => new Uri("http://works/"), followsConventions: false)),
                 "navigationProperty",
-                "The declaring entity type 'System.Web.OData.Builder.TestModels.Car' of the given navigation property is not a part of the " +
-                "entity type 'System.Web.OData.Builder.TestModels.Vehicle' hierarchy of the entity set or singleton 'MyVehicle'.");
+                "The declaring entity type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Car' of the given navigation property is not a part of the " +
+                "entity type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Vehicle' hierarchy of the entity set or singleton 'MyVehicle'.");
         }
 
         [Fact]

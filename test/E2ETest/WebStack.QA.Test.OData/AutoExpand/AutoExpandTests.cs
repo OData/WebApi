@@ -1,10 +1,13 @@
-﻿using System.Linq;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
-using System.Web.OData.Extensions;
+using Microsoft.AspNet.OData.Extensions;
 using Newtonsoft.Json.Linq;
 using Nuwa;
 using WebStack.QA.Common.XUnit;

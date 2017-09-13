@@ -1,4 +1,7 @@
-﻿namespace WebStack.QA.Test.OData.OpenType
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+namespace WebStack.QA.Test.OData.OpenType
 {
     using System;
     using System.Collections.Generic;
@@ -11,11 +14,11 @@
     using System.Threading.Tasks;
     using System.Web.Http;
     using System.Web.Http.Dispatcher;
-    using System.Web.OData;
-    using System.Web.OData.Extensions;
-    using System.Web.OData.Routing;
-    using System.Web.OData.Routing.Conventions;
     using System.Xml;
+    using Microsoft.AspNet.OData;
+    using Microsoft.AspNet.OData.Extensions;
+    using Microsoft.AspNet.OData.Routing;
+    using Microsoft.AspNet.OData.Routing.Conventions;
     using Microsoft.OData.Client;
     using Microsoft.OData.Edm;
     using Microsoft.OData.Edm.Csdl;

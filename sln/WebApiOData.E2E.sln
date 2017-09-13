@@ -1,16 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "base", "base", "{C015197B-27D3-499F-9A31-63E9E7D58F58}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{DD61AE62-B084-4A8C-AE1E-615A62BA645D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebStack.QA.Test.OData", "..\test\E2ETest\WebStack.QA.Test.OData\WebStack.QA.Test.OData.csproj", "{5516EA5D-350A-447A-9399-61A22A9C4F4B}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318} = {D23E28F1-CCD0-43E0-8C0D-36731EC91318}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nuwa", "..\test\E2ETest\Nuwa\Nuwa.csproj", "{A0A7A1E8-AF58-4BC8-A547-91D1DB9680CC}"
 EndProject
@@ -24,14 +21,20 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebStack.QA.Share", "..\tes
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F4C937D2-3BD0-4F6B-B75F-A526A7FD978B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Web.OData", "..\src\System.Web.OData\System.Web.OData.csproj", "{D23E28F1-CCD0-43E0-8C0D-36731EC91318}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2EB8D1F9-C505-4FA8-8D1C-F167B5B1AB8E}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNet.OData", "..\src\Microsoft.AspNet.OData\Microsoft.AspNet.OData.csproj", "{A6F9775D-F7E2-424E-8363-79644A73038F}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Shared", "..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.shproj", "{B6B951B6-C3F0-4B8E-8955-E039145E7DEC}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{a6f9775d-f7e2-424e-8363-79644a73038f}*SharedItemsImports = 4
+		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{b6b951b6-c3f0-4b8e-8955-e039145e7dec}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CodeAnalysis|Any CPU = CodeAnalysis|Any CPU
 		CodeAnalysis|Mixed Platforms = CodeAnalysis|Mixed Platforms
@@ -167,26 +170,30 @@ Global
 		{1D7E43C6-399C-4D06-9F5B-00241324B4D1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{1D7E43C6-399C-4D06-9F5B-00241324B4D1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{1D7E43C6-399C-4D06-9F5B-00241324B4D1}.Release|x86.ActiveCfg = Release|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.CodeAnalysis|Mixed Platforms.ActiveCfg = CodeAnalysis|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.CodeAnalysis|Mixed Platforms.Build.0 = CodeAnalysis|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.CodeAnalysis|x86.ActiveCfg = CodeAnalysis|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.CodeCoverage|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.CodeCoverage|Any CPU.Build.0 = CodeAnalysis|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.CodeCoverage|Mixed Platforms.ActiveCfg = CodeAnalysis|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.CodeCoverage|Mixed Platforms.Build.0 = CodeAnalysis|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.CodeCoverage|x86.ActiveCfg = CodeAnalysis|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318}.Release|x86.ActiveCfg = Release|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeAnalysis|Mixed Platforms.ActiveCfg = CodeAnalysis|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeAnalysis|Mixed Platforms.Build.0 = CodeAnalysis|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeAnalysis|x86.ActiveCfg = CodeAnalysis|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeAnalysis|x86.Build.0 = CodeAnalysis|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeCoverage|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeCoverage|Any CPU.Build.0 = CodeAnalysis|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeCoverage|Mixed Platforms.ActiveCfg = CodeAnalysis|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeCoverage|Mixed Platforms.Build.0 = CodeAnalysis|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeCoverage|x86.ActiveCfg = CodeAnalysis|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeCoverage|x86.Build.0 = CodeAnalysis|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.Debug|x86.Build.0 = Debug|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.Release|x86.ActiveCfg = Release|Any CPU
+		{A6F9775D-F7E2-424E-8363-79644A73038F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -198,6 +205,7 @@ Global
 		{A71A9BE1-93A6-487E-98EB-9550C7401C12} = {C015197B-27D3-499F-9A31-63E9E7D58F58}
 		{FAC5C560-6EE4-441A-B7F4-8B21951C35E0} = {C015197B-27D3-499F-9A31-63E9E7D58F58}
 		{1D7E43C6-399C-4D06-9F5B-00241324B4D1} = {C015197B-27D3-499F-9A31-63E9E7D58F58}
-		{D23E28F1-CCD0-43E0-8C0D-36731EC91318} = {F4C937D2-3BD0-4F6B-B75F-A526A7FD978B}
+		{A6F9775D-F7E2-424E-8363-79644A73038F} = {F4C937D2-3BD0-4F6B-B75F-A526A7FD978B}
+		{B6B951B6-C3F0-4B8E-8955-E039145E7DEC} = {F4C937D2-3BD0-4F6B-B75F-A526A7FD978B}
 	EndGlobalSection
 EndGlobal

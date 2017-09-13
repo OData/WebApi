@@ -1,11 +1,11 @@
-﻿namespace WebStack.QA.Test.OData.OpenType.Typed.Client
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+namespace WebStack.QA.Test.OData.OpenType.Typed.Client
 {
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     public partial class Account
     {

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,8 +16,8 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Web.Http.Hosting;
-using System.Web.OData;
-using System.Web.OData.Extensions;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
 using WebStack.QA.Common.XUnit;
 using WebStack.QA.Instancing;
 using WebStack.QA.Test.OData.ModelBuilder;

@@ -1,6 +1,8 @@
-﻿using System;
-using System.Web.OData.Routing;
-using Microsoft.OData.Edm;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
+using Microsoft.AspNet.OData.Routing;
 
 namespace WebStack.QA.Test.OData.Swagger
 {

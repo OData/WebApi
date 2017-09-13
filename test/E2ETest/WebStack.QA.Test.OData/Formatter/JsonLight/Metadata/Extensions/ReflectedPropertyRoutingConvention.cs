@@ -3,11 +3,11 @@
 
 using System.Linq;
 using System.Web.Http.Controllers;
-using System.Web.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using WebStack.QA.Test.OData.Common;
-using ODataPath = System.Web.OData.Routing.ODataPath;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace WebStack.QA.Test.OData.Formatter.JsonLight.Metadata.Extensions
 {

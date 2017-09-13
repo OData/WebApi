@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System.Linq;
 using WebStack.QA.Test.OData.Common.Controllers;
 using WebStack.QA.Test.OData.Formatter.JsonLight.Metadata.Model;
 

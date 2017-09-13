@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
-using System.Web.OData.Extensions;
+using Microsoft.AspNet.OData.Extensions;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;

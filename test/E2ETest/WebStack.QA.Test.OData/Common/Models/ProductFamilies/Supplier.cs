@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace WebStack.QA.Test.OData.Common.Models.ProductFamilies
 {
     [Flags]
-    public enum Country
+    public enum CountryOrRegion
     {
         USA = 1,
         China = 2,
@@ -32,6 +32,6 @@ namespace WebStack.QA.Test.OData.Common.Models.ProductFamilies
 
         public virtual ICollection<ProductFamily> ProductFamilies { get; set; }
 
-        public Country Country { get; set; }
+        public CountryOrRegion CountryOrRegion { get; set; }
     }
 }

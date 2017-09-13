@@ -92,8 +92,8 @@ namespace WebStack.QA.Test.OData.Formatter.JsonLight
             }
         }
 
-        [Theory(Skip = "github Issue #324 random deadlock")]
-        [PropertyData("EntityTypes")]
+        // [Theory(Skip = "github Issue #324 random deadlock")]
+        // [PropertyData("EntityTypes")]
         public async Task TestRandomEntityTypesJsonLight(string acceptHeader, Type entityType, string entitySetName)
         {
             AcceptHeader = acceptHeader;

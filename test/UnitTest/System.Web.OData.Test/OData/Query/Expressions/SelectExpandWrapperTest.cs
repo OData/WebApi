@@ -38,29 +38,6 @@ namespace System.Web.OData.Query.Expressions
         }
 
         [Fact]
-        public void GetEdmType_Returns_TypeFromTypeNameIfNotNull()
-        {
-            SelectExpandWrapper<int> wrapper = new SelectExpandWrapper<int> { TypeName = _model.Customer.FullName(), ModelID = _modelID };
-
-            IEdmTypeReference result = wrapper.GetEdmType();
-
-            Assert.Same(_model.Customer, result.Definition);
-        }
-
-        [Fact]
-        public void GetEdmType_ThrowsODataException_IfTypeFromTypeNameIsNotFoundInModel()
-        {
-            // Arrange
-            _modelID = ModelContainer.GetModelID(EdmCoreModel.Instance);
-            SelectExpandWrapper<int> wrapper = new SelectExpandWrapper<int> { TypeName = _model.Customer.FullName(), ModelID = _modelID };
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(
-                () => wrapper.GetEdmType(),
-                "Cannot find the resource type 'NS.Customer' in the model.");
-        }
-
-        [Fact]
         public void GetEdmType_Returns_InstanceType()
         {
             _model.Model.SetAnnotationValue(_model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
@@ -116,6 +93,7 @@ namespace System.Web.OData.Query.Expressions
                     Container = container
                 };
             wrapper.Instance = new TestEntity { SampleProperty = expectedPropertyValue };
+            wrapper.UseInstanceForProperties = true;
 
             object value;
             bool result = wrapper.TryGetPropertyValue("SampleProperty", out value);
@@ -130,6 +108,7 @@ namespace System.Web.OData.Query.Expressions
             object expectedPropertyValue = new object();
             SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity> { ModelID = _modelID };
             wrapper.Instance = new TestEntity { SampleProperty = expectedPropertyValue };
+            wrapper.UseInstanceForProperties = true;
 
             object value;
             bool result = wrapper.TryGetPropertyValue("SampleProperty", out value);
@@ -149,6 +128,7 @@ namespace System.Web.OData.Query.Expressions
             object expectedPropertyValue = new object();
             SelectExpandWrapper<TestEntityWithAlias> wrapper = new SelectExpandWrapper<TestEntityWithAlias> { ModelID = _modelID };
             wrapper.Instance = new TestEntityWithAlias { SampleProperty = expectedPropertyValue };
+            wrapper.UseInstanceForProperties = true;
 
             // Act
             object value;
@@ -194,7 +174,8 @@ namespace System.Web.OData.Query.Expressions
             SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>
             {
                 Instance = new TestEntity { SampleProperty = 42 },
-                ModelID = ModelContainer.GetModelID(model)
+                ModelID = ModelContainer.GetModelID(model),
+                UseInstanceForProperties = true,
             };
 
             // Act
@@ -282,7 +263,8 @@ namespace System.Web.OData.Query.Expressions
             SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>
             {
                 Instance = new TestEntity { SampleProperty = 42 },
-                ModelID = ModelContainer.GetModelID(model)
+                ModelID = ModelContainer.GetModelID(model),
+                UseInstanceForProperties = true,
             };
 
             Mock<IPropertyMapper> mapperMock = new Mock<IPropertyMapper>();
@@ -311,7 +293,8 @@ namespace System.Web.OData.Query.Expressions
             SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>
             {
                 Instance = new TestEntity { SampleProperty = 42 },
-                ModelID = ModelContainer.GetModelID(model)
+                ModelID = ModelContainer.GetModelID(model),
+                UseInstanceForProperties = true,
             };
             
             Mock<IPropertyMapper> mapperMock = new Mock<IPropertyMapper>();

@@ -93,8 +93,8 @@
                 var gender = (string)results[2]["AccountInfo"]["Gender"];
                 Assert.Equal("Female", gender);
 
-                var country = results[1]["Address"]["Country"].ToString();
-                Assert.Equal("China", country);
+                var countryOrRegion = results[1]["Address"]["CountryOrRegion"].ToString();
+                Assert.Equal("China", countryOrRegion);
 
                 var tag1 = results[0]["Tags"]["Tag1"];
                 Assert.Equal("Value 1", tag1);
@@ -126,8 +126,8 @@
                 var gender = (string)result["AccountInfo"]["Gender"];
                 Assert.Equal("Male", gender);
 
-                var country = result["Address"]["Country"].ToString();
-                Assert.Equal("US", country);
+                var countryOrRegion = result["Address"]["CountryOrRegion"].ToString();
+                Assert.Equal("US", countryOrRegion);
 
                 var tag1 = result["Tags"]["Tag1"];
                 Assert.Equal("Value 1", tag1);
@@ -200,8 +200,8 @@
             var city = json.GetValue("City").ToString();
             Assert.Equal("Redmond", city);
 
-            var country = json.GetValue("Country").ToString();
-            Assert.Equal("US", country);
+            var countryOrRegion = json.GetValue("CountryOrRegion").ToString();
+            Assert.Equal("US", countryOrRegion);
 
             // Property defined in the derived type.
             var countryCode = json.GetValue("CountryCode").ToString();
@@ -226,8 +226,8 @@
             var city = json.GetValue("City").ToString();
             Assert.Equal("Redmond", city);
 
-            var country = json.GetValue("Country").ToString();
-            Assert.Equal("US", country);
+            var countryOrRegion = json.GetValue("CountryOrRegion").ToString();
+            Assert.Equal("US", countryOrRegion);
         }
 
         [Theory]
@@ -294,7 +294,7 @@
                  @"{
                     '@odata.type':'#WebStack.QA.Test.OData.OpenType.Account',
                     'AccountInfo':{'NickName':'NewNickName1','Age':40,'Gender': 'Male'},
-                    'Address':{'Country':'United States'},
+                    'Address':{'CountryOrRegion':'United States'},
                     'Tags':{'Tag1':'New Value'},
                     'ShipAddresses@odata.type':'#Collection(WebStack.QA.Test.OData.OpenType.Address)',
                     'ShipAddresses':[],
@@ -316,7 +316,7 @@
                     Assert.Equal("Male", (string)accountInfo["Gender"]);
 
                     var address = content["Address"];
-                    Assert.Equal("United States", address["Country"]);
+                    Assert.Equal("United States", address["CountryOrRegion"]);
 
                     var tags = content["Tags"];
                     Assert.Equal("New Value", tags["Tag1"]);
@@ -338,7 +338,7 @@
                 Assert.Equal("Male", updatedAccountinfo["Gender"]);
 
                 var updatedAddress = result["Address"];
-                Assert.Equal("United States", updatedAddress["Country"]);
+                Assert.Equal("United States", updatedAddress["CountryOrRegion"]);
 
                 var updatedTags = result["Tags"];
                 Assert.Equal("New Value", updatedTags["Tag1"]);
@@ -358,7 +358,7 @@
                 var putUri = string.Format(this.BaseAddress + "/{0}/Accounts(1)?$format={1}", routing, format);
                 var putContent = JObject.Parse(@"{'Id':1,'Name':'NewName1',
                 'AccountInfo':{'NickName':'NewNickName1','Age':11,'Gender@odata.type':'#WebStack.QA.Test.OData.OpenType.Gender','Gender':'Male'},
-                'Address':{'City':'Redmond','Street':'1 Microsoft Way','Country':'United States'},
+                'Address':{'City':'Redmond','Street':'1 Microsoft Way','CountryOrRegion':'United States'},
                 'Tags':{'Tag1':'New Value'}}");
 
                 using (HttpResponseMessage putResponse = await Client.PutAsJsonAsync(putUri, putContent))
@@ -374,7 +374,7 @@
                     Assert.Equal("Male", accountInfo["Gender"]);
 
                     var address = content["Address"];
-                    Assert.Equal("United States", address["Country"]);
+                    Assert.Equal("United States", address["CountryOrRegion"]);
 
                     var tags = content["Tags"];
                     Assert.Equal("New Value", tags["Tag1"]);
@@ -392,7 +392,7 @@
                 Assert.Equal(11, updatedAccountinfo["Age"]);
 
                 var updatedAddress = result["Address"];
-                Assert.Equal("United States", updatedAddress["Country"]);
+                Assert.Equal("United States", updatedAddress["CountryOrRegion"]);
 
                 var updatedTags = result["Tags"];
                 Assert.Equal("New Value", updatedTags["Tag1"]);
@@ -416,7 +416,7 @@
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("US", content["CountryCode"]);
-                Assert.Equal("US", content["Country"]); // dynamic property
+                Assert.Equal("US", content["CountryOrRegion"]); // dynamic property
 
                 // Patch ~/Accounts(1)/Address
                 request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
@@ -441,7 +441,7 @@
                 Assert.Equal("NewCity", content["City"]); // updated
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("US", content["CountryCode"]);
-                Assert.Equal("US", content["Country"]);
+                Assert.Equal("US", content["CountryOrRegion"]);
                 Assert.Equal("2016-02-01", content["OtherProperty"]);
             }
         }
@@ -463,7 +463,7 @@
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("US", content["CountryCode"]);
-                Assert.Equal("US", content["Country"]);
+                Assert.Equal("US", content["CountryOrRegion"]);
 
                 // Patch ~/Accounts(1)/Address/WebStack.QA.Test.OData.OpenType.GlobalAddress
                 request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
@@ -471,7 +471,7 @@
                     @"{
                         '@odata.type':'#WebStack.QA.Test.OData.OpenType.GlobalAddress',
                         'CountryCode':'NewCountryCode',
-                        'Country':'NewCountry'
+                        'CountryOrRegion':'NewCountry'
                   }");
                 request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
@@ -487,7 +487,7 @@
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("NewCountryCode", content["CountryCode"]); // updated
-                Assert.Equal("NewCountry", content["Country"]);  // updated
+                Assert.Equal("NewCountry", content["CountryOrRegion"]);  // updated
             }
         }
 
@@ -508,7 +508,7 @@
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("US", content["CountryCode"]);
-                Assert.Equal("US", content["Country"]); // dynamic property
+                Assert.Equal("US", content["CountryOrRegion"]); // dynamic property
 
                 // Put ~/Accounts(1)/Address
                 request = new HttpRequestMessage(HttpMethod.Put, requestUri);
@@ -534,7 +534,7 @@
                 Assert.Equal("NewCity", content["City"]); // updated
                 Assert.Equal("NewStreet", content["Street"]); // updated
                 Assert.Equal("US", content["CountryCode"]);
-                Assert.Null(content["Country"]);
+                Assert.Null(content["CountryOrRegion"]);
                 Assert.Equal("2016-02-01", content["OtherProperty"]);
             }
         }
@@ -563,7 +563,7 @@
     'Address':
     {
         '@odata.type':'#WebStack.QA.Test.OData.OpenType.GlobalAddress',
-        'City':'London','Street':'Baker street','Country':'UnitedKindom','CountryCode':'Code'
+        'City':'London','Street':'Baker street','CountryOrRegion':'UnitedKindom','CountryCode':'Code'
     },
     'Tags':{'Tag1':'Value 1','Tag2':'Value 2'},
     'AnotherGender@odata.type':'#WebStack.QA.Test.OData.OpenType.Gender',
@@ -581,8 +581,8 @@
                     var gender = (string)json["AccountInfo"]["Gender"];
                     Assert.Equal("Male", gender);
 
-                    var country = json["Address"]["Country"];
-                    Assert.Equal("UnitedKindom", country);
+                    var countryOrRegion = json["Address"]["CountryOrRegion"];
+                    Assert.Equal("UnitedKindom", countryOrRegion);
 
                     var countryCode = json["Address"]["CountryCode"];
                     Assert.Equal("Code", countryCode);
@@ -649,7 +649,7 @@
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("US", content["CountryCode"]);
-                Assert.Equal("US", content["Country"]); // dynamic property
+                Assert.Equal("US", content["CountryOrRegion"]); // dynamic property
 
                 // Delete ~/Accounts(1)/Address
                 request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
@@ -686,8 +686,8 @@
                 var city = json.GetValue("City").ToString();
                 Assert.Equal("Redmond", city);
 
-                var country = json.GetValue("Country");
-                Assert.Equal("US", country);
+                var countryOrRegion = json.GetValue("CountryOrRegion");
+                Assert.Equal("US", countryOrRegion);
 
                 var countryCode = json.GetValue("CountryCode");
                 Assert.Equal("US", countryCode);
@@ -731,7 +731,7 @@
             await ResetDatasource();
 
             string uri = this.BaseAddress + "/AttributeRouting/UpdateAddressAction?$format=" + format;
-            var content = new { Address = new { Street = "Street 11", City = "City 11", Country = "Country 11" }, ID = 1 };
+            var content = new { Address = new { Street = "Street 11", City = "City 11", CountryOrRegion = "CountryOrRegion 11" }, ID = 1 };
 
             var response = await Client.PostAsJsonAsync(uri, content);
             Assert.True(response.IsSuccessStatusCode);
@@ -745,8 +745,8 @@
 
             var city = result["Address"]["City"].ToString();
             Assert.Equal("City 11", city);
-            var country = result["Address"]["Country"].ToString();
-            Assert.Equal("Country 11", country);
+            var country = result["Address"]["CountryOrRegion"].ToString();
+            Assert.Equal("CountryOrRegion 11", country);
         }
 
         #endregion
@@ -773,7 +773,7 @@
 
                 Assert.Equal(2, accountList.Count);
                 Assert.Equal(1, accountList[0].Id);
-                Assert.Equal("US", accountList[0].Address.Country);
+                Assert.Equal("US", accountList[0].Address.CountryOrRegion);
                 Assert.Equal(10, accountList[0].AccountInfo.Age);
 
                 Assert.Equal(TypedProxy.Gender.Male, accountList[0].AccountInfo.Gender);
@@ -824,7 +824,7 @@
                 var account = client.Accounts.Where(a => a.Id == 1).Single();
 
                 Assert.Equal(1, account.Id);
-                Assert.Equal("US", account.Address.Country);
+                Assert.Equal("US", account.Address.CountryOrRegion);
                 Assert.Equal(10, account.AccountInfo.Age);
 
                 Assert.Equal(WebStack.QA.Test.OData.OpenType.Typed.Client.Gender.Male, account.AccountInfo.Gender);
@@ -853,7 +853,7 @@
                 var premiumAcconts = client.Accounts.OfType<TypedProxy.PremiumAccount>().ToList();
                 var premiumAccount = premiumAcconts.Single(pa => pa.Id == 1);
                 Assert.Equal(1, premiumAccount.Id);
-                Assert.Equal("US", premiumAccount.Address.Country);
+                Assert.Equal("US", premiumAccount.Address.CountryOrRegion);
                 Assert.Equal(10, premiumAccount.AccountInfo.Age);
 
                 Assert.Equal(WebStack.QA.Test.OData.OpenType.Typed.Client.Gender.Male, premiumAccount.AccountInfo.Gender);
@@ -896,7 +896,7 @@
             var address = client.Accounts.Where(a => a.Id == 1).Select(a => a.Address).Single();
 
             Assert.Equal("Redmond", address.City);
-            Assert.Equal("US", address.Country);
+            Assert.Equal("US", address.CountryOrRegion);
         }
 
         [Fact]
@@ -952,7 +952,7 @@
 
                 account.AccountInfo.Subs = new Collection<string>() { "1", "2", "3" };
 
-                account.Address.Country = "United States";
+                account.Address.CountryOrRegion = "United States";
                 account.Tags.Tag1 = "New Value";
                 account.OwnerAlias = "saxu";
                 // TODO: client bug, collection should be nullable for dynamic properties.
@@ -977,7 +977,7 @@
 
                 var updatedAddress = updatedAccount.Address;
                 Assert.NotNull(updatedAddress);
-                Assert.Equal("United States", updatedAddress.Country);
+                Assert.Equal("United States", updatedAddress.CountryOrRegion);
 
                 Assert.Equal("New Value", updatedAccount.Tags.Tag1);
 
@@ -1016,7 +1016,7 @@
 
                 account.AccountInfo.Subs = new Collection<string>() { "1", "2", "3" };
 
-                account.Address.Country = "United States";
+                account.Address.CountryOrRegion = "United States";
                 account.Tags.Tag1 = "New Value";
 
                 account.OwnerAlias = "saxu";
@@ -1042,7 +1042,7 @@
 
                 var updatedAddress = updatedAccount.Address;
                 Assert.NotNull(updatedAddress);
-                Assert.Equal("United States", updatedAddress.Country);
+                Assert.Equal("United States", updatedAddress.CountryOrRegion);
 
                 Assert.Equal("New Value", updatedAccount.Tags.Tag1);
 
@@ -1085,7 +1085,7 @@
                 {
                     City = "Paris",
                     Street = "1 Microsoft Way",
-                    Country = "France",
+                    CountryOrRegion = "France",
                 },
                 Tags = new TypedProxy.Tags
                 {
@@ -1105,7 +1105,7 @@
                         City="Nanjing",
                         Street="Zixing",
                     },
-                
+
                 },
                 OwnerGender = TypedProxy.Gender.Male,
                 Emails = new List<string>() { "a@a.com", "b@b.com" },
@@ -1154,7 +1154,7 @@
                 {
                     City = "Paris",
                     Street = "1 Microsoft Way",
-                    Country = "France",
+                    CountryOrRegion = "France",
                 },
                 Tags = new TypedProxy.Tags
                 {
@@ -1174,7 +1174,7 @@
                         City="Nanjing",
                         Street="Zixing",
                     },
-                
+
                 },
                 OwnerGender = TypedProxy.Gender.Male,
                 Emails = new List<string>() { "a@a.com", "b@b.com" },
@@ -1231,7 +1231,7 @@
 
         #region Function & Action
 
-        [Fact(Skip = "Potencially a client bug, and the owner is investigating it.")]
+        // [Fact(Skip = "Potencially a client bug, and the owner is investigating it.")]
         public async Task GetAddressFunctionClientTest()
         {
             foreach (string routing in Routings)
@@ -1247,7 +1247,7 @@
                 var address = client.Accounts.Where(a => a.Id == 1).Single().GetAddressFunction().GetValue();
 
                 Assert.Equal("Redmond", address.City);
-                Assert.Equal("US", address.Country);
+                Assert.Equal("US", address.CountryOrRegion);
             }
         }
 
@@ -1305,7 +1305,7 @@
 
                 TypedProxy.Address shipAddress = new TypedProxy.Address()
                 {
-                    City = "Hang zhou",
+                    City = "Hangzhou",
                     Street = "Anything",
                 };
                 int shipAddressCount = client.Accounts.Where(a => a.Id == 1).Single().AddShipAddress(shipAddress).GetValue();
@@ -1330,13 +1330,13 @@
             {
                 City = "New City",
                 Street = "New Street",
-                Country = "New Country"
+                CountryOrRegion = "New CountryOrRegion"
             };
             client.UpdateAddressAction(address, 1).GetValue();
 
             var account = client.Accounts.Where(a => a.Id == 1).Single();
             Assert.Equal("New City", account.Address.City);
-            Assert.Equal("New Country", account.Address.Country);
+            Assert.Equal("New CountryOrRegion", account.Address.CountryOrRegion);
         }
 
         #endregion
@@ -1536,7 +1536,7 @@
                 string.Format("Manager PhoneNumbers count is in-correct, expected: {0}, actual: {1}", expectedValueOfInt, actualValueOfInt));
         }
 
-        [Fact(Skip = "Used to generate csdl file")]
+        // [Fact(Skip = "Used to generate csdl file")]
         public void GetMetadata()
         {
             var directory = Directory.GetCurrentDirectory();

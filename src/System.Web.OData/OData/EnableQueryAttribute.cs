@@ -15,7 +15,6 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
 using System.Web.OData.Query;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
@@ -158,6 +157,23 @@ namespace System.Web.OData
             set
             {
                 _querySettings.PageSize = value;
+            }
+        }
+
+        /// <summary>
+        /// Honor $filter inside $expand of non-collection navigation property.
+        /// The expanded property is only populated when the filter evaluates to true.
+        /// This setting is false by default.
+        /// </summary>
+        public bool HandleReferenceNavigationPropertyExpandFilter
+        {
+            get
+            {
+                return _querySettings.HandleReferenceNavigationPropertyExpandFilter;
+            }
+            set
+            {
+                _querySettings.HandleReferenceNavigationPropertyExpandFilter = value;
             }
         }
 
@@ -575,8 +591,6 @@ namespace System.Web.OData
             }
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
-            Justification = "Response disposed after being sent.")]
         private object ExecuteQuery(object response, HttpRequestMessage request, HttpActionDescriptor actionDescriptor, ODataQueryContext queryContext)
         {
             if (queryContext == null)

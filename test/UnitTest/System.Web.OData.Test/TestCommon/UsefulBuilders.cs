@@ -117,9 +117,17 @@ namespace System.Web.OData
             return builder;
         }
 
-        public static ODataModelBuilder Add_Customer_EntityType_With_Address(this ODataModelBuilder builder)
+        public static ODataModelBuilder Add_Customer_EntityType_With_DynamicProperties(this ODataModelBuilder builder)
         {
             builder.Add_Customer_EntityType();
+            var customer = builder.EntityType<Customer>();
+            customer.HasDynamicProperties(c => c.DynamicProperties);
+            return builder;
+        }
+
+        public static ODataModelBuilder Add_Customer_EntityType_With_Address(this ODataModelBuilder builder)
+        {
+            builder.Add_Customer_EntityType_With_DynamicProperties();
             builder.Add_Address_ComplexType();
             var customer = builder.EntityType<Customer>();
             customer.ComplexProperty(c => c.Address);

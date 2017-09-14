@@ -4,6 +4,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -72,6 +73,8 @@ namespace System.Web.OData
         };
 
         private static MethodInfo _enumerableCountMethod = GenericMethodOf(_ => Enumerable.LongCount<int>(default(IEnumerable<int>)));
+
+        private static MethodInfo _safeConvertToDecimalMethod = typeof(ExpressionHelperMethods).GetMethod("SafeConvertToDecimal");
 
         public static MethodInfo QueryableOrderByGeneric
         {
@@ -246,6 +249,33 @@ namespace System.Web.OData
         public static MethodInfo EnumerableCountGeneric
         {
             get { return _enumerableCountMethod; }
+        }
+
+        public static MethodInfo ConvertToDecimal
+        {
+            get { return _safeConvertToDecimalMethod; }
+        }
+
+        public static decimal? SafeConvertToDecimal(object value)
+        {
+            if (value == null || value == DBNull.Value)
+            {
+                return null;
+            }
+
+            Type type = value.GetType();
+            type = Nullable.GetUnderlyingType(type) ?? type;
+            if (type == typeof(short) ||
+                type == typeof(int) ||
+                type == typeof(long) ||
+                type == typeof(decimal) ||
+                type == typeof(double) ||
+                type == typeof(float))
+            {
+                return (decimal?)Convert.ChangeType(value, typeof(decimal), CultureInfo.InvariantCulture);
+            }
+            
+            return null;
         }
 
         private static MethodInfo GenericMethodOf<TReturn>(Expression<Func<object, TReturn>> expression)

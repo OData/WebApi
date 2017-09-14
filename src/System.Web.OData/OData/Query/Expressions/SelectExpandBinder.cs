@@ -219,10 +219,10 @@ namespace System.Web.OData.Query.Expressions
 
                     nullablePropertyType = filterResult.Type;
                 }
-                else if(_settings.HandleReferenceNavigationPropertyExpandFilter)
+                else if (_settings.HandleReferenceNavigationPropertyExpandFilter)
                 {
                     LambdaExpression filterLambdaExpression = FilterBinder.Bind(null, filterClause, clrElementType, _context.RequestContainer) as LambdaExpression;
-                    if(filterLambdaExpression == null)
+                    if (filterLambdaExpression == null)
                     {
                         throw new ODataException(Error.Format(SRResources.ExpandFilterExpressionNotLambdaExpression,
                             property.Name, "LambdaExpression"));
@@ -282,7 +282,7 @@ namespace System.Web.OData.Query.Expressions
 
             protected override Expression VisitParameter(ParameterExpression node)
             {
-                if(node != _parameterExpression)
+                if (node != _parameterExpression)
                 {
                     throw new ODataException(Error.Format(SRResources.ReferenceNavigationPropertyExpandFilterVisitorUnexpectedParameter, node.Name));
                 }

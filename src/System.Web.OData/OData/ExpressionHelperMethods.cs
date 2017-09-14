@@ -263,7 +263,7 @@ namespace System.Web.OData
                 return null;
             }
 
-            var type = value.GetType();
+            Type type = value.GetType();
             type = Nullable.GetUnderlyingType(type) ?? type;
             if (type == typeof(short) ||
                 type == typeof(int) ||

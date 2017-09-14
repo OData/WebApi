@@ -504,11 +504,11 @@ namespace System.Web.OData.Query.Expressions
         /// Gets property for dynamic properties dictionary.
         /// </summary>
         /// <param name="openNode"></param>
-        /// <returns></returns>
+        /// <returns>Returns CLR property for dynamic properties container.</returns>
         protected PropertyInfo GetDynamicPropertyContainer(SingleValueOpenPropertyAccessNode openNode)
         {
             IEdmStructuredType edmStructuredType;
-            var edmTypeReference = openNode.Source.TypeReference;
+            IEdmTypeReference edmTypeReference = openNode.Source.TypeReference;
             if (edmTypeReference.IsEntity())
             {
                 edmStructuredType = edmTypeReference.AsEntity().EntityDefinition();
@@ -521,8 +521,8 @@ namespace System.Web.OData.Query.Expressions
             {
                 throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, openNode.Kind, typeof(FilterBinder).Name);
             }
-            var prop = EdmLibHelpers.GetDynamicPropertyDictionary(edmStructuredType, Model);
-            return prop;
+
+            return EdmLibHelpers.GetDynamicPropertyDictionary(edmStructuredType, Model);
         }
 
         private static Expression CheckIfArgumentsAreNull(Expression[] arguments)

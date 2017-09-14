@@ -78,6 +78,16 @@ namespace System.Web.OData.Query.Expressions
             _groupByClrType = _groupByClrType ?? typeof(NoGroupByWrapper);
         }
 
+        private static Expression WrapDynamicCastIfNeeded(Expression propertyAccessor)
+        {
+            if (propertyAccessor.Type == typeof(object))
+            {
+                return Expression.Call(null, ExpressionHelperMethods.ConvertToDecimal, propertyAccessor);
+            }
+
+            return propertyAccessor;
+        }
+
         private IEnumerable<AggregateExpression> FixCustomMethodReturnTypes(IEnumerable<AggregateExpression> aggregateExpressions)
         {
             return aggregateExpressions.Select(FixCustomMethodReturnType);
@@ -414,7 +424,7 @@ namespace System.Web.OData.Query.Expressions
 
         private Expression CreateOpenPropertyAccessExpression(SingleValueOpenPropertyAccessNode openNode)
         {
-            var sourceAccessor = BindAccessor(openNode.Source);
+            Expression sourceAccessor = BindAccessor(openNode.Source);
 
             // First check that property exists in source
             // It's the case when we are apply transformation based on earlier transformation
@@ -425,12 +435,12 @@ namespace System.Web.OData.Query.Expressions
 
             // Property doesn't exists go for dynamic properties dictionary
             PropertyInfo prop = GetDynamicPropertyContainer(openNode);
-            var propertyAccessExpression = Expression.Property(sourceAccessor, prop.Name);
-            var readDictionaryIndexerExpression = Expression.Property(propertyAccessExpression,
+            MemberExpression propertyAccessExpression = Expression.Property(sourceAccessor, prop.Name);
+            IndexExpression readDictionaryIndexerExpression = Expression.Property(propertyAccessExpression,
                             DictionaryStringObjectIndexerName, Expression.Constant(openNode.Name));
-            var containsKeyExpression = Expression.Call(propertyAccessExpression,
+            MethodCallExpression containsKeyExpression = Expression.Call(propertyAccessExpression,
                 propertyAccessExpression.Type.GetMethod("ContainsKey"), Expression.Constant(openNode.Name));
-            var nullExpression = Expression.Constant(null);
+            ConstantExpression nullExpression = Expression.Constant(null);
 
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
@@ -508,16 +518,6 @@ namespace System.Web.OData.Query.Expressions
             }
 
             return properties;
-        }
-
-        private static Expression WrapDynamicCastIfNeeded(Expression propertyAccessor)
-        {
-            if (propertyAccessor.Type == typeof(object))
-            {
-                return Expression.Call(null, ExpressionHelperMethods.ConvertToDecimal, propertyAccessor);
-            }
-
-            return propertyAccessor;
         }
     }
 }

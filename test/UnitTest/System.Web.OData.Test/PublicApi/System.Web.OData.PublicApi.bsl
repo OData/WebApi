@@ -3228,6 +3228,7 @@ public abstract class System.Web.OData.Query.Expressions.ExpressionBinderBase {
 	protected ExpressionBinderBase (System.IServiceProvider requestContainer)
 
 	protected void EnsureFlattenedPropertyContainer (System.Linq.Expressions.ParameterExpression source)
+	protected System.Reflection.PropertyInfo GetDynamicPropertyContainer (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
 	protected System.Linq.Expressions.Expression GetFlattenedPropertyExpression (string propertyPath)
 }
 

@@ -124,7 +124,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 if (entrySerializer == null)
                 {
                     throw new SerializationException(
-                        Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                        Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName()));
                 }
 
                 foreach (object entry in enumerable)

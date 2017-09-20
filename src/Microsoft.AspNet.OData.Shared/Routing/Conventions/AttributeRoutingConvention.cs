@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// Represents a routing convention that looks for <see cref="ODataRouteAttribute"/>s to match an <see cref="ODataPath"/>
     /// to a controller and an action.
     /// </summary>
-    public partial class AttributeRoutingConvention : IODataRoutingConvention
+    public partial class AttributeRoutingConvention
     {
         /// <inheritdoc />
         internal static SelectControllerResult SelectControllerImpl(ODataPath odataPath, IWebApiRequestMessage request,

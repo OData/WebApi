@@ -212,7 +212,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 // if (serializer == null)
                 // {
                 //     throw new SerializationException(
-                //         Error.Format(SRResources.TypeCannotBeSerialized, edmProperty.Type.ToTraceString(), typeof(ODataResourceSerializer).Name));
+                //         Error.Format(SRResources.TypeCannotBeSerialized, edmProperty.Type.ToTraceString()));
                 // }
                 if (edmProperty.Type.IsCollection())
                 {
@@ -723,8 +723,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             if (serializer == null)
             {
                 throw new SerializationException(
-                    Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString(),
-                        typeof(ODataResourceSerializer).Name));
+                    Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString()));
             }
 
             serializer.WriteObjectInline(propertyValue, edmType, writer, nestedWriteContext);
@@ -794,7 +793,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 if (serializer == null)
                 {
                     throw new SerializationException(
-                        Error.Format(SRResources.TypeCannotBeSerialized, edmProperty.Type.ToTraceString(), typeof(ODataResourceSerializer).Name));
+                        Error.Format(SRResources.TypeCannotBeSerialized, edmProperty.Type.ToTraceString()));
                 }
 
                 serializer.WriteObjectInline(propertyValue, edmProperty.Type, writer, nestedWriteContext);
@@ -909,7 +908,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             if (serializer == null)
             {
                 throw new SerializationException(
-                    Error.Format(SRResources.TypeCannotBeSerialized, structuralProperty.Type.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                    Error.Format(SRResources.TypeCannotBeSerialized, structuralProperty.Type.FullName()));
             }
 
             object propertyValue = resourceContext.GetPropertyValue(structuralProperty.Name);

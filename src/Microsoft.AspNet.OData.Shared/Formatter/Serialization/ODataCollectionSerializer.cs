@@ -7,7 +7,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
@@ -87,14 +86,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if (writeContext.Request != null)
             {
-                if (writeContext.Request.ODataProperties().NextLink != null)
+                if (writeContext.InternalRequest.Context.NextLink != null)
                 {
-                    collectionStart.NextPageLink = writeContext.Request.ODataProperties().NextLink;
+                    collectionStart.NextPageLink = writeContext.InternalRequest.Context.NextLink;
                 }
 
-                if (writeContext.Request.ODataProperties().TotalCount != null)
+                if (writeContext.InternalRequest.Context.TotalCount != null)
                 {
-                    collectionStart.Count = writeContext.Request.ODataProperties().TotalCount;
+                    collectionStart.Count = writeContext.InternalRequest.Context.TotalCount;
                 }
             }
 

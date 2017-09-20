@@ -600,7 +600,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 serializer = serializerProvider.GetEdmTypeSerializer(edmType);
                 if (serializer == null)
                 {
-                    string message = Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString(), typeof(ODataMediaTypeFormatter).Name);
+                    string message = Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString());
                     throw new SerializationException(message);
                 }
             }
@@ -616,7 +616,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 serializer = serializerProvider.GetODataPayloadSerializer(type, Request);
                 if (serializer == null)
                 {
-                    string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name, typeof(ODataMediaTypeFormatter).Name);
+                    string message = Error.Format(SRResources.TypeCannotBeSerialized, type.Name);
                     throw new SerializationException(message);
                 }
             }

@@ -5,6 +5,7 @@ using System.Web.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
+using System.Reflection;
 
 namespace System.Web.OData
 {
@@ -78,7 +79,7 @@ namespace System.Web.OData
         /// <returns>The container built by this builder.</returns>
         public virtual IServiceProvider BuildContainer()
         {
-            return services.BuildServiceProvider();
+            return (IServiceProvider)services.GetType().GetTypeInfo().Assembly.GetType(typeof(ServiceCollectionContainerBuilderExtensions).GetTypeInfo().FullName).GetMethod(nameof(ServiceCollectionContainerBuilderExtensions.BuildServiceProvider), new[] { typeof(IServiceCollection) }).Invoke(null, new object[] { services });
         }
 
         private static Microsoft.Extensions.DependencyInjection.ServiceLifetime TranslateServiceLifetime(

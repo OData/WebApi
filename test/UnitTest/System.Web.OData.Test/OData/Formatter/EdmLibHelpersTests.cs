@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Data.Linq;
 using System.Linq;
 using System.Web.OData.Builder;
 using System.Web.OData.Formatter.Serialization.Models;
@@ -37,7 +36,6 @@ namespace System.Web.OData.Formatter
         [InlineData(typeof(uint?), typeof(long?))]
         [InlineData(typeof(ulong?), typeof(long?))]
         [InlineData(typeof(char[]), typeof(string))]
-        [InlineData(typeof(Binary), typeof(byte[]))]
         [InlineData(typeof(XElement), typeof(string))]
         [InlineData(typeof(DateTime), typeof(DateTimeOffset))]
         [InlineData(typeof(DateTime?), typeof(DateTimeOffset?))]

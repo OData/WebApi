@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Data.Linq;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -2720,7 +2719,6 @@ namespace System.Web.OData.Query.Expressions
         [InlineData("UIntProp eq 12", "$it => (Convert($it.UIntProp) == 12)")]
         [InlineData("CharProp eq 'a'", "$it => (Convert($it.CharProp.ToString()) == \"a\")")]
         [InlineData("CharArrayProp eq 'a'", "$it => (new String($it.CharArrayProp) == \"a\")")]
-        [InlineData("BinaryProp eq binary'TWFu'", "$it => ($it.BinaryProp.ToArray() == System.Byte[])")]
         [InlineData("XElementProp eq '<name />'", "$it => ($it.XElementProp.ToString() == \"<name />\")")]
         public void NonstandardEdmPrimtives(string filter, string expression)
         {
@@ -2734,15 +2732,12 @@ namespace System.Web.OData.Query.Expressions
                     UIntProp = 12,
                     CharProp = 'a',
                     CharArrayProp = new[] { 'a' },
-                    BinaryProp = new Binary(new byte[] { 77, 97, 110 }),
                     XElementProp = new XElement("name")
                 },
                 new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
 
         [Theory]
-        [InlineData("BinaryProp eq binary'I6v/'", "$it => ($it.BinaryProp.ToArray() == System.Byte[])", true, true)]
-        [InlineData("BinaryProp ne binary'I6v/'", "$it => ($it.BinaryProp.ToArray() != System.Byte[])", false, false)]
         [InlineData("ByteArrayProp eq binary'I6v/'", "$it => ($it.ByteArrayProp == System.Byte[])", true, true)]
         [InlineData("ByteArrayProp ne binary'I6v/'", "$it => ($it.ByteArrayProp != System.Byte[])", false, false)]
         [InlineData("binary'I6v/' eq binary'I6v/'", "$it => (System.Byte[] == System.Byte[])", true, true)]
@@ -2759,7 +2754,6 @@ namespace System.Web.OData.Query.Expressions
             RunFilters(filters,
                 new DataTypes
                 {
-                    BinaryProp = new Binary(new byte[] { 35, 171, 255 }),
                     ByteArrayProp = new byte[] { 35, 171, 255 }
                 },
                 new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });

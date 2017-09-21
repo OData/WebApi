@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Data.Linq;
 using System.IO;
 using System.Net.Http;
 using System.Web.Http;
@@ -32,7 +31,6 @@ namespace System.Web.OData.Formatter.Deserialization
                     { (UInt32)1, (long)1 },
                     { (UInt64)1, (long)1 },
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
-                    { new Binary(new byte[] {1}), new byte[] {1} }
                 };
             }
         }

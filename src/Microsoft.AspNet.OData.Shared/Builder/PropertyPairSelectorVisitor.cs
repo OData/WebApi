@@ -91,8 +91,8 @@ namespace Microsoft.AspNet.OData.Builder
                 if (leftType != rightType)
                 {
                     throw Error.InvalidOperation(SRResources.EqualExpressionsMustHaveSameTypes,
-                        left.ReflectedType.FullName, left.Name, left.PropertyType.FullName,
-                        right.ReflectedType.FullName, right.Name, right.PropertyType.FullName);
+                        TypeHelper.GetReflectedType(left).FullName, left.Name, left.PropertyType.FullName,
+                        TypeHelper.GetReflectedType(right).FullName, right.Name, right.PropertyType.FullName);
                 }
 
                 _properties.Add(left, right);
@@ -125,7 +125,7 @@ namespace Microsoft.AspNet.OData.Builder
             if (propertyInfo == null)
             {
                 throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties,
-                    memberNode.Member.ReflectedType.FullName, memberNode.Member.Name);
+                    TypeHelper.GetReflectedType(memberNode.Member).FullName, memberNode.Member.Name);
             }
 
             if (memberNode.Expression.NodeType != ExpressionType.Parameter)

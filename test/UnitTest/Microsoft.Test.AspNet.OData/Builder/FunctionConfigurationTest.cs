@@ -823,11 +823,11 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             IEdmOperationParameter parameter = function.FindParameter("p1");
             Assert.Equal(expect, parameter.Type.FullName());
-            Assert.Equal(paramType.IsNullable(), parameter.Type.IsNullable);
+            Assert.Equal(TypeHelper.IsNullable(paramType), parameter.Type.IsNullable);
 
             parameter = function.FindParameter("p2");
             Assert.Equal("Collection(" + expect + ")", parameter.Type.FullName());
-            Assert.Equal(paramType.IsNullable(), parameter.Type.IsNullable);
+            Assert.Equal(TypeHelper.IsNullable(paramType), parameter.Type.IsNullable);
         }
 
         [Theory]

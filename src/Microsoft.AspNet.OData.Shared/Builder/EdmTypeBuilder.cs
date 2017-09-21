@@ -301,7 +301,7 @@ namespace Microsoft.AspNet.OData.Builder
             IEdmTypeReference elementTypeReference = null;
             Type clrType = TypeHelper.GetUnderlyingTypeOrSelf(collectionProperty.ElementType);
 
-            if (clrType.IsEnum)
+            if (TypeHelper.IsEnum(clrType))
             {
                 IEdmType edmType = GetEdmType(clrType);
 
@@ -439,8 +439,8 @@ namespace Microsoft.AspNet.OData.Builder
                 }
                 else
                 {
-                    Contract.Assert(propInfo.ReflectedType != null);
-                    Type baseType = propInfo.ReflectedType.BaseType;
+                    Contract.Assert(TypeHelper.GetReflectedType(propInfo) != null);
+                    Type baseType = TypeHelper.GetBaseType(TypeHelper.GetReflectedType(propInfo));
                     while (baseType != null)
                     {
                         PropertyInfo basePropInfo = baseType.GetProperty(propInfo.Name);
@@ -450,7 +450,7 @@ namespace Microsoft.AspNet.OData.Builder
                             break;
                         }
 
-                        baseType = baseType.BaseType;
+                        baseType = TypeHelper.GetBaseType(baseType);
                     }
 
                     Contract.Assert(baseType != null);

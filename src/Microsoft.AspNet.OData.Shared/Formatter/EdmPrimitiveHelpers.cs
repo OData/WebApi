@@ -3,7 +3,9 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+#if !NETCORE
 using System.Data.Linq;
+#endif
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Xml.Linq;
@@ -54,10 +56,12 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 return str.ToCharArray();
             }
+#if !NETCORE
             else if (type == typeof(Binary))
             {
                 return new Binary((byte[])value);
             }
+#endif
             else if (type == typeof(XElement))
             {
                 if (str == null)
@@ -70,7 +74,7 @@ namespace Microsoft.AspNet.OData.Formatter
             else
             {
                 type = Nullable.GetUnderlyingType(type) ?? type;
-                if (type.IsEnum)
+                if (TypeHelper.IsEnum(type))
                 {
                     if (str == null)
                     {

@@ -115,7 +115,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 Type propertyType = GetPropertyType(resource, propertyName);
 
                 Type elementType;
-                if (!propertyType.IsCollection(out elementType))
+                if (!TypeHelper.IsCollection(propertyType, out elementType))
                 {
                     string message = Error.Format(SRResources.PropertyIsNotCollection, propertyType.FullName, propertyName, resourceType.FullName);
                     throw new SerializationException(message);

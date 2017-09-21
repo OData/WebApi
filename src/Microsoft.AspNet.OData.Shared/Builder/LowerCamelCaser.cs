@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
@@ -86,7 +85,7 @@ namespace Microsoft.AspNet.OData.Builder
                 }
                 else
                 {
-                    stringBuilder.Append(Char.ToLower(name[index], CultureInfo.InvariantCulture));
+                    stringBuilder.Append(Char.ToLowerInvariant(name[index]));
                 }
             }
 

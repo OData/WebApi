@@ -5,7 +5,6 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData.Edm;
@@ -239,9 +238,9 @@ namespace Microsoft.AspNet.OData
         // If the expression is not a nullable type, cast it to one.
         public static Expression ToNullable(Expression expression)
         {
-            if (!expression.Type.IsNullable())
+            if (!TypeHelper.IsNullable(expression.Type))
             {
-                return Expression.Convert(expression, expression.Type.ToNullable());
+                return Expression.Convert(expression, TypeHelper.ToNullable(expression.Type));
             }
 
             return expression;
@@ -250,7 +249,7 @@ namespace Microsoft.AspNet.OData
         // Entity Framework does not understand default(T) expression. Hence, generate a constant expression with the default value.
         public static Expression Default(Type type)
         {
-            if (type.IsValueType)
+            if (TypeHelper.IsValueType(type))
             {
                 return Expression.Constant(Activator.CreateInstance(type), type);
             }

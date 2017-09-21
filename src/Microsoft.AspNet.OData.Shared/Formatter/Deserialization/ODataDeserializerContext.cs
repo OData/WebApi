@@ -47,7 +47,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 if (!_isDeltaOfT.HasValue)
                 {
-                    _isDeltaOfT = ResourceType != null && ResourceType.IsGenericType && ResourceType.GetGenericTypeDefinition() == typeof(Delta<>);
+                    _isDeltaOfT = ResourceType != null && TypeHelper.IsGenericType(ResourceType) && ResourceType.GetGenericTypeDefinition() == typeof(Delta<>);
                 }
 
                 return _isDeltaOfT.Value;
@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 if (!_isUntyped.HasValue)
                 {
-                    _isUntyped = typeof(IEdmObject).IsAssignableFrom(ResourceType) ||
+                    _isUntyped = TypeHelper.IsTypeAssignableFrom(typeof(IEdmObject), ResourceType) ||
                         typeof(ODataUntypedActionParameters) == ResourceType;
                 }
 

@@ -145,7 +145,7 @@ namespace Microsoft.AspNet.OData
             }
 
             Type propertyType = cacheHit.Property.PropertyType;
-            if (value != null && !propertyType.IsCollection() && !propertyType.IsAssignableFrom(value.GetType()))
+            if (value != null && !TypeHelper.IsCollection(propertyType) && !propertyType.IsAssignableFrom(value.GetType()))
             {
                 return false;
             }
@@ -446,7 +446,7 @@ namespace Microsoft.AspNet.OData
                 _entityType,
                 (backingType) => backingType
                     .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                    .Where(p => (p.GetSetMethod() != null || p.PropertyType.IsCollection()) && p.GetGetMethod() != null)
+                    .Where(p => (p.GetSetMethod() != null || TypeHelper.IsCollection(p.PropertyType)) && p.GetGetMethod() != null)
                     .Select<PropertyInfo, PropertyAccessor<TStructuralType>>(p => new FastPropertyAccessor<TStructuralType>(p))
                     .ToDictionary(p => p.Property.Name));
 

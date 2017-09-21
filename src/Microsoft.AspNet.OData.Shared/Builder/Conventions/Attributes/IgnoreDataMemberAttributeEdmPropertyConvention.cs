@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Common;
 
@@ -42,7 +43,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
 
             if (!edmProperty.AddedExplicitly)
             {
-                bool isTypeDataContract = structuralTypeConfiguration.ClrType.GetCustomAttributes(typeof(DataContractAttribute), inherit: true).Any();
+                bool isTypeDataContract = TypeHelper.AsMemberInfo(structuralTypeConfiguration.ClrType).GetCustomAttributes(typeof(DataContractAttribute), inherit: true).Any();
                 bool isPropertyDataMember = edmProperty.PropertyInfo.GetCustomAttributes(typeof(DataMemberAttribute), inherit: true).Any();
 
                 if (isTypeDataContract && isPropertyDataMember)

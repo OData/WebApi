@@ -20,7 +20,7 @@ namespace Microsoft.AspNet.OData
             }
             Property = property;
             if (Property.GetGetMethod() == null ||
-                (!Property.PropertyType.IsCollection() && Property.GetSetMethod() == null))
+                (!TypeHelper.IsCollection(property.PropertyType) && Property.GetSetMethod() == null))
             {
                 throw Error.Argument("property", SRResources.PropertyMustHavePublicGetterAndSetter);
             }

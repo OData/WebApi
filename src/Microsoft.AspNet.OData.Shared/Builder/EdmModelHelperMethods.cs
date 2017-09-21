@@ -172,9 +172,9 @@ namespace Microsoft.AspNet.OData.Builder
         private static string ConvertBindingPath(EdmTypeMap edmMap, NavigationPropertyBindingConfiguration binding)
         {
             IList<string> bindings = new List<string>();
-            foreach (var bindingInfo in binding.Path)
+            foreach (MemberInfo bindingInfo in binding.Path)
             {
-                Type typeCast = bindingInfo as Type;
+                Type typeCast = TypeHelper.AsType(bindingInfo);
                 PropertyInfo propertyInfo = bindingInfo as PropertyInfo;
 
                 if (typeCast != null)
@@ -825,7 +825,7 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 Type configurationClrType = TypeHelper.GetUnderlyingTypeOrSelf(configuration.ClrType);
 
-                if (!configurationClrType.IsEnum)
+                if (!TypeHelper.IsEnum(configurationClrType))
                 {
                     configurationClrType = configuration.ClrType;
                 }

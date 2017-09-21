@@ -6,8 +6,10 @@ using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
 
+#if !NETCORE
 [assembly: AssemblyProduct("Microsoft OData Web API")]
 [assembly: AssemblyConfiguration("")]
+#endif
 [assembly: AssemblyTrademark("")]
 [assembly: ComVisible(false)]
 #if !NOT_CLS_COMPLIANT

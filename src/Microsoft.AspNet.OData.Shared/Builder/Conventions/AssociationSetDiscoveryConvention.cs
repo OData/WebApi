@@ -48,7 +48,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions
             if (targetEntityType == null)
             {
                 throw Error.InvalidOperation(SRResources.TargetEntityTypeMissing, navigationProperty.Name,
-                    navigationProperty.PropertyInfo.ReflectedType.FullName);
+                    TypeHelper.GetReflectedType(navigationProperty.PropertyInfo).FullName);
             }
 
             bool hasSingletonAttribute = navigationProperty.PropertyInfo.GetCustomAttributes<SingletonAttribute>().Any();

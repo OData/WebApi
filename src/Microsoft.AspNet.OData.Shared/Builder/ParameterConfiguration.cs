@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.OData.Builder
             TypeConfiguration = parameterType;
 
             Type elementType;
-            OptionalParameter = parameterType.ClrType.IsCollection(out elementType)
+            OptionalParameter = TypeHelper.IsCollection(parameterType.ClrType, out elementType)
                 ? EdmLibHelpers.IsNullable(elementType)
                 : EdmLibHelpers.IsNullable(parameterType.ClrType);
         }

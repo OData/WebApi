@@ -19,7 +19,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\TaskHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\TaskHelpersExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Error.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Common\TypeExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\CountAttributeEdmPropertyConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\CountAttributeEdmTypeConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\FilterAttributeEdmPropertyConvention.cs" />

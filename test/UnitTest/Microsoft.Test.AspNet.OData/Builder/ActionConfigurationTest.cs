@@ -754,11 +754,11 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             IEdmOperationParameter parameter = action.FindParameter("p1");
             Assert.Equal(expect, parameter.Type.FullName());
-            Assert.Equal(paramType.IsNullable(), parameter.Type.IsNullable);
+            Assert.Equal(TypeHelper.IsNullable(paramType), parameter.Type.IsNullable);
 
             parameter = action.FindParameter("p2");
             Assert.Equal("Collection(" + expect + ")", parameter.Type.FullName());
-            Assert.Equal(paramType.IsNullable(), parameter.Type.IsNullable);
+            Assert.Equal(TypeHelper.IsNullable(paramType), parameter.Type.IsNullable);
         }
 
         [Theory]

@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData
             : base(property)
         {
             _property = property;
-            _isCollection = property.PropertyType.IsCollection();
+            _isCollection = TypeHelper.IsCollection(property.PropertyType);
 
             if (!_isCollection)
             {

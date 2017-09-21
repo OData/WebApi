@@ -42,9 +42,9 @@ namespace Microsoft.AspNet.OData.Builder
             if (multiplicity == EdmMultiplicity.Many)
             {
                 Type elementType;
-                if (!_relatedType.IsCollection(out elementType))
+                if (!TypeHelper.IsCollection(_relatedType, out elementType))
                 {
-                    throw Error.Argument("property", SRResources.ManyToManyNavigationPropertyMustReturnCollection, property.Name, property.ReflectedType.Name);
+                    throw Error.Argument("property", SRResources.ManyToManyNavigationPropertyMustReturnCollection, property.Name, TypeHelper.GetReflectedType(property).Name);
                 }
 
                 _relatedType = elementType;

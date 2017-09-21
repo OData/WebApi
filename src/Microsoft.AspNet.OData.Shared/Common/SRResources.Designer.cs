@@ -40,11 +40,7 @@ namespace Microsoft.AspNet.OData.Common {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-#if NETFX_CORE
-                    Assembly assembly = typeof(SRResources).GetTypeInfo().Assembly;
-#else
-                    Assembly assembly = typeof(SRResources).Assembly;
-#endif
+                    Assembly assembly = TypeHelper.GetAssembly(typeof(CommonWebApiResources));
 
                     // Find the CommonResources.resources file's full resource name in this assembly
                     string srResourcesName = assembly.GetManifestResourceNames().Where(s => s.EndsWith("SRResources.resources", StringComparison.OrdinalIgnoreCase)).Single();

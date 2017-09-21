@@ -247,7 +247,7 @@ namespace Microsoft.AspNet.OData.Builder
             IList<MemberInfo> bindingPath = new List<MemberInfo> { navigationConfiguration.PropertyInfo };
             if (navigationConfiguration.DeclaringType != EntityType)
             {
-                bindingPath.Insert(0, navigationConfiguration.DeclaringType.ClrType);
+                bindingPath.Insert(0, TypeHelper.AsMemberInfo(navigationConfiguration.DeclaringType.ClrType));
             }
 
             return AddBinding(navigationConfiguration, targetNavigationSource, bindingPath);
@@ -540,16 +540,16 @@ namespace Microsoft.AspNet.OData.Builder
             Contract.Assert(current != null);
             Contract.Assert(info != null);
 
-            Type derivedType = info as Type;
+            TypeInfo derivedType = info as TypeInfo;
             if (derivedType != null)
             {
-                if (!(derivedType.IsAssignableFrom(current) || current.IsAssignableFrom(derivedType)))
+                if (!(derivedType.IsAssignableFrom(current) || current.IsAssignableFrom(derivedType.BaseType)))
                 {
                     throw Error.InvalidOperation(SRResources.NavigationPropertyBindingPathNotInHierarchy,
                         derivedType.FullName, info.Name, current.FullName);
                 }
 
-                return derivedType;
+                return derivedType.BaseType;
             }
 
             PropertyInfo propertyInfo = info as PropertyInfo;
@@ -567,7 +567,7 @@ namespace Microsoft.AspNet.OData.Builder
             }
 
             Type elementType;
-            if (propertyInfo.PropertyType.IsCollection(out elementType))
+            if (TypeHelper.IsCollection(propertyInfo.PropertyType, out elementType))
             {
                 return elementType;
             }

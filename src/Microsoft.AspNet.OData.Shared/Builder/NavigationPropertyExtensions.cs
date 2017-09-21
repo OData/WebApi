@@ -52,7 +52,7 @@ namespace Microsoft.AspNet.OData.Builder
                     continue;
                 }
 
-                path.Push(config.ClrType);
+                path.Push(TypeHelper.AsMemberInfo(config.ClrType));
 
                 builder.FindNavigationProperties(config, navigations, path);
 

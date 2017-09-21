@@ -2,7 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+#if !NETCORE
 using System.Data.Linq;
+#endif
 using System.Diagnostics.Contracts;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData.Common;
@@ -220,10 +222,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         {
                             return ((XElement)value).ToString();
                         }
+#if !NETCORE
                         else if (type == typeof(Binary))
                         {
                             return ((Binary)value).ToArray();
                         }
+#endif
                         break;
                 }
             }

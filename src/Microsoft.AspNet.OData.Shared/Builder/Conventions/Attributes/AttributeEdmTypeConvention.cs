@@ -49,7 +49,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
                 throw Error.ArgumentNull("edmTypeConfiguration");
             }
 
-            foreach (Attribute attribute in GetAttributes(edmTypeConfiguration.ClrType))
+            foreach (Attribute attribute in GetAttributes(TypeHelper.AsMemberInfo(edmTypeConfiguration.ClrType)))
             {
                 Apply(edmTypeConfiguration, model, attribute);
             }

@@ -94,7 +94,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 return null;
             }
 
-            if (type.IsNullable() && String.Equals(valueString, "null", StringComparison.Ordinal))
+            if (TypeHelper.IsNullable(type) && String.Equals(valueString, "null", StringComparison.Ordinal))
             {
                 return null;
             }
@@ -188,7 +188,7 @@ namespace Microsoft.AspNet.OData.Formatter
             Contract.Assert(collection != null);
 
             Type elementType;
-            if (!clrType.IsCollection(out elementType))
+            if (!TypeHelper.IsCollection(clrType, out elementType))
             {
                 // EdmEntityCollectionObject and EdmComplexCollectionObject are collection types.
                 throw new ODataException(String.Format(CultureInfo.InvariantCulture,

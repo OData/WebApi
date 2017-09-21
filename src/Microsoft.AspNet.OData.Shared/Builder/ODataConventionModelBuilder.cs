@@ -219,7 +219,7 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("type");
             }
 
-            if (!type.IsEnum)
+            if (!TypeHelper.IsEnum(type))
             {
                 throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
             }
@@ -303,7 +303,7 @@ namespace Microsoft.AspNet.OData.Builder
 
             foreach (EntityTypeConfiguration entity in StructuralTypes.OfType<EntityTypeConfiguration>().Where(e => !e.BaseTypeConfigured))
             {
-                Type baseClrType = entity.ClrType.BaseType;
+                Type baseClrType = TypeHelper.GetBaseType(entity.ClrType);
                 while (baseClrType != null)
                 {
                     // see if we there is an entity that we know mapping to this clr types base type.
@@ -331,7 +331,7 @@ namespace Microsoft.AspNet.OData.Builder
                         break;
                     }
 
-                    baseClrType = baseClrType.BaseType;
+                    baseClrType = TypeHelper.GetBaseType(baseClrType);
                 }
             }
 
@@ -340,7 +340,7 @@ namespace Microsoft.AspNet.OData.Builder
             foreach (ComplexTypeConfiguration complex in
                 StructuralTypes.OfType<ComplexTypeConfiguration>().Where(e => !e.BaseTypeConfigured))
             {
-                Type baseClrType = complex.ClrType.BaseType;
+                Type baseClrType = TypeHelper.GetBaseType(complex.ClrType);
                 while (baseClrType != null)
                 {
                     ComplexTypeConfiguration baseComplexType;
@@ -351,7 +351,7 @@ namespace Microsoft.AspNet.OData.Builder
                         break;
                     }
 
-                    baseClrType = baseClrType.BaseType;
+                    baseClrType = TypeHelper.GetBaseType(baseClrType);
                 }
             }
         }
@@ -653,12 +653,12 @@ namespace Microsoft.AspNet.OData.Builder
                     Contract.Assert(propertyKind != PropertyKind.Complex, "we don't create complex types in query composition mode.");
                 }
 
-                if (property.PropertyType.IsGenericType)
+                if (TypeHelper.IsGenericType(property.PropertyType))
                 {
                     Type elementType = property.PropertyType.GetGenericArguments().First();
                     Type elementUnderlyingTypeOrSelf = TypeHelper.GetUnderlyingTypeOrSelf(elementType);
 
-                    if (elementUnderlyingTypeOrSelf.IsEnum)
+                    if (TypeHelper.IsEnum(elementUnderlyingTypeOrSelf))
                     {
                         AddEnumType(elementUnderlyingTypeOrSelf);
                     }
@@ -666,10 +666,10 @@ namespace Microsoft.AspNet.OData.Builder
                 else
                 {
                     Type elementType;
-                    if (property.PropertyType.IsCollection(out elementType))
+                    if (TypeHelper.IsCollection(property.PropertyType, out elementType))
                     {
                         Type elementUnderlyingTypeOrSelf = TypeHelper.GetUnderlyingTypeOrSelf(elementType);
-                        if (elementUnderlyingTypeOrSelf.IsEnum)
+                        if (TypeHelper.IsEnum(elementUnderlyingTypeOrSelf))
                         {
                             AddEnumType(elementUnderlyingTypeOrSelf);
                         }
@@ -706,7 +706,7 @@ namespace Microsoft.AspNet.OData.Builder
             }
 
             Type elementType;
-            if (property.PropertyType.IsCollection(out elementType))
+            if (TypeHelper.IsCollection(property.PropertyType, out elementType))
             {
                 isCollection = true;
                 if (TryGetPropertyTypeKind(elementType, out mappedType, out propertyKind))
@@ -757,7 +757,7 @@ namespace Microsoft.AspNet.OData.Builder
 
             // If one of the base types is configured as complex type, the type of this property
             // should be configured as complex type too.
-            Type baseType = propertyType.BaseType;
+            Type baseType = TypeHelper.GetBaseType(propertyType);
             while (baseType != null && baseType != typeof(object))
             {
                 IEdmTypeConfiguration baseMappedType = GetStructuralTypeOrNull(baseType);
@@ -770,7 +770,7 @@ namespace Microsoft.AspNet.OData.Builder
                     }
                 }
 
-                baseType = baseType.BaseType;
+                baseType = TypeHelper.GetBaseType(baseType);
             }
 
             // refer the Edm type from the derived types
@@ -1066,13 +1066,13 @@ namespace Microsoft.AspNet.OData.Builder
 
         private static Dictionary<Type, List<Type>> BuildDerivedTypesMapping(IWebApiAssembliesResolver assemblyResolver)
         {
-            IEnumerable<Type> allTypes = TypeHelper.GetLoadedTypes(assemblyResolver).Where(t => t.IsVisible && t.IsClass && t != typeof(object));
+            IEnumerable<Type> allTypes = TypeHelper.GetLoadedTypes(assemblyResolver).Where(t => TypeHelper.IsVisible(t) && TypeHelper.IsClass(t) && t != typeof(object));
             Dictionary<Type, List<Type>> allTypeMapping = allTypes.ToDictionary(k => k, k => new List<Type>());
 
             foreach (Type type in allTypes)
             {
                 List<Type> derivedTypes;
-                if (type.BaseType != null && allTypeMapping.TryGetValue(type.BaseType, out derivedTypes))
+                if (TypeHelper.GetBaseType(type) != null && allTypeMapping.TryGetValue(TypeHelper.GetBaseType(type), out derivedTypes))
                 {
                     derivedTypes.Add(type);
                 }

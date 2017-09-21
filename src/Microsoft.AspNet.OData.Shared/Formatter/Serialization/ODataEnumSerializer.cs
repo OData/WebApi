@@ -77,7 +77,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             string value = null;
-            if (graph.GetType().IsEnum)
+            if (TypeHelper.IsEnum(graph.GetType()))
             {
                 value = graph.ToString();
             }

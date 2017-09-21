@@ -16,54 +16,317 @@ namespace Microsoft.AspNet.OData
 {
     internal static class TypeHelper
     {
-        public static Type ToNullable(this Type t)
+        /// <summary>
+        /// Return the memberInfo from a type.
+        /// </summary>
+        /// <param name="clrType">The type to convert.</param>
+        /// <returns>The memberInfo from a type.</returns>
+        public static MemberInfo AsMemberInfo(Type clrType)
         {
-            if (t.IsNullable())
+#if NETCORE1x
+            return clrType.GetTypeInfo() as MemberInfo;
+#else
+            return clrType as MemberInfo;
+#endif
+        }
+
+        /// <summary>
+        /// Return the type from a MemberInfo.
+        /// </summary>
+        /// <param name="memberInfo">The MemberInfo to convert.</param>
+        /// <returns>The type from a MemberInfo.</returns>
+        public static Type AsType(MemberInfo memberInfo)
+        {
+#if NETCORE1x
+            return memberInfo.DeclaringType;
+#else
+            return memberInfo as Type;
+#endif
+        }
+
+        /// <summary>
+        /// Return the assembly from a type.
+        /// </summary>
+        /// <param name="clrType">The type to convert.</param>
+        /// <returns>The assembly from a type.</returns>
+        public static Assembly GetAssembly(Type clrType)
+        {
+#if NETCORE1x
+            return clrType.GetTypeInfo().Assembly;
+#else
+            return clrType.Assembly;
+#endif
+        }
+
+        /// <summary>
+        /// Return the base type from a type.
+        /// </summary>
+        /// <param name="clrType">The type to convert.</param>
+        /// <returns>The base type from a type.</returns>
+        public static Type GetBaseType(Type clrType)
+        {
+#if NETCORE1x
+            return clrType.GetTypeInfo().BaseType;
+#else
+            return clrType.BaseType;
+#endif
+        }
+
+        /// <summary>
+        /// Return the qualified name from a member info.
+        /// </summary>
+        /// <param name="memberInfo">The member info to convert.</param>
+        /// <returns>The qualified name from a member info.</returns>
+        public static string GetQualifiedName(MemberInfo memberInfo)
+        {
+            Contract.Assert(memberInfo != null);
+#if NETCORE1x
+            TypeInfo type = memberInfo as TypeInfo;
+            return type != null ? (type.Namespace + "." + type.Name) : memberInfo.Name;
+#else
+            Type type = memberInfo as Type;
+            return type != null ? (type.Namespace + "." + type.Name) : memberInfo.Name;
+#endif
+        }
+
+        /// <summary>
+        /// Return the reflected type from a member info.
+        /// </summary>
+        /// <param name="memberInfo">The member info to convert.</param>
+        /// <returns>The reflected type from a member info.</returns>
+        public static Type GetReflectedType(MemberInfo memberInfo)
+        {
+#if NETCORE1x
+            return memberInfo.DeclaringType;
+#else
+            return memberInfo.ReflectedType;
+#endif
+        }
+
+        /// <summary>
+        /// Determine if a type is abstract.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is abstract; false otherwise.</returns>
+        public static bool IsAbstract(Type clrType)
+        {
+#if NETCORE1x
+            return clrType.GetTypeInfo().IsAbstract;
+#else
+            return clrType.IsAbstract;
+#endif
+        }
+
+        /// <summary>
+        /// Determine if a type is a class.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is a class; false otherwise.</returns>
+        public static bool IsClass(Type clrType)
+        {
+#if NETCORE1x
+            return clrType.GetTypeInfo().IsClass;
+#else
+            return clrType.IsClass;
+#endif
+        }
+
+        /// <summary>
+        /// Determine if a type is a generic type.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is a generic type; false otherwise.</returns>
+        public static bool IsGenericType(this Type clrType)
+        {
+#if NETCORE1x
+            return clrType.GetTypeInfo().IsGenericType;
+#else
+            return clrType.IsGenericType;
+#endif
+        }
+
+        /// <summary>
+        /// Determine if a type is a generic type definition.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is a generic type definition; false otherwise.</returns>
+        public static bool IsGenericTypeDefinition(this Type clrType)
+        {
+#if NETCORE1x
+            return clrType.GetTypeInfo().IsGenericTypeDefinition;
+#else
+            return clrType.IsGenericTypeDefinition;
+#endif
+        }
+
+        /// <summary>
+        /// Determine if a type is an interface.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is an interface; false otherwise.</returns>
+        public static bool IsInterface(Type clrType)
+        {
+#if NETCORE1x
+            return clrType.GetTypeInfo().IsInterface;
+#else
+            return clrType.IsInterface;
+#endif
+        }
+
+        /// <summary>
+        /// Determine if a type is null-able.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is null-able; false otherwise.</returns>
+        public static bool IsNullable(Type clrType)
+        {
+            if (TypeHelper.IsValueType(clrType))
             {
-                return t;
+                // value types are only nullable if they are Nullable<T>
+                return TypeHelper.IsGenericType(clrType) && clrType.GetGenericTypeDefinition() == typeof(Nullable<>);
             }
             else
             {
-                return typeof(Nullable<>).MakeGenericType(t);
+                // reference types are always nullable
+                return true;
             }
         }
 
-        // Gets the collection element type.
-        public static Type GetInnerElementType(this Type type)
+        /// <summary>
+        /// Determine if a type is public.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is public; false otherwise.</returns>
+        public static bool IsPublic(Type clrType)
+        {
+#if NETCORE1x
+            return clrType.GetTypeInfo().IsPublic;
+#else
+            return clrType.IsPublic;
+#endif
+        }
+
+        /// <summary>
+        /// Determine if a type is a primitive.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is a primitive; false otherwise.</returns>
+        public static bool IsPrimitive(Type clrType)
+        {
+#if NETCORE1x
+            return clrType.GetTypeInfo().IsPrimitive;
+#else
+            return clrType.IsPrimitive;
+#endif
+        }
+
+        /// <summary>
+        /// Determine if a type is assignable from another type.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <param name="fromType">The type to assign from.</param>
+        /// <returns>True if the type is assignable; false otherwise.</returns>
+        public static bool IsTypeAssignableFrom(Type clrType, Type fromType)
+        {
+            return clrType.IsAssignableFrom(fromType);
+        }
+
+        /// <summary>
+        /// Determine if a type is a value type.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is a value type; false otherwise.</returns>
+        public static bool IsValueType(Type clrType)
+        {
+#if NETCORE1x
+            return clrType.GetTypeInfo().IsValueType;
+#else
+            return clrType.IsValueType;
+#endif
+        }
+
+        /// <summary>
+        /// Determine if a type is visible.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is visible; false otherwise.</returns>
+        public static bool IsVisible(Type clrType)
+        {
+#if NETCORE1x
+            return clrType.GetTypeInfo().IsVisible;
+#else
+            return clrType.IsVisible;
+#endif
+        }
+
+        /// <summary>
+        /// Return the type from a nullable type.
+        /// </summary>
+        /// <param name="clrType">The type to convert.</param>
+        /// <returns>The type from a nullable type.</returns>
+        public static Type ToNullable(Type clrType)
+        {
+            if (TypeHelper.IsNullable(clrType))
+            {
+                return clrType;
+            }
+            else
+            {
+                return typeof(Nullable<>).MakeGenericType(clrType);
+            }
+        }
+
+        /// <summary>
+        /// Return the collection element type.
+        /// </summary>
+        /// <param name="clrType">The type to convert.</param>
+        /// <returns>The collection element type from a type.</returns>
+        public static Type GetInnerElementType(Type clrType)
         {
             Type elementType;
-            type.IsCollection(out elementType);
+            TypeHelper.IsCollection(clrType, out elementType);
             Contract.Assert(elementType != null);
 
             return elementType;
         }
 
-        public static bool IsCollection(this Type type)
+        /// <summary>
+        /// Determine if a type is a collection.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is an enumeration; false otherwise.</returns>
+        public static bool IsCollection(Type clrType)
         {
             Type elementType;
-            return type.IsCollection(out elementType);
+            return TypeHelper.IsCollection(clrType, out elementType);
         }
 
-        public static bool IsCollection(this Type type, out Type elementType)
+        /// <summary>
+        /// Determine if a type is a collection.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <param name="elementType">out: the element type of the collection.</param>
+        /// <returns>True if the type is an enumeration; false otherwise.</returns>
+        public static bool IsCollection(Type clrType, out Type elementType)
         {
-            if (type == null)
+            if (clrType == null)
             {
-                throw Error.ArgumentNull("type");
+                throw Error.ArgumentNull("clrType");
             }
 
-            elementType = type;
+            elementType = clrType;
 
             // see if this type should be ignored.
-            if (type == typeof(string))
+            if (clrType == typeof(string))
             {
                 return false;
             }
 
             Type collectionInterface
-                = type.GetInterfaces()
-                    .Union(new[] { type })
+                = clrType.GetInterfaces()
+                    .Union(new[] { clrType })
                     .FirstOrDefault(
-                        t => t.IsGenericType
+                        t => TypeHelper.IsGenericType(t)
                              && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
 
             if (collectionInterface != null)
@@ -80,21 +343,40 @@ namespace Microsoft.AspNet.OData
             return Nullable.GetUnderlyingType(type) ?? type;
         }
 
-        public static bool IsEnum(Type type)
+        /// <summary>
+        /// Determine if a type is an enumeration.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is an enumeration; false otherwise.</returns>
+        public static bool IsEnum(Type clrType)
         {
-            Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
+            Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(clrType);
+#if NETCORE1x
+            return underlyingTypeOrSelf.GetTypeInfo().IsEnum;
+#else
             return underlyingTypeOrSelf.IsEnum;
+#endif
         }
-        
-        public static bool IsDateTime(Type type)
+
+        /// <summary>
+        /// Determine if a type is a DateTime.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is a DateTime; false otherwise.</returns>
+        public static bool IsDateTime(Type clrType)
         {
-            Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
+            Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(clrType);
             return Type.GetTypeCode(underlyingTypeOrSelf) == TypeCode.DateTime;
         }
 
-        public static bool IsTimeSpan(Type type)
+        /// <summary>
+        /// Determine if a type is a TimeSpan.
+        /// </summary>
+        /// <param name="clrType">The type to test.</param>
+        /// <returns>True if the type is a TimeSpan; false otherwise.</returns>
+        public static bool IsTimeSpan(Type clrType)
         {
-            Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
+            Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(clrType);
             return underlyingTypeOrSelf == typeof(TimeSpan);
         }
 
@@ -111,8 +393,8 @@ namespace Microsoft.AspNet.OData
 
             type = GetInnerMostElementType(type);
 
-            return type.IsEnum ||
-                   type.IsPrimitive ||
+            return TypeHelper.IsEnum(type) ||
+                   TypeHelper.IsPrimitive(type) ||
                    type == typeof(Uri) ||
                    (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(type) != null);
         }
@@ -153,12 +435,12 @@ namespace Microsoft.AspNet.OData
         internal static Type GetImplementedIEnumerableType(Type type)
         {
             // get inner type from Task<T>
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Task<>))
+            if (TypeHelper.IsGenericType(type) && type.GetGenericTypeDefinition() == typeof(Task<>))
             {
                 type = type.GetGenericArguments().First();
             }
 
-            if (type.IsGenericType && type.IsInterface &&
+            if (TypeHelper.IsGenericType(type) && TypeHelper.IsInterface(type) &&
                 (type.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
                  type.GetGenericTypeDefinition() == typeof(IQueryable<>)))
             {
@@ -171,7 +453,7 @@ namespace Microsoft.AspNet.OData
                 Type[] interfaces = type.GetInterfaces();
                 foreach (Type interfaceType in interfaces)
                 {
-                    if (interfaceType.IsGenericType &&
+                    if (TypeHelper.IsGenericType(interfaceType) &&
                         (interfaceType.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
                          interfaceType.GetGenericTypeDefinition() == typeof(IQueryable<>)))
                     {
@@ -221,7 +503,7 @@ namespace Microsoft.AspNet.OData
 
                 if (exportedTypes != null)
                 {
-                    result.AddRange(exportedTypes.Where(t => t != null && t.IsVisible));
+                    result.AddRange(exportedTypes.Where(t => t != null && TypeHelper.IsVisible(t)));
                 }
             }
 

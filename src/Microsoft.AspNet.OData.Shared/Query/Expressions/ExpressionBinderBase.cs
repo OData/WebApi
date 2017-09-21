@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+#if !NETCORE
 using System.Data.Linq;
+#endif
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -96,9 +98,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Type rightUnderlyingType = Nullable.GetUnderlyingType(right.Type) ?? right.Type;
 
             // Convert to integers unless Enum type is required
-            if ((leftUnderlyingType.IsEnum || rightUnderlyingType.IsEnum) && binaryOperator != BinaryOperatorKind.Has)
+            if ((TypeHelper.IsEnum(leftUnderlyingType) || TypeHelper.IsEnum(rightUnderlyingType)) && binaryOperator != BinaryOperatorKind.Has)
             {
-                Type enumType = leftUnderlyingType.IsEnum ? leftUnderlyingType : rightUnderlyingType;
+                Type enumType = TypeHelper.IsEnum(leftUnderlyingType) ? leftUnderlyingType : rightUnderlyingType;
                 Type enumUnderlyingType = Enum.GetUnderlyingType(enumType);
                 left = ConvertToEnumUnderlyingType(left, enumType, enumUnderlyingType);
                 right = ConvertToEnumUnderlyingType(right, enumType, enumUnderlyingType);
@@ -268,7 +270,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
                 Expression convertedExpression = null;
 
-                if (sourceType.IsEnum)
+                if (TypeHelper.IsEnum(sourceType))
                 {
                     // we handle enum conversions ourselves
                     convertedExpression = source;
@@ -300,10 +302,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                             {
                                 convertedExpression = Expression.Call(source, "ToString", typeArguments: null, arguments: null);
                             }
+#if !NETCORE
                             else if (sourceType == typeof(Binary))
                             {
                                 convertedExpression = Expression.Call(source, "ToArray", typeArguments: null, arguments: null);
                             }
+#endif
                             break;
 
                         default:
@@ -758,7 +762,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         private static Expression ConvertToDateTimeRelatedConstExpression(Expression source)
         {
             var parameterizedConstantValue = ExtractParameterizedConstant(source);
-            if (parameterizedConstantValue != null && source.Type.IsNullable())
+            if (parameterizedConstantValue != null && TypeHelper.IsNullable(source.Type))
             {
                 var dateTimeOffset = parameterizedConstantValue as DateTimeOffset?;
                 if (dateTimeOffset != null)
@@ -871,7 +875,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         internal static bool IsNullable(Type t)
         {
-            if (!t.IsValueType || (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>)))
+            if (!TypeHelper.IsValueType(t) || (TypeHelper.IsGenericType(t) && t.GetGenericTypeDefinition() == typeof(Nullable<>)))
             {
                 return true;
             }

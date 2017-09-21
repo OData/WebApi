@@ -134,7 +134,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 instance = new EdmEnumObjectCollection(edmCollectionType);
                 return true;
             }
-            else if (collectionType.IsGenericType)
+            else if (TypeHelper.IsGenericType(collectionType))
             {
                 Type genericDefinition = collectionType.GetGenericTypeDefinition();
                 if (genericDefinition == typeof(IEnumerable<>) ||
@@ -153,7 +153,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 return true;
             }
 
-            if (collectionType.GetConstructor(Type.EmptyTypes) != null && !collectionType.IsAbstract)
+            if (collectionType.GetConstructor(Type.EmptyTypes) != null && !TypeHelper.IsAbstract(collectionType))
             {
                 instance = Activator.CreateInstance(collectionType) as IEnumerable;
                 return true;

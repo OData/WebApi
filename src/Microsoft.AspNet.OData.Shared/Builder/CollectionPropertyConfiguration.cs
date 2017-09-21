@@ -20,7 +20,7 @@ namespace Microsoft.AspNet.OData.Builder
         public CollectionPropertyConfiguration(PropertyInfo property, StructuralTypeConfiguration declaringType)
             : base(property, declaringType)
         {
-            if (!property.PropertyType.IsCollection(out _elementType))
+            if (!TypeHelper.IsCollection(property.PropertyType, out _elementType))
             {
                 throw Error.Argument("property", SRResources.CollectionPropertiesMustReturnIEnumerable, property.Name, property.DeclaringType.FullName);
             }

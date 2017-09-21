@@ -47,7 +47,7 @@ namespace Microsoft.AspNet.OData.Builder
 
             if (pinfo == null)
             {
-                throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties, node.Member.ReflectedType.FullName, node.Member.Name);
+                throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties, TypeHelper.GetReflectedType(node.Member).FullName, node.Member.Name);
             }
 
             if (node.Expression.NodeType != ExpressionType.Parameter)

@@ -287,7 +287,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 Type elementType;
                 if (typeof(IEdmObject).IsAssignableFrom(type) ||
-                    (type.IsCollection(out elementType) && typeof(IEdmObject).IsAssignableFrom(elementType)))
+                    (TypeHelper.IsCollection(type, out elementType) && typeof(IEdmObject).IsAssignableFrom(elementType)))
                 {
                     payloadKind = GetEdmObjectPayloadKind(type);
                 }
@@ -537,7 +537,7 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             Type elementType;
-            if (type.IsCollection(out elementType))
+            if (TypeHelper.IsCollection(type, out elementType))
             {
                 if (typeof(IEdmComplexObject).IsAssignableFrom(elementType) || typeof(IEdmEnumObject).IsAssignableFrom(elementType))
                 {

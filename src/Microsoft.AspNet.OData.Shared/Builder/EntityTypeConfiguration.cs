@@ -119,7 +119,7 @@ namespace Microsoft.AspNet.OData.Builder
             }
 
             // Add the enum key if the property type is enum
-            if (keyProperty.PropertyType.IsEnum)
+            if (TypeHelper.IsEnum(keyProperty.PropertyType))
             {
                 ModelBuilder.AddEnumType(keyProperty.PropertyType);
                 EnumPropertyConfiguration enumConfig = AddEnumProperty(keyProperty);

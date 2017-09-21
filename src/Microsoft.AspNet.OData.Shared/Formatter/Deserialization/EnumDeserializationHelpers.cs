@@ -36,7 +36,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw new ValidationException(Error.Format(SRResources.PropertyMustBeEnum, value.GetType().Name, "ODataEnumValue"));
             }
 
-            if (!enumType.IsEnum)
+            if (!TypeHelper.IsEnum(enumType))
             {
                 throw Error.InvalidOperation(Error.Format(SRResources.TypeMustBeEnumOrNullableEnum, type.Name));
             }

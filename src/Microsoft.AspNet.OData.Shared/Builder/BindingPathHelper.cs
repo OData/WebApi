@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNet.OData.Common;
@@ -24,15 +23,7 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("bindingPath");
             }
 
-            return String.Join("/", bindingPath.Select(e => e.GetQualifiedName()));
-        }
-
-        private static string GetQualifiedName(this MemberInfo memberInfo)
-        {
-            Contract.Assert(memberInfo != null);
-
-            Type type = memberInfo as Type;
-            return type != null ? (type.Namespace + "." + type.Name) : memberInfo.Name;
+            return String.Join("/", bindingPath.Select(e => TypeHelper.GetQualifiedName(e)));
         }
     }
 }

@@ -853,7 +853,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
             else
             {
-                if (source.Type.IsNullable() && !targetClrType.IsNullable())
+                if (TypeHelper.IsNullable(source.Type) && !TypeHelper.IsNullable(targetClrType))
                 {
                     // Make the target Clr type nullable to avoid failure while casting
                     // nullable source, whose value may be null, to a non-nullable type.
@@ -878,7 +878,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             Expression sourceValue;
 
-            if (source.Type.IsGenericType && source.Type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (TypeHelper.IsGenericType(source.Type) && source.Type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 if (TypeHelper.IsEnum(source.Type))
                 {
@@ -984,9 +984,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             if (isSourcePrimitiveOrEnum && isTargetPrimitiveOrEnum)
             {
-                if (source.Type.IsNullable())
+                if (TypeHelper.IsNullable(source.Type))
                 {
-                    clrType = clrType.ToNullable();
+                    clrType = TypeHelper.ToNullable(clrType);
                 }
             }
 
@@ -1488,7 +1488,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             Contract.Assert(source != null);
             Type elementType;
-            source.Type.IsCollection(out elementType);
+            TypeHelper.IsCollection(source.Type, out elementType);
             Contract.Assert(elementType != null);
 
             if (filter == null)
@@ -1521,7 +1521,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Contract.Assert(filter != null);
 
             Type elementType;
-            source.Type.IsCollection(out elementType);
+            TypeHelper.IsCollection(source.Type, out elementType);
             Contract.Assert(elementType != null);
 
             if (IsIQueryable(source.Type))

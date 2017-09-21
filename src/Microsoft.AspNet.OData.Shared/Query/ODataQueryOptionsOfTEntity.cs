@@ -43,7 +43,7 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNull("query");
             }
 
-            if (!typeof(TEntity).IsAssignableFrom(query.ElementType))
+            if (!TypeHelper.IsTypeAssignableFrom(typeof(TEntity), query.ElementType))
             {
                 throw Error.Argument("query", SRResources.CannotApplyODataQueryOptionsOfT, typeof(ODataQueryOptions).Name, typeof(TEntity).FullName, typeof(IQueryable).Name, query.ElementType.FullName);
             }

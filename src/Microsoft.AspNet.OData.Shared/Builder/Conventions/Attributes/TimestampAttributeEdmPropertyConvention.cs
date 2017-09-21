@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reflection;
 
 namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
 {
@@ -38,7 +39,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
         {
             IEnumerable<PropertyConfiguration> properties = config.ThisAndBaseTypes().SelectMany(p => p.Properties);
             return properties.OfType<PrimitivePropertyConfiguration>()
-                .Where(pc => pc.PropertyInfo.GetCustomAttributes(typeof(TimestampAttribute), inherit: true).Length > 0)
+                .Where(pc => pc.PropertyInfo.GetCustomAttributes(typeof(TimestampAttribute), inherit: true).Any())
                 .ToArray();
         }
     }

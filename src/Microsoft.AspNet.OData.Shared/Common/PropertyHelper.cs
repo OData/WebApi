@@ -45,12 +45,12 @@ namespace Microsoft.AspNet.OData.Common
             Contract.Assert(setMethod != null);
             Contract.Assert(!setMethod.IsStatic);
             Contract.Assert(setMethod.GetParameters().Length == 1);
-            Contract.Assert(!propertyInfo.ReflectedType.IsValueType);
+            Contract.Assert(!TypeHelper.IsValueType(TypeHelper.GetReflectedType(propertyInfo)));
 
             // Instance methods in the CLR can be turned into static methods where the first parameter
             // is open over "this". This parameter is always passed by reference, so we have a code
             // path for value types and a code path for reference types.
-            Type typeInput = propertyInfo.ReflectedType;
+            Type typeInput = TypeHelper.GetReflectedType(propertyInfo);
             Type typeValue = setMethod.GetParameters()[0].ParameterType;
 
             Delegate callPropertySetterDelegate;
@@ -58,7 +58,7 @@ namespace Microsoft.AspNet.OData.Common
             // Create a delegate TValue -> "TDeclaringType.Property"
             var propertySetterAsAction = setMethod.CreateDelegate(typeof(Action<,>).MakeGenericType(typeInput, typeValue));
             var callPropertySetterClosedGenericMethod = _callPropertySetterOpenGenericMethod.MakeGenericMethod(typeInput, typeValue);
-            callPropertySetterDelegate = Delegate.CreateDelegate(typeof(Action<TDeclaringType, object>), propertySetterAsAction, callPropertySetterClosedGenericMethod);
+            callPropertySetterDelegate = callPropertySetterClosedGenericMethod.CreateDelegate(typeof(Action<TDeclaringType, object>), propertySetterAsAction);
 
             return (Action<TDeclaringType, object>)callPropertySetterDelegate;
         }
@@ -100,23 +100,23 @@ namespace Microsoft.AspNet.OData.Common
             // Instance methods in the CLR can be turned into static methods where the first parameter
             // is open over "this". This parameter is always passed by reference, so we have a code
             // path for value types and a code path for reference types.
-            Type typeInput = getMethod.ReflectedType;
+            Type typeInput = TypeHelper.GetReflectedType(getMethod);
             Type typeOutput = getMethod.ReturnType;
 
             Delegate callPropertyGetterDelegate;
-            if (typeInput.IsValueType)
+            if (TypeHelper.IsValueType(typeInput))
             {
                 // Create a delegate (ref TDeclaringType) -> TValue
                 Delegate propertyGetterAsFunc = getMethod.CreateDelegate(typeof(ByRefFunc<,>).MakeGenericType(typeInput, typeOutput));
                 MethodInfo callPropertyGetterClosedGenericMethod = _callPropertyGetterByReferenceOpenGenericMethod.MakeGenericMethod(typeInput, typeOutput);
-                callPropertyGetterDelegate = Delegate.CreateDelegate(typeof(Func<object, object>), propertyGetterAsFunc, callPropertyGetterClosedGenericMethod);
+                callPropertyGetterDelegate = callPropertyGetterClosedGenericMethod.CreateDelegate(typeof(Func<object, object>), propertyGetterAsFunc);
             }
             else
             {
                 // Create a delegate TDeclaringType -> TValue
                 Delegate propertyGetterAsFunc = getMethod.CreateDelegate(typeof(Func<,>).MakeGenericType(typeInput, typeOutput));
                 MethodInfo callPropertyGetterClosedGenericMethod = _callPropertyGetterOpenGenericMethod.MakeGenericMethod(typeInput, typeOutput);
-                callPropertyGetterDelegate = Delegate.CreateDelegate(typeof(Func<object, object>), propertyGetterAsFunc, callPropertyGetterClosedGenericMethod);
+                callPropertyGetterDelegate = callPropertyGetterClosedGenericMethod.CreateDelegate(typeof(Func<object, object>), propertyGetterAsFunc);
             }
 
             return (Func<object, object>)callPropertyGetterDelegate;

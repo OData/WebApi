@@ -299,7 +299,7 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("type");
             }
 
-            if (!type.IsEnum)
+            if (!TypeHelper.IsEnum(type))
             {
                 throw Error.Argument("type", SRResources.TypeCannotBeEnum, type.FullName);
             }

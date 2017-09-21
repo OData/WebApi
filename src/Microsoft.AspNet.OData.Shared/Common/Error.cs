@@ -225,7 +225,7 @@ namespace Microsoft.AspNet.OData.Common
         /// <returns>The logged <see cref="Exception"/>.</returns>
         internal static ArgumentException InvalidEnumArgument(string parameterName, int invalidValue, Type enumClass)
         {
-#if NETFX_CORE
+#if NETCORE1x
             return new ArgumentException(Error.Format(CommonWebApiResources.InvalidEnumArgument, parameterName, invalidValue, enumClass.Name), parameterName);
 #else
             return new InvalidEnumArgumentException(parameterName, invalidValue, enumClass);

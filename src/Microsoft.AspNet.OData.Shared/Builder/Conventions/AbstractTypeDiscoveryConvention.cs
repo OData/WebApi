@@ -14,7 +14,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions
             StructuralTypeConfiguration structuralType = edmTypeConfiguration as StructuralTypeConfiguration;
             if (structuralType != null && structuralType.IsAbstract == null)
             {
-                structuralType.IsAbstract = structuralType.ClrType.IsAbstract;
+                structuralType.IsAbstract = TypeHelper.IsAbstract(structuralType.ClrType);
             }
         }
     }

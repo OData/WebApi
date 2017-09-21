@@ -235,7 +235,7 @@ namespace Microsoft.AspNet.OData
                 {
                     string propertyName = EdmLibHelpers.GetClrPropertyName(property, EdmModel);
 
-                    if (value.GetType().IsCollection())
+                    if (TypeHelper.IsCollection(value.GetType()))
                     {
                         DeserializationHelpers.SetCollectionProperty(resource, property, value, propertyName);
                     }

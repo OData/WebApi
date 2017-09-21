@@ -53,7 +53,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions
             Contract.Assert(value != null);
 
             Type type = value.GetType();
-            if (type.IsEnum)
+            if (TypeHelper.IsEnum(type))
             {
                 value = new ODataEnumValue(value.ToString(), type.EdmFullName());
             }
@@ -119,7 +119,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions
                 .ClrType
                 .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                 .Where(p => p.IsValidStructuralProperty() && !type.IgnoredProperties().Any(p1 => p1.Name == p.Name)
-                    && (includeReadOnly || p.GetSetMethod() != null || p.PropertyType.IsCollection()));
+                    && (includeReadOnly || p.GetSetMethod() != null || TypeHelper.IsCollection(p.PropertyType)));
         }
 
         public static bool IsValidStructuralProperty(this PropertyInfo propertyInfo)
@@ -175,10 +175,10 @@ namespace Microsoft.AspNet.OData.Builder.Conventions
 
             Type elementType;
 
-            return !(type.IsGenericTypeDefinition
+            return !(TypeHelper.IsGenericTypeDefinition(type)
                      || type.IsPointer
                      || type == typeof(object)
-                     || (type.IsCollection(out elementType) && elementType == typeof(object)));
+                     || (TypeHelper.IsCollection(type, out elementType) && elementType == typeof(object)));
         }
 
         // gets the primitive odata uri representation.
@@ -187,7 +187,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions
             Contract.Assert(value != null);
 
             Type type = value.GetType();
-            if (type.IsEnum)
+            if (TypeHelper.IsEnum(type))
             {
                 value = new ODataEnumValue(value.ToString(), type.EdmFullName());
             }

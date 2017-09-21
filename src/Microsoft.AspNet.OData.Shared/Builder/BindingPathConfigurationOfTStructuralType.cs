@@ -192,7 +192,7 @@ namespace Microsoft.AspNet.OData.Builder
             PropertyInfo pathProperty = PropertySelectorVisitor.GetSelectedProperty(pathExpression);
 
             IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
-            bindingPath.Add(typeof(TDerivedType));
+            bindingPath.Add(TypeHelper.AsMemberInfo(typeof(TDerivedType)));
             bindingPath.Add(pathProperty);
 
             // make sure the derived type has the same type kind with the resource type.
@@ -336,7 +336,7 @@ namespace Microsoft.AspNet.OData.Builder
             PropertyInfo pathProperty = PropertySelectorVisitor.GetSelectedProperty(pathExpression);
 
             IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
-            bindingPath.Add(typeof(TDerivedType));
+            bindingPath.Add(TypeHelper.AsMemberInfo(typeof(TDerivedType)));
             bindingPath.Add(pathProperty);
 
             // make sure the derived type has the same type kind with the resource type.
@@ -451,7 +451,7 @@ namespace Microsoft.AspNet.OData.Builder
             NavigationPropertyConfiguration navigation = derivedConfiguration.HasMany(navigationExpression);
 
             IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
-            bindingPath.Add(typeof(TDerivedType));
+            bindingPath.Add(TypeHelper.AsMemberInfo(typeof(TDerivedType)));
             bindingPath.Add(navigation.PropertyInfo);
 
             NavigationSourceConfiguration entitySet = _modelBuilder.EntitySet<TTargetType>(targetEntitySet).Configuration;
@@ -537,7 +537,7 @@ namespace Microsoft.AspNet.OData.Builder
             NavigationPropertyConfiguration navigation = derivedConfiguration.HasRequired(navigationExpression);
 
             IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
-            bindingPath.Add(typeof(TDerivedType));
+            bindingPath.Add(TypeHelper.AsMemberInfo(typeof(TDerivedType)));
             bindingPath.Add(navigation.PropertyInfo);
 
             NavigationSourceConfiguration entitySet = _modelBuilder.EntitySet<TTargetType>(targetEntitySet).Configuration;
@@ -622,7 +622,7 @@ namespace Microsoft.AspNet.OData.Builder
             NavigationPropertyConfiguration navigation = derivedConfiguration.HasOptional(navigationExpression);
 
             IList<MemberInfo> bindingPath = new List<MemberInfo>(_bindingPath);
-            bindingPath.Add(typeof(TDerivedType));
+            bindingPath.Add(TypeHelper.AsMemberInfo(typeof(TDerivedType)));
             bindingPath.Add(navigation.PropertyInfo);
 
             NavigationSourceConfiguration entitySet = _modelBuilder.EntitySet<TTargetType>(targetEntitySet).Configuration;

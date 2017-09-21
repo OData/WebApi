@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Query.Expressions
@@ -158,7 +159,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             Type elementType = (property.PageSize == null && property.CountOption == null)
                 ? property.Value.Type
-                : property.Value.Type.GetInnerElementType();
+                : TypeHelper.GetInnerElementType(property.Value.Type);
             return namedPropertyGenericType.MakeGenericType(elementType);
         }
 

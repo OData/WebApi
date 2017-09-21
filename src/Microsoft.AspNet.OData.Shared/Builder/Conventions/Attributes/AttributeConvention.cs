@@ -64,7 +64,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
                     "member",
                     SRResources.MultipleAttributesFound,
                     member.Name,
-                    member.ReflectedType.Name,
+                    TypeHelper.GetReflectedType(member).Name,
                     attributes.First().GetType().Name);
             }
 

@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+#if !NETCORE
 using System.Data.Linq;
+#endif
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
@@ -84,7 +86,9 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 // Keep the Binary and XElement in the end, since there are not the default mappings for Edm.Binary and Edm.String.
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(XElement), GetPrimitiveType(EdmPrimitiveTypeKind.String)),
+#if !NETCORE
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Binary), GetPrimitiveType(EdmPrimitiveTypeKind.Binary)),
+#endif
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(ushort), GetPrimitiveType(EdmPrimitiveTypeKind.Int32)),
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(ushort?), GetPrimitiveType(EdmPrimitiveTypeKind.Int32)),
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(uint), GetPrimitiveType(EdmPrimitiveTypeKind.Int64)),
@@ -149,7 +153,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 }
 
                 Type underlyingType = TypeHelper.GetUnderlyingTypeOrSelf(clrType);
-                if (underlyingType.IsEnum)
+                if (TypeHelper.IsEnum(underlyingType))
                 {
                     clrType = underlyingType;
                 }
@@ -167,10 +171,10 @@ namespace Microsoft.AspNet.OData.Formatter
                 // default to the EdmType with the same name as the ClrType name
                 returnType = returnType ?? edmModel.FindType(clrType.EdmFullName());
 
-                if (clrType.BaseType != null)
+                if (TypeHelper.GetBaseType(clrType) != null)
                 {
                     // go up the inheritance tree to see if we have a mapping defined for the base type.
-                    returnType = returnType ?? GetEdmType(edmModel, clrType.BaseType, testCollections);
+                    returnType = returnType ?? GetEdmType(edmModel, TypeHelper.GetBaseType(clrType), testCollections);
                 }
                 return returnType;
             }
@@ -240,9 +244,9 @@ namespace Microsoft.AspNet.OData.Formatter
             else
             {
                 Type clrType = GetClrType(edmTypeReference.Definition, edmModel, assembliesResolver);
-                if (clrType != null && clrType.IsEnum && edmTypeReference.IsNullable)
+                if (clrType != null && TypeHelper.IsEnum(clrType) && edmTypeReference.IsNullable)
                 {
-                    return clrType.ToNullable();
+                    return TypeHelper.ToNullable(clrType);
                 }
 
                 return clrType;
@@ -839,7 +843,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
         public static bool IsNullable(Type type)
         {
-            return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
+            return !TypeHelper.IsValueType(type) || Nullable.GetUnderlyingType(type) != null;
         }
 
         /// <summary>
@@ -887,7 +891,7 @@ namespace Microsoft.AspNet.OData.Formatter
         /// <returns>True if the type was generic Delta; false otherwise.</returns>
         internal static bool TryGetInnerTypeForDelta(ref Type type)
         {
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Delta<>))
+            if (TypeHelper.IsGenericType(type) && type.GetGenericTypeDefinition() == typeof(Delta<>))
             {
                 type = type.GetGenericArguments()[0];
                 return true;
@@ -1000,24 +1004,24 @@ namespace Microsoft.AspNet.OData.Formatter
                 return false;
             }
 
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SelectExpandWrapper<>))
+            if (TypeHelper.IsGenericType(type) && type.GetGenericTypeDefinition() == typeof(SelectExpandWrapper<>))
             {
                 entityType = type.GetGenericArguments()[0];
                 return true;
             }
 
-            return IsSelectExpandWrapper(type.BaseType, out entityType);
+            return IsSelectExpandWrapper(TypeHelper.GetBaseType(type), out entityType);
         }
 
         private static Type ExtractGenericInterface(Type queryType, Type interfaceType)
         {
-            Func<Type, bool> matchesInterface = t => t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType;
+            Func<Type, bool> matchesInterface = t => TypeHelper.IsGenericType(t) && t.GetGenericTypeDefinition() == interfaceType;
             return matchesInterface(queryType) ? queryType : queryType.GetInterfaces().FirstOrDefault(matchesInterface);
         }
 
         private static IEnumerable<Type> GetMatchingTypes(string edmFullName, IWebApiAssembliesResolver assembliesResolver)
         {
-            return TypeHelper.GetLoadedTypes(assembliesResolver).Where(t => t.IsPublic && t.EdmFullName() == edmFullName);
+            return TypeHelper.GetLoadedTypes(assembliesResolver).Where(t => TypeHelper.IsPublic(t) && t.EdmFullName() == edmFullName);
         }
 
         // TODO (workitem 336): Support nested types and anonymous types.
@@ -1025,7 +1029,7 @@ namespace Microsoft.AspNet.OData.Formatter
         {
             Contract.Assert(type != null);
 
-            if (!type.IsGenericType)
+            if (!TypeHelper.IsGenericType(type))
             {
                 return type.Name;
             }

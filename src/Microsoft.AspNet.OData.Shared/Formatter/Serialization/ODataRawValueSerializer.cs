@@ -33,7 +33,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 throw Error.ArgumentNull("graph");
             }
 
-            if (graph.GetType().IsEnum)
+            if (TypeHelper.IsEnum(graph.GetType()))
             {
                 messageWriter.WriteValue(graph.ToString());
             }

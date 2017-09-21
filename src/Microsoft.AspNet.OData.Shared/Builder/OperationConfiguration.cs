@@ -328,7 +328,7 @@ namespace Microsoft.AspNet.OData.Builder
             Type type = TypeHelper.GetUnderlyingTypeOrSelf(clrType);
             IEdmTypeConfiguration edmTypeConfiguration;
 
-            if (type.IsEnum)
+            if (TypeHelper.IsEnum(type))
             {
                 edmTypeConfiguration = ModelBuilder.GetTypeConfigurationOrNull(type);
 
@@ -344,7 +344,7 @@ namespace Microsoft.AspNet.OData.Builder
 
             if (edmTypeConfiguration == null)
             {
-                if (type.IsEnum)
+                if (TypeHelper.IsEnum(type))
                 {
                     EnumTypeConfiguration enumTypeConfiguration = ModelBuilder.AddEnumType(type);
 

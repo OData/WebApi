@@ -77,7 +77,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             builder.EnumType<Color>();
 
             Type elementType;
-            Assert.True(type.IsCollection(out elementType));
+            Assert.True(TypeHelper.IsCollection(type, out elementType));
 
             // Act
             Type underlyingType = TypeHelper.GetUnderlyingTypeOrSelf(elementType);

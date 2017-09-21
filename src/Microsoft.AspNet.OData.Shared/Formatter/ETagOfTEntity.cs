@@ -49,7 +49,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.ArgumentNull("query");
             }
 
-            if (!typeof(TEntity).IsAssignableFrom(query.ElementType))
+            if (!TypeHelper.IsTypeAssignableFrom(typeof(TEntity), query.ElementType))
             {
                 throw Error.Argument(
                     "query",

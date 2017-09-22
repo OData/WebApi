@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-#if !NETCORE
+#if NETFX
 using System.Data.Linq;
 #endif
 using System.Diagnostics.CodeAnalysis;
@@ -302,7 +302,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                             {
                                 convertedExpression = Expression.Call(source, "ToString", typeArguments: null, arguments: null);
                             }
-#if !NETCORE
+#if NETFX
                             else if (sourceType == typeof(Binary))
                             {
                                 convertedExpression = Expression.Call(source, "ToArray", typeArguments: null, arguments: null);

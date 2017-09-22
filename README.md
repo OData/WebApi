@@ -78,7 +78,7 @@ To connect to webapinightly feed, use this feed URL: [webapinightly MyGet feed U
 You can query the latest nightly NuGet packages using this query: [MAGIC WebApi query](https://www.myget.org/F/webapinightly/Packages?$select=Id,Version&$orderby=Version%20desc&$top=4&$format=application/json)
 
 ### Contribution
-Please refer to the [CONTRIBUTION.md](https://github.com/OData/WebApi/blob/master/CONTRIBUTION.md).
+Please refer to the [CONTRIBUTION.md](https://github.com/OData/WebApi/blob/master/.github/CONTRIBUTION.md).
 
 ### Documentation
 Please visit the [OData Web API pages](http://odata.github.io/WebApi).

@@ -62,7 +62,7 @@ namespace Microsoft.AspNet.OData.Query.Validators
                 options.Filter.Validate(validationSettings);
             }
 
-            if (options.Count != null || ODataCountMediaTypeMapping.IsCountRequest(options.Request))
+            if (options.Count != null || options.InternalRequest.IsCountRequest())
             {
                 ValidateQueryOptionAllowed(AllowedQueryOptions.Count, validationSettings.AllowedQueryOptions);
 

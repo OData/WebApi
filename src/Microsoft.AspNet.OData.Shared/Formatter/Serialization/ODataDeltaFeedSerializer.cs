@@ -17,7 +17,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     /// OData serializer for serializing a collection of <see cref="IEdmEntityType" />
     /// The Collection is of <see cref="IEdmChangedObject"/> which is the base interface implemented by all objects which are a part of the DeltaFeed payload.
     /// </summary>
-    public class ODataDeltaFeedSerializer : ODataEdmTypeSerializer
+    public partial class ODataDeltaFeedSerializer : ODataEdmTypeSerializer
     {
         private const string DeltaFeed = "deltafeed";
 
@@ -179,7 +179,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                                 if (entrySerializer == null)
                                 {
                                     throw new SerializationException(
-                                        Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                                        Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName()));
                                 }
                                 entrySerializer.WriteDeltaObjectInline(entry, elementType, writer, writeContext);
                                 break;
@@ -227,10 +227,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
                 else if (writeContext.Request != null)
                 {
-                    feed.NextPageLink = writeContext.Request.ODataProperties().NextLink;
-                    feed.DeltaLink = writeContext.Request.ODataProperties().DeltaLink;
+                    feed.NextPageLink = writeContext.InternalRequest.Context.NextLink;
+                    feed.DeltaLink = writeContext.InternalRequest.Context.DeltaLink;
 
-                    long? countValue = writeContext.Request.ODataProperties().TotalCount;
+                    long? countValue = writeContext.InternalRequest.Context.TotalCount;
                     if (countValue.HasValue)
                     {
                         feed.Count = countValue.Value;
@@ -358,7 +358,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if (navigationLink != null)
             {
-                return HttpRequestMessageExtensions.GetNextPageLink(navigationLink, pageSize);
+                return ODataDeltaFeedSerializer.GetNextPageLink(navigationLink, pageSize);
             }
 
             return null;

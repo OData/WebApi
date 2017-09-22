@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Text;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -221,21 +222,19 @@ namespace Microsoft.AspNet.OData.Formatter
                 return null;
             }
 
-            HttpRequestMessage request = readContext.Request;
-            ODataMessageReaderSettings oDataReaderSettings = request.GetReaderSettings();
+            IWebApiRequestMessage request = readContext.InternalRequest;
+            ODataMessageReaderSettings oDataReaderSettings = request.ReaderSettings;
 
             using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(valueString)))
             {
                 stream.Seek(0, SeekOrigin.Begin);
 
                 IODataRequestMessage oDataRequestMessage = new ODataMessageWrapper(stream, null,
-                    request.GetODataContentIdMapping());
+                    request.ODataContentIdMapping);
                 using (
                     ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage,
                         oDataReaderSettings, readContext.Model))
                 {
-                    request.RegisterForDispose(oDataMessageReader);
-
                     if (edmTypeReference.IsCollection())
                     {
                         return ConvertResourceSet(oDataMessageReader, edmTypeReference, readContext);
@@ -266,7 +265,7 @@ namespace Microsoft.AspNet.OData.Formatter
             ODataResourceSetWrapper resourceSet =
                 odataReader.ReadResourceOrResourceSet() as ODataResourceSetWrapper;
 
-            ODataDeserializerProvider deserializerProvider = readContext.Request.GetDeserializerProvider();
+            ODataDeserializerProvider deserializerProvider = readContext.InternalRequest.DeserializerProvider;
 
             ODataResourceSetDeserializer resourceSetDeserializer =
                 (ODataResourceSetDeserializer)deserializerProvider.GetEdmTypeDeserializer(collectionType);
@@ -321,7 +320,7 @@ namespace Microsoft.AspNet.OData.Formatter
             ODataResourceWrapper topLevelResource = item as ODataResourceWrapper;
             Contract.Assert(topLevelResource != null);
 
-            ODataDeserializerProvider deserializerProvider = readContext.Request.GetDeserializerProvider();
+            ODataDeserializerProvider deserializerProvider = readContext.InternalRequest.DeserializerProvider;
 
             ODataResourceDeserializer entityDeserializer =
                 (ODataResourceDeserializer)deserializerProvider.GetEdmTypeDeserializer(edmTypeReference);
@@ -361,12 +360,12 @@ namespace Microsoft.AspNet.OData.Formatter
                 return source;
             }
 
-            HttpRequestMessage request = readContext.Request;
+            IWebApiRequestMessage request = readContext.InternalRequest;
 
             DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
             string serviceRoot = GetServiceRoot(request);
             IEnumerable<KeyValuePair<string, object>> keyValues = GetKeys(pathHandler, serviceRoot, resource.Id,
-                request.GetRequestContainer());
+                request.RequestContainer);
 
             IList<IEdmStructuralProperty> keys = entityTypeReference.Key().ToList();
 
@@ -394,11 +393,11 @@ namespace Microsoft.AspNet.OData.Formatter
             return source;
         }
 
-        private static string GetServiceRoot(HttpRequestMessage request)
+        private static string GetServiceRoot(IWebApiRequestMessage request)
         {
-            return request.GetUrlHelper().CreateODataLink(
-                request.ODataProperties().RouteName,
-                request.GetPathHandler(),
+            return request.UrlHelper.CreateODataLink(
+                request.Context.RouteName,
+                request.PathHandler,
                 new List<ODataPathSegment>());
         }
 

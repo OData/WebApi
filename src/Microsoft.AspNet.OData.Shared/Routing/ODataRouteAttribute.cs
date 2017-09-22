@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.AspNet.OData.Routing
 {
     /// <summary>
-    /// Represents an attribute that can be placed on an action of an <see cref="ODataController"/> to specify
+    /// Represents an attribute that can be placed on an action of an ODataController to specify
     /// the OData URLs that the action handles.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]

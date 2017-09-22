@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -10,14 +13,14 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles entity reference manipulations.
     /// </summary>
-    public class RefRoutingConvention : NavigationSourceRoutingConvention
+    public partial class RefRoutingConvention
     {
         private const string DeleteRefActionNamePrefix = "DeleteRef";
         private const string CreateRefActionNamePrefix = "CreateRef";
         private const string GetRefActionNamePrefix = "GetRef";
 
         /// <inheritdoc/>
-        public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
+        internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
             if (odataPath == null)
             {
@@ -31,11 +34,10 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
             if (actionMap == null)
             {
-                throw Error.ArgumentNull("actionMap");
+                throw Error.ArgumentNull("controllerContext");
             }
 
-            HttpMethod requestMethod = controllerContext.Request.Method;
-            IHttpRouteData routeData = controllerContext.RouteData;
+            ODataRequestMethod requestMethod = controllerContext.Request.Method;
 
             if (!IsSupportedRequestMethod(requestMethod))
             {
@@ -59,11 +61,11 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         controllerContext.AddKeyValueToRouteData((KeySegment)odataPath.Segments[1]);
                     }
 
-                    routeData.Values[ODataRouteConstants.NavigationProperty] = navigationLinkSegment.NavigationProperty.Name;
+                    controllerContext.RouteData.Add(ODataRouteConstants.NavigationProperty, navigationLinkSegment.NavigationProperty.Name);
                     return refActionName;
                 }
             }
-            else if ((requestMethod == HttpMethod.Delete) && (
+            else if ((ODataRequestMethod.Delete == requestMethod) && (
                 odataPath.PathTemplate == "~/entityset/key/navigation/key/$ref" ||
                 odataPath.PathTemplate == "~/entityset/key/cast/navigation/key/$ref" ||
                 odataPath.PathTemplate == "~/singleton/navigation/key/$ref" ||
@@ -83,7 +85,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         controllerContext.AddKeyValueToRouteData((KeySegment)odataPath.Segments[1]);
                     }
 
-                    routeData.Values[ODataRouteConstants.NavigationProperty] = navigationLinkSegment.NavigationProperty.Name;
+                    controllerContext.RouteData.Add(ODataRouteConstants.NavigationProperty, navigationLinkSegment.NavigationProperty.Name);
                     controllerContext.AddKeyValueToRouteData((KeySegment)odataPath.Segments.Last(e => e is KeySegment), ODataRouteConstants.RelatedKey);
                     return refActionName;
                 }
@@ -92,21 +94,23 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             return null;
         }
 
-        private static string FindRefActionName(ILookup<string, HttpActionDescriptor> actionMap,
-            IEdmNavigationProperty navigationProperty, IEdmEntityType declaringType, HttpMethod method)
+        private static string FindRefActionName(IWebApiActionMap actionMap,
+            IEdmNavigationProperty navigationProperty, IEdmEntityType declaringType, ODataRequestMethod method)
         {
             string actionNamePrefix;
-            if (method == HttpMethod.Delete)
+            switch (method)
             {
-                actionNamePrefix = DeleteRefActionNamePrefix;
-            }
-            else if (method == HttpMethod.Get)
-            {
-                actionNamePrefix = GetRefActionNamePrefix;
-            }
-            else
-            {
-                actionNamePrefix = CreateRefActionNamePrefix;
+                case ODataRequestMethod.Delete:
+                    actionNamePrefix = DeleteRefActionNamePrefix;
+                    break;
+
+                case ODataRequestMethod.Get:
+                    actionNamePrefix = GetRefActionNamePrefix;
+                    break;
+
+                default:
+                    actionNamePrefix = CreateRefActionNamePrefix;
+                    break;
             }
 
             // Examples: CreateRefToOrdersFromCustomer, CreateRefToOrders, CreateRef.
@@ -116,12 +120,12 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         actionNamePrefix);
         }
 
-        private static bool IsSupportedRequestMethod(HttpMethod method)
+        private static bool IsSupportedRequestMethod(ODataRequestMethod method)
         {
-            return (method == HttpMethod.Delete ||
-                method == HttpMethod.Put ||
-                method == HttpMethod.Post ||
-                method == HttpMethod.Get);
+            return (ODataRequestMethod.Delete == method ||
+                ODataRequestMethod.Put == method ||
+                ODataRequestMethod.Post == method ||
+                ODataRequestMethod.Get == method);
         }
     }
 }

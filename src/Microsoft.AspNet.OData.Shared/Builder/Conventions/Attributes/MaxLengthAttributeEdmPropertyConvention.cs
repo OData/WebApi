@@ -3,7 +3,6 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Web.Http;
 using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes

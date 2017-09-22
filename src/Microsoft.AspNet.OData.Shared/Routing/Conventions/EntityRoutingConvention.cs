@@ -2,7 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
-using System.Linq;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -11,10 +12,10 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles operating on entities by key.
     /// </summary>
-    public class EntityRoutingConvention : NavigationSourceRoutingConvention
+    public partial class EntityRoutingConvention
     {
         /// <inheritdoc/>
-        public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
+        internal  static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
             if (odataPath == null)
             {
@@ -34,22 +35,21 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             if (odataPath.PathTemplate == "~/entityset/key" ||
                 odataPath.PathTemplate == "~/entityset/key/cast")
             {
-                HttpMethod httpMethod = controllerContext.Request.Method;
                 string httpMethodName;
 
-                switch (httpMethod.ToString().ToUpperInvariant())
+                switch (controllerContext.Request.Method)
                 {
-                    case "GET":
+                    case ODataRequestMethod.Get:
                         httpMethodName = "Get";
                         break;
-                    case "PUT":
+                    case ODataRequestMethod.Put:
                         httpMethodName = "Put";
                         break;
-                    case "PATCH":
-                    case "MERGE":
+                    case ODataRequestMethod.Patch:
+                    case ODataRequestMethod.Merge:
                         httpMethodName = "Patch";
                         break;
-                    case "DELETE":
+                    case ODataRequestMethod.Delete:
                         httpMethodName = "Delete";
                         break;
                     default:

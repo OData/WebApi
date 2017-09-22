@@ -72,7 +72,7 @@ namespace Microsoft.AspNet.OData.Query
         Apply = 0x400,
 
         /// <summary>
-        /// A value that corresponds to the default query options supported by <see cref="EnableQueryAttribute"/>.
+        /// A value that corresponds to the default query options supported.
         /// </summary>
         Supported = Filter | OrderBy | Top | Skip | Count | Select | Expand | Format | Apply,
 

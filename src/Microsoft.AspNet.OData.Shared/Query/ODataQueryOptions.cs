@@ -10,8 +10,8 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query.Validators;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -24,74 +24,23 @@ namespace Microsoft.AspNet.OData.Query
     /// Currently this only supports $filter, $orderby, $top, $skip, and $count.
     /// </summary>
     [ODataQueryParameterBinding]
-    public class ODataQueryOptions
+    public partial class ODataQueryOptions
     {
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
-
-        private ETag _etagIfMatch;
-
-        private bool _etagIfMatchChecked;
-
-        private ETag _etagIfNoneMatch;
-
-        private bool _etagIfNoneMatchChecked;
 
         private ODataQueryOptionParser _queryOptionParser;
 
         private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
-        /// the <see cref="ODataQueryContext"/>.
+        /// Gets the request message associated with this instance.
         /// </summary>
-        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information.</param>
-        /// <param name="request">The incoming request message.</param>
-        public ODataQueryOptions(ODataQueryContext context, HttpRequestMessage request)
-        {
-            if (context == null)
-            {
-                throw Error.ArgumentNull("context");
-            }
-
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
-            // Set the request container into context
-            Contract.Assert(context.RequestContainer == null);
-            context.RequestContainer = request.GetRequestContainer();
-
-            // Remember the context and request
-            Context = context;
-            Request = request;
-
-            // Parse the query from request Uri, including only keys which are OData query parameters or parameter alias
-            RawValues = new ODataRawQueryOptions();
-            IDictionary<string, string> queryParameters = GetODataQueryParameters();
-
-            _queryOptionParser = new ODataQueryOptionParser(
-                context.Model,
-                context.ElementType,
-                context.NavigationSource,
-                queryParameters);
-
-            _queryOptionParser.Resolver = request.GetRequestContainer().GetRequiredService<ODataUriResolver>();
-
-            BuildQueryOptions(queryParameters);
-
-            Validator = ODataQueryValidator.GetODataQueryValidator(context);
-        }
+        internal IWebApiRequestMessage InternalRequest { get; private set; }
 
         /// <summary>
         ///  Gets the given <see cref="ODataQueryContext"/>
         /// </summary>
         public ODataQueryContext Context { get; private set; }
-
-        /// <summary>
-        /// Gets the request message associated with this instance.
-        /// </summary>
-        public HttpRequestMessage Request { get; private set; }
 
         /// <summary>
         /// Gets the raw string of all the OData query options
@@ -137,46 +86,6 @@ namespace Microsoft.AspNet.OData.Query
         /// Gets or sets the query validator.
         /// </summary>
         public ODataQueryValidator Validator { get; set; }
-
-        /// <summary>
-        /// Gets the <see cref="ETag"/> from IfMatch header.
-        /// </summary>
-        public virtual ETag IfMatch
-        {
-            get
-            {
-                if (!_etagIfMatchChecked && _etagIfMatch == null)
-                {
-                    EntityTagHeaderValue etagHeaderValue = Request.Headers.IfMatch.SingleOrDefault();
-                    _etagIfMatch = GetETag(etagHeaderValue);
-                    _etagIfMatchChecked = true;
-                }
-
-                return _etagIfMatch;
-            }
-        }
-
-        /// <summary>
-        /// Gets the <see cref="ETag"/> from IfNoneMatch header.
-        /// </summary>
-        public virtual ETag IfNoneMatch
-        {
-            get
-            {
-                if (!_etagIfNoneMatchChecked && _etagIfNoneMatch == null)
-                {
-                    EntityTagHeaderValue etagHeaderValue = Request.Headers.IfNoneMatch.SingleOrDefault();
-                    _etagIfNoneMatch = GetETag(etagHeaderValue);
-                    if (_etagIfNoneMatch != null)
-                    {
-                        _etagIfNoneMatch.IsIfNoneMatch = true;
-                    }
-                    _etagIfNoneMatchChecked = true;
-                }
-
-                return _etagIfNoneMatch;
-            }
-        }
 
         /// <summary>
         /// Check if the given query option is an OData system query option.
@@ -283,7 +192,7 @@ namespace Microsoft.AspNet.OData.Query
             if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
             {
                 result = Apply.ApplyTo(result, querySettings);
-                Request.ODataProperties().ApplyClause = Apply.ApplyClause;
+                InternalRequest.Context.ApplyClause = Apply.ApplyClause;
                 this.Context.ElementClrType = Apply.ResultClrType;
                 apply = Apply.ApplyClause;
             }
@@ -296,16 +205,16 @@ namespace Microsoft.AspNet.OData.Query
 
             if (IsAvailableODataQueryOption(Count, AllowedQueryOptions.Count))
             {
-                if (Request.ODataProperties().TotalCountFunc == null)
+                if (InternalRequest.Context.TotalCountFunc == null)
                 {
                     Func<long> countFunc = Count.GetEntityCountFunc(result);
                     if (countFunc != null)
                     {
-                        Request.ODataProperties().TotalCountFunc = countFunc;
+                        InternalRequest.Context.TotalCountFunc = countFunc;
                     }
                 }
 
-                if (ODataCountMediaTypeMapping.IsCountRequest(Request))
+                if (InternalRequest.IsCountRequest())
                 {
                     return result;
                 }
@@ -374,11 +283,11 @@ namespace Microsoft.AspNet.OData.Query
             {
                 bool resultsLimited;
                 result = LimitResults(result, pageSize, out resultsLimited);
-                if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri &&
-                    Request.ODataProperties().NextLink == null)
+                if (resultsLimited && InternalRequest.RequestUri != null && InternalRequest.RequestUri.IsAbsoluteUri &&
+                    InternalRequest.Context.NextLink == null)
                 {
-                    Uri nextPageLink = Request.GetNextPageLink(pageSize);
-                    Request.ODataProperties().NextLink = nextPageLink;
+                    Uri nextPageLink = InternalRequest.GetNextPageLink(pageSize);
+                    InternalRequest.Context.NextLink = nextPageLink;
                 }
             }
 
@@ -643,11 +552,6 @@ namespace Microsoft.AspNet.OData.Query
             return truncatedCollection.AsQueryable();
         }
 
-        internal virtual ETag GetETag(EntityTagHeaderValue etagHeaderValue)
-        {
-            return Request.GetETag(etagHeaderValue);
-        }
-
         internal void AddAutoSelectExpandProperties()
         {
             bool containsAutoSelectExpandProperties = false;
@@ -698,10 +602,7 @@ namespace Microsoft.AspNet.OData.Query
 
         private IDictionary<string, string> GetODataQueryParameters()
         {
-            return Request.GetQueryNameValuePairs()
-                .Where(p => p.Key.StartsWith("$", StringComparison.Ordinal) ||
-                    p.Key.StartsWith("@", StringComparison.Ordinal))
-                .ToDictionary(p => p.Key, p => p.Value);
+            return InternalRequest.ODataQueryParameters;
         }
 
         private string GetAutoSelectRawValue()
@@ -789,6 +690,8 @@ namespace Microsoft.AspNet.OData.Query
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase",
             Justification = "Need lower case string here.")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+            Justification = "These are simple conversion function and cannot be split up.")]
         private void BuildQueryOptions(IDictionary<string, string> queryParameters)
         {
             foreach (KeyValuePair<string, string> kvp in queryParameters)
@@ -852,7 +755,7 @@ namespace Microsoft.AspNet.OData.Query
                     Context, _queryOptionParser);
             }
 
-            if (ODataCountMediaTypeMapping.IsCountRequest(Request))
+            if (InternalRequest.IsCountRequest())
             {
                 Count = new CountQueryOption(
                     "true",
@@ -893,7 +796,7 @@ namespace Microsoft.AspNet.OData.Query
                     SelectExpand.Context,
                     processedClause);
 
-                Request.ODataProperties().SelectExpandClause = processedClause;
+                InternalRequest.Context.SelectExpandClause = processedClause;
 
                 var type = typeof(T);
                 if (type == typeof(IQueryable))

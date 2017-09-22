@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 
 namespace Microsoft.AspNet.OData
 {
@@ -185,12 +186,17 @@ namespace Microsoft.AspNet.OData
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching all exceptions in this case is the right to do.")]
         // This code is copied from DefaultHttpControllerTypeResolver.GetControllerTypes.
-        internal static IEnumerable<Type> GetLoadedTypes(IAssembliesResolver assembliesResolver)
+        internal static IEnumerable<Type> GetLoadedTypes(IWebApiAssembliesResolver assembliesResolver)
         {
             List<Type> result = new List<Type>();
 
+            if (assembliesResolver == null)
+            {
+                return result;
+            }
+
             // Go through all assemblies referenced by the application and search for types matching a predicate
-            ICollection<Assembly> assemblies = assembliesResolver.GetAssemblies();
+            IEnumerable<Assembly> assemblies = assembliesResolver.Assemblies;
             foreach (Assembly assembly in assemblies)
             {
                 Type[] exportedTypes = null;

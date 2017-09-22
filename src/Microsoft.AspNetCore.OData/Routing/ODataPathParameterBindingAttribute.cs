@@ -1,0 +1,15 @@
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
+
+namespace Microsoft.AspNet.OData.Routing
+{
+    /// <summary>
+    /// Implementation of <see cref="ParameterBindingAttribute"/> used to bind an instance of <see cref="ODataPath"/> as an action parameter.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Parameter, Inherited = true, AllowMultiple = false)]
+    public sealed partial class ODataPathParameterBindingAttribute : Attribute
+    {
+    }
+}

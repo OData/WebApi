@@ -19,7 +19,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     /// <summary>
     /// OData serializer for serializing a collection of <see cref="IEdmEntityType" /> or <see cref="IEdmComplexType"/>
     /// </summary>
-    public class ODataResourceSetSerializer : ODataEdmTypeSerializer
+    public partial class ODataResourceSetSerializer : ODataEdmTypeSerializer
     {
         private const string ResourceSet = "ResourceSet";
 
@@ -117,7 +117,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             if (resourceSerializer == null)
             {
                 throw new SerializationException(
-                    Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                    Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName()));
             }
 
             // save this for later to support JSON odata.streaming.
@@ -179,8 +179,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 ResourceSetContext resourceSetContext = new ResourceSetContext
                 {
-                    Request = writeContext.Request,
-                    RequestContext = writeContext.RequestContext,
+                    Request= writeContext.Request,
                     EntitySetBase = writeContext.NavigationSource as IEdmEntitySetBase,
                     Url = writeContext.Url,
                     ResourceSetInstance = resourceSetInstance
@@ -214,10 +213,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
                 else if (writeContext.Request != null)
                 {
-                    resourceSet.NextPageLink = writeContext.Request.ODataProperties().NextLink;
-                    resourceSet.DeltaLink = writeContext.Request.ODataProperties().DeltaLink;
+                    resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLink;
+                    resourceSet.DeltaLink = writeContext.InternalRequest.Context.DeltaLink;
 
-                    long? countValue = writeContext.Request.ODataProperties().TotalCount;
+                    long? countValue = writeContext.InternalRequest.Context.TotalCount;
                     if (countValue.HasValue)
                     {
                         resourceSet.Count = countValue.Value;
@@ -290,7 +289,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 return null;
             }
 
-            Uri baseUri = new Uri(writeContext.Url.CreateODataLink(MetadataSegment.Instance));
+            Uri baseUri = new Uri(writeContext.InternalUrl.CreateODataLink(MetadataSegment.Instance));
             Uri metadata = new Uri(baseUri, "#" + operation.FullName());
 
             ODataOperation odataOperation;
@@ -344,7 +343,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if (navigationLink != null)
             {
-                return HttpRequestMessageExtensions.GetNextPageLink(navigationLink, pageSize);
+                return ODataResourceSetSerializer.GetNextPageLink(navigationLink, pageSize);
             }
 
             return null;

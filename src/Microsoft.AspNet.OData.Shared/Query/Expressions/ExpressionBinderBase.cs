@@ -13,7 +13,7 @@ using System.Reflection;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     /// <summary>
     /// The base class for all expression binders.
     /// </summary>
-    public abstract class ExpressionBinderBase
+    public abstract partial class ExpressionBinderBase
     {
         internal static readonly MethodInfo StringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
 
@@ -57,7 +57,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         internal ODataQuerySettings QuerySettings { get; set; }
 
-        internal IAssembliesResolver AssembliesResolver { get; set; }
+        internal IWebApiAssembliesResolver AssembliesResolver { get; set; }
 
         /// <summary>
         /// Base query used for the binder.
@@ -69,20 +69,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// </summary>
         internal IDictionary<string, Expression> FlattenedPropertyContainer;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExpressionBinderBase"/> class.
-        /// </summary>
-        /// <param name="requestContainer">The request container.</param>
-        protected ExpressionBinderBase(IServiceProvider requestContainer)
-        {
-            Contract.Assert(requestContainer != null);
-
-            QuerySettings = requestContainer.GetRequiredService<ODataQuerySettings>();
-            Model = requestContainer.GetRequiredService<IEdmModel>();
-            AssembliesResolver = requestContainer.GetRequiredService<IAssembliesResolver>();
-        }
-
-        internal ExpressionBinderBase(IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
+        internal ExpressionBinderBase(IEdmModel model, IWebApiAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
             : this(model, querySettings)
         {
             AssembliesResolver = assembliesResolver;

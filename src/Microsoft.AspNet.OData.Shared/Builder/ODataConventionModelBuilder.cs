@@ -11,6 +11,7 @@ using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Builder
@@ -19,7 +20,7 @@ namespace Microsoft.AspNet.OData.Builder
     /// <see cref="ODataConventionModelBuilder"/> is used to automatically map CLR classes to an EDM model based on a set of <see cref="IConvention"/>.
     /// </summary>
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Most of the referenced types are helper types needed for operation.")]
-    public class ODataConventionModelBuilder : ODataModelBuilder
+    public partial class ODataConventionModelBuilder : ODataModelBuilder
     {
         private static readonly List<IConvention> _conventions = new List<IConvention>
         {
@@ -86,37 +87,29 @@ namespace Microsoft.AspNet.OData.Builder
         private Lazy<IDictionary<Type, List<Type>>> _allTypesWithDerivedTypeMapping;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
-        /// </summary>
-        public ODataConventionModelBuilder()
-        {
-            Initialize(new DefaultAssembliesResolver(), isQueryCompositionMode: false);
-        }
-
-        /// <summary>
         /// Initializes a new <see cref="ODataConventionModelBuilder"/>.
         /// </summary>
-        /// <param name="configuration">The <see cref="HttpConfiguration"/> to use.</param>
-        public ODataConventionModelBuilder(HttpConfiguration configuration)
-            : this(configuration, isQueryCompositionMode: false)
+        /// <param name="resolver">The <see cref="IWebApiAssembliesResolver"/> to use.</param>
+        internal ODataConventionModelBuilder(IWebApiAssembliesResolver resolver)
+            : this(resolver, isQueryCompositionMode: false)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
         /// </summary>
-        /// <param name="configuration">The <see cref="HttpConfiguration"/> to use.</param>
+        /// <param name="resolver">The <see cref="IWebApiAssembliesResolver"/> to use.</param>
         /// <param name="isQueryCompositionMode">If the model is being built for only querying.</param>
         /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <c>true</c> has more relaxed
         /// inference rules and also treats all types as entity types. This constructor is intended for use by unit testing only.</remarks>
-        public ODataConventionModelBuilder(HttpConfiguration configuration, bool isQueryCompositionMode)
+        internal ODataConventionModelBuilder(IWebApiAssembliesResolver resolver, bool isQueryCompositionMode)
         {
-            if (configuration == null)
+            if (resolver == null)
             {
-                throw Error.ArgumentNull("configuration");
+                throw Error.ArgumentNull("resolver");
             }
 
-            Initialize(configuration.Services.GetAssembliesResolver(), isQueryCompositionMode);
+            Initialize(resolver, isQueryCompositionMode);
         }
 
         /// <summary>
@@ -131,7 +124,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <remarks>Use this action to modify the <see cref="ODataModelBuilder"/> configuration that has been inferred by convention.</remarks>
         public Action<ODataConventionModelBuilder> OnModelCreating { get; set; }
 
-        internal void Initialize(IAssembliesResolver assembliesResolver, bool isQueryCompositionMode)
+        internal void Initialize(IWebApiAssembliesResolver assembliesResolver, bool isQueryCompositionMode)
         {
             _isQueryCompositionMode = isQueryCompositionMode;
             _configuredNavigationSources = new HashSet<NavigationSourceConfiguration>();
@@ -1071,7 +1064,7 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
-        private static Dictionary<Type, List<Type>> BuildDerivedTypesMapping(IAssembliesResolver assemblyResolver)
+        private static Dictionary<Type, List<Type>> BuildDerivedTypesMapping(IWebApiAssembliesResolver assemblyResolver)
         {
             IEnumerable<Type> allTypes = TypeHelper.GetLoadedTypes(assemblyResolver).Where(t => t.IsVisible && t.IsClass && t != typeof(object));
             Dictionary<Type, List<Type>> allTypeMapping = allTypes.ToDictionary(k => k, k => new List<Type>());

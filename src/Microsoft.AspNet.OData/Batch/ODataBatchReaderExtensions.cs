@@ -148,7 +148,7 @@ namespace Microsoft.AspNet.OData.Batch
         {
             ODataBatchOperationRequestMessage batchRequest = reader.CreateOperationRequestMessage();
             HttpRequestMessage request = new HttpRequestMessage();
-            request.Method = new HttpMethod(batchRequest.Method);
+            request.Method = new System.Net.Http.HttpMethod(batchRequest.Method);
             request.RequestUri = batchRequest.Url;
 
             if (bufferContentStream)

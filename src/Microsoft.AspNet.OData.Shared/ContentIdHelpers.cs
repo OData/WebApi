@@ -53,17 +53,16 @@ namespace Microsoft.AspNet.OData
         }
 
         public static void AddLocationHeaderToMapping(
-            HttpResponseMessage response,
+            Uri location,
             IDictionary<string, string> contentIdToLocationMapping,
             string contentId)
         {
-            Contract.Assert(response != null);
             Contract.Assert(contentIdToLocationMapping != null);
             Contract.Assert(contentId != null);
 
-            if (response.Headers.Location != null)
+            if (location != null)
             {
-                contentIdToLocationMapping.Add(contentId, response.Headers.Location.AbsoluteUri);
+                contentIdToLocationMapping.Add(contentId, location.AbsoluteUri);
             }
         }
 

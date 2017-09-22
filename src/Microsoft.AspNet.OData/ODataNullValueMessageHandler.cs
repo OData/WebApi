@@ -38,7 +38,7 @@ namespace Microsoft.AspNet.OData
             // in a 204 response status code, is when a primitive property is set to null through a PUT request to the
             // property URL and in that case, the user can return the right status code himself.
             ObjectContent content = response == null ? null : response.Content as ObjectContent;
-            if (request.Method == HttpMethod.Get && content != null && content.Value == null &&
+            if (request.Method == System.Net.Http.HttpMethod.Get && content != null && content.Value == null &&
                 response.StatusCode == HttpStatusCode.OK)
             {
                 HttpStatusCode? newStatusCode = GetUpdatedResponseStatusCodeOrNull(request.ODataProperties().Path);

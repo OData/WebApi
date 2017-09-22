@@ -48,7 +48,7 @@ namespace Microsoft.AspNet.OData.Builder
                 idLinkPathSegments.Add(new TypeSegment(resourceContext.StructuredType, navigationSource: null));
             }
 
-            string idLink = resourceContext.Url.CreateODataLink(idLinkPathSegments);
+            string idLink = resourceContext.InternalUrlHelper.CreateODataLink(idLinkPathSegments);
             if (idLink == null)
             {
                 return null;
@@ -86,7 +86,7 @@ namespace Microsoft.AspNet.OData.Builder
 
             navigationPathSegments.Add(new NavigationPropertySegment(navigationProperty, navigationSource: null));
 
-            string link = resourceContext.Url.CreateODataLink(navigationPathSegments);
+            string link = resourceContext.InternalUrlHelper.CreateODataLink(navigationPathSegments);
             if (link == null)
             {
                 return null;
@@ -174,7 +174,7 @@ namespace Microsoft.AspNet.OData.Builder
             OperationSegment operationSegment = new OperationSegment(action, entitySet: null);
             actionPathSegments.Add(operationSegment);
 
-            string actionLink = resourceSetContext.Url.CreateODataLink(actionPathSegments);
+            string actionLink = resourceSetContext.InternalUrlHelper.CreateODataLink(actionPathSegments);
             return actionLink == null ? null : new Uri(actionLink);
         }
 
@@ -239,7 +239,7 @@ namespace Microsoft.AspNet.OData.Builder
             OperationSegment segment = new OperationSegment(new[] { functionImport }, parameters, null);
             functionPathSegments.Add(segment);
 
-            string functionLink = resourceSetContext.Url.CreateODataLink(functionPathSegments);
+            string functionLink = resourceSetContext.InternalUrlHelper.CreateODataLink(functionPathSegments);
             return functionLink == null ? null : new Uri(functionLink);
         }
 
@@ -318,7 +318,7 @@ namespace Microsoft.AspNet.OData.Builder
             OperationSegment operationSegment = new OperationSegment(new[] { action }, null);
             actionPathSegments.Add(operationSegment);
 
-            string actionLink = resourceContext.Url.CreateODataLink(actionPathSegments);
+            string actionLink = resourceContext.InternalUrlHelper.CreateODataLink(actionPathSegments);
             return actionLink == null ? null : new Uri(actionLink);
         }
 
@@ -393,7 +393,7 @@ namespace Microsoft.AspNet.OData.Builder
             OperationSegment segment = new OperationSegment(new[] { function }, parameters, null);
             functionPathSegments.Add(segment);
 
-            string functionLink = resourceContext.Url.CreateODataLink(functionPathSegments);
+            string functionLink = resourceContext.InternalUrlHelper.CreateODataLink(functionPathSegments);
             return functionLink == null ? null : new Uri(functionLink);
         }
 
@@ -535,7 +535,7 @@ namespace Microsoft.AspNet.OData.Builder
             this ResourceSetContext feedContext,
             IList<ODataPathSegment> odataPath)
         {
-            GenerateBaseODataPathSegmentsForNonSingletons(feedContext.Request.ODataProperties().Path,
+            GenerateBaseODataPathSegmentsForNonSingletons(feedContext.InternalRequest.Context.Path,
                 feedContext.EntitySetBase,
                 odataPath);
         }

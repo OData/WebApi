@@ -9,9 +9,9 @@ using Microsoft.OData;
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
     /// <summary>
-    /// Represents an <see cref="ODataSerializer"/> to serialize <see cref="ODataError"/>s and <see cref="HttpError"/>s.
+    /// Represents an <see cref="ODataSerializer"/> to serialize <see cref="ODataError"/>s.
     /// </summary>
-    public class ODataErrorSerializer : ODataSerializer
+    public partial class ODataErrorSerializer : ODataSerializer
     {
         /// <summary>
         /// Initializes a new instance of the class <see cref="ODataSerializer"/>.
@@ -36,15 +36,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             ODataError oDataError = graph as ODataError;
             if (oDataError == null)
             {
-                HttpError httpError = graph as HttpError;
-                if (httpError == null)
+                if (!IsHttpError(graph))
                 {
                     string message = Error.Format(SRResources.ErrorTypeMustBeODataErrorOrHttpError, graph.GetType().FullName);
                     throw new SerializationException(message);
                 }
                 else
                 {
-                    oDataError = httpError.CreateODataError();
+                    oDataError = CreateODataError(graph);
                 }
             }
 

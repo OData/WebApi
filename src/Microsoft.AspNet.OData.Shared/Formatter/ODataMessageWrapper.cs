@@ -29,17 +29,17 @@ namespace Microsoft.AspNet.OData.Formatter
         {
         }
 
-        public ODataMessageWrapper(Stream stream, HttpHeaders headers)
+        public ODataMessageWrapper(Stream stream, Dictionary<string, string> headers)
             : this(stream: stream, headers: headers, contentIdMapping: null)
         {
         }
 
-        public ODataMessageWrapper(Stream stream, HttpHeaders headers, IDictionary<string, string> contentIdMapping)
+        public ODataMessageWrapper(Stream stream, Dictionary<string, string> headers, IDictionary<string, string> contentIdMapping)
         {
             _stream = stream;
             if (headers != null)
             {
-                _headers = headers.ToDictionary(kvp => kvp.Key, kvp => String.Join(";", kvp.Value));
+                _headers = headers;
             }
             else
             {

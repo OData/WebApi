@@ -158,8 +158,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     if (itemSerializer == null)
                     {
                         throw new SerializationException(
-                            Error.Format(SRResources.TypeCannotBeSerialized, actualType.FullName(),
-                            typeof(ODataMediaTypeFormatter).Name));
+                            Error.Format(SRResources.TypeCannotBeSerialized, actualType.FullName()));
                     }
 
                     // ODataCollectionWriter expects the individual elements in the collection to be the underlying

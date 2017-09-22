@@ -99,7 +99,6 @@ namespace Microsoft.AspNet.OData.Routing
             ODataUriParser uriParser;
             Uri serviceRootUri = null;
             Uri fullUri = null;
-            NameValueCollection queryString = null;
             IEdmModel model = requestContainer.GetRequiredService<IEdmModel>();
             if (template)
             {
@@ -116,7 +115,6 @@ namespace Microsoft.AspNet.OData.Routing
                         : serviceRoot + "/");
 
                 fullUri = new Uri(serviceRootUri, odataPath);
-                queryString = fullUri.ParseQueryString();
                 uriParser = new ODataUriParser(model, serviceRootUri, fullUri, requestContainer);
             }
 
@@ -200,7 +198,24 @@ namespace Microsoft.AspNet.OData.Routing
                                 !(id.EdmType.IsOrInheritsFrom(lastSegmentEdmType.ElementType.Definition) ||
                                   lastSegmentEdmType.ElementType.Definition.IsOrInheritsFrom(id.EdmType)))))
                     {
-                        throw new ODataException(Error.Format(SRResources.InvalidDollarId, queryString.Get("$id")));
+                        // To avoid a dependency on System.Net.Http, extract id manually.
+                        string idValue = fullUri.Query;
+                        string idParam = "$id=";
+                        int start = idValue.IndexOf(idParam, StringComparison.OrdinalIgnoreCase);
+                        if (start >= 0)
+                        {
+                            int end = idValue.IndexOf("&", start, StringComparison.OrdinalIgnoreCase);
+                            if (end >= 0)
+                            {
+                                idValue = idValue.Substring(start + idParam.Length, end - 1);
+                            }
+                            else
+                            {
+                                idValue = idValue.Substring(start + idParam.Length);
+                            }
+                        }
+
+                        throw new ODataException(Error.Format(SRResources.InvalidDollarId, idValue));
                     }
                 }
             }

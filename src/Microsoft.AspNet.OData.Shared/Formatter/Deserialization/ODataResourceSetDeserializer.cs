@@ -121,7 +121,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             if (deserializer == null)
             {
                 throw new SerializationException(
-                    Error.Format(SRResources.TypeCannotBeDeserialized, elementType.FullName(), typeof(ODataMediaTypeFormatter).Name));
+                    Error.Format(SRResources.TypeCannotBeDeserialized, elementType.FullName()));
             }
 
             foreach (ODataResourceWrapper resourceWrapper in resourceSet.Resources)

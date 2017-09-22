@@ -1,7 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Linq;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -10,11 +11,11 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles the singleton.
     /// </summary>
-    public class SingletonRoutingConvention : NavigationSourceRoutingConvention
+    public partial class SingletonRoutingConvention
     {
         /// <inheritdoc/>
-        public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext,
-            ILookup<string, HttpActionDescriptor> actionMap)
+        internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext,
+            IWebApiActionMap actionMap)
         {
             if (odataPath == null)
             {
@@ -62,19 +63,19 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             return null;
         }
 
-        private static string GetActionNamePrefix(HttpMethod method)
+        private static string GetActionNamePrefix(ODataRequestMethod method)
         {
             string actionNamePrefix;
-            switch (method.Method.ToUpperInvariant())
+            switch (method)
             {
-                case "GET":
+                case ODataRequestMethod.Get:
                     actionNamePrefix = "Get";
                     break;
-                case "PUT":
+                case ODataRequestMethod.Put:
                     actionNamePrefix = "Put";
                     break;
-                case "PATCH":
-                case "MERGE":
+                case ODataRequestMethod.Patch:
+                case ODataRequestMethod.Merge:
                     actionNamePrefix = "Patch";
                     break;
                 default:

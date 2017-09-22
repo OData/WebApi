@@ -15,7 +15,7 @@ using Microsoft.OData.Edm.Csdl;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Represents an <see cref="ApiController"/> for generating OData servicedoc and metadata document ($metadata).
+    /// Represents a controller for generating OData servicedoc and metadata document ($metadata).
     /// </summary>
     public class MetadataController : ODataController
     {

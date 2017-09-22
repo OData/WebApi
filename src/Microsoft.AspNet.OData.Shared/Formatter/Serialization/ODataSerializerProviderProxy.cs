@@ -11,7 +11,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     /// <summary>
     /// The default <see cref="ODataSerializerProvider"/>.
     /// </summary>
-    internal class ODataSerializerProviderProxy : ODataSerializerProvider
+    internal partial class ODataSerializerProviderProxy : ODataSerializerProvider
     {
         private static readonly ODataSerializerProviderProxy _instance = new ODataSerializerProviderProxy();
 
@@ -43,13 +43,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public override ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmType)
         {
             return RequestContainer.GetRequiredService<ODataSerializerProvider>().GetEdmTypeSerializer(edmType);
-        }
-
-        /// <inheritdoc />
-        public override ODataSerializer GetODataPayloadSerializer(Type type, HttpRequestMessage request)
-        {
-            return RequestContainer.GetRequiredService<ODataSerializerProvider>()
-                .GetODataPayloadSerializer(type, request);
         }
     }
 }

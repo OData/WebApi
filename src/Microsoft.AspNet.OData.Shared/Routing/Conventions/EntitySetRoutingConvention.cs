@@ -1,7 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Linq;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -10,7 +11,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles entity sets.
     /// </summary>
-    public class EntitySetRoutingConvention : NavigationSourceRoutingConvention
+    public partial class EntitySetRoutingConvention
     {
         /// <summary>
         /// Selects the action for OData requests.
@@ -21,7 +22,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// <returns>
         ///   <c>null</c> if the request isn't handled by this convention; otherwise, the name of the selected action
         /// </returns>
-        public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
+        internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
             if (odataPath == null)
             {
@@ -42,16 +43,15 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             {
                 EntitySetSegment entitySetSegment = (EntitySetSegment)odataPath.Segments[0];
                 IEdmEntitySetBase entitySet = entitySetSegment.EntitySet;
-                HttpMethod httpMethod = controllerContext.Request.Method;
 
-                if (httpMethod == HttpMethod.Get)
+                if (ODataRequestMethod.Get == controllerContext.Request.Method)
                 {
                     // e.g. Try GetCustomers first, then fall back to Get action name
                     return actionMap.FindMatchingAction(
                         "Get" + entitySet.Name,
                         "Get");
                 }
-                else if (httpMethod == HttpMethod.Post)
+                else if (ODataRequestMethod.Post == controllerContext.Request.Method)
                 {
                     // e.g. Try PostCustomer first, then fall back to Post action name
                     return actionMap.FindMatchingAction(
@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 }
             }
             else if (odataPath.PathTemplate == "~/entityset/$count" &&
-                controllerContext.Request.Method == HttpMethod.Get)
+                ODataRequestMethod.Get == controllerContext.Request.Method)
             {
                 EntitySetSegment entitySetSegment = (EntitySetSegment)odataPath.Segments[0];
                 IEdmEntitySetBase entitySet = entitySetSegment.EntitySet;
@@ -76,16 +76,15 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 IEdmEntitySetBase entitySet = entitySetSegment.EntitySet;
                 IEdmCollectionType collectionType = (IEdmCollectionType)odataPath.EdmType;
                 IEdmEntityType entityType = (IEdmEntityType)collectionType.ElementType.Definition;
-                HttpMethod httpMethod = controllerContext.Request.Method;
 
-                if (httpMethod == HttpMethod.Get)
+                if (ODataRequestMethod.Get == controllerContext.Request.Method)
                 {
                     // e.g. Try GetCustomersFromSpecialCustomer first, then fall back to GetFromSpecialCustomer
                     return actionMap.FindMatchingAction(
                         "Get" + entitySet.Name + "From" + entityType.Name,
                         "GetFrom" + entityType.Name);
                 }
-                else if (httpMethod == HttpMethod.Post)
+                else if (ODataRequestMethod.Post == controllerContext.Request.Method)
                 {
                     // e.g. Try PostCustomerFromSpecialCustomer first, then fall back to PostFromSpecialCustomer
                     return actionMap.FindMatchingAction(
@@ -94,7 +93,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 }
             }
             else if (odataPath.PathTemplate == "~/entityset/cast/$count" &&
-                controllerContext.Request.Method == HttpMethod.Get)
+                ODataRequestMethod.Get == controllerContext.Request.Method)
             {
                 EntitySetSegment entitySetSegment = (EntitySetSegment)odataPath.Segments[0];
                 IEdmEntitySetBase entitySet = entitySetSegment.EntitySet;

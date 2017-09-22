@@ -2,6 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -10,10 +12,10 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles action invocations.
     /// </summary>
-    public class ActionRoutingConvention : NavigationSourceRoutingConvention
+    public partial class ActionRoutingConvention
     {
         /// <inheritdoc/>
-        public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
+        internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
             if (odataPath == null)
             {
@@ -30,7 +32,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 throw Error.ArgumentNull("actionMap");
             }
 
-            if (controllerContext.Request.Method == HttpMethod.Post)
+            if (ODataRequestMethod.Post == controllerContext.Request.Method)
             {
                 switch (odataPath.PathTemplate)
                 {

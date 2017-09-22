@@ -6,6 +6,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -18,7 +19,7 @@ namespace Microsoft.AspNet.OData.Query
     /// </summary>
     public class ApplyQueryOption
     {
-        private readonly IAssembliesResolver _assembliesResolver;
+        private readonly IWebApiAssembliesResolver _assembliesResolver;
 
         private ApplyClause _applyClause;
         private ODataQueryOptionParser _queryOptionParser;

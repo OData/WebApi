@@ -13,121 +13,39 @@ namespace Microsoft.AspNet.OData.Formatter
     /// </summary>
     internal static class ODataMediaTypes
     {
-        private static readonly MediaTypeHeaderValue _applicationJson = new MediaTypeHeaderValue("application/json");
-        private static readonly MediaTypeHeaderValue _applicationJsonODataFullMetadata =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
-        private static readonly MediaTypeHeaderValue _applicationJsonODataFullMetadataStreamingFalse =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false");
-        private static readonly MediaTypeHeaderValue _applicationJsonODataFullMetadataStreamingTrue =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true");
-        private static readonly MediaTypeHeaderValue _applicationJsonODataMinimalMetadata =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal");
-        private static readonly MediaTypeHeaderValue _applicationJsonODataMinimalMetadataStreamingFalse =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false");
-        private static readonly MediaTypeHeaderValue _applicationJsonODataMinimalMetadataStreamingTrue =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true");
-        private static readonly MediaTypeHeaderValue _applicationJsonODataNoMetadata =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=none");
-        private static readonly MediaTypeHeaderValue _applicationJsonODataNoMetadataStreamingFalse =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false");
-        private static readonly MediaTypeHeaderValue _applicationJsonODataNoMetadataStreamingTrue =
-            MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true");
-        private static readonly MediaTypeHeaderValue _applicationJsonStreamingFalse =
-            MediaTypeHeaderValue.Parse("application/json;odata.streaming=false");
-        private static readonly MediaTypeHeaderValue _applicationJsonStreamingTrue =
-            MediaTypeHeaderValue.Parse("application/json;odata.streaming=true");
-        private static readonly MediaTypeHeaderValue _applicationXml = new MediaTypeHeaderValue("application/xml");
+        public static readonly string ApplicationJson = "application/json";
+        public static readonly string ApplicationJsonODataFullMetadata = "application/json; odata.metadata=full";
+        public static readonly string ApplicationJsonODataFullMetadataStreamingFalse = "application/json; odata.metadata=full; odata.streaming=false";
+        public static readonly string ApplicationJsonODataFullMetadataStreamingTrue = "application/json; odata.metadata=full; odata.streaming=true";
+        public static readonly string ApplicationJsonODataMinimalMetadata = "application/json; odata.metadata=minimal";
+        public static readonly string ApplicationJsonODataMinimalMetadataStreamingFalse = "application/json; odata.metadata=minimal; odata.streaming=false";
+        public static readonly string ApplicationJsonODataMinimalMetadataStreamingTrue = "application/json; odata.metadata=minimal; odata.streaming=true";
+        public static readonly string ApplicationJsonODataNoMetadata = "application/json; odata.metadata=none";
+        public static readonly string ApplicationJsonODataNoMetadataStreamingFalse = "application/json; odata.metadata=none; odata.streaming=false";
+        public static readonly string ApplicationJsonODataNoMetadataStreamingTrue = "application/json; odata.metadata=none; odata.streaming=true";
+        public static readonly string ApplicationJsonStreamingFalse = "application/json; odata.streaming=false";
+        public static readonly string ApplicationJsonStreamingTrue = "application/json; odata.streaming=true";
+        public static readonly string ApplicationXml = "application/xml";
 
-        public static MediaTypeHeaderValue ApplicationJson
+        public static ODataMetadataLevel GetMetadataLevel(string mediaType, IEnumerable<KeyValuePair<string, string>> parameters)
         {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJson).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonODataFullMetadata
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataFullMetadata).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonODataFullMetadataStreamingFalse
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataFullMetadataStreamingFalse).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonODataFullMetadataStreamingTrue
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataFullMetadataStreamingTrue).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonODataMinimalMetadata
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataMinimalMetadata).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonODataMinimalMetadataStreamingFalse
-        {
-            get
-            {
-                return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataMinimalMetadataStreamingFalse).Clone();
-            }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonODataMinimalMetadataStreamingTrue
-        {
-            get
-            {
-                return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataMinimalMetadataStreamingTrue).Clone();
-            }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonODataNoMetadata
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataNoMetadata).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonODataNoMetadataStreamingFalse
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataNoMetadataStreamingFalse).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonODataNoMetadataStreamingTrue
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonODataNoMetadataStreamingTrue).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonStreamingFalse
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonStreamingFalse).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationJsonStreamingTrue
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationJsonStreamingTrue).Clone(); }
-        }
-
-        public static MediaTypeHeaderValue ApplicationXml
-        {
-            get { return (MediaTypeHeaderValue)((ICloneable)_applicationXml).Clone(); }
-        }
-
-        public static ODataMetadataLevel GetMetadataLevel(MediaTypeHeaderValue contentType)
-        {
-            if (contentType == null)
+            if (mediaType == null)
             {
                 return ODataMetadataLevel.MinimalMetadata;
             }
 
-            if (!String.Equals(ODataMediaTypes.ApplicationJson.MediaType, contentType.MediaType,
+            if (!String.Equals(ODataMediaTypes.ApplicationJson, mediaType,
                 StringComparison.Ordinal))
             {
                 return ODataMetadataLevel.MinimalMetadata;
             }
 
-            Contract.Assert(contentType.Parameters != null);
-            NameValueHeaderValue odataParameter =
-                contentType.Parameters.FirstOrDefault(
-                    (p) => String.Equals("odata.metadata", p.Name, StringComparison.OrdinalIgnoreCase));
+            Contract.Assert(parameters != null);
+            KeyValuePair<string, string> odataParameter =
+                parameters.FirstOrDefault(
+                    (p) => String.Equals("odata.metadata", p.Key, StringComparison.OrdinalIgnoreCase));
 
-            if (odataParameter != null)
+            if (!odataParameter.Equals(default(KeyValuePair<string, string>)))
             {
                 if (String.Equals("full", odataParameter.Value, StringComparison.OrdinalIgnoreCase))
                 {

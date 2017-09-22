@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Linq;
+using Microsoft.AspNet.OData.Interfaces;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
 {
@@ -10,7 +10,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// </summary>
     internal static class ActionMapExtensions
     {
-        public static string FindMatchingAction(this ILookup<string, HttpActionDescriptor> actionMap, params string[] targetActionNames)
+        public static string FindMatchingAction(this IWebApiActionMap actionMap, params string[] targetActionNames)
         {
             foreach (string targetActionName in targetActionNames)
             {

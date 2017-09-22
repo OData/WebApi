@@ -10,8 +10,9 @@
 
 namespace Microsoft.AspNet.OData.Common {
     using System;
-    
-    
+    using System.Linq;
+    using System.Reflection;
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -39,7 +40,20 @@ namespace Microsoft.AspNet.OData.Common {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("System.Web.OData.Properties.SRResources", typeof(SRResources).Assembly);
+#if NETFX_CORE
+                    Assembly assembly = typeof(SRResources).GetTypeInfo().Assembly;
+#else
+                    Assembly assembly = typeof(SRResources).Assembly;
+#endif
+
+                    // Find the CommonResources.resources file's full resource name in this assembly
+                    string srResourcesName = assembly.GetManifestResourceNames().Where(s => s.EndsWith("SRResources.resources", StringComparison.OrdinalIgnoreCase)).Single();
+
+                    // Trim off the ".resources"
+                    srResourcesName = srResourcesName.Substring(0, srResourcesName.Length - 10);
+
+                    // Load the resource manager
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager(srResourcesName, assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -2068,7 +2082,7 @@ namespace Microsoft.AspNet.OData.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; cannot be deserialized using the {1}..
+        ///   Looks up a localized string similar to &apos;{0}&apos; cannot be deserialized using the ODataMediaTypeFormatter..
         /// </summary>
         internal static string TypeCannotBeDeserialized {
             get {
@@ -2095,7 +2109,7 @@ namespace Microsoft.AspNet.OData.Common {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; cannot be serialized using the {1}..
+        ///   Looks up a localized string similar to &apos;{0}&apos; cannot be serialized using the ODataMediaTypeFormatter..
         /// </summary>
         internal static string TypeCannotBeSerialized {
             get {

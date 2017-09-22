@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -81,7 +82,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private FilterBinder(
             IEdmModel model,
-            IAssembliesResolver assembliesResolver,
+            IWebApiAssembliesResolver assembliesResolver,
             ODataQuerySettings querySettings,
             Type filterType)
             : base(model, assembliesResolver, querySettings)
@@ -90,13 +91,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         internal static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterClause filterClause, IEdmModel model,
-            IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
+            IWebApiAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
         {
             return Bind(filterClause, typeof(TEntityType), model, assembliesResolver, querySettings) as Expression<Func<TEntityType, bool>>;
         }
 
         internal static Expression Bind(FilterClause filterClause, Type filterType, IEdmModel model,
-            IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
+            IWebApiAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
         {
             if (filterClause == null)
             {
@@ -109,6 +110,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             if (model == null)
             {
                 throw Error.ArgumentNull("model");
+            }
+            if (assembliesResolver == null)
+            {
+                throw Error.ArgumentNull("assembliesResolver");
             }
 
             FilterBinder binder = new FilterBinder(model, assembliesResolver, querySettings, filterType);
@@ -718,6 +723,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// </summary>
         /// <param name="node">The node to bind.</param>
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+            Justification = "These are simple conversion function and cannot be split up.")]
         public virtual Expression BindSingleValueFunctionCallNode(SingleValueFunctionCallNode node)
         {
             switch (node.Name)

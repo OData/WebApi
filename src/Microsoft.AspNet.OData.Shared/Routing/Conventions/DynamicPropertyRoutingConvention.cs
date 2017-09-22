@@ -1,9 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -12,13 +16,15 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles dynamic properties for open type.
     /// </summary>
-    public class DynamicPropertyRoutingConvention : NavigationSourceRoutingConvention
+    public partial class DynamicPropertyRoutingConvention
     {
-        private readonly string _actionName = "DynamicProperty";
+        private const string _actionName = "DynamicProperty";
 
         /// <inheritdoc/>
-        public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext,
-            ILookup<string, HttpActionDescriptor> actionMap)
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+            Justification = "These are simple conversion function and cannot be split up.")]
+        internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext,
+            IWebApiActionMap actionMap)
         {
             if (odataPath == null)
             {
@@ -50,7 +56,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         return null;
                     }
 
-                    if (controllerContext.Request.Method == HttpMethod.Get)
+                    if (ODataRequestMethod.Get == controllerContext.Request.Method)
                     {
                         string actionNamePrefix = String.Format(CultureInfo.InvariantCulture, "Get{0}", _actionName);
                         actionName = actionMap.FindMatchingAction(actionNamePrefix);
@@ -79,7 +85,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         return null;
                     }
 
-                    if (controllerContext.Request.Method == HttpMethod.Get)
+                    if (ODataRequestMethod.Get == controllerContext.Request.Method)
                     {
                         string actionNamePrefix = String.Format(CultureInfo.InvariantCulture, "Get{0}", _actionName);
                         actionName = actionMap.FindMatchingAction(actionNamePrefix + "From" + propertyAccessSegment.Property.Name);
@@ -96,11 +102,11 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     controllerContext.AddKeyValueToRouteData(keyValueSegment);
                 }
 
-                controllerContext.RouteData.Values[ODataRouteConstants.DynamicProperty] = dynamicPropertSegment.Identifier;
+                controllerContext.RouteData.Add(ODataRouteConstants.DynamicProperty, dynamicPropertSegment.Identifier);
                 var key = ODataParameterValue.ParameterValuePrefix + ODataRouteConstants.DynamicProperty;
                 var value = new ODataParameterValue(dynamicPropertSegment.Identifier, EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
-                controllerContext.RouteData.Values[key] = value;
-                controllerContext.Request.ODataProperties().RoutingConventionsStore[key] = value;
+                controllerContext.RouteData.Add(key, value);
+                controllerContext.Request.Context.RoutingConventionsStore.Add(key, value);
                 return actionName;
             }
             return null;

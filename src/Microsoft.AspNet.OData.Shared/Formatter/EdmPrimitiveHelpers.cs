@@ -3,7 +3,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
-#if !NETCORE
+#if NETFX
 using System.Data.Linq;
 #endif
 using System.Diagnostics.Contracts;
@@ -56,7 +56,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 return str.ToCharArray();
             }
-#if !NETCORE
+#if NETFX
             else if (type == typeof(Binary))
             {
                 return new Binary((byte[])value);

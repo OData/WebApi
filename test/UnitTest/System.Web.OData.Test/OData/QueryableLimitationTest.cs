@@ -12,6 +12,7 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.TestCommon;
+using System.Threading.Tasks;
 
 namespace System.Web.OData
 {
@@ -425,6 +426,25 @@ namespace System.Web.OData
                 responseString);
         }
 
+        [Fact]      
+        public async Task QueryableLimitation_WithConcurrentRequests_AnyAllowedInFilter()
+        {
+            // Arrange
+            string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$filter=ImportantOrders/any()";
+            //first request to initialize the service
+            await _client.SendAsync(new HttpRequestMessage(HttpMethod.Get, requestUri));
+
+            // Act            
+            var requests = Enumerable.Range(0, 200)
+                                     .Select(_ => Task.Run(() => _client.SendAsync(new HttpRequestMessage(HttpMethod.Get, requestUri))))
+                                     .ToArray();
+            HttpResponseMessage[] responses = await Task.WhenAll(requests);
+
+            // Assert
+            Assert.True(responses.All(r => r.IsSuccessStatusCode));
+            Assert.True(responses.All(r => r.StatusCode == HttpStatusCode.OK));
+        }
+
         // Controller
         public class QueryLimitCustomersController : ODataController
         {
@@ -456,7 +476,7 @@ namespace System.Web.OData
                             }).ToList()
                     }).ToList();
 
-            [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
+            [EnableQuery(PageSize = 10, MaxExpansionDepth = 5, MaxAnyAllExpressionDepth = 1)]
             public IHttpActionResult Get()
             {
                 return Ok(customers);

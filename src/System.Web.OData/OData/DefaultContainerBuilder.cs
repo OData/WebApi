@@ -79,7 +79,17 @@ namespace System.Web.OData
         /// <returns>The container built by this builder.</returns>
         public virtual IServiceProvider BuildContainer()
         {
-            return (IServiceProvider)services.GetType().GetTypeInfo().Assembly.GetType(typeof(ServiceCollectionContainerBuilderExtensions).GetTypeInfo().FullName).GetMethod(nameof(ServiceCollectionContainerBuilderExtensions.BuildServiceProvider), new[] { typeof(IServiceCollection) }).Invoke(null, new object[] { services });
+            /* "services.BuildServiceProvider()" returns IServiceProvider in Microsoft.Extensions.DependencyInjection 1.0 and ServiceProvider in Microsoft.Extensions.DependencyInjection 2.0
+            * (This is a breaking change)[https://github.com/aspnet/DependencyInjection/issues/550].
+            * To support both versions with the same code base in OData/WebAPI we decided to call that extension method using reflection.
+            * More info at https://github.com/OData/WebApi/pull/1082
+            */
+
+            Assembly microsoftExtensionsDependencyInjectionAssembly = services.GetType().GetTypeInfo().Assembly;
+            TypeInfo serviceCollectionContainerBuilderExtensionsType = microsoftExtensionsDependencyInjectionAssembly.GetType(typeof(ServiceCollectionContainerBuilderExtensions).GetTypeInfo().FullName).GetTypeInfo();
+            MethodInfo buildServiceProviderMethod = serviceCollectionContainerBuilderExtensionsType.GetMethod("BuildServiceProvider", new[] { typeof(IServiceCollection) });
+
+            return (IServiceProvider)buildServiceProviderMethod.Invoke(null, new object[] { services });
         }
 
         private static Microsoft.Extensions.DependencyInjection.ServiceLifetime TranslateServiceLifetime(

@@ -3216,6 +3216,9 @@ public class System.Web.OData.Formatter.Serialization.SelectExpandNode {
 	public static void GetStructuralProperties (Microsoft.OData.Edm.IEdmStructuredType structuredType, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] structuralProperties, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] nestedStructuralProperties)
 }
 
+[
+JsonConverterAttribute(),
+]
 public abstract class System.Web.OData.Query.Expressions.DynamicTypeWrapper {
 	protected DynamicTypeWrapper ()
 

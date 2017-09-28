@@ -47,7 +47,11 @@ namespace Nuwa.WebStack.Host
                 sandbox.Load(TypeDescriptor.TestAssembly.GetName());
             }
 
-            int repeat = 10; // a magic number
+            SecurityHelper.AddIpListen();
+
+            // retry three times using port scan with three port types.
+            int repeat = 3;
+
             bool result = false;
             for (int i = 1; i <= repeat; ++i)
             {
@@ -70,7 +74,7 @@ namespace Nuwa.WebStack.Host
         {
             string baseAddress;
             string port = _portArranger.Reserve();
-            SecurityHelper.AddIpListen();
+
             SecurityOptionElement securityElem = frame.GetFirstElement<SecurityOptionElement>();
             if (securityElem != null)
             {

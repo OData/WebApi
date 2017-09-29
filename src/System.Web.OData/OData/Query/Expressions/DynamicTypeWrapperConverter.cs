@@ -33,10 +33,10 @@ namespace System.Web.OData.Query.Expressions
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            DynamicTypeWrapper selectExpandWrapper = value as DynamicTypeWrapper;
-            if (selectExpandWrapper != null)
+            DynamicTypeWrapper dynamicTypeWrapper = value as DynamicTypeWrapper;
+            if (dynamicTypeWrapper != null)
             {
-                serializer.Serialize(writer, selectExpandWrapper.Values);
+                serializer.Serialize(writer, dynamicTypeWrapper.Values);
             }
         }
     }

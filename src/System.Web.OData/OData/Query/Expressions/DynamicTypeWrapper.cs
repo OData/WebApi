@@ -12,7 +12,6 @@ namespace System.Web.OData.Query.Expressions
     /// <summary>
     /// Represents a container class that contains properties that are grouped by using $apply.
     /// </summary>
-    [JsonConverter(typeof(DynamicTypeWrapperConverter))]
     public abstract class DynamicTypeWrapper
     {
         /// <summary>
@@ -33,6 +32,7 @@ namespace System.Web.OData.Query.Expressions
         }
     }
 
+    [JsonConverter(typeof(DynamicTypeWrapperConverter))]
     internal class GroupByWrapper : DynamicTypeWrapper
     {
         private Dictionary<string, object> _values;

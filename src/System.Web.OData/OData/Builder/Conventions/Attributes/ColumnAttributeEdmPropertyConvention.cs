@@ -3,6 +3,7 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Web.Http;
+using System.Web.OData.Query;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
@@ -42,7 +43,18 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 return; // ignore non-primitive property
             }
 
-            var columnAttribute = attribute as ColumnAttribute;
+            var columnAttribute = attribute as ColumnAttribute;            
+
+            if (columnAttribute != null && columnAttribute.Order > 0)
+            {
+                var columnOrder = columnAttribute.Order;                
+
+                ModelBoundQuerySettings querySettings =
+                    edmProperty.QueryConfiguration.GetModelBoundQuerySettingsOrDefault();
+                
+                querySettings.SetColumnOrder(columnOrder);
+
+            }
             if (columnAttribute == null || columnAttribute.TypeName == null)
             {
                 return; // ignore the column type

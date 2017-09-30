@@ -13,6 +13,7 @@ namespace System.Web.OData.Query
     {
         private int? _pageSize;
         private int? _maxTop = 0;
+        private int _columnOrder = 0;
         private Dictionary<string, ExpandConfiguration> _expandConfigurations = new Dictionary<string, ExpandConfiguration>();
         private Dictionary<string, SelectExpandType> _selectConfigurations = new Dictionary<string, SelectExpandType>();
         private Dictionary<string, bool> _orderByConfigurations = new Dictionary<string, bool>();
@@ -112,6 +113,18 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
+        /// Gets the column order configuration of properties.
+        /// </summary>
+        public int ColumnOrder
+        {
+            get
+            {
+                return _columnOrder;
+            }
+
+        }
+
+        /// <summary>
         /// Gets or sets the default <see cref="SelectExpandType"/> of navigation properties.
         /// </summary>
         public SelectExpandType? DefaultExpandType { get; set; }
@@ -191,6 +204,14 @@ namespace System.Web.OData.Query
             {
                 _orderByConfigurations.Add(orderByConfiguration.Key, orderByConfiguration.Value);
             }
+        }
+
+        /// <summary>
+        /// Set column order.
+        /// </summary>
+        internal void SetColumnOrder(int colunOrder)
+        {
+            _columnOrder = colunOrder;
         }
 
         /// <summary>

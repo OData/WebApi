@@ -10,8 +10,8 @@
 
 ### Checklist (Uncheck if it is not completed)
 
-- [ x ] Test cases added
-- [ x ] Build and test with one-click build and test script passed
+- [ ] *Test cases added*
+- [ ] *Build and test with one-click build and test script passed*
 
 ### Additional work necessary
 

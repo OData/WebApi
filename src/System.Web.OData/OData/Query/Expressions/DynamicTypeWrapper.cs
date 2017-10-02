@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Newtonsoft.Json;
 [module: SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass", Justification = "Extra needed to workaorund EF issue with expression shape.")]
 
 namespace System.Web.OData.Query.Expressions
@@ -31,6 +32,7 @@ namespace System.Web.OData.Query.Expressions
         }
     }
 
+    [JsonConverter(typeof(DynamicTypeWrapperConverter))]
     internal class GroupByWrapper : DynamicTypeWrapper
     {
         private Dictionary<string, object> _values;

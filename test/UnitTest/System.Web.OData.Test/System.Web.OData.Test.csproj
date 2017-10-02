@@ -351,6 +351,7 @@
     <Compile Include="OData\Query\Validators\TopQueryValidatorTest.cs" />
     <Compile Include="OData\Routing\ODataValueProviderFactoryTest.cs" />
     <Compile Include="OData\SelectExpandNestedDollarCountTest.cs" />
+    <Compile Include="OData\ApplyTest.cs" />
     <Compile Include="OData\SelectExpandTest.cs" />
     <Compile Include="PublicApi\PublicApiHelper.cs" />
     <Compile Include="PublicApi\PublicApiTest.cs" />

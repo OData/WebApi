@@ -56,14 +56,21 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
 
             ICollection<Attribute> attributes;
-            if (!attributesCache.TryGetValue(member, out attributes))
+            boolean cacheHit = false;
+
+            lock(attributesCache) // isolate access to cache
+            {
+                cacheHit = attributesCache.TryGetValue(member, out attributes));
+            }
+
+            if (!cacheHit)
             {
                 attributes = member
                 .GetCustomAttributes(inherit: true)
                 .OfType<Attribute>()
                 .ToList();
 
-                lock(attributesCache) // prevent concurrent writes which can result in NullReferenceExceptions in Dictionary
+                lock(attributesCache) // isolate access to cache
                 {
                     // It's OK to replace it someone else already added 
                     attributesCache[member] = attributes; 

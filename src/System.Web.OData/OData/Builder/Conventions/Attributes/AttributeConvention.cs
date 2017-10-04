@@ -63,8 +63,11 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 .OfType<Attribute>()
                 .ToList();
 
-                // It's OK to replace it someone else already added 
-                attributesCache[member] = attributes; 
+                lock(attributesCache) // prevent concurrent writes which can result in NullReferenceExceptions in Dictionary
+                {
+                    // It's OK to replace it someone else already added 
+                    attributesCache[member] = attributes; 
+                }
             }
 
              attributes = attributes

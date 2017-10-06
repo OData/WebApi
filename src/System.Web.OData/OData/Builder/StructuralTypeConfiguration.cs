@@ -211,9 +211,27 @@ namespace System.Web.OData.Builder
         protected internal IList<PropertyInfo> RemovedProperties { get; private set; }
 
         /// <summary>
+        /// Variable for property ExplicitProperties.
+        /// </summary>
+        protected IDictionary<PropertyInfo, PropertyConfiguration> explicitInnerProperties;
+
+        /// <summary>
         /// Gets the collection of explicitly added properties.
         /// </summary>
-        protected internal IDictionary<PropertyInfo, PropertyConfiguration> ExplicitProperties { get; private set; }
+        protected internal IDictionary<PropertyInfo, PropertyConfiguration> ExplicitProperties
+        {
+            get
+            {
+                if (explicitInnerProperties.Any(a => a.Value.QueryConfiguration != null &&
+                        a.Value.QueryConfiguration.ModelBoundQuerySettings != null))
+                {
+                    explicitInnerProperties = OrderColumn(explicitInnerProperties);
+                }
+
+                return explicitInnerProperties;
+            }
+            private set => explicitInnerProperties = value;
+        }
 
         /// <summary>
         /// Gets the base type of this structural type.
@@ -224,6 +242,18 @@ namespace System.Web.OData.Builder
             {
                 return _baseType;
             }
+        }
+
+        /// <summary>
+        /// Sort Explicit properties by column order.
+        /// </summary>        
+        internal IDictionary<PropertyInfo, PropertyConfiguration> OrderColumn(IDictionary<PropertyInfo, PropertyConfiguration> notSorted)
+        {
+            var orderedResult = notSorted.ToList();
+            orderedResult = orderedResult.OrderBy(o => o.Value.QueryConfiguration.ModelBoundQuerySettings.ColumnOrder).ToList();
+            var orderedDictionary = orderedResult.ToDictionary(item => item.Key, item => item.Value);
+
+            return orderedDictionary;
         }
 
         internal virtual void AbstractImpl()

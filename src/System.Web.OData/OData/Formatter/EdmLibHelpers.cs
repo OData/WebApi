@@ -789,12 +789,12 @@ namespace System.Web.OData.Formatter
             ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>> concurrencyProperties = model.GetAnnotationValue<ConcurrencyPropertiesAnnotation>(model);
             if (concurrencyProperties == null)
             {
-                concurrencyProperties = new ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>>();
+                concurrencyProperties = new ConcurrencyPropertiesAnnotation();
                 model.SetAnnotationValue(model, concurrencyProperties);
             }
 
             IEnumerable<IEdmStructuralProperty> cachedProperties;
-            if (concurrencyProperties != null && concurrencyProperties.TryGetValue(navigationSource, out cachedProperties))
+            if (concurrencyProperties.TryGetValue(navigationSource, out cachedProperties))
             {
                 return cachedProperties;
             }
@@ -829,11 +829,6 @@ namespace System.Web.OData.Formatter
                         }
                     }
                 }
-            }
-
-            if (concurrencyProperties == null)
-            {
-                concurrencyProperties = new ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>>();
             }
 
             if (results.Any())
@@ -994,13 +989,6 @@ namespace System.Web.OData.Formatter
                     type.Name.Replace('`', '_'),
                     String.Join("_", type.GetGenericArguments().Select(t => MangleClrTypeName(t))));
             }
-        }
-
-        /// <summary>
-        /// Annotation to store cache for concurrency properties
-        /// </summary>
-        private class ConcurrencyPropertiesAnnotation : ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>>
-        {
         }
     }
 }

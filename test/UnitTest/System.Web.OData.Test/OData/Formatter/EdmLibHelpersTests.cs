@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Linq;
 using System.Linq;
 using System.Web.OData.Builder;
@@ -224,6 +225,27 @@ namespace System.Web.OData.Formatter
             Assert.Same(expectedType, EdmLibHelpers.GetClrType(edmTypeReference, GetEdmModel()));
         }
 
+        [Theory]
+        [InlineData("WithoutCP")]
+        [InlineData("WithCP")]
+        public void GetConcurrencyProperties_CachesCollection(string entitySetName)
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<TypeWithoutConcurrencyProperties>("WithoutCP");
+            builder.EntitySet<TypeWithConcurrencyProperties>("WithCP");
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet(entitySetName);
+
+            // Act
+            var first = EdmLibHelpers.GetConcurrencyProperties(model, entitySet);
+            var second = EdmLibHelpers.GetConcurrencyProperties(model, entitySet);
+
+            // Assert
+            Assert.Same(first, second);
+        }
+
         private static IEdmModel _edmModel;
         private static IEdmModel GetEdmModel()
         {
@@ -272,6 +294,17 @@ namespace System.Web.OData.Formatter
 
         public class RecursiveCollection : List<RecursiveCollection>
         {
+        }
+
+        public class TypeWithoutConcurrencyProperties
+        {
+            public int Id {get; set;}
+        }
+
+        public class TypeWithConcurrencyProperties
+        {
+            [ConcurrencyCheck]
+            public int Id { get; set; }
         }
     }
 }

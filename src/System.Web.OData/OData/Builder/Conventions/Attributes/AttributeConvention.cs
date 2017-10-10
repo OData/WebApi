@@ -56,11 +56,11 @@ namespace System.Web.OData.Builder.Conventions.Attributes
 
 
             ICollection<Attribute> attributes;
-            boolean cacheHit = false;
+            bool cacheHit = false;
 
             lock(attributesCache) // isolate access to cache
             {
-                cacheHit = attributesCache.TryGetValue(member, out attributes));
+                cacheHit = attributesCache.TryGetValue(member, out attributes);
             }
 
             if (!cacheHit)

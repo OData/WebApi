@@ -31,6 +31,8 @@ namespace System.Web.OData.Query
     {
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
+        private static Dictionary<string, int> _columnOreder = new Dictionary<string, int>();
+
         private ETag _etagIfMatch;
 
         private bool _etagIfMatchChecked;
@@ -156,6 +158,23 @@ namespace System.Web.OData.Query
                 }
 
                 return _etagIfMatch;
+            }
+        }
+
+        /// <summary>
+        /// Column order. For support default order by.
+        /// </summary>        
+        public static Dictionary<string, int> ColumnOrder
+        {
+            set
+            {
+                _columnOreder = value;
+
+
+            }
+            get
+            {
+                return _columnOreder;
             }
         }
 
@@ -528,8 +547,27 @@ namespace System.Web.OData.Query
                             .StructuralProperties()
                             .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
 
-                // Sort properties alphabetically for stable sort
-                return properties.OrderBy(property => property.Name);
+
+                var sorted = new Dictionary<IEdmStructuralProperty, int>();
+
+                foreach (var property in properties)
+                {
+                    var order = _columnOreder.FirstOrDefault(f => f.Key == property.Name);
+                    sorted.Add(property, order.Value);
+                }
+
+                var result = new List<IEdmStructuralProperty>();
+                //If any column have column order
+                if (sorted.Any(a => a.Value > 0))
+                {
+                    result = sorted.OrderBy(property => property.Value).Select(s => s.Key).ToList();
+                }
+                else // no column order defined
+                {
+                    result = sorted.OrderBy(property => property.Key.Name).Select(s => s.Key).ToList();
+                }
+
+                return result;
             }
             else
             {

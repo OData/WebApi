@@ -141,6 +141,7 @@ namespace System.Web.OData.Query.Expressions
 
             // Answer is query.GroupBy($it => new DynamicType1() {...}).Select($it => new DynamicType2() {...})
             // We are doing Grouping even if only aggregate was specified to have a IQuaryable after aggregation
+
             // Flatten first
             if (_aggregateExpressions != null 
                 && _aggregateExpressions.Any(e => e.Method != AggregationMethod.VirtualPropertyCount)
@@ -170,7 +171,7 @@ namespace System.Web.OData.Query.Expressions
                         Expression.Property(currentContainerExpression, "Value"),
                         type);
                     currentContainerExpression = Expression.Property(currentContainerExpression, "Next");
-                    _preFlattenedMap.Add(aggExpression, flatAccessExpression);
+                    _preFlattenedMap.Add(aggExpression.Expression, flatAccessExpression);
                     aliasIdx++;
                 }
 
@@ -195,7 +196,7 @@ namespace System.Web.OData.Query.Expressions
             return result;
         }
 
-        private Dictionary<AggregateExpression, Expression> _preFlattenedMap = new Dictionary<AggregateExpression, Expression>();
+        private Dictionary<SingleValueNode, Expression> _preFlattenedMap = new Dictionary<SingleValueNode, Expression>();
 
         private IQueryable BindSelect(IQueryable grouping)
         {
@@ -288,7 +289,7 @@ namespace System.Web.OData.Query.Expressions
             Expression body;
             if (this._preFlattened)
             {
-                body = this._preFlattenedMap[expression];
+                body = this._preFlattenedMap[expression.Expression];
             }
             else
             {

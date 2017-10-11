@@ -24,6 +24,7 @@ namespace System.Web.OData.Query.Expressions
         private TransformationNode _transformation;
 
         private ParameterExpression _lambdaParameter;
+        private bool _preFlattened = false;
 
         private IEnumerable<AggregateExpression> _aggregateExpressions;
         private IEnumerable<GroupByPropertyNode> _groupingProperties;
@@ -140,12 +141,48 @@ namespace System.Web.OData.Query.Expressions
 
             // Answer is query.GroupBy($it => new DynamicType1() {...}).Select($it => new DynamicType2() {...})
             // We are doing Grouping even if only aggregate was specified to have a IQuaryable after aggregation
+            // Flatten first
+            if (_aggregateExpressions != null 
+                && _aggregateExpressions.Any(e => e.Method != AggregationMethod.VirtualPropertyCount)
+                && _groupingProperties != null
+                && _groupingProperties.Any()
+                )
+            {
+                var wrapperType = typeof(FlattaningWrapper<>).MakeGenericType(this._elementType);
+                var sourceProperty = wrapperType.GetProperty("Source");
+                List<MemberAssignment> wta = new List<MemberAssignment>();
+                wta.Add(Expression.Bind(sourceProperty, this._lambdaParameter));
+
+                var properties = new List<NamedPropertyExpression>();
+                var aliasIdx = 0;
+                foreach (var aggExpression in _aggregateExpressions.Where(e => e.Method != AggregationMethod.VirtualPropertyCount))
+                {
+                    var alias = "Property" + aliasIdx;
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(alias), BindAccessor(aggExpression.Expression)));
+                    aliasIdx++;
+                }
+
+                var wrapperProperty = ResultClrType.GetProperty("GroupByContainer");
+                wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(properties)));
+
+                var flatLambda = Expression.Lambda(Expression.MemberInit(Expression.New(wrapperType), wta), _lambdaParameter);
+
+                query = ExpressionHelpers.Select(query, flatLambda, this._elementType);
+                this._preFlattened = true;
+                this._lambdaParameter = Expression.Parameter(wrapperType, "$it");
+                this._elementType = wrapperType;
+                
+            }
+
+
             IQueryable grouping = BindGroupBy(query);
 
             IQueryable result = BindSelect(grouping);
 
             return result;
         }
+
+        private Dictionary<AggregateExpression, Expression> _preFlattenedMap = new Dictionary<AggregateExpression, Expression>();
 
         private IQueryable BindSelect(IQueryable grouping)
         {
@@ -235,8 +272,16 @@ namespace System.Web.OData.Query.Expressions
                 var countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(this._elementType);
                 return WrapConvert(Expression.Call(null, countMethod, asQuerableExpression));
             }
-
-            LambdaExpression propertyLambda = Expression.Lambda(BindAccessor(expression.Expression), this._lambdaParameter);
+            Expression body;
+            if (this._preFlattened)
+            {
+                body = Expression.Convert(Expression.Property(Expression.Property(this._lambdaParameter, "GroupByContainer"), "Value"), typeof(string));
+            }
+            else
+            {
+                body = BindAccessor(expression.Expression);
+            }
+            LambdaExpression propertyLambda = Expression.Lambda(body, this._lambdaParameter);
 
             Expression aggregationExpression;
 
@@ -332,7 +377,8 @@ namespace System.Web.OData.Query.Expressions
             switch (node.Kind)
             {
                 case QueryNodeKind.ResourceRangeVariableReference:
-                    return this._lambdaParameter;
+                    return this._preFlattened? (Expression) Expression.Property(this._lambdaParameter, "Source") :this._lambdaParameter;
+                    //return this._lambdaParameter;
                 case QueryNodeKind.SingleValuePropertyAccess:
                     var propAccessNode = node as SingleValuePropertyAccessNode;
                     return CreatePropertyAccessExpression(BindAccessor(propAccessNode.Source), propAccessNode.Property, GetFullPropertyPath(propAccessNode));
@@ -391,6 +437,7 @@ namespace System.Web.OData.Query.Expressions
         private IQueryable BindGroupBy(IQueryable query)
         {
             LambdaExpression groupLambda = null;
+            Type elementType = query.ElementType;
             if (_groupingProperties != null && _groupingProperties.Any())
             {
                 // Generates expression
@@ -423,7 +470,7 @@ namespace System.Web.OData.Query.Expressions
                 groupLambda = Expression.Lambda(Expression.New(this._groupByClrType), this._lambdaParameter);
             }
 
-            return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, this._groupByClrType);
+            return ExpressionHelpers.GroupBy(query, groupLambda, elementType, this._groupByClrType);
         }
 
         private List<NamedPropertyExpression> CreateGroupByMemberAssignments(IEnumerable<GroupByPropertyNode> nodes)

@@ -102,6 +102,11 @@ namespace System.Web.OData.Query.Expressions
         }
     }
 
+    internal class FlattaningWrapper<T> : GroupByWrapper
+    {
+        public T Source { get; set; }
+    }
+
     internal class NoGroupByWrapper : GroupByWrapper
     {
     }

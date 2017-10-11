@@ -29,131 +29,131 @@ namespace System.Web.OData.Test.OData.Query
             {
                 return new TheoryDataSet<string, List<Dictionary<string, object>>>
                 {
-                    //{
-                    //    "aggregate($count as Count)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Count", 5L} }
-                    //    }
-                    //},
-                    //{
-                    //    "aggregate(CustomerId with sum as CustomerId)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "CustomerId", 15} }
-                    //    }
-                    //},
-                    //{
-                    //    "aggregate(SharePrice with sum as SharePrice)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "SharePrice", 22.5M} }
-                    //    }
-                    //},
-                    //{
-                    //    "aggregate(SharePrice with min as SharePrice)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "SharePrice", 2.5M} }
-                    //    }
-                    //},
-                    // {
-                    //    "aggregate(SharePrice with max as SharePrice)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "SharePrice", 10M} }
-                    //    }
-                    //},
-                    //{
-                    //    "aggregate(SharePrice with average as SharePrice)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "SharePrice", 7.5M} }
-                    //    }
-                    //},
-                    //{
-                    //    "aggregate(CustomerId with sum as Total, SharePrice with countdistinct as SharePriceDistinctCount)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "SharePriceDistinctCount", 3L}, { "Total", 15} }
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Name))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Name", "Lowest"} },
-                    //        new Dictionary<string, object> { { "Name", "Highest"} },
-                    //        new Dictionary<string, object> { { "Name", "Middle"} }
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Name), aggregate(CustomerId with sum as Total))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 10} },
-                    //        new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} },
-                    //        new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Name), aggregate($count as Count))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Name", "Lowest"}, { "Count", 3L} },
-                    //        new Dictionary<string, object> { { "Name", "Highest"}, { "Count", 1L} },
-                    //        new Dictionary<string, object> { { "Name", "Middle"}, { "Count", 1L} }
-                    //    }
-                    //},
-                    //{
-                    //    "filter(Name eq 'Lowest')/groupby((Name))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Name", "Lowest"} }
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Name), aggregate(CustomerId with sum as Total))/filter(Total eq 3)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Name))/filter(Name eq 'Lowest')",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Name", "Lowest"} }
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Address/City))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Address/City", "redmond"} },
-                    //        new Dictionary<string, object> { { "Address/City", "seattle"} },
-                    //        new Dictionary<string, object> { { "Address/City", "hobart"} },
-                    //        new Dictionary<string, object> { { "Address/City", null} },
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Address/City, Address/State))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Address/City", "redmond"}, { "Address/State", "WA"} },
-                    //        new Dictionary<string, object> { { "Address/City", "seattle"}, { "Address/State", "WA"} },
-                    //        new Dictionary<string, object> { { "Address/City", "hobart"}, { "Address/State", null} },
-                    //        new Dictionary<string, object> { { "Address/City", null}, { "Address/State", null} },
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Address/City, Address/State))/groupby((Address/State))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "MaxCity", "seattle"}, { "Address/State", "WA"} },
-                    //        new Dictionary<string, object> { { "MaxCity", "hobart"}, { "Address/State", null} },
-                    //    }
-                    //},
+                    {
+                        "aggregate($count as Count)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Count", 5L} }
+                        }
+                    },
+                    {
+                        "aggregate(CustomerId with sum as CustomerId)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", 15} }
+                        }
+                    },
+                    {
+                        "aggregate(SharePrice with sum as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", 22.5M} }
+                        }
+                    },
+                    {
+                        "aggregate(SharePrice with min as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", 2.5M} }
+                        }
+                    },
+                     {
+                        "aggregate(SharePrice with max as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", 10M} }
+                        }
+                    },
+                    {
+                        "aggregate(SharePrice with average as SharePrice)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePrice", 7.5M} }
+                        }
+                    },
+                    {
+                        "aggregate(CustomerId with sum as Total, SharePrice with countdistinct as SharePriceDistinctCount)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "SharePriceDistinctCount", 3L}, { "Total", 15} }
+                        }
+                    },
+                    {
+                        "groupby((Name))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"} },
+                            new Dictionary<string, object> { { "Name", "Highest"} },
+                            new Dictionary<string, object> { { "Name", "Middle"} }
+                        }
+                    },
+                    {
+                        "groupby((Name), aggregate(CustomerId with sum as Total))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Total", 10} },
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} },
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
+                        }
+                    },
+                    {
+                        "groupby((Name), aggregate($count as Count))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Count", 3L} },
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "Count", 1L} },
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "Count", 1L} }
+                        }
+                    },
+                    {
+                        "filter(Name eq 'Lowest')/groupby((Name))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"} }
+                        }
+                    },
+                    {
+                        "groupby((Name), aggregate(CustomerId with sum as Total))/filter(Total eq 3)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "Total", 3 } }
+                        }
+                    },
+                    {
+                        "groupby((Name))/filter(Name eq 'Lowest')",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"} }
+                        }
+                    },
+                    {
+                        "groupby((Address/City))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Address/City", "redmond"} },
+                            new Dictionary<string, object> { { "Address/City", "seattle"} },
+                            new Dictionary<string, object> { { "Address/City", "hobart"} },
+                            new Dictionary<string, object> { { "Address/City", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/City, Address/State))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Address/City", "redmond"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "Address/City", "seattle"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "Address/City", "hobart"}, { "Address/State", null} },
+                            new Dictionary<string, object> { { "Address/City", null}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/City, Address/State))/groupby((Address/State), aggregate(Address/City with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "Address/State", null} },
+                        }
+                    },
                     {
                         "groupby((Address/State), aggregate(Address/City with max as MaxCity))",
                         new List<Dictionary<string, object>>
@@ -178,28 +178,28 @@ namespace System.Web.OData.Test.OData.Query
                             new Dictionary<string, object> { { "CustomerId", 25}, { "Address/State", null} },
                         }
                     },
-                    //{
-                    //    "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "CustomerId", 55} }
-                    //    }
-                    //},
-                    //{
-                    //    // Note SharePrice and CustomerId have different type
-                    //    "aggregate(SharePrice mul CustomerId with sum as Result)",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Result", 65.0M} }
-                    //    }
-                    //},
-                    //{
-                    //    "groupby((Website))",
-                    //    new List<Dictionary<string, object>>
-                    //    {
-                    //        new Dictionary<string, object> { { "Website", null} },
-                    //    }
-                    //},
+                    {
+                        "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", 55} }
+                        }
+                    },
+                    {
+                        // Note SharePrice and CustomerId have different type
+                        "aggregate(SharePrice mul CustomerId with sum as Result)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Result", 65.0M} }
+                        }
+                    },
+                    {
+                        "groupby((Website))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Website", null} },
+                        }
+                    },
                 };
             }
         }

@@ -152,10 +152,25 @@ namespace System.Web.OData.Query.Expressions
         }
 
         /// <summary>
-        /// Pre flattens properties referenced in aggregate clause to avoid generation of nested queries
+        /// Pre flattens properties referenced in aggregate clause to avoid generation of nested queries by EF.
+        /// For query like groupby((A), aggregate(B/C with max as Alias1, B/D with max as Alias2)) we need to generate 
+        /// .Select(
+        ///     $it => new FlattenninWrapper () {
+        ///         Source = $it, // Will used in groupby stage
+        ///         Container = new {
+        ///             Value = $it.B.C
+        ///             Next = new {
+        ///                 Value = $it.B.D
+        ///             }
+        ///         }
+        ///     }
+        /// )
+        /// Also we need to populate expressions to access B/C and B/D in aggregate stage. It will look like:
+        /// B/C : $it.Container.Value
+        /// B/D : $it.Container.Next.Value
         /// </summary>
         /// <param name="query"></param>
-        /// <returns></returns>
+        /// <returns>Query with Select that flattens properties</returns>
         private IQueryable FlattenReferencedProperties(IQueryable query)
         {
             if (_aggregateExpressions != null
@@ -165,7 +180,7 @@ namespace System.Web.OData.Query.Expressions
                 && (FlattenedPropertyContainer == null || !FlattenedPropertyContainer.Any())
                 )
             {
-                var wrapperType = typeof(FlattaningWrapper<>).MakeGenericType(this._elementType);
+                var wrapperType = typeof(FlatteningWrapper<>).MakeGenericType(this._elementType);
                 var sourceProperty = wrapperType.GetProperty("Source");
                 List<MemberAssignment> wta = new List<MemberAssignment>();
                 wta.Add(Expression.Bind(sourceProperty, this._lambdaParameter));
@@ -176,12 +191,15 @@ namespace System.Web.OData.Query.Expressions
                 var currentContainerExpression = Expression.Property(aggParam, GroupByContainerProperty);
                 foreach (var aggExpression in _aggregateExpressions.Where(e => e.Method != AggregationMethod.VirtualPropertyCount))
                 {
-                    var alias = "Property" + aliasIdx;
+                    var alias = "Property" + aliasIdx; // We just need unique alias, we aren't going to use it
+
+                    // Add Value = $it.B.C
                     var propAccessExpression = BindAccessor(aggExpression.Expression);
                     var type = propAccessExpression.Type;
                     propAccessExpression = WrapConvert(propAccessExpression);
                     properties.Add(new NamedPropertyExpression(Expression.Constant(alias), propAccessExpression));
 
+                    // Save $it.Container.Next.Value for future use
                     UnaryExpression flatAccessExpression = Expression.Convert(
                         Expression.Property(currentContainerExpression, "Value"),
                         type);
@@ -197,6 +215,8 @@ namespace System.Web.OData.Query.Expressions
                 var flatLambda = Expression.Lambda(Expression.MemberInit(Expression.New(wrapperType), wta), _lambdaParameter);
 
                 query = ExpressionHelpers.Select(query, flatLambda, this._elementType);
+
+                // We applied flattening let .GroupBy know about it.
                 this._preFlattened = true;
                 this._lambdaParameter = aggParam;
                 this._elementType = wrapperType;

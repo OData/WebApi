@@ -20,6 +20,7 @@ namespace System.Web.OData.Query.Expressions
 {
     internal class AggregationBinder : ExpressionBinderBase
     {
+        private const string GroupByContainerProperty = "GroupByContainer";
         private Type _elementType;
         private TransformationNode _transformation;
 
@@ -139,11 +140,25 @@ namespace System.Web.OData.Query.Expressions
             this.BaseQuery = query;
             EnsureFlattenedPropertyContainer(this._lambdaParameter);
 
+            query = FlattenReferencedProperties(query);
+
             // Answer is query.GroupBy($it => new DynamicType1() {...}).Select($it => new DynamicType2() {...})
             // We are doing Grouping even if only aggregate was specified to have a IQuaryable after aggregation
+            IQueryable grouping = BindGroupBy(query);
 
-            // Flatten first
-            if (_aggregateExpressions != null 
+            IQueryable result = BindSelect(grouping);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Pre flattens properties referenced in aggregate clause to avoid generation of nested queries
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        private IQueryable FlattenReferencedProperties(IQueryable query)
+        {
+            if (_aggregateExpressions != null
                 && _aggregateExpressions.Any(e => e.Method != AggregationMethod.VirtualPropertyCount)
                 && _groupingProperties != null
                 && _groupingProperties.Any()
@@ -158,7 +173,7 @@ namespace System.Web.OData.Query.Expressions
                 var properties = new List<NamedPropertyExpression>();
                 var aliasIdx = 0;
                 var aggParam = Expression.Parameter(wrapperType, "$it");
-                var currentContainerExpression = Expression.Property(aggParam, "GroupByContainer");
+                var currentContainerExpression = Expression.Property(aggParam, GroupByContainerProperty);
                 foreach (var aggExpression in _aggregateExpressions.Where(e => e.Method != AggregationMethod.VirtualPropertyCount))
                 {
                     var alias = "Property" + aliasIdx;
@@ -166,7 +181,7 @@ namespace System.Web.OData.Query.Expressions
                     var type = propAccessExpression.Type;
                     propAccessExpression = WrapConvert(propAccessExpression);
                     properties.Add(new NamedPropertyExpression(Expression.Constant(alias), propAccessExpression));
-                    
+
                     UnaryExpression flatAccessExpression = Expression.Convert(
                         Expression.Property(currentContainerExpression, "Value"),
                         type);
@@ -175,8 +190,8 @@ namespace System.Web.OData.Query.Expressions
                     aliasIdx++;
                 }
 
-                var wrapperProperty = ResultClrType.GetProperty("GroupByContainer");
-                
+                var wrapperProperty = ResultClrType.GetProperty(GroupByContainerProperty);
+
                 wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(properties)));
 
                 var flatLambda = Expression.Lambda(Expression.MemberInit(Expression.New(wrapperType), wta), _lambdaParameter);
@@ -185,15 +200,9 @@ namespace System.Web.OData.Query.Expressions
                 this._preFlattened = true;
                 this._lambdaParameter = aggParam;
                 this._elementType = wrapperType;
-                
             }
 
-
-            IQueryable grouping = BindGroupBy(query);
-
-            IQueryable result = BindSelect(grouping);
-
-            return result;
+            return query;
         }
 
         private Dictionary<SingleValueNode, Expression> _preFlattenedMap = new Dictionary<SingleValueNode, Expression>();
@@ -221,9 +230,9 @@ namespace System.Web.OData.Query.Expressions
             // Setting GroupByContainer property when previous step was grouping
             if (this._groupingProperties != null && this._groupingProperties.Any())
             {
-                var wrapperProperty = this.ResultClrType.GetProperty("GroupByContainer");
+                var wrapperProperty = this.ResultClrType.GetProperty(GroupByContainerProperty);
 
-                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Property(Expression.Property(accum, "Key"), "GroupByContainer")));
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Property(Expression.Property(accum, "Key"), GroupByContainerProperty)));
             }
 
             // Setting Container property when we have aggregation clauses
@@ -472,7 +481,7 @@ namespace System.Web.OData.Query.Expressions
                 //                                      }) 
                 List<NamedPropertyExpression> properties = CreateGroupByMemberAssignments(_groupingProperties);
 
-                var wrapperProperty = typeof(GroupByWrapper).GetProperty("GroupByContainer");
+                var wrapperProperty = typeof(GroupByWrapper).GetProperty(GroupByContainerProperty);
                 List<MemberAssignment> wta = new List<MemberAssignment>();
                 wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(properties)));
                 groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(typeof(GroupByWrapper)), wta), _lambdaParameter);
@@ -499,7 +508,7 @@ namespace System.Web.OData.Query.Expressions
                 }
                 else
                 {
-                    var wrapperProperty = typeof(GroupByWrapper).GetProperty("GroupByContainer");
+                    var wrapperProperty = typeof(GroupByWrapper).GetProperty(GroupByContainerProperty);
                     List<MemberAssignment> wta = new List<MemberAssignment>();
                     wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(CreateGroupByMemberAssignments(grpProp.ChildTransformations))));
                     properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.MemberInit(Expression.New(typeof(GroupByWrapper)), wta)));

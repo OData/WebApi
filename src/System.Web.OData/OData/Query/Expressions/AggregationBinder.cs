@@ -155,21 +155,28 @@ namespace System.Web.OData.Query.Expressions
 
                 var properties = new List<NamedPropertyExpression>();
                 var aliasIdx = 0;
+                var aggParam = Expression.Parameter(wrapperType, "$it");
+                var currentContainerExpression = Expression.Property(aggParam, "GroupByContainer");
                 foreach (var aggExpression in _aggregateExpressions.Where(e => e.Method != AggregationMethod.VirtualPropertyCount))
                 {
                     var alias = "Property" + aliasIdx;
-                    properties.Add(new NamedPropertyExpression(Expression.Constant(alias), BindAccessor(aggExpression.Expression)));
+                    var propAccessExpression = BindAccessor(aggExpression.Expression);
+                    properties.Add(new NamedPropertyExpression(Expression.Constant(alias), propAccessExpression));
+                    var flatAccessExpression = Expression.Convert(Expression.Property(currentContainerExpression, "Value"), typeof(string));
+                    currentContainerExpression = Expression.Property(currentContainerExpression, "Next");
+                    _preFlattenedMap.Add(aggExpression, flatAccessExpression);
                     aliasIdx++;
                 }
 
                 var wrapperProperty = ResultClrType.GetProperty("GroupByContainer");
+                
                 wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(properties)));
 
                 var flatLambda = Expression.Lambda(Expression.MemberInit(Expression.New(wrapperType), wta), _lambdaParameter);
 
                 query = ExpressionHelpers.Select(query, flatLambda, this._elementType);
                 this._preFlattened = true;
-                this._lambdaParameter = Expression.Parameter(wrapperType, "$it");
+                this._lambdaParameter = aggParam;
                 this._elementType = wrapperType;
                 
             }
@@ -275,7 +282,7 @@ namespace System.Web.OData.Query.Expressions
             Expression body;
             if (this._preFlattened)
             {
-                body = Expression.Convert(Expression.Property(Expression.Property(this._lambdaParameter, "GroupByContainer"), "Value"), typeof(string));
+                body = this._preFlattenedMap[expression];
             }
             else
             {

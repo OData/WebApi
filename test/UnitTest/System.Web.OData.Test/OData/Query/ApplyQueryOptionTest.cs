@@ -170,6 +170,14 @@ namespace System.Web.OData.Test.OData.Query
                             new Dictionary<string, object> { { "MaxCity", "hobart"}, { "MinCity", "hobart" }, { "Address/State", null} },
                         }
                     },
+                    {
+                        "groupby((Address/State), aggregate(CustomerId mul CustomerId with sum as CustomerId))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", 30}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "CustomerId", 25}, { "Address/State", null} },
+                        }
+                    },
                     //{
                     //    "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
                     //    new List<Dictionary<string, object>>

@@ -146,6 +146,7 @@ namespace System.Web.OData.Query.Expressions
                 && _aggregateExpressions.Any(e => e.Method != AggregationMethod.VirtualPropertyCount)
                 && _groupingProperties != null
                 && _groupingProperties.Any()
+                //&& false
                 )
             {
                 var wrapperType = typeof(FlattaningWrapper<>).MakeGenericType(this._elementType);
@@ -161,8 +162,13 @@ namespace System.Web.OData.Query.Expressions
                 {
                     var alias = "Property" + aliasIdx;
                     var propAccessExpression = BindAccessor(aggExpression.Expression);
+                    var type = propAccessExpression.Type;
+                    propAccessExpression = WrapConvert(propAccessExpression);
                     properties.Add(new NamedPropertyExpression(Expression.Constant(alias), propAccessExpression));
-                    var flatAccessExpression = Expression.Convert(Expression.Property(currentContainerExpression, "Value"), typeof(string));
+                    
+                    UnaryExpression flatAccessExpression = Expression.Convert(
+                        Expression.Property(currentContainerExpression, "Value"),
+                        type);
                     currentContainerExpression = Expression.Property(currentContainerExpression, "Next");
                     _preFlattenedMap.Add(aggExpression, flatAccessExpression);
                     aliasIdx++;

@@ -25,7 +25,6 @@ namespace System.Web.OData.Query.Expressions
         private TransformationNode _transformation;
 
         private ParameterExpression _lambdaParameter;
-        private bool _preFlattened = false;
 
         private IEnumerable<AggregateExpression> _aggregateExpressions;
         private IEnumerable<GroupByPropertyNode> _groupingProperties;
@@ -217,7 +216,6 @@ namespace System.Web.OData.Query.Expressions
                 query = ExpressionHelpers.Select(query, flatLambda, this._elementType);
 
                 // We applied flattening let .GroupBy know about it.
-                this._preFlattened = true;
                 this._lambdaParameter = aggParam;
                 this._elementType = wrapperType;
             }
@@ -316,11 +314,8 @@ namespace System.Web.OData.Query.Expressions
                 return WrapConvert(Expression.Call(null, countMethod, asQuerableExpression));
             }
             Expression body;
-            if (this._preFlattened)
-            {
-                body = this._preFlattenedMap[expression.Expression];
-            }
-            else
+
+            if (!this._preFlattenedMap.TryGetValue(expression.Expression, out body))
             {
                 body = BindAccessor(expression.Expression);
             }
@@ -420,8 +415,9 @@ namespace System.Web.OData.Query.Expressions
             switch (node.Kind)
             {
                 case QueryNodeKind.ResourceRangeVariableReference:
-                    return this._preFlattened? (Expression) Expression.Property(this._lambdaParameter, "Source") :this._lambdaParameter;
-                    //return this._lambdaParameter;
+                    return this._lambdaParameter.Type.IsGenericType && this._lambdaParameter.Type.GetGenericTypeDefinition() == typeof(FlatteningWrapper<>)
+                        ? (Expression)Expression.Property(this._lambdaParameter, "Source")
+                        : this._lambdaParameter;
                 case QueryNodeKind.SingleValuePropertyAccess:
                     var propAccessNode = node as SingleValuePropertyAccessNode;
                     return CreatePropertyAccessExpression(BindAccessor(propAccessNode.Source), propAccessNode.Property, GetFullPropertyPath(propAccessNode));

@@ -169,8 +169,6 @@ namespace System.Web.OData.Query
             set
             {
                 _columnOrder = value;
-
-
             }
             get
             {
@@ -547,9 +545,8 @@ namespace System.Web.OData.Query
                             .StructuralProperties()
                             .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
 
-                var result =  properties.OrderBy(o => _columnOrder.FirstOrDefault(order => order.Key == o.Name).Value).ThenBy(o => o.Name).ToList();
-
-                return result;
+                return properties.OrderBy(o => _columnOrder.FirstOrDefault(order => order.Key == o.Name).Value).ThenBy(o => o.Name).ToList();
+                
             }
             else
             {

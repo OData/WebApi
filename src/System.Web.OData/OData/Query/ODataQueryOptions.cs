@@ -31,6 +31,8 @@ namespace System.Web.OData.Query
     {
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
+        private static Dictionary<string, int> _columnOrder = new Dictionary<string, int>();
+
         private ETag _etagIfMatch;
 
         private bool _etagIfMatchChecked;
@@ -156,6 +158,21 @@ namespace System.Web.OData.Query
                 }
 
                 return _etagIfMatch;
+            }
+        }
+
+        /// <summary>
+        /// Column order. For support default order by.
+        /// </summary>        
+        public static Dictionary<string, int> ColumnOrder
+        {
+            set
+            {
+                _columnOrder = value;
+            }
+            get
+            {
+                return _columnOrder;
             }
         }
 
@@ -528,8 +545,8 @@ namespace System.Web.OData.Query
                             .StructuralProperties()
                             .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
 
-                // Sort properties alphabetically for stable sort
-                return properties.OrderBy(property => property.Name);
+                return properties.OrderBy(o => _columnOrder.FirstOrDefault(order => order.Key == o.Name).Value).ThenBy(o => o.Name).ToList();
+                
             }
             else
             {

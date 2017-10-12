@@ -31,7 +31,7 @@ namespace System.Web.OData.Query
     {
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
-        private static Dictionary<string, int> _columnOreder = new Dictionary<string, int>();
+        private static Dictionary<string, int> _columnOrder = new Dictionary<string, int>();
 
         private ETag _etagIfMatch;
 
@@ -168,13 +168,13 @@ namespace System.Web.OData.Query
         {
             set
             {
-                _columnOreder = value;
+                _columnOrder = value;
 
 
             }
             get
             {
-                return _columnOreder;
+                return _columnOrder;
             }
         }
 
@@ -547,25 +547,7 @@ namespace System.Web.OData.Query
                             .StructuralProperties()
                             .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
 
-
-                var sorted = new Dictionary<IEdmStructuralProperty, int>();
-
-                foreach (var property in properties)
-                {
-                    var order = _columnOreder.FirstOrDefault(f => f.Key == property.Name);
-                    sorted.Add(property, order.Value);
-                }
-
-                var result = new List<IEdmStructuralProperty>();
-                //If any column have column order
-                if (sorted.Any(a => a.Value > 0))
-                {
-                    result = sorted.OrderBy(property => property.Value).Select(s => s.Key).ToList();
-                }
-                else // no column order defined
-                {
-                    result = sorted.OrderBy(property => property.Key.Name).Select(s => s.Key).ToList();
-                }
+                var result =  properties.OrderBy(o => _columnOrder.FirstOrDefault(order => order.Key == o.Name).Value).ThenBy(o => o.Name).ToList();
 
                 return result;
             }

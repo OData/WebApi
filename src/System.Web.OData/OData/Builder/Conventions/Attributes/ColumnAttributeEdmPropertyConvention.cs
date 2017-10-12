@@ -3,6 +3,7 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Web.Http;
+using System.Web.OData.Query;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
@@ -35,14 +36,22 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             {
                 return;
             }
+            var primitiveProperty = edmProperty as PrimitivePropertyConfiguration;           
 
-            var primitiveProperty = edmProperty as PrimitivePropertyConfiguration;
             if (primitiveProperty == null)
             {
                 return; // ignore non-primitive property
             }
 
             var columnAttribute = attribute as ColumnAttribute;
+            if (columnAttribute != null && columnAttribute.Order > 0)
+            {
+                var columnName = edmProperty.Name;
+                var columnOrder = columnAttribute.Order;
+                ODataQueryOptions.ColumnOrder.Add(columnName, columnOrder);
+
+            }
+
             if (columnAttribute == null || columnAttribute.TypeName == null)
             {
                 return; // ignore the column type

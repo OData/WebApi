@@ -323,6 +323,7 @@ namespace WebStack.QA.Test.OData.Aggregation
 
             // Act
             HttpResponseMessage response = client.SendAsync(request).Result;
+            System.Console.WriteLine(response.Content.ReadAsStringAsync().Result);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);

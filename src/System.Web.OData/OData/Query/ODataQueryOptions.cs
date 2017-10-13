@@ -536,7 +536,6 @@ namespace System.Web.OData.Query
                             .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
 
                 return properties.OrderBy(o => ColumnOrder.FirstOrDefault(order => order.Key == o.Name).Value).ThenBy(o => o.Name).ToList();
-                
             }
             return Enumerable.Empty<IEdmStructuralProperty>();
         }

@@ -31,8 +31,6 @@ namespace System.Web.OData.Query
     {
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
-        private static Dictionary<string, int> _columnOrder = new Dictionary<string, int>();
-
         private ETag _etagIfMatch;
 
         private bool _etagIfMatchChecked;
@@ -164,17 +162,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// Column order. For support default order by.
         /// </summary>        
-        public static Dictionary<string, int> ColumnOrder
-        {
-            set
-            {
-                _columnOrder = value;
-            }
-            get
-            {
-                return _columnOrder;
-            }
-        }
+        public static Dictionary<string, int> ColumnOrder { get; set; } = new Dictionary<string, int>();
 
         /// <summary>
         /// Gets the <see cref="ETag"/> from IfNoneMatch header.
@@ -191,6 +179,7 @@ namespace System.Web.OData.Query
                     {
                         _etagIfNoneMatch.IsIfNoneMatch = true;
                     }
+
                     _etagIfNoneMatchChecked = true;
                 }
 
@@ -478,6 +467,7 @@ namespace System.Web.OData.Query
             {
                 throw Error.ArgumentNull("entity");
             }
+
             if (querySettings == null)
             {
                 throw Error.ArgumentNull("querySettings");
@@ -545,13 +535,10 @@ namespace System.Web.OData.Query
                             .StructuralProperties()
                             .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
 
-                return properties.OrderBy(o => _columnOrder.FirstOrDefault(order => order.Key == o.Name).Value).ThenBy(o => o.Name).ToList();
+                return properties.OrderBy(o => ColumnOrder.FirstOrDefault(order => order.Key == o.Name).Value).ThenBy(o => o.Name).ToList();
                 
             }
-            else
-            {
-                return Enumerable.Empty<IEdmStructuralProperty>();
-            }
+            return Enumerable.Empty<IEdmStructuralProperty>();
         }
 
         // Generates the OrderByQueryOption to use by default for $skip or $top
@@ -804,6 +791,7 @@ namespace System.Web.OData.Query
                     expandRawValue = autoExpandRawValue;
                 }
             }
+
             return expandRawValue;
         }
 
@@ -925,6 +913,7 @@ namespace System.Web.OData.Query
                     result = (T)newSelectExpand.ApplyTo(entity, querySettings);
                 }
             }
+
             return result;
         }
     }

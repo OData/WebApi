@@ -526,18 +526,18 @@ namespace System.Web.OData.Query
             Contract.Assert(context != null);
 
             IEdmEntityType entityType = context.ElementType as IEdmEntityType;
-            if (entityType != null)
+            if (entityType == null)
             {
-                IEnumerable<IEdmStructuralProperty> properties =
-                    entityType.Key().Any()
-                        ? entityType.Key()
-                        : entityType
-                            .StructuralProperties()
-                            .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
-
-                return properties.OrderBy(o => ColumnOrder.FirstOrDefault(order => order.Key == o.Name).Value).ThenBy(o => o.Name).ToList();
+                return Enumerable.Empty<IEdmStructuralProperty>();
             }
-            return Enumerable.Empty<IEdmStructuralProperty>();
+            IEnumerable<IEdmStructuralProperty> properties =
+                entityType.Key().Any()
+                    ? entityType.Key()
+                    : entityType
+                        .StructuralProperties()
+                        .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
+
+            return properties.OrderBy(o => ColumnOrder.FirstOrDefault(order => order.Key == o.Name).Value).ThenBy(o => o.Name).ToList();
         }
 
         // Generates the OrderByQueryOption to use by default for $skip or $top

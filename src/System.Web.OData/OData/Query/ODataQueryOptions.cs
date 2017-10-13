@@ -525,12 +525,12 @@ namespace System.Web.OData.Query
         {
             Contract.Assert(context != null);
 
-            IEdmEntityType entityType = context.ElementType as IEdmEntityType;
+            var entityType = context.ElementType as IEdmEntityType;
             if (entityType == null)
             {
                 return Enumerable.Empty<IEdmStructuralProperty>();
             }
-            IEnumerable<IEdmStructuralProperty> properties =
+            var properties =
                 entityType.Key().Any()
                     ? entityType.Key()
                     : entityType

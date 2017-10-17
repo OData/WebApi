@@ -36,8 +36,8 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             {
                 return;
             }
-            var primitiveProperty = edmProperty as PrimitivePropertyConfiguration;           
 
+            var primitiveProperty = edmProperty as PrimitivePropertyConfiguration;           
             if (primitiveProperty == null)
             {
                 return; // ignore non-primitive property

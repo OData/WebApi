@@ -527,7 +527,8 @@ namespace System.Web.OData.Query
         {
             Contract.Assert(context != null);
 
-            if (!(context.ElementType is IEdmEntityType entityType))
+            var entityType = context.ElementType as IEdmEntityType;
+            if (entityType == null)
             {
                 return Enumerable.Empty<IEdmStructuralProperty>();
             }
@@ -538,8 +539,7 @@ namespace System.Web.OData.Query
                         .StructuralProperties()
                         .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
 
-            return properties.OrderBy(o => ColumnOrder.FirstOrDefault(order => order.Key == o.Name).Value)
-                .ThenBy(o => o.Name).ToList();
+            return properties.OrderBy(o => ColumnOrder.FirstOrDefault(order => order.Key == o.Name).Value).ThenBy(o => o.Name).ToList();
         }
 
         // Generates the OrderByQueryOption to use by default for $skip or $top

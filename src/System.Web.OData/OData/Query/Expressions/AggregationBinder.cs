@@ -186,11 +186,11 @@ namespace System.Web.OData.Query.Expressions
 
                 var aggrregatedPropertiesToFlatten = _aggregateExpressions.Where(e => e.Method != AggregationMethod.VirtualPropertyCount).ToList();
                 // Generated Select will be stack like, meaning that first property in the list will be deepest one
-                // For example if we add $id.B.C, $it.B.D, select will look like
+                // For example if we add $it.B.C, $it.B.D, select will look like
                 // new {
-                //      Value = $it.B.D
+                //      Value = $it.B.C
                 //      Next = new {
-                //          Value = $it.B.C
+                //          Value = $it.B.D
                 //      }
                 // }
                 // We are generated references (in currentContainerExpression) from  the begining of the  Select ($it.Value, then $it.Next.Value etc.)

@@ -84,6 +84,8 @@ namespace System.Web.OData.Query
             BuildQueryOptions(queryParameters);
 
             Validator = ODataQueryValidator.GetODataQueryValidator(context);
+
+            ColumnOrder = new Dictionary<string, int>();
         }
 
         /// <summary>
@@ -162,7 +164,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// Column order. For support default order by.
         /// </summary>        
-        public static Dictionary<string, int> ColumnOrder { get; set; } = new Dictionary<string, int>();
+        public static Dictionary<string, int> ColumnOrder { get; set; }
 
         /// <summary>
         /// Gets the <see cref="ETag"/> from IfNoneMatch header.

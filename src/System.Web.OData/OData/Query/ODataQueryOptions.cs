@@ -164,7 +164,11 @@ namespace System.Web.OData.Query
         /// <summary>
         /// Column order. For support default order by.
         /// </summary>        
-        public static Dictionary<string, int> ColumnOrder { get; set; }
+        public static Dictionary<string, int> ColumnOrder
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets the <see cref="ETag"/> from IfNoneMatch header.

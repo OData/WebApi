@@ -184,11 +184,25 @@ namespace System.Web.OData.Query.Expressions
                 List<MemberAssignment> wta = new List<MemberAssignment>();
                 wta.Add(Expression.Bind(sourceProperty, this._lambdaParameter));
 
-                var properties = new List<NamedPropertyExpression>();
-                var aliasIdx = 0;
+                var aggrregatedPropertiesToFlatten = _aggregateExpressions.Where(e => e.Method != AggregationMethod.VirtualPropertyCount).ToList();
+                // Generated Select will be stack like, meaning that first property in the list will be deepest one
+                // For example if we add $it.B.C, $it.B.D, select will look like
+                // new {
+                //      Value = $it.B.C
+                //      Next = new {
+                //          Value = $it.B.D
+                //      }
+                // }
+                // We are generated references (in currentContainerExpression) from  the begining of the  Select ($it.Value, then $it.Next.Value etc.)
+                // We have proper match we need insert properties in reverse order
+                // After this 
+                // properties = { $it.B.D, $it.B.C}
+                // _preFlattendMAp = { {$it.B.C, $it.Value}, {$it.B.D, $it.Next.Value} }
+                var properties = new NamedPropertyExpression[aggrregatedPropertiesToFlatten.Count];
+                var aliasIdx = aggrregatedPropertiesToFlatten.Count - 1;
                 var aggParam = Expression.Parameter(wrapperType, "$it");
                 var currentContainerExpression = Expression.Property(aggParam, GroupByContainerProperty);
-                foreach (var aggExpression in _aggregateExpressions.Where(e => e.Method != AggregationMethod.VirtualPropertyCount))
+                foreach (var aggExpression in aggrregatedPropertiesToFlatten)
                 {
                     var alias = "Property" + aliasIdx; // We just need unique alias, we aren't going to use it
 
@@ -196,7 +210,7 @@ namespace System.Web.OData.Query.Expressions
                     var propAccessExpression = BindAccessor(aggExpression.Expression);
                     var type = propAccessExpression.Type;
                     propAccessExpression = WrapConvert(propAccessExpression);
-                    properties.Add(new NamedPropertyExpression(Expression.Constant(alias), propAccessExpression));
+                    properties[aliasIdx] = new NamedPropertyExpression(Expression.Constant(alias), propAccessExpression);
 
                     // Save $it.Container.Next.Value for future use
                     UnaryExpression flatAccessExpression = Expression.Convert(
@@ -204,7 +218,7 @@ namespace System.Web.OData.Query.Expressions
                         type);
                     currentContainerExpression = Expression.Property(currentContainerExpression, "Next");
                     _preFlattenedMap.Add(aggExpression.Expression, flatAccessExpression);
-                    aliasIdx++;
+                    aliasIdx--;
                 }
 
                 var wrapperProperty = ResultClrType.GetProperty(GroupByContainerProperty);

@@ -31,29 +31,24 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             {
                 throw Error.ArgumentNull("edmProperty");
             }
-
             if (edmProperty.AddedExplicitly)
             {
                 return;
             }
-
             var primitiveProperty = edmProperty as PrimitivePropertyConfiguration;           
             if (primitiveProperty == null)
             {
                 return; // ignore non-primitive property
             }
-
             var columnAttribute = attribute as ColumnAttribute;
             if (columnAttribute != null && columnAttribute.Order > 0)
             {
                 ODataQueryOptions.ColumnOrder.Add(edmProperty.Name, columnAttribute.Order);
             }
-
             if (columnAttribute == null || columnAttribute.TypeName == null)
             {
                 return; // ignore the column type
             }
-
             string typeName = columnAttribute.TypeName;
             if (String.Compare(typeName, "date", StringComparison.OrdinalIgnoreCase) == 0)
             {

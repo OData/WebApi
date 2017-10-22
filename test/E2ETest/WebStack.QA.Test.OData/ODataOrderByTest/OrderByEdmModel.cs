@@ -9,7 +9,7 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
         public class OrderByContext: DbContext
         {
             private static readonly string ConnectionString =
-                @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=OrderByTest";
+                @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=OrderByTest";
 
             public OrderByContext()
                 : base(ConnectionString)

@@ -34,7 +34,7 @@ namespace System.Web.OData.Query
         private ETag _etagIfMatch;
 
         private bool _etagIfMatchChecked;
-
+        
         private ETag _etagIfNoneMatch;
 
         private bool _etagIfNoneMatchChecked;
@@ -84,9 +84,12 @@ namespace System.Web.OData.Query
             BuildQueryOptions(queryParameters);
 
             Validator = ODataQueryValidator.GetODataQueryValidator(context);
-
-            ColumnOrder = new Dictionary<string, int>();
         }
+
+        /// <summary>
+        /// Gets Column order.
+        /// </summary>
+        public static Dictionary<string, int> ColumnOrder { get; private set; } = new Dictionary<string, int>();
 
         /// <summary>
         ///  Gets the given <see cref="ODataQueryContext"/>
@@ -160,11 +163,7 @@ namespace System.Web.OData.Query
                 return _etagIfMatch;
             }
         }
-
-        /// <summary>
-        /// Column order. For support default order by.
-        /// </summary>        
-        public static Dictionary<string, int> ColumnOrder { get; set; }
+       
 
         /// <summary>
         /// Gets the <see cref="ETag"/> from IfNoneMatch header.

@@ -7,6 +7,8 @@ using System.Web.OData.Query;
 
 namespace System.Web.OData.Builder.Conventions.Attributes
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// Marks properties that have <see cref="ColumnAttribute"/> as the target EDM type.
     /// </summary>
@@ -46,6 +48,11 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             var columnAttribute = attribute as ColumnAttribute;
             if (columnAttribute != null && columnAttribute.Order > 0)
             {
+                if (ODataQueryOptions.ColumnOrder == null)
+                {
+                    ODataQueryOptions.ColumnOrder = new Dictionary<string, int>();
+                }
+                
                 ODataQueryOptions.ColumnOrder.Add(edmProperty.Name, columnAttribute.Order);
             }
 

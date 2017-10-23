@@ -89,7 +89,7 @@ namespace System.Web.OData.Query
         /// <summary>
         /// Gets Column order.
         /// </summary>
-        public static Dictionary<string, int> ColumnOrder { get; private set; } = new Dictionary<string, int>();
+        public static Dictionary<string, int> ColumnOrder { get; set; }
 
         /// <summary>
         ///  Gets the given <see cref="ODataQueryContext"/>

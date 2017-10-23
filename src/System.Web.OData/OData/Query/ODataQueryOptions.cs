@@ -163,7 +163,6 @@ namespace System.Web.OData.Query
                 return _etagIfMatch;
             }
         }
-       
 
         /// <summary>
         /// Gets the <see cref="ETag"/> from IfNoneMatch header.

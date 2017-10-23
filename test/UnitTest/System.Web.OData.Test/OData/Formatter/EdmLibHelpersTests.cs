@@ -246,6 +246,28 @@ namespace System.Web.OData.Formatter
             Assert.Same(first, second);
         }
 
+        [Theory]
+        [InlineData("WithoutCP")]
+        [InlineData("WithCP")]
+        public void ConcurrencyPropertiesAnnotation_NotSerializedToMetadata(string entitySetName)
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<TypeWithoutConcurrencyProperties>("WithoutCP");
+            builder.EntitySet<TypeWithConcurrencyProperties>("WithCP");
+            IEdmModel model = builder.GetEdmModel();
+            string originalMetadata = MetadataTest.GetCSDL(model);
+
+            IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet(entitySetName);
+
+            // Act
+            EdmLibHelpers.GetConcurrencyProperties(model, entitySet);
+            string actualMetadata = MetadataTest.GetCSDL(model);
+
+            // Assert
+            Assert.Equal(originalMetadata, actualMetadata);
+        }
+
         private static IEdmModel _edmModel;
         private static IEdmModel GetEdmModel()
         {

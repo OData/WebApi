@@ -360,7 +360,6 @@ namespace System.Web.OData.Formatter.Deserialization
                         ApplyResourceInNestedProperty(edmProperty, resource, resourceWrapper, readContext);
                     }
                 }
-
             }
         }
 

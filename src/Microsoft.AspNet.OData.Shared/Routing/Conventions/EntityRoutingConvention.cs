@@ -15,7 +15,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     public partial class EntityRoutingConvention
     {
         /// <inheritdoc/>
-        internal  static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
+        internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
             if (odataPath == null)
             {

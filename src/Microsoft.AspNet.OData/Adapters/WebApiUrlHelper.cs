@@ -19,7 +19,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <summary>
         /// The inner helper wrapped by this instance.
         /// </summary>
-        internal UrlHelper innerHelper;
+        private UrlHelper innerHelper;
 
         /// <summary>
         /// Initializes a new instance of the WebApiUrlHelper class.

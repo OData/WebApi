@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 odataPath,
                 new WebApiRequestMessage(request));
 
-            return controllerResult?.ControllerName;
+            return controllerResult != null ? controllerResult.ControllerName : null;
         }
 
         /// <summary>

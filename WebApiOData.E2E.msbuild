@@ -1,4 +1,4 @@
-<Project DefaultTargets="E2ETest" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="E2ETest" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="tools/WebStack.tasks.targets"/>
   
   <!-- Common Properties -->

@@ -179,7 +179,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 ResourceSetContext resourceSetContext = new ResourceSetContext
                 {
-                    Request= writeContext.Request,
+                    Request = writeContext.Request,
                     EntitySetBase = writeContext.NavigationSource as IEdmEntitySetBase,
                     Url = writeContext.Url,
                     ResourceSetInstance = resourceSetInstance

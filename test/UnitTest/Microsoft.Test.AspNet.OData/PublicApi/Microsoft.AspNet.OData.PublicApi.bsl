@@ -394,7 +394,6 @@ public class Microsoft.AspNet.OData.ETagMessageHandler : System.Net.Http.Delegat
 	public ETagMessageHandler ()
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	protected virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] SendAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
@@ -435,7 +434,6 @@ public class Microsoft.AspNet.OData.ODataNullValueMessageHandler : System.Net.Ht
 	public ODataNullValueMessageHandler ()
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	protected virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] SendAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
@@ -604,7 +602,6 @@ public abstract class Microsoft.AspNet.OData.Batch.ODataBatchRequestItem : IDisp
 	protected abstract void Dispose (bool disposing)
 	public abstract System.Collections.Generic.IEnumerable`1[[System.IDisposable]] GetResourcesForDisposal ()
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public static System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] SendMessageAsync (System.Net.Http.HttpMessageInvoker invoker, System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken, System.Collections.Generic.Dictionary`2[[System.String],[System.String]] contentIdToLocationMapping)
@@ -620,7 +617,6 @@ public abstract class Microsoft.AspNet.OData.Batch.ODataBatchResponseItem : IDis
 	internal virtual bool IsResponseSuccessful ()
 	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, System.Net.Http.HttpResponseMessage response)
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, System.Net.Http.HttpResponseMessage response, System.Threading.CancellationToken cancellationToken)
@@ -695,7 +691,6 @@ public sealed class Microsoft.AspNet.OData.Batch.ODataBatchReaderExtensions {
 	public static System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[System.Net.Http.HttpRequestMessage]]]] ReadChangeSetRequestAsync (Microsoft.OData.ODataBatchReader reader, System.Guid batchId)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	ExtensionAttribute(),
 	]
@@ -723,7 +718,6 @@ public sealed class Microsoft.AspNet.OData.Batch.ODataHttpContentExtensions {
 	public static System.Threading.Tasks.Task`1[[Microsoft.OData.ODataMessageReader]] GetODataMessageReaderAsync (System.Net.Http.HttpContent content, System.IServiceProvider requestContainer)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	ExtensionAttribute(),
 	]
@@ -738,7 +732,6 @@ public class Microsoft.AspNet.OData.Batch.ChangeSetRequestItem : ODataBatchReque
 	protected virtual void Dispose (bool disposing)
 	public virtual System.Collections.Generic.IEnumerable`1[[System.IDisposable]] GetResourcesForDisposal ()
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] SendRequestAsync (System.Net.Http.HttpMessageInvoker invoker, System.Threading.CancellationToken cancellationToken)
@@ -752,7 +745,6 @@ public class Microsoft.AspNet.OData.Batch.ChangeSetResponseItem : ODataBatchResp
 	protected virtual void Dispose (bool disposing)
 	internal virtual bool IsResponseSuccessful ()
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, System.Threading.CancellationToken cancellationToken)
@@ -762,19 +754,16 @@ public class Microsoft.AspNet.OData.Batch.DefaultODataBatchHandler : ODataBatchH
 	public DefaultODataBatchHandler (System.Web.Http.HttpServer httpServer)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]]]] ExecuteRequestMessagesAsync (System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchRequestItem]] requests, System.Threading.CancellationToken cancellationToken)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Batch.ODataBatchRequestItem]]]] ParseBatchRequestsAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] ProcessBatchAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
@@ -787,7 +776,6 @@ public class Microsoft.AspNet.OData.Batch.ODataBatchContent : System.Net.Http.Ht
 
 	protected virtual void Dispose (bool disposing)
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	protected virtual System.Threading.Tasks.Task SerializeToStreamAsync (System.IO.Stream stream, System.Net.TransportContext context)
@@ -803,7 +791,6 @@ public class Microsoft.AspNet.OData.Batch.OperationRequestItem : ODataBatchReque
 	protected virtual void Dispose (bool disposing)
 	public virtual System.Collections.Generic.IEnumerable`1[[System.IDisposable]] GetResourcesForDisposal ()
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] SendRequestAsync (System.Net.Http.HttpMessageInvoker invoker, System.Threading.CancellationToken cancellationToken)
@@ -823,19 +810,16 @@ public class Microsoft.AspNet.OData.Batch.UnbufferedODataBatchHandler : ODataBat
 	public UnbufferedODataBatchHandler (System.Web.Http.HttpServer httpServer)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] ExecuteChangeSetAsync (Microsoft.OData.ODataBatchReader batchReader, System.Guid batchId, System.Net.Http.HttpRequestMessage originalRequest, System.Threading.CancellationToken cancellationToken)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] ExecuteOperationAsync (Microsoft.OData.ODataBatchReader batchReader, System.Guid batchId, System.Net.Http.HttpRequestMessage originalRequest, System.Threading.CancellationToken cancellationToken)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] ProcessBatchAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
@@ -2624,7 +2608,6 @@ public class Microsoft.AspNet.OData.Results.CreatedODataResult`1 : IHttpActionRe
 	System.Net.Http.HttpRequestMessage Request  { public get; }
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] ExecuteAsync (System.Threading.CancellationToken cancellationToken)
@@ -2640,7 +2623,6 @@ public class Microsoft.AspNet.OData.Results.UpdatedODataResult`1 : IHttpActionRe
 	System.Net.Http.HttpRequestMessage Request  { public get; }
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] ExecuteAsync (System.Threading.CancellationToken cancellationToken)

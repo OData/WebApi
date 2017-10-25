@@ -34,7 +34,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 request.Properties["AttributeRouteData"] = controllerResult.Values;
             }
 
-            return controllerResult?.ControllerName;
+            return controllerResult != null ? controllerResult.ControllerName : null;
         }
 
         /// <summary>
@@ -53,14 +53,25 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// Get the controller result used to call the shared version of SelectAction()
         /// </summary>
         /// <param name="controllerContext">The controller context.</param>
-        internal SelectControllerResult GetControllerResult(HttpControllerContext controllerContext)
+        internal static SelectControllerResult GetControllerResult(HttpControllerContext controllerContext)
         {
+            string controllerName = null;
             object value = null;
-            controllerContext?.Request?.Properties.TryGetValue("AttributeRouteData", out value);
 
-            return new SelectControllerResult(
-                controllerContext?.ControllerDescriptor?.ControllerName,
-                value as IDictionary<string, object>);
+            if (controllerContext != null)
+            {
+                if (controllerContext.Request != null)
+                {
+                    controllerContext.Request.Properties.TryGetValue("AttributeRouteData", out value);
+                }
+
+                if (controllerContext.ControllerDescriptor != null)
+                {
+                    controllerName = controllerContext.ControllerDescriptor.ControllerName;
+                }
+            }
+
+            return new SelectControllerResult(controllerName, value as IDictionary<string, object>);
         }
     }
 }

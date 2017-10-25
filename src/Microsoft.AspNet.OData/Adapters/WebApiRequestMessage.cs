@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Batch;
@@ -26,7 +27,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <summary>
         /// The inner request wrapped by this instance.
         /// </summary>
-        internal HttpRequestMessage innerRequest;
+        private HttpRequestMessage innerRequest;
 
         /// <summary>
         /// Initializes a new instance of the WebApiRequestMessage class.
@@ -150,7 +151,8 @@ namespace Microsoft.AspNet.OData.Adapters
                 throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
             }
 
-            return configuration.GetETagHandler().CreateETag(properties)?.ToString();
+            EntityTagHeaderValue etag = configuration.GetETagHandler().CreateETag(properties);
+            return etag != null ? etag.ToString() : null;
         }
 
         /// <summary>

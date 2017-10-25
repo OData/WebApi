@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Routing.Template;
 
@@ -38,8 +39,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         }
 
         /// <inheritdoc />
-        internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext,
-            IWebApiActionMap actionMap)
+        internal static string SelectActionImpl(IWebApiControllerContext controllerContext)
         {
             var routeData = controllerContext.Request.RouteData;
             var routingConventionsStore = controllerContext.Request.Context.RoutingConventionsStore;

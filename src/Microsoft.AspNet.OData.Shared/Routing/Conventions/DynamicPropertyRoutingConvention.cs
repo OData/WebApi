@@ -18,7 +18,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// </summary>
     public partial class DynamicPropertyRoutingConvention
     {
-        private const string _actionName = "DynamicProperty";
+        private const string ActionName = "DynamicProperty";
 
         /// <inheritdoc/>
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
@@ -58,7 +58,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
                     if (ODataRequestMethod.Get == controllerContext.Request.Method)
                     {
-                        string actionNamePrefix = String.Format(CultureInfo.InvariantCulture, "Get{0}", _actionName);
+                        string actionNamePrefix = String.Format(CultureInfo.InvariantCulture, "Get{0}", ActionName);
                         actionName = actionMap.FindMatchingAction(actionNamePrefix);
                     }
                     break;
@@ -87,7 +87,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
                     if (ODataRequestMethod.Get == controllerContext.Request.Method)
                     {
-                        string actionNamePrefix = String.Format(CultureInfo.InvariantCulture, "Get{0}", _actionName);
+                        string actionNamePrefix = String.Format(CultureInfo.InvariantCulture, "Get{0}", ActionName);
                         actionName = actionMap.FindMatchingAction(actionNamePrefix + "From" + propertyAccessSegment.Property.Name);
                     }
                     break;

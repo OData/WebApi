@@ -174,7 +174,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 request.Properties["AttributeRouteData"] = controllerResult.Values;
             }
 
-            return controllerResult?.ControllerName;
+            return controllerResult != null ? controllerResult.ControllerName : null;
         }
 
         /// <inheritdoc />
@@ -202,10 +202,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 controllerContext.ControllerDescriptor.ControllerName,
                 value as IDictionary<string, object>);
 
-            return SelectActionImpl(
-                odataPath,
-                new WebApiControllerContext(controllerContext, controllerResult),
-                new WebApiActionMap(actionMap));
+            return SelectActionImpl(new WebApiControllerContext(controllerContext, controllerResult));
         }
 
         private IDictionary<ODataPathTemplate, IWebApiActionDescriptor> BuildAttributeMappings(IEnumerable<HttpControllerDescriptor> controllers)

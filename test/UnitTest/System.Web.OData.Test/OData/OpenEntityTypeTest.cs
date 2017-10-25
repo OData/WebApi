@@ -235,6 +235,38 @@ namespace System.Web.OData
         }
 
         [Fact]
+        public void Post_OpenEntityTypeWithNullComplexTypeProperty()
+        {
+            // Arrange
+            const string Payload = "{" +
+              "\"@odata.context\":\"http://localhost/odata/$metadata#OpenCustomers/$entity\"," +
+              "\"CustomerId\":99,\"Name\":\"FirstName 99\"," + // special CustomerId to test the Address == null in the controller.
+              "\"Address\": null," +
+              "\"Website\": \"WebSite #6\"," +
+              "\"Place@odata.type\":\"#String\",\"Place\":\"My Dynamic Place\"," + // odata.type is necessary, otherwise it will get an ODataUntypedValue
+              "\"Token@odata.type\":\"#Guid\",\"Token\":\"2c1f450a-a2a7-4fe1-a25d-4d9332fc0694\"," +
+              "\"DoubleList@odata.type\":\"#Collection(Double)\"," +
+              "\"DoubleList\":[5.5, 4.4, 3.3]" +
+            "}";
+
+            const string RequestUri = "http://localhost/odata/SimpleOpenCustomers";
+
+            var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+
+            HttpClient client = new HttpClient(new HttpServer(configuration));
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
+            request.Content = new StringContent(Payload);
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
         public void Post_UnTyped_OpenEntityType()
         {
             // Arrange
@@ -467,6 +499,13 @@ namespace System.Web.OData
             Assert.NotNull(value);
             List<double> doubleValues = Assert.IsType<List<double>>(value);
             Assert.Equal(new[] { 5.5, 4.4, 3.3 }, doubleValues);
+
+            // special test cases to test the complex type property value is null.
+            if (customer.CustomerId == 99)
+            {
+                Assert.Null(customer.Address);
+            }
+
             return Ok();
         }
 

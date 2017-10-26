@@ -84,12 +84,14 @@ namespace System.Web.OData.Query
             BuildQueryOptions(queryParameters);
 
             Validator = ODataQueryValidator.GetODataQueryValidator(context);
+
+            ColumnOrder = new Dictionary<string, int>();
         }
 
         /// <summary>
         /// Gets Column order.
         /// </summary>
-        public static Dictionary<string, int> ColumnOrder { get; set; }
+        public static Dictionary<string, int> ColumnOrder { get; private set; }
 
         /// <summary>
         ///  Gets the given <see cref="ODataQueryContext"/>

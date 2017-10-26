@@ -4,7 +4,7 @@ using Microsoft.OData.Edm;
 
 namespace WebStack.QA.Test.OData.ODataOrderByTest
 {
-    public  class OrderByEdmModel
+    public class OrderByEdmModel
     {
         public class OrderByContext: DbContext
         {

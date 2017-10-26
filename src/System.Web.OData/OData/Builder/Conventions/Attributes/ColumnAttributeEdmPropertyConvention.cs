@@ -47,11 +47,6 @@ namespace System.Web.OData.Builder.Conventions.Attributes
             var columnAttribute = attribute as ColumnAttribute;
             if (columnAttribute != null && columnAttribute.Order > 0)
             {
-                if (ODataQueryOptions.ColumnOrder == null)
-                {
-                    ODataQueryOptions.ColumnOrder = new Dictionary<string, int>();
-                }
-                
                 ODataQueryOptions.ColumnOrder.Add(edmProperty.Name, columnAttribute.Order);
             }
 

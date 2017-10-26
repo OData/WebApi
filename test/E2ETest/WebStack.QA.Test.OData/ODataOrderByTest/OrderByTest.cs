@@ -52,7 +52,7 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
         [Fact]
         public async Task TestOrderByResult()
         {   // Arrange
-            string requestUri = $"{BaseAddress}/odata/Items";
+            var requestUri = string.Format("{0}/odata/Items", BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
             var response = await Client.SendAsync(request);
@@ -67,7 +67,8 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
             Assert.NotEmpty(concreteResult);
             for (var i = 0; i < concreteResult.Count - 1; i++)
             {
-                Assert.True(concreteResult[i].Name.StartsWith($"#{i+1}"), "Incorrect order.");
+                var value =string.Format("#{0}", i + 1);
+                Assert.True(concreteResult[i].Name.StartsWith(value), "Incorrect order.");
             }
         }
     }

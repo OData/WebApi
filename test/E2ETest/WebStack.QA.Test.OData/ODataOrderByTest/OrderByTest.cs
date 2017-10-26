@@ -67,7 +67,7 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
             Assert.NotEmpty(concreteResult);
             for (var i = 0; i < concreteResult.Count - 1; i++)
             {
-                var value =string.Format("#{0}", i + 1);
+                var value = string.Format("#{0}", i + 1);
                 Assert.True(concreteResult[i].Name.StartsWith(value), "Incorrect order.");
             }
         }

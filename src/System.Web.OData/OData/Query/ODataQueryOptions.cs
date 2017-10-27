@@ -31,13 +31,15 @@ namespace System.Web.OData.Query
     {
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
+        private static Dictionary<string, int> _columnOrder = new Dictionary<string, int>();
+
         private ETag _etagIfMatch;
 
         private bool _etagIfMatchChecked;
         
         private ETag _etagIfNoneMatch;
 
-        private bool _etagIfNoneMatchChecked;
+        private bool _etagIfNoneMatchChecked;        
 
         private ODataQueryOptionParser _queryOptionParser;
 
@@ -83,15 +85,23 @@ namespace System.Web.OData.Query
 
             BuildQueryOptions(queryParameters);
 
-            Validator = ODataQueryValidator.GetODataQueryValidator(context);
-
-            ColumnOrder = new Dictionary<string, int>();
+            Validator = ODataQueryValidator.GetODataQueryValidator(context);           
         }
 
         /// <summary>
         /// Gets Column order.
         /// </summary>
-        public static Dictionary<string, int> ColumnOrder { get; private set; }
+        public static Dictionary<string, int> ColumnOrder
+        {
+            get
+            {
+                return _columnOrder;
+            }
+            private set
+            {
+                _columnOrder = value;
+            }
+        }
 
         /// <summary>
         ///  Gets the given <see cref="ODataQueryContext"/>

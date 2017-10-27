@@ -2295,6 +2295,7 @@ public class System.Web.OData.Query.ODataQueryOptions {
 	public ODataQueryOptions (ODataQueryContext context, System.Net.Http.HttpRequestMessage request)
 
 	ApplyQueryOption Apply  { public get; }
+	System.Collections.Generic.Dictionary`2[[System.String],[System.Int32]] ColumnOrder  { public static get; }
 	ODataQueryContext Context  { public get; }
 	CountQueryOption Count  { public get; }
 	FilterQueryOption Filter  { public get; }

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Web.Http;
 using System.Web.OData;
+using System.Web.OData.Routing;
 
 namespace WebStack.QA.Test.OData.ODataOrderByTest
 {
@@ -10,7 +11,7 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
 
         static ItemsController()
         {
-            if (Db.Items.Any())
+            if (Db.Items.Any() && Db.Items2.Any())
             {
                 return;
             }
@@ -20,6 +21,11 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
             Db.Items.Add(new Item() { A = 1, C = 3, B = 97, Name = "#3 - A1 C3 B97" });
             Db.Items.Add(new Item() { A = 1, C = 4, B = 96, Name = "#4 - A1 C4 B96" });
 
+            Db.Items2.Add(new Item2() { ColumnA = "AA", ColumnC = "BB", ColumnB = 99, Name = "#2" });
+            Db.Items2.Add(new Item2() { ColumnA = "BB", ColumnC = "AA", ColumnB = 98, Name = "#1" });
+            Db.Items2.Add(new Item2() { ColumnA = "01", ColumnC = "XX", ColumnB = 1, Name = "#3" });
+            Db.Items2.Add(new Item2() { ColumnA = "00", ColumnC = "ZZ", ColumnB = 96, Name = "#4" });
+
             Db.SaveChanges();
         }
 
@@ -27,6 +33,15 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
         public IHttpActionResult Get()
         {
             return Ok(Db.Items);
-        }        
+        }
+
+        [EnableQuery]
+        [HttpGet]
+        [ODataRoute("Items2")]
+        public IHttpActionResult GetItems2()
+        {
+            return Ok(Db.Items2);
+        }
+
     }
 }

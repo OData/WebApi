@@ -914,7 +914,7 @@ namespace System.Web.OData.Formatter
             return mergedQuerySettings;
         }
 
-        private static ModelBoundQuerySettings GetModelBoundQuerySettings<T>(T key, IEdmModel edmModel,
+        internal static ModelBoundQuerySettings GetModelBoundQuerySettings<T>(T key, IEdmModel edmModel,
             DefaultQuerySettings defaultQuerySettings = null)
             where T : IEdmElement
         {

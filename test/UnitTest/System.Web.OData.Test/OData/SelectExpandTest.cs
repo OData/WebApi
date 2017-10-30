@@ -38,6 +38,7 @@ namespace System.Web.OData
                     typeof(SelectExpandTestOrder), typeof(SelectExpandTestSpecialOrder),
                     typeof(SelectExpandTestSpecialOrderWithAlias),
                     typeof(ReferenceNavigationPropertyExpandFilterController),
+                    typeof(SelectExpandTestCustomersWithAutoSelectController)
                 }.GetHttpConfiguration();
             _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             _configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
@@ -51,8 +52,10 @@ namespace System.Web.OData
                 GetModelWithCustomerAliasAndInheritance());
             _configuration.MapODataServiceRoute("odata2", "odata2", GetModelWithOperations());
             _configuration.MapODataServiceRoute("odata-expandfilter", "odata-expandfilter", GetModelWithReferenceNavigationPropertyFilter());
+            _configuration.MapODataServiceRoute("odata-autoselect", "odata-autoselect", GetModelWithAutoSelect());
             _configuration.Routes.MapHttpRoute("api", "api/{controller}", new { controller = "NonODataSelectExpandTestCustomers" });
             _configuration.EnableDependencyInjection();
+
 
             HttpServer server = new HttpServer(_configuration);
             _client = new HttpClient(server);
@@ -73,6 +76,40 @@ namespace System.Web.OData
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
             Assert.Equal("http://localhost/odata/$metadata#SelectExpandTestCustomers(ID,Orders)", result["@odata.context"]);
             ValidateCustomer(result["value"][0]);
+        }
+
+        [Fact]
+        public void AutoSelectDoesntAddToContext()
+        {
+            // Arrange
+            string uri = "/odata-autoselect/SelectExpandTestCustomers";
+
+            // Act
+            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Console.WriteLine(result["@odata.context"]);
+            Assert.Equal("http://localhost/odata-autoselect/$metadata#SelectExpandTestCustomers", result["@odata.context"]);
+        }
+
+        [Fact]
+        public void AutoSelectDoesntAddToContextForExpanded()
+        {
+            // Arrange
+            string uri = "/odata-autoselect/SelectExpandTestCustomers?$expand=Orders";
+
+            // Act
+            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Console.WriteLine(result["@odata.context"]);
+            Assert.Equal("http://localhost/odata-autoselect/$metadata#SelectExpandTestCustomers(Orders)", result["@odata.context"]);
         }
 
         [Theory]
@@ -472,6 +509,30 @@ namespace System.Web.OData
             builder.EntitySet<SelectExpandTestCustomer>("ReferenceNavigationPropertyExpandFilter");
             return builder.GetEdmModel();
         }
+
+        private IEdmModel GetModelWithAutoSelect()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<SelectExpandTestCustomer>("SelectExpandTestCustomers");
+            builder.EntitySet<SelectExpandTestOrder>("SelectExpandTestOrders");
+            builder.Ignore<SelectExpandTestSpecialCustomer>();
+            builder.Ignore<SelectExpandTestSpecialOrder>();
+            var model =  builder.GetEdmModel();
+            Action<string> enableAutoSelect = (string entityName) =>
+            {
+                var entityType = model.EntityContainer.FindEntitySet(entityName).EntityType();
+                var modelBound = new ModelBoundQuerySettings()
+                {
+                    DefaultSelectType = SelectExpandType.Automatic,
+                    MaxTop = null // Ensure that system wide settings are respected
+                };
+                model.SetAnnotationValue(entityType, modelBound);
+
+            };
+            enableAutoSelect("SelectExpandTestCustomers");
+            enableAutoSelect("SelectExpandTestOrders");
+            return model;
+        }
     }
 
     public class SelectExpandTestCustomer
@@ -662,6 +723,15 @@ namespace System.Web.OData
         public SelectExpandTestCustomer GetSelectExpandTestCustomer([FromODataUri]int key)
         {
             return SelectExpandTestCustomer.Customers[0];
+        }
+    }
+
+    public class SelectExpandTestCustomersWithAutoSelectController : ODataController
+    {
+        [EnableQuery]
+        public IEnumerable<SelectExpandTestCustomer> Get()
+        {
+            return SelectExpandTestCustomer.Customers;
         }
     }
 

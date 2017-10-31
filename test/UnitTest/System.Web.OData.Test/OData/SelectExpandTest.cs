@@ -95,6 +95,24 @@ namespace System.Web.OData
             Assert.Equal("http://localhost/odata-autoselect/$metadata#SelectExpandTestCustomers", result["@odata.context"]);
         }
 
+
+        [Fact]
+        public void ExplicitSelectHasPriorityToAutoSelect()
+        {
+            // Arrange
+            string uri = "/odata-autoselect/SelectExpandTestCustomers?$select=ID";
+
+            // Act
+            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Console.WriteLine(result["@odata.context"]);
+            Assert.Equal("http://localhost/odata-autoselect/$metadata#SelectExpandTestCustomers(ID)", result["@odata.context"]);
+        }
+
         [Fact]
         public void AutoSelectDoesntAddToContextForExpanded()
         {
@@ -110,6 +128,23 @@ namespace System.Web.OData
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
             Console.WriteLine(result["@odata.context"]);
             Assert.Equal("http://localhost/odata-autoselect/$metadata#SelectExpandTestCustomers(Orders)", result["@odata.context"]);
+        }
+
+        [Fact]
+        public void ExplicitSelectInExpandHasPriorityToAutoSelect()
+        {
+            // Arrange
+            string uri = "/odata-autoselect/SelectExpandTestCustomers?$expand=Orders($select=ID)";
+
+            // Act
+            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            Console.WriteLine(result["@odata.context"]);
+            Assert.Equal("http://localhost/odata-autoselect/$metadata#SelectExpandTestCustomers(Orders(ID))", result["@odata.context"]);
         }
 
         [Theory]

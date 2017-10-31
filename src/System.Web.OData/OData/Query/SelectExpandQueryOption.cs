@@ -135,8 +135,6 @@ namespace System.Web.OData.Query
                 if (_selectExpandClause == null)
                 {
                     _selectExpandClause = _queryOptionParser.ParseSelectAndExpand();
-                    var typeLevelModelSettings = EdmLibHelpers.GetModelBoundQuerySettings(this.Context.ElementType, this.Context.Model, this.Context.DefaultQuerySettings);
-                    _selectExpandClause.AllAutoSelected = (typeLevelModelSettings != null && typeLevelModelSettings.DefaultSelectType == SelectExpandType.Automatic);
                 }
 
                 return _selectExpandClause;

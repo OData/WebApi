@@ -704,6 +704,10 @@ namespace System.Web.OData.Query
                     autoExpandRawValue,
                     Context,
                     _queryOptionParser);
+
+                var typeLevelModelSettings = EdmLibHelpers.GetModelBoundQuerySettings(this.Context.ElementType, this.Context.Model, this.Context.DefaultQuerySettings);
+                SelectExpand.SelectExpandClause.AllAutoSelected = (typeLevelModelSettings != null && typeLevelModelSettings.DefaultSelectType == SelectExpandType.Automatic);
+
                 if (originalSelectExpand != null && originalSelectExpand.LevelsMaxLiteralExpansionDepth > 0)
                 {
                     SelectExpand.LevelsMaxLiteralExpansionDepth = originalSelectExpand.LevelsMaxLiteralExpansionDepth;

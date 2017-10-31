@@ -91,7 +91,6 @@ namespace System.Web.OData
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Console.WriteLine(result["@odata.context"]);
             Assert.Equal("http://localhost/odata-autoselect/$metadata#SelectExpandTestCustomers", result["@odata.context"]);
         }
 
@@ -109,7 +108,6 @@ namespace System.Web.OData
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Console.WriteLine(result["@odata.context"]);
             Assert.Equal("http://localhost/odata-autoselect/$metadata#SelectExpandTestCustomers(ID)", result["@odata.context"]);
         }
 
@@ -126,7 +124,6 @@ namespace System.Web.OData
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Console.WriteLine(result["@odata.context"]);
             Assert.Equal("http://localhost/odata-autoselect/$metadata#SelectExpandTestCustomers(Orders)", result["@odata.context"]);
         }
 
@@ -143,7 +140,6 @@ namespace System.Web.OData
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Console.WriteLine(result["@odata.context"]);
             Assert.Equal("http://localhost/odata-autoselect/$metadata#SelectExpandTestCustomers(Orders(ID))", result["@odata.context"]);
         }
 

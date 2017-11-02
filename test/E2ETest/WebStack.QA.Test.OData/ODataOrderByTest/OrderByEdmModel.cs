@@ -17,13 +17,16 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
             }
 
             public IDbSet<Item> Items { get; set; }
+            public IDbSet<Item2> Items2 { get; set; }
+
         }
-        
+
 
         public static IEdmModel GetModel()
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<Item>("Items");
+            builder.EntitySet<Item2>("Items2");
 
             return builder.GetEdmModel();
         }

@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Web.Http;
+using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
@@ -86,21 +87,6 @@ namespace System.Web.OData.Query
             BuildQueryOptions(queryParameters);
 
             Validator = ODataQueryValidator.GetODataQueryValidator(context);           
-        }
-
-        /// <summary>
-        /// Gets Column order.
-        /// </summary>
-        public static Dictionary<string, int> ColumnOrder
-        {
-            get
-            {
-                return _columnOrder;
-            }
-            private set
-            {
-                _columnOrder = value;
-            }
         }
 
         /// <summary>
@@ -549,7 +535,7 @@ namespace System.Web.OData.Query
                         .StructuralProperties()
                         .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
 
-            return properties.OrderBy(o => ColumnOrder.FirstOrDefault(order => order.Key == o.Name).Value).ThenBy(o => o.Name).ToList();
+            return properties.OrderBy(o => ((PrimitivePropertyConfiguration)o.DeclaringType).Order).ThenBy(o => o.Name).ToList();
         }
 
         // Generates the OrderByQueryOption to use by default for $skip or $top

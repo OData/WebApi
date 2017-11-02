@@ -991,6 +991,7 @@ public abstract class System.Web.OData.Builder.PropertyConfiguration {
 	bool NotFilterable  { public get; public set; }
 	bool NotNavigable  { public get; public set; }
 	bool NotSortable  { public get; public set; }
+	int Order  { public get; public set; }
 	System.Reflection.PropertyInfo PropertyInfo  { public get; }
 	QueryConfiguration QueryConfiguration  { public get; public set; }
 	System.Type RelatedClrType  { public abstract get; }
@@ -2295,7 +2296,6 @@ public class System.Web.OData.Query.ODataQueryOptions {
 	public ODataQueryOptions (ODataQueryContext context, System.Net.Http.HttpRequestMessage request)
 
 	ApplyQueryOption Apply  { public get; }
-	System.Collections.Generic.Dictionary`2[[System.String],[System.Int32]] ColumnOrder  { public static get; }
 	ODataQueryContext Context  { public get; }
 	CountQueryOption Count  { public get; }
 	FilterQueryOption Filter  { public get; }

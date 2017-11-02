@@ -145,7 +145,12 @@ namespace System.Web.OData.Builder
         /// <summary>
         /// Gets or sets whether the property is not countable. default is false.
         /// </summary>
-        public bool NotCountable { get; set; }
+        public bool NotCountable { get; set; } 
+
+        /// <summary>
+        /// Get or sets order in "order by"  expression.
+        /// </summary>
+        public int Order { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="QueryConfiguration"/>.

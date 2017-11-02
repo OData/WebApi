@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -9,15 +9,9 @@ using Newtonsoft.Json.Linq;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
-using Xunit.Extensions;
 
 namespace WebStack.QA.Test.OData.ODataOrderByTest
 {
-    using System.Collections.Generic;
-    using System.Web.Http.Results;
-
-    using Newtonsoft.Json;
-
     [NuwaFramework]
     [NuwaTrace(NuwaTraceAttribute.Tag.Off)]
     public class ODataOrderByTest
@@ -64,6 +58,29 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
             var jsonValue = jsonResult.SelectToken("value");
             Assert.NotNull(jsonValue);
             var concreteResult = jsonValue.ToObject<List<Item>>();
+            Assert.NotEmpty(concreteResult);
+            for (var i = 0; i < concreteResult.Count - 1; i++)
+            {
+                var value = string.Format("#{0}", i + 1);
+                Assert.True(concreteResult[i].Name.StartsWith(value), "Incorrect order.");
+            }
+        }
+
+        [Fact]
+        public async Task TestOrderByResult2()
+        {   // Arrange
+            var requestUri = string.Format("{0}/odata/Items2", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+            var response = await Client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var rawResult = response.Content.ReadAsStringAsync().Result;
+            var jsonResult = JObject.Parse(rawResult);
+            var jsonValue = jsonResult.SelectToken("value");
+            Assert.NotNull(jsonValue);
+            var concreteResult = jsonValue.ToObject<List<Item2>>();
             Assert.NotEmpty(concreteResult);
             for (var i = 0; i < concreteResult.Count - 1; i++)
             {

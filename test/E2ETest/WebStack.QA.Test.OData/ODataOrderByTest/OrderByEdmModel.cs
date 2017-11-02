@@ -6,10 +6,10 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
 {
     public class OrderByEdmModel
     {
-        public class OrderByContext: DbContext
+        public class OrderByContext : DbContext
         {
             private static readonly string ConnectionString =
-                @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=OrderByTest";
+                @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=OrderTest";
 
             public OrderByContext()
                 : base(ConnectionString)
@@ -27,9 +27,7 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<Item>("Items");
             builder.EntitySet<Item2>("Items2");
-
             return builder.GetEdmModel();
         }
-
     }
 }

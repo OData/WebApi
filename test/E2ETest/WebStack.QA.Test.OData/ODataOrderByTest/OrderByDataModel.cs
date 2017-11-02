@@ -6,15 +6,15 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
     public class Item
     {
         [Key]
-        [Column(Order = 2)]       
+        [Column(Order = 2)]
         public int A { get; set; }
 
         [Key]
-        [Column(Order = 1)]        
+        [Column(Order = 1)]
         public int C { get; set; }
 
         [Key]
-        [Column(Order = 3)]        
+        [Column(Order = 3)]
         public int B { get; set; }
 
         [Required]

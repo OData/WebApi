@@ -21,11 +21,11 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
             Db.Items.Add(new Item() { A = 1, C = 3, B = 97, Name = "#3 - A1 C3 B97" });
             Db.Items.Add(new Item() { A = 1, C = 4, B = 96, Name = "#4 - A1 C4 B96" });
 
+
             Db.Items2.Add(new Item2() { A = "AA", C = "BB", B = 99, Name = "#2" });
             Db.Items2.Add(new Item2() { A = "BB", C = "AA", B = 98, Name = "#1" });
             Db.Items2.Add(new Item2() { A = "01", C = "XX", B = 1, Name = "#3" });
             Db.Items2.Add(new Item2() { A = "00", C = "ZZ", B = 96, Name = "#4" });
-
             Db.SaveChanges();
         }
 
@@ -34,7 +34,6 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
         {
             return Ok(Db.Items);
         }
-
 
         [EnableQuery]
         [HttpGet]

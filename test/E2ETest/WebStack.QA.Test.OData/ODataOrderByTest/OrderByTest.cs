@@ -44,7 +44,7 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
         }
 
         [Fact]
-        public async Task TestOrderByResult()
+        public async Task TestOrderByResultItem()
         {   // Arrange
             var requestUri = string.Format("{0}/odata/Items", BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
@@ -67,7 +67,7 @@ namespace WebStack.QA.Test.OData.ODataOrderByTest
         }
 
         [Fact]
-        public async Task TestOrderByResult2()
+        public async Task TestOrderByResultItem2()
         {   // Arrange
             var requestUri = string.Format("{0}/odata/Items2", BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);

@@ -540,6 +540,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Settings.StyleCop" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="OData\Query\Expressions\PropertyContainer.generated.tt">

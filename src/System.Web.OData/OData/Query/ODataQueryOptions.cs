@@ -40,7 +40,7 @@ namespace System.Web.OData.Query
  
         private ETag _etagIfNoneMatch;
 
-        private bool _etagIfNoneMatchChecked;    
+        private bool _etagIfNoneMatchChecked;
 
         private ODataQueryOptionParser _queryOptionParser;
 
@@ -86,7 +86,7 @@ namespace System.Web.OData.Query
 
             BuildQueryOptions(queryParameters);
 
-            Validator = ODataQueryValidator.GetODataQueryValidator(context);           
+            Validator = ODataQueryValidator.GetODataQueryValidator(context);
         }
 
         /// <summary>

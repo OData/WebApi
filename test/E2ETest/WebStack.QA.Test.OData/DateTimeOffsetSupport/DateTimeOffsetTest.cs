@@ -354,7 +354,7 @@ namespace WebStack.QA.Test.OData.DateTimeOffsetSupport
 
             var responseFileList = DeserializeList(response);
             Assert.Equal(5, fileList.Count());
-            Assert.True(fileList.SequenceEqual(responseFileList));
+            Assert.True(fileList.Where(p => p.CreatedDate.Day == time.Day).OrderBy(p => p.CreatedDate).SequenceEqual(responseFileList.OrderBy(p => p.CreatedDate)));
         }
 
         [Theory]

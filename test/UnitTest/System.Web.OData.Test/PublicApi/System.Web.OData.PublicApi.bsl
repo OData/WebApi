@@ -991,6 +991,7 @@ public abstract class System.Web.OData.Builder.PropertyConfiguration {
 	bool NotFilterable  { public get; public set; }
 	bool NotNavigable  { public get; public set; }
 	bool NotSortable  { public get; public set; }
+	int Order  { public get; public set; }
 	System.Reflection.PropertyInfo PropertyInfo  { public get; }
 	QueryConfiguration QueryConfiguration  { public get; public set; }
 	System.Type RelatedClrType  { public abstract get; }
@@ -1599,7 +1600,6 @@ public class System.Web.OData.Builder.PrimitivePropertyConfiguration : Structura
 	public PrimitivePropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
 
 	PropertyKind Kind  { public virtual get; }
-	int Order  { public get; public set; }
 	System.Type RelatedClrType  { public virtual get; }
 	System.Nullable`1[[Microsoft.OData.Edm.EdmPrimitiveTypeKind]] TargetEdmTypeKind  { public get; }
 

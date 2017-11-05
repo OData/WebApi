@@ -535,7 +535,11 @@ namespace System.Web.OData.Query
                         .StructuralProperties()
                         .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
 
-            return properties.OrderBy(o => ((PrimitivePropertyConfiguration)o.DeclaringType).Order).ThenBy(o => o.Name).ToList();
+            return properties.OrderBy(o =>
+            {
+               var value = o.DeclaringType as PrimitivePropertyConfiguration;
+                return value == null ? 0 : value.Order;
+            }).ThenBy(o => o.Name).ToList();
         }
 
         // Generates the OrderByQueryOption to use by default for $skip or $top

@@ -72,10 +72,5 @@ namespace System.Web.OData.Builder
             ConcurrencyToken = true;
             return this;
         }
-
-        /// <summary>
-        /// Get or sets order in "order by"  expression.
-        /// </summary>
-        public int Order { get; set; }
     }
 }

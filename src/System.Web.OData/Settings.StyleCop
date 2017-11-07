@@ -1,4 +1,4 @@
-﻿<StyleCopSettings Version="105">
+<StyleCopSettings Version="105">
   <Analyzers>
     <Analyzer AnalyzerId="StyleCop.CSharp.LayoutRules">
       <AnalyzerSettings />

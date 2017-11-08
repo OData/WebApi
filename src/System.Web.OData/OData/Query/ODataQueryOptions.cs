@@ -32,8 +32,6 @@ namespace System.Web.OData.Query
     {
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethod("LimitResults");
 
-        private static Dictionary<string, int> _columnOrder = new Dictionary<string, int>();
-
         private ETag _etagIfMatch;
 
         private bool _etagIfMatchChecked;
@@ -537,7 +535,7 @@ namespace System.Web.OData.Query
 
             return properties.OrderBy(o =>
             {
-               var value = o.DeclaringType as PrimitivePropertyConfiguration;
+                var value = o.DeclaringType as PrimitivePropertyConfiguration;
                 return value == null ? 0 : value.Order;
             }).ThenBy(o => o.Name).ToList();
         }

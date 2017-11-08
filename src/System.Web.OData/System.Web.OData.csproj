@@ -539,7 +539,7 @@
     <CodeAnalysisDictionary Include="..\CodeAnalysisDictionary.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />    
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="OData\Query\Expressions\PropertyContainer.generated.tt">

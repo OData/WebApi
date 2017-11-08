@@ -35,7 +35,7 @@ namespace System.Web.OData.Query
         private ETag _etagIfMatch;
 
         private bool _etagIfMatchChecked;
- 
+
         private ETag _etagIfNoneMatch;
 
         private bool _etagIfNoneMatchChecked;

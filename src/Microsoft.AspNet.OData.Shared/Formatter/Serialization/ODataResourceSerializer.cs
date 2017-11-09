@@ -493,7 +493,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 nullDynamicPropertyEnabled = true;
             }
-            else if (resourceContext.Request != null)
+            else if (resourceContext.InternalRequest != null)
             {
                 nullDynamicPropertyEnabled = resourceContext.InternalRequest.Options.NullDynamicPropertyIsEnabled;
             }
@@ -600,7 +600,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <returns>The created ETag.</returns>
         public virtual string CreateETag(ResourceContext resourceContext)
         {
-            if (resourceContext.Request != null)
+            if (resourceContext.InternalRequest != null)
             {
                 IEdmModel model = resourceContext.EdmModel;
                 IEdmNavigationSource navigationSource = resourceContext.NavigationSource;

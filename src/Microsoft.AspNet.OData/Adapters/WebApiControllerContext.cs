@@ -32,6 +32,11 @@ namespace Microsoft.AspNet.OData.Adapters
                 throw Error.ArgumentNull("controllerContext");
             }
 
+            if (controllerResult == null)
+            {
+                throw Error.ArgumentNull("controllerResult");
+            }
+
             this.innerContext = controllerContext;
             this.ControllerResult = controllerResult;
 

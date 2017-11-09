@@ -25,6 +25,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 _request = value;
                 InternalRequest = _request != null ? new WebApiRequestMessage(_request) : null;
+                InternalUrlHelper = _request != null ? new WebApiUrlHelper(_request.GetUrlHelper()) : null;
             }
         }
 

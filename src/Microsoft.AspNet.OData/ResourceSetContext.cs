@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 
@@ -60,14 +62,22 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Gets or sets the HTTP request that causes this instance to be generated.
+        /// Create a <see cref="ResourceSetContext"/> from an <see cref="ODataSerializerContext"/> and <see cref="IEnumerable"/>.
         /// </summary>
-        internal IWebApiRequestMessage InternalRequest { get; private set; }
+        /// <param name="resourceSetInstance">The instance representing the resource set being written.</param>
+        /// <param name="writeContext">The serializer context.</param>
+        /// <returns>A new <see cref="ResourceSetContext"/>.</returns>
+        internal static ResourceSetContext Create(ODataSerializerContext writeContext, IEnumerable resourceSetInstance)
+        {
+            ResourceSetContext resourceSetContext = new ResourceSetContext
+            {
+                Request = writeContext.Request,
+                EntitySetBase = writeContext.NavigationSource as IEdmEntitySetBase,
+                Url = writeContext.Url,
+                ResourceSetInstance = resourceSetInstance
+            };
 
-        /// <summary>
-        /// Gets or sets the <see cref="IWebApiUrlHelper"/> to be used for generating links while serializing this
-        /// feed instance.
-        /// </summary>
-        internal IWebApiUrlHelper InternalUrlHelper { get; private set; }
+            return resourceSetContext;
+        }
     }
 }

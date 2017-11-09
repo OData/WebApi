@@ -33,10 +33,10 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
-        /// Determines whether a specified key exists.
+        /// Determines whether a specified action exists.
         /// </summary>
-        /// <param name="name">The key.</param>
-        /// <returns>True if the key exist; false otherwise.</returns>
+        /// <param name="name">The action name.</param>
+        /// <returns>True if the action name exist; false otherwise.</returns>
         public bool Contains(string name)
         {
             return this.innerMap.Contains(name);

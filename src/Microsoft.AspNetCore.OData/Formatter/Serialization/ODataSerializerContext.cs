@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
-using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNet.OData.Adapters;
+using Microsoft.AspNet.OData.Extensions;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
@@ -13,35 +13,36 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     /// </summary>
     public partial class ODataSerializerContext
     {
-        private IUrlHelper _urlHelper;
+        private HttpRequest _request;
 
         /// <summary>
         /// Gets or sets the HTTP Request whose response is being serialized.
         /// </summary>
         public HttpRequest Request
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get { return _request; }
+
             set
             {
-                throw new NotImplementedException();
+                _request = value;
+                InternalRequest = _request != null ? new WebApiRequestMessage(_request) : null;
+                InternalUrlHelper = _request != null ? new WebApiUrlHelper(_request.HttpContext.GetUrlHelper()) : null;
             }
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="UrlHelper"/> to use for generating OData links.
+        /// Clone this instance of <see cref="ODataSerializerContext"/> from an existing instance.
         /// </summary>
-        public IUrlHelper Url
+        /// <param name="context">The context from which to copy properties.</param>
+        private void CopyProperties(ODataSerializerContext context)
         {
-            get { return _urlHelper; }
-
-            set
-            {
-                _urlHelper = value;
-                InternalUrl = _urlHelper != null ? new WebApiUrlHelper(_urlHelper) : null;
-            }
+            Request = context.Request;
+            Model = context.Model;
+            Path = context.Path;
+            RootElementName = context.RootElementName;
+            SkipExpensiveAvailabilityChecks = context.SkipExpensiveAvailabilityChecks;
+            MetadataLevel = context.MetadataLevel;
+            Items = context.Items;
         }
     }
 }

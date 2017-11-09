@@ -289,7 +289,7 @@ namespace Microsoft.Test.AspNet.OData
             IEnumerable<string> definedNames = assembly.GetTypes().Select(t => t.FullName);
             IEnumerable<string> foundNames = foundTypes.Select(t => t.FullName);
 
-            foreach (string  name in definedNames)
+            foreach (string name in definedNames)
             {
                 Assert.True(foundNames.Contains(name));
             }
@@ -323,7 +323,7 @@ namespace Microsoft.Test.AspNet.OData
         /// </summary>
         private abstract class CustomAbstractClass
         {
-            abstract public int Area();
+            public abstract int Area();
         }
 
         /// <summary>
@@ -331,7 +331,7 @@ namespace Microsoft.Test.AspNet.OData
         /// </summary>
         private class CustomConcreteClass : CustomAbstractClass
         {
-            override public int Area() { return 42; }
+            public override int Area() { return 42; }
         }
     }
 }

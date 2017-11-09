@@ -6,16 +6,21 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Csdl;
 
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
     /// Represents a controller for generating OData servicedoc and metadata document ($metadata).
     /// </summary>
-    public partial class MetadataController : ODataController
+    public class MetadataController : ODataController
     {
+        private static readonly Version _defaultEdmxVersion = new Version(4, 0);
+
         /// <summary>
         /// Generates the OData $metadata document.
         /// </summary>
@@ -95,6 +100,18 @@ namespace Microsoft.AspNet.OData
             };
 
             return info;
+        }
+
+        private IEdmModel GetModel()
+        {
+            IEdmModel model = Request.GetModel();
+            if (model == null)
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
+            }
+
+            model.SetEdmxVersion(_defaultEdmxVersion);
+            return model;
         }
     }
 }

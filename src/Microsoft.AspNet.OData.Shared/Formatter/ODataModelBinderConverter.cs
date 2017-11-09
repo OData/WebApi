@@ -361,9 +361,14 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             IWebApiRequestMessage request = readContext.InternalRequest;
+            IWebApiUrlHelper urlHelper = readContext.InternalUrlHelper;
 
             DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
-            string serviceRoot = GetServiceRoot(request);
+            string serviceRoot = urlHelper.CreateODataLink(
+                request.Context.RouteName,
+                request.PathHandler,
+                new List<ODataPathSegment>());
+
             IEnumerable<KeyValuePair<string, object>> keyValues = GetKeys(pathHandler, serviceRoot, resource.Id,
                 request.RequestContainer);
 
@@ -391,14 +396,6 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             return source;
-        }
-
-        private static string GetServiceRoot(IWebApiRequestMessage request)
-        {
-            return request.UrlHelper.CreateODataLink(
-                request.Context.RouteName,
-                request.PathHandler,
-                new List<ODataPathSegment>());
         }
 
         private static IEnumerable<KeyValuePair<string, object>> GetKeys(DefaultODataPathHandler pathHandler,

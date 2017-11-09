@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// </summary>
         /// <param name="segments">The OData path segments.</param>
         /// <returns>The generated OData link.</returns>
-        public string CreateODataLink(IList<ODataPathSegment> segments)
+        public string CreateODataLink(params ODataPathSegment[] segments)
         {
             return this.innerHelper.CreateODataLink(segments);
         }
@@ -50,7 +50,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// </summary>
         /// <param name="segments">The OData path segments.</param>
         /// <returns>The generated OData link.</returns>
-        public string CreateODataLink(params ODataPathSegment[] segments)
+        public string CreateODataLink(IList<ODataPathSegment> segments)
         {
             return this.innerHelper.CreateODataLink(segments);
         }

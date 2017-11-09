@@ -82,14 +82,13 @@
     <Compile Include="Batch\ODataBatchHttpRequestMessageExtensions.cs" />
     <Compile Include="ETagMessageHandler.cs" />
     <Compile Include="Formatter\EdmLibHelpers.cs" />
-    <Compile Include="Formatter\IETagHandler.cs" />
     <Compile Include="Formatter\ODataCountMediaTypeMapping.cs" />
     <Compile Include="Formatter\ODataEnumValueMediaTypeMapping.cs" />
     <Compile Include="Formatter\Serialization\DefaultODataSerializerProvider.cs" />
     <Compile Include="Formatter\Serialization\ODataSerializerContext.cs" />
     <Compile Include="Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="Formatter\Serialization\ODataSerializerProviderProxy.cs" />
-    <Compile Include="MetadataController.cs" />
+    <Compile Include="PerRouteContainer.cs" />
     <Compile Include="Query\Expressions\ExpressionBinderBase.cs" />
     <Compile Include="Batch\UnbufferedODataBatchHandler.cs" />
     <Compile Include="Batch\ODataBatchResponseItem.cs" />

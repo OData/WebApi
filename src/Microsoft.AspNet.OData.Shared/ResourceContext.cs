@@ -143,7 +143,7 @@ namespace Microsoft.AspNet.OData
         {
             get
             {
-                return SerializerContext.InternalUrl;
+                return SerializerContext.InternalUrlHelper;
             }
         }
 

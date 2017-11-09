@@ -34,9 +34,9 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
-        /// Returns a list of assemblies available for the application. 
+        /// Returns a list of assemblies available for the application.
         /// </summary>
-        /// <returns>A list of assemblies available for the application. </returns>
+        /// <returns>A list of assemblies available for the application.</returns>
         public IEnumerable<Assembly> Assemblies
         {
             get

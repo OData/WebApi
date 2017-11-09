@@ -177,14 +177,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             IEdmStructuredTypeReference structuredType = GetResourceType(resourceSetType).AsStructured();
             if (writeContext.NavigationSource != null && structuredType.IsEntity())
             {
-                ResourceSetContext resourceSetContext = new ResourceSetContext
-                {
-                    Request = writeContext.Request,
-                    EntitySetBase = writeContext.NavigationSource as IEdmEntitySetBase,
-                    Url = writeContext.Url,
-                    ResourceSetInstance = resourceSetInstance
-                };
-
+                ResourceSetContext resourceSetContext = ResourceSetContext.Create(writeContext, resourceSetInstance);
                 IEdmEntityType entityType = structuredType.AsEntity().EntityDefinition();
                 var operations = writeContext.Model.GetAvailableOperationsBoundToCollection(entityType);
                 var odataOperations = CreateODataOperations(operations, resourceSetContext, writeContext);
@@ -289,7 +282,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 return null;
             }
 
-            Uri baseUri = new Uri(writeContext.InternalUrl.CreateODataLink(MetadataSegment.Instance));
+            Uri baseUri = new Uri(writeContext.InternalUrlHelper.CreateODataLink(MetadataSegment.Instance));
             Uri metadata = new Uri(baseUri, "#" + operation.FullName());
 
             ODataOperation odataOperation;

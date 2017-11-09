@@ -43,8 +43,24 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             set
             {
                 _urlHelper = value;
-                InternalUrl = _urlHelper != null ? new WebApiUrlHelper(_urlHelper) : null;
+                InternalUrlHelper = _urlHelper != null ? new WebApiUrlHelper(_urlHelper) : null;
             }
+        }
+
+        /// <summary>
+        /// Copy the properties this instance of <see cref="ODataSerializerContext"/> from an existing instance.
+        /// </summary>
+        /// <param name="context">The context from which to copy properties.</param>
+        private void CopyProperties(ODataSerializerContext context)
+        {
+            Request = context.Request;
+            Url = context.Url;
+            Model = context.Model;
+            Path = context.Path;
+            RootElementName = context.RootElementName;
+            SkipExpensiveAvailabilityChecks = context.SkipExpensiveAvailabilityChecks;
+            MetadataLevel = context.MetadataLevel;
+            Items = context.Items;
         }
     }
 }

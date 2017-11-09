@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
+using System.Collections;
 using Microsoft.AspNet.OData.Adapters;
-using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
@@ -15,34 +15,19 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     public partial class ResourceSetContext
     {
-        private IUrlHelper _urlHelper;
+        private HttpRequest _request;
 
         /// <summary>
         /// Gets or sets the HTTP request that caused this instance to be generated.
         /// </summary>
         public HttpRequest Request
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get { return _request; }
             set
             {
-                throw new NotImplementedException();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the <see cref="IWebApiUrlHelper"/> to be used for generating links while serializing this
-        /// feed instance.
-        /// </summary>
-        public IUrlHelper Url
-        {
-            get { return _urlHelper; }
-            set
-            {
-                _urlHelper = value;
-                InternalUrlHelper = _urlHelper != null ? new WebApiUrlHelper(_urlHelper) : null;
+                _request = value;
+                InternalRequest = _request != null ? new WebApiRequestMessage(_request) : null;
+                InternalUrlHelper = _request != null ? new WebApiUrlHelper(_request.HttpContext.GetUrlHelper()) : null;
             }
         }
 
@@ -51,21 +36,25 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         public IEdmModel EdmModel
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get { return Request.GetModel(); }
         }
 
         /// <summary>
-        /// Gets or sets the HTTP request that caused this instance to be generated.
+        /// Create a <see cref="ResourceSetContext"/> from an <see cref="ODataSerializerContext"/> and <see cref="IEnumerable"/>.
         /// </summary>
-        internal IWebApiRequestMessage InternalRequest { get; private set; }
+        /// <param name="resourceSetInstance">The instance representing the resourceSet being written.</param>
+        /// <param name="writeContext">The serializer context.</param>
+        /// <returns>A new <see cref="ResourceSetContext"/>.</returns>
+        internal static ResourceSetContext Create(ODataSerializerContext writeContext, IEnumerable resourceSetInstance)
+        {
+            ResourceSetContext resourceSetContext = new ResourceSetContext
+            {
+                Request = writeContext.Request,
+                EntitySetBase = writeContext.NavigationSource as IEdmEntitySetBase,
+                ResourceSetInstance = resourceSetInstance
+            };
 
-        /// <summary>
-        /// Gets or sets the <see cref="IWebApiUrlHelper"/> to be used for generating links while serializing this
-        /// feed instance.
-        /// </summary>
-        internal IWebApiUrlHelper InternalUrlHelper { get; private set; }
+            return resourceSetContext;
+        }
     }
 }

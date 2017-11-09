@@ -65,7 +65,7 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
-        /// Gets or sets the OData path.
+        /// Gets the OData path.
         /// </summary>
         public ODataPath Path
         {

@@ -169,6 +169,10 @@
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayTest.cs" />
     <Compile Include="DateAndTimeOfDay\DateAndTimeOfDayWithEfTest.cs" />
     <Compile Include="DateAndTimeOfDay\DateWithEfTest.cs" />
+    <Compile Include="DateTimeOffsetSupport\DateTimeOffsetController.cs" />
+    <Compile Include="DateTimeOffsetSupport\DateTimeOffsetDataModel.cs" />
+    <Compile Include="DateTimeOffsetSupport\DateTimeOffsetEdmModel.cs" />
+    <Compile Include="DateTimeOffsetSupport\DateTimeOffsetTest.cs" />
     <Compile Include="DeltaQueryTests\DeltaQueryTests.cs" />
     <Compile Include="DependencyInjection\CustomizeCountQueryValidatorTest.cs" />
     <Compile Include="DependencyInjection\CustomizeSerializerTest.cs" />

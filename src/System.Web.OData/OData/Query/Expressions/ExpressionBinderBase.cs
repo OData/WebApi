@@ -874,6 +874,13 @@ namespace System.Web.OData.Query.Expressions
             {
                 MemberExpression memberAccess = expression as MemberExpression;
                 Contract.Assert(memberAccess != null);
+
+                PropertyInfo propertyInfo = memberAccess.Member as PropertyInfo;
+                if (propertyInfo != null && propertyInfo.GetMethod.IsStatic)
+                {
+                    return propertyInfo.GetValue(new object());
+                }
+
                 if (memberAccess.Expression.NodeType == ExpressionType.Constant)
                 {
                     ConstantExpression constant = memberAccess.Expression as ConstantExpression;

@@ -26,7 +26,7 @@ namespace Microsoft.AspNet.OData.Adapters
         private HttpActionDescriptor innerDescriptor;
 
         /// <summary>
-        /// Initializes a new instance of the WebApiActionDescriptor class.
+        /// Initializes a new instance of the <see cref="WebApiActionDescriptor"/> class.
         /// </summary>
         /// <param name="actionDescriptor">The inner descriptor.</param>
         public WebApiActionDescriptor(HttpActionDescriptor actionDescriptor)

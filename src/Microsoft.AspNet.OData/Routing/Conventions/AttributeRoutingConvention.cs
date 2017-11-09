@@ -112,6 +112,11 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             _attributeMappings = BuildAttributeMappings(controllers);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AttributeRoutingConvention"/> class.
+        /// </summary>
+        /// <param name="routeName">The name of the route.</param>
+        /// <param name="pathTemplateHandler">The path template handler to be used for parsing the path templates.</param>
         private AttributeRoutingConvention(string routeName, IODataPathTemplateHandler pathTemplateHandler)
         {
             if (routeName == null)
@@ -133,6 +138,9 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// </summary>
         public IODataPathTemplateHandler ODataPathTemplateHandler { get; private set; }
 
+        /// <summary>
+        /// Gets the atribute mappings.
+        /// </summary>
         internal IDictionary<ODataPathTemplate, IWebApiActionDescriptor> AttributeMappings
         {
             get

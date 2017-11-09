@@ -41,6 +41,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// </summary>
         internal IWebApiRequestMessage InternalRequest { get; private set; }
 
+        /// <summary>
+        /// Gets or sets the <see cref="IWebApiUrlHelper"/> to be used for generating links while serializing this
+        /// feed instance.
+        /// </summary>
+        internal IWebApiUrlHelper InternalUrlHelper { get; private set; }
+
         internal bool IsDeltaOfT
         {
             get

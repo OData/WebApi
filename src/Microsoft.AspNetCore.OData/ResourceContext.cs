@@ -32,21 +32,5 @@ namespace Microsoft.AspNet.OData
                 SerializerContext.Request = value;
             }
         }
-
-        /// <summary>
-        /// Gets or sets a <see cref="IWebApiUrlHelper"/> that may be used to generate links while serializing this resource
-        /// instance.
-        /// </summary>
-        public IUrlHelper Url
-        {
-            get
-            {
-                return SerializerContext.Url;
-            }
-            set
-            {
-                SerializerContext.Url = value;
-            }
-        }
     }
 }

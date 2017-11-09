@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
+using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
@@ -147,7 +148,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
             HttpRouteCollection httpRouteCollection = new HttpRouteCollection();
             httpRouteCollection.Add(_routeName, new HttpRoute());
             var configuration = new HttpConfiguration(httpRouteCollection);
-            configuration.SetODataRootContainer(_routeName, _rootContainer);
+            PerRouteContainer perRouteContainer = configuration.GetPerRouteContainer() as PerRouteContainer;
+            perRouteContainer.SetODataRootContainer(_routeName, _rootContainer);
             request.SetConfiguration(configuration);
 
             var values = new Dictionary<string, object>() { { "odataPath", "$metadata" } };

@@ -51,11 +51,6 @@ namespace Microsoft.AspNet.OData.Interfaces
         Uri RequestUri { get; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IWebApiUrlHelper"/> to use for generating OData links.
-        /// </summary>
-        IWebApiUrlHelper UrlHelper { get; set; }
-
-        /// <summary>
         /// Gets the deserializer provider associated with the request.
         /// </summary>
         /// <returns></returns>

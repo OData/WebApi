@@ -4,10 +4,17 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.UriParser;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNet.OData.Adapters
 {
@@ -17,7 +24,7 @@ namespace Microsoft.AspNet.OData.Adapters
     internal class WebApiUrlHelper : IWebApiUrlHelper
     {
         /// <summary>
-        /// The inner helper wrapped by this instance.
+        /// The inner request wrapped by this instance.
         /// </summary>
         internal IUrlHelper innerHelper;
 
@@ -40,9 +47,9 @@ namespace Microsoft.AspNet.OData.Adapters
         /// </summary>
         /// <param name="segments">The OData path segments.</param>
         /// <returns>The generated OData link.</returns>
-        public string CreateODataLink(IList<ODataPathSegment> segments)
+        public string CreateODataLink(params ODataPathSegment[] segments)
         {
-            throw new NotImplementedException();
+            return this.CreateODataLink(segments as IList<ODataPathSegment>);
         }
 
         /// <summary>
@@ -50,9 +57,16 @@ namespace Microsoft.AspNet.OData.Adapters
         /// </summary>
         /// <param name="segments">The OData path segments.</param>
         /// <returns>The generated OData link.</returns>
-        public string CreateODataLink(params ODataPathSegment[] segments)
+        public string CreateODataLink(IList<ODataPathSegment> segments)
         {
-            throw new NotImplementedException();
+            string routeName = this.innerHelper.ActionContext.HttpContext.Request.ODataFeature().RouteName;
+            if (String.IsNullOrEmpty(routeName))
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustHaveODataRouteName);
+            }
+
+            IODataPathHandler pathHandler = this.innerHelper.ActionContext.HttpContext.Request.GetPathHandler();
+            return CreateODataLink(routeName, pathHandler, segments);
         }
 
         /// <summary>
@@ -64,7 +78,21 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <returns>The generated OData link.</returns>
         public string CreateODataLink(string routeName, IODataPathHandler pathHandler, IList<ODataPathSegment> segments)
         {
-            throw new NotImplementedException();
+            if (String.IsNullOrEmpty(routeName))
+            {
+                throw Error.InvalidOperation(SRResources.RequestMustHaveODataRouteName);
+            }
+
+            if (pathHandler == null)
+            {
+                throw Error.ArgumentNull("pathHandler");
+            }
+
+            string odataPath = pathHandler.Link(new ODataPath(segments));
+
+            return this.innerHelper.Link(
+                routeName,
+                new RouteValueDictionary() { { ODataRouteConstants.ODataPath, odataPath } });
         }
     }
 }

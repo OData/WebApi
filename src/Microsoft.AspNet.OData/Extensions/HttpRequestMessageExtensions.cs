@@ -477,7 +477,7 @@ namespace Microsoft.AspNet.OData.Extensions
             return uriBuilder.Uri;
         }
 
-        private static IServiceProvider GetRootContainer(this HttpRequestMessage request, string routeName)
+        private static IServiceScope CreateRequestScope(this HttpRequestMessage request, string routeName)
         {
             HttpConfiguration configuration = request.GetConfiguration();
             if (configuration == null)
@@ -486,14 +486,11 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             // Requests from OData routes will have RouteName set.
-            return routeName != null
+            IServiceProvider rootContainer = (routeName != null)
                 ? configuration.GetODataRootContainer(routeName)
                 : configuration.GetNonODataRootContainer();
-        }
 
-        private static IServiceScope CreateRequestScope(this HttpRequestMessage request, string routeName)
-        {
-            return request.GetRootContainer(routeName).GetRequiredService<IServiceScopeFactory>().CreateScope();
+            return rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
         }
     }
 }

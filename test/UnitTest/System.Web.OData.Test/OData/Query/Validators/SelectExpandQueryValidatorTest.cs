@@ -271,9 +271,9 @@ namespace System.Web.OData.Query.Validators
         }
 
         [Theory]
-        //[InlineData(1)]
+        [InlineData(1)]
         [InlineData(2)]
-        //[InlineData(3)]
+        [InlineData(3)]
         public void ValidateDoesNotThrow_IfMaxDepthEqualsToLevels(int level)
         {
             // Arrange

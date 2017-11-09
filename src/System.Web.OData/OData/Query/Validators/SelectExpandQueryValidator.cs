@@ -357,12 +357,12 @@ namespace System.Web.OData.Query.Validators
 
                     if (remainDepth.HasValue)
                     {
-                        remainDepth--;
                         if (expandItem.LevelsOption != null)
                         {
                             ValidateLevelsOption(expandItem.LevelsOption, remainDepth.Value, currentDepth + 1, edmModel,
                                 property);
                         }
+                        remainDepth--;
                     }
 
                     ValidateRestrictions(remainDepth, currentDepth + 1, expandItem.SelectAndExpand, property,

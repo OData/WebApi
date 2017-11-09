@@ -271,9 +271,9 @@ namespace System.Web.OData.Query.Validators
         }
 
         [Theory]
-        [InlineData(1)]
+        //[InlineData(1)]
         [InlineData(2)]
-        [InlineData(3)]
+        //[InlineData(3)]
         public void ValidateDoesNotThrow_IfMaxDepthEqualsToLevels(int level)
         {
             // Arrange
@@ -300,6 +300,39 @@ namespace System.Web.OData.Query.Validators
             // Act & Assert
             Assert.DoesNotThrow(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = 0 }));
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void Validate_Throws_IfMaxDepthLessThanLevels(int level)
+        {
+            // Arrange
+            string expand = string.Format("Parent($levels={0})", level + 1);
+
+            var validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
+            IEdmModel model = builder.GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
+            context.RequestContainer = new MockContainer();
+            var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
+
+            IEdmStructuredType customerType =
+                model.SchemaElements.First(e => e.Name.Equals("LevelsEntity")) as IEdmStructuredType;
+            ModelBoundQuerySettings querySettings = new ModelBoundQuerySettings();
+            querySettings.ExpandConfigurations.Add("Parent", new ExpandConfiguration
+            {
+                ExpandType = SelectExpandType.Allowed,
+                MaxDepth = level
+            });
+            model.SetAnnotationValue(customerType, querySettings);
+
+            // Act & Assert
+            Assert.Throws<ODataException>(
+                () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = 0 }),
+                String.Format(CultureInfo.CurrentCulture, MaxExpandDepthExceededErrorString, level));
         }
 
         [Fact]

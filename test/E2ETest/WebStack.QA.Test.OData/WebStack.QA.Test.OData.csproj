@@ -210,6 +210,10 @@
     <Compile Include="ODataCountTest\CountDataModel.cs" />
     <Compile Include="ODataCountTest\CountEdmModel.cs" />
     <Compile Include="ODataCountTest\CountTest.cs" />
+    <Compile Include="ODataOrderByTest\OrderByController.cs" />
+    <Compile Include="ODataOrderByTest\OrderByDataModel.cs" />
+    <Compile Include="ODataOrderByTest\OrderByEdmModel.cs" />
+    <Compile Include="ODataOrderByTest\OrderByTest.cs" />
     <Compile Include="ODataPathHandlerExtensions.cs" />
     <Compile Include="QueryComposition\EFWideCustomer.cs">
       <AutoGen>True</AutoGen>

@@ -995,6 +995,7 @@ public abstract class System.Web.OData.Builder.PropertyConfiguration {
 	bool NotFilterable  { public get; public set; }
 	bool NotNavigable  { public get; public set; }
 	bool NotSortable  { public get; public set; }
+	int Order  { public get; public set; }
 	System.Reflection.PropertyInfo PropertyInfo  { public get; }
 	QueryConfiguration QueryConfiguration  { public get; public set; }
 	System.Type RelatedClrType  { public abstract get; }

@@ -148,6 +148,11 @@ namespace System.Web.OData.Builder
         public bool NotCountable { get; set; }
 
         /// <summary>
+        /// Get or sets order in "order by"  expression.
+        /// </summary>
+        public int Order { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="QueryConfiguration"/>.
         /// </summary>
         public QueryConfiguration QueryConfiguration { get; set; }

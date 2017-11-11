@@ -9,7 +9,7 @@ namespace WebStack.QA.Test.OData.AutoExpand
     public class AutoExpandContext : DbContext
     {
         public static string ConnectionString =
-            @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=AutoExpandTest";
+            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=AutoExpandTest";
 
         public AutoExpandContext()
             : base(ConnectionString)

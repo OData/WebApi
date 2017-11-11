@@ -434,7 +434,7 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
             JObject content = await response.Content.ReadAsAsync<JObject>();
 
             Assert.Equal(2, content["Id"]);
-            Assert.Equal(DateTimeOffset.Parse("2016-12-24T03:02:03.007-08:00"), content["DateTime"]);
+            Assert.Equal(DateTimeOffset.Parse("2016-12-24T03:02:03.006-08:00"), content["DateTime"]);
             Assert.Equal(DateTimeOffset.Parse("2015-02-24T03:02:03.006-08:00"), content["Offset"]);
             Assert.Equal(DateTimeOffset.Parse("2014-12-26T11:02:03.004-08:00"), content["NullableOffset"]);
 
@@ -467,7 +467,7 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
                     new object[] {"$filter=NullableOffset lt cast(2014-12-29T01:02:03.004Z,Edm.DateTimeOffset)", new [] {1,2} },
 
                     // fractionalseconds()
-                    new object[] {"$filter=fractionalseconds(DateTime) eq 0.007", new[] {1,2,3,4} },
+                    new object[] {"$filter=fractionalseconds(DateTime) eq 0.007", new[] {3} },
                     new object[] {"$filter=fractionalseconds(Offset) gt 0.004", new[] {1,2,3,4,5} },
 
                     new object[] {"$filter=fractionalseconds(NullableDateTime) eq null", new[] {2,4} },
@@ -499,9 +499,9 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
                     new object[] {"$filter=2014-12-28 ne date(NullableOffset)", new[] {1,2,3,5} },
 
                     // time(DateTime)
-                    new object[] {"$filter=time(DateTime) eq 02:02:03.007", new[] {1} },
-                    new object[] {"$filter=05:02:03.007 eq time(DateTime)", new[] {4} },
-                    new object[] {"$filter=time(DateTime) lt 05:02:03.007", new[] {1,2,3} },
+                    new object[] {"$filter=time(DateTime) eq 02:02:03.005", new[] {1} },
+                    new object[] {"$filter=05:02:03.008 eq time(DateTime)", new[] {4} },
+                    new object[] {"$filter=time(DateTime) lt 05:02:03.008", new[] {1,2,3} },
 
                     // time(DateTimeOffset)
                     new object[] {"$filter=time(Offset) eq 02:02:03.005", new[] {1} },

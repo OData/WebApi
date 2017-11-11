@@ -11,7 +11,7 @@ namespace WebStack.QA.Test.OData.ODataCountTest
     {
         public class CountContext : DbContext
         {
-            public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=CountTest";
+            public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=CountTest";
 
             public CountContext()
                 : base(ConnectionString)

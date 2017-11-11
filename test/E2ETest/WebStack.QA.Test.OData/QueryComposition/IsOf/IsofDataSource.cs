@@ -148,7 +148,7 @@ namespace WebStack.QA.Test.OData.QueryComposition.IsOf
     public class BillingCustomerContextTest : DbContext
     {
         public static string ConnectionString =
-            @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=BillingCustomerContextTest";
+            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=BillingCustomerContextTest";
 
         public BillingCustomerContextTest()
             : base(ConnectionString)

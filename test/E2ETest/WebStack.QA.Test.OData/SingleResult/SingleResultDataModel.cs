@@ -9,7 +9,7 @@ namespace WebStack.QA.Test.OData.SingleResultTest
     public class SingleResultContext : DbContext
     {
         public static string ConnectionString =
-            @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=SingleResultTest";
+            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=SingleResultTest";
 
         public SingleResultContext()
             : base(ConnectionString)

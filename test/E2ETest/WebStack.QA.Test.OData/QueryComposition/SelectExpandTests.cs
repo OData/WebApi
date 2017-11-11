@@ -726,7 +726,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
     public class SampleContext : DbContext
     {
-        public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=SelectExpandTest";
+        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=SelectExpandTest";
 
         public SampleContext()
             : base(ConnectionString)

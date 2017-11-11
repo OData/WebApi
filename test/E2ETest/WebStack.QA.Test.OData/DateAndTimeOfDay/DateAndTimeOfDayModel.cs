@@ -42,6 +42,7 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
         public int Id { get; set; }
 
         // non-nullable
+        [Column(TypeName = "datetime2")]
         public DateTime DateTime { get; set; }
         public DateTimeOffset Offset { get; set; }
 

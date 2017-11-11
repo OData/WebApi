@@ -123,7 +123,7 @@ namespace WebStack.QA.Common.Database
 
         public ConnectionStringBuilder UseLocalDB()
         {
-            this.DataSource = "(LocalDB)\\v11.0";
+            this.DataSource = "(LocalDB)\\MSSQLLocalDB";
             this.IntegratedSecurity = true;
             this.MultipleActiveResultSets = true;
 

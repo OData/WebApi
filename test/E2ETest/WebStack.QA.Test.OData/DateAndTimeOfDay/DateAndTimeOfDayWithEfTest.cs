@@ -385,7 +385,7 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
 
     public class EfDateAndTimeOfDayModelContext : DbContext
     {
-        public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=EfDateAndTimeOfDayModelContext";
+        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=EfDateAndTimeOfDayModelContext";
 
         public EfDateAndTimeOfDayModelContext()
             : base(ConnectionString)

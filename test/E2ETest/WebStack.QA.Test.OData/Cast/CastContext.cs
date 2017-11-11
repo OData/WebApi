@@ -63,7 +63,7 @@ namespace WebStack.QA.Test.OData.Cast
                 {
                     Database.SetInitializer(new DropCreateDatabaseAlways<ProductsContext>());
                     string databaseName = "CastTest_" + DateTime.Now.Ticks.ToString();
-                    string connectionString = string.Format(@"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog={0}", databaseName);
+                    string connectionString = string.Format(@"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog={0}", databaseName);
 
                     _context = new ProductsContext(connectionString);
                     foreach (Product product in DataSource.InMemoryProducts)

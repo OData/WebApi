@@ -6,8 +6,8 @@
     <ProjectGuid>{74A22C68-168D-4492-9A43-FD7FB9C04CC5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.Test.OData.WebApi.TestCommon</RootNamespace>
-    <AssemblyName>Microsoft.Test.OData.WebApi.TestCommon</AssemblyName>
+    <RootNamespace>Microsoft.Test.AspNet.OData.TestCommon</RootNamespace>
+    <AssemblyName>Microsoft.Test.AspNet.OData.TestCommon</AssemblyName>
     <OutputPath>..\..\..\bin\$(Configuration)\UnitTest\</OutputPath>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>

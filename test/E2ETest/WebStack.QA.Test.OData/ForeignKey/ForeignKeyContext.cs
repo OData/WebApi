@@ -8,7 +8,7 @@ namespace WebStack.QA.Test.OData.ForeignKey
 {
     public class ForeignKeyContext : DbContext
     {
-        public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=ForeignKeyE2EContextV4";
+        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=ForeignKeyE2EContextV4";
 
         public ForeignKeyContext()
             : base(ConnectionString)
@@ -22,7 +22,7 @@ namespace WebStack.QA.Test.OData.ForeignKey
 
     public class ForeignKeyContextNoCascade : DbContext
     {
-        public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=ForeignKeyE2EContextNoCascadeV4";
+        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=ForeignKeyE2EContextNoCascadeV4";
 
         public ForeignKeyContextNoCascade()
             : base(ConnectionString)

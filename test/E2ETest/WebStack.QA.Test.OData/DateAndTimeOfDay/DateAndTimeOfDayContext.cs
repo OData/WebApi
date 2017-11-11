@@ -7,11 +7,12 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
 {
     public class DateAndTimeOfDayContext : DbContext
     {
-        public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=DateAndTimeOfDayEfDbContext";
+        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=DateAndTimeOfDayEfDbContext";
 
         public DateAndTimeOfDayContext()
             : base(ConnectionString)
         {
+            Database.SetInitializer<DateAndTimeOfDayContext>(new DropCreateDatabaseIfModelChanges<DateAndTimeOfDayContext>());
         }
 
         public DbSet<EfCustomer> Customers { get; set; }
@@ -19,7 +20,7 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
 
     public class EdmDateWithEfContext : DbContext
     {
-        public static string ConnectionString = @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=EdmDateWithEfDbContext";
+        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=EdmDateWithEfDbContext";
 
         public EdmDateWithEfContext()
             : base(ConnectionString)

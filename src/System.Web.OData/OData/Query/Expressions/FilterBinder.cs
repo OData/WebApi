@@ -697,6 +697,8 @@ namespace System.Web.OData.Query.Expressions
         /// </summary>
         /// <param name="node">The node to bind.</param>
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", 
+            Justification = "These are simple binding functions and cannot be split up.")]
         public virtual Expression BindSingleValueFunctionCallNode(SingleValueFunctionCallNode node)
         {
             switch (node.Name)
@@ -1029,7 +1031,7 @@ namespace System.Web.OData.Query.Expressions
         {
             Contract.Assert("now" == node.Name);
 
-            // Function Now() does not take any arguemnts.  
+            // Function Now() does not take any arguemnts.
             Expression[] arguments = BindArguments(node.Parameters);
             Contract.Assert(arguments.Length == 0);
 

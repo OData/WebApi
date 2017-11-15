@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
@@ -16,6 +17,8 @@ namespace System.Web.OData.Routing.Conventions
     public class FunctionRoutingConvention : NavigationSourceRoutingConvention
     {
         /// <inheritdoc/>
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+            Justification = "These is simple conversion function based on context and OData path value and cannot be split up.")]
         public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext,
             ILookup<string, HttpActionDescriptor> actionMap)
         {
@@ -79,7 +82,7 @@ namespace System.Web.OData.Routing.Conventions
                         actionName = GetFunction(function).SelectAction(actionMap, isCollection: false);
                         break;
                 }
-                
+
                 if (actionName != null)
                 {
                     controllerContext.AddFunctionParameterToRouteData(function);

@@ -21,6 +21,8 @@ namespace System.Web.OData.Query.Expressions
     /// <summary>
     /// Applies the given <see cref="SelectExpandQueryOption"/> to the given <see cref="IQueryable"/>.
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",
+        Justification = "Class coupling acceptable.")]
     internal class SelectExpandBinder
     {
         private SelectExpandQueryOption _selectExpandQuery;

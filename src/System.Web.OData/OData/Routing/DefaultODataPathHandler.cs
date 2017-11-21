@@ -112,12 +112,10 @@ namespace System.Web.OData.Routing
             {
                 Contract.Assert(serviceRoot != null);
 
-                serviceRootUri = new Uri(
-                    serviceRoot.EndsWith("/", StringComparison.Ordinal)
-                        ? serviceRoot
-                        : serviceRoot + "/");
+                string serviceRootStr = serviceRoot.EndsWith("/", StringComparison.Ordinal) ? serviceRoot : serviceRoot + "/";
+                serviceRootUri = new Uri(serviceRootStr);
 
-                fullUri = new Uri(serviceRootUri, odataPath);
+                fullUri = new Uri(serviceRootStr + odataPath);
                 queryString = fullUri.ParseQueryString();
                 uriParser = new ODataUriParser(model, serviceRootUri, fullUri, requestContainer);
             }

@@ -143,7 +143,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// be aware of this and should plan accordingly. For example, the logic in ShouldMapController() should be simple
         /// enough so as not to depend on the "this" pointer referencing a fully constructed object.
         /// </summary>
-        /// <param name="controller">The controller.</param>
+        /// <param name="controllerAction">The controller action.</param>
         /// <returns><c>true</c> if this controller should be included in the map; <c>false</c> otherwise.</returns>
         /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         public virtual bool ShouldMapController(ControllerActionDescriptor controllerAction)

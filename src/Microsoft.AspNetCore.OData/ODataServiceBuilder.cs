@@ -26,6 +26,9 @@ namespace Microsoft.AspNet.OData
             this.Services = serviceCollection;
         }
 
+        /// <summary>
+        /// Gets the services collection.
+        /// </summary>
         public IServiceCollection Services { get; private set; }
     }
 }

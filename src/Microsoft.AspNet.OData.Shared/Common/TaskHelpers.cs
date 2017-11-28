@@ -11,6 +11,7 @@ namespace Microsoft.AspNet.OData.Common
     /// </summary>
     internal static class TaskHelpers
     {
+#if NETFX
         private static readonly Task _defaultCompleted = Task.FromResult<AsyncVoid>(default(AsyncVoid));
 
         private static readonly Task<object> _completedTaskReturningNull = Task.FromResult<object>(null);
@@ -22,21 +23,18 @@ namespace Microsoft.AspNet.OData.Common
         {
             return CancelCache<AsyncVoid>.Canceled;
         }
-
-        /// <summary>
-        /// Returns a canceled Task of the given type. The task is completed, IsCanceled = True, IsFaulted = False.
-        /// </summary>
-        internal static Task<TResult> Canceled<TResult>()
-        {
-            return CancelCache<TResult>.Canceled;
-        }
+#endif
 
         /// <summary>
         /// Returns a completed task that has no result. 
-        /// </summary>        
+        /// </summary>
         internal static Task Completed()
         {
+#if NETCORE
+            return Task.CompletedTask;
+#else
             return _defaultCompleted;
+#endif
         }
 
         /// <summary>
@@ -44,7 +42,11 @@ namespace Microsoft.AspNet.OData.Common
         /// </summary>
         internal static Task FromError(Exception exception)
         {
+#if NETCORE
+            return Task.FromException(exception);
+#else
             return FromError<AsyncVoid>(exception);
+#endif
         }
 
         /// <summary>
@@ -53,16 +55,16 @@ namespace Microsoft.AspNet.OData.Common
         /// <typeparam name="TResult"></typeparam>
         internal static Task<TResult> FromError<TResult>(Exception exception)
         {
+#if NETCORE
+            return Task.FromException<TResult>(exception);
+#else
             TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();
             tcs.SetException(exception);
             return tcs.Task;
+#endif
         }
 
-        internal static Task<object> NullResult()
-        {
-            return _completedTaskReturningNull;
-        }
-
+#if NETFX
         /// <summary>
         /// Used as the T in a "conversion" of a Task into a Task{T}
         /// </summary>
@@ -84,5 +86,6 @@ namespace Microsoft.AspNet.OData.Common
                 return tcs.Task;
             }
         }
+#endif
     }
 }

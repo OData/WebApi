@@ -63,7 +63,6 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="routeName">The route name.</param>
         /// <param name="rootContainer">The root container to set.</param>
-        /// <returns>The root container for the route name.</returns>
         /// <remarks>Used by unit tests to insert root containers.</remarks>
         internal abstract void SetODataRootContainer(string routeName, IServiceProvider rootContainer);
 

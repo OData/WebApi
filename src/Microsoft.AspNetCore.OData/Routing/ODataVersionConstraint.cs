@@ -13,7 +13,7 @@ using Microsoft.OData;
 namespace Microsoft.AspNet.OData.Routing
 {
     /// <summary>
-    /// An implementation of <see cref="IHttpRouteConstraint"/> that only matches a specific OData protocol 
+    /// An implementation of <see cref="IRouteConstraint"/> that only matches a specific OData protocol 
     /// version. This constraint won't match incoming requests that contain any of the previous OData version
     /// headers (for OData versions 1.0 to 3.0) regardless of the version in the current version headers.
     /// </summary>

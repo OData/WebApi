@@ -9,6 +9,7 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
+using IODataRoutingConvention = Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNet.OData
@@ -17,11 +18,14 @@ namespace Microsoft.AspNet.OData
     /// Contains the details of a given OData request. These properties should all be mutable.
     /// None of these properties should ever be set to null.
     /// </summary>
-    public class ODataFeature : IODataFeature
+    public class ODataFeature : IODataFeature, IDisposable
     {
         internal const string ODataServiceVersionHeader = "OData-Version";
         internal const ODataVersion DefaultODataVersion = ODataVersion.V4;
 
+        /// <summary>
+        /// Instantiates a new instance of the <see cref="ODataFeature"/> class.
+        /// </summary>
         public ODataFeature()
         {
             Model = EdmCoreModel.Instance; // default Edm model
@@ -96,5 +100,20 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <value>Initially an empty <c>IDictionary&lt;string, object&gt;</c>.</value>
         public IDictionary<string, object> RoutingConventionsStore { get; set; } = new Dictionary<string, object>();
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        /// <inheritdoc/>
+        protected void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                RequestScope?.Dispose();
+            }
+        }
     }
 }

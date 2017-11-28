@@ -38,18 +38,7 @@
     
   </Target>
   
-  <Target Name="BuildTools">
-    <PropertyGroup>
-        <FxCopProjectLocation>$(MsBuildThisFileDirectory)tools\src\Microsoft.Web.FxCop\</FxCopProjectLocation>
-        <CustomFxCopRulesPath>$(MsBuildThisFileDirectory)sln\packages\CustomFxCopRules</CustomFxCopRulesPath>
-    </PropertyGroup>
-    <MsBuild 
-          Condition=" '$(CodeAnalysis)' == 'true' "
-          Projects="$(FxCopProjectLocation)\Microsoft.Web.FxCop.csproj" 
-          Properties="Configuration=Release;OutputPath=$(CustomFxCopRulesPath)" />
-  </Target>
-
-  <Target Name="Build" DependsOnTargets="RestorePackages;BuildTools">
+  <Target Name="Build" DependsOnTargets="RestorePackages">
     <PropertyGroup>
       <RunCodeAnalysis>false</RunCodeAnalysis>
     </PropertyGroup>

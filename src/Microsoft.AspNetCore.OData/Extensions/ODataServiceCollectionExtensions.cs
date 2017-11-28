@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
@@ -72,7 +73,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <see cref="EnableQueryAttribute"/> to validate incoming queries. For more information, visit
         /// http://go.microsoft.com/fwlink/?LinkId=279712.
         /// </summary>
-        /// <param name="configuration">The server configuration.</param>
+        /// <param name="services">The services collection.</param>
         public static IServiceCollection AddODataQueryFilter(this IServiceCollection services)
         {
             return AddODataQueryFilter(services, new EnableQueryAttribute());
@@ -84,7 +85,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <see cref="EnableQueryAttribute"/> to validate incoming queries. For more information, visit
         /// http://go.microsoft.com/fwlink/?LinkId=279712.
         /// </summary>
-        /// <param name="configuration">The server configuration.</param>
+        /// <param name="services">The services collection.</param>
         /// <param name="queryFilter">The action filter that executes the query.</param>
         public static IServiceCollection AddODataQueryFilter(this IServiceCollection services, IActionFilter queryFilter)
         {

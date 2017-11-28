@@ -14,15 +14,10 @@ namespace Microsoft.AspNet.OData.Routing
     /// A route implementation for OData routes. It supports passing in a route prefix for the route as well
     /// as a path constraint that parses the request path as OData.
     /// </summary>
-    public class ODataRoute : HttpRoute
+    public partial class ODataRoute : HttpRoute
     {
-        private static readonly string _escapedHashMark = Uri.HexEscape('#');
-        private static readonly string _escapedQuestionMark = Uri.HexEscape('?');
-
-        private bool _canGenerateDirectLink;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataRoute" /> class.
+        /// Initializes a new instance of the <see cref="ODataRoute"/> class.
         /// </summary>
         /// <param name="routePrefix">The route prefix.</param>
         /// <param name="pathConstraint">The OData path constraint.</param>
@@ -38,6 +33,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         /// <param name="routePrefix">The route prefix.</param>
         /// <param name="routeConstraint">The route constraint.</param>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public ODataRoute(string routePrefix, IHttpRouteConstraint routeConstraint)
             : this(routePrefix, routeConstraint, defaults: null, constraints: null, dataTokens: null, handler: null)
         {
@@ -52,6 +48,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// <param name="constraints">The route constraints.</param>
         /// <param name="dataTokens">The data tokens.</param>
         /// <param name="handler">The message handler for the route.</param>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public ODataRoute(
             string routePrefix,
             ODataPathRouteConstraint pathConstraint,
@@ -72,6 +69,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// <param name="constraints">The route constraints.</param>
         /// <param name="dataTokens">The data tokens.</param>
         /// <param name="handler">The message handler for the route.</param>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public ODataRoute(
             string routePrefix,
             IHttpRouteConstraint routeConstraint,
@@ -81,13 +79,8 @@ namespace Microsoft.AspNet.OData.Routing
             HttpMessageHandler handler)
             : base(GetRouteTemplate(routePrefix), defaults, constraints, dataTokens, handler)
         {
-            RoutePrefix = routePrefix;
-            PathRouteConstraint = routeConstraint as ODataPathRouteConstraint;
             RouteConstraint = routeConstraint;
-
-            // We can only use our fast-path for link generation if there are no open brackets in the route prefix
-            // that need to be replaced. If there are, fall back to the slow path.
-            _canGenerateDirectLink = routePrefix == null || routePrefix.IndexOf('{') == -1;
+            Initialize(routePrefix, routeConstraint as ODataPathRouteConstraint);
 
             if (routeConstraint != null)
             {
@@ -98,29 +91,13 @@ namespace Microsoft.AspNet.OData.Routing
         }
 
         /// <summary>
-        /// Gets the route prefix.
-        /// </summary>
-        public string RoutePrefix { get; private set; }
-
-        /// <summary>
-        /// Gets the <see cref="ODataPathRouteConstraint"/> on this route.
-        /// </summary>
-        public ODataPathRouteConstraint PathRouteConstraint { get; private set; }
-
-        /// <summary>
         /// Gets the <see cref="IHttpRouteConstraint"/> on this route.
         /// </summary>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public IHttpRouteConstraint RouteConstraint { get; private set; }
 
-        internal bool CanGenerateDirectLink
-        {
-            get
-            {
-                return _canGenerateDirectLink;
-            }
-        }
-
         /// <inheritdoc />
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public override IHttpVirtualPathData GetVirtualPath(HttpRequestMessage request, IDictionary<string, object> values)
         {
             // Only perform URL generation if the "httproute" key was specified. This allows these
@@ -139,7 +116,7 @@ namespace Microsoft.AspNet.OData.Routing
                     {
                         // Try to generate an optimized direct link
                         // Otherwise, fall back to the base implementation
-                        return _canGenerateDirectLink
+                        return CanGenerateDirectLink
                             ? GenerateLinkDirectly(odataPath)
                             : base.GetVirtualPath(request, values);
                     }
@@ -170,43 +147,15 @@ namespace Microsoft.AspNet.OData.Routing
             return this;
         }
 
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         internal HttpVirtualPathData GenerateLinkDirectly(string odataPath)
         {
             Contract.Assert(odataPath != null);
-            Contract.Assert(_canGenerateDirectLink);
+            Contract.Assert(CanGenerateDirectLink);
 
             string link = CombinePathSegments(RoutePrefix, odataPath);
             link = UriEncode(link);
             return new HttpVirtualPathData(this, link);
         }
-
-        private static string GetRouteTemplate(string prefix)
-        {
-            return String.IsNullOrEmpty(prefix) ?
-                ODataRouteConstants.ODataPathTemplate :
-                prefix + '/' + ODataRouteConstants.ODataPathTemplate;
-        }
-
-        private static string CombinePathSegments(string routePrefix, string odataPath)
-        {
-            if (String.IsNullOrEmpty(routePrefix))
-            {
-                return odataPath;
-            }
-            else
-            {
-                return String.IsNullOrEmpty(odataPath) ? routePrefix : routePrefix + '/' + odataPath;
-            }
-        }
-
-        private static string UriEncode(string str)
-        {
-            Contract.Assert(str != null);
-
-            string escape = Uri.EscapeUriString(str);
-            escape = escape.Replace("#", _escapedHashMark);
-            escape = escape.Replace("?", _escapedQuestionMark);
-            return escape;
-        }
-    }
+   }
 }

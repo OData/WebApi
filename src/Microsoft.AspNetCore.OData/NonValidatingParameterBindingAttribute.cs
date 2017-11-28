@@ -2,6 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Microsoft.AspNet.OData
 {
@@ -9,7 +11,8 @@ namespace Microsoft.AspNet.OData
     /// An attribute to disable WebApi model validation for a particular type.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    internal sealed partial class NonValidatingParameterBindingAttribute : Attribute
+    internal sealed partial class NonValidatingParameterBindingAttribute : Attribute, IBindingSourceMetadata
     {
+        public BindingSource BindingSource => throw new NotImplementedException();
     }
 }

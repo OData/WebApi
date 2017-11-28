@@ -17,6 +17,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="type">The <see cref="Type"/> for which the serializer is being requested.</param>
         /// <param name="request">The request for which the response is being serialized.</param>
         /// <returns>The <see cref="ODataSerializer"/> for the given type.</returns>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public abstract ODataSerializer GetODataPayloadSerializer(Type type, HttpRequestMessage request);
     }
 }

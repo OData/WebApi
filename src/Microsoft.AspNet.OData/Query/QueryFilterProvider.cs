@@ -50,19 +50,13 @@ namespace Microsoft.AspNet.OData.Query
             // Actions with a bound parameter of type ODataQueryOptions do not support the query filter
             // The assumption is that the action will handle the querying within the action implementation
             if (actionDescriptor != null &&
-                (IsIQueryable(actionDescriptor.ReturnType) || typeof(SingleResult).IsAssignableFrom(actionDescriptor.ReturnType)) &&
+                (TypeHelper.IsIQueryable(actionDescriptor.ReturnType) || typeof(SingleResult).IsAssignableFrom(actionDescriptor.ReturnType)) &&
                 !actionDescriptor.GetParameters().Any(parameter => typeof(ODataQueryOptions).IsAssignableFrom(parameter.ParameterType)))
             {
                 return new FilterInfo[] { new FilterInfo(QueryFilter, FilterScope.Global) };
             }
 
             return Enumerable.Empty<FilterInfo>();
-        }
-
-        internal static bool IsIQueryable(Type type)
-        {
-            return type == typeof(IQueryable) ||
-                (type != null && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IQueryable<>));
         }
     }
 }

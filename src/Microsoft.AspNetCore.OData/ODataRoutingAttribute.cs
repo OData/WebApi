@@ -11,5 +11,6 @@ namespace Microsoft.AspNet.OData
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public sealed class ODataRoutingAttribute : Attribute
     {
+        // This class is not needed; Routing is injected in ODataServiceCollectionExtensions::AddOdata()
     }
 }

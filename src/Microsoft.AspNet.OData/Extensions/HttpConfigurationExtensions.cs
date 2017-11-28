@@ -10,10 +10,11 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.Filters;
-using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
@@ -798,13 +799,17 @@ namespace Microsoft.AspNet.OData.Extensions
             return (builder =>
             {
                 // Add platform-specific services here. Add Configuration first as other services may rely on it.
+                // For assembly resolution, add both the public (IAssembliesResolver) and internal (IWebApiAssembliesResolver)
+                // where IWebApiAssembliesResolver is transient and instantiated from IAssembliesResolver by DI.
+                IAssembliesResolver resolver = configuration.Services.GetAssembliesResolver() ?? new DefaultAssembliesResolver();
+                builder.AddService(ServiceLifetime.Singleton, sp => resolver);
+                builder.AddService<IWebApiAssembliesResolver, WebApiAssembliesResolver>(ServiceLifetime.Transient);
+
                 builder.AddService(ServiceLifetime.Singleton, sp => configuration);
                 builder.AddService(ServiceLifetime.Singleton, sp => configuration.GetDefaultQuerySettings());
 
-                IAssembliesResolver resolver = configuration.Services.GetAssembliesResolver() ?? new DefaultAssembliesResolver();
-                builder.AddService(ServiceLifetime.Singleton, sp => resolver);
-
-                builder.AddService<IETagHandler, DefaultODataETagHandler>(ServiceLifetime.Singleton);
+                // Currently, the ETagHandler is attached to the configuration.
+                //builder.AddService<IETagHandler, DefaultODataETagHandler>(ServiceLifetime.Singleton);
 
                 // Add the default webApi services.
                 builder.AddDefaultWebApiServices();

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Microsoft.AspNet.OData
 {
@@ -21,6 +20,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets or sets the HTTP request that caused this instance to be generated.
         /// </summary>
+        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         public HttpRequest Request
         {
             get

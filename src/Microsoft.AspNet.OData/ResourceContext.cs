@@ -22,6 +22,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets or sets the HTTP request that causes this instance to be generated.
         /// </summary>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public HttpRequestMessage Request
         {
             get
@@ -38,6 +39,7 @@ namespace Microsoft.AspNet.OData
         /// Gets or sets a <see cref="UrlHelper"/> that may be used to generate links while serializing this resource
         /// instance.
         /// </summary>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public UrlHelper Url
         {
             get

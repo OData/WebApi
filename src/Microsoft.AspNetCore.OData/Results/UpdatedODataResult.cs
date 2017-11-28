@@ -2,8 +2,11 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Diagnostics.Contracts;
+using System.Net;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Adapters;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Microsoft.AspNet.OData.Results
@@ -24,14 +27,37 @@ namespace Microsoft.AspNet.OData.Results
         /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
         public UpdatedODataResult(T entity)
         {
-            Contract.Assert(entity != null);
+            if (entity == null)
+            {
+                throw Error.ArgumentNull("entity");
+            }
+
             this._innerResult = entity;
         }
 
         /// <inheritdoc/>
         public virtual Task ExecuteResultAsync(ActionContext context)
         {
-            throw new NotImplementedException();
+            HttpRequest request = context.HttpContext.Request;
+            IActionResult result = GetInnerActionResult(request);
+            return result.ExecuteResultAsync(context);
+        }
+
+        internal IActionResult GetInnerActionResult(HttpRequest request)
+        {
+            if (RequestPreferenceHelpers.RequestPrefersReturnContent(new WebApiRequestHeaders(request.Headers)))
+            {
+                ObjectResult objectResult = new ObjectResult(_innerResult)
+                {
+                    StatusCode = StatusCodes.Status200OK
+                };
+
+                return objectResult;
+            }
+            else
+            {
+                return new StatusCodeResult((int)HttpStatusCode.NoContent);
+            }
         }
     }
 }

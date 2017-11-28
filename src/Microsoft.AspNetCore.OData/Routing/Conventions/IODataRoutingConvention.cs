@@ -2,11 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.AspNet.OData.Routing;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
@@ -24,6 +20,6 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// <c>null</c> if the request isn't handled by this convention;
         ///  otherwise, the <see cref="ActionDescriptor"/> of the selected controller.
         /// </returns>
-        ControllerActionDescriptor SelectAction(RouteContext routeContext);
+        IEnumerable<ControllerActionDescriptor> SelectAction(RouteContext routeContext);
     }
 }

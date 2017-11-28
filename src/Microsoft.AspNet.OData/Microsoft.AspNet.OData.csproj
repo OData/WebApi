@@ -9,6 +9,8 @@
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <RunCodeAnalysis>$(CodeAnalysis)</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>$(DefineConstants);ASPNETODATA;ASPNETWEBAPI</DefineConstants>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <DefineConstants>$(DefineConstants);ASPNETODATA;ASPNETWEBAPI;NETFX;NETFX45</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
@@ -76,7 +78,6 @@
     <Compile Include="Formatter\Deserialization\ODataDeserializerContext.cs" />
     <Compile Include="Formatter\Deserialization\ODataDeserializerProvider.cs" />
     <Compile Include="Formatter\Deserialization\ODataDeserializerProviderProxy.cs" />
-    <Compile Include="Extensions\ContainerBuilderExtensions.cs" />
     <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="Batch\ODataBatchHandler.cs" />
     <Compile Include="Batch\ODataBatchHttpRequestMessageExtensions.cs" />
@@ -89,7 +90,7 @@
     <Compile Include="Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="Formatter\Serialization\ODataSerializerProviderProxy.cs" />
     <Compile Include="PerRouteContainer.cs" />
-    <Compile Include="Query\Expressions\ExpressionBinderBase.cs" />
+    <Compile Include="GetNextPageHelper.cs" />
     <Compile Include="Batch\UnbufferedODataBatchHandler.cs" />
     <Compile Include="Batch\ODataBatchResponseItem.cs" />
     <Compile Include="Batch\ODataBatchRequestItem.cs" />
@@ -110,11 +111,8 @@
     <Compile Include="ODataNullValueMessageHandler.cs" />
     <Compile Include="ODataRoutingAttribute.cs" />
     <Compile Include="Builder\ODataConventionModelBuilder.cs" />
-    <Compile Include="Formatter\Serialization\ODataDeltaFeedSerializer.cs" />
     <Compile Include="Formatter\Serialization\ODataErrorSerializer.cs" />
-    <Compile Include="ODataQueryContextExtensions.cs" />
     <Compile Include="Query\ODataQueryOptions.cs" />
-    <Compile Include="Formatter\Serialization\ODataResourceSetSerializer.cs" />
     <Compile Include="PerRequestContentNegotiator.cs" />
     <Compile Include="Query\ODataQueryOptionsOfTEntity.cs" />
     <Compile Include="ResourceContext.cs" />
@@ -189,7 +187,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="..\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

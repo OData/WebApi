@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -11,7 +10,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles entity sets.
     /// </summary>
-    public partial class EntitySetRoutingConvention
+    public partial class EntitySetRoutingConvention : NavigationSourceRoutingConvention
     {
         /// <summary>
         /// Selects the action for OData requests.
@@ -24,21 +23,6 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// </returns>
         internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
-            if (odataPath == null)
-            {
-                throw Error.ArgumentNull("odataPath");
-            }
-
-            if (controllerContext == null)
-            {
-                throw Error.ArgumentNull("controllerContext");
-            }
-
-            if (actionMap == null)
-            {
-                throw Error.ArgumentNull("actionMap");
-            }
-
             if (odataPath.PathTemplate == "~/entityset")
             {
                 EntitySetSegment entitySetSegment = (EntitySetSegment)odataPath.Segments[0];

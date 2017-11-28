@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -13,26 +12,11 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles navigation properties.
     /// </summary>
-    public partial class NavigationRoutingConvention
+    public partial class NavigationRoutingConvention : NavigationSourceRoutingConvention
     {
         /// <inheritdoc/>
         internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
-            if (odataPath == null)
-            {
-                throw Error.ArgumentNull("odataPath");
-            }
-
-            if (controllerContext == null)
-            {
-                throw Error.ArgumentNull("controllerContext");
-            }
-
-            if (actionMap == null)
-            {
-                throw Error.ArgumentNull("actionMap");
-            }
-
             ODataRequestMethod method = controllerContext.Request.Method;
             string actionNamePrefix = GetActionMethodPrefix(method);
             if (actionNamePrefix == null)

@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 
@@ -41,8 +42,8 @@ namespace Microsoft.AspNet.OData.Batch
             _requestContainer = requestContainer;
             _writerSettings = requestContainer.GetRequiredService<ODataMessageWriterSettings>();
             Headers.ContentType = MediaTypeHeaderValue.Parse(String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}", Guid.NewGuid()));
-            ODataVersion version = _writerSettings.Version ?? HttpRequestMessageProperties.DefaultODataVersion;
-            Headers.TryAddWithoutValidation(HttpRequestMessageProperties.ODataServiceVersionHeader, ODataUtils.ODataVersionToString(version));
+            ODataVersion version = _writerSettings.Version ?? ODataVersionConstraint.DefaultODataVersion;
+            Headers.TryAddWithoutValidation(ODataVersionConstraint.ODataServiceVersionHeader, ODataUtils.ODataVersionToString(version));
         }
 
         /// <summary>

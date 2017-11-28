@@ -2,19 +2,16 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
@@ -110,12 +107,12 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (builder == null)
             {
-                throw new ArgumentNullException(nameof(builder));
+                throw Error.ArgumentNull(nameof(builder));
             }
 
             if (setupAction == null)
             {
-                throw new ArgumentNullException(nameof(setupAction));
+                throw Error.ArgumentNull(nameof(setupAction));
             }
 
             builder.Services.Configure(setupAction);
@@ -132,33 +129,16 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (builder == null)
             {
-                throw new ArgumentNullException(nameof(builder));
+                throw Error.ArgumentNull(nameof(builder));
             }
 
             if (setupAction == null)
             {
-                throw new ArgumentNullException(nameof(setupAction));
+                throw Error.ArgumentNull(nameof(setupAction));
             }
 
             builder.Services.Configure(setupAction);
             return builder;
         }
-
-
-        /// <summary>
-        /// Get the default assembly resolver.
-        /// </summary>
-        /// <param name="provider">The server configuration.</param>
-        internal static IWebApiAssembliesResolver GetWebApiAssembliesResolver(this IServiceProvider provider)
-        {
-            if (provider == null)
-            {
-                throw Error.ArgumentNull(nameof(provider));
-            }
-
-            ApplicationPartManager applicationPartManager = provider.GetRequiredService<ApplicationPartManager>();
-            return new WebApiAssembliesResolver(applicationPartManager);
-        }
-
     }
 }

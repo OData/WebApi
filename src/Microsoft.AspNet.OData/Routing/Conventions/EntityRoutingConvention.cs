@@ -4,33 +4,19 @@
 using System.Linq;
 using System.Web.Http.Controllers;
 using Microsoft.AspNet.OData.Adapters;
-using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles operating on entities by key.
     /// </summary>
-    public partial class EntityRoutingConvention : NavigationSourceRoutingConvention
+    public partial class EntityRoutingConvention
     {
         /// <inheritdoc/>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
         {
-            if (odataPath == null)
-            {
-                throw Error.ArgumentNull("odataPath");
-            }
-
-            if (controllerContext == null)
-            {
-                throw Error.ArgumentNull("controllerContext");
-            }
-
-            if (actionMap == null)
-            {
-                throw Error.ArgumentNull("actionMap");
-            }
-
+            ValidateSelectActionParameters(odataPath, controllerContext, actionMap);
             return SelectActionImpl(
                 odataPath,
                 new WebApiControllerContext(controllerContext, GetControllerResult(controllerContext)),

@@ -213,12 +213,12 @@ namespace Microsoft.Test.AspNet.OData.Routing.Test
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
             if (dataServiceVersion != null)
             {
-                string versionHeaderName = HttpRequestMessageProperties.ODataServiceVersionHeader;
+                string versionHeaderName = ODataVersionConstraint.ODataServiceVersionHeader;
                 request.Headers.TryAddWithoutValidation(versionHeaderName, dataServiceVersion);
             }
             if (maxDataServiceVersion != null)
             {
-                string maxVersionHeaderName = HttpRequestMessageProperties.ODataMaxServiceVersionHeader;
+                string maxVersionHeaderName = ODataVersionConstraint.ODataMaxServiceVersionHeader;
                 request.Headers.TryAddWithoutValidation(maxVersionHeaderName, maxDataServiceVersion);
             }
 

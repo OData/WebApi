@@ -19,7 +19,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     /// <summary>
     /// OData serializer for serializing a collection of <see cref="IEdmEntityType" /> or <see cref="IEdmComplexType"/>
     /// </summary>
-    public partial class ODataResourceSetSerializer : ODataEdmTypeSerializer
+    public class ODataResourceSetSerializer : ODataEdmTypeSerializer
     {
         private const string ResourceSet = "ResourceSet";
 
@@ -336,7 +336,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if (navigationLink != null)
             {
-                return ODataResourceSetSerializer.GetNextPageLink(navigationLink, pageSize);
+                return GetNextPageHelper.GetNextPageLink(navigationLink, pageSize);
             }
 
             return null;

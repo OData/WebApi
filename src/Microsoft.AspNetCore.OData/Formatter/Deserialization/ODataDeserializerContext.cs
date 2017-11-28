@@ -17,6 +17,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <summary>
         /// Gets or sets the HTTP Request that is being deserialized.
         /// </summary>
+        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         public HttpRequest Request
         {
             get { return _request; }

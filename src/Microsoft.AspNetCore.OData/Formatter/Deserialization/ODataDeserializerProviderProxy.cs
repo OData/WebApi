@@ -3,37 +3,21 @@
 
 using System;
 using Microsoft.AspNetCore.Http;
-using Microsoft.OData.Edm;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
     /// <summary>
     /// The default <see cref="ODataDeserializerProviderProxy"/>.
     /// </summary>
-    internal class ODataDeserializerProviderProxy : ODataDeserializerProvider
+    internal partial class ODataDeserializerProviderProxy
     {
-        public IServiceProvider RequestContainer
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
-
         /// <inheritdoc />
-        public override ODataEdmTypeDeserializer GetEdmTypeDeserializer(IEdmTypeReference edmType)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
+        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         public override ODataDeserializer GetODataDeserializer(Type type, HttpRequest request)
         {
-            throw new NotImplementedException();
+            return RequestContainer.GetRequiredService<ODataDeserializerProvider>()
+                .GetODataDeserializer(type, request);
         }
     }
 }

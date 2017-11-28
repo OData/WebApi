@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Routing;
@@ -152,6 +154,24 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
+        /// Gets the EntityTagHeaderValue ETag>.
+        /// </summary>
+        /// <remarks>This function uses types that are AspNet-specific.</remarks>
+        public ETag GetETag(EntityTagHeaderValue etagHeaderValue)
+        {
+            return this.innerRequest.GetETag(etagHeaderValue);
+        }
+
+        /// <summary>
+        /// Gets the EntityTagHeaderValue ETag>.
+        /// </summary>
+        /// <remarks>This function uses types that are AspNet-specific.</remarks>
+        public ETag GetETag<TEntity>(EntityTagHeaderValue etagHeaderValue)
+        {
+            return this.innerRequest.GetETag<TEntity>(etagHeaderValue);
+        }
+
+        /// <summary>
         /// Gets a list of content Id mappings associated with the request.
         /// </summary>
         /// <returns></returns>
@@ -192,15 +212,6 @@ namespace Microsoft.AspNet.OData.Adapters
         public ODataMessageReaderSettings ReaderSettings
         {
             get { return this.innerRequest.GetReaderSettings(); }
-        }
-
-        /// <summary>
-        /// Gets the route data for the given request or null if not available.
-        /// </summary>
-        /// <returns></returns>
-        public IDictionary<string, object> RouteData
-        {
-            get { return this.innerRequest.HttpContext.GetRouteData().Values; }
         }
     }
 }

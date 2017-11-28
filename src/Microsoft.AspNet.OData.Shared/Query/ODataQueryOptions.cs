@@ -7,11 +7,13 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query.Validators;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -31,6 +33,38 @@ namespace Microsoft.AspNet.OData.Query
         private ODataQueryOptionParser _queryOptionParser;
 
         private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
+
+        private ETag _etagIfMatch;
+
+        private bool _etagIfMatchChecked;
+
+        private ETag _etagIfNoneMatch;
+
+        private bool _etagIfNoneMatchChecked;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
+        /// the <see cref="ODataQueryContext"/>.
+        /// </summary>
+        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information.</param>
+        private void Initialize(ODataQueryContext context)
+        {
+            // Parse the query from request Uri, including only keys which are OData query parameters or parameter alias
+            RawValues = new ODataRawQueryOptions();
+            IDictionary<string, string> queryParameters = GetODataQueryParameters();
+
+            _queryOptionParser = new ODataQueryOptionParser(
+                context.Model,
+                context.ElementType,
+                context.NavigationSource,
+                queryParameters);
+
+            _queryOptionParser.Resolver = context.RequestContainer.GetRequiredService<ODataUriResolver>();
+
+            BuildQueryOptions(queryParameters);
+
+            Validator = ODataQueryValidator.GetODataQueryValidator(context);
+        }
 
         /// <summary>
         /// Gets the request message associated with this instance.
@@ -88,6 +122,11 @@ namespace Microsoft.AspNet.OData.Query
         public ODataQueryValidator Validator { get; set; }
 
         /// <summary>
+        /// Gets or sets the request headers.
+        /// </summary>
+        private IWebApiHeaders InternalHeaders { get; set; }
+
+        /// <summary>
         /// Check if the given query option is an OData system query option.
         /// </summary>
         /// <param name="queryOptionName">The name of the query option.</param>
@@ -105,6 +144,62 @@ namespace Microsoft.AspNet.OData.Query
                  queryOptionName == "$skiptoken" ||
                  queryOptionName == "$deltatoken" ||
                  queryOptionName == "$apply";
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ETag"/> from IfMatch header.
+        /// </summary>
+        public virtual ETag IfMatch
+        {
+            get
+            {
+                if (!_etagIfMatchChecked && _etagIfMatch == null)
+                {
+                    IEnumerable<string> ifMatchValues;
+                    if (InternalHeaders.TryGetValues("If-Match", out ifMatchValues))
+                    {
+                        EntityTagHeaderValue etagHeaderValue = EntityTagHeaderValue.Parse(ifMatchValues.SingleOrDefault());
+                        _etagIfMatch = GetETag(etagHeaderValue);
+                        _etagIfMatchChecked = true;
+                    }
+                }
+
+                return _etagIfMatch;
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ETag"/> from IfNoneMatch header.
+        /// </summary>
+        public virtual ETag IfNoneMatch
+        {
+            get
+            {
+                if (!_etagIfNoneMatchChecked && _etagIfNoneMatch == null)
+                {
+                    IEnumerable<string> ifNoneMatchValues;
+                    if (InternalHeaders.TryGetValues("If-None-Match", out ifNoneMatchValues))
+                    {
+                        EntityTagHeaderValue etagHeaderValue = EntityTagHeaderValue.Parse(ifNoneMatchValues.SingleOrDefault());
+                        _etagIfNoneMatch = GetETag(etagHeaderValue);
+                        if (_etagIfNoneMatch != null)
+                        {
+                            _etagIfNoneMatch.IsIfNoneMatch = true;
+                        }
+                        _etagIfNoneMatchChecked = true;
+                    }
+                }
+
+                return _etagIfNoneMatch;
+            }
+        }
+
+        /// <summary>
+        /// Gets the EntityTagHeaderValue ETag.
+        /// </summary>
+        internal virtual ETag GetETag(EntityTagHeaderValue etagHeaderValue)
+        {
+            return InternalRequest.GetETag(etagHeaderValue);
         }
 
         /// <summary>

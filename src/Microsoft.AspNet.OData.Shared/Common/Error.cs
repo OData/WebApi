@@ -114,7 +114,7 @@ namespace Microsoft.AspNet.OData.Common
         /// <returns>The logged <see cref="Exception"/>.</returns>
         internal static ArgumentNullException ArgumentNull(string parameterName, string messageFormat, params object[] messageArgs)
         {
-            return new ArgumentNullException(parameterName, Error.Format(messageFormat, messageArgs));
+            return Error.ArgumentNull(parameterName, Error.Format(messageFormat, messageArgs));
         }
 
         /// <summary>

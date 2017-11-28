@@ -2,8 +2,24 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Reflection;
+using Microsoft.AspNet.OData.Adapters;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Primitives;
+using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
 {
@@ -16,8 +32,13 @@ namespace Microsoft.AspNet.OData
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes",
         Justification = "We want to be able to subclass this type.")]
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    public class EnableQueryAttribute : ActionFilterAttribute
+    public partial class EnableQueryAttribute : ActionFilterAttribute
     {
+        // Maintain the Microsoft.AspNet.OData. prefix in any new properties to avoid conflicts with user properties
+        // and those of the v3 assembly.  Concern is reduced here due to addition of user type name but prefix
+        // also clearly ties the property to code in this assembly.
+        private const string ModelKeyPrefix = "Microsoft.AspNet.OData.Model+";
+
         /// <summary>
         /// Performs the query composition after action is executed. It first tries to retrieve the IQueryable from the
         /// returning response message. It then validates the query from uri based on the validation settings on
@@ -28,7 +49,158 @@ namespace Microsoft.AspNet.OData
         /// request message and HttpConfiguration etc.</param>
         public override void OnActionExecuted(ActionExecutedContext actionExecutedContext)
         {
-            throw new NotImplementedException();
+            if (actionExecutedContext == null)
+            {
+                throw Error.ArgumentNull("actionExecutedContext");
+            }
+
+            HttpRequest request = actionExecutedContext.HttpContext.Request;
+            if (request == null)
+            {
+                throw Error.Argument("actionExecutedContext", SRResources.ActionExecutedContextMustHaveRequest);
+            }
+
+            ActionDescriptor actionDescriptor = actionExecutedContext.ActionDescriptor;
+            if (actionDescriptor == null)
+            {
+                throw Error.Argument("actionExecutedContext", SRResources.ActionContextMustHaveDescriptor);
+            }
+
+            HttpResponse response = actionExecutedContext.HttpContext.Response;
+
+            if (response != null && response.IsSuccessStatusCode() && actionExecutedContext.Result != null)
+            {
+                ObjectResult responseContent = actionExecutedContext.Result as ObjectResult;
+                if (responseContent == null)
+                {
+                    throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent,
+                        actionExecutedContext.Result.GetType().FullName);
+                }
+
+                // Get collection from SingleResult.
+                IQueryable singleResultCollection = null;
+                SingleResult singleResult = responseContent.Value as SingleResult;
+                if (singleResult != null)
+                {
+                    // This could be a SingleResult, which has the property Queryable.
+                    // But it could be a SingleResult() or SingleResult<T>. Sort by number of parameters
+                    // on the property and get the one with the most parameters.
+                    PropertyInfo propInfo = responseContent.Value.GetType().GetProperties()
+                        .OrderBy(p => p.GetIndexParameters().Count())
+                        .Where(p => p.Name.Equals("Queryable"))
+                        .LastOrDefault();
+
+                    singleResultCollection = propInfo.GetValue(singleResult) as IQueryable;
+                }
+
+                // Execution the action.
+                object queryResult = OnActionExecuted(
+                    responseContent.Value,
+                    singleResultCollection,
+                    new WebApiActionDescriptor(actionDescriptor as ControllerActionDescriptor),
+                    new WebApiRequestMessage(request),
+                    (elementClrType) => GetModel(elementClrType, request, actionDescriptor),
+                    (queryContext) => CreateAndValidateQueryOptions(request, queryContext),
+                    (statusCode) => actionExecutedContext.Result = new StatusCodeResult((int)statusCode),
+                    (statusCode, message, exception) => actionExecutedContext.Result = new BadRequestObjectResult(message));
+
+                if (queryResult != null)
+                {
+                    responseContent.Value = queryResult;
+                }
+            }
         }
-   }
+
+        /// <summary>
+        /// Create and validate a new instance of <see cref="ODataQueryOptions"/> from a query and context.
+        /// </summary>
+        /// <param name="request">The incoming request.</param>
+        /// <param name="queryContext">The query context.</param>
+        /// <returns></returns>
+        private ODataQueryOptions CreateAndValidateQueryOptions(HttpRequest request, ODataQueryContext queryContext)
+        {
+            ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
+            ValidateQuery(request, queryOptions);
+
+            return queryOptions;
+        }
+
+        /// <summary>
+        /// Validates the OData query in the incoming request. By default, the implementation throws an exception if
+        /// the query contains unsupported query parameters. Override this method to perform additional validation of
+        /// the query.
+        /// </summary>
+        /// <param name="request">The incoming request.</param>
+        /// <param name="queryOptions">
+        /// The <see cref="ODataQueryOptions"/> instance constructed based on the incoming request.
+        /// </param>
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
+            Justification = "Response disposed after being sent.")]
+        public virtual void ValidateQuery(HttpRequest request, ODataQueryOptions queryOptions)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            if (queryOptions == null)
+            {
+                throw Error.ArgumentNull("queryOptions");
+            }
+
+            IEnumerable<KeyValuePair<string, StringValues>> queryParameters = request.Query;
+            foreach (KeyValuePair<string, StringValues> kvp in queryParameters)
+            {
+                if (!queryOptions.IsSupportedQueryOption(kvp.Key) &&
+                     kvp.Key.StartsWith("$", StringComparison.Ordinal))
+                {
+                    // we don't support any custom query options that start with $
+                    // this should be caught be OnActionExecuted().
+                    throw new ArgumentOutOfRangeException(kvp.Key);
+                }
+            }
+
+            queryOptions.Validate(_validationSettings);
+        }
+        /// <summary>
+        /// Gets the EDM model for the given type and request.Override this method to customize the EDM model used for
+        /// querying.
+        /// </summary>
+        /// <param name = "elementClrType" > The CLR type to retrieve a model for.</param>
+        /// <param name = "request" > The request message to retrieve a model for.</param>
+        /// <param name = "actionDescriptor" > The action descriptor for the action being queried on.</param>
+        /// <returns>The EDM model for the given type and request.</returns>
+        public virtual IEdmModel GetModel(
+            Type elementClrType,
+            HttpRequest request,
+            ActionDescriptor actionDescriptor)
+        {
+            // Get model for the request
+            IEdmModel model = request.GetModel();
+
+            if (model == EdmCoreModel.Instance || model.GetEdmType(elementClrType) == null)
+            {
+                // user has not configured anything or has registered a model without the element type
+                // let's create one just for this type and cache it in the action descriptor
+                string key = ModelKeyPrefix + elementClrType.FullName;
+                object modelAsObject = null;
+                if (!actionDescriptor.Properties.TryGetValue(key, out modelAsObject))
+                {
+                    ODataConventionModelBuilder builder =
+                        new ODataConventionModelBuilder(request.HttpContext.RequestServices, isQueryCompositionMode: true);
+                    EntityTypeConfiguration entityTypeConfiguration = builder.AddEntityType(elementClrType);
+                    builder.AddEntitySet(elementClrType.Name, entityTypeConfiguration);
+                    model = builder.GetEdmModel();
+                    actionDescriptor.Properties.Add(key, model);
+                }
+                else
+                {
+                    model = modelAsObject as IEdmModel;
+                }
+            }
+
+            Contract.Assert(model != null);
+            return model;
+        }
+    }
 }

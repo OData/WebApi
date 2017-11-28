@@ -22,6 +22,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -82,7 +83,7 @@ namespace Microsoft.AspNet.OData.Formatter
             _serializerProvider = serializerProvider;
             _payloadKinds = payloadKinds;
 
-            _version = HttpRequestMessageProperties.DefaultODataVersion;
+            _version = ODataVersionConstraint.DefaultODataVersion;
         }
 
         /// <summary>
@@ -246,7 +247,7 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             headers.TryAddWithoutValidation(
-                HttpRequestMessageProperties.ODataServiceVersionHeader,
+                ODataVersionConstraint.ODataServiceVersionHeader,
                 ODataUtils.ODataVersionToString(_version));
         }
 
@@ -705,7 +706,7 @@ namespace Microsoft.AspNet.OData.Formatter
             HttpRequestMessageProperties properties = request.ODataProperties();
             return properties.ODataMaxServiceVersion ??
                 properties.ODataServiceVersion ??
-                HttpRequestMessageProperties.DefaultODataVersion;
+                ODataVersionConstraint.DefaultODataVersion;
         }
 
         // This function is used to determine whether an OData path includes operation (import) path segments.

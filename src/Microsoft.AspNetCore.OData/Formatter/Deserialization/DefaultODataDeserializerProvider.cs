@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNet.OData.Extensions;
 
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
@@ -12,9 +13,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     public partial class DefaultODataDeserializerProvider : ODataDeserializerProvider
     {
         /// <inheritdoc />
+        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         public override ODataDeserializer GetODataDeserializer(Type type, HttpRequest request)
         {
-            throw new NotImplementedException();
+            // Using a Func<IEdmModel> to delay evaluation of the model.
+            return GetODataDeserializerImpl(type, () => request.GetModel());
         }
     }
 }

@@ -79,7 +79,7 @@ namespace Microsoft.AspNet.OData.Query
             {
                 Type returnType = controllerActionDescriptor.MethodInfo.ReturnType;
 
-                if ((IsIQueryable(returnType) /* TODO: || TypeHelper.IsTypeAssignableFrom(typeof(SingleResult), returnType)*/) &&
+                if ((TypeHelper.IsIQueryable(returnType) || TypeHelper.IsTypeAssignableFrom(typeof(SingleResult), returnType)) &&
                     !controllerActionDescriptor.Parameters.Any(parameter => TypeHelper.IsTypeAssignableFrom(typeof(ODataQueryOptions), parameter.ParameterType)))
                 {
                     context.Results.Add(new FilterItem(new FilterDescriptor(QueryFilter, FilterScope.Global)));
@@ -95,12 +95,6 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="context">The Microsoft.AspNetCore.Mvc.Filters.FilterProviderContext.</param>
         public void OnProvidersExecuted(FilterProviderContext context)
         {
-        }
-
-        internal static bool IsIQueryable(Type type)
-        {
-            return type == typeof(IQueryable) ||
-                (type != null && TypeHelper.IsGenericType (type) && type.GetGenericTypeDefinition() == typeof(IQueryable<>));
         }
     }
 }

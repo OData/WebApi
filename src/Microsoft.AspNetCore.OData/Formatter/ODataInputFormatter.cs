@@ -30,8 +30,6 @@ namespace Microsoft.AspNet.OData.Formatter
     /// </summary>
     public class ODataInputFormatter : TextInputFormatter
     {
-        private readonly ODataVersion _version;
-
         /// <summary>
         /// The set of payload kinds this formatter will accept in CanReadType.
         /// </summary>
@@ -68,49 +66,6 @@ namespace Microsoft.AspNet.OData.Formatter
 
             _deserializerProvider = deserializerProvider;
             _payloadKinds = payloadKinds;
-
-            _version = ODataVersionConstraint.DefaultODataVersion;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ODataInputFormatter"/> class.
-        /// </summary>
-        /// <param name="formatter">The <see cref="ODataInputFormatter"/> to copy settings from.</param>
-        /// <param name="version">The OData version that this formatter supports.</param>
-        /// <param name="request">The <see cref="HttpRequest"/> for the per-request formatter instance.</param>
-        /// <remarks>This is a copy constructor to be used in <see cref="GetPerRequestFormatterInstance"/>.</remarks>
-        internal ODataInputFormatter(ODataInputFormatter formatter, ODataVersion version, HttpRequest request)
-        {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
-            Contract.Assert(formatter._deserializerProvider != null);
-            Contract.Assert(formatter._payloadKinds != null);
-
-            // Parameter 1: formatter
-
-            // Except for the other two parameters, this constructor is a copy constructor, and we need to copy
-            // everything on the other instance.
-
-            // Copy this class's private fields and internal properties.
-            _deserializerProvider = formatter._deserializerProvider;
-            _payloadKinds = formatter._payloadKinds;
-
-            // Parameter 2: version
-            _version = version;
-
-            // Parameter 3: request
-            Request = request;
-
-            if (_deserializerProvider.GetType() == typeof(ODataDeserializerProviderProxy))
-            {
-                _deserializerProvider = new ODataDeserializerProviderProxy
-                {
-                    RequestContainer = request.GetRequestContainer()
-                };
-            }
         }
 
         /// <summary>

@@ -76,47 +76,6 @@ namespace Microsoft.AspNet.OData.Formatter
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataOutputFormatter"/> class.
-        /// </summary>
-        /// <param name="formatter">The <see cref="ODataOutputFormatter"/> to copy settings from.</param>
-        /// <param name="version">The OData version that this formatter supports.</param>
-        /// <param name="request">The <see cref="HttpRequest"/> for the per-request formatter instance.</param>
-        /// <remarks>This is a copy constructor to be used in <see cref="GetPerRequestFormatterInstance"/>.</remarks>
-        internal ODataOutputFormatter(ODataOutputFormatter formatter, ODataVersion version, HttpRequest request)
-        {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
-            Contract.Assert(formatter._serializerProvider != null);
-            Contract.Assert(formatter._payloadKinds != null);
-
-            // Parameter 1: formatter
-
-            // Execept for the other two parameters, this constructor is a copy constructor, and we need to copy
-            // everything on the other instance.
-
-            // Copy this class's private fields and internal properties.
-            _serializerProvider = formatter._serializerProvider;
-            _payloadKinds = formatter._payloadKinds;
-
-            // Parameter 2: version
-            _version = version;
-
-            // Parameter 3: request
-            Request = request;
-
-            if (_serializerProvider.GetType() == typeof(ODataSerializerProviderProxy))
-            {
-                _serializerProvider = new ODataSerializerProviderProxy
-                {
-                    RequestContainer = request.GetRequestContainer(),
-                };
-            }
-        }
-
-        /// <summary>
         /// Gets the <see cref="ODataSerializerProvider"/> that will be used by this formatter instance.
         /// </summary>
         public ODataSerializerProvider SerializerProvider

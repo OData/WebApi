@@ -15,7 +15,7 @@ using ODataPathSegment = Microsoft.OData.UriParser.ODataPathSegment;
 namespace Microsoft.AspNet.OData.Extensions
 {
     /// <summary>
-    /// Provides extension methods for the <see cref="UrlHelper"/> class.
+    /// Provides extension methods for the <see cref="IUrlHelper"/> class.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class UrlHelperExtensions

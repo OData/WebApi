@@ -70,6 +70,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// Selects the action for OData requests.
         /// </summary>
         /// <param name="routeContext">The route context.</param>
+        /// <param name="controllerResult">The result of selecitng a controller.</param>
         /// <param name="actionDescriptors">The list of action descriptors.</param>
         /// <returns>
         ///   <c>null</c> if the request isn't handled by this convention; otherwise, the action descriptor of the selected action.

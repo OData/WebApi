@@ -27,7 +27,6 @@ namespace Microsoft.AspNet.OData.Routing
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataActionSelector" /> class.
         /// </summary>
-        /// <param name="serviceProvider">IServiceProvider instance from dependency injection.</param>
         /// <param name="actionDescriptorCollectionProvider">IActionDescriptorCollectionProvider instance from dependency injection.</param>
         /// <param name="actionConstraintProviders">ActionConstraintCache instance from dependency injection.</param>
         /// <param name="loggerFactory">ILoggerFactory instance from dependency injection.</param>

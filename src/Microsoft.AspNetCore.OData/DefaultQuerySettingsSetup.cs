@@ -16,6 +16,10 @@ namespace Microsoft.AspNet.OData
     {
         private IServiceProvider services;
 
+        /// <summary>
+        /// Instantiates a new instance of the <see cref="DefaultQuerySettingsSetup"/> class.
+        /// </summary>
+        /// <param name="services">The services collection.</param>
         public DefaultQuerySettingsSetup(IServiceProvider services)
         {
             if (services == null)
@@ -26,6 +30,10 @@ namespace Microsoft.AspNet.OData
             this.services = services;
         }
 
+        /// <summary>
+        /// Invoked to configure a <see cref="DefaultQuerySettingsSetup"/> instance.
+        /// </summary>
+        /// <param name="options">The options instance to configure.</param>
         public void Configure(DefaultQuerySettings options)
         {
             // DefaultQuerySettings requires no additional configuration.

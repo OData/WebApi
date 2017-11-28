@@ -14,9 +14,9 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>Microsoft AspNet WebApi AspNetWebApi OData</tags>
     <dependencies>
-      <dependency id="Microsoft.AspNet.WebApi.Client" version="$WebApiClientPackageDependency$" />
-      <dependency id="Microsoft.AspNet.WebApi.Core" version="$WebApiCorePackageDependency$" />
-      <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="$DependencyInjectionPackageDependency$" />
+      <dependency id="Microsoft.AspNet.WebApi.Client" version="$AspNetPackageDependency$" />
+      <dependency id="Microsoft.AspNet.WebApi.Core" version="$AspNetPackageDependency$" />
+      <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="$DependencyInjection1PackageDependency$" />
       <dependency id="Microsoft.Extensions.DependencyInjection" version="$DependencyInjectionPackageDependency$" />
       <dependency id="Microsoft.OData.Core" version="$ODataLibPackageDependency$" />
     </dependencies>
@@ -29,5 +29,6 @@
     <file src="$ProductRoot$\Microsoft.AspNet.OData.pdb" target="lib\net45" />
     <file src="$ProductRoot$\Microsoft.AspNet.OData.xml" target="lib\net45" />
     <file src="$SourcesRoot$\src\Microsoft.AspNet.OData\**\*.cs" target="src\Microsoft.AspNet.OData" />
+    <file src="$SourcesRoot$\src\Microsoft.AspNet.OData.Shared\**\*.cs" target="src\Microsoft.AspNet.OData.Shared" />
   </files>
 </package>

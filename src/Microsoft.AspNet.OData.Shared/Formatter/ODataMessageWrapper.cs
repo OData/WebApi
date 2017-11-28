@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.OData.Formatter
     /// <summary>
     /// Wrapper for IODataRequestMessage and IODataResponseMessage.
     /// </summary>
-    internal class ODataMessageWrapper : IODataRequestMessage, IODataResponseMessage, IODataPayloadUriConverter, IContainerProvider
+    internal class ODataMessageWrapper : IODataRequestMessage, IODataResponseMessage, IODataPayloadUriConverter, IContainerProvider, IDisposable
     {
         private Stream _stream;
         private Dictionary<string, string> _headers;
@@ -131,6 +131,24 @@ namespace Microsoft.AspNet.OData.Formatter
 
             // Returning null for default resolution.
             return null;
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        /// <inheritdoc/>
+        protected void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_stream != null)
+                {
+                    _stream.Dispose();
+                }
+            }
         }
     }
 }

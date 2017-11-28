@@ -8,9 +8,10 @@
     <Message Importance="high" Text="##vso[task.setvariable variable=VersionFull]$(VersionFull)" />
     <Message Importance="high" Text="##vso[task.setvariable variable=VersionNuGetSemantic]$(VersionNuGetSemantic)" />
     <Message Importance="high" Text="##vso[task.setvariable variable=VersionNugetNightlyBuild]$(VersionNugetNightlyBuild)" />
-    <Message Importance="high" Text="##vso[task.setvariable variable=WebApiClientPackageDependency]$(WebApiClientPackageDependency)" />
-    <Message Importance="high" Text="##vso[task.setvariable variable=WebApiCorePackageDependency]$(WebApiCorePackageDependency)" />
-    <Message Importance="high" Text="##vso[task.setvariable variable=DependencyInjectionPackageDependency]$(DependencyInjectionPackageDependency)" />
+    <Message Importance="high" Text="##vso[task.setvariable variable=AspNetPackageDependency]$(AspNetPackageDependency)" />
+    <Message Importance="high" Text="##vso[task.setvariable variable=AspNetCorePackageDependency]$(AspNetCorePackageDependency)" />
+    <Message Importance="high" Text="##vso[task.setvariable variable=DependencyInjection1PackageDependency]$(DependencyInjection1PackageDependency)" />
+    <Message Importance="high" Text="##vso[task.setvariable variable=DependencyInjection2PackageDependency]$(DependencyInjection2PackageDependency)" />
     <Message Importance="high" Text="##vso[task.setvariable variable=ODataLibPackageDependency]$(ODataLibPackageDependency)" />
   </Target>
 </Project>

@@ -23,6 +23,9 @@ using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
+    /// <summary>
+    /// Provides extension methods for the <see cref="HttpRequestExtensions"/>.
+    /// </summary>
     public static class HttpRequestExtensions
     {
         /// <summary>

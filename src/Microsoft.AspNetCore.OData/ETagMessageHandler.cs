@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
@@ -11,9 +12,10 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Defines a <see cref="HttpMessageHandler"/> to add an ETag header value to an OData response when the response
+    /// Defines a <see cref="ActionFilterAttribute"/> to add an ETag header value to an OData response when the response
     /// is a single resource that has an ETag defined.
     /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public partial class ETagMessageHandler : ActionFilterAttribute
     {
         /// <inheritdoc/>

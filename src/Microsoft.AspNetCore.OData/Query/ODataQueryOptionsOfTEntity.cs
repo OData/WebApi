@@ -3,6 +3,7 @@
 
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Http;
+using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Query
 {

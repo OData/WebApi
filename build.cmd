@@ -25,6 +25,10 @@ if /I "%1" == "QUICK" (
   set FullBuild=0
   goto BuildDefaults
 )
+if /I "%1" == "-Q" (
+  set FullBuild=0
+  goto BuildDefaults
+)
 
 REM Continue to suport original switches for those
 REM who might have scripts setup to use them.

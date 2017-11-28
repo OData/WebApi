@@ -6,6 +6,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Query
 {

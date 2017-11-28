@@ -18,7 +18,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
         /// </summary>
-        /// <param name="configuration">The <see cref="IAssembliesResolver"/> to use.</param>
+        /// <param name="provider">The service provider to use.</param>
         /// <remarks>
         /// While this function does not use types that are AspNetCore-specific,
         /// the functionality is due to the way assembly resolution is done in AspNet vs AspnetCore.
@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
         /// </summary>
-        /// <param name="configuration">The <see cref="HttpConfiguration"/> to use.</param>
+        /// <param name="provider">The service provider to use.</param>
         /// <param name="isQueryCompositionMode">If the model is being built for only querying.</param>
         /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <c>true</c> has more relaxed
         /// inference rules and also treats all types as entity types. This constructor is intended for use by unit testing only.</remarks>

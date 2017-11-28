@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
+using IODataRoutingConvention = Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNet.OData.Adapters

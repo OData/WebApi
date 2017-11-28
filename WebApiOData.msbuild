@@ -65,18 +65,7 @@
     <!-- Pick the right Microsoft.Web.FxCop package to use and copy it to a standard location. -->
   </Target>
   
-  <Target Name="BuildTools">
-    <PropertyGroup>
-        <FxCopProjectLocation>$(MsBuildThisFileDirectory)tools\src\Microsoft.Web.FxCop\</FxCopProjectLocation>
-        <CustomFxCopRulesPath>$(MsBuildThisFileDirectory)sln\packages\CustomFxCopRules</CustomFxCopRulesPath>
-    </PropertyGroup>
-    <MsBuild 
-          Condition=" '$(CodeAnalysis)' == 'true' "
-          Projects="$(FxCopProjectLocation)\Microsoft.Web.FxCop.csproj" 
-          Properties="Configuration=Release;OutputPath=$(CustomFxCopRulesPath)" />
-  </Target>
-
-  <Target Name="Build" DependsOnTargets="RestorePackages;BuildTools">
+  <Target Name="Build" DependsOnTargets="RestorePackages">
     <!-- we need to batch the solution files since they both build Microsoft.TestCommon -->
     <Error Condition=" '$(CodeAnalysis)' == 'true' and '$(Configuration)' == 'Release' " Text="Unable to run code analysis in Release configuration. Release assemblies do not include SuppressMessage attributes (so code analysis would always fail with the errors that are normally suppressed)." />
     <MakeDir Directories="bin\$(Configuration)" />

@@ -15,7 +15,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <summary>
         /// Initializes a new instance of the WebApiOptions class.
         /// </summary>
-        /// <param name="feature">The inner feature.</param>
+        /// <param name="options">The inner options.</param>
         public WebApiOptions(ODataOptions options)
         {
             if (options == null)

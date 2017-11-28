@@ -24,7 +24,6 @@ namespace Microsoft.AspNet.OData.Results
         /// Initializes a new instance of the <see cref="UpdatedODataResult{T}"/> class.
         /// </summary>
         /// <param name="entity">The updated entity.</param>
-        /// <param name="controller">The controller from which to obtain the dependencies needed for execution.</param>
         public UpdatedODataResult(T entity)
         {
             if (entity == null)

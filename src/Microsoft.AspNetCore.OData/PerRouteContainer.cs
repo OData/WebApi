@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 
 namespace Microsoft.AspNet.OData
 {
@@ -45,7 +46,6 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="routeName">The route name.</param>
         /// <param name="rootContainer">The root container to set.</param>
-        /// <returns>The root container for the route name.</returns>
         /// <remarks>Used by unit tests to insert root containers.</remarks>
         internal override void SetODataRootContainer(string routeName, IServiceProvider rootContainer)
         {

@@ -824,7 +824,8 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void GetElementType_Returns_ExpectedElementType(object response, Type expectedElementType)
         {
             HttpActionDescriptor actionDescriptor = new Mock<HttpActionDescriptor>().Object;
-            IQueryable collection = (response as SingleResult)?.Queryable;
+            SingleResult singleResult = response as SingleResult;
+            IQueryable collection = (singleResult == null) ? null : singleResult.Queryable;
             Assert.Equal(expectedElementType, EnableQueryAttribute.GetElementType(response, collection, new WebApiActionDescriptor(actionDescriptor)));
         }
 

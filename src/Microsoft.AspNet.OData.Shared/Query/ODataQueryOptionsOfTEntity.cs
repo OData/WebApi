@@ -2,7 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter;
 
 namespace Microsoft.AspNet.OData.Query
 {
@@ -13,6 +15,37 @@ namespace Microsoft.AspNet.OData.Query
     [ODataQueryParameterBinding]
     public partial class ODataQueryOptions<TEntity> : ODataQueryOptions
     {
+        /// <summary>
+        /// Gets the <see cref="ETag{TEntity}"/> from IfMatch header.
+        /// </summary>
+        public new ETag<TEntity> IfMatch
+        {
+            get
+            {
+                return base.IfMatch as ETag<TEntity>;
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ETag{TEntity}"/> from IfNoneMatch header.
+        /// </summary>
+        public new ETag<TEntity> IfNoneMatch
+        {
+            get
+            {
+                return base.IfNoneMatch as ETag<TEntity>;
+            }
+        }
+
+        /// <summary>
+        /// Gets the EntityTagHeaderValue ETag>.
+        /// </summary>
+        /// <remarks>This function uses types that are AspNetCore-specific.</remarks>
+        internal override ETag GetETag(EntityTagHeaderValue etagHeaderValue)
+        {
+            return InternalRequest.GetETag<TEntity>(etagHeaderValue);
+        }
+
         /// <summary>
         /// Apply the individual query to the given IQueryable in the right order.
         /// </summary>

@@ -46,7 +46,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             if (actionLinkFactory == null)
             {
-                throw new ArgumentNullException("actionLinkFactory");
+                throw Error.ArgumentNull("actionLinkFactory");
             }
 
             if (!IsBindable || BindingParameter.TypeConfiguration.Kind != EdmTypeKind.Entity)
@@ -80,7 +80,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             if (actionLinkFactory == null)
             {
-                throw new ArgumentNullException("actionLinkFactory");
+                throw Error.ArgumentNull("actionLinkFactory");
             }
 
             if (!IsBindable ||
@@ -243,7 +243,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             if (String.IsNullOrEmpty(entitySetPath))
             {
-                throw new ArgumentNullException("entitySetPath");
+                throw Error.ArgumentNull("entitySetPath");
             }
             ReturnsEntityViaEntitySetPathImplementation<TEntityType>(entitySetPath.Split('/'));
             return this;
@@ -271,7 +271,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             if (String.IsNullOrEmpty(entitySetPath))
             {
-                throw new ArgumentNullException("entitySetPath");
+                throw Error.ArgumentNull("entitySetPath");
             }
             ReturnsCollectionViaEntitySetPathImplementation<TElementEntityType>(entitySetPath.Split('/'));
             return this;

@@ -13,6 +13,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     internal partial class ODataSerializerProviderProxy : ODataSerializerProvider
     {
         /// <inheritdoc />
+        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         public override ODataSerializer GetODataPayloadSerializer(Type type, HttpRequest request)
         {
             return RequestContainer.GetRequiredService<ODataSerializerProvider>()

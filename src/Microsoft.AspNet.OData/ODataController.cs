@@ -12,6 +12,7 @@ namespace Microsoft.AspNet.OData
     /// <summary>
     /// Defines a base class for OData controllers that support writing and reading data using the OData formats.
     /// </summary>
+    /// <remarks>These attributes and this signature uses types that are AspNet-specific.</remarks>
     [ODataFormatting]
     [ODataRouting]
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -24,6 +25,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="disposing">
         /// True to release both managed and unmanaged resources; false to release only unmanaged resources.
         /// </param>
+        /// <remarks>These method is unique to AspNet.</remarks>
         protected override void Dispose(bool disposing)
         {
             if (disposing && Request != null)
@@ -41,6 +43,7 @@ namespace Microsoft.AspNet.OData
         /// <typeparam name="TEntity">The created entity type.</typeparam>
         /// <param name="entity">The created entity.</param>
         /// <returns>A <see cref="CreatedODataResult{TEntity}"/> with the specified values.</returns>
+        /// <remarks>These function uses types that are AspNet-specific.</remarks>
         protected virtual CreatedODataResult<TEntity> Created<TEntity>(TEntity entity)
         {
             if (entity == null)
@@ -58,6 +61,7 @@ namespace Microsoft.AspNet.OData
         /// <typeparam name="TEntity">The updated entity type.</typeparam>
         /// <param name="entity">The updated entity.</param>
         /// <returns>An <see cref="UpdatedODataResult{TEntity}"/> with the specified values.</returns>
+        /// <remarks>These function uses types that are AspNet-specific.</remarks>
         protected virtual UpdatedODataResult<TEntity> Updated<TEntity>(TEntity entity)
         {
             if (entity == null)

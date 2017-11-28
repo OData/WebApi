@@ -27,7 +27,6 @@ namespace Microsoft.AspNet.OData.Results
     {
         private readonly NegotiatedContentResult<T> _innerResult;
         private Uri _locationHeader;
-        private Uri _entityIdHeader;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CreatedODataResult{T}"/> class.
@@ -116,38 +115,28 @@ namespace Microsoft.AspNet.OData.Results
         {
             get
             {
-                _locationHeader = _locationHeader ?? GenerateLocationHeader();
+                _locationHeader = _locationHeader ?? GenerateLocationHeader(Request);
                 return _locationHeader;
-            }
-        }
-
-        // internal just for unit test.
-        internal Uri EntityId
-        {
-            get
-            {
-                _entityIdHeader = _entityIdHeader ?? ResultHelpers.GenerateODataLink(Request, Entity, isEntityId: true);
-                return _entityIdHeader;
             }
         }
 
         /// <inheritdoc/>
         public virtual async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
-            IHttpActionResult result = GetInnerActionResult();
+            IHttpActionResult result = GetInnerActionResult(Request);
             HttpResponseMessage response = await result.ExecuteAsync(cancellationToken);
             response.Headers.Location = LocationHeader;
-            ResultHelpers.AddEntityId(response, () => EntityId);
+            ResultHelpers.AddEntityId(response, () => GenerateEntityId(Request));
 
             return response;
         }
 
-        internal IHttpActionResult GetInnerActionResult()
+        internal IHttpActionResult GetInnerActionResult(HttpRequestMessage request)
         {
-            WebApiRequestHeaders headers = new WebApiRequestHeaders(Request.Headers);
+            WebApiRequestHeaders headers = new WebApiRequestHeaders(request.Headers);
             if (RequestPreferenceHelpers.RequestPrefersReturnNoContent(headers))
             {
-                return new StatusCodeResult(HttpStatusCode.NoContent, Request);
+                return new StatusCodeResult(HttpStatusCode.NoContent, request);
             }
             else
             {
@@ -155,9 +144,14 @@ namespace Microsoft.AspNet.OData.Results
             }
         }
 
-        internal Uri GenerateLocationHeader()
+        internal Uri GenerateEntityId(HttpRequestMessage request)
         {
-            return ResultHelpers.GenerateODataLink(Request, Entity, isEntityId: false);
+            return ResultHelpers.GenerateODataLink(request, Entity, isEntityId: true);
+        }
+
+        internal Uri GenerateLocationHeader(HttpRequestMessage request)
+        {
+            return ResultHelpers.GenerateODataLink(request, Entity, isEntityId: false);
         }
 
         private static T CheckNull(T entity)

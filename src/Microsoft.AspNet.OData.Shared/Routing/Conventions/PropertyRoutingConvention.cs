@@ -4,7 +4,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -14,26 +13,11 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles reading structural properties.
     /// </summary>
-    public partial class PropertyRoutingConvention
+    public partial class PropertyRoutingConvention : NavigationSourceRoutingConvention
     {
         /// <inheritdoc/>
         internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
-            if (odataPath == null)
-            {
-                throw Error.ArgumentNull("odataPath");
-            }
-
-            if (controllerContext == null)
-            {
-                throw Error.ArgumentNull("controllerContext");
-            }
-
-            if (actionMap == null)
-            {
-                throw Error.ArgumentNull("actionMap");
-            }
-
             string prefix;
             TypeSegment cast;
             IEdmProperty property = GetProperty(odataPath, controllerContext.Request.Method, out prefix, out cast);

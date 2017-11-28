@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query.Expressions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
@@ -19,8 +20,6 @@ namespace Microsoft.AspNet.OData.Query
     /// </summary>
     public class ApplyQueryOption
     {
-        private readonly IWebApiAssembliesResolver _assembliesResolver;
-
         private ApplyClause _applyClause;
         private ODataQueryOptionParser _queryOptionParser;
 
@@ -54,7 +53,6 @@ namespace Microsoft.AspNet.OData.Query
             //Validator = new FilterQueryValidator();
             _queryOptionParser = queryOptionParser;
             ResultClrType = Context.ElementClrType;
-            _assembliesResolver = context.GetAssembliesResolver();
         }
 
         /// <summary>
@@ -120,11 +118,13 @@ namespace Microsoft.AspNet.OData.Query
 
             ODataQuerySettings updatedSettings = Context.UpdateQuerySettings(querySettings, query);
 
+            IWebApiAssembliesResolver assembliesResolver = Context.RequestContainer.GetRequiredService<IWebApiAssembliesResolver>();
+
             foreach (var transformation in applyClause.Transformations)
             {
                 if (transformation.Kind == TransformationNodeKind.Aggregate || transformation.Kind == TransformationNodeKind.GroupBy)
                 {
-                    var binder = new AggregationBinder(updatedSettings, _assembliesResolver, ResultClrType, Context.Model, transformation);
+                    var binder = new AggregationBinder(updatedSettings, assembliesResolver, ResultClrType, Context.Model, transformation);
                     query = binder.Bind(query);
                     this.ResultClrType = binder.ResultClrType;
                 }

@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNet.OData
 {
-    internal static partial class ODataQueryContextExtensions
+    internal static class ODataQueryContextExtensions
     {
         public static ODataQuerySettings UpdateQuerySettings(this ODataQueryContext context, ODataQuerySettings querySettings, IQueryable query)
         {

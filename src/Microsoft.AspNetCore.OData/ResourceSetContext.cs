@@ -2,10 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections;
-using Microsoft.AspNet.OData.Adapters;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNet.OData.Adapters;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
@@ -20,6 +20,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets or sets the HTTP request that caused this instance to be generated.
         /// </summary>
+        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         public HttpRequest Request
         {
             get { return _request; }
@@ -34,6 +35,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets or sets the <see cref="IEdmModel"/> to which this instance belongs.
         /// </summary>
+        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         public IEdmModel EdmModel
         {
             get { return Request.GetModel(); }
@@ -45,6 +47,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="resourceSetInstance">The instance representing the resourceSet being written.</param>
         /// <param name="writeContext">The serializer context.</param>
         /// <returns>A new <see cref="ResourceSetContext"/>.</returns>
+        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         internal static ResourceSetContext Create(ODataSerializerContext writeContext, IEnumerable resourceSetInstance)
         {
             ResourceSetContext resourceSetContext = new ResourceSetContext

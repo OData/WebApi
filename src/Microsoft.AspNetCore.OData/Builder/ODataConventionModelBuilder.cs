@@ -5,7 +5,8 @@ using System;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
-using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNet.OData.Builder
 {
@@ -18,6 +19,10 @@ namespace Microsoft.AspNet.OData.Builder
         /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
         /// </summary>
         /// <param name="configuration">The <see cref="IAssembliesResolver"/> to use.</param>
+        /// <remarks>
+        /// While this function does not use types that are AspNetCore-specific,
+        /// the functionality is due to the way assembly resolution is done in AspNet vs AspnetCore.
+        /// </remarks>
         public ODataConventionModelBuilder(IServiceProvider provider)
             : this(provider, isQueryCompositionMode: false)
         {
@@ -30,6 +35,10 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="isQueryCompositionMode">If the model is being built for only querying.</param>
         /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <c>true</c> has more relaxed
         /// inference rules and also treats all types as entity types. This constructor is intended for use by unit testing only.</remarks>
+        /// <remarks>
+        /// While this function does not use types that are AspNetCore-specific,
+        /// the functionality is due to the way assembly resolution is done in AspNet vs AspnetCore.
+        /// </remarks>
         public ODataConventionModelBuilder(IServiceProvider provider, bool isQueryCompositionMode)
         {
             if (provider == null)
@@ -37,7 +46,10 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("provider");
             }
 
-            Initialize(provider.GetWebApiAssembliesResolver(), isQueryCompositionMode);
+            // Create an IWebApiAssembliesResolver from configuration and initialize.
+            ApplicationPartManager applicationPartManager = provider.GetRequiredService<ApplicationPartManager>();
+            IWebApiAssembliesResolver internalResolver = new WebApiAssembliesResolver(applicationPartManager);
+            Initialize(internalResolver, isQueryCompositionMode);
         }
     }
 }

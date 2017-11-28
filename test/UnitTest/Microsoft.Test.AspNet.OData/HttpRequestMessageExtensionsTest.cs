@@ -280,7 +280,7 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void GetNextPageLink_ThatTakesUri_GetsNextPageLink()
         {
-            Uri nextPageLink = Microsoft.AspNet.OData.Extensions.HttpRequestMessageExtensions.GetNextPageLink(new Uri("http://localhost/Customers?$filter=Age ge 18"), 10);
+            Uri nextPageLink = Microsoft.AspNet.OData.GetNextPageHelper.GetNextPageLink(new Uri("http://localhost/Customers?$filter=Age ge 18"), 10);
             Assert.Equal("http://localhost/Customers?$filter=Age%20ge%2018&$skip=10", nextPageLink.AbsoluteUri);
         }
 

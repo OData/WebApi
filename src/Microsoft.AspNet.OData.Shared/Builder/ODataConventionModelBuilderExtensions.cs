@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Builder
 {
@@ -24,7 +25,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             if (builder == null)
             {
-                throw new ArgumentNullException("builder");
+                throw Error.ArgumentNull("builder");
             }
 
             return builder.EnableLowerCamelCase(
@@ -45,7 +46,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             if (builder == null)
             {
-                throw new ArgumentNullException("builder");
+                throw Error.ArgumentNull("builder");
             }
             
             builder.OnModelCreating += new LowerCamelCaser(options).ApplyLowerCamelCase;

@@ -3,11 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Internal;
 
 namespace Microsoft.AspNet.OData.Adapters
 {
@@ -17,12 +20,31 @@ namespace Microsoft.AspNet.OData.Adapters
     internal class WebApiActionDescriptor : IWebApiActionDescriptor
     {
         /// <summary>
+        /// Gets the collection of supported HTTP methods for the descriptor.
+        /// </summary>
+        private IList<ODataRequestMethod> supportedHttpMethods;
+
+        /// <summary>
+        /// Gets the collection of supported HTTP methods for conventions.
+        /// </summary>
+        private static readonly string[] SupportedHttpMethodConventions = new string[]
+        {
+            "GET",
+            "PUT",
+            "POST",
+            "DELETE",
+            "PATCH",
+            "HEAD",
+            "OPTIONS",
+        };
+
+        /// <summary>
         /// The inner action wrapped by this instance.
         /// </summary>
         private ControllerActionDescriptor innerDescriptor;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="WebApiActionDescriptor"/> class.
+        /// Initializes a new instance of the WebApiActionDescriptor class.
         /// </summary>
         /// <param name="actionDescriptor">The inner descriptor.</param>
         public WebApiActionDescriptor(ControllerActionDescriptor actionDescriptor)
@@ -33,6 +55,36 @@ namespace Microsoft.AspNet.OData.Adapters
             }
 
             this.innerDescriptor = actionDescriptor;
+            this.supportedHttpMethods = new List<ODataRequestMethod>();
+
+            // Determine the supported methods.
+            IEnumerable<string> actionMethods = actionDescriptor.ActionConstraints?
+                .OfType<HttpMethodActionConstraint>()
+                .FirstOrDefault()?
+                .HttpMethods;
+
+            if (actionMethods == null)
+            {
+                // If no HttpMethodActionConstraint is specified, fall back to convention the way AspNet does.
+                actionMethods = SupportedHttpMethodConventions
+                    .Where(method => actionDescriptor.MethodInfo.Name.StartsWith(method, StringComparison.OrdinalIgnoreCase));
+
+                // Use POST as the default method.
+                if (!actionMethods.Any())
+                {
+                    actionMethods = new string[] { "POST" };
+                }
+            }
+
+            foreach (string method in actionMethods)
+            {
+                bool ignoreCase = true;
+                ODataRequestMethod methodEnum = ODataRequestMethod.Unknown;
+                if (Enum.TryParse<ODataRequestMethod>(method, ignoreCase, out methodEnum))
+                {
+                    this.supportedHttpMethods.Add(methodEnum);
+                }
+            }
         }
 
         /// <summary>
@@ -67,9 +119,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// </summary>
         public bool IsHttpMethodSupported(ODataRequestMethod method)
         {
-            // ControllerActionDescriptor no longer contains a SupportedHttpMethods
-            // property so return true, allowing all methods to potentially match.
-            return true;
+            return this.supportedHttpMethods.Contains(method);
         }
     }
 }

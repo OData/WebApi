@@ -66,7 +66,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [InlineData(typeof(Customer[]), false)]
         public void IsIQueryable_ReturnsWhetherTypeIsIQueryable(Type type, bool isIQueryable)
         {
-            Assert.Equal(isIQueryable, QueryFilterProvider.IsIQueryable(type));
+            Assert.Equal(isIQueryable, TypeHelper.IsIQueryable(type));
         }
     }
 

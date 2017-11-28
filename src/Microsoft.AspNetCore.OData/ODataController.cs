@@ -1,9 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNet.OData;
+using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Csdl;
 
 namespace Microsoft.AspNet.OData
 {

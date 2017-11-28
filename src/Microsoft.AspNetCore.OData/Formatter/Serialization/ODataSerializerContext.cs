@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
@@ -18,6 +17,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <summary>
         /// Gets or sets the HTTP Request whose response is being serialized.
         /// </summary>
+        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         public HttpRequest Request
         {
             get { return _request; }
@@ -33,16 +33,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <summary>
         /// Clone this instance of <see cref="ODataSerializerContext"/> from an existing instance.
         /// </summary>
-        /// <param name="context">The context from which to copy properties.</param>
-        private void CopyProperties(ODataSerializerContext context)
+        /// <param name="context"></param>
+        /// <remarks>This function uses types that are AspNetCore-specific.</remarks>
+        private void CopyPlatformSpecificProperties(ODataSerializerContext context)
         {
             Request = context.Request;
-            Model = context.Model;
-            Path = context.Path;
-            RootElementName = context.RootElementName;
-            SkipExpensiveAvailabilityChecks = context.SkipExpensiveAvailabilityChecks;
-            MetadataLevel = context.MetadataLevel;
-            Items = context.Items;
         }
     }
 }

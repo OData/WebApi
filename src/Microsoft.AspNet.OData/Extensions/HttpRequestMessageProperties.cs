@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
@@ -35,11 +36,6 @@ namespace Microsoft.AspNet.OData.Extensions
         private const string ApplyClauseKey = "Microsoft.AspNet.OData.ApplyClause";
         private const string TotalCountKey = "Microsoft.AspNet.OData.TotalCount";
         private const string TotalCountFuncKey = "Microsoft.AspNet.OData.TotalCountFunc";
-
-        internal const string ODataServiceVersionHeader = "OData-Version";
-        internal const string ODataMaxServiceVersionHeader = "OData-MaxVersion";
-
-        internal const ODataVersion DefaultODataVersion = ODataVersion.V4;
 
         private HttpRequestMessage _request;
 
@@ -237,7 +233,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             get
             {
-                return GetODataVersionFromHeader(_request.Headers, ODataServiceVersionHeader);
+                return GetODataVersionFromHeader(_request.Headers, ODataVersionConstraint.ODataServiceVersionHeader);
             }
         }
 
@@ -245,7 +241,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             get
             {
-                return GetODataVersionFromHeader(_request.Headers, ODataMaxServiceVersionHeader);
+                return GetODataVersionFromHeader(_request.Headers, ODataVersionConstraint.ODataMaxServiceVersionHeader);
             }
         }
 

@@ -140,7 +140,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
                 new CreatedODataResult<TestEntity>(_entity, _contentNegotiator, request, _formatters, _locationHeader);
 
             // Act
-            IHttpActionResult result = createdODataResult.GetInnerActionResult();
+            IHttpActionResult result = createdODataResult.GetInnerActionResult(request);
 
             // Assert
             NegotiatedContentResult<TestEntity> negotiatedResult = Assert.IsType<NegotiatedContentResult<TestEntity>>(result);
@@ -161,7 +161,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
                 new CreatedODataResult<TestEntity>(_entity, _contentNegotiator, request, _formatters, _locationHeader);
 
             // Act
-            IHttpActionResult result = createdODataResult.GetInnerActionResult();
+            IHttpActionResult result = createdODataResult.GetInnerActionResult(request);
 
             // Assert
             StatusCodeResult statusCodeResult = Assert.IsType<StatusCodeResult>(result);
@@ -179,7 +179,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
                 new CreatedODataResult<TestEntity>(_entity, _contentNegotiator, request, _formatters, _locationHeader);
 
             // Act
-            IHttpActionResult result = createdODataResult.GetInnerActionResult();
+            IHttpActionResult result = createdODataResult.GetInnerActionResult(request);
 
             // Assert
             NegotiatedContentResult<TestEntity> negotiatedResult = Assert.IsType<NegotiatedContentResult<TestEntity>>(result);
@@ -198,7 +198,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(),
+            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
                 "The operation cannot be completed because no ODataPath is available for the request.");
         }
 
@@ -213,7 +213,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(),
+            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
                 "The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to serialize the payload.");
         }
 
@@ -229,7 +229,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(),
+            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
                 "Cannot find the resource type 'Microsoft.Test.AspNet.OData.Query.Results.CreatedODataResultTest+TestEntity' in the model.");
         }
 
@@ -245,7 +245,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(),
+            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
                 "NS.Address is not an entity type. Only entity types are supported.");
         }
 
@@ -270,7 +270,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act
-            var locationHeader = createdODataResult.GenerateLocationHeader();
+            var locationHeader = createdODataResult.GenerateLocationHeader(request);
 
             // Assert
             Assert.Same(editLink, locationHeader);
@@ -297,7 +297,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
                 _locationHeader);
 
             // Act
-            var locationHeader = createdODataResult.GenerateLocationHeader();
+            var locationHeader = createdODataResult.GenerateLocationHeader(request);
 
             // Assert
             Assert.Equal("http://localhost/MyOrders(1)/OrderLines(2)", locationHeader.ToString());
@@ -318,7 +318,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act
-            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(),
+            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
                 "The edit link builder for the entity set 'Customers' returned null. An edit link is required for the location header.");
         }
 
@@ -400,7 +400,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
 
             // Act
             controller.Request = request;
-            Uri entityIdHeader = createdODataResult.EntityId;
+            Uri entityIdHeader = createdODataResult.GenerateEntityId(request);
 
             // Assert
             Assert.Same(idLink, entityIdHeader);

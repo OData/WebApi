@@ -45,7 +45,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // Clone the resource's context. Use a helper function so it can
             // handle platform-specific differences in ODataSerializerContext.
             ODataSerializerContext context = resource.SerializerContext;
-            this.CopyProperties(context);
+            this.CopyPlatformSpecificProperties(context);
+
+            Model = context.Model;
+            Path = context.Path;
+            RootElementName = context.RootElementName;
+            SkipExpensiveAvailabilityChecks = context.SkipExpensiveAvailabilityChecks;
+            MetadataLevel = context.MetadataLevel;
+            Items = context.Items;
 
             ExpandedResource = resource; // parent resource
             SelectExpandClause = selectExpandClause;

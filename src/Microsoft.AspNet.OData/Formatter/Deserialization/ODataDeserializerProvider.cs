@@ -17,6 +17,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <param name="type">The CLR type.</param>
         /// <param name="request">The request being deserialized.</param>
         /// <returns>An <see cref="ODataDeserializer"/> that can deserialize the given type.</returns>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public abstract ODataDeserializer GetODataDeserializer(Type type, HttpRequestMessage request);
     }
 }

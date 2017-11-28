@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.UriParser;
 
@@ -18,22 +17,11 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// Selects the controller for OData requests.
         /// </summary>
         /// <param name="odataPath">The OData path.</param>
-        /// <param name="request">The request.</param>
         /// <returns>
         ///   <c>null</c> if the request isn't handled by this convention; otherwise, the name of the selected controller
         /// </returns>
-        internal static SelectControllerResult SelectControllerImpl(ODataPath odataPath, IWebApiRequestMessage request)
+        internal static SelectControllerResult SelectControllerImpl(ODataPath odataPath)
         {
-            if (odataPath == null)
-            {
-                throw Error.ArgumentNull("odataPath");
-            }
-
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
             // entity set
             EntitySetSegment entitySetSegment = odataPath.Segments.FirstOrDefault() as EntitySetSegment;
             if (entitySetSegment != null)

@@ -4,7 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Routing;
@@ -50,7 +54,8 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             // Create an service provider for this route. Add the default services to the custom configuration actions.
-            IServiceProvider serviceProvider = perRouteContainer.CreateODataRootContainer(routeName, ConfigureDefaultServices(configureAction));
+            Action<IContainerBuilder> builderAction = ConfigureDefaultServices(configureAction);
+            IServiceProvider serviceProvider = perRouteContainer.CreateODataRootContainer(routeName, builderAction);
 
             // Resolve the path handler and set URI resolver to it.
             IODataPathHandler pathHandler = serviceProvider.GetRequiredService<IODataPathHandler>();
@@ -142,12 +147,16 @@ namespace Microsoft.AspNet.OData.Extensions
         /// </summary>
         /// <param name="configureAction">The configuring action to add the services to the root container.</param>
         /// <returns>A configuring action to add the services to the root container.</returns>
-        private static Action<IContainerBuilder> ConfigureDefaultServices(Action<IContainerBuilder> configureAction)
+        internal static Action<IContainerBuilder> ConfigureDefaultServices(Action<IContainerBuilder> configureAction)
         {
             return (builder =>
             {
                 // Add platform-specific services here. Add Configuration first as other services may rely on it.
+                // For assembly resolution, add the and internal (IWebApiAssembliesResolver) where IWebApiAssembliesResolver
+                // is transient and instantiated from ApplicationPartManager by DI.
+                builder.AddService<IWebApiAssembliesResolver, WebApiAssembliesResolver>(ServiceLifetime.Transient);
                 builder.AddService<IODataPathTemplateHandler, DefaultODataPathHandler>(ServiceLifetime.Singleton);
+                builder.AddService<IETagHandler, DefaultODataETagHandler>(ServiceLifetime.Singleton);
 
                 // Add the default webApi services.
                 builder.AddDefaultWebApiServices();

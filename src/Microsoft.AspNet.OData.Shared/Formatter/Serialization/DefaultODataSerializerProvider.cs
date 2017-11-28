@@ -3,9 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
@@ -67,6 +71,68 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 default:
                     return null;
+            }
+        }
+
+        /// <inheritdoc />
+        internal ODataSerializer GetODataPayloadSerializerImpl(Type type, Func<IEdmModel> modelFunction, ODataPath path, Type errorType)
+        {
+            if (type == null)
+            {
+                throw Error.ArgumentNull("type");
+            }
+            if (modelFunction == null)
+            {
+                throw Error.ArgumentNull("modelFunction");
+            }
+
+            // handle the special types.
+            if (type == typeof(ODataServiceDocument))
+            {
+                return _rootContainer.GetRequiredService<ODataServiceDocumentSerializer>();
+            }
+            else if (type == typeof(Uri) || type == typeof(ODataEntityReferenceLink))
+            {
+                return _rootContainer.GetRequiredService<ODataEntityReferenceLinkSerializer>();
+            }
+            else if (TypeHelper.IsTypeAssignableFrom(typeof(IEnumerable<Uri>), type) || type == typeof(ODataEntityReferenceLinks))
+            {
+                return _rootContainer.GetRequiredService<ODataEntityReferenceLinksSerializer>();
+            }
+            else if (type == typeof(ODataError) || type == errorType)
+            {
+                return _rootContainer.GetRequiredService<ODataErrorSerializer>();
+            }
+            else if (TypeHelper.IsTypeAssignableFrom(typeof(IEdmModel), type))
+            {
+                return _rootContainer.GetRequiredService<ODataMetadataSerializer>();
+            }
+
+            // Get the model. Using a Func<IEdmModel> to delay evaluation of the model
+            // until after the above checks have passed.
+            IEdmModel model = modelFunction();
+
+            // if it is not a special type, assume it has a corresponding EdmType.
+            ClrTypeCache typeMappingCache = model.GetTypeMappingCache();
+            IEdmTypeReference edmType = typeMappingCache.GetEdmType(type, model);
+
+            if (edmType != null)
+            {
+                bool isCountRequest = path != null && path.Segments.LastOrDefault() is CountSegment;
+                bool isRawValueRequest = path != null && path.Segments.LastOrDefault() is ValueSegment;
+
+                if (((edmType.IsPrimitive() || edmType.IsEnum()) && isRawValueRequest) || isCountRequest)
+                {
+                    return _rootContainer.GetRequiredService<ODataRawValueSerializer>();
+                }
+                else
+                {
+                    return GetEdmTypeSerializer(edmType);
+                }
+            }
+            else
+            {
+                return null;
             }
         }
     }

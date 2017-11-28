@@ -17,6 +17,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// </summary>
         /// <param name="error">The error to test.</param>
         /// <returns>true of the object is an HttpError</returns>
+        /// <remarks>This function uses types that are AspNet-specific.</remarks>
         internal static bool IsHttpError(object error)
         {
             return error is HttpError;
@@ -27,6 +28,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// </summary>
         /// <param name="error">The error to use.</param>
         /// <returns>an ODataError.</returns>
+        /// <remarks>This function uses types that are AspNet-specific.</remarks>
         internal static ODataError CreateODataError(object error)
         {
             HttpError httpError = error as HttpError;

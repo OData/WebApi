@@ -433,6 +433,10 @@ namespace Microsoft.Test.AspNet.OData.PublicApi
                     {
                         continue;
                     }
+                    if (attribute is DebuggerStepThroughAttribute)
+                    {
+                        continue;
+                    }
                     if (isEnum && (attribute is SerializableAttribute))
                     {
                         continue;

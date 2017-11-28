@@ -381,6 +381,17 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Determines whether the given type is IQueryable.
+        /// </summary>
+        /// <param name="type">The type</param>
+        /// <returns><c>true</c> if the type is IQueryable.</returns>
+        internal static bool IsIQueryable(Type type)
+        {
+            return type == typeof(IQueryable) ||
+                (type != null && TypeHelper.IsGenericType(type) && type.GetGenericTypeDefinition() == typeof(IQueryable<>));
+        }
+
+        /// <summary>
         /// Determines whether the given type is a primitive type or
         /// is a <see cref="string"/>, <see cref="DateTime"/>, <see cref="Decimal"/>,
         /// <see cref="Guid"/>, <see cref="DateTimeOffset"/> or <see cref="TimeSpan"/>.

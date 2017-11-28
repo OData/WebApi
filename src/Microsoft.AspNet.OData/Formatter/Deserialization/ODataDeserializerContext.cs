@@ -18,6 +18,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <summary>
         /// Gets or sets the HTTP Request that is being deserialized.
         /// </summary>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public HttpRequestMessage Request
         {
             get { return _request; }
@@ -30,6 +31,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         /// <summary>Gets or sets the request context.</summary>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public HttpRequestContext RequestContext { get; set; }
     }
 }

@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
-using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
@@ -16,7 +15,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// <summary>
     /// An implementation of <see cref="IODataRoutingConvention"/> that handles dynamic properties for open type.
     /// </summary>
-    public partial class DynamicPropertyRoutingConvention
+    public partial class DynamicPropertyRoutingConvention : NavigationSourceRoutingConvention
     {
         private const string ActionName = "DynamicProperty";
 
@@ -26,21 +25,6 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext,
             IWebApiActionMap actionMap)
         {
-            if (odataPath == null)
-            {
-                throw Error.ArgumentNull("odataPath");
-            }
-
-            if (controllerContext == null)
-            {
-                throw Error.ArgumentNull("controllerContext");
-            }
-
-            if (actionMap == null)
-            {
-                throw Error.ArgumentNull("actionMap");
-            }
-
             string actionName = null;
             DynamicPathSegment dynamicPropertSegment = null;
 

@@ -38,14 +38,17 @@ namespace Microsoft.AspNet.OData.Adapters
 
             this.innerDescriptor = actionDescriptor;
 
-            this.supportedHttpMethods = new List<ODataRequestMethod>();
-            foreach (System.Net.Http.HttpMethod method in actionDescriptor.SupportedHttpMethods)
+            if (actionDescriptor.SupportedHttpMethods != null)
             {
-                bool ignoreCase = true;
-                ODataRequestMethod methodEnum = ODataRequestMethod.Unknown;
-                if (Enum.TryParse<ODataRequestMethod>(method.Method, ignoreCase, out methodEnum))
+                this.supportedHttpMethods = new List<ODataRequestMethod>();
+                foreach (System.Net.Http.HttpMethod method in actionDescriptor.SupportedHttpMethods)
                 {
-                    this.supportedHttpMethods.Add(methodEnum);
+                    bool ignoreCase = true;
+                    ODataRequestMethod methodEnum = ODataRequestMethod.Unknown;
+                    if (Enum.TryParse<ODataRequestMethod>(method.Method, ignoreCase, out methodEnum))
+                    {
+                        this.supportedHttpMethods.Add(methodEnum);
+                    }
                 }
             }
         }
@@ -55,7 +58,12 @@ namespace Microsoft.AspNet.OData.Adapters
         /// </summary>
         public string ControllerName
         {
-            get { return this.innerDescriptor.ControllerDescriptor.ControllerName; }
+            get
+            {
+                return this.innerDescriptor.ControllerDescriptor != null
+                    ? this.innerDescriptor.ControllerDescriptor.ControllerName
+                    : null;
+            }
         }
 
         /// <summary>
@@ -82,6 +90,12 @@ namespace Microsoft.AspNet.OData.Adapters
         /// </summary>
         public bool IsHttpMethodSupported(ODataRequestMethod method)
         {
+            if (this.supportedHttpMethods == null)
+            {
+                // Assume all methods are supported if not specified.
+                return true;
+            }
+
             return this.supportedHttpMethods.Contains(method);
         }
     }

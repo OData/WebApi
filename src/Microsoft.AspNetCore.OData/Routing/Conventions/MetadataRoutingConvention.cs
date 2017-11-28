@@ -23,9 +23,39 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     public partial class MetadataRoutingConvention : IODataRoutingConvention
     {
         /// <inheritdoc/>
-        public ControllerActionDescriptor SelectAction(RouteContext routeContext)
+        public IEnumerable<ControllerActionDescriptor> SelectAction(RouteContext routeContext)
         {
-            throw new NotImplementedException();
+            // Get a IActionDescriptorCollectionProvider from the global service provider.
+            IActionDescriptorCollectionProvider actionCollectionProvider =
+                routeContext.HttpContext.RequestServices.GetRequiredService<IActionDescriptorCollectionProvider>();
+            Contract.Assert(actionCollectionProvider != null);
+
+            ODataPath odataPath = routeContext.HttpContext.ODataFeature().Path;
+            HttpRequest request = routeContext.HttpContext.Request;
+
+            SelectControllerResult controllerResult = SelectControllerImpl(
+                odataPath,
+                new WebApiRequestMessage(request));
+
+            if (controllerResult != null)
+            {
+                IEnumerable<ControllerActionDescriptor> actionDescriptors = actionCollectionProvider
+                    .ActionDescriptors.Items.OfType<ControllerActionDescriptor>()
+                    .Where(c => c.ControllerName == controllerResult.ControllerName);
+
+                string actionName = SelectActionImpl(
+                    odataPath,
+                    new WebApiControllerContext(routeContext, controllerResult),
+                    new WebApiActionMap(actionDescriptors));
+
+                if (!String.IsNullOrEmpty(actionName))
+                {
+                    return actionDescriptors.Where(
+                        c => String.Equals(c.ActionName, actionName, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+
+            return null;
         }
     }
 }

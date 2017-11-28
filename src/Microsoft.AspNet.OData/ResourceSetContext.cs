@@ -24,6 +24,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets or sets the HTTP request that caused this instance to be generated.
         /// </summary>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public HttpRequestMessage Request
         {
             get { return _request; }
@@ -37,12 +38,14 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets or sets the request context.
         /// </summary>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public HttpRequestContext RequestContext { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IWebApiUrlHelper"/> to be used for generating links while serializing this
         /// feed instance.
         /// </summary>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public UrlHelper Url
         {
             get { return _urlHelper; }
@@ -56,6 +59,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets or sets the <see cref="IEdmModel"/> to which this instance belongs.
         /// </summary>
+        /// <remarks>This function uses types that are AspNet-specific.</remarks>
         public IEdmModel EdmModel
         {
             get { return Request.GetModel(); }
@@ -67,6 +71,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="resourceSetInstance">The instance representing the resource set being written.</param>
         /// <param name="writeContext">The serializer context.</param>
         /// <returns>A new <see cref="ResourceSetContext"/>.</returns>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         internal static ResourceSetContext Create(ODataSerializerContext writeContext, IEnumerable resourceSetInstance)
         {
             ResourceSetContext resourceSetContext = new ResourceSetContext

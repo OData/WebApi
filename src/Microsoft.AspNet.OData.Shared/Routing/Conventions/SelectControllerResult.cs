@@ -11,7 +11,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     /// <remarks>
     /// This class is not intended to be exposed publicly; it used for the internal
     /// implementations of SelectControl(). Any design which makes this class public
-    /// should be find an alternative.
+    /// should find an alternative design.
     /// </remarks>
     internal class SelectControllerResult
     {

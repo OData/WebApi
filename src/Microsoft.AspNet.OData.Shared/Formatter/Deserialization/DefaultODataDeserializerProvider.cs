@@ -64,5 +64,44 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     return null;
             }
         }
+
+        /// <inheritdoc />
+        internal ODataDeserializer GetODataDeserializerImpl(Type type, Func<IEdmModel> modelFunction)
+        {
+            if (type == null)
+            {
+                throw Error.ArgumentNull("type");
+            }
+
+            if (modelFunction == null)
+            {
+                throw Error.ArgumentNull("modelFunction");
+            }
+
+            if (type == typeof(Uri))
+            {
+                return _rootContainer.GetRequiredService<ODataEntityReferenceLinkDeserializer>();
+            }
+
+            if (type == typeof(ODataActionParameters) || type == typeof(ODataUntypedActionParameters))
+            {
+                return _rootContainer.GetRequiredService<ODataActionPayloadDeserializer>();
+            }
+
+            // Get the model. Using a Func<IEdmModel> to delay evaluation of the model
+            // until after the above checks have passed.
+            IEdmModel model = modelFunction();
+            ClrTypeCache typeMappingCache = model.GetTypeMappingCache();
+            IEdmTypeReference edmType = typeMappingCache.GetEdmType(type, model);
+
+            if (edmType == null)
+            {
+                return null;
+            }
+            else
+            {
+                return GetEdmTypeDeserializer(edmType);
+            }
+        }
     }
 }

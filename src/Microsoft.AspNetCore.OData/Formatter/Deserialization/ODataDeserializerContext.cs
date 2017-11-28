@@ -8,7 +8,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
     /// <summary>
     /// This class encapsulates the state and settings that get passed to <see cref="ODataDeserializer"/>
-    /// from the <see cref="ODataMediaTypeFormatter"/>.
+    /// from the <see cref="ODataInputFormatter"/>.
     /// </summary>
     public partial class ODataDeserializerContext
     {

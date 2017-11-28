@@ -65,11 +65,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <summary>
         /// Provides filters to apply to the specified action.
         /// </summary>
-        /// <param name="configuration">The server configuration.</param>
-        /// <param name="actionDescriptor">The action descriptor for the action to provide filters for.</param>
-        /// <returns>
-        /// The filters to apply to the specified action.
-        /// </returns>
+        /// <param name="context">The filter context.</param>
         public void OnProvidersExecuting(FilterProviderContext context)
         {
             // Actions with a bound parameter of type ODataQueryOptions do not support the query filter

@@ -17,7 +17,7 @@
       <dependency id="Microsoft.AspNet.WebApi.Client" version="$AspNetPackageDependency$" />
       <dependency id="Microsoft.AspNet.WebApi.Core" version="$AspNetPackageDependency$" />
       <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="$DependencyInjection1PackageDependency$" />
-      <dependency id="Microsoft.Extensions.DependencyInjection" version="$DependencyInjectionPackageDependency$" />
+      <dependency id="Microsoft.Extensions.DependencyInjection" version="$DependencyInjection1PackageDependency$" />
       <dependency id="Microsoft.OData.Core" version="$ODataLibPackageDependency$" />
     </dependencies>
     <frameworkAssemblies>

@@ -41,7 +41,7 @@ namespace Microsoft.AspNet.OData.Adapters
             if (actionDescriptor.SupportedHttpMethods != null)
             {
                 this.supportedHttpMethods = new List<ODataRequestMethod>();
-                foreach (System.Net.Http.HttpMethod method in actionDescriptor.SupportedHttpMethods)
+                foreach (HttpMethod method in actionDescriptor.SupportedHttpMethods)
                 {
                     bool ignoreCase = true;
                     ODataRequestMethod methodEnum = ODataRequestMethod.Unknown;

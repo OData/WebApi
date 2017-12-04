@@ -158,6 +158,11 @@ namespace Microsoft.AspNet.OData.Extensions
                 builder.AddService<IODataPathTemplateHandler, DefaultODataPathHandler>(ServiceLifetime.Singleton);
                 builder.AddService<IETagHandler, DefaultODataETagHandler>(ServiceLifetime.Singleton);
 
+                // TODO #1147 - These are used by some constructors and the IOptions<> versions
+                // don't work in that case.
+                builder.AddService<ODataOptions, ODataOptions>(ServiceLifetime.Singleton);
+                builder.AddService<DefaultQuerySettings, DefaultQuerySettings>(ServiceLifetime.Singleton);
+
                 // Add the default webApi services.
                 builder.AddDefaultWebApiServices();
 

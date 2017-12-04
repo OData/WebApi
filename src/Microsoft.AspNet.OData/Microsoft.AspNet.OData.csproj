@@ -12,7 +12,6 @@
     <RunCodeAnalysis Condition=" '$(CodeAnalysis)' == '' and '$(Configuration)' != 'Release' ">true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
     <StyleCopEnabled Condition=" '$(StyleCopEnabled)' == '' ">true</StyleCopEnabled>
-    <DefineConstants>$(DefineConstants);ASPNETODATA;ASPNETWEBAPI</DefineConstants>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <DefineConstants>$(DefineConstants);ASPNETODATA;ASPNETWEBAPI;NETFX;NETFX45</DefineConstants>
   </PropertyGroup>

@@ -1068,7 +1068,18 @@ namespace Microsoft.AspNet.OData.Common {
                 return ResourceManager.GetString("MemberExpressionsMustBeBoundToLambdaParameter", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot find '{0}'. OData services have not been configured. Are you missing a call to AddOData()?.
+        /// </summary>
+        internal static string MissingODataServices
+        {
+            get
+            {
+                return ResourceManager.GetString("MissingODataServices", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Member &apos;{0}.{1}&apos; is not a property..
         /// </summary>

@@ -37,9 +37,10 @@ namespace Microsoft.AspNet.OData.Extensions
             // per-route classes will be injected, such as IEdmModel and IODataRoutingConventions.
             services.AddSingleton<IPerRouteContainer, PerRouteContainer>();
 
-            // Add OData options.
-            services.TryAddEnumerable(ServiceDescriptor.Transient<IConfigureOptions<ODataOptions>, ODataOptionsSetup>());
-            services.TryAddEnumerable(ServiceDescriptor.Transient<IConfigureOptions<DefaultQuerySettings>, DefaultQuerySettingsSetup>());
+            // Add OData and query options. Opting not to use IConfigurationOptions in favor of
+            // fluent extensions APIs to IRouteBuilder.
+            services.AddSingleton<ODataOptions>();
+            services.AddSingleton<DefaultQuerySettings>();
 
             // Configure MvcCore to use formatters.
             services.AddMvcCore(options =>
@@ -96,50 +97,6 @@ namespace Microsoft.AspNet.OData.Extensions
 
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IFilterProvider>(new QueryFilterProvider(queryFilter)));
             return services;
-        }
-
-        /// <summary>
-        /// Configure the <see cref="ODataOptions" /> options.
-        /// </summary>
-        /// <param name="builder">The <see cref="IODataBuilder" /> to add configuration to.</param>
-        /// <param name="setupAction">An <see cref="Action{ODataOptions}"/> to configure the provided <see cref="ODataOptions"/>.</param>
-        /// <returns>An <see cref="IODataBuilder"/> that can be used to further configure the MVC services.</returns>
-        public static IODataBuilder ConfigureODataOptions(this IODataBuilder builder, Action<ODataOptions> setupAction)
-        {
-            if (builder == null)
-            {
-                throw Error.ArgumentNull(nameof(builder));
-            }
-
-            if (setupAction == null)
-            {
-                throw Error.ArgumentNull(nameof(setupAction));
-            }
-
-            builder.Services.Configure(setupAction);
-            return builder;
-        }
-
-        /// <summary>
-        /// Configure the <see cref="DefaultQuerySettings" /> options.
-        /// </summary>
-        /// <param name="builder">The <see cref="IODataBuilder" /> to add configuration to.</param>
-        /// <param name="setupAction">An <see cref="Action{DefaultQuerySettings}"/> to configure the provided <see cref="DefaultQuerySettings"/>.</param>
-        /// <returns>An <see cref="IODataBuilder"/> that can be used to further configure the MVC services.</returns>
-        public static IODataBuilder ConfigureDefaultQuerySettings(this IODataBuilder builder, Action<DefaultQuerySettings> setupAction)
-        {
-            if (builder == null)
-            {
-                throw Error.ArgumentNull(nameof(builder));
-            }
-
-            if (setupAction == null)
-            {
-                throw Error.ArgumentNull(nameof(setupAction));
-            }
-
-            builder.Services.Configure(setupAction);
-            return builder;
         }
     }
 }

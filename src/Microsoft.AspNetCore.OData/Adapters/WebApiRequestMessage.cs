@@ -52,7 +52,7 @@ namespace Microsoft.AspNet.OData.Adapters
             }
 
             // Get the ODataOptions from the global service provider.
-            ODataOptions options = request.HttpContext.RequestServices.GetRequiredService<IOptions<ODataOptions>>().Value;
+            ODataOptions options = request.HttpContext.RequestServices.GetRequiredService<ODataOptions>();
             if (options != null)
             {
                 this.Options = new WebApiOptions(options);

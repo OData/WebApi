@@ -26,6 +26,382 @@ namespace Microsoft.AspNet.OData.Extensions
     public static class ODataRouteBuilderExtensions
     {
         /// <summary>
+        /// Sets the <see cref="DefaultQuerySettings"/> in route builder.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        /// <param name="defaultQuerySettings">The default query settings.</param>
+        public static IRouteBuilder SetDefaultQuerySettings(this IRouteBuilder builder, DefaultQuerySettings defaultQuerySettings)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            if (defaultQuerySettings == null)
+            {
+                throw Error.ArgumentNull("defaultQuerySettings");
+            }
+
+            if (!defaultQuerySettings.MaxTop.HasValue || defaultQuerySettings.MaxTop > 0)
+            {
+                ModelBoundQuerySettings.DefaultModelBoundQuerySettings.MaxTop = defaultQuerySettings.MaxTop;
+            }
+
+            DefaultQuerySettings querySettings = builder.ServiceProvider.GetRequiredService<DefaultQuerySettings>();
+            if (querySettings == null)
+            {
+                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(DefaultQuerySettings));
+            }
+
+            querySettings = defaultQuerySettings;
+            return builder;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="DefaultQuerySettings"/> from route builder.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        public static DefaultQuerySettings GetDefaultQuerySettings(this IRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings querySettings = builder.ServiceProvider.GetRequiredService<DefaultQuerySettings>();
+            if (querySettings == null)
+            {
+                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(DefaultQuerySettings));
+            }
+
+            return querySettings;
+        }
+
+        /// <summary>
+        /// Sets the MaxTop of <see cref="DefaultQuerySettings"/> in route builder.
+        /// </summary>
+        public static IRouteBuilder MaxTop(this IRouteBuilder builder, int? maxTopValue)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
+            defaultQuerySettings.MaxTop = maxTopValue;
+            if (!maxTopValue.HasValue || maxTopValue > 0)
+            {
+                ModelBoundQuerySettings.DefaultModelBoundQuerySettings.MaxTop = maxTopValue;
+            }
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the EnableExpand of <see cref="DefaultQuerySettings"/> in route builder,
+        /// depends on <see cref="QueryOptionSetting"/>.
+        /// Todo: change QueryOptionSetting to SelectExpandType.
+        /// </summary>
+        public static IRouteBuilder Expand(this IRouteBuilder builder, QueryOptionSetting setting)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableExpand = setting == QueryOptionSetting.Allowed;
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the EnableExpand to true of <see cref="DefaultQuerySettings"/> in route builder.
+        /// </summary>
+        public static IRouteBuilder Expand(this IRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableExpand = true;
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the SelectType of <see cref="DefaultQuerySettings"/> in route builder,
+        /// depends on <see cref="QueryOptionSetting"/>.
+        /// Todo: change QueryOptionSetting to SelectExpandType.
+        /// </summary>
+        public static IRouteBuilder Select(this IRouteBuilder builder, QueryOptionSetting setting)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableSelect = setting == QueryOptionSetting.Allowed;
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the EnableSelect to true of <see cref="DefaultQuerySettings"/> in route builder.
+        /// </summary>
+        public static IRouteBuilder Select(this IRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableSelect = true;
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the EnableFilter of <see cref="DefaultQuerySettings"/> in route builder,
+        /// depends on <see cref="QueryOptionSetting"/>.
+        /// </summary>
+        public static IRouteBuilder Filter(this IRouteBuilder builder, QueryOptionSetting setting)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableFilter = setting == QueryOptionSetting.Allowed;
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the EnableFilter to true of <see cref="DefaultQuerySettings"/> in route builder.
+        /// </summary>
+        public static IRouteBuilder Filter(this IRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableFilter = true;
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the EnableOrderBy of <see cref="DefaultQuerySettings"/> in route builder,
+        /// depends on <see cref="QueryOptionSetting"/>.
+        /// </summary>
+        public static IRouteBuilder OrderBy(this IRouteBuilder builder, QueryOptionSetting setting)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableOrderBy = setting == QueryOptionSetting.Allowed;
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the EnableOrderBy to true of <see cref="DefaultQuerySettings"/> in route builder.
+        /// </summary>
+        public static IRouteBuilder OrderBy(this IRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableOrderBy = true;
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the EnableCount of <see cref="DefaultQuerySettings"/> in route builder,
+        /// depends on <see cref="QueryOptionSetting"/>.
+        /// </summary>
+        public static IRouteBuilder Count(this IRouteBuilder builder, QueryOptionSetting setting)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableCount = setting == QueryOptionSetting.Allowed;
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the EnableCount to true of <see cref="DefaultQuerySettings"/> in route builder.
+        /// </summary>
+        public static IRouteBuilder Count(this IRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableCount = true;
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="DefaultQuerySettings"/> in route builder.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        /// <param name="defaultOptions">The default options.</param>
+        public static IRouteBuilder SetDefaultODataOptions(this IRouteBuilder builder, ODataOptions defaultOptions)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            if (defaultOptions == null)
+            {
+                throw Error.ArgumentNull("defaultOptions");
+            }
+
+            ODataOptions options = builder.ServiceProvider.GetRequiredService<ODataOptions>();
+            if (options == null)
+            {
+                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(ODataOptions));
+            }
+
+            options = defaultOptions;
+            return builder;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ODataOptions"/> from route builder.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        public static ODataOptions GetDefaultODataOptions(this IRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            ODataOptions options = builder.ServiceProvider.GetRequiredService<ODataOptions>();
+            if (options == null)
+            {
+                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(ODataOptions));
+            }
+
+            return options;
+        }
+
+        /// <summary>
+        /// Enable the continue-on-error header.
+        /// </summary>
+        public static IRouteBuilder EnableContinueOnErrorHeader(this IRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            ODataOptions defaultOptions = builder.GetDefaultODataOptions();
+            defaultOptions.EnableContinueOnErrorHeader = true;
+            return builder;
+        }
+
+        /// <summary>
+        /// Check the continue-on-error header is enable or not.
+        /// </summary>
+        /// <returns></returns>
+        public static bool HasEnabledContinueOnErrorHeader(this IRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            ODataOptions defaultOptions = builder.GetDefaultODataOptions();
+            return defaultOptions.EnableContinueOnErrorHeader;
+        }
+
+        /// <summary>
+        /// Sets whether or not the null dynamic property to be serialized.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        /// <param name="serialize"><c>true</c> to serialize null dynamic property, <c>false</c> otherwise.</param>
+        public static IRouteBuilder SetSerializeNullDynamicProperty(this IRouteBuilder builder, bool serialize)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            ODataOptions defaultOptions = builder.GetDefaultODataOptions();
+            defaultOptions.NullDynamicPropertyIsEnabled = serialize;
+            return builder;
+        }
+
+        /// <summary>
+        /// Check the null dynamic property is enable or not.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        /// <returns></returns>
+        public static bool HasEnabledNullDynamicProperty(this IRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            ODataOptions defaultOptions = builder.GetDefaultODataOptions();
+            return defaultOptions.NullDynamicPropertyIsEnabled;
+        }
+
+        /// <summary>
+        /// Set the UrlKeyDelimiter in DefaultODataPathHandler.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        /// <param name="urlKeyDelimiter">The <see cref="ODataUrlKeyDelimiter"/></param>
+        public static IRouteBuilder SetUrlKeyDelimiter(this IRouteBuilder builder, ODataUrlKeyDelimiter urlKeyDelimiter)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            if (urlKeyDelimiter == null)
+            {
+                throw Error.ArgumentNull("urlKeyDelimiter");
+            }
+
+            ODataOptions defaultOptions = builder.GetDefaultODataOptions();
+            defaultOptions.UrlKeyDelimiter = urlKeyDelimiter;
+            return builder;
+        }
+
+        /// <summary>
+        /// Get the UrlKeyDelimiter in DefaultODataPathHandler.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        internal static ODataUrlKeyDelimiter GetUrlKeyDelimiter(this IRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            ODataOptions defaultOptions = builder.GetDefaultODataOptions();
+            return defaultOptions.UrlKeyDelimiter;
+        }
+
+        /// <summary>
         /// Maps the specified OData route and the OData route attributes.
         /// </summary>
         /// <param name="builder">The <see cref="IRouteBuilder"/> to add the route to.</param>
@@ -54,14 +430,14 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             // Create an service provider for this route. Add the default services to the custom configuration actions.
-            Action<IContainerBuilder> builderAction = ConfigureDefaultServices(configureAction);
+            Action<IContainerBuilder> builderAction = ConfigureDefaultServices(builder, configureAction);
             IServiceProvider serviceProvider = perRouteContainer.CreateODataRootContainer(routeName, builderAction);
 
             // Resolve the path handler and set URI resolver to it.
             IODataPathHandler pathHandler = serviceProvider.GetRequiredService<IODataPathHandler>();
 
             // If settings is not on local, use the global configuration settings.
-            ODataOptions options = builder.ServiceProvider.GetRequiredService<IOptions<ODataOptions>>().Value;
+            ODataOptions options = builder.ServiceProvider.GetRequiredService<ODataOptions>();
             if (pathHandler != null && pathHandler.UrlKeyDelimiter == null)
             {
                 pathHandler.UrlKeyDelimiter = options.UrlKeyDelimiter;
@@ -145,9 +521,10 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <summary>
         /// Configure the default services.
         /// </summary>
+        /// <param name="routeBuilder">The <see cref="IRouteBuilder"/>.</param>
         /// <param name="configureAction">The configuring action to add the services to the root container.</param>
         /// <returns>A configuring action to add the services to the root container.</returns>
-        internal static Action<IContainerBuilder> ConfigureDefaultServices(Action<IContainerBuilder> configureAction)
+        internal static Action<IContainerBuilder> ConfigureDefaultServices(IRouteBuilder routeBuilder, Action<IContainerBuilder> configureAction)
         {
             return (builder =>
             {
@@ -158,10 +535,9 @@ namespace Microsoft.AspNet.OData.Extensions
                 builder.AddService<IODataPathTemplateHandler, DefaultODataPathHandler>(ServiceLifetime.Singleton);
                 builder.AddService<IETagHandler, DefaultODataETagHandler>(ServiceLifetime.Singleton);
 
-                // TODO #1147 - These are used by some constructors and the IOptions<> versions
-                // don't work in that case.
-                builder.AddService<ODataOptions, ODataOptions>(ServiceLifetime.Singleton);
-                builder.AddService<DefaultQuerySettings, DefaultQuerySettings>(ServiceLifetime.Singleton);
+                // Access the default query settings and options from the global container.
+                builder.AddService(ServiceLifetime.Singleton, sp => routeBuilder.GetDefaultQuerySettings());
+                builder.AddService(ServiceLifetime.Singleton, sp => routeBuilder.GetDefaultODataOptions());
 
                 // Add the default webApi services.
                 builder.AddDefaultWebApiServices();

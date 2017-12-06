@@ -2,17 +2,23 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
     /// An attribute to disable WebApi model validation for a particular type.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    internal sealed partial class NonValidatingParameterBindingAttribute : Attribute, IBindingSourceMetadata
+    /// <remarks>
+    /// This is essentially a <see cref="ValidateNeverAttribute"/>.
+    /// </remarks>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    internal sealed partial class NonValidatingParameterBindingAttribute : Attribute, IPropertyValidationFilter
     {
-        public BindingSource BindingSource => throw new NotImplementedException();
+        /// <inheritdoc />
+        public bool ShouldValidateEntry(ValidationEntry entry, ValidationEntry parentEntry)
+        {
+            return false;
+        }
     }
 }

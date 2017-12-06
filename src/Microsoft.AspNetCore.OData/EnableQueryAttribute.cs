@@ -182,21 +182,7 @@ namespace Microsoft.AspNet.OData
             {
                 // user has not configured anything or has registered a model without the element type
                 // let's create one just for this type and cache it in the action descriptor
-                string key = ModelKeyPrefix + elementClrType.FullName;
-                object modelAsObject = null;
-                if (!actionDescriptor.Properties.TryGetValue(key, out modelAsObject))
-                {
-                    ODataConventionModelBuilder builder =
-                        new ODataConventionModelBuilder(request.HttpContext.RequestServices, isQueryCompositionMode: true);
-                    EntityTypeConfiguration entityTypeConfiguration = builder.AddEntityType(elementClrType);
-                    builder.AddEntitySet(elementClrType.Name, entityTypeConfiguration);
-                    model = builder.GetEdmModel();
-                    actionDescriptor.Properties.Add(key, model);
-                }
-                else
-                {
-                    model = modelAsObject as IEdmModel;
-                }
+                model = actionDescriptor.GetEdmModel(request, elementClrType);
             }
 
             Contract.Assert(model != null);

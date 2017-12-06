@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -23,12 +24,16 @@ namespace Microsoft.AspNet.OData
         internal const string ODataServiceVersionHeader = "OData-Version";
         internal const ODataVersion DefaultODataVersion = ODataVersion.V4;
 
+        private long? totalCount;
+        private bool totalCountSet;
+
         /// <summary>
         /// Instantiates a new instance of the <see cref="ODataFeature"/> class.
         /// </summary>
         public ODataFeature()
         {
             Model = EdmCoreModel.Instance; // default Edm model
+            totalCountSet = false;
         }
 
         /// <summary>
@@ -78,7 +83,36 @@ namespace Microsoft.AspNet.OData
         /// Gets or sets the total count for the OData response.
         /// </summary>
         /// <value><c>null</c> if no count should be sent back to the client.</value>
-        public long? TotalCount { get; set; }
+        public long? TotalCount
+        {
+            get
+            {
+                if (this.totalCountSet)
+                {
+                    return this.totalCount;
+                }
+
+                if (this.TotalCountFunc != null)
+                {
+                    this.totalCount = this.TotalCountFunc();
+                    this.totalCountSet = true;
+                    return this.totalCount;
+                }
+
+                return null;
+            }
+
+            set
+            {
+                if (!value.HasValue)
+                {
+                    throw Error.ArgumentNull("value");
+                }
+
+                this.totalCount = value;
+                this.totalCountSet = true;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the total count function for the OData response.

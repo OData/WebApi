@@ -3,7 +3,7 @@
 
 using System;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNet.OData.Formatter;
 
 namespace Microsoft.AspNet.OData
 {
@@ -13,18 +13,12 @@ namespace Microsoft.AspNet.OData
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Parameter, Inherited = true, AllowMultiple = false)]
     public sealed class FromODataUriAttribute : ModelBinderAttribute
     {
-        /// <inheritdoc/>
-        public override BindingSource BindingSource
+        /// <summary>
+        /// Instantiates a new instance of the <see cref="FromODataUriAttribute"/> class.
+        /// </summary>
+        public FromODataUriAttribute()
+            : base(typeof(ODataModelBinder))
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            protected set
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

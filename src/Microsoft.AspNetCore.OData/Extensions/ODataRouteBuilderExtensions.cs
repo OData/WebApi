@@ -502,7 +502,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// Remote the trailing slash from a route prefix string.
         /// </summary>
         /// <param name="routePrefix">The route prefix string.</param>
-        /// <returns>The route prefix string without a strainling slash.</returns>
+        /// <returns>The route prefix string without a trailing slash.</returns>
         private static string RemoveTrailingSlash(string routePrefix)
         {
             if (!String.IsNullOrEmpty(routePrefix))

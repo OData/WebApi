@@ -23,6 +23,10 @@ namespace Microsoft.AspNet.OData.Formatter
     /// <summary>
     /// Provides a <see cref="IModelBinder"/> for EDM primitive types.
     /// </summary>
+    /// <remarks>
+    /// This class is similar to ODataModelBinder in AspNetCore. The flow is similar but the
+    /// type are dissimilar enough making a common version more complex than separate versions.
+    /// </remarks>
     public class ODataModelBinderProvider : ModelBinderProvider
     {
         /// <inheritdoc />

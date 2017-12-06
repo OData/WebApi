@@ -3,8 +3,6 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
@@ -73,7 +71,7 @@ namespace Microsoft.AspNet.OData
                 // Get the entity type from the parameter type if it is ODataQueryOptions<T>.
                 // Fall back to the return type if not. Also, note that the entity type from the return type and ODataQueryOptions<T>
                 // can be different (example implementing $select or $expand).
-                Type entityClrType = GetEntityClrTypeFromParameterType(Descriptor) ?? GetEntityClrTypeFromActionReturnType(actionDescriptor);
+                Type entityClrType = GetEntityClrTypeFromParameterType(Descriptor.ParameterType) ?? GetEntityClrTypeFromActionReturnType(actionDescriptor);
 
                 IEdmModel userModel = request.GetModel();
                 IEdmModel model = userModel != EdmCoreModel.Instance ? userModel : actionDescriptor.GetEdmModel(entityClrType);
@@ -123,22 +121,6 @@ namespace Microsoft.AspNet.OData
                 }
 
                 return entityClrType;
-            }
-
-            internal static Type GetEntityClrTypeFromParameterType(HttpParameterDescriptor parameterDescriptor)
-            {
-                Contract.Assert(parameterDescriptor != null);
-
-                Type parameterType = parameterDescriptor.ParameterType;
-                Contract.Assert(parameterType != null);
-
-                if (parameterType.IsGenericType &&
-                    parameterType.GetGenericTypeDefinition() == typeof(ODataQueryOptions<>))
-                {
-                    return parameterType.GetGenericArguments().Single();
-                }
-
-                return null;
             }
         }
     }

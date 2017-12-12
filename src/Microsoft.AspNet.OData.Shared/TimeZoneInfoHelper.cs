@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.AspNet.OData
 {
-    internal class TimeZoneInfoHelper
+    public class TimeZoneInfoHelper
     {
         private static TimeZoneInfo _defaultTimeZoneInfo;
 

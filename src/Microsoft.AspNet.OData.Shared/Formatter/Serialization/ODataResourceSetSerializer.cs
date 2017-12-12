@@ -209,7 +209,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLink;
                     resourceSet.DeltaLink = writeContext.InternalRequest.Context.DeltaLink;
 
-                    long? countValue = writeContext.InternalRequest.Context.TotalCount;
+                    long? countValue = writeContext.InternalRequest.Context.TotalCount
+                        ?? writeContext.InternalRequest.Context.TotalCountFunc?.Invoke();
                     if (countValue.HasValue)
                     {
                         resourceSet.Count = countValue.Value;

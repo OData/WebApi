@@ -400,6 +400,43 @@ namespace Microsoft.AspNet.OData.Extensions
             ODataOptions defaultOptions = builder.GetDefaultODataOptions();
             return defaultOptions.UrlKeyDelimiter;
         }
+        
+        /// <summary>
+        /// Sets the <see cref="TimeZoneInfo"/> in route builder.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        /// <param name="timeZoneInfo">The <see cref="TimeZoneInfo"/></param>
+        /// <returns></returns>
+        public static IRouteBuilder SetTimeZoneInfo(this IRouteBuilder builder, TimeZoneInfo timeZoneInfo)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            if (timeZoneInfo == null)
+            {
+                throw Error.ArgumentNull("timeZoneInfo");
+            }
+
+            TimeZoneInfoHelper.TimeZone = timeZoneInfo;
+            return builder;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="TimeZoneInfo"/> from route builder.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        /// <returns></returns>
+        public static TimeZoneInfo GetTimeZoneInfo(this IRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            return TimeZoneInfoHelper.TimeZone;
+        }
 
         /// <summary>
         /// Maps the specified OData route and the OData route attributes.
